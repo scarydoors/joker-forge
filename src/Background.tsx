@@ -13,7 +13,6 @@ const Background: React.FC = () => {
       return;
     }
 
-    // Set canvas size to window size
     const resizeCanvas = () => {
       if (!canvas) return;
       canvas.width = window.innerWidth;
@@ -32,92 +31,97 @@ const Background: React.FC = () => {
       }
     `;
 
-    // Fragment shader - create a nice abstract background fitting for a card game
+    // Fragment shader
     const fragmentShaderSource = `
       precision mediump float;
-      uniform float time;
+      #define SPIN_EASE 0.8
+      #define spin_time 5.0
+      #define spin_amount 0.3
+      #define contrast 3.0
+      #define PIXEL_SIZE 2.0  // Adjust this value to change pixelation amount
+
+      #define colour_1 vec4(1.0, 0.3725490196, 0.3333333333, 1.0)
+      #define colour_2 vec4(0.0, 0.6156862745, 1.0, 1.0)
+      #define colour_3 vec4(0.2156862745, 0.2588235294, 0.2666666667, 1.0)
+
       uniform vec2 resolution;
-
-      // Noise function
-      float hash(float n) {
-        return fract(sin(n) * 43758.5453);
-      }
-
-      float noise(vec2 p) {
-        vec2 i = floor(p);
-        vec2 f = fract(p);
-        f = f * f * (3.0 - 2.0 * f);
-        float n = i.x + i.y * 57.0;
-        return mix(
-          mix(hash(n), hash(n + 1.0), f.x),
-          mix(hash(n + 57.0), hash(n + 58.0), f.x),
-          f.y
-        );
-      }
-
-      // Simplex-like noise
-      float fbm(vec2 p) {
-        float f = 0.0;
-        f += 0.5000 * noise(p); p *= 2.02;
-        f += 0.2500 * noise(p); p *= 2.03;
-        f += 0.1250 * noise(p); p *= 2.01;
-        f += 0.0625 * noise(p);
-        return f / 0.9375;
-      }
+      uniform float time;
 
       void main() {
-        vec2 uv = gl_FragCoord.xy / resolution.xy;
+        // Pixelation
+        vec2 pixels = vec2(PIXEL_SIZE);
+        vec2 uv = floor(gl_FragCoord.xy/pixels)*pixels;
         
-        // Subtle movement
-        vec2 p = uv;
-        p.x += time * 0.02;
-        p.y += time * 0.01;
-        
-        // Balatro-like colors - dark purplish blue to green/teal
-        vec3 baseColor1 = vec3(0.1, 0.12, 0.25); 
-        vec3 baseColor2 = vec3(0.15, 0.3, 0.4);
-        
-        // Generate noise pattern
-        float noise1 = fbm(p * 3.0);
-        float noise2 = fbm(p * 6.0 + vec2(time * 0.01, time * 0.015));
-        
-        // Combine noises for interesting patterns
-        float combinedNoise = noise1 * 0.7 + noise2 * 0.3;
-        
-        // Create gradient with the noise
-        vec3 color = mix(baseColor1, baseColor2, combinedNoise);
-        
-        // Add some variations
-        color += vec3(0.05, 0.1, 0.2) * fbm(p * 10.0 + time * 0.05);
-        
-        // Vignette effect
-        float vignette = 1.0 - length(uv - 0.5) * 0.7;
-        color *= vignette;
-        
-        gl_FragColor = vec4(color, 1.0);
+        // Center UV coordinates - removed the offset that was causing the shift
+        uv = (uv - 0.5*resolution.xy)/length(resolution.xy);
+
+        float uv_len = length(uv);
+
+        float speed = (spin_time*SPIN_EASE*0.2) + 302.2;
+        float new_pixel_angle = (atan(uv.y, uv.x)) + speed - SPIN_EASE*20.0*(1.0*spin_amount*uv_len + (1.0 - 1.0*spin_amount));
+
+        vec2 mid = vec2(0.5, 0.5);
+        uv = (vec2((uv_len * cos(new_pixel_angle) + mid.x), (uv_len * sin(new_pixel_angle) + mid.y)) - mid);
+
+        uv *= 30.0;
+        speed = time*(2.0);
+        vec2 uv2 = vec2(uv.x+uv.y);
+
+        for(int i=0; i < 5; i++) {
+          uv2 += sin(max(uv.x, uv.y)) + uv;
+          uv  += 0.5*vec2(cos(5.1123314 + 0.353*uv2.y + speed*0.131121),sin(uv2.x - 0.113*speed));
+          uv  -= 1.0*cos(uv.x + uv.y) - 1.0*sin(uv.x*0.711 - uv.y);
+        }
+
+        float contrast_mod = (0.25*contrast + 0.5*spin_amount + 1.2);
+        float paint_res = min(2.0, max(0.0,length(uv)*(0.035)*contrast_mod));
+        float c1p = max(0.0,1.0 - contrast_mod*abs(1.0-paint_res));
+        float c2p = max(0.0,1.0 - contrast_mod*abs(paint_res));
+        float c3p = 1.0 - min(1.0, c1p + c2p);
+
+        gl_FragColor = (0.3/contrast)*colour_1 + (1.0 - 0.3/contrast)*(colour_1*c1p + colour_2*c2p + vec4(c3p*colour_3.rgb, c3p*colour_1.a));
       }
     `;
 
-    // Create shaders
     const vertexShader = gl.createShader(gl.VERTEX_SHADER);
     if (!vertexShader) return;
     gl.shaderSource(vertexShader, vertexShaderSource);
     gl.compileShader(vertexShader);
+
+    if (!gl.getShaderParameter(vertexShader, gl.COMPILE_STATUS)) {
+      console.error(
+        "Vertex shader compilation failed:",
+        gl.getShaderInfoLog(vertexShader)
+      );
+      return;
+    }
 
     const fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
     if (!fragmentShader) return;
     gl.shaderSource(fragmentShader, fragmentShaderSource);
     gl.compileShader(fragmentShader);
 
-    // Create program
+    if (!gl.getShaderParameter(fragmentShader, gl.COMPILE_STATUS)) {
+      console.error(
+        "Fragment shader compilation failed:",
+        gl.getShaderInfoLog(fragmentShader)
+      );
+      return;
+    }
+
     const program = gl.createProgram();
     if (!program) return;
     gl.attachShader(program, vertexShader);
     gl.attachShader(program, fragmentShader);
     gl.linkProgram(program);
+
+    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+      console.error("Program linking failed:", gl.getProgramInfoLog(program));
+      return;
+    }
+
     gl.useProgram(program);
 
-    // Vertices for a fullscreen quad
     const vertices = new Float32Array([
       -1.0, -1.0, 1.0, -1.0, -1.0, 1.0, -1.0, 1.0, 1.0, -1.0, 1.0, 1.0,
     ]);
@@ -174,6 +178,7 @@ const Background: React.FC = () => {
     <canvas
       ref={canvasRef}
       className="fixed top-0 left-0 w-full h-full -z-10"
+      style={{ display: "block" }}
     />
   );
 };
