@@ -6,6 +6,7 @@ interface JokerCollectionProps {
   selectedJokerId: string | null;
   onSelectJoker: (jokerId: string) => void;
   onAddNewJoker: () => void;
+  onExportClick: () => void;
   modName: string;
 }
 
@@ -14,6 +15,7 @@ const JokerCollection: React.FC<JokerCollectionProps> = ({
   selectedJokerId,
   onSelectJoker,
   onAddNewJoker,
+  onExportClick,
   modName,
 }) => {
   return (
@@ -52,7 +54,7 @@ const JokerCollection: React.FC<JokerCollectionProps> = ({
         )}
       </div>
 
-      <div className="mt-4">
+      <div className="mt-4 space-y-3">
         <button
           className="w-full text-white text-lg bg-balatro-black hover:bg-balatro-light-black py-2 pixel-corners-medium relative"
           onClick={onAddNewJoker}
@@ -62,6 +64,16 @@ const JokerCollection: React.FC<JokerCollectionProps> = ({
           <span className="relative text-shadow-pixel z-10">
             + Add New Joker
           </span>
+        </button>
+
+        <button
+          className="w-full text-white text-lg bg-balatro-blue hover:bg-balatro-blueshadow py-2 pixel-corners-medium relative"
+          onClick={onExportClick}
+          disabled={jokers.length === 0}
+          style={{ transition: "background-color 0.2s ease" }}
+        >
+          <div className="absolute inset-0 bg-balatro-blackshadow pixel-corners-medium translate-y-1"></div>
+          <span className="relative text-shadow-pixel z-10">Export as Mod</span>
         </button>
       </div>
     </div>

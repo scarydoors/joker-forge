@@ -3,11 +3,17 @@ import Background from "./Background";
 import JokerCollection from "./components/JokerCollection";
 import JokerForm from "./components/JokerForm";
 import { JokerData } from "./components/JokerCard";
+import { exportJokersAsMod } from "./components/codeGeneration";
 
 function App() {
   const [jokers, setJokers] = useState<JokerData[]>([]);
   const [selectedJokerId, setSelectedJokerId] = useState<string | null>(null);
   const [modName, setModName] = useState("My Custom Mod");
+
+  // Export modal state
+  const [showExportModal, setShowExportModal] = useState(false);
+  const [authorName, setAuthorName] = useState("");
+  const [exportLoading, setExportLoading] = useState(false);
 
   const handleSelectJoker = (jokerId: string) => {
     setSelectedJokerId(jokerId);
@@ -17,12 +23,12 @@ function App() {
     const newJoker: JokerData = {
       id: crypto.randomUUID(),
       name: "New Joker",
-      description: "A [b]custom[/] joker with [r]unique[/] effects.",
+      description: "A {C:blue}custom{} joker with {C:red}unique{} effects.",
       chipAddition: 0,
       multAddition: 0,
       xMult: 1,
       imagePreview: "",
-      rarity: 0,
+      rarity: 1,
     };
     setJokers([...jokers, newJoker]);
     setSelectedJokerId(newJoker.id);
@@ -43,6 +49,28 @@ function App() {
       setSelectedJokerId(
         remainingJokers.length > 0 ? remainingJokers[0].id : null
       );
+    }
+  };
+
+  const handleExportClick = () => {
+    setShowExportModal(true);
+  };
+
+  const handleExportConfirm = async () => {
+    if (!authorName.trim()) {
+      alert("Please enter an author name");
+      return;
+    }
+
+    setExportLoading(true);
+    try {
+      await exportJokersAsMod(jokers, modName, authorName);
+    } catch (error) {
+      console.error("Export failed:", error);
+      alert("Failed to export mod. Please try again.");
+    } finally {
+      setExportLoading(false);
+      setShowExportModal(false);
     }
   };
 
@@ -74,7 +102,7 @@ function App() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-5 gap-8 h-[calc(100vh-220px)]">
-            {/* JokerForm - Left side (3 cols) */}
+            {/* JokerForm */}
             <div className="md:col-span-3 h-full">
               {selectedJoker ? (
                 <JokerForm
@@ -93,7 +121,7 @@ function App() {
               )}
             </div>
 
-            {/* JokerCollection - Right side (2 cols) */}
+            {/* JokerCollection */}
             <div className="md:col-span-2 h-full pixel-corners-medium p-6">
               <JokerCollection
                 jokers={jokers}
@@ -101,13 +129,47 @@ function App() {
                 onSelectJoker={handleSelectJoker}
                 onAddNewJoker={handleAddNewJoker}
                 modName={modName}
+                onExportClick={handleExportClick}
               />
             </div>
           </div>
-
-          {/* Footer information */}
         </div>
       </div>
+
+      {/* Export Modal */}
+      {showExportModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
+          <div className="bg-balatro-black pixel-corners-medium p-6 max-w-md w-full">
+            <h3 className="text-xl text-white text-shadow-pixel mb-4">
+              Enter Author Name
+            </h3>
+            <input
+              type="text"
+              value={authorName}
+              onChange={(e) => setAuthorName(e.target.value)}
+              placeholder="Your name"
+              className="w-full bg-balatro-grey text-white px-3 py-2 pixel-corners-small mb-4 focus:outline-none"
+            />
+            <div className="flex space-x-4">
+              <button
+                className="flex-1 bg-balatro-red hover:bg-balatro-redshadow text-white py-2 pixel-corners-small transition-colors"
+                onClick={() => setShowExportModal(false)}
+              >
+                <span className="relative z-10 text-shadow-pixel">Cancel</span>
+              </button>
+              <button
+                className="flex-1 bg-balatro-green hover:bg-balatro-greenshadow text-white py-2 pixel-corners-small transition-colors relative"
+                onClick={handleExportConfirm}
+                disabled={exportLoading}
+              >
+                <span className="relative z-10 text-shadow-pixel">
+                  {exportLoading ? "Exporting..." : "Export"}
+                </span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

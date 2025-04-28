@@ -9,33 +9,25 @@ interface JokerFormProps {
 }
 
 const formatButtons = [
-  { tag: "[/]", label: "Default", color: "text-white" },
-  { tag: "[b]", label: "Blue", color: "bg-balatro-blue" },
-  { tag: "[r]", label: "Red", color: "bg-balatro-red" },
-  { tag: "[o]", label: "Orange", color: "bg-balatro-orange" },
-  { tag: "[g]", label: "Green", color: "bg-balatro-green" },
-  { tag: "[p]", label: "Purple", color: "bg-balatro-purple" },
-  { tag: "[a]", label: "Aqua", color: "bg-balatro-planet" },
-  { tag: "[y]", label: "Yellow", color: "bg-balatro-money" },
-  { tag: "[n]", label: "Negative", color: "bg-balatro-black" },
-  {
-    tag: "[l]",
-    label: "Light Gray",
-    color: "bg-balatro-lightgrey text-balatro-black",
-  },
-  { tag: "[1]", label: "Diamond", color: "bg-balatro-orange" },
-  { tag: "[2]", label: "Club", color: "bg-balatro-green" },
-  { tag: "[3]", label: "Heart", color: "bg-balatro-red" },
-  { tag: "[4]", label: "Spade", color: "bg-balatro-blue" },
-  { tag: "[m]", label: "Marked", color: "bg-balatro-red" },
+  { tag: "{}", label: "Close Tag", color: "text-white" },
+  { tag: "{C:blue}", label: "Blue", color: "bg-balatro-blue" },
+  { tag: "{C:red}", label: "Red", color: "bg-balatro-red" },
+  { tag: "{C:orange}", label: "Orange", color: "bg-balatro-orange" },
+  { tag: "{C:green}", label: "Green", color: "bg-balatro-green" },
+  { tag: "{C:purple}", label: "Purple", color: "bg-balatro-purple" },
+  { tag: "{C:attention}", label: "Attention", color: "bg-balatro-planet" },
+  { tag: "{C:chips}", label: "Chips", color: "bg-balatro-chips" },
+  { tag: "{C:mult}", label: "Mult", color: "bg-balatro-mult" },
+  { tag: "{C:money}", label: "Money", color: "bg-balatro-money" },
+  { tag: "{X:mult,C:white}", label: "XMult", color: "text-white" },
   { tag: "[s]", label: "New Line", color: "bg-balatro-grey" },
 ];
 
 const rarityOptions = [
-  { value: 0, label: "Common", color: "bg-balatro-blue" },
-  { value: 1, label: "Uncommon", color: "bg-balatro-green" },
-  { value: 2, label: "Rare", color: "bg-balatro-red" },
-  { value: 3, label: "Legendary", color: "bg-balatro-purple" },
+  { value: 1, label: "Common", color: "bg-balatro-blue" },
+  { value: 2, label: "Uncommon", color: "bg-balatro-green" },
+  { value: 3, label: "Rare", color: "bg-balatro-red" },
+  { value: 4, label: "Legendary", color: "bg-balatro-purple" },
 ];
 
 const JokerForm: React.FC<JokerFormProps> = ({
@@ -47,12 +39,12 @@ const JokerForm: React.FC<JokerFormProps> = ({
     joker || {
       id: crypto.randomUUID(),
       name: "New Joker",
-      description: "A [b]custom[/] joker with [r]unique[/] effects.",
+      description: "A {C:blue}custom{} joker with {C:red}unique{} effects.",
       chipAddition: 0,
       multAddition: 0,
       xMult: 1,
       imagePreview: "",
-      rarity: 0,
+      rarity: 1,
     }
   );
   const [changesExist, setChangesExist] = useState(false);
@@ -158,6 +150,35 @@ const JokerForm: React.FC<JokerFormProps> = ({
       </div>
     );
   }
+
+  const createAutoDescription = () => {
+    if (
+      formData.description ===
+      "A {C:blue}custom{} joker with {C:red}unique{} effects."
+    ) {
+      const effects: string[] = [];
+
+      if (formData.chipAddition > 0) {
+        effects.push(`{C:chips}+${formData.chipAddition} Chips{}`);
+      }
+
+      if (formData.multAddition > 0) {
+        effects.push(`{C:mult}+${formData.multAddition} Mult{}`);
+      }
+
+      if (formData.xMult > 1) {
+        effects.push(`{X:mult,C:white}X${formData.xMult}{}`);
+      }
+
+      if (effects.length > 0) {
+        setFormData((prev) => ({
+          ...prev,
+          description: `${effects.join(", ")}`,
+        }));
+        setChangesExist(true);
+      }
+    }
+  };
 
   return (
     <div className="h-full overflow-auto custom-scrollbar bg-balatro-transparentblack pixel-corners-medium p-6">
@@ -299,6 +320,18 @@ const JokerForm: React.FC<JokerFormProps> = ({
                   {btn.label}
                 </button>
               ))}
+            </div>
+            <div className="text-xs mt-2 text-balatro-lightgrey">
+              Tip: Remember to close color tags with {"{}"} after the colored
+              text
+            </div>
+            <div className="mt-2">
+              <button
+                className="bg-balatro-grey hover:bg-balatro-light-black text-xs text-white px-3 py-1 pixel-corners-small"
+                onClick={createAutoDescription}
+              >
+                Auto Generate Description From Effects
+              </button>
             </div>
           </div>
         </div>

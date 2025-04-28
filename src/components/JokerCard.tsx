@@ -14,15 +14,15 @@ export interface JokerData {
   multAddition: number;
   xMult: number;
   imagePreview: string;
-  rarity: number; // 0: Common, 1: Uncommon, 2: Rare, 3: Legendary
+  rarity: number; // 1: Common, 2: Uncommon, 3: Rare, 4: Legendary
 }
 
 const getRarityText = (rarity: number) => {
   const rarityMap = {
-    0: "Common",
-    1: "Uncommon",
-    2: "Rare",
-    3: "Legendary",
+    1: "Common",
+    2: "Uncommon",
+    3: "Rare",
+    4: "Legendary",
   };
   return rarityMap[rarity as keyof typeof rarityMap] || "Unknown";
 };
@@ -49,109 +49,53 @@ const getRarityStyles = (rarity: number) => {
   return styleMap[rarity as keyof typeof styleMap] || styleMap[0];
 };
 
+/**
+ * Format Balatro description syntax for display in the UI
+ * Handles color tags like {C:blue} and newlines [s]
+ */
 const formatDescription = (text: string) => {
-  // If no formatting tags, return as is
-  if (!text.includes("[")) return text;
+  if (!text) return "";
 
-  // Replace new line tags
+  // Handle newline tags
   text = text.replace(/\[s\]/g, "<br />");
 
-  let result = "";
-  let currentIndex = 0;
-  let currentTag = "";
+  // Replace Balatro color tags with HTML spans
+  let result = text;
 
-  // Function to find next tag position
-  const findNextTag = (
-    startFrom: number
-  ): number | { start: number; end: number } => {
-    const nextOpen = text.indexOf("[", startFrom);
-    if (nextOpen === -1) return -1;
+  // Handle color tags like {C:blue} and closing tags {}
+  const colorPattern = /\{C:([a-z]+)\}(.*?)(\{\}|$)/g;
+  result = result.replace(colorPattern, (match, color, content) => {
+    return `<span class="${getColorClass(color)}">${content}</span>`;
+  });
 
-    const nextClose = text.indexOf("]", nextOpen);
-    if (nextClose === -1) return -1; // Treat malformed tag as end
-
-    return { start: nextOpen, end: nextClose };
-  };
-
-  // Use a different variable name for the result of findNextTag
-  let nextTagResult = findNextTag(currentIndex);
-
-  // Process the text with formatting
-  while (nextTagResult !== -1) {
-    // Explicitly assign to a new variable *inside* the loop after the check
-    // This makes the type `{ start: number, end: number }` absolutely clear in this scope
-    const currentTagInfo = nextTagResult;
-    const start = currentTagInfo.start;
-    const end = currentTagInfo.end;
-
-    // Add text before the tag
-    if (start > currentIndex) {
-      result += text.substring(currentIndex, start);
-    }
-
-    // Get the tag
-    const tag = text.substring(start, end + 1);
-
-    // Apply the tag formatting
-    if (tag === "[/]") {
-      // Close current formatting
-      if (currentTag) {
-        result += "</span>";
-        currentTag = "";
-      }
-    } else {
-      // Start new formatting
-      const colorClass = getColorClass(tag);
-
-      // Close previous tag if exists
-      if (currentTag) {
-        result += "</span>";
-      }
-
-      // Open new tag
-      result += `<span class="${colorClass}">`;
-      currentTag = tag;
-    }
-
-    // Update current position using the confirmed 'end' value
-    currentIndex = end + 1;
-
-    // Find next tag for the next iteration check
-    nextTagResult = findNextTag(currentIndex);
-  }
-
-  // Add remaining text
-  if (currentIndex < text.length) {
-    result += text.substring(currentIndex);
-  }
-
-  // Close any open tag
-  if (currentTag) {
-    result += "</span>";
-  }
+  // Handle X multiplier tags
+  const xMultPattern = /\{X:mult,C:([a-z]+)\}(.*?)(\{\}|$)/g;
+  result = result.replace(xMultPattern, (match, color, content) => {
+    return `<span class="${getColorClass(color)}">×${content}</span>`;
+  });
 
   return result;
 };
 
-const getColorClass = (tag: string) => {
+/**
+ * Map Balatro color names to Tailwind CSS classes
+ */
+const getColorClass = (color: string) => {
   const colorMap: Record<string, string> = {
-    "[/]": "text-white", // default color
-    "[b]": "text-balatro-blue",
-    "[r]": "text-balatro-red",
-    "[o]": "text-balatro-orange",
-    "[g]": "text-balatro-green",
-    "[p]": "text-balatro-purple",
-    "[a]": "text-balatro-planet", // aqua
-    "[y]": "text-balatro-money", // yellow
-    "[n]": "text-balatro-black", // negative
-    "[l]": "text-balatro-lightgrey", // light gray
-    "[1]": "text-balatro-orange", // diamond
-    "[2]": "text-balatro-green", // club
-    "[3]": "text-balatro-red", // heart
-    "[4]": "text-balatro-blue", // spade
-    "[m]": "text-white bg-balatro-red px-1 rounded", // white with red bg
+    white: "text-white",
+    blue: "text-balatro-blue",
+    red: "text-balatro-red",
+    orange: "text-balatro-orange",
+    green: "text-balatro-green",
+    purple: "text-balatro-purple",
+    attention: "text-balatro-planet", // aqua/attention
+    chips: "text-balatro-chips",
+    mult: "text-balatro-mult",
+    money: "text-balatro-money",
+    black: "text-balatro-black",
+    lightgrey: "text-balatro-lightgrey",
   };
-  return colorMap[tag] || "text-white";
+  return colorMap[color] || "text-white";
 };
 
 const JokerCard: React.FC<JokerCardProps> = ({ joker, onClick }) => {
@@ -181,7 +125,7 @@ const JokerCard: React.FC<JokerCardProps> = ({ joker, onClick }) => {
 
     if (isHovering) {
       updatePosition();
-      window.addEventListener("scroll", updatePosition, true); // Use capture phase for scroll
+      window.addEventListener("scroll", updatePosition, true);
       window.addEventListener("resize", updatePosition);
       return () => {
         window.removeEventListener("scroll", updatePosition, true);
@@ -231,6 +175,26 @@ const JokerCard: React.FC<JokerCardProps> = ({ joker, onClick }) => {
                   />
                 </div>
               </div>
+              {/* Effects Preview */}
+              {(joker.chipAddition > 0 ||
+                joker.multAddition > 0 ||
+                joker.xMult > 1) && (
+                <div className="text-center text-sm mb-2">
+                  {joker.chipAddition > 0 && (
+                    <span className="text-balatro-chips mr-2">
+                      +{joker.chipAddition} Chips
+                    </span>
+                  )}
+                  {joker.multAddition > 0 && (
+                    <span className="text-balatro-mult mr-2">
+                      +{joker.multAddition} Mult
+                    </span>
+                  )}
+                  {joker.xMult > 1 && (
+                    <span className="text-balatro-money">×{joker.xMult}</span>
+                  )}
+                </div>
+              )}
               {/* Rarity indicator */}
               <div className="relative mx-7 mt-2">
                 <div
@@ -248,7 +212,7 @@ const JokerCard: React.FC<JokerCardProps> = ({ joker, onClick }) => {
           </div>
         </div>
       </div>,
-      document.getElementById("joker-info-root")! // Assert non-null as we create it if needed
+      document.getElementById("joker-info-root")!
     );
 
   return (
@@ -260,7 +224,7 @@ const JokerCard: React.FC<JokerCardProps> = ({ joker, onClick }) => {
         onMouseEnter={() => setIsHovering(true)}
         onMouseLeave={() => setIsHovering(false)}
       >
-        {/* Card body - No separate shadow div */}
+        {/* Card body */}
         <div className="w-full aspect-[2/3] pixel-corners-medium overflow-hidden">
           {joker.imagePreview ? (
             <img
