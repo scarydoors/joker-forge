@@ -200,6 +200,12 @@ const JokerForm: React.FC<JokerFormProps> = ({
     }
   };
 
+  const getOptionByValue = (value: number) => {
+    return (
+      rarityOptions.find((option) => option.value === value) || rarityOptions[0]
+    );
+  };
+
   return (
     <div className="h-full overflow-auto custom-scrollbar bg-balatro-transparentblack pixel-corners-medium p-6">
       <h2 className="text-2xl text-white text-shadow-pixel text-center mb-4">
@@ -307,7 +313,7 @@ const JokerForm: React.FC<JokerFormProps> = ({
                 <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
                   <div
                     className={`w-4 h-4 ${
-                      rarityOptions[formData.rarity].color
+                      getOptionByValue(formData.rarity).color
                     }`}
                   ></div>
                 </div>

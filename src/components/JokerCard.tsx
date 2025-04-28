@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
 
 interface JokerCardProps {
@@ -18,35 +18,41 @@ export interface JokerData {
 }
 
 const getRarityText = (rarity: number) => {
-  const rarityMap = {
+  const rarityMap: Record<number, string> = {
     1: "Common",
     2: "Uncommon",
     3: "Rare",
     4: "Legendary",
   };
-  return rarityMap[rarity as keyof typeof rarityMap] || "Unknown";
+  return rarityMap[rarity] || "Common"; // Default to Common if invalid
 };
 
 const getRarityStyles = (rarity: number) => {
-  const styleMap = {
-    0: {
+  const styleMap: Record<number, { bg: string; shadow: string }> = {
+    1: {
+      // Common
       bg: "bg-balatro-blue",
       shadow: "bg-balatro-blueshadow",
     },
-    1: {
+    2: {
+      // Uncommon
       bg: "bg-balatro-green",
       shadow: "bg-balatro-greenshadow",
     },
-    2: {
+    3: {
+      // Rare
       bg: "bg-balatro-red",
       shadow: "bg-balatro-redshadow",
     },
-    3: {
+    4: {
+      // Legendary
       bg: "bg-balatro-purple",
       shadow: "bg-balatro-purpleshadow",
     },
   };
-  return styleMap[rarity as keyof typeof styleMap] || styleMap[0];
+
+  // Safely return a valid style, defaulting to Common (1)
+  return styleMap[rarity] || styleMap[1];
 };
 
 /**
@@ -104,8 +110,20 @@ const JokerCard: React.FC<JokerCardProps> = ({ joker, onClick }) => {
     null
   );
   const cardRef = useRef<HTMLDivElement>(null);
+  const [portalRoot, setPortalRoot] = useState<HTMLElement | null>(null);
 
-  const updatePosition = () => {
+  // Find or create the portal root element
+  useEffect(() => {
+    let root = document.getElementById("joker-info-root");
+    if (!root) {
+      root = document.createElement("div");
+      root.id = "joker-info-root";
+      document.body.appendChild(root);
+    }
+    setPortalRoot(root);
+  }, []);
+
+  const updatePosition = useCallback(() => {
     if (cardRef.current) {
       const rect = cardRef.current.getBoundingClientRect();
       setPosition({
@@ -113,16 +131,9 @@ const JokerCard: React.FC<JokerCardProps> = ({ joker, onClick }) => {
         y: rect.bottom,
       });
     }
-  };
+  }, []);
 
   useEffect(() => {
-    let portalRoot = document.getElementById("joker-info-root");
-    if (!portalRoot) {
-      portalRoot = document.createElement("div");
-      portalRoot.id = "joker-info-root";
-      document.body.appendChild(portalRoot);
-    }
-
     if (isHovering) {
       updatePosition();
       window.addEventListener("scroll", updatePosition, true);
@@ -132,15 +143,22 @@ const JokerCard: React.FC<JokerCardProps> = ({ joker, onClick }) => {
         window.removeEventListener("resize", updatePosition);
       };
     }
-  }, [isHovering]);
+  }, [isHovering, updatePosition]);
 
-  const rarityStyles = getRarityStyles(joker.rarity);
+  // Safely determine the rarity styles
+  const safeRarity =
+    typeof joker.rarity === "number" && joker.rarity >= 1 && joker.rarity <= 4
+      ? joker.rarity
+      : 1; // Default to Common
+
+  const rarityStyles = getRarityStyles(safeRarity);
+  const rarityText = getRarityText(safeRarity);
 
   // Display info tooltip on hover
-  const infoTooltip =
-    position &&
-    isHovering &&
-    createPortal(
+  const renderTooltip = () => {
+    if (!position || !isHovering || !portalRoot) return null;
+
+    return createPortal(
       <div
         className="fixed pointer-events-none font-game z-50"
         style={{
@@ -154,13 +172,9 @@ const JokerCard: React.FC<JokerCardProps> = ({ joker, onClick }) => {
           {/* Tooltip Shadow */}
           <div className="absolute inset-0 bg-balatro-blackshadow pixel-corners-medium translate-y-1" />
           {/* Tooltip Body */}
-          <div
-            className={`relative bg-balatro-lightgrey pixel-corners-medium p-1`}
-          >
+          <div className="relative bg-balatro-lightgrey pixel-corners-medium p-1">
             <div className="bg-balatro-black pixel-corners-medium p-2">
-              <h3
-                className={`text-2xl mb-1 text-center text-white text-shadow-pixel`}
-              >
+              <h3 className="text-2xl mb-1 text-center text-white text-shadow-pixel">
                 {joker.name}
               </h3>
               {/* Description Box */}
@@ -204,7 +218,7 @@ const JokerCard: React.FC<JokerCardProps> = ({ joker, onClick }) => {
                   className={`relative ${rarityStyles.bg} pixel-corners-small text-center text-lg text-white`}
                 >
                   <span className="relative text-shadow-pixel">
-                    {getRarityText(joker.rarity)}
+                    {rarityText}
                   </span>
                 </div>
               </div>
@@ -212,8 +226,9 @@ const JokerCard: React.FC<JokerCardProps> = ({ joker, onClick }) => {
           </div>
         </div>
       </div>,
-      document.getElementById("joker-info-root")!
+      portalRoot
     );
+  };
 
   return (
     <>
@@ -245,7 +260,7 @@ const JokerCard: React.FC<JokerCardProps> = ({ joker, onClick }) => {
       </div>
 
       {/* Info tooltip */}
-      {infoTooltip}
+      {renderTooltip()}
     </>
   );
 };
