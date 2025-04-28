@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
+import { Rule } from "./RuleBuilder";
 
 interface JokerCardProps {
   joker: JokerData;
@@ -15,6 +16,7 @@ export interface JokerData {
   xMult: number;
   imagePreview: string;
   rarity: number; // 1: Common, 2: Uncommon, 3: Rare, 4: Legendary
+  rules?: Rule[];
 }
 
 const getRarityText = (rarity: number) => {

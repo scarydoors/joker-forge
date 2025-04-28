@@ -6,6 +6,7 @@ interface JokerFormProps {
   onSaveJoker: (joker: JokerData) => void;
   onDeleteJoker: (jokerId: string) => void;
   modName: string;
+  onOpenRuleBuilder: () => void;
 }
 
 const formatButtons = [
@@ -34,6 +35,7 @@ const JokerForm: React.FC<JokerFormProps> = ({
   joker,
   onSaveJoker,
   onDeleteJoker,
+  onOpenRuleBuilder,
 }) => {
   const [formData, setFormData] = useState<JokerData>(
     joker || {
@@ -45,6 +47,7 @@ const JokerForm: React.FC<JokerFormProps> = ({
       xMult: 1,
       imagePreview: "",
       rarity: 1,
+      rules: [],
     }
   );
   const [changesExist, setChangesExist] = useState(false);
@@ -438,6 +441,29 @@ const JokerForm: React.FC<JokerFormProps> = ({
               </div>
             </div>
           </div>
+        </div>
+
+        <div className="mt-6">
+          <h3 className="text-xl text-white text-shadow-pixel mb-2">
+            Advanced Rules
+          </h3>
+          <button
+            className="w-full bg-balatro-blue hover:bg-balatro-blueshadow text-white py-2 pixel-corners-small transition-colors"
+            onClick={onOpenRuleBuilder}
+          >
+            <span className="text-shadow-pixel">
+              {formData.rules && formData.rules.length > 0
+                ? `Edit Rules (${formData.rules.length})`
+                : "Add Custom Rules"}
+            </span>
+          </button>
+
+          {formData.rules && formData.rules.length > 0 && (
+            <div className="text-sm text-center mt-2 text-balatro-lightgrey">
+              This joker has {formData.rules.length} custom rule
+              {formData.rules.length !== 1 ? "s" : ""}
+            </div>
+          )}
         </div>
 
         {/* Action buttons */}

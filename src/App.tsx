@@ -4,6 +4,7 @@ import JokerCollection from "./components/JokerCollection";
 import JokerForm from "./components/JokerForm";
 import { JokerData } from "./components/JokerCard";
 import { exportJokersAsMod } from "./components/codeGeneration";
+import RuleBuilder, { Rule } from "./components/RuleBuilder";
 
 function App() {
   const [jokers, setJokers] = useState<JokerData[]>([]);
@@ -14,6 +15,9 @@ function App() {
   const [showExportModal, setShowExportModal] = useState(false);
   const [authorName, setAuthorName] = useState("");
   const [exportLoading, setExportLoading] = useState(false);
+
+  // Rule Builder modal state
+  const [showRuleBuilderModal, setShowRuleBuilderModal] = useState(false);
 
   const handleSelectJoker = (jokerId: string) => {
     setSelectedJokerId(jokerId);
@@ -29,6 +33,7 @@ function App() {
       xMult: 1,
       imagePreview: "",
       rarity: 1,
+      rules: [],
     };
     setJokers([...jokers, newJoker]);
     setSelectedJokerId(newJoker.id);
@@ -74,6 +79,19 @@ function App() {
     }
   };
 
+  // Function to open the Rule Builder modal
+  const handleOpenRuleBuilder = () => {
+    setShowRuleBuilderModal(true);
+  };
+
+  // Function to save rules from the Rule Builder
+  const handleSaveRules = (rules: Rule[]) => {
+    if (selectedJoker) {
+      const updatedJoker = { ...selectedJoker, rules };
+      handleSaveJoker(updatedJoker);
+    }
+  };
+
   const selectedJoker =
     jokers.find((joker) => joker.id === selectedJokerId) || null;
 
@@ -110,6 +128,7 @@ function App() {
                   onSaveJoker={handleSaveJoker}
                   onDeleteJoker={handleDeleteJoker}
                   modName={modName}
+                  onOpenRuleBuilder={handleOpenRuleBuilder}
                 />
               ) : (
                 <div className="h-full flex items-center justify-center bg-balatro-transparentblack pixel-corners-medium">
@@ -170,6 +189,14 @@ function App() {
           </div>
         </div>
       )}
+
+      {/* Rule Builder Modal */}
+      <RuleBuilder
+        isOpen={showRuleBuilderModal}
+        onClose={() => setShowRuleBuilderModal(false)}
+        onSave={handleSaveRules}
+        existingRules={selectedJoker?.rules || []}
+      />
     </>
   );
 }
