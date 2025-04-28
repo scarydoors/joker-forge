@@ -18,14 +18,14 @@ export interface Condition {
   id: string;
   type: string;
   negate: boolean; // For NOT logic
-  params: Record<string, any>;
+  params: Record<string, unknown>;
 }
 
 // An effect with parameters
 export interface Effect {
   id: string;
   type: string;
-  params: Record<string, any>;
+  params: Record<string, unknown>;
 }
 
 // Interface for trigger definitions
@@ -35,12 +35,10 @@ export interface TriggerDefinition {
   description: string;
 }
 
-// Interface for condition type definitions
-export interface ConditionTypeDefinition {
-  id: string;
-  label: string;
-  description: string;
-  params: ConditionParameter[];
+// When a parameter should be shown based on other parameter values
+export interface ShowWhenCondition {
+  parameter: string;
+  values: string[];
 }
 
 // Interface for condition parameters
@@ -52,12 +50,9 @@ export interface ConditionParameter {
   options?: ConditionParameterOption[];
   min?: number;
   max?: number;
-  default?: any;
+  default?: unknown;
   // When this parameter should be shown based on other parameter values
-  showWhen?: {
-    parameter: string;
-    values: string[];
-  };
+  showWhen?: ShowWhenCondition;
 }
 
 // Interface for condition parameter options
@@ -66,12 +61,12 @@ export interface ConditionParameterOption {
   label: string;
 }
 
-// Interface for effect type definitions
-export interface EffectTypeDefinition {
+// Interface for condition type definitions
+export interface ConditionTypeDefinition {
   id: string;
   label: string;
   description: string;
-  params: EffectParameter[];
+  params: ConditionParameter[];
 }
 
 // Interface for effect parameters
@@ -83,13 +78,23 @@ export interface EffectParameter {
   options?: EffectParameterOption[];
   min?: number;
   max?: number;
-  default?: any;
+  default?: unknown;
+  // When this parameter should be shown based on other parameter values
+  showWhen?: ShowWhenCondition;
 }
 
 // Interface for effect parameter options
 export interface EffectParameterOption {
   value: string;
   label: string;
+}
+
+// Interface for effect type definitions
+export interface EffectTypeDefinition {
+  id: string;
+  label: string;
+  description: string;
+  params: EffectParameter[];
 }
 
 // Interface for logical operators

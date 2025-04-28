@@ -4,7 +4,8 @@ import JokerCollection from "./components/JokerCollection";
 import JokerForm from "./components/JokerForm";
 import { JokerData } from "./components/JokerCard";
 import { exportJokersAsMod } from "./components/codeGeneration";
-import RuleBuilder, { Rule } from "./components/RuleBuilder";
+import RuleBuilder from "./components/rulebuilder/RuleBuilder";
+import type { Rule } from "./components/rulebuilder/types";
 
 function App() {
   const [jokers, setJokers] = useState<JokerData[]>([]);
@@ -90,6 +91,7 @@ function App() {
       const updatedJoker = { ...selectedJoker, rules };
       handleSaveJoker(updatedJoker);
     }
+    setShowRuleBuilderModal(false);
   };
 
   const selectedJoker =
