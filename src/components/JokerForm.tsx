@@ -1,4 +1,4 @@
-import React, { ChangeEvent, useState, useRef } from "react";
+import React, { ChangeEvent, useState, useRef, useEffect } from "react";
 import { JokerData } from "./JokerCard";
 
 interface JokerFormProps {
@@ -51,6 +51,13 @@ const JokerForm: React.FC<JokerFormProps> = ({
   const descriptionRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  useEffect(() => {
+    if (joker) {
+      setFormData(joker);
+      setChangesExist(false);
+    }
+  }, [joker]);
+
   const handleInputChange = (
     e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
@@ -79,11 +86,24 @@ const JokerForm: React.FC<JokerFormProps> = ({
     if (file) {
       const reader = new FileReader();
       reader.onload = () => {
-        setFormData((prev) => ({
-          ...prev,
-          imagePreview: reader.result as string,
-        }));
-        setChangesExist(true);
+        // Create an image element to check dimensions
+        const img = new Image();
+        img.onload = () => {
+          // Check if dimensions match the required 142x190
+          if (img.width === 142 && img.height === 190) {
+            setFormData((prev) => ({
+              ...prev,
+              imagePreview: reader.result as string,
+            }));
+            setChangesExist(true);
+          } else {
+            // Show error for incorrect dimensions
+            alert(
+              `Image dimensions must be 142x190 pixels. Your image is ${img.width}x${img.height}.`
+            );
+          }
+        };
+        img.src = reader.result as string;
       };
       reader.readAsDataURL(file);
     }
@@ -244,6 +264,10 @@ const JokerForm: React.FC<JokerFormProps> = ({
                   <span className="relative z-10 text-shadow-pixel">Clear</span>
                 </button>
               )}
+
+              <div className="text-xs text-balatro-lightgrey mt-1">
+                Note: Image must be exactly 142×190 pixels
+              </div>
             </div>
           </div>
 
