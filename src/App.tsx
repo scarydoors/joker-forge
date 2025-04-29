@@ -3,7 +3,7 @@ import Background from "./Background";
 import JokerCollection from "./components/JokerCollection";
 import JokerForm from "./components/JokerForm";
 import { JokerData } from "./components/JokerCard";
-import { exportJokersAsMod } from "./components/codegeneration/index";
+import { exportJokersAsMod } from "./components/codeGeneration/index";
 import RuleBuilder from "./components/ruleBuilder/RuleBuilder";
 import type { Rule } from "./components/ruleBuilder/types";
 
