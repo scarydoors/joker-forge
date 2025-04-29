@@ -1,5 +1,5 @@
 import { JokerData } from "../../JokerCard";
-import { Rule } from "../../ruleBuilder/types";
+import { Rule, Effect } from "../../ruleBuilder/types";
 
 export const generatePokerHandCode = (
   joker: JokerData,
@@ -10,7 +10,12 @@ export const generatePokerHandCode = (
   if (pokerHandRules.length === 0) return "";
 
   const handTypes: string[] = [];
+  let effectType: string = "";
+  let effectValue: any = null;
+
+  // Extract hand types and effects from rules
   pokerHandRules.forEach((rule) => {
+    // Extract hand types from conditions
     rule.conditionGroups.forEach((group) => {
       group.conditions.forEach((condition) => {
         if (
@@ -21,53 +26,76 @@ export const generatePokerHandCode = (
         }
       });
     });
+
+    // Extract effect type and value
+    if (rule.effects.length > 0) {
+      const effect = rule.effects[0]; // Use the first effect
+      effectType = effect.type;
+      effectValue = effect.params.value;
+    }
   });
 
   if (handTypes.length === 0) return "";
 
+  // If no explicit effect in rules, use joker properties
+  if (!effectType) {
+    if (joker.chipAddition > 0) {
+      effectType = "add_chips";
+      effectValue = joker.chipAddition;
+    } else if (joker.multAddition > 0) {
+      effectType = "add_mult";
+      effectValue = joker.multAddition;
+    } else if (joker.xMult > 1) {
+      effectType = "apply_x_mult";
+      effectValue = joker.xMult;
+    }
+  }
+
+  // Generate return statement based on effect type
+  let returnStatement = "";
+  let colour = "G.C.WHITE";
+
+  if (effectType === "add_chips") {
+    returnStatement = `
+                    message = localize{type='variable',key='a_chips',vars={card.ability.extra.chips}},
+                    chip_mod = card.ability.extra.chips`;
+    colour = "G.C.CHIPS";
+  } else if (effectType === "add_mult") {
+    returnStatement = `
+                    message = localize{type='variable',key='a_mult',vars={card.ability.extra.mult}},
+                    mult_mod = card.ability.extra.mult`;
+    colour = "G.C.MULT";
+  } else if (effectType === "apply_x_mult") {
+    returnStatement = `
+                    message = localize{type='variable',key='a_xmult',vars={card.ability.extra.Xmult}},
+                    Xmult_mod = card.ability.extra.Xmult`;
+    colour = "G.C.MONEY";
+  } else {
+    // Default case
+    returnStatement = `
+                    message = "Activated!"`;
+  }
+
+  // Single hand type
   if (handTypes.length === 1) {
     const handType = handTypes[0];
-    let calculateCode = `calculate = function(self, card, context)
+
+    return `calculate = function(self, card, context)
+        -- Main scoring time for jokers - this is when most jokers apply their effects
         if context.cardarea == G.jokers and context.joker_main then
+            -- Check if the current hand is a ${handType}
             if context.scoring_name == "${handType}" then
-                return {`;
-
-    if (joker.chipAddition > 0) {
-      calculateCode += `
-                    message = localize{type='variable',key='a_chips',vars={card.ability.extra.chips}},
-                    chip_mod = card.ability.extra.chips,`;
-    }
-
-    if (joker.multAddition > 0) {
-      calculateCode += `
-                    ${
-                      !joker.chipAddition
-                        ? "message = localize{type='variable',key='a_mult',vars={card.ability.extra.mult}},"
-                        : ""
-                    }
-                    mult_mod = card.ability.extra.mult,`;
-    }
-
-    if (joker.xMult > 1) {
-      calculateCode += `
-                    ${
-                      !joker.chipAddition && !joker.multAddition
-                        ? "message = localize{type='variable',key='a_xmult',vars={card.ability.extra.Xmult}},"
-                        : ""
-                    }
-                    Xmult_mod = card.ability.extra.Xmult,`;
-    }
-
-    calculateCode += `
-                    colour = G.C.CHIPS
+                return {${returnStatement},
+                    colour = ${colour}
                 }
             end
         end
     end`;
-
-    return calculateCode;
-  } else {
+  }
+  // Multiple hand types
+  else {
     let calculateCode = `calculate = function(self, card, context)
+        -- Main scoring time for jokers - this is when most jokers apply their effects
         if context.cardarea == G.jokers and context.joker_main then
             local handType = context.scoring_name
             
@@ -79,47 +107,13 @@ export const generatePokerHandCode = (
     });
 
     calculateCode += ` then
-                if `;
-
-    handTypes.forEach((handType, index) => {
-      if (index > 0) calculateCode += ` elseif `;
-      calculateCode += `handType == "${handType}" then`;
-
-      if (joker.chipAddition > 0) {
-        calculateCode += `
-                    return {
-                        message = localize{type='variable',key='a_chips',vars={card.ability.extra.chips}},
-                        chip_mod = card.ability.extra.chips,
-                        colour = G.C.CHIPS
-                    }`;
-      } else if (joker.multAddition > 0) {
-        calculateCode += `
-                    return {
-                        message = localize{type='variable',key='a_mult',vars={card.ability.extra.mult}},
-                        mult_mod = card.ability.extra.mult,
-                        colour = G.C.MULT
-                    }`;
-      } else if (joker.xMult > 1) {
-        calculateCode += `
-                    return {
-                        message = localize{type='variable',key='a_xmult',vars={card.ability.extra.Xmult}},
-                        Xmult_mod = card.ability.extra.Xmult,
-                        colour = G.C.MONEY
-                    }`;
-      }
-    });
-
-    calculateCode += `
-                end
+                return {${returnStatement},
+                    colour = ${colour}
+                }
             end
         end
     end`;
 
     return calculateCode;
   }
-};
-
-// Don't generate descriptions - keep what user entered
-export const generatePokerHandDescription = (): string[] => {
-  return [];
 };

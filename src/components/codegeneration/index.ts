@@ -5,8 +5,12 @@ import {
   generateJokerBaseCode,
   generateBasicLocVarsFunction,
   generateBasicCalculateFunction,
+  shouldUseSpecializedHandler,
 } from "./JokerBase";
-import { generatePokerHandCode } from "./effects/PokerHandEffects";
+import {
+  generatePokerHandCode,
+  generatePokerHandDescription,
+} from "./effects/PokerHandEffects";
 
 export const exportJokersAsMod = async (
   jokers: JokerData[],
@@ -76,16 +80,17 @@ const generateJokerCode = (
   let calculateCode = "";
 
   if (joker.rules && joker.rules.length > 0) {
+    // Check for poker hand rules
     const pokerHandRules = joker.rules.filter(
       (rule) => rule.trigger === "poker_hand_played"
     );
 
     if (pokerHandRules.length > 0) {
-      // No description changes - use exactly what was provided
+      // Generate specialized code for poker hand rules
       locVarsCode = generateBasicLocVarsFunction(joker);
       calculateCode = generatePokerHandCode(joker, joker.rules);
     } else {
-      // Standard code for other rules
+      // Standard code for other rules or no rules
       locVarsCode = generateBasicLocVarsFunction(joker);
       calculateCode = generateBasicCalculateFunction(joker);
     }
