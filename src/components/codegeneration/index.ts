@@ -5,12 +5,10 @@ import {
   generateJokerBaseCode,
   generateBasicLocVarsFunction,
   generateBasicCalculateFunction,
-  shouldUseSpecializedHandler,
 } from "./JokerBase";
-import {
-  generatePokerHandCode,
-  generatePokerHandDescription,
-} from "./effects/PokerHandEffects";
+import { generatePokerHandCode } from "./effects/PokerHandEffects";
+
+import { generateSuitCardCode } from "./effects/SuitCardEffects";
 
 export const exportJokersAsMod = async (
   jokers: JokerData[],
@@ -74,28 +72,73 @@ const generateJokerCode = (
   index: number,
   atlasKey: string
 ): string => {
+  console.log(`Generating code for joker: ${joker.name}`);
+
   // Start with the base joker code
   let jokerCode = generateJokerBaseCode(joker, index, atlasKey);
   let locVarsCode = "";
   let calculateCode = "";
 
   if (joker.rules && joker.rules.length > 0) {
-    // Check for poker hand rules
-    const pokerHandRules = joker.rules.filter(
-      (rule) => rule.trigger === "poker_hand_played"
-    );
+    console.log(`Joker has ${joker.rules.length} rules`);
 
-    if (pokerHandRules.length > 0) {
-      // Generate specialized code for poker hand rules
+    // First check for suit rules - look for card_suit conditions (PRIORITIZE THIS)
+    const suitRules = joker.rules.filter((rule) => {
+      return rule.conditionGroups.some((group) =>
+        group.conditions.some((condition) => condition.type === "card_suit")
+      );
+    });
+    console.log(`Found ${suitRules.length} suit rules`);
+
+    // Then check for poker hand rules (only if no suit rules)
+    const pokerHandRules =
+      suitRules.length === 0
+        ? joker.rules.filter((rule) => rule.trigger === "poker_hand_played")
+        : [];
+    console.log(`Found ${pokerHandRules.length} poker hand rules`);
+
+    // Log the first suit rule structure for debugging
+    if (suitRules.length > 0) {
+      console.log("First suit rule:", JSON.stringify(suitRules[0], null, 2));
+    }
+
+    if (suitRules.length > 0) {
+      // Generate specialized code for suit rules
+      console.log("Generating code for suit rules");
       locVarsCode = generateBasicLocVarsFunction(joker);
-      calculateCode = generatePokerHandCode(joker, joker.rules);
+      calculateCode = generateSuitCardCode(joker, suitRules);
+      console.log(`Generated calculate code length: ${calculateCode.length}`);
+
+      // Fallback if no code was generated
+      if (!calculateCode || calculateCode.trim() === "") {
+        console.warn(
+          "No calculate code generated for suit rules, using fallback"
+        );
+        calculateCode = generateBasicCalculateFunction(joker);
+      }
+    } else if (pokerHandRules.length > 0) {
+      // Generate specialized code for poker hand rules
+      console.log("Generating code for poker hand rules");
+      locVarsCode = generateBasicLocVarsFunction(joker);
+      calculateCode = generatePokerHandCode(joker, pokerHandRules);
+      console.log(`Generated calculate code length: ${calculateCode.length}`);
+
+      // Fallback if no code was generated
+      if (!calculateCode || calculateCode.trim() === "") {
+        console.warn(
+          "No calculate code generated for poker hand rules, using fallback"
+        );
+        calculateCode = generateBasicCalculateFunction(joker);
+      }
     } else {
       // Standard code for other rules or no rules
+      console.log("Generating basic calculate function");
       locVarsCode = generateBasicLocVarsFunction(joker);
       calculateCode = generateBasicCalculateFunction(joker);
     }
   } else {
     // No rules
+    console.log("No rules - generating basic calculate function");
     locVarsCode = generateBasicLocVarsFunction(joker);
     calculateCode = generateBasicCalculateFunction(joker);
   }
