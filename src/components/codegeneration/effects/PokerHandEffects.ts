@@ -11,8 +11,8 @@ export const generatePokerHandCode = (
   if (pokerHandRules.length === 0) return "";
 
   const handTypes: string[] = [];
-  let effectType: string = "";
-  let effectValue: string | number | null = null;
+  // Collect all effect types from the rules
+  const effectTypes: string[] = [];
 
   // Extract hand types and effects from rules
   pokerHandRules.forEach((rule) => {
@@ -28,31 +28,27 @@ export const generatePokerHandCode = (
       });
     });
 
-    // Extract effect type and value
-    if (rule.effects.length > 0) {
-      const effect = rule.effects[0]; // Use the first effect
-      effectType = effect.type;
-      effectValue = effect.params.value as string | number | null;
-    }
+    // Extract all effect types
+    rule.effects.forEach((effect) => {
+      if (!effectTypes.includes(effect.type)) {
+        effectTypes.push(effect.type);
+      }
+    });
   });
 
   if (handTypes.length === 0) return "";
 
-  // If no explicit effect in rules, use joker properties
-  if (!effectType) {
-    if (joker.chipAddition > 0) {
-      effectType = "add_chips";
-    } else if (joker.multAddition > 0) {
-      effectType = "add_mult";
-    } else if (joker.xMult > 1) {
-      effectType = "apply_x_mult";
-    }
+  // If no effects found in rules, add defaults based on joker properties
+  if (effectTypes.length === 0) {
+    if (joker.chipAddition > 0) effectTypes.push("add_chips");
+    if (joker.multAddition > 0) effectTypes.push("add_mult");
+    if (joker.xMult > 1) effectTypes.push("apply_x_mult");
   }
 
-  // Get return statement based on effect type
+  // Get return statement based on all effect types
   const { statement: returnStatement, colour } = generateEffectReturnStatement(
-    effectType,
-    joker
+    joker,
+    effectTypes
   );
 
   // Single hand type

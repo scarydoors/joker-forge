@@ -6,34 +6,113 @@ export interface ReturnStatementResult {
 }
 
 /**
- * Generate a return statement based on effect type or joker properties
+ * Generate a return statement based on effect types and joker properties
+ * Chains multiple effects with their own messages using the 'extra' field
  */
 export function generateEffectReturnStatement(
-  effectType: string,
-  joker: JokerData
+  joker: JokerData,
+  effectTypes: string[] = []
 ): ReturnStatementResult {
+  // Keep track of active effects for chaining
+  const activeEffects: string[] = [];
+
+  // Add joker default effects if they're set
+  if (joker.chipAddition > 0 && !effectTypes.includes("add_chips")) {
+    activeEffects.push("add_chips");
+  }
+  if (joker.multAddition > 0 && !effectTypes.includes("add_mult")) {
+    activeEffects.push("add_mult");
+  }
+  if (joker.xMult > 1 && !effectTypes.includes("apply_x_mult")) {
+    activeEffects.push("apply_x_mult");
+  }
+
+  // Add explicit effect types if not already included
+  effectTypes.forEach((type) => {
+    if (!activeEffects.includes(type)) {
+      activeEffects.push(type);
+    }
+  });
+
+  // If no effects found, return a simple activation message
+  if (activeEffects.length === 0) {
+    return {
+      statement: '\n                message = "Activated!"',
+      colour: "G.C.WHITE",
+    };
+  }
+
+  // Build the return statement by chaining effects
   let returnStatement = "";
   let colour = "G.C.WHITE";
 
-  if (effectType === "add_chips" || joker.chipAddition > 0) {
+  // Process the first effect (goes directly in the return table)
+  const firstEffect = activeEffects[0];
+  if (firstEffect === "add_chips") {
     returnStatement = `
-                message = localize{type='variable',key='a_chips',vars={card.ability.extra.chips}},
-                chip_mod = card.ability.extra.chips`;
+                chip_mod = card.ability.extra.chips,
+                message = localize{type='variable',key='a_chips',vars={card.ability.extra.chips}}`;
     colour = "G.C.CHIPS";
-  } else if (effectType === "add_mult" || joker.multAddition > 0) {
+  } else if (firstEffect === "add_mult") {
     returnStatement = `
-                message = localize{type='variable',key='a_mult',vars={card.ability.extra.mult}},
-                mult_mod = card.ability.extra.mult`;
+                mult_mod = card.ability.extra.mult,
+                message = localize{type='variable',key='a_mult',vars={card.ability.extra.mult}}`;
     colour = "G.C.MULT";
-  } else if (effectType === "apply_x_mult" || joker.xMult > 1) {
+  } else if (firstEffect === "apply_x_mult") {
     returnStatement = `
-                message = localize{type='variable',key='a_xmult',vars={card.ability.extra.Xmult}},
-                Xmult_mod = card.ability.extra.Xmult`;
+                Xmult_mod = card.ability.extra.Xmult,
+                message = localize{type='variable',key='a_xmult',vars={card.ability.extra.Xmult}}`;
     colour = "G.C.MONEY";
-  } else {
-    // Default case
-    returnStatement = `
-                message = "Activated!"`;
+  }
+
+  // If there are more effects, chain them using 'extra'
+  if (activeEffects.length > 1) {
+    // Start building the extra object for the second effect
+    let extraChain = "";
+
+    // Process each additional effect (goes in nested 'extra' fields)
+    for (let i = 1; i < activeEffects.length; i++) {
+      const effect = activeEffects[i];
+      let extraContent = "";
+      let effectColour = "G.C.WHITE";
+
+      if (effect === "add_chips") {
+        extraContent = `chip_mod = card.ability.extra.chips,
+                        message = localize{type='variable',key='a_chips',vars={card.ability.extra.chips}}`;
+        effectColour = "G.C.CHIPS";
+      } else if (effect === "add_mult") {
+        extraContent = `mult_mod = card.ability.extra.mult,
+                        message = localize{type='variable',key='a_mult',vars={card.ability.extra.mult}}`;
+        effectColour = "G.C.MULT";
+      } else if (effect === "apply_x_mult") {
+        extraContent = `Xmult_mod = card.ability.extra.Xmult,
+                        message = localize{type='variable',key='a_xmult',vars={card.ability.extra.Xmult}}`;
+        effectColour = "G.C.MONEY";
+      }
+
+      // For the second effect, start the extra chain
+      if (i === 1) {
+        extraChain = `
+                extra = {
+                    ${extraContent},
+                    colour = ${effectColour}`;
+      } else {
+        // For third+ effects, nest within the previous extra
+        extraChain += `,
+                    extra = {
+                        ${extraContent},
+                        colour = ${effectColour}`;
+      }
+    }
+
+    // Close all the extra brackets
+    for (let i = 1; i < activeEffects.length; i++) {
+      extraChain += `
+                    }`;
+    }
+
+    // Add the complete extra chain to the return statement
+    returnStatement += `,${extraChain}`;
   }
 
   return { statement: returnStatement, colour };
@@ -43,37 +122,23 @@ export function generateEffectReturnStatement(
  * Generate a fallback calculate function if other methods fail
  */
 export function generateFallbackCalculate(joker: JokerData): string {
-  if (joker.chipAddition > 0) {
-    return `calculate = function(self, card, context)
+  // Generate a list of effect types based on joker properties
+  const effectTypes: string[] = [];
+  if (joker.chipAddition > 0) effectTypes.push("add_chips");
+  if (joker.multAddition > 0) effectTypes.push("add_mult");
+  if (joker.xMult > 1) effectTypes.push("apply_x_mult");
+
+  // Get the appropriate return statement with all effects
+  const { statement, colour } = generateEffectReturnStatement(
+    joker,
+    effectTypes
+  );
+
+  return `calculate = function(self, card, context)
         if context.joker_main then
-            return {
-                message = localize{type='variable',key='a_chips',vars={card.ability.extra.chips}},
-                chip_mod = card.ability.extra.chips,
-                colour = G.C.CHIPS
+            return {${statement},
+                colour = ${colour}
             }
         end
     end`;
-  } else if (joker.multAddition > 0) {
-    return `calculate = function(self, card, context)
-        if context.joker_main then
-            return {
-                message = localize{type='variable',key='a_mult',vars={card.ability.extra.mult}},
-                mult_mod = card.ability.extra.mult,
-                colour = G.C.MULT
-            }
-        end
-    end`;
-  } else if (joker.xMult > 1) {
-    return `calculate = function(self, card, context)
-        if context.joker_main then
-            return {
-                message = localize{type='variable',key='a_xmult',vars={card.ability.extra.Xmult}},
-                Xmult_mod = card.ability.extra.Xmult,
-                colour = G.C.MONEY
-            }
-        end
-    end`;
-  } else {
-    return `calculate = function(self, card, context) end`;
-  }
 }
