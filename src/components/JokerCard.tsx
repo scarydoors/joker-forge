@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
-import { Rule } from "./RuleBuilder";
+import { Rule } from "./ruleBuilder";
 
 interface JokerCardProps {
   joker: JokerData;

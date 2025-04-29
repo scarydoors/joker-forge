@@ -1,5 +1,5 @@
 import JSZip from "jszip";
-import { JokerData } from "./JokerCard";
+import { JokerData } from "../JokerCard";
 
 /**
  * Process uploaded joker images for the mod

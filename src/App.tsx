@@ -3,9 +3,9 @@ import Background from "./Background";
 import JokerCollection from "./components/JokerCollection";
 import JokerForm from "./components/JokerForm";
 import { JokerData } from "./components/JokerCard";
-import { exportJokersAsMod } from "./components/codeGeneration";
-import RuleBuilder from "./components/rulebuilder/RuleBuilder";
-import type { Rule } from "./components/rulebuilder/types";
+import { exportJokersAsMod } from "./components/codegeneration/index";
+import RuleBuilder from "./components/ruleBuilder/RuleBuilder";
+import type { Rule } from "./components/ruleBuilder/types";
 
 function App() {
   const [jokers, setJokers] = useState<JokerData[]>([]);
