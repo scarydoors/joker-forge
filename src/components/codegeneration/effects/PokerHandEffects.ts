@@ -1,5 +1,6 @@
 import { JokerData } from "../../JokerCard";
-import { Rule, Effect } from "../../ruleBuilder/types";
+import type { Rule } from "../../ruleBuilder/types";
+import { generateEffectReturnStatement } from "../effectUtils";
 
 export const generatePokerHandCode = (
   joker: JokerData,
@@ -11,7 +12,7 @@ export const generatePokerHandCode = (
 
   const handTypes: string[] = [];
   let effectType: string = "";
-  let effectValue: any = null;
+  let effectValue: string | number | null = null;
 
   // Extract hand types and effects from rules
   pokerHandRules.forEach((rule) => {
@@ -31,7 +32,7 @@ export const generatePokerHandCode = (
     if (rule.effects.length > 0) {
       const effect = rule.effects[0]; // Use the first effect
       effectType = effect.type;
-      effectValue = effect.params.value;
+      effectValue = effect.params.value as string | number | null;
     }
   });
 
@@ -41,40 +42,18 @@ export const generatePokerHandCode = (
   if (!effectType) {
     if (joker.chipAddition > 0) {
       effectType = "add_chips";
-      effectValue = joker.chipAddition;
     } else if (joker.multAddition > 0) {
       effectType = "add_mult";
-      effectValue = joker.multAddition;
     } else if (joker.xMult > 1) {
       effectType = "apply_x_mult";
-      effectValue = joker.xMult;
     }
   }
 
-  // Generate return statement based on effect type
-  let returnStatement = "";
-  let colour = "G.C.WHITE";
-
-  if (effectType === "add_chips") {
-    returnStatement = `
-                    message = localize{type='variable',key='a_chips',vars={card.ability.extra.chips}},
-                    chip_mod = card.ability.extra.chips`;
-    colour = "G.C.CHIPS";
-  } else if (effectType === "add_mult") {
-    returnStatement = `
-                    message = localize{type='variable',key='a_mult',vars={card.ability.extra.mult}},
-                    mult_mod = card.ability.extra.mult`;
-    colour = "G.C.MULT";
-  } else if (effectType === "apply_x_mult") {
-    returnStatement = `
-                    message = localize{type='variable',key='a_xmult',vars={card.ability.extra.Xmult}},
-                    Xmult_mod = card.ability.extra.Xmult`;
-    colour = "G.C.MONEY";
-  } else {
-    // Default case
-    returnStatement = `
-                    message = "Activated!"`;
-  }
+  // Get return statement based on effect type
+  const { statement: returnStatement, colour } = generateEffectReturnStatement(
+    effectType,
+    joker
+  );
 
   // Single hand type
   if (handTypes.length === 1) {

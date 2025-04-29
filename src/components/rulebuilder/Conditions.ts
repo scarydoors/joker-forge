@@ -20,6 +20,11 @@ const CARD_QUANTIFIERS = [
   { value: "at_most", label: "At most N cards" },
 ];
 
+const CARD_SCOPE = [
+  { value: "scoring", label: "Scoring cards only" },
+  { value: "all_played", label: "All played cards" },
+];
+
 // Card ranks for selection
 const CARD_RANKS = [
   { value: "2", label: "2" },
@@ -176,10 +181,11 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
     description: "Check the suit of cards in the played hand",
     params: [
       {
-        id: "quantifier",
+        id: "card_scope",
         type: "select",
-        label: "Quantifier",
-        options: CARD_QUANTIFIERS,
+        label: "Card Scope",
+        options: CARD_SCOPE,
+        default: "scoring",
       },
       {
         id: "count",

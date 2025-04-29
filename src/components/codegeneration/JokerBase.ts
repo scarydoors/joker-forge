@@ -1,5 +1,4 @@
 import { JokerData } from "../JokerCard";
-import { Rule, Effect } from "../ruleBuilder/types";
 
 export const generateJokerBaseCode = (
   joker: JokerData,
@@ -39,7 +38,7 @@ export const generateJokerBaseCode = (
 
 // Extract effect values from joker data and rules to populate the config.extra section
 export const extractEffectsConfig = (joker: JokerData): string => {
-  const configItems = [];
+  const configItems: string[] = [];
 
   // Add basic effects from joker data
   if (joker.chipAddition > 0) {
@@ -113,7 +112,7 @@ export const formatJokerDescription = (joker: JokerData): string => {
 };
 
 export const generateBasicLocVarsFunction = (joker: JokerData): string => {
-  const vars = [];
+  const vars: string[] = [];
 
   // Check joker properties
   if (joker.chipAddition > 0) vars.push("card.ability.extra.chips");
@@ -156,7 +155,7 @@ export const generateBasicCalculateFunction = (joker: JokerData): string => {
     return "calculate = function(self, card, context) end";
   }
 
-  let returnItems = [];
+  const returnItems: string[] = [];
 
   if (joker.chipAddition > 0) {
     returnItems.push(

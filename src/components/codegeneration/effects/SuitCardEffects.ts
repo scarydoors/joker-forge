@@ -1,5 +1,9 @@
 import { JokerData } from "../../JokerCard";
-import { Rule, Condition } from "../../ruleBuilder/types";
+import type { Rule, Condition } from "../../ruleBuilder/types";
+import {
+  generateEffectReturnStatement,
+  generateFallbackCalculate,
+} from "../effectUtils";
 
 export const generateSuitCardCode = (
   joker: JokerData,
@@ -41,13 +45,13 @@ export const generateSuitCardCode = (
 
   // Extract effect type and value
   let effectType = "";
-  let effectValue: any = null;
+  let effectValue: string | number | null = null;
 
   // First check rule effects (they take priority)
   if (suitRules[0].effects.length > 0) {
     const effect = suitRules[0].effects[0];
     effectType = effect.type;
-    effectValue = effect.params.value;
+    effectValue = effect.params.value as string | number | null;
   }
   // Then check joker properties as fallback
   else if (joker.chipAddition > 0) {
@@ -61,30 +65,11 @@ export const generateSuitCardCode = (
     effectValue = joker.xMult;
   }
 
-  // Generate return statement based on effect type
-  let returnStatement = "";
-  let colour = "G.C.WHITE";
-
-  if (effectType === "add_chips" || joker.chipAddition > 0) {
-    returnStatement = `
-                message = localize{type='variable',key='a_chips',vars={card.ability.extra.chips}},
-                chip_mod = card.ability.extra.chips`;
-    colour = "G.C.CHIPS";
-  } else if (effectType === "add_mult" || joker.multAddition > 0) {
-    returnStatement = `
-                message = localize{type='variable',key='a_mult',vars={card.ability.extra.mult}},
-                mult_mod = card.ability.extra.mult`;
-    colour = "G.C.MULT";
-  } else if (effectType === "apply_x_mult" || joker.xMult > 1) {
-    returnStatement = `
-                message = localize{type='variable',key='a_xmult',vars={card.ability.extra.Xmult}},
-                Xmult_mod = card.ability.extra.Xmult`;
-    colour = "G.C.MONEY";
-  } else {
-    // Default case
-    returnStatement = `
-                message = "Activated!"`;
-  }
+  // Get return statement based on effect type
+  const { statement: returnStatement, colour } = generateEffectReturnStatement(
+    effectType,
+    joker
+  );
 
   // Extract suit condition parameters with defaults
   const quantifier =
@@ -130,43 +115,6 @@ end`;
   } catch (error) {
     console.error("Error generating suit card code:", error);
     return generateFallbackCalculate(joker);
-  }
-};
-
-// Fallback calculate function if something goes wrong
-const generateFallbackCalculate = (joker: JokerData): string => {
-  if (joker.chipAddition > 0) {
-    return `calculate = function(self, card, context)
-        if context.joker_main then
-            return {
-                message = localize{type='variable',key='a_chips',vars={card.ability.extra.chips}},
-                chip_mod = card.ability.extra.chips,
-                colour = G.C.CHIPS
-            }
-        end
-    end`;
-  } else if (joker.multAddition > 0) {
-    return `calculate = function(self, card, context)
-        if context.joker_main then
-            return {
-                message = localize{type='variable',key='a_mult',vars={card.ability.extra.mult}},
-                mult_mod = card.ability.extra.mult,
-                colour = G.C.MULT
-            }
-        end
-    end`;
-  } else if (joker.xMult > 1) {
-    return `calculate = function(self, card, context)
-        if context.joker_main then
-            return {
-                message = localize{type='variable',key='a_xmult',vars={card.ability.extra.Xmult}},
-                Xmult_mod = card.ability.extra.Xmult,
-                colour = G.C.MONEY
-            }
-        end
-    end`;
-  } else {
-    return `calculate = function(self, card, context) end`;
   }
 };
 
