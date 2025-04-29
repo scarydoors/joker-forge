@@ -443,7 +443,7 @@ const JokerForm: React.FC<JokerFormProps> = ({
           </div>
         </div>
 
-        <div className="mt-6">
+        <div className="mt-4">
           <h3 className="text-xl text-white text-shadow-pixel mb-2">
             Advanced Rules
           </h3>

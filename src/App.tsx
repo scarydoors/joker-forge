@@ -104,7 +104,7 @@ function App() {
 
       <div className="min-h-screen font-game text-white overflow-hidden p-4">
         <div className="container mx-auto max-w-6xl">
-          <h1 className="text-6xl text-white text-center text-shadow-pixel mb-4">
+          <h1 className="text-4xl text-white text-shadow-pixel -mb-12">
             Joker Forge
           </h1>
 

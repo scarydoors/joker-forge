@@ -1,9 +1,9 @@
-// codeGeneration.ts
 // Functions for generating Lua code for Balatro mods
 
 import { JokerData } from "./JokerCard";
 import JSZip from "jszip";
 import { addAtlasToZip } from "./imageProcessor";
+import { Rule, ConditionGroup, Condition } from "./rulebuilder/types";
 
 /**
  * Generate Lua code for a Balatro mod based on the jokers provided
@@ -46,13 +46,15 @@ export const exportJokersAsMod = async (
 const generateMainLua = (jokers: JokerData[]): string => {
   let output = `local mod = SMODS.current_mod
 
+// Configure the mod
 mod.config = {}
 
+// Create custom joker atlas
 SMODS.Atlas({
-    key = "CustomJokers",
-    path = "CustomJokers.png",
+    key = "CustomJokers", 
+    path = "CustomJokers.png", 
     px = 71,
-    py = 95,
+    py = 95, 
     atlas_table = "ASSET_ATLAS"
 }):register()
 
@@ -104,7 +106,6 @@ const generateJokerCode = (
     },
     cost = ${getCostFromRarity(joker.rarity)},
     rarity = ${joker.rarity},
-    pools = { ['Joker'] = true },
     blueprint_compat = true,
     eternal_compat = true,
     unlocked = true,
@@ -155,8 +156,8 @@ const formatJokerDescription = (joker: JokerData): string => {
     let n = 1;
     if (joker.chipAddition > 0) parts.push(`{C:chips}+#${n++}# Chips{}`);
     if (joker.multAddition > 0) parts.push(`{C:mult}+#${n++}# Mult{}`);
-    if (joker.xMult > 1) parts.push(`{X:mult,C:white}X#${n++}#`);
-    formatted = parts.join(", ") + " to all hands";
+    if (joker.xMult > 1) parts.push(`{X:mult,C:white}X#${n++}#{}`);
+    formatted = parts.join(", ");
   }
 
   const words = formatted.split(" ");
@@ -174,8 +175,8 @@ const formatJokerDescription = (joker: JokerData): string => {
   if (line) lines.push(line.trim());
 
   return `{\n${lines
-    .map((line, i) => `        [${i + 1}] = '${line.replace(/'/g, "\\'")}'`)
-    .join(",\n")}\n    }`;
+    .map((line, i) => `            [${i + 1}] = '${line.replace(/'/g, "\\'")}'`)
+    .join(",\n")}\n        }`;
 };
 
 /**
@@ -188,46 +189,237 @@ const generateLocVarsFunction = (joker: JokerData): string => {
   if (joker.xMult > 1) vars.push("card.ability.extra.Xmult");
 
   return `loc_vars = function(self, info_queue, card)
-        return { vars = { ${vars.join(", ")} } }
+        return {vars = {${vars.join(", ")}}}
     end`;
 };
 
 /**
- * Generate the Joker's calculate function
+ * Generate the Joker's calculate function, including rule-based logic
  */
 const generateCalculateFunction = (joker: JokerData): string => {
-  if (joker.chipAddition <= 0 && joker.multAddition <= 0 && joker.xMult <= 1) {
+  // Handle case with no effects or rules
+  const basicEffects = !!(
+    joker.chipAddition > 0 ||
+    joker.multAddition > 0 ||
+    joker.xMult > 1
+  );
+  const hasRules = !!(joker.rules && joker.rules.length > 0);
+
+  if (!basicEffects && !hasRules) {
     return "calculate = function(self, card, context) end";
   }
 
-  let message = "";
-  if (joker.xMult > 1) {
-    message =
-      "message = localize{type='variable',key='a_xmult',vars={card.ability.extra.Xmult}},";
-  } else if (joker.multAddition > 0) {
-    message =
-      "message = localize{type='variable',key='a_mult',vars={card.ability.extra.mult}},";
-  } else if (joker.chipAddition > 0) {
-    message =
-      "message = localize{type='variable',key='a_chips',vars={card.ability.extra.chips}},";
-  }
+  // Generate code for basic effects
+  let basicEffectsCode = "";
+  if (basicEffects) {
+    let message = "";
+    if (joker.xMult > 1) {
+      message =
+        "message = localize{type='variable',key='a_xmult',vars={card.ability.extra.Xmult}},";
+    } else if (joker.multAddition > 0) {
+      message =
+        "message = localize{type='variable',key='a_mult',vars={card.ability.extra.mult}},";
+    } else if (joker.chipAddition > 0) {
+      message =
+        "message = localize{type='variable',key='a_chips',vars={card.ability.extra.chips}},";
+    }
 
-  const mods = [
-    joker.chipAddition > 0 ? "chip_mod = card.ability.extra.chips" : "",
-    joker.multAddition > 0 ? "mult_mod = card.ability.extra.mult" : "",
-    joker.xMult > 1 ? "Xmult_mod = card.ability.extra.Xmult" : "",
-  ]
-    .filter(Boolean)
-    .join(",\n                ");
+    const mods = [
+      joker.chipAddition > 0 ? "chip_mod = card.ability.extra.chips" : "",
+      joker.multAddition > 0 ? "mult_mod = card.ability.extra.mult" : "",
+      joker.xMult > 1 ? "Xmult_mod = card.ability.extra.Xmult" : "",
+    ]
+      .filter(Boolean)
+      .join(",\n                ");
 
-  return `calculate = function(self, card, context)
+    basicEffectsCode = `
         if context.cardarea == G.jokers and context.joker_main then
             return {
                 ${message}
                 ${mods}
             }
-        end
+        end`;
+  }
+
+  // Generate code for rule-based logic
+  let rulesCode = "";
+  if (hasRules) {
+    rulesCode = generateRulesCode(joker.rules || []);
+  }
+
+  return `calculate = function(self, card, context)${basicEffectsCode}${rulesCode}
     end`;
+};
+
+/**
+ * Generate code for rule-based logic
+ */
+const generateRulesCode = (rules: Rule[]): string => {
+  const pokerHandRules = rules.filter(
+    (rule) => rule.trigger === "poker_hand_played"
+  );
+
+  if (pokerHandRules.length === 0) {
+    return "";
+  }
+
+  let code = `
+        -- Rule-based effects for when poker hands are played
+        if context.before and context.cardarea == G.play then
+            local chips_mod = 0
+            local mult_mod = 0
+            local xmult_mod = 1
+            local level_up_value = 0
+  `;
+
+  pokerHandRules.forEach((rule) => {
+    let conditionCode = "true";
+    if (rule.conditionGroups.length > 0) {
+      const groupCodes = rule.conditionGroups.map(generateConditionGroupCode);
+
+      // Build the condition code with proper operators
+      conditionCode = groupCodes[0];
+      for (let i = 1; i < rule.conditionGroups.length; i++) {
+        const operator =
+          rule.conditionGroups[i].operator === "and" ? " and " : " or ";
+        conditionCode += `${operator}${groupCodes[i]}`;
+      }
+    }
+
+    const effectValues = getEffectValues(rule);
+
+    code += `
+            -- Check rule conditions
+            if ${conditionCode} then
+                ${
+                  effectValues.chips
+                    ? `chips_mod = chips_mod + ${effectValues.chips}`
+                    : ""
+                }
+                ${
+                  effectValues.mult
+                    ? `mult_mod = mult_mod + ${effectValues.mult}`
+                    : ""
+                }
+                ${
+                  effectValues.xmult && effectValues.xmult !== 1
+                    ? `xmult_mod = xmult_mod * ${effectValues.xmult}`
+                    : ""
+                }
+                ${
+                  effectValues.level_up
+                    ? `level_up_value = ${effectValues.level_up}`
+                    : ""
+                }
+                ${
+                  effectValues.message
+                    ? `card_eval_status_text(context.blueprint_card or card, 'extra', nil, nil, nil, {message = "${effectValues.message}", colour = G.C.CHIPS})`
+                    : ""
+                }
+            end`;
+  });
+
+  code += `
+            -- Return combined effects if any were triggered
+            if chips_mod > 0 or mult_mod > 0 or xmult_mod > 1 or level_up_value > 0 then
+                local ret = {}
+                if chips_mod > 0 then ret.chip_mod = chips_mod end
+                if mult_mod > 0 then ret.mult_mod = mult_mod end
+                if xmult_mod > 1 then ret.Xmult_mod = xmult_mod end
+                if level_up_value > 0 then ret.level_up = level_up_value end
+                return ret
+            end
+        end`;
+
+  return code;
+};
+
+/**
+ * Generate code for a condition group
+ */
+const generateConditionGroupCode = (group: ConditionGroup): string => {
+  if (group.conditions.length === 0) {
+    return "true";
+  }
+
+  const conditionCodes = group.conditions.map(generateConditionCode);
+  return `(${conditionCodes.join(" and ")})`;
+};
+
+/**
+ * Generate code for a single condition
+ */
+const generateConditionCode = (condition: Condition): string => {
+  if (condition.type === "hand_type") {
+    return generateHandTypeConditionCode(condition);
+  }
+
+  // Add more condition types here as needed
+
+  return "true"; // Default to true if condition type is not supported
+};
+
+/**
+ * Generate code for a hand type condition
+ */
+const generateHandTypeConditionCode = (condition: Condition): string => {
+  const operator = condition.params.operator as string;
+  const value = condition.params.value as string;
+
+  let code = "";
+  if (operator === "equals") {
+    code = `next(context.poker_hands["${value}"])`;
+  } else if (operator === "not_equals") {
+    code = `not next(context.poker_hands["${value}"])`;
+  }
+
+  return condition.negate ? `not (${code})` : code;
+};
+
+/**
+ * Get effect values for a rule
+ */
+const getEffectValues = (rule: Rule): Record<string, any> => {
+  const values: Record<string, any> = {};
+
+  rule.effects.forEach((effect) => {
+    if (effect.type === "add_chips") {
+      const value = effect.params.value as number;
+      values.chips = (values.chips || 0) + value;
+
+      // Add a message for the first effect
+      if (!values.message) {
+        values.message = `+${value} Chips`;
+      }
+    } else if (effect.type === "add_mult") {
+      const value = effect.params.value as number;
+      values.mult = (values.mult || 0) + value;
+
+      // Add a message for the first effect if none yet
+      if (!values.message) {
+        values.message = `+${value} Mult`;
+      }
+    } else if (effect.type === "apply_x_mult") {
+      const value = effect.params.value as number;
+      values.xmult = (values.xmult || 1) * value;
+
+      // Add a message for the first effect if none yet
+      if (!values.message) {
+        values.message = `×${value}`;
+      }
+    } else if (effect.type === "level_up_hand") {
+      const value = effect.params.value as number;
+      values.level_up = value;
+
+      // Add a message for the first effect if none yet
+      if (!values.message) {
+        values.message = `Level Up +${value}`;
+      }
+    }
+    // Add more effect types here as needed
+  });
+
+  return values;
 };
 
 /**
