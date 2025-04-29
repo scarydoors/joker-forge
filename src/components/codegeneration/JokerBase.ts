@@ -1,6 +1,5 @@
 import { JokerData } from "../JokerCard";
 
-// Generate the base joker code structure
 export const generateJokerBaseCode = (
   joker: JokerData,
   index: number,
@@ -36,7 +35,6 @@ export const generateJokerBaseCode = (
     atlas = '${atlasKey}'`;
 };
 
-// Turn a name into a safe Lua key
 export const slugify = (text: string): string => {
   return (
     text
@@ -47,22 +45,10 @@ export const slugify = (text: string): string => {
   );
 };
 
-// Format joker description into a Lua loc_txt table
 export const formatJokerDescription = (joker: JokerData): string => {
-  let formatted = joker.description.replace(/<br\s*\/?>/gi, "[s]");
+  const formatted = joker.description.replace(/<br\s*\/?>/gi, "[s]");
 
-  // Auto-generate description based on effects
-  if (
-    formatted === "A {C:blue}custom{} joker with {C:red}unique{} effects." &&
-    (joker.chipAddition > 0 || joker.multAddition > 0 || joker.xMult > 1)
-  ) {
-    const parts = [];
-    let n = 1;
-    if (joker.chipAddition > 0) parts.push(`{C:chips}+#${n++}# Chips{}`);
-    if (joker.multAddition > 0) parts.push(`{C:mult}+#${n++}# Mult{}`);
-    if (joker.xMult > 1) parts.push(`{X:mult,C:white}X#${n++}#{}`);
-    formatted = parts.join(", ");
-  }
+  // No automatic description generation - use exactly what user provided
 
   const words = formatted.split(" ");
   const lines = [];
@@ -83,7 +69,6 @@ export const formatJokerDescription = (joker: JokerData): string => {
     .join(",\n")}\n        }`;
 };
 
-// Generate the basic loc_vars function
 export const generateBasicLocVarsFunction = (joker: JokerData): string => {
   const vars = [];
   if (joker.chipAddition > 0) vars.push("card.ability.extra.chips");
@@ -95,7 +80,6 @@ export const generateBasicLocVarsFunction = (joker: JokerData): string => {
     end`;
 };
 
-// Generate a default calculate function for basic effects
 export const generateBasicCalculateFunction = (joker: JokerData): string => {
   if (joker.chipAddition <= 0 && joker.multAddition <= 0 && joker.xMult <= 1) {
     return "calculate = function(self, card, context) end";
@@ -131,7 +115,6 @@ export const generateBasicCalculateFunction = (joker: JokerData): string => {
     end`;
 };
 
-// Get the cost value from rarity
 export const getCostFromRarity = (rarity: number): number => {
   switch (rarity) {
     case 1:
