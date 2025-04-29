@@ -67,6 +67,7 @@ export interface ConditionTypeDefinition {
   label: string;
   description: string;
   params: ConditionParameter[];
+  applicableTriggers?: string[];
 }
 
 // Interface for effect parameters

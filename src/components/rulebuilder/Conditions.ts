@@ -10,16 +10,7 @@ const COMPARISON_OPERATORS = [
   { value: "less_equals", label: "less than or equal to" },
 ];
 
-// Card quantifier options (how many cards should match)
-const CARD_QUANTIFIERS = [
-  { value: "at_least_one", label: "At least one card" },
-  { value: "all", label: "All cards" },
-  { value: "none", label: "No cards" },
-  { value: "exactly", label: "Exactly N cards" },
-  { value: "at_least", label: "At least N cards" },
-  { value: "at_most", label: "At most N cards" },
-];
-
+// Card scope options
 const CARD_SCOPE = [
   { value: "scoring", label: "Scoring cards only" },
   { value: "all_played", label: "All played cards" },
@@ -100,11 +91,20 @@ const SEAL_TYPES = [
 
 // Condition types and their possible parameters
 export const CONDITION_TYPES: ConditionTypeDefinition[] = [
+  // Hand-level conditions (ONLY for hand_played trigger)
   {
     id: "hand_type",
     label: "Hand Type",
     description: "Check the type of poker hand",
+    applicableTriggers: ["hand_played"],
     params: [
+      {
+        id: "card_scope",
+        type: "select",
+        label: "Card Scope",
+        options: CARD_SCOPE,
+        default: "scoring",
+      },
       {
         id: "operator",
         type: "select",
@@ -123,15 +123,87 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
     ],
   },
   {
-    id: "card_rank",
-    label: "Card Rank",
-    description: "Check the rank of cards in the played hand",
+    id: "card_count",
+    label: "Card Count",
+    description: "Check the number of cards in the played hand",
+    applicableTriggers: ["hand_played"],
     params: [
+      {
+        id: "card_scope",
+        type: "select",
+        label: "Card Scope",
+        options: CARD_SCOPE,
+        default: "scoring",
+      },
+      {
+        id: "operator",
+        type: "select",
+        label: "Operator",
+        options: COMPARISON_OPERATORS,
+      },
+      {
+        id: "value",
+        type: "number",
+        label: "Number of Cards",
+        min: 1,
+        max: 52,
+        default: 5,
+      },
+    ],
+  },
+  {
+    id: "suit_count",
+    label: "Suit Count in Hand",
+    description: "Check how many cards of a specific suit are in the hand",
+    applicableTriggers: ["hand_played"],
+    params: [
+      {
+        id: "card_scope",
+        type: "select",
+        label: "Card Scope",
+        options: CARD_SCOPE,
+        default: "scoring",
+      },
+      {
+        id: "suit_type",
+        type: "select",
+        label: "Suit Type",
+        options: [
+          { value: "specific", label: "Specific Suit" },
+          { value: "group", label: "Suit Group" },
+        ],
+      },
+      {
+        id: "specific_suit",
+        type: "select",
+        label: "Suit",
+        options: CARD_SUITS,
+        showWhen: {
+          parameter: "suit_type",
+          values: ["specific"],
+        },
+      },
+      {
+        id: "suit_group",
+        type: "select",
+        label: "Suit Group",
+        options: CARD_SUIT_GROUPS,
+        showWhen: {
+          parameter: "suit_type",
+          values: ["group"],
+        },
+      },
       {
         id: "quantifier",
         type: "select",
-        label: "Quantifier",
-        options: CARD_QUANTIFIERS,
+        label: "Condition",
+        options: [
+          { value: "all", label: "All cards must be this suit" },
+          { value: "none", label: "No cards can be this suit" },
+          { value: "exactly", label: "Exactly N cards of this suit" },
+          { value: "at_least", label: "At least N cards of this suit" },
+          { value: "at_most", label: "At most N cards of this suit" },
+        ],
       },
       {
         id: "count",
@@ -144,6 +216,83 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
           values: ["exactly", "at_least", "at_most"],
         },
       },
+    ],
+  },
+  {
+    id: "rank_count",
+    label: "Rank Count in Hand",
+    description: "Check how many cards of a specific rank are in the hand",
+    applicableTriggers: ["hand_played"],
+    params: [
+      {
+        id: "card_scope",
+        type: "select",
+        label: "Card Scope",
+        options: CARD_SCOPE,
+        default: "scoring",
+      },
+      {
+        id: "rank_type",
+        type: "select",
+        label: "Rank Type",
+        options: [
+          { value: "specific", label: "Specific Rank" },
+          { value: "group", label: "Rank Group" },
+        ],
+      },
+      {
+        id: "specific_rank",
+        type: "select",
+        label: "Rank",
+        options: CARD_RANKS,
+        showWhen: {
+          parameter: "rank_type",
+          values: ["specific"],
+        },
+      },
+      {
+        id: "rank_group",
+        type: "select",
+        label: "Rank Group",
+        options: CARD_RANK_GROUPS,
+        showWhen: {
+          parameter: "rank_type",
+          values: ["group"],
+        },
+      },
+      {
+        id: "quantifier",
+        type: "select",
+        label: "Condition",
+        options: [
+          { value: "all", label: "All cards must be this rank" },
+          { value: "none", label: "No cards can be this rank" },
+          { value: "exactly", label: "Exactly N cards of this rank" },
+          { value: "at_least", label: "At least N cards of this rank" },
+          { value: "at_most", label: "At most N cards of this rank" },
+        ],
+      },
+      {
+        id: "count",
+        type: "number",
+        label: "Count",
+        default: 1,
+        min: 1,
+        showWhen: {
+          parameter: "quantifier",
+          values: ["exactly", "at_least", "at_most"],
+        },
+      },
+    ],
+  },
+
+  // Card-level conditions (for card_scored trigger)
+  {
+    id: "card_rank",
+    label: "Card Rank",
+    description: "Check the rank of the card",
+    applicableTriggers: ["card_scored"],
+    params: [
       {
         id: "rank_type",
         type: "select",
@@ -178,26 +327,9 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
   {
     id: "card_suit",
     label: "Card Suit",
-    description: "Check the suit of cards in the played hand",
+    description: "Check the suit of the card",
+    applicableTriggers: ["card_scored"],
     params: [
-      {
-        id: "card_scope",
-        type: "select",
-        label: "Card Scope",
-        options: CARD_SCOPE,
-        default: "scoring",
-      },
-      {
-        id: "count",
-        type: "number",
-        label: "Count",
-        default: 1,
-        min: 1,
-        showWhen: {
-          parameter: "quantifier",
-          values: ["exactly", "at_least", "at_most"],
-        },
-      },
       {
         id: "suit_type",
         type: "select",
@@ -230,90 +362,11 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
     ],
   },
   {
-    id: "card_count",
-    label: "Card Count",
-    description: "Check the number of cards in the played hand",
+    id: "card_enhancement",
+    label: "Card Enhancement",
+    description: "Check if the card has a specific enhancement",
+    applicableTriggers: ["card_scored"],
     params: [
-      {
-        id: "operator",
-        type: "select",
-        label: "Operator",
-        options: COMPARISON_OPERATORS,
-      },
-      {
-        id: "value",
-        type: "number",
-        label: "Number of Cards",
-        min: 1,
-        max: 52,
-        default: 5,
-      },
-    ],
-  },
-  {
-    id: "unique_suits",
-    label: "Unique Suits",
-    description: "Check the number of different suits in the played hand",
-    params: [
-      {
-        id: "operator",
-        type: "select",
-        label: "Operator",
-        options: COMPARISON_OPERATORS,
-      },
-      {
-        id: "value",
-        type: "number",
-        label: "Number of Different Suits",
-        min: 1,
-        max: 4,
-        default: 1,
-      },
-    ],
-  },
-  {
-    id: "unique_ranks",
-    label: "Unique Ranks",
-    description: "Check the number of different ranks in the played hand",
-    params: [
-      {
-        id: "operator",
-        type: "select",
-        label: "Operator",
-        options: COMPARISON_OPERATORS,
-      },
-      {
-        id: "value",
-        type: "number",
-        label: "Number of Different Ranks",
-        min: 1,
-        max: 13,
-        default: 1,
-      },
-    ],
-  },
-  {
-    id: "enhanced_cards",
-    label: "Enhanced Cards",
-    description: "Check for cards with enhancements in the played hand",
-    params: [
-      {
-        id: "quantifier",
-        type: "select",
-        label: "Quantifier",
-        options: CARD_QUANTIFIERS,
-      },
-      {
-        id: "count",
-        type: "number",
-        label: "Count",
-        default: 1,
-        min: 1,
-        showWhen: {
-          parameter: "quantifier",
-          values: ["exactly", "at_least", "at_most"],
-        },
-      },
       {
         id: "enhancement",
         type: "select",
@@ -326,27 +379,11 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
     ],
   },
   {
-    id: "sealed_cards",
-    label: "Sealed Cards",
-    description: "Check for cards with seals in the played hand",
+    id: "card_seal",
+    label: "Card Seal",
+    description: "Check if the card has a specific seal",
+    applicableTriggers: ["card_scored"],
     params: [
-      {
-        id: "quantifier",
-        type: "select",
-        label: "Quantifier",
-        options: CARD_QUANTIFIERS,
-      },
-      {
-        id: "count",
-        type: "number",
-        label: "Count",
-        default: 1,
-        min: 1,
-        showWhen: {
-          parameter: "quantifier",
-          values: ["exactly", "at_least", "at_most"],
-        },
-      },
       {
         id: "seal",
         type: "select",
@@ -355,10 +392,19 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
       },
     ],
   },
+
+  // Player/Game state conditions (applicable to all triggers)
   {
     id: "player_money",
     label: "Player Money",
     description: "Check how much money the player has",
+    applicableTriggers: [
+      "hand_played",
+      "card_scored",
+      "start_of_round",
+      "end_of_round",
+      "passive",
+    ],
     params: [
       {
         id: "operator",
@@ -379,6 +425,13 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
     id: "remaining_hands",
     label: "Remaining Hands",
     description: "Check how many hands the player has left",
+    applicableTriggers: [
+      "hand_played",
+      "card_scored",
+      "start_of_round",
+      "end_of_round",
+      "passive",
+    ],
     params: [
       {
         id: "operator",
@@ -399,6 +452,13 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
     id: "remaining_discards",
     label: "Remaining Discards",
     description: "Check how many discards the player has left",
+    applicableTriggers: [
+      "hand_played",
+      "card_scored",
+      "start_of_round",
+      "end_of_round",
+      "passive",
+    ],
     params: [
       {
         id: "operator",
@@ -419,6 +479,13 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
     id: "joker_count",
     label: "Joker Count",
     description: "Check how many jokers the player has",
+    applicableTriggers: [
+      "hand_played",
+      "card_scored",
+      "start_of_round",
+      "end_of_round",
+      "passive",
+    ],
     params: [
       {
         id: "operator",
@@ -439,6 +506,13 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
     id: "random_chance",
     label: "Random Chance",
     description: "Random probability check",
+    applicableTriggers: [
+      "hand_played",
+      "card_scored",
+      "start_of_round",
+      "end_of_round",
+      "passive",
+    ],
     params: [
       {
         id: "numerator",
@@ -460,6 +534,13 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
     id: "internal_counter",
     label: "Internal Counter",
     description: "Check the value of a joker's internal counter",
+    applicableTriggers: [
+      "hand_played",
+      "card_scored",
+      "start_of_round",
+      "end_of_round",
+      "passive",
+    ],
     params: [
       {
         id: "counter_name",
@@ -490,6 +571,13 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
     id: "blind_type",
     label: "Blind Type",
     description: "Check the type of the current blind",
+    applicableTriggers: [
+      "hand_played",
+      "card_scored",
+      "start_of_round",
+      "end_of_round",
+      "passive",
+    ],
     params: [
       {
         id: "blind_type",
@@ -507,6 +595,13 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
     id: "ante_level",
     label: "Ante Level",
     description: "Check the current ante level",
+    applicableTriggers: [
+      "hand_played",
+      "card_scored",
+      "start_of_round",
+      "end_of_round",
+      "passive",
+    ],
     params: [
       {
         id: "operator",
@@ -530,4 +625,15 @@ export function getConditionTypeById(
   id: string
 ): ConditionTypeDefinition | undefined {
   return CONDITION_TYPES.find((conditionType) => conditionType.id === id);
+}
+
+// Helper function to get conditions applicable to a specific trigger
+export function getConditionsForTrigger(
+  triggerId: string
+): ConditionTypeDefinition[] {
+  return CONDITION_TYPES.filter(
+    (condition) =>
+      condition.applicableTriggers &&
+      condition.applicableTriggers.includes(triggerId)
+  );
 }

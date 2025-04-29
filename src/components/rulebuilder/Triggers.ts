@@ -3,22 +3,16 @@ import { TriggerDefinition } from "./types";
 // Trigger definitions
 export const TRIGGERS: TriggerDefinition[] = [
   {
-    id: "poker_hand_played",
-    label: "When a Poker Hand is Scored",
+    id: "hand_played",
+    label: "When a Hand is Played",
     description:
-      "Triggers when a poker hand is scored. Conditions apply only to the cards that contribute to the poker hand score.",
-  },
-  {
-    id: "cards_played",
-    label: "When Cards Are Played",
-    description:
-      "Triggers when any cards are played. Conditions check all cards in the played hand, including non-scoring cards.",
+      "Triggers when any hand is played. Use conditions to specify whether to check scoring cards, all played cards, or specific hand types.",
   },
   {
     id: "card_scored",
     label: "When a Card is Scored",
     description:
-      "Triggers for each individual card that is scored within a hand. Use this for card-specific conditions.",
+      "Triggers for each individual card during scoring. Use this for card-specific properties like suit, rank, or enhancements.",
   },
   {
     id: "start_of_round",

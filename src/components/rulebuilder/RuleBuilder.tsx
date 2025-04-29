@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { TRIGGERS, getTriggerById } from "./Triggers";
-import { CONDITION_TYPES, getConditionTypeById } from "./Conditions";
+import { getConditionTypeById, getConditionsForTrigger } from "./Conditions";
 import { EFFECT_TYPES, getEffectTypeById } from "./Effects";
 import { LOGICAL_OPERATORS } from "./types";
 import type {
@@ -156,8 +156,12 @@ const ConditionEditor: React.FC<{
   onUpdate: (updates: Partial<Condition>) => void;
   onDelete: () => void;
   onToggleNegate: () => void;
-}> = ({ condition, onUpdate, onDelete, onToggleNegate }) => {
+  currentTrigger: string;
+}> = ({ condition, onUpdate, onDelete, onToggleNegate, currentTrigger }) => {
   const conditionType = getConditionTypeById(condition.type);
+
+  // Get only applicable conditions for the current trigger
+  const availableConditions = getConditionsForTrigger(currentTrigger);
 
   if (!conditionType) return null;
 
@@ -182,7 +186,7 @@ const ConditionEditor: React.FC<{
           }}
           className="bg-balatro-grey text-white px-2 py-1 pixel-corners-small"
         >
-          {CONDITION_TYPES.map((type) => (
+          {availableConditions.map((type) => (
             <option key={type.id} value={type.id}>
               {type.label}
             </option>
@@ -225,6 +229,7 @@ const ConditionGroupEditor: React.FC<{
   onDeleteCondition: (conditionIndex: number) => void;
   onDeleteGroup: () => void;
   isFirst: boolean;
+  currentTrigger: string;
 }> = ({
   group,
   groupIndex,
@@ -234,6 +239,7 @@ const ConditionGroupEditor: React.FC<{
   onDeleteCondition,
   onDeleteGroup,
   isFirst,
+  currentTrigger,
 }) => {
   return (
     <div className="bg-balatro-grey p-3 pixel-corners-small mb-4">
@@ -291,6 +297,7 @@ const ConditionGroupEditor: React.FC<{
               onToggleNegate={() => {
                 onUpdateCondition(condIndex, { negate: !condition.negate });
               }}
+              currentTrigger={currentTrigger}
             />
           ))}
         </div>
@@ -492,6 +499,7 @@ const RuleEditor: React.FC<{
                 }}
                 onDeleteGroup={() => onDeleteConditionGroup(groupIndex)}
                 isFirst={groupIndex === 0}
+                currentTrigger={rule.trigger}
               />
             ))}
           </div>
@@ -555,7 +563,7 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
   const addRule = () => {
     const newRule: Rule = {
       id: crypto.randomUUID(),
-      trigger: "poker_hand_played",
+      trigger: "hand_played",
       conditionGroups: [
         {
           id: crypto.randomUUID(),
