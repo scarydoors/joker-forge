@@ -11,6 +11,8 @@ import { generateSuitCardCondition } from "./effects/SuitCardEffects";
 import { generateRankCardCondition } from "./effects/RankCardEffects";
 import { generateCountCardCondition } from "./effects/CountHandEffects";
 import { generatePlayerMoneyCondition } from "./effects/PlayerMoneyEffects";
+import { generateRemainingHandsCondition } from "./effects/RemainingHandsEffects";
+import { generateRemainingDiscardsCondition } from "./effects/RemainingDiscardsEffects";
 
 export const exportJokersAsMod = async (
   jokers: JokerData[],
@@ -145,6 +147,42 @@ const generateMainLua = (jokers: JokerData[]): string => {
       if (moneyCondition) {
         helperFunctions.push(moneyCondition.functionCode);
         functionNames.push(moneyCondition.functionName);
+      }
+    }
+
+    // Check for remaining hands rules
+    const handsRules = (joker.rules ?? []).filter((rule) => {
+      return rule.conditionGroups.some((group) =>
+        group.conditions.some(
+          (condition) => condition.type === "remaining_hands"
+        )
+      );
+    });
+
+    // Generate remaining hands condition function if needed
+    if (handsRules.length > 0) {
+      const handsCondition = generateRemainingHandsCondition(handsRules);
+      if (handsCondition) {
+        helperFunctions.push(handsCondition.functionCode);
+        functionNames.push(handsCondition.functionName);
+      }
+    }
+
+    // Check for remaining discards rules
+    const discardRules = (joker.rules ?? []).filter((rule) => {
+      return rule.conditionGroups.some((group) =>
+        group.conditions.some(
+          (condition) => condition.type === "remaining_discards"
+        )
+      );
+    });
+
+    // Generate remaining discards condition function if needed
+    if (discardRules.length > 0) {
+      const discardCondition = generateRemainingDiscardsCondition(discardRules);
+      if (discardCondition) {
+        helperFunctions.push(discardCondition.functionCode);
+        functionNames.push(discardCondition.functionName);
       }
     }
 
