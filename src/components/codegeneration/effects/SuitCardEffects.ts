@@ -5,7 +5,6 @@ export interface SuitCondition {
   functionCode: string;
 }
 
-// Helper to get a descriptive function name for suit conditions
 export const getSuitFunctionName = (
   suitType: string,
   specificSuit: string | null,
@@ -16,7 +15,6 @@ export const getSuitFunctionName = (
 ): string => {
   const prefix = "check_suit";
 
-  // Determine suit part of name
   let suitPart = "";
   if (suitType === "specific" && specificSuit) {
     suitPart = specificSuit.toLowerCase();
@@ -26,7 +24,6 @@ export const getSuitFunctionName = (
     suitPart = "unknown";
   }
 
-  // Determine quantifier part
   let quantifierPart = "";
   switch (quantifier) {
     case "at_least_one":
@@ -48,7 +45,6 @@ export const getSuitFunctionName = (
       quantifierPart = quantifier;
   }
 
-  // Add scope
   const scopePart = scope === "all_played" ? "played" : "scoring";
 
   return `${prefix}_${suitPart}_${quantifierPart}_${scopePart}`;
@@ -57,7 +53,6 @@ export const getSuitFunctionName = (
 export const generateSuitCardCondition = (
   rules: Rule[]
 ): SuitCondition | null => {
-  // Filter rules related to card suits
   const suitRules = rules?.filter((rule) => {
     return rule.conditionGroups.some((group) =>
       group.conditions.some(
@@ -71,10 +66,8 @@ export const generateSuitCardCondition = (
     return null;
   }
 
-  // Find the first suit condition in any rule condition group
   let suitCondition: Condition | undefined;
 
-  // Search through all rules and all groups for a suit-related condition
   for (const rule of suitRules) {
     for (const group of rule.conditionGroups) {
       const condition = group.conditions.find(
@@ -85,18 +78,15 @@ export const generateSuitCardCondition = (
         break;
       }
     }
-    if (suitCondition) break; // Exit once we find a condition
+    if (suitCondition) break;
   }
 
-  // If no suitable condition found, return null
   if (!suitCondition) {
     return null;
   }
 
-  // Extract suit condition parameters
   const params = suitCondition.params;
 
-  // Default values for parameters
   const suitType = (params.suit_type as string) || "specific";
   const specificSuit = (params.specific_suit as string) || null;
   const suitGroup = (params.suit_group as string) || null;
@@ -104,7 +94,6 @@ export const generateSuitCardCondition = (
   const count = (params.count as number) || 1;
   const scope = (params.card_scope as string) || "scoring";
 
-  // Generate function name
   const functionName = getSuitFunctionName(
     suitType,
     specificSuit,
@@ -114,20 +103,17 @@ export const generateSuitCardCondition = (
     scope
   );
 
-  // Generate condition code based on suit type, quantifier, and scope
   let conditionCode = "";
   let conditionComment = "";
 
-  // Helper function to get the suits check logic
   const getSuitsCheckLogic = (suits: string[]): string => {
     if (suits.length === 1) {
-      return `c.suit == "${suits[0]}"`;
+      return `c:is_suit("${suits[0]}")`;
     } else {
-      return suits.map((suit) => `c.suit == "${suit}"`).join(" or ");
+      return suits.map((suit) => `c:is_suit("${suit}")`).join(" or ");
     }
   };
 
-  // Determine the suits to check based on type
   let suits: string[] = [];
   if (suitType === "specific" && specificSuit) {
     suits = [specificSuit];
@@ -142,11 +128,9 @@ export const generateSuitCardCondition = (
     }
   }
 
-  // Set up the card collection to check based on scope
   const cardsToCheck =
     scope === "scoring" ? "context.scoring_hand" : "context.full_hand";
 
-  // Generate condition code based on quantifier
   switch (quantifier) {
     case "at_least_one":
       conditionCode = `
@@ -211,7 +195,6 @@ export const generateSuitCardCondition = (
       break;
 
     default:
-      // Default to at least one
       conditionCode = `
     local suitFound = false
     for i, c in ipairs(${cardsToCheck}) do
@@ -224,7 +207,6 @@ export const generateSuitCardCondition = (
     return suitFound`;
   }
 
-  // Generate the function that checks if the suit condition is met
   const functionCode = `-- Suit condition check
 local function ${functionName}(context)
     ${conditionComment}${conditionCode}
