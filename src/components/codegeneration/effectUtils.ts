@@ -1,5 +1,4 @@
 import { JokerData } from "../JokerCard";
-import type { Rule, Effect } from "../ruleBuilder/types";
 
 export interface ReturnStatementResult {
   statement: string;
@@ -49,7 +48,6 @@ export function generateEffectReturnStatement(
 
   // Process the first effect (goes directly in the return table)
   const firstEffect = activeEffects[0];
-
   if (firstEffect === "add_chips") {
     returnStatement = `
                 chip_mod = card.ability.extra.chips,
@@ -65,11 +63,6 @@ export function generateEffectReturnStatement(
                 Xmult_mod = card.ability.extra.Xmult,
                 message = localize{type='variable',key='a_xmult',vars={card.ability.extra.Xmult}}`;
     colour = "G.C.MONEY";
-  } else if (firstEffect === "level_up_hand") {
-    returnStatement = `
-                level_up = card.ability.extra.level_up,
-                message = "Level Up!"`;
-    colour = "G.C.MULT";
   }
 
   // If there are more effects, chain them using 'extra'
@@ -95,10 +88,6 @@ export function generateEffectReturnStatement(
         extraContent = `Xmult_mod = card.ability.extra.Xmult,
                         message = localize{type='variable',key='a_xmult',vars={card.ability.extra.Xmult}}`;
         effectColour = "G.C.MONEY";
-      } else if (effect === "level_up_hand") {
-        extraContent = `level_up = card.ability.extra.level_up,
-                        message = "Level Up!"`;
-        effectColour = "G.C.MULT";
       }
 
       // For the second effect, start the extra chain
@@ -152,39 +141,4 @@ export function generateFallbackCalculate(joker: JokerData): string {
             }
         end
     end`;
-}
-
-/**
- * Check if a joker has an effect of the specified type
- */
-export function hasEffectType(joker: JokerData, effectType: string): boolean {
-  if (!joker.rules) return false;
-
-  return joker.rules.some((rule) =>
-    rule.effects.some((effect) => effect.type === effectType)
-  );
-}
-
-/**
- * Get the first effect parameter value of a specific type from rules
- */
-export function getEffectParamValue(
-  joker: JokerData,
-  effectType: string,
-  paramName: string
-): number | null {
-  if (!joker.rules) return null;
-
-  for (const rule of joker.rules) {
-    for (const effect of rule.effects) {
-      if (
-        effect.type === effectType &&
-        effect.params[paramName] !== undefined
-      ) {
-        return effect.params[paramName] as number;
-      }
-    }
-  }
-
-  return null;
 }
