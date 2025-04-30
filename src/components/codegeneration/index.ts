@@ -9,6 +9,7 @@ import { generatePokerHandCondition } from "./effects/PokerHandEffects";
 import { generateCalculateFunction } from "./calculateUtils";
 import { generateSuitCardCondition } from "./effects/SuitCardEffects";
 import { generateRankCardCondition } from "./effects/RankCardEffects";
+import { generateCountCardCondition } from "./effects/CountHandEffects";
 
 export const exportJokersAsMod = async (
   jokers: JokerData[],
@@ -110,6 +111,22 @@ const generateMainLua = (jokers: JokerData[]): string => {
         if (rankCondition) {
           helperFunctions.push(rankCondition.functionCode);
           functionNames.push(rankCondition.functionName);
+        }
+      }
+
+      // Check for card count rules
+      const countRules = joker.rules.filter((rule) => {
+        return rule.conditionGroups.some((group) =>
+          group.conditions.some((condition) => condition.type === "card_count")
+        );
+      });
+
+      // Generate card count condition function if needed
+      if (countRules.length > 0) {
+        const countCondition = generateCountCardCondition(countRules);
+        if (countCondition) {
+          helperFunctions.push(countCondition.functionCode);
+          functionNames.push(countCondition.functionName);
         }
       }
     }
