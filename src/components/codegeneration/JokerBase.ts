@@ -1,4 +1,5 @@
 import { JokerData } from "../JokerCard";
+import { hasEffectType, getEffectParamValue } from "./effectUtils";
 
 export const generateJokerBaseCode = (
   joker: JokerData,
@@ -72,6 +73,30 @@ export const extractEffectsConfig = (joker: JokerData): string => {
             configItems.push(`Xmult = ${effect.params.value}`);
           }
         }
+
+        // Add new effect types
+        if (effect.type === "add_money" && effect.params.value) {
+          if (!configItems.some((item) => item.startsWith("money ="))) {
+            configItems.push(`money = ${effect.params.value}`);
+          }
+        }
+        if (effect.type === "level_up_hand" && effect.params.value) {
+          if (!configItems.some((item) => item.startsWith("level_up ="))) {
+            configItems.push(`level_up = ${effect.params.value}`);
+          }
+        }
+        if (effect.type === "add_discard" && effect.params.value) {
+          if (
+            !configItems.some((item) => item.startsWith("discard_amount ="))
+          ) {
+            configItems.push(`discard_amount = ${effect.params.value}`);
+          }
+        }
+        if (effect.type === "add_hand" && effect.params.value) {
+          if (!configItems.some((item) => item.startsWith("hand_amount ="))) {
+            configItems.push(`hand_amount = ${effect.params.value}`);
+          }
+        }
       });
     });
   }
@@ -111,6 +136,7 @@ export const formatJokerDescription = (joker: JokerData): string => {
     .join(",\n")}\n        }`;
 };
 
+// Generate a loc_vars function
 export const generateBasicLocVarsFunction = (joker: JokerData): string => {
   const vars: string[] = [];
 
@@ -141,6 +167,32 @@ export const generateBasicLocVarsFunction = (joker: JokerData): string => {
         ) {
           vars.push("card.ability.extra.Xmult");
         }
+
+        // Add new effect vars
+        if (
+          effect.type === "add_money" &&
+          !vars.includes("card.ability.extra.money")
+        ) {
+          vars.push("card.ability.extra.money");
+        }
+        if (
+          effect.type === "level_up_hand" &&
+          !vars.includes("card.ability.extra.level_up")
+        ) {
+          vars.push("card.ability.extra.level_up");
+        }
+        if (
+          effect.type === "add_discard" &&
+          !vars.includes("card.ability.extra.discard_amount")
+        ) {
+          vars.push("card.ability.extra.discard_amount");
+        }
+        if (
+          effect.type === "add_hand" &&
+          !vars.includes("card.ability.extra.hand_amount")
+        ) {
+          vars.push("card.ability.extra.hand_amount");
+        }
       });
     });
   }
@@ -151,36 +203,164 @@ export const generateBasicLocVarsFunction = (joker: JokerData): string => {
 };
 
 export const generateBasicCalculateFunction = (joker: JokerData): string => {
-  if (joker.chipAddition <= 0 && joker.multAddition <= 0 && joker.xMult <= 1) {
+  // Generate standard joker_main calculate function
+  let calculateBody = "";
+
+  // First check main effects
+  if (joker.chipAddition > 0 || joker.multAddition > 0 || joker.xMult > 1) {
+    calculateBody += `if context.joker_main then
+            return {`;
+
+    const returnItems: string[] = [];
+
+    if (joker.chipAddition > 0) {
+      returnItems.push(
+        `message = localize{type='variable',key='a_chips',vars={card.ability.extra.chips}}`
+      );
+      returnItems.push(`chip_mod = card.ability.extra.chips`);
+      returnItems.push(`colour = G.C.CHIPS`);
+    } else if (joker.multAddition > 0) {
+      returnItems.push(
+        `message = localize{type='variable',key='a_mult',vars={card.ability.extra.mult}}`
+      );
+      returnItems.push(`mult_mod = card.ability.extra.mult`);
+      returnItems.push(`colour = G.C.MULT`);
+    } else if (joker.xMult > 1) {
+      returnItems.push(
+        `message = localize{type='variable',key='a_xmult',vars={card.ability.extra.Xmult}}`
+      );
+      returnItems.push(`Xmult_mod = card.ability.extra.Xmult`);
+      returnItems.push(`colour = G.C.MONEY`);
+    }
+
+    calculateBody += `
+                ${returnItems.join(",\n                ")}
+            }
+        end`;
+  }
+
+  // Add level_up_hand logic if needed
+  const hasLevelUp = hasEffectType(joker, "level_up_hand");
+  if (hasLevelUp) {
+    const levelUpValue =
+      getEffectParamValue(joker, "level_up_hand", "value") || 1;
+
+    calculateBody += `${
+      calculateBody ? "\n\n        " : ""
+    }if context.cardarea == G.play and context.before then
+            return {
+                level_up = ${levelUpValue},
+                message = "Level Up!",
+                colour = G.C.MULT
+            }
+        end`;
+  }
+
+  // If no calculate body was generated, create a simple placeholder function
+  if (!calculateBody) {
     return "calculate = function(self, card, context) end";
   }
 
-  const returnItems: string[] = [];
+  return `calculate = function(self, card, context)
+        ${calculateBody}
+    end`;
+};
 
-  if (joker.chipAddition > 0) {
-    returnItems.push(
-      `message = localize{type='variable',key='a_chips',vars={card.ability.extra.chips}}`
-    );
-    returnItems.push(`chip_mod = card.ability.extra.chips`);
-    returnItems.push(`colour = G.C.CHIPS`);
-  } else if (joker.multAddition > 0) {
-    returnItems.push(
-      `message = localize{type='variable',key='a_mult',vars={card.ability.extra.mult}}`
-    );
-    returnItems.push(`mult_mod = card.ability.extra.mult`);
-    returnItems.push(`colour = G.C.MULT`);
-  } else if (joker.xMult > 1) {
-    returnItems.push(
-      `message = localize{type='variable',key='a_xmult',vars={card.ability.extra.Xmult}}`
-    );
-    returnItems.push(`Xmult_mod = card.ability.extra.Xmult`);
-    returnItems.push(`colour = G.C.MONEY`);
+// Generate add_to_deck and remove_from_deck functions for discard/hand effects
+export const generateAddToRemoveFromDeckFunctions = (
+  joker: JokerData
+): string => {
+  const hasDiscardEffect = hasEffectType(joker, "add_discard");
+  const hasHandEffect = hasEffectType(joker, "add_hand");
+
+  if (!hasDiscardEffect && !hasHandEffect) {
+    return "";
   }
 
-  return `calculate = function(self, card, context)
-        if context.joker_main then
+  const discardValue = getEffectParamValue(joker, "add_discard", "value") || 1;
+  const handValue = getEffectParamValue(joker, "add_hand", "value") || 1;
+
+  let addToFuncBody = "";
+  let removeFromFuncBody = "";
+
+  if (hasDiscardEffect) {
+    addToFuncBody += `G.GAME.round_resets.discards = G.GAME.round_resets.discards + ${discardValue}`;
+    removeFromFuncBody += `G.GAME.round_resets.discards = G.GAME.round_resets.discards - ${discardValue}`;
+  }
+
+  if (hasHandEffect) {
+    addToFuncBody += `${
+      addToFuncBody ? "\n        " : ""
+    }G.GAME.round_resets.hands = G.GAME.round_resets.hands + ${handValue}`;
+    removeFromFuncBody += `${
+      removeFromFuncBody ? "\n        " : ""
+    }G.GAME.round_resets.hands = G.GAME.round_resets.hands - ${handValue}`;
+  }
+
+  return `
+    add_to_deck = function(self, card, from_debuff)
+        ${addToFuncBody}
+    end,
+    
+    remove_from_deck = function(self, card, from_debuff)
+        ${removeFromFuncBody}
+    end`;
+};
+
+// Generate calc_dollar_bonus function for add_money effect
+export const generateCalcDollarBonusFunction = (joker: JokerData): string => {
+  const hasMoneyEffect = hasEffectType(joker, "add_money");
+
+  if (!hasMoneyEffect) {
+    return "";
+  }
+
+  const moneyValue = getEffectParamValue(joker, "add_money", "value") || 0;
+
+  return `
+    calc_dollar_bonus = function(self, card)
+        local bonus = card.ability.extra.money or ${moneyValue}
+        if bonus > 0 then return bonus end
+    end`;
+};
+
+// Generate self-destruct code
+export const generateSelfDestructCode = (joker: JokerData): string => {
+  const hasSelfDestruct = hasEffectType(joker, "destroy_self");
+
+  if (!hasSelfDestruct) {
+    return "";
+  }
+
+  // This follows the pattern from Gros Michel 2
+  return `
+    calculate = function(self, card, context)
+        if context.end_of_round and not context.repetition and context.game_over == false and not context.blueprint then
+            G.E_MANAGER:add_event(Event({
+                func = function()
+                    play_sound('tarot1')
+                    card.T.r = -0.2
+                    card:juice_up(0.3, 0.4)
+                    card.states.drag.is = true
+                    card.children.center.pinch.x = true
+                    
+                    G.E_MANAGER:add_event(Event({
+                        trigger = 'after',
+                        delay = 0.3,
+                        blockable = false,
+                        func = function()
+                            G.jokers:remove_card(card)
+                            card:remove()
+                            card = nil
+                            return true;
+                        end
+                    }))
+                    return true
+                end
+            }))
             return {
-                ${returnItems.join(",\n                ")}
+                message = 'Self Destruct!',
+                colour = G.C.RED
             }
         end
     end`;
