@@ -1,4 +1,3 @@
-// src/components/codegeneration/effects/PlayerMoneyEffects.ts
 import type { Rule, Condition } from "../../ruleBuilder/types";
 
 export interface PlayerMoneyCondition {
@@ -6,14 +5,12 @@ export interface PlayerMoneyCondition {
   functionCode: string;
 }
 
-// Helper to get a descriptive function name for player money conditions
 export const getPlayerMoneyFunctionName = (
   operator: string,
   value: number
 ): string => {
   const prefix = "check_player_money";
 
-  // Determine operator part of name
   let operatorPart = "";
   switch (operator) {
     case "equals":
@@ -38,7 +35,6 @@ export const getPlayerMoneyFunctionName = (
       operatorPart = operator;
   }
 
-  // Add value to name
   const valuePart = value.toString();
 
   return `${prefix}_${operatorPart}_${valuePart}`;
@@ -47,7 +43,6 @@ export const getPlayerMoneyFunctionName = (
 export const generatePlayerMoneyCondition = (
   rules: Rule[]
 ): PlayerMoneyCondition | null => {
-  // Filter rules related to player money
   const moneyRules = rules?.filter((rule) => {
     return rule.conditionGroups.some((group) =>
       group.conditions.some((condition) => condition.type === "player_money")
@@ -58,10 +53,8 @@ export const generatePlayerMoneyCondition = (
     return null;
   }
 
-  // Find the first player money condition in any rule condition group
   let moneyCondition: Condition | undefined;
 
-  // Search through all rules and all groups for a money-related condition
   for (const rule of moneyRules) {
     for (const group of rule.conditionGroups) {
       const condition = group.conditions.find((c) => c.type === "player_money");
@@ -70,29 +63,23 @@ export const generatePlayerMoneyCondition = (
         break;
       }
     }
-    if (moneyCondition) break; // Exit once we find a condition
+    if (moneyCondition) break;
   }
 
-  // If no suitable condition found, return null
   if (!moneyCondition) {
     return null;
   }
 
-  // Extract money condition parameters
   const params = moneyCondition.params;
 
-  // Default values for parameters
   const operator = (params.operator as string) || "equals";
   const value = (params.value as number) || 10;
 
-  // Generate function name
   const functionName = getPlayerMoneyFunctionName(operator, value);
 
-  // Generate condition code based on operator
   let conditionCode = "";
   let conditionComment = "";
 
-  // Generate the comparison based on the operator
   let comparison = "";
   switch (operator) {
     case "equals":
@@ -124,11 +111,9 @@ export const generatePlayerMoneyCondition = (
       conditionComment = `-- Check if player money equals ${value}`;
   }
 
-  // Generate the final code
   conditionCode = `
-    return G.GAME.money ${comparison}`;
+    return G.GAME.dollars ${comparison}`;
 
-  // Generate the function that checks the player money condition
   const functionCode = `-- Player money condition check
 local function ${functionName}(context)
     ${conditionComment}${conditionCode}
