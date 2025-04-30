@@ -117,28 +117,3 @@ export function generateEffectReturnStatement(
 
   return { statement: returnStatement, colour };
 }
-
-/**
- * Generate a fallback calculate function if other methods fail
- */
-export function generateFallbackCalculate(joker: JokerData): string {
-  // Generate a list of effect types based on joker properties
-  const effectTypes: string[] = [];
-  if (joker.chipAddition > 0) effectTypes.push("add_chips");
-  if (joker.multAddition > 0) effectTypes.push("add_mult");
-  if (joker.xMult > 1) effectTypes.push("apply_x_mult");
-
-  // Get the appropriate return statement with all effects
-  const { statement, colour } = generateEffectReturnStatement(
-    joker,
-    effectTypes
-  );
-
-  return `calculate = function(self, card, context)
-        if context.joker_main then
-            return {${statement},
-                colour = ${colour}
-            }
-        end
-    end`;
-}

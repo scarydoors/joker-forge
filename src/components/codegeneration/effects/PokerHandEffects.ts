@@ -1,30 +1,42 @@
-import { JokerData } from "../../JokerCard";
 import type { Rule } from "../../ruleBuilder/types";
-import { generateEffectReturnStatement } from "../effectUtils";
 
-export const generatePokerHandCode = (
-  joker: JokerData,
-  rules: Rule[]
+export interface PokerHandCondition {
+  functionName: string;
+  functionCode: string;
+}
+
+// Return descriptive function name based on condition
+export const getPokerHandFunctionName = (
+  handType: string,
+  scope: string,
+  negate: boolean
 ): string => {
+  const prefix = "check_poker_hand";
+  const handTypePart = handType.toLowerCase().replace(/\s+/g, "_");
+  const scopePart = scope === "all_played" ? "any" : "scoring";
+  const negatePart = negate ? "not_" : "";
+
+  return `${prefix}_${negatePart}${handTypePart}_${scopePart}`;
+};
+
+export const generatePokerHandCondition = (
+  rules: Rule[]
+): PokerHandCondition | null => {
   const pokerHandRules =
     rules?.filter((rule) => rule.trigger === "hand_played") || [];
-  if (pokerHandRules.length === 0) return "";
-
-  // Collect all effect types from the rules
-  const effectTypes: string[] = [];
+  if (pokerHandRules.length === 0) return null;
 
   // Structure to track hand type conditions and their card scope
-  type HandTypeCondition = {
+  type HandTypeConditionDef = {
     handType: string;
     scope: string;
     negate: boolean;
   };
 
-  const handConditions: HandTypeCondition[] = [];
+  const handConditions: HandTypeConditionDef[] = [];
 
-  // Extract hand types, card scopes, and effects from rules
+  // Extract hand types and card scope from conditions
   pokerHandRules.forEach((rule) => {
-    // Extract hand types and card scope from conditions
     rule.conditionGroups.forEach((group) => {
       group.conditions.forEach((condition) => {
         if (condition.type === "hand_type") {
@@ -43,31 +55,11 @@ export const generatePokerHandCode = (
         }
       });
     });
-
-    // Extract all effect types
-    rule.effects.forEach((effect) => {
-      if (!effectTypes.includes(effect.type)) {
-        effectTypes.push(effect.type);
-      }
-    });
   });
 
-  if (handConditions.length === 0) return "";
+  if (handConditions.length === 0) return null;
 
-  // If no effects found in rules, add defaults based on joker properties
-  if (effectTypes.length === 0) {
-    if (joker.chipAddition > 0) effectTypes.push("add_chips");
-    if (joker.multAddition > 0) effectTypes.push("add_mult");
-    if (joker.xMult > 1) effectTypes.push("apply_x_mult");
-  }
-
-  // Get return statement based on all effect types
-  const { statement: returnStatement, colour } = generateEffectReturnStatement(
-    joker,
-    effectTypes
-  );
-
-  // Generate code for hand conditions with AND logic
+  // Generate code for hand conditions
   let conditionChecks = "";
   let conditionComment = "";
 
@@ -75,6 +67,13 @@ export const generatePokerHandCode = (
   if (handConditions.length === 1) {
     // Single condition case
     const condition = handConditions[0];
+
+    // Generate descriptive function name
+    const functionName = getPokerHandFunctionName(
+      condition.handType,
+      condition.scope,
+      condition.negate
+    );
 
     if (condition.scope === "scoring") {
       // For scoring cards, check the scoring_name
@@ -95,12 +94,28 @@ export const generatePokerHandCode = (
         conditionComment = `-- Check if a ${condition.handType} exists in played cards`;
       }
     }
+
+    // Generate the function that checks if the hand condition is met
+    const functionCode = `-- Poker hand condition check
+local function ${functionName}(context)
+    ${conditionComment}
+    return ${conditionChecks}
+end`;
+
+    return { functionName, functionCode };
   } else {
     // Multiple conditions case - using AND logic between them
-    conditionComment = `-- Check that ALL of the following conditions are true:`;
+    conditionComment = `-- Check that ALL of the following poker hand conditions are true:`;
+
+    // Generate a compound function name
+    const functionName =
+      "check_poker_hand_compound_" +
+      handConditions
+        .map((c) => c.handType.toLowerCase().replace(/\s+/g, "_"))
+        .join("_and_");
 
     handConditions.forEach((condition, index) => {
-      if (index > 0) conditionChecks += " and "; // Changed from OR to AND
+      if (index > 0) conditionChecks += " and "; // AND logic between conditions
 
       // Different check based on card scope
       if (condition.scope === "scoring") {
@@ -111,7 +126,7 @@ export const generatePokerHandCode = (
           conditionChecks += `context.scoring_name == "${condition.handType}"`;
         }
 
-        conditionComment += `\n        -- ${index + 1}. ${
+        conditionComment += `\n    -- ${index + 1}. ${
           condition.negate ? "NOT " : ""
         }${condition.handType} (scoring hand)`;
       } else if (condition.scope === "all_played") {
@@ -122,25 +137,19 @@ export const generatePokerHandCode = (
           conditionChecks += `next(context.poker_hands["${condition.handType}"] or {})`;
         }
 
-        conditionComment += `\n        -- ${index + 1}. ${
+        conditionComment += `\n    -- ${index + 1}. ${
           condition.negate ? "NO " : ""
         }${condition.handType} (any played cards)`;
       }
     });
-  }
 
-  // Generate the final calculate function with proper scope handling and correct comments
-  const calculateCode = `calculate = function(self, card, context)
-    -- Main scoring time for jokers - this is when most jokers apply their effects
-    if context.cardarea == G.jokers and context.joker_main then
-        ${conditionComment}
-        if ${conditionChecks} then
-            return {${returnStatement},
-                colour = ${colour}
-            }
-        end
-    end
+    // Generate the function that checks if the compound hand condition is met
+    const functionCode = `-- Poker hand condition check (compound)
+local function ${functionName}(context)
+    ${conditionComment}
+    return ${conditionChecks}
 end`;
 
-  return calculateCode;
+    return { functionName, functionCode };
+  }
 };
