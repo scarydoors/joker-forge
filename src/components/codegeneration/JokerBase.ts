@@ -27,12 +27,16 @@ export const generateJokerBaseCode = (
         x = ${x},
         y = ${y}
     },
-    cost = ${getCostFromRarity(joker.rarity)},
+    cost = ${joker.cost !== undefined ? joker.cost : 4},
     rarity = ${joker.rarity},
-    blueprint_compat = true,
-    eternal_compat = true,
-    unlocked = true,
-    discovered = true,
+    blueprint_compat = ${
+      joker.blueprint_compat !== undefined ? joker.blueprint_compat : true
+    },
+    eternal_compat = ${
+      joker.eternal_compat !== undefined ? joker.eternal_compat : true
+    },
+    unlocked = ${joker.unlocked !== undefined ? joker.unlocked : true},
+    discovered = ${joker.discovered !== undefined ? joker.discovered : true},
     atlas = '${atlasKey}'`;
 };
 
@@ -184,19 +188,4 @@ export const generateBasicCalculateFunction = (joker: JokerData): string => {
             }
         end
     end`;
-};
-
-export const getCostFromRarity = (rarity: number): number => {
-  switch (rarity) {
-    case 1:
-      return 4;
-    case 2:
-      return 5;
-    case 3:
-      return 6;
-    case 4:
-      return 8;
-    default:
-      return 5;
-  }
 };

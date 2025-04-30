@@ -47,6 +47,11 @@ const JokerForm: React.FC<JokerFormProps> = ({
       xMult: 1,
       imagePreview: "",
       rarity: 1,
+      cost: 4,
+      blueprint_compat: true,
+      eternal_compat: true,
+      unlocked: true,
+      discovered: true,
       rules: [],
     }
   );
@@ -56,7 +61,16 @@ const JokerForm: React.FC<JokerFormProps> = ({
 
   useEffect(() => {
     if (joker) {
-      setFormData(joker);
+      // Ensure all fields exist with defaults
+      const updatedJoker = {
+        ...joker,
+        cost: joker.cost ?? getCostFromRarity(joker.rarity),
+        blueprint_compat: joker.blueprint_compat ?? true,
+        eternal_compat: joker.eternal_compat ?? true,
+        unlocked: joker.unlocked ?? true,
+        discovered: joker.discovered ?? true,
+      };
+      setFormData(updatedJoker);
       setChangesExist(false);
     }
   }, [joker]);
@@ -80,6 +94,15 @@ const JokerForm: React.FC<JokerFormProps> = ({
     setFormData((prev) => ({
       ...prev,
       [field]: isNaN(value) ? 0 : value,
+    }));
+    setChangesExist(true);
+  };
+
+  const handleCheckboxChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const { name, checked } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: checked,
     }));
     setChangesExist(true);
   };
@@ -117,8 +140,28 @@ const JokerForm: React.FC<JokerFormProps> = ({
     setFormData((prev) => ({
       ...prev,
       rarity: value,
+      // Update cost based on rarity if it hasn't been customized
+      cost:
+        prev.cost === getCostFromRarity(prev.rarity)
+          ? getCostFromRarity(value)
+          : prev.cost,
     }));
     setChangesExist(true);
+  };
+
+  const getCostFromRarity = (rarity: number): number => {
+    switch (rarity) {
+      case 1:
+        return 4;
+      case 2:
+        return 5;
+      case 3:
+        return 6;
+      case 4:
+        return 8;
+      default:
+        return 5;
+    }
   };
 
   const insertFormatTag = (tag: string) => {
@@ -174,35 +217,6 @@ const JokerForm: React.FC<JokerFormProps> = ({
     );
   }
 
-  const createAutoDescription = () => {
-    if (
-      formData.description ===
-      "A {C:blue}custom{} joker with {C:red}unique{} effects."
-    ) {
-      const effects: string[] = [];
-
-      if (formData.chipAddition > 0) {
-        effects.push(`{C:chips}+${formData.chipAddition} Chips{}`);
-      }
-
-      if (formData.multAddition > 0) {
-        effects.push(`{C:mult}+${formData.multAddition} Mult{}`);
-      }
-
-      if (formData.xMult > 1) {
-        effects.push(`{X:mult,C:white}X${formData.xMult}{}`);
-      }
-
-      if (effects.length > 0) {
-        setFormData((prev) => ({
-          ...prev,
-          description: `${effects.join(", ")}`,
-        }));
-        setChangesExist(true);
-      }
-    }
-  };
-
   const getOptionByValue = (value: number) => {
     return (
       rarityOptions.find((option) => option.value === value) || rarityOptions[0]
@@ -211,11 +225,7 @@ const JokerForm: React.FC<JokerFormProps> = ({
 
   return (
     <div className="h-full overflow-auto custom-scrollbar bg-balatro-transparentblack pixel-corners-medium p-6">
-      <h2 className="text-2xl text-white text-shadow-pixel text-center mb-4">
-        {joker ? "Edit Joker" : "New Joker"}
-      </h2>
-
-      <div className="space-y-4">
+      <div className="space-y-2">
         {/* Image and name section */}
         <div className="grid grid-cols-2 gap-6">
           {/* Image upload */}
@@ -322,6 +332,20 @@ const JokerForm: React.FC<JokerFormProps> = ({
                 </div>
               </div>
             </div>
+
+            <div>
+              <label className="block text-white mb-2 text-shadow-pixel">
+                Cost
+              </label>
+              <input
+                type="number"
+                name="cost"
+                value={formData.cost}
+                onChange={(e) => handleNumberChange(e, "cost")}
+                className="w-full bg-balatro-grey text-white px-3 py-2 pixel-corners-small focus:outline-none focus:ring-1 focus:ring-balatro-attention"
+                min={1}
+              />
+            </div>
           </div>
         </div>
 
@@ -335,12 +359,12 @@ const JokerForm: React.FC<JokerFormProps> = ({
             value={formData.description}
             onChange={handleInputChange}
             ref={descriptionRef}
-            className="w-full bg-balatro-grey text-white px-3 py-2 pixel-corners-small focus:outline-none focus:ring-1 focus:ring-balatro-attention h-20"
+            className="w-full bg-balatro-grey text-white px-3 py-1 pixel-corners-small focus:outline-none focus:ring-1 focus:ring-balatro-attention h-20"
             maxLength={120}
           />
 
           {/* Text format buttons */}
-          <div className="mt-2">
+          <div className="">
             <div className="text-white text-sm mb-2">Format Tags:</div>
             <div className="grid grid-cols-4 gap-2">
               {formatButtons.map((btn) => (
@@ -358,21 +382,13 @@ const JokerForm: React.FC<JokerFormProps> = ({
               Tip: Remember to close color tags with {"{}"} after the colored
               text
             </div>
-            <div className="mt-2">
-              <button
-                className="bg-balatro-grey hover:bg-balatro-light-black text-xs text-white px-3 py-1 pixel-corners-small"
-                onClick={createAutoDescription}
-              >
-                Auto Generate Description From Effects
-              </button>
-            </div>
           </div>
         </div>
 
         {/* Effects */}
         <div>
           <label className="block text-white mb-2 text-shadow-pixel">
-            Effects
+            Base Effects
           </label>
           <div className="grid grid-cols-3 gap-4">
             {/* Chips */}
@@ -439,6 +455,76 @@ const JokerForm: React.FC<JokerFormProps> = ({
               <div className="text-xs text-balatro-money mt-1 text-center">
                 xMult
               </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Compatibility Options */}
+        <div>
+          <label className="block text-white text-shadow-pixel">
+            Compatibility
+          </label>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="flex items-center">
+              <input
+                type="checkbox"
+                id="blueprint_compat"
+                name="blueprint_compat"
+                checked={formData.blueprint_compat}
+                onChange={handleCheckboxChange}
+                className="mr-2 h-4 w-4"
+              />
+              <label htmlFor="blueprint_compat" className="text-white">
+                Blueprint Compatible
+              </label>
+            </div>
+            <div className="flex items-center">
+              <input
+                type="checkbox"
+                id="eternal_compat"
+                name="eternal_compat"
+                checked={formData.eternal_compat}
+                onChange={handleCheckboxChange}
+                className="mr-2 h-4 w-4"
+              />
+              <label htmlFor="eternal_compat" className="text-white">
+                Eternal Compatible
+              </label>
+            </div>
+          </div>
+        </div>
+
+        {/* Collection/Discovery Options */}
+        <div>
+          <label className="block text-white text-shadow-pixel">
+            Collection State
+          </label>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="flex items-center">
+              <input
+                type="checkbox"
+                id="unlocked"
+                name="unlocked"
+                checked={formData.unlocked}
+                onChange={handleCheckboxChange}
+                className="mr-2 h-4 w-4"
+              />
+              <label htmlFor="unlocked" className="text-white">
+                Unlocked by Default
+              </label>
+            </div>
+            <div className="flex items-center">
+              <input
+                type="checkbox"
+                id="discovered"
+                name="discovered"
+                checked={formData.discovered}
+                onChange={handleCheckboxChange}
+                className="mr-2 h-4 w-4"
+              />
+              <label htmlFor="discovered" className="text-white">
+                Discovered by Default
+              </label>
             </div>
           </div>
         </div>

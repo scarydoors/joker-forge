@@ -16,6 +16,11 @@ export interface JokerData {
   xMult: number;
   imagePreview: string;
   rarity: number; // 1: Common, 2: Uncommon, 3: Rare, 4: Legendary
+  cost?: number;
+  blueprint_compat?: boolean;
+  eternal_compat?: boolean;
+  unlocked?: boolean;
+  discovered?: boolean;
   rules?: Rule[];
 }
 
@@ -72,13 +77,13 @@ const formatDescription = (text: string) => {
 
   // Handle color tags like {C:blue} and closing tags {}
   const colorPattern = /\{C:([a-z]+)\}(.*?)(\{\}|$)/g;
-  result = result.replace(colorPattern, (match, color, content) => {
+  result = result.replace(colorPattern, (color, content) => {
     return `<span class="${getColorClass(color)}">${content}</span>`;
   });
 
   // Handle X multiplier tags
   const xMultPattern = /\{X:mult,C:([a-z]+)\}(.*?)(\{\}|$)/g;
-  result = result.replace(xMultPattern, (match, color, content) => {
+  result = result.replace(xMultPattern, (color, content) => {
     return `<span class="${getColorClass(color)}">×${content}</span>`;
   });
 
