@@ -8,6 +8,7 @@ import {
 import { generatePokerHandCondition } from "./effects/PokerHandEffects";
 import { generateCalculateFunction } from "./calculateUtils";
 import { generateSuitCardCondition } from "./effects/SuitCardEffects";
+import { generateRankCardCondition } from "./effects/RankCardEffects";
 
 export const exportJokersAsMod = async (
   jokers: JokerData[],
@@ -55,6 +56,8 @@ const generateMainLua = (jokers: JokerData[]): string => {
   jokers.forEach((joker, index) => {
     const functionNames: string[] = [];
 
+    console.log("Joker rules:", joker.rules);
+
     if (joker.rules && joker.rules.length > 0) {
       // Check for poker hand rules
       const pokerHandRules = joker.rules.filter((rule) => {
@@ -88,6 +91,25 @@ const generateMainLua = (jokers: JokerData[]): string => {
         if (suitCondition) {
           helperFunctions.push(suitCondition.functionCode);
           functionNames.push(suitCondition.functionName);
+        }
+      }
+
+      // Check for rank rules
+      const rankRules = joker.rules.filter((rule) => {
+        return rule.conditionGroups.some((group) =>
+          group.conditions.some(
+            (condition) =>
+              condition.type === "rank_count" || condition.type === "card_rank"
+          )
+        );
+      });
+
+      // Generate rank condition function if needed
+      if (rankRules.length > 0) {
+        const rankCondition = generateRankCardCondition(rankRules);
+        if (rankCondition) {
+          helperFunctions.push(rankCondition.functionCode);
+          functionNames.push(rankCondition.functionName);
         }
       }
     }
