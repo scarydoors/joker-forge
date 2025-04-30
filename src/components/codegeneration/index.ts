@@ -13,6 +13,7 @@ import { generateCountCardCondition } from "./effects/CountHandEffects";
 import { generatePlayerMoneyCondition } from "./effects/PlayerMoneyEffects";
 import { generateRemainingHandsCondition } from "./effects/RemainingHandsEffects";
 import { generateRemainingDiscardsCondition } from "./effects/RemainingDiscardsEffects";
+import { generateJokerCountCondition } from "./effects/JokerCountEffects";
 
 export const exportJokersAsMod = async (
   jokers: JokerData[],
@@ -183,6 +184,21 @@ const generateMainLua = (jokers: JokerData[]): string => {
       if (discardCondition) {
         helperFunctions.push(discardCondition.functionCode);
         functionNames.push(discardCondition.functionName);
+      }
+    }
+
+    const jokerCountRules = (joker.rules ?? []).filter((rule) => {
+      return rule.conditionGroups.some((group) =>
+        group.conditions.some((condition) => condition.type === "joker_count")
+      );
+    });
+
+    // Generate joker count condition function if needed
+    if (jokerCountRules.length > 0) {
+      const jokerCountCondition = generateJokerCountCondition(jokerCountRules);
+      if (jokerCountCondition) {
+        helperFunctions.push(jokerCountCondition.functionCode);
+        functionNames.push(jokerCountCondition.functionName);
       }
     }
 
