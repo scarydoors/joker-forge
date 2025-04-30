@@ -10,6 +10,7 @@ import { generateCalculateFunction } from "./calculateUtils";
 import { generateSuitCardCondition } from "./effects/SuitCardEffects";
 import { generateRankCardCondition } from "./effects/RankCardEffects";
 import { generateCountCardCondition } from "./effects/CountHandEffects";
+import { generatePlayerMoneyCondition } from "./effects/PlayerMoneyEffects";
 
 export const exportJokersAsMod = async (
   jokers: JokerData[],
@@ -128,6 +129,22 @@ const generateMainLua = (jokers: JokerData[]): string => {
           helperFunctions.push(countCondition.functionCode);
           functionNames.push(countCondition.functionName);
         }
+      }
+    }
+
+    // Check for player money rules
+    const moneyRules = (joker.rules ?? []).filter((rule) => {
+      return rule.conditionGroups.some((group) =>
+        group.conditions.some((condition) => condition.type === "player_money")
+      );
+    });
+
+    // Generate player money condition function if needed
+    if (moneyRules.length > 0) {
+      const moneyCondition = generatePlayerMoneyCondition(moneyRules);
+      if (moneyCondition) {
+        helperFunctions.push(moneyCondition.functionCode);
+        functionNames.push(moneyCondition.functionName);
       }
     }
 
