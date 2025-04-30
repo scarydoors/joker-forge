@@ -153,7 +153,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
   },
   {
     id: "suit_count",
-    label: "Suit Count in Hand",
+    label: "Suit Count",
     description: "Check how many cards of a specific suit are in the hand",
     applicableTriggers: ["hand_played"],
     params: [
@@ -220,7 +220,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
   },
   {
     id: "rank_count",
-    label: "Rank Count in Hand",
+    label: "Rank Count",
     description: "Check how many cards of a specific rank are in the hand",
     applicableTriggers: ["hand_played"],
     params: [

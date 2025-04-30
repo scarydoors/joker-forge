@@ -321,7 +321,7 @@ const EffectEditor: React.FC<{
       <select
         value={effect.type}
         onChange={(e) => onUpdate({ type: e.target.value })}
-        className="bg-balatro-black text-white px-2 py-1 pixel-corners-small"
+        className="bg-balatro-black text-white px-2 py-1 mt-4 pixel-corners-small"
       >
         {EFFECT_TYPES.map((type) => (
           <option key={type.id} value={type.id}>
@@ -808,16 +808,18 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
-      <div className="bg-balatro-black pixel-corners-medium p-6 max-w-5xl w-full h-[90vh] overflow-hidden flex flex-col">
-        <h2 className="text-2xl text-white text-shadow-pixel mb-4">
+    <div className="fixed inset-0 bg-black/60 bg-opacity-20 flex items-center justify-center z-50 font-game tracking-wider">
+      <div className="bg-balatro-black pixel-corners-medium p-6 max-w-7xl w-full h-[90vh] overflow-hidden flex flex-col">
+        <h2 className="text-2xl text-white text-shadow-pixel mb-4 tracking-widest">
           Rule Builder
         </h2>
 
         <div className="flex-grow flex gap-4 overflow-hidden">
           {/* Rules List Sidebar */}
           <div className="w-1/4 bg-balatro-transparentblack pixel-corners-small p-4 overflow-y-auto custom-scrollbar">
-            <h3 className="text-lg text-white text-shadow-pixel mb-2">Rules</h3>
+            <h3 className="text-lg text-white text-shadow-pixel mb-2 tracking-widest">
+              Rules
+            </h3>
 
             <div className="space-y-2">
               {rules.map((rule, index) => (
