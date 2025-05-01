@@ -5,16 +5,16 @@ import {
   generateJokerBaseCode,
   generateBasicLocVarsFunction,
 } from "./JokerBase";
-import { generatePokerHandCondition } from "./effects/PokerHandEffects";
+import { generatePokerHandCondition } from "./conditions/PokerHandCondition";
 import { generateCalculateFunction } from "./calculateUtils";
-import { generateSuitCardCondition } from "./effects/SuitCardEffects";
-import { generateRankCardCondition } from "./effects/RankCardEffects";
-import { generateCountCardCondition } from "./effects/CountHandEffects";
-import { generatePlayerMoneyCondition } from "./effects/PlayerMoneyEffects";
-import { generateRemainingHandsCondition } from "./effects/RemainingHandsEffects";
-import { generateRemainingDiscardsCondition } from "./effects/RemainingDiscardsEffects";
-import { generateJokerCountCondition } from "./effects/JokerCountEffects";
-import { generateBlindTypeCondition } from "./effects/BlindTypeEffects";
+import { generateSuitCardCondition } from "./conditions/SuitCardCondition";
+import { generateRankCardCondition } from "./conditions/RankCardCondition";
+import { generateCountCardCondition } from "./conditions/CountHandCondition";
+import { generatePlayerMoneyCondition } from "./conditions/PlayerMoneyCondition";
+import { generateRemainingHandsCondition } from "./conditions/RemainingHandsCondition";
+import { generateRemainingDiscardsCondition } from "./conditions/RemainingDiscardsCondition";
+import { generateJokerCountCondition } from "./conditions/JokerCountCondition";
+import { generateBlindTypeCondition } from "./conditions/BlindTypeCondition";
 
 export const exportJokersAsMod = async (
   jokers: JokerData[],
