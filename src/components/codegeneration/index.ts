@@ -14,6 +14,7 @@ import { generatePlayerMoneyCondition } from "./effects/PlayerMoneyEffects";
 import { generateRemainingHandsCondition } from "./effects/RemainingHandsEffects";
 import { generateRemainingDiscardsCondition } from "./effects/RemainingDiscardsEffects";
 import { generateJokerCountCondition } from "./effects/JokerCountEffects";
+import { generateBlindTypeCondition } from "./effects/BlindTypeEffects";
 
 export const exportJokersAsMod = async (
   jokers: JokerData[],
@@ -199,6 +200,22 @@ const generateMainLua = (jokers: JokerData[]): string => {
       if (jokerCountCondition) {
         helperFunctions.push(jokerCountCondition.functionCode);
         functionNames.push(jokerCountCondition.functionName);
+      }
+    }
+
+    // Check for blind type rules
+    const blindTypeRules = (joker.rules ?? []).filter((rule) => {
+      return rule.conditionGroups.some((group) =>
+        group.conditions.some((condition) => condition.type === "blind_type")
+      );
+    });
+
+    // Generate blind type condition function if needed
+    if (blindTypeRules.length > 0) {
+      const blindTypeCondition = generateBlindTypeCondition(blindTypeRules);
+      if (blindTypeCondition) {
+        helperFunctions.push(blindTypeCondition.functionCode);
+        functionNames.push(blindTypeCondition.functionName);
       }
     }
 
