@@ -1,23 +1,25 @@
 import { useState } from "react";
-import Background from "./Background";
 import JokerCollection from "./components/JokerCollection";
 import JokerForm from "./components/JokerForm";
 import { JokerData } from "./components/JokerCard";
 import { exportJokersAsMod } from "./components/codeGeneration/index";
 import RuleBuilder from "./components/ruleBuilder/RuleBuilder";
 import type { Rule } from "./components/ruleBuilder/types";
+import InputField from "./components/generic/InputField";
+import {
+  DocumentTextIcon,
+  UserIcon,
+  ArrowUpTrayIcon,
+  Cog8ToothIcon,
+  CodeBracketIcon,
+} from "@heroicons/react/24/outline";
 
 function App() {
   const [jokers, setJokers] = useState<JokerData[]>([]);
   const [selectedJokerId, setSelectedJokerId] = useState<string | null>(null);
   const [modName, setModName] = useState("My Custom Mod");
-
-  // Export modal state
-  const [showExportModal, setShowExportModal] = useState(false);
   const [authorName, setAuthorName] = useState("");
   const [exportLoading, setExportLoading] = useState(false);
-
-  // Rule Builder modal state
   const [showRuleBuilderModal, setShowRuleBuilderModal] = useState(false);
 
   const handleSelectJoker = (jokerId: string) => {
@@ -49,7 +51,6 @@ function App() {
   const handleDeleteJoker = (jokerId: string) => {
     setJokers((prev) => prev.filter((joker) => joker.id !== jokerId));
 
-    // If we're deleting the selected joker, select the first one or null
     if (selectedJokerId === jokerId) {
       const remainingJokers = jokers.filter((joker) => joker.id !== jokerId);
       setSelectedJokerId(
@@ -58,11 +59,7 @@ function App() {
     }
   };
 
-  const handleExportClick = () => {
-    setShowExportModal(true);
-  };
-
-  const handleExportConfirm = async () => {
+  const handleExport = async () => {
     if (!authorName.trim()) {
       alert("Please enter an author name");
       return;
@@ -76,16 +73,13 @@ function App() {
       alert("Failed to export mod. Please try again.");
     } finally {
       setExportLoading(false);
-      setShowExportModal(false);
     }
   };
 
-  // Function to open the Rule Builder modal
   const handleOpenRuleBuilder = () => {
     setShowRuleBuilderModal(true);
   };
 
-  // Function to save rules from the Rule Builder
   const handleSaveRules = (rules: Rule[]) => {
     if (selectedJoker) {
       const updatedJoker = { ...selectedJoker, rules };
@@ -94,35 +88,75 @@ function App() {
     setShowRuleBuilderModal(false);
   };
 
+  const openGitHub = () => {
+    window.open("https://github.com/Jayd-H/joker-forge", "_blank");
+  };
+
   const selectedJoker =
     jokers.find((joker) => joker.id === selectedJokerId) || null;
 
   return (
     <>
-      <Background />
-      <div id="joker-info-root"></div>
-
-      <div className="min-h-screen font-game text-white overflow-hidden p-4">
+      <div className="min-h-screen font-game bg-black-darker overflow-hidden p-4">
         <div className="container mx-auto max-w-6xl">
-          <h1 className="text-4xl text-white text-shadow-pixel -mb-12">
-            Joker Forge
-          </h1>
+          <div className="flex justify-between items-center mb-6">
+            <div className="flex space-x-4 flex-1">
+              <div className="w-1/2">
+                <InputField
+                  value={modName}
+                  onChange={(e) => setModName(e.target.value)}
+                  placeholder="Enter your mod name"
+                  separator={true}
+                  icon={
+                    <DocumentTextIcon className="h-6 w-6 text-mint stroke-2" />
+                  }
+                  className="h-[42px]" // Fixed height to match icon bar
+                />
+              </div>
+              <div className="w-1/2">
+                <InputField
+                  value={authorName}
+                  onChange={(e) => setAuthorName(e.target.value)}
+                  placeholder="Author name"
+                  separator={true}
+                  icon={<UserIcon className="h-6 w-6 text-mint stroke-2" />}
+                  className="h-[42px]" // Fixed height to match icon bar
+                />
+              </div>
+            </div>
 
-          {/* Mod Name Input */}
-          <div className="mx-auto max-w-xs mb-6">
-            <label className="block text-white mb-1 text-center">
-              Mod Name
-            </label>
-            <input
-              type="text"
-              value={modName}
-              onChange={(e) => setModName(e.target.value)}
-              className="w-full bg-balatro-grey text-white px-3 py-2 text-center pixel-corners-small focus:outline-none"
-            />
+            <div className="flex bg-black-dark border-2 border-black-light rounded-lg ml-4 h-[42px]">
+              <button
+                onClick={openGitHub}
+                className="px-3 flex items-center justify-center group"
+                title="GitHub Repository"
+              >
+                <CodeBracketIcon className="h-6 w-6 text-mint stroke-2 group-hover:text-mint-lighter transition-colors" />
+              </button>
+
+              <div className="w-px self-stretch my-2 bg-black-light"></div>
+
+              <button
+                onClick={handleExport}
+                className="px-3 flex items-center justify-center group"
+                title="Export Mod"
+                disabled={exportLoading}
+              >
+                <ArrowUpTrayIcon className="h-6 w-6 text-mint stroke-2 group-hover:text-mint-lighter transition-colors" />
+              </button>
+
+              <div className="w-px self-stretch my-2 bg-black-light"></div>
+
+              <button
+                className="px-3 flex items-center justify-center group"
+                title="Settings"
+              >
+                <Cog8ToothIcon className="h-6 w-6 text-mint stroke-2 group-hover:text-mint-lighter transition-colors" />
+              </button>
+            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-5 gap-8 h-[calc(100vh-220px)]">
-            {/* JokerForm */}
             <div className="md:col-span-3 h-full">
               {selectedJoker ? (
                 <JokerForm
@@ -142,7 +176,6 @@ function App() {
               )}
             </div>
 
-            {/* JokerCollection */}
             <div className="md:col-span-2 h-full pixel-corners-medium p-6">
               <JokerCollection
                 jokers={jokers}
@@ -150,49 +183,13 @@ function App() {
                 onSelectJoker={handleSelectJoker}
                 onAddNewJoker={handleAddNewJoker}
                 modName={modName}
-                onExportClick={handleExportClick}
+                onExportClick={handleExport}
               />
             </div>
           </div>
         </div>
       </div>
 
-      {/* Export Modal */}
-      {showExportModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
-          <div className="bg-balatro-black pixel-corners-medium p-6 max-w-md w-full">
-            <h3 className="text-xl text-white text-shadow-pixel mb-4">
-              Enter Author Name
-            </h3>
-            <input
-              type="text"
-              value={authorName}
-              onChange={(e) => setAuthorName(e.target.value)}
-              placeholder="Your name"
-              className="w-full bg-balatro-grey text-white px-3 py-2 pixel-corners-small mb-4 focus:outline-none"
-            />
-            <div className="flex space-x-4">
-              <button
-                className="flex-1 bg-balatro-red hover:bg-balatro-redshadow text-white py-2 pixel-corners-small transition-colors"
-                onClick={() => setShowExportModal(false)}
-              >
-                <span className="relative z-10 text-shadow-pixel">Cancel</span>
-              </button>
-              <button
-                className="flex-1 bg-balatro-green hover:bg-balatro-greenshadow text-white py-2 pixel-corners-small transition-colors relative"
-                onClick={handleExportConfirm}
-                disabled={exportLoading}
-              >
-                <span className="relative z-10 text-shadow-pixel">
-                  {exportLoading ? "Exporting..." : "Export"}
-                </span>
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Rule Builder Modal */}
       <RuleBuilder
         isOpen={showRuleBuilderModal}
         onClose={() => setShowRuleBuilderModal(false)}

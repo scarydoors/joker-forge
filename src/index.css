@@ -1,6 +1,6 @@
+@import url("https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap");
 @import "tailwindcss";
 
-/* Font setup */
 @font-face {
   font-family: "m6x11plus";
   src: url("/fonts/m6x11plus.ttf") format("truetype");
@@ -10,7 +10,6 @@
   --color-balatro-mult: #fe5f55;
   --color-balatro-chips: #009dff;
   --color-balatro-money: #f3b958;
-  --color-balatro-filter: #ff9a00;
   --color-balatro-attention: #ff9a00;
   --color-balatro-orange: #fda200;
   --color-balatro-gold: #eac058;
@@ -39,8 +38,27 @@
   --color-balatro-buttonshadow: #1e2f32;
   --color-balatro-blackshadow: #0b1415;
 
+  --color-mint-lighter: #6cb79a;
+  --color-mint-light: #59a487;
+  --color-mint: #469274;
+  --color-mint-dark: #3c7f65;
+  --color-mint-darker: #336d57;
+
+  --color-white-lighter: #d8dfe8;
+  --color-white-light: #cbd3de;
+  --color-white: #bec7d4;
+  --color-white-dark: #aab4c2;
+  --color-white-darker: #96a1b0;
+
+  --color-black-lighter: #465a60;
+  --color-black-light: #3a4c53;
+  --color-black: #2f4047;
+  --color-black-dark: #26353b;
+  --color-black-darker: #1e2b30;
+
   /* Font family */
   --font-game: "m6x11plus", sans-serif;
+  --font-lexend: "Lexend", sans-serif;
 }
 
 @layer utilities {
