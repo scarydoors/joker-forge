@@ -82,7 +82,7 @@ const InputField: React.FC<InputFieldProps> = ({
           className={`
             bg-black-dark text-white-light px-3 py-2 tracking-wide font-light text-xl
             ${useGameFont ? "font-game" : "font-lexend"}
-            ${separator ? "pl-14" : "pl-11"}s
+            ${separator ? "pl-14" : "pl-11"}
             focus:outline-none rounded-lg
             border-2 border-black-lighter focus:border-mint transition-colors w-full
             ${error ? "border-balatro-red" : ""}
