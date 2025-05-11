@@ -110,7 +110,7 @@ function App() {
                   icon={
                     <DocumentTextIcon className="h-6 w-6 text-mint stroke-2" />
                   }
-                  className="h-[42px]" // Fixed height to match icon bar
+                  className="h-[42px]"
                 />
               </div>
               <div className="w-1/2">
@@ -120,7 +120,7 @@ function App() {
                   placeholder="Author name"
                   separator={true}
                   icon={<UserIcon className="h-6 w-6 text-mint stroke-2" />}
-                  className="h-[42px]" // Fixed height to match icon bar
+                  className="h-[42px]"
                 />
               </div>
             </div>

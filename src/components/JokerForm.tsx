@@ -1,4 +1,15 @@
-import React, { ChangeEvent, useState, useRef, useEffect } from "react";
+import React, { useState, useRef } from "react";
+import {
+  PhotoIcon,
+  ArrowPathIcon,
+  PuzzlePieceIcon,
+  LockOpenIcon,
+  TrashIcon,
+} from "@heroicons/react/24/outline";
+import InputField from "./generic/InputField";
+import InputDropdown from "./generic/InputDropdown";
+import Checkbox from "./generic/Checkbox";
+import Button from "./generic/Button";
 import { JokerData } from "./JokerCard";
 
 interface JokerFormProps {
@@ -8,28 +19,6 @@ interface JokerFormProps {
   modName: string;
   onOpenRuleBuilder: () => void;
 }
-
-const formatButtons = [
-  { tag: "{}", label: "Close Tag", color: "text-white" },
-  { tag: "{C:blue}", label: "Blue", color: "bg-balatro-blue" },
-  { tag: "{C:red}", label: "Red", color: "bg-balatro-red" },
-  { tag: "{C:orange}", label: "Orange", color: "bg-balatro-orange" },
-  { tag: "{C:green}", label: "Green", color: "bg-balatro-green" },
-  { tag: "{C:purple}", label: "Purple", color: "bg-balatro-purple" },
-  { tag: "{C:attention}", label: "Attention", color: "bg-balatro-planet" },
-  { tag: "{C:chips}", label: "Chips", color: "bg-balatro-chips" },
-  { tag: "{C:mult}", label: "Mult", color: "bg-balatro-mult" },
-  { tag: "{C:money}", label: "Money", color: "bg-balatro-money" },
-  { tag: "{X:mult,C:white}", label: "XMult", color: "text-white" },
-  { tag: "[s]", label: "New Line", color: "bg-balatro-grey" },
-];
-
-const rarityOptions = [
-  { value: 1, label: "Common", color: "bg-balatro-blue" },
-  { value: 2, label: "Uncommon", color: "bg-balatro-green" },
-  { value: 3, label: "Rare", color: "bg-balatro-red" },
-  { value: 4, label: "Legendary", color: "bg-balatro-purple" },
-];
 
 const JokerForm: React.FC<JokerFormProps> = ({
   joker,
@@ -55,75 +44,78 @@ const JokerForm: React.FC<JokerFormProps> = ({
       rules: [],
     }
   );
-  const [changesExist, setChangesExist] = useState(false);
-  const descriptionRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    if (joker) {
-      // Ensure all fields exist with defaults
-      const updatedJoker = {
-        ...joker,
-        cost: joker.cost ?? getCostFromRarity(joker.rarity),
-        blueprint_compat: joker.blueprint_compat ?? true,
-        eternal_compat: joker.eternal_compat ?? true,
-        unlocked: joker.unlocked ?? true,
-        discovered: joker.discovered ?? true,
-      };
-      setFormData(updatedJoker);
-      setChangesExist(false);
+  // Debounce saving to prevent too many saves
+  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Save changes with a debounce
+  const saveChanges = (updatedData: JokerData) => {
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
     }
-  }, [joker]);
 
-  const handleInputChange = (
-    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
-  ) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-    setChangesExist(true);
+    saveTimeoutRef.current = setTimeout(() => {
+      onSaveJoker(updatedData);
+    }, 500); // 500ms debounce
   };
 
-  const handleNumberChange = (
-    e: ChangeEvent<HTMLInputElement>,
-    field: string
-  ) => {
-    const value = parseFloat(e.target.value);
-    setFormData((prev) => ({
-      ...prev,
+  const handleInputChange = (field: string, value: string) => {
+    const updatedData = {
+      ...formData,
+      [field]: value,
+    };
+    setFormData(updatedData);
+    saveChanges(updatedData);
+  };
+
+  const handleNumberChange = (field: string, value: number) => {
+    const updatedData = {
+      ...formData,
       [field]: isNaN(value) ? 0 : value,
-    }));
-    setChangesExist(true);
+    };
+    setFormData(updatedData);
+    saveChanges(updatedData);
   };
 
-  const handleCheckboxChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const { name, checked } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: checked,
-    }));
-    setChangesExist(true);
+  const handleCheckboxChange = (field: string, checked: boolean) => {
+    const updatedData = {
+      ...formData,
+      [field]: checked,
+    };
+    setFormData(updatedData);
+    saveChanges(updatedData);
   };
 
-  const handleImageUpload = (e: ChangeEvent<HTMLInputElement>) => {
+  const handleRarityChange = (value: string) => {
+    const rarity = parseInt(value, 10);
+    const updatedData = {
+      ...formData,
+      rarity,
+      cost:
+        formData.cost === getCostFromRarity(formData.rarity)
+          ? getCostFromRarity(rarity)
+          : formData.cost,
+    };
+    setFormData(updatedData);
+    saveChanges(updatedData);
+  };
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] || null;
     if (file) {
       const reader = new FileReader();
       reader.onload = () => {
-        // Create an image element to check dimensions
         const img = new Image();
         img.onload = () => {
-          // Check if dimensions match the required 142x190
           if (img.width === 142 && img.height === 190) {
-            setFormData((prev) => ({
-              ...prev,
+            const updatedData = {
+              ...formData,
               imagePreview: reader.result as string,
-            }));
-            setChangesExist(true);
+            };
+            setFormData(updatedData);
+            saveChanges(updatedData);
           } else {
-            // Show error for incorrect dimensions
             alert(
               `Image dimensions must be 142x190 pixels. Your image is ${img.width}x${img.height}.`
             );
@@ -133,20 +125,6 @@ const JokerForm: React.FC<JokerFormProps> = ({
       };
       reader.readAsDataURL(file);
     }
-  };
-
-  const handleRarityChange = (e: ChangeEvent<HTMLSelectElement>) => {
-    const value = parseInt(e.target.value, 10);
-    setFormData((prev) => ({
-      ...prev,
-      rarity: value,
-      // Update cost based on rarity if it hasn't been customized
-      cost:
-        prev.cost === getCostFromRarity(prev.rarity)
-          ? getCostFromRarity(value)
-          : prev.cost,
-    }));
-    setChangesExist(true);
   };
 
   const getCostFromRarity = (rarity: number): number => {
@@ -164,40 +142,6 @@ const JokerForm: React.FC<JokerFormProps> = ({
     }
   };
 
-  const insertFormatTag = (tag: string) => {
-    if (!descriptionRef.current) return;
-    const startPos = descriptionRef.current.selectionStart;
-    const endPos = descriptionRef.current.selectionEnd;
-    const currentValue = descriptionRef.current.value;
-    const newValue =
-      currentValue.substring(0, startPos) +
-      tag +
-      currentValue.substring(endPos);
-
-    // Update formData
-    setFormData((prev) => ({
-      ...prev,
-      description: newValue,
-    }));
-    setChangesExist(true);
-
-    // Set cursor position after the inserted tag
-    setTimeout(() => {
-      if (descriptionRef.current) {
-        descriptionRef.current.focus();
-        descriptionRef.current.setSelectionRange(
-          startPos + tag.length,
-          startPos + tag.length
-        );
-      }
-    }, 0);
-  };
-
-  const handleSave = () => {
-    onSaveJoker({ ...formData });
-    setChangesExist(false);
-  };
-
   const handleDelete = () => {
     if (
       joker &&
@@ -207,379 +151,308 @@ const JokerForm: React.FC<JokerFormProps> = ({
     }
   };
 
-  if (!joker && !formData) {
-    return (
-      <div className="flex items-center justify-center h-full text-white">
-        <p className="text-center text-lg">
-          Select a joker to edit or create a new one
-        </p>
-      </div>
-    );
-  }
+  const insertColorTag = (color: string) => {
+    const textArea = document.getElementById(
+      "joker-description"
+    ) as HTMLTextAreaElement;
+    if (!textArea) return;
 
-  const getOptionByValue = (value: number) => {
-    return (
-      rarityOptions.find((option) => option.value === value) || rarityOptions[0]
-    );
+    const startPos = textArea.selectionStart;
+    const endPos = textArea.selectionEnd;
+    const currentValue = textArea.value;
+
+    const colorTag = `{C:${color}}`;
+    const closingTag = `{}`;
+    const newText =
+      currentValue.substring(0, startPos) +
+      colorTag +
+      currentValue.substring(startPos, endPos) +
+      closingTag +
+      currentValue.substring(endPos);
+
+    handleInputChange("description", newText);
+
+    setTimeout(() => {
+      textArea.focus();
+      textArea.setSelectionRange(
+        startPos + colorTag.length + (endPos - startPos) + closingTag.length,
+        startPos + colorTag.length + (endPos - startPos) + closingTag.length
+      );
+    }, 0);
   };
 
+  const addNewLine = () => {
+    const textArea = document.getElementById(
+      "joker-description"
+    ) as HTMLTextAreaElement;
+    if (!textArea) return;
+
+    const startPos = textArea.selectionStart;
+    const currentValue = textArea.value;
+
+    const newText =
+      currentValue.substring(0, startPos) +
+      "[s]" +
+      currentValue.substring(startPos);
+
+    handleInputChange("description", newText);
+
+    setTimeout(() => {
+      textArea.focus();
+      textArea.setSelectionRange(startPos + 3, startPos + 3);
+    }, 0);
+  };
+
+  const rarityOptions = [
+    { value: "1", label: "Common" },
+    { value: "2", label: "Uncommon" },
+    { value: "3", label: "Rare" },
+    { value: "4", label: "Legendary" },
+  ];
+
+  const spawnPoolOptions = [
+    { value: "shop", label: "Shop" },
+    { value: "boss", label: "Boss" },
+    { value: "ante", label: "Ante" },
+    { value: "planet", label: "Planet" },
+    { value: "spectral", label: "Spectral" },
+  ];
+
   return (
-    <div className="h-full overflow-auto custom-scrollbar bg-balatro-transparentblack pixel-corners-medium p-6">
-      <div className="space-y-2">
-        {/* Image and name section */}
-        <div className="grid grid-cols-2 gap-6">
-          {/* Image upload */}
+    <div className="w-full font-lexend flex flex-col min-h-full">
+      <h2 className="text-xl text-white-darker font-extralight tracking-widest mb-4">
+        EDIT JOKER
+      </h2>
+
+      <div className="flex flex-wrap gap-8 mb-6">
+        <div className="w-auto">
+          <div className="flex flex-col items-center">
+            <div className="relative">
+              <div className="aspect-[2/3] w-48 overflow-hidden">
+                {formData.imagePreview ? (
+                  <img
+                    src={formData.imagePreview}
+                    alt={formData.name}
+                    className="w-full h-full object-contain"
+                    draggable="false"
+                  />
+                ) : (
+                  <img
+                    src="/images/placeholder-joker.png"
+                    alt="Default Joker"
+                    className="w-full h-full object-contain"
+                    draggable="false"
+                  />
+                )}
+
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  className="hidden"
+                  ref={fileInputRef}
+                />
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  className="absolute bottom-8 right-4 bg-black-dark opacity-60 hover:opacity-100 p-2 rounded-xl transition-all"
+                >
+                  <PhotoIcon className="h-6 w-6 text-mint" />
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex-1 space-y-6">
           <div>
-            <label className="block text-white mb-2 text-shadow-pixel">
-              Image
-            </label>
-            <div className="aspect-[2/3] w-28 mx-auto pixel-corners-medium overflow-hidden mb-2">
-              {formData.imagePreview ? (
-                <img
-                  src={formData.imagePreview}
-                  alt="Joker Preview"
-                  className="w-full h-full object-contain pixelated"
-                  draggable="false"
-                />
-              ) : (
-                <img
-                  src="/images/placeholder-joker.png"
-                  alt="Default Joker"
-                  className="w-full h-full object-contain pixelated"
-                  draggable="false"
-                />
-              )}
+            <InputField
+              value={formData.name}
+              onChange={(e) => handleInputChange("name", e.target.value)}
+              placeholder="Enter joker name"
+              separator={true}
+              useGameFont={true}
+              label="Joker Name"
+            />
+          </div>
+
+          <div>
+            <div className="relative">
+              <InputField
+                id="joker-description"
+                value={formData.description}
+                onChange={(e) =>
+                  handleInputChange("description", e.target.value)
+                }
+                multiline={true}
+                height="100px"
+                separator={true}
+                useGameFont={true}
+                label="Joker Description"
+              />
             </div>
 
-            <div className="flex space-x-2 mt-2">
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleImageUpload}
-                className="hidden"
-                ref={fileInputRef}
-              />
+            <div className="flex flex-wrap gap-2 -mt-3 pt-3 rounded-b-lg justify-cente p-2 border-black-lighter border-2">
               <button
-                type="button"
-                onClick={() => fileInputRef.current?.click()}
-                className="flex-1 bg-balatro-grey hover:bg-balatro-light-black text-white py-1 pixel-corners-small transition-colors relative"
-                style={{ transition: "background-color 0.2s ease" }}
+                onClick={() => insertColorTag("red")}
+                className="w-8 h-8 bg-balatro-red rounded-md"
+              ></button>
+              <button
+                onClick={() => insertColorTag("orange")}
+                className="w-8 h-8 bg-balatro-orange rounded-md"
+              ></button>
+              <button
+                onClick={() => insertColorTag("blue")}
+                className="w-8 h-8 bg-balatro-blue rounded-md"
+              ></button>
+              <button
+                onClick={() => insertColorTag("money")}
+                className="w-8 h-8 bg-balatro-money rounded-md"
+              ></button>
+              <button
+                onClick={() => insertColorTag("green")}
+                className="w-8 h-8 bg-balatro-green rounded-md"
+              ></button>
+              <button
+                onClick={() => insertColorTag("purple")}
+                className="w-8 h-8 bg-balatro-purple rounded-md"
+              ></button>
+              <button
+                onClick={() => insertColorTag("attention")}
+                className="w-8 h-8 bg-balatro-planet rounded-md"
+              ></button>
+              <button
+                onClick={() => insertColorTag("chips")}
+                className="w-8 h-8 bg-balatro-chips rounded-md"
+              ></button>
+              <button
+                onClick={() => insertColorTag("mult")}
+                className="w-8 h-8 bg-balatro-mult rounded-md"
+              ></button>
+              <Button
+                size="sm"
+                variant="primary"
+                onClick={addNewLine}
+                icon={<ArrowPathIcon className="h-4 w-4" />}
+                height="34px"
               >
-                <span className="relative z-10 text-shadow-pixel">
-                  Browse...
-                </span>
-              </button>
-
-              {formData.imagePreview && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setFormData((prev) => ({ ...prev, imagePreview: "" }));
-                    setChangesExist(true);
-                  }}
-                  className="flex-1 bg-balatro-red hover:bg-balatro-redshadow text-white py-1 pixel-corners-small transition-colors relative"
-                  style={{ transition: "background-color 0.2s ease" }}
-                >
-                  <span className="relative z-10 text-shadow-pixel">Clear</span>
-                </button>
-              )}
-
-              <div className="text-xs text-balatro-lightgrey mt-1">
-                Note: Image must be exactly 142×190 pixels
-              </div>
+                NL
+              </Button>
             </div>
           </div>
-
-          {/* Name and rarity */}
-          <div className="space-y-4">
-            <div>
-              <label className="block text-white mb-2 text-shadow-pixel">
-                Name
-              </label>
-              <input
-                type="text"
-                name="name"
-                value={formData.name}
-                onChange={handleInputChange}
-                className="w-full bg-balatro-grey text-white px-3 py-2 pixel-corners-small focus:outline-none focus:ring-1 focus:ring-balatro-attention"
-                maxLength={25}
-              />
-            </div>
-
-            <div>
-              <label className="block text-white mb-2 text-shadow-pixel">
-                Rarity
-              </label>
-              <div className="relative">
-                <select
-                  name="rarity"
-                  value={formData.rarity}
-                  onChange={handleRarityChange}
-                  className="w-full bg-balatro-grey text-white px-3 py-2 pixel-corners-small focus:outline-none focus:ring-1 focus:ring-balatro-attention appearance-none"
-                >
-                  {rarityOptions.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-                <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                  <div
-                    className={`w-4 h-4 ${
-                      getOptionByValue(formData.rarity).color
-                    }`}
-                  ></div>
-                </div>
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-white mb-2 text-shadow-pixel">
-                Cost
-              </label>
-              <input
-                type="number"
-                name="cost"
-                value={formData.cost}
-                onChange={(e) => handleNumberChange(e, "cost")}
-                className="w-full bg-balatro-grey text-white px-3 py-2 pixel-corners-small focus:outline-none focus:ring-1 focus:ring-balatro-attention"
-                min={1}
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Description */}
-        <div>
-          <label className="block text-white mb-2 text-shadow-pixel">
-            Description
-          </label>
-          <textarea
-            name="description"
-            value={formData.description}
-            onChange={handleInputChange}
-            ref={descriptionRef}
-            className="w-full bg-balatro-grey text-white px-3 py-1 pixel-corners-small focus:outline-none focus:ring-1 focus:ring-balatro-attention h-20"
-            maxLength={120}
-          />
-
-          {/* Text format buttons */}
-          <div className="">
-            <div className="text-white text-sm mb-2">Format Tags:</div>
-            <div className="grid grid-cols-4 gap-2">
-              {formatButtons.map((btn) => (
-                <button
-                  key={btn.tag}
-                  type="button"
-                  className={`${btn.color} text-xs text-white px-1 py-1 pixel-corners-small`}
-                  onClick={() => insertFormatTag(btn.tag)}
-                >
-                  {btn.label}
-                </button>
-              ))}
-            </div>
-            <div className="text-xs mt-2 text-balatro-lightgrey">
-              Tip: Remember to close color tags with {"{}"} after the colored
-              text
-            </div>
-          </div>
-        </div>
-
-        {/* Effects */}
-        <div>
-          <label className="block text-white mb-2 text-shadow-pixel">
-            Base Effects
-          </label>
-          <div className="grid grid-cols-3 gap-4">
-            {/* Chips */}
-            <div>
-              <div className="flex items-center bg-balatro-grey pixel-corners-small">
-                <div className="w-8 h-8 bg-balatro-chips flex-shrink-0 flex items-center justify-center pixel-corners-small">
-                  <span className="text-white text-shadow-pixel font-bold">
-                    +
-                  </span>
-                </div>
-                <input
-                  type="number"
-                  value={formData.chipAddition}
-                  onChange={(e) => handleNumberChange(e, "chipAddition")}
-                  className="w-full bg-transparent text-white px-2 py-1 focus:outline-none"
-                  min="0"
-                  step="1"
-                />
-              </div>
-              <div className="text-xs text-balatro-chips mt-1 text-center">
-                Chips
-              </div>
-            </div>
-
-            {/* Mult */}
-            <div>
-              <div className="flex items-center bg-balatro-grey pixel-corners-small">
-                <div className="w-8 h-8 bg-balatro-mult flex-shrink-0 flex items-center justify-center pixel-corners-small">
-                  <span className="text-white text-shadow-pixel font-bold">
-                    +
-                  </span>
-                </div>
-                <input
-                  type="number"
-                  value={formData.multAddition}
-                  onChange={(e) => handleNumberChange(e, "multAddition")}
-                  className="w-full bg-transparent text-white px-2 py-1 focus:outline-none"
-                  min="0"
-                  step="1"
-                />
-              </div>
-              <div className="text-xs text-balatro-mult mt-1 text-center">
-                Mult
-              </div>
-            </div>
-
-            {/* xMult */}
-            <div>
-              <div className="flex items-center bg-balatro-grey pixel-corners-small">
-                <div className="w-8 h-8 bg-balatro-money flex-shrink-0 flex items-center justify-center pixel-corners-small">
-                  <span className="text-white text-shadow-pixel font-bold">
-                    ×
-                  </span>
-                </div>
-                <input
-                  type="number"
-                  value={formData.xMult}
-                  onChange={(e) => handleNumberChange(e, "xMult")}
-                  className="w-full bg-transparent text-white px-2 py-1 focus:outline-none"
-                  min="1"
-                  step="0.1"
-                />
-              </div>
-              <div className="text-xs text-balatro-money mt-1 text-center">
-                xMult
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Compatibility Options */}
-        <div>
-          <label className="block text-white text-shadow-pixel">
-            Compatibility
-          </label>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                id="blueprint_compat"
-                name="blueprint_compat"
-                checked={formData.blueprint_compat}
-                onChange={handleCheckboxChange}
-                className="mr-2 h-4 w-4"
-              />
-              <label htmlFor="blueprint_compat" className="text-white">
-                Blueprint Compatible
-              </label>
-            </div>
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                id="eternal_compat"
-                name="eternal_compat"
-                checked={formData.eternal_compat}
-                onChange={handleCheckboxChange}
-                className="mr-2 h-4 w-4"
-              />
-              <label htmlFor="eternal_compat" className="text-white">
-                Eternal Compatible
-              </label>
-            </div>
-          </div>
-        </div>
-
-        {/* Collection/Discovery Options */}
-        <div>
-          <label className="block text-white text-shadow-pixel">
-            Collection State
-          </label>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                id="unlocked"
-                name="unlocked"
-                checked={formData.unlocked}
-                onChange={handleCheckboxChange}
-                className="mr-2 h-4 w-4"
-              />
-              <label htmlFor="unlocked" className="text-white">
-                Unlocked by Default
-              </label>
-            </div>
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                id="discovered"
-                name="discovered"
-                checked={formData.discovered}
-                onChange={handleCheckboxChange}
-                className="mr-2 h-4 w-4"
-              />
-              <label htmlFor="discovered" className="text-white">
-                Discovered by Default
-              </label>
-            </div>
-          </div>
-        </div>
-
-        <div className="mt-4">
-          <h3 className="text-xl text-white text-shadow-pixel mb-2">
-            Advanced Rules
-          </h3>
-          <button
-            className="w-full bg-balatro-blue hover:bg-balatro-blueshadow text-white py-2 pixel-corners-small transition-colors"
-            onClick={onOpenRuleBuilder}
-          >
-            <span className="text-shadow-pixel">
-              {formData.rules && formData.rules.length > 0
-                ? `Edit Rules (${formData.rules.length})`
-                : "Add Custom Rules"}
-            </span>
-          </button>
-
-          {formData.rules && formData.rules.length > 0 && (
-            <div className="text-sm text-center mt-2 text-balatro-lightgrey">
-              This joker has {formData.rules.length} custom rule
-              {formData.rules.length !== 1 ? "s" : ""}
-            </div>
-          )}
-        </div>
-
-        {/* Action buttons */}
-        <div className="flex space-x-4 pt-4">
-          <button
-            type="button"
-            onClick={handleSave}
-            disabled={!changesExist}
-            className={`flex-1 ${
-              changesExist
-                ? "bg-balatro-green hover:bg-balatro-greenshadow"
-                : "bg-balatro-grey cursor-not-allowed"
-            } text-white py-2 pixel-corners-small transition-colors`}
-            style={{ transition: "background-color 0.2s ease" }}
-          >
-            <span className="text-shadow-pixel">Save Changes</span>
-          </button>
-
-          {joker && (
-            <button
-              type="button"
-              onClick={handleDelete}
-              className="flex-1 bg-balatro-red hover:bg-balatro-redshadow text-white py-2 pixel-corners-small transition-colors"
-              style={{ transition: "background-color 0.2s ease" }}
-            >
-              <span className="text-shadow-pixel">Delete Joker</span>
-            </button>
-          )}
         </div>
       </div>
+
+      <div className="mb-8 w-full h-[2px] bg-black"></div>
+
+      <div className="grid grid-cols-3 gap-4 mb-8">
+        <div>
+          <InputDropdown
+            value={formData.rarity.toString()}
+            onChange={handleRarityChange}
+            options={rarityOptions}
+            separator={true}
+            label="Rarity"
+          />
+        </div>
+
+        <div>
+          <InputField
+            value={formData.cost?.toString() || "4"}
+            onChange={(e) =>
+              handleNumberChange("cost", parseInt(e.target.value))
+            }
+            placeholder="Cost"
+            separator={true}
+            type="number"
+            min={1}
+            label="Cost"
+          />
+        </div>
+
+        <div>
+          <InputDropdown
+            value={"shop"}
+            onChange={(value) => console.log(value)}
+            options={spawnPoolOptions}
+            separator={true}
+            label="Spawn Pool"
+          />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-6 mb-8">
+        <div>
+          <h3 className="text-lg text-white-light mb-3 flex tracking-wider items-center">
+            <PuzzlePieceIcon className="h-5 w-5 mr-2 text-mint" />
+            Compatibility
+          </h3>
+          <div className="space-y-3">
+            <Checkbox
+              id="blueprint_compat"
+              label="Blueprint Compatible"
+              checked={Boolean(formData.blueprint_compat)}
+              onChange={(checked) =>
+                handleCheckboxChange("blueprint_compat", checked)
+              }
+            />
+            <Checkbox
+              id="eternal_compat"
+              label="Eternal Compatible"
+              checked={Boolean(formData.eternal_compat)}
+              onChange={(checked) =>
+                handleCheckboxChange("eternal_compat", checked)
+              }
+            />
+          </div>
+        </div>
+
+        <div>
+          <h3 className="text-lg text-white-light  mb-3 flex items-center tracking-wider">
+            <LockOpenIcon className="h-5 w-5 mr-2 text-mint" />
+            Availability
+          </h3>
+          <div className="space-y-3">
+            <Checkbox
+              id="unlocked"
+              label="Unlocked by Default"
+              checked={Boolean(formData.unlocked)}
+              onChange={(checked) => handleCheckboxChange("unlocked", checked)}
+            />
+            <Checkbox
+              id="discovered"
+              label="Discovered by Default"
+              checked={Boolean(formData.discovered)}
+              onChange={(checked) =>
+                handleCheckboxChange("discovered", checked)
+              }
+            />
+          </div>
+        </div>
+      </div>
+
+      <div className="pt-4 mb-6">
+        <Button
+          variant="primary"
+          fullWidth
+          onClick={onOpenRuleBuilder}
+          size="lg"
+        >
+          Edit Rules
+        </Button>
+      </div>
+
+      {joker && (
+        <div className="mt-auto pt-6">
+          <Button
+            onClick={handleDelete}
+            variant="danger"
+            fullWidth
+            icon={<TrashIcon className="h-5 w-5 mr-2" />}
+          >
+            Delete Joker
+          </Button>
+        </div>
+      )}
     </div>
   );
 };
