@@ -77,14 +77,14 @@ const formatDescription = (text: string) => {
 
   // Handle color tags like {C:blue} and closing tags {}
   const colorPattern = /\{C:([a-z]+)\}(.*?)(\{\}|$)/g;
-  result = result.replace(colorPattern, (color, content) => {
-    return `<span class="${getColorClass(color)}">${content}</span>`;
+  result = result.replace(colorPattern, (_, colorName, content) => {
+    return `<span class="${getColorClass(colorName)}">${content}</span>`;
   });
 
   // Handle X multiplier tags
   const xMultPattern = /\{X:mult,C:([a-z]+)\}(.*?)(\{\}|$)/g;
-  result = result.replace(xMultPattern, (color, content) => {
-    return `<span class="${getColorClass(color)}">×${content}</span>`;
+  result = result.replace(xMultPattern, (_, colorName, content) => {
+    return `<span class="${getColorClass(colorName)}">×${content}</span>`;
   });
 
   return result;
@@ -95,20 +95,20 @@ const formatDescription = (text: string) => {
  */
 const getColorClass = (color: string) => {
   const colorMap: Record<string, string> = {
-    white: "text-white",
+    white: "text-balatro-white",
     blue: "text-balatro-blue",
     red: "text-balatro-red",
     orange: "text-balatro-orange",
     green: "text-balatro-green",
     purple: "text-balatro-purple",
-    attention: "text-balatro-planet", // aqua/attention
+    attention: "text-balatro-planet",
     chips: "text-balatro-chips",
     mult: "text-balatro-mult",
     money: "text-balatro-money",
     black: "text-balatro-black",
     lightgrey: "text-balatro-lightgrey",
   };
-  return colorMap[color] || "text-white";
+  return colorMap[color] || "text-balatro-white";
 };
 
 const JokerCard: React.FC<JokerCardProps> = ({ joker, onClick }) => {
@@ -181,13 +181,13 @@ const JokerCard: React.FC<JokerCardProps> = ({ joker, onClick }) => {
           {/* Tooltip Body */}
           <div className="relative bg-balatro-lightgrey pixel-corners-medium p-1">
             <div className="bg-balatro-black pixel-corners-medium p-2">
-              <h3 className="text-2xl mb-1 text-center text-white text-shadow-pixel">
+              <h3 className="text-2xl mb-1 text-center text-balatro-white text-shadow-pixel">
                 {joker.name}
               </h3>
               {/* Description Box */}
               <div className="relative mb-2">
                 <div className="absolute inset-0 bg-balatro-whiteshadow pixel-corners-small translate-y-1" />
-                <div className="relative bg-white text-balatro-black font-thin px-2 py-1 pixel-corners-small">
+                <div className="relative bg-balatro-white text-balatro-black font-thin px-2 py-1 pixel-corners-small">
                   <p
                     className="text-base text-center leading-4"
                     dangerouslySetInnerHTML={{
@@ -222,7 +222,7 @@ const JokerCard: React.FC<JokerCardProps> = ({ joker, onClick }) => {
                   className={`absolute inset-0 ${rarityStyles.shadow} pixel-corners-small translate-y-1`}
                 />
                 <div
-                  className={`relative ${rarityStyles.bg} pixel-corners-small text-center text-lg text-white`}
+                  className={`relative ${rarityStyles.bg} pixel-corners-small text-center text-lg text-balatro-white`}
                 >
                   <span className="relative text-shadow-pixel">
                     {rarityText}
