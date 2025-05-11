@@ -13,12 +13,10 @@ import type {
   ShowWhenCondition,
 } from "./types";
 
-// Import generic components
 import Button from "../generic/Button";
 import InputField from "../generic/InputField";
 import InputDropdown from "../generic/InputDropdown";
 
-// Import icons
 import {
   PlusIcon,
   TrashIcon,
@@ -45,7 +43,6 @@ interface ParameterFieldProps {
   parentValues?: Record<string, unknown>;
 }
 
-// Helper function to check if a parameter has showWhen property
 function hasShowWhen(param: ConditionParameter | EffectParameter): param is (
   | ConditionParameter
   | EffectParameter
@@ -55,7 +52,6 @@ function hasShowWhen(param: ConditionParameter | EffectParameter): param is (
   return "showWhen" in param && param.showWhen !== undefined;
 }
 
-// Parameter Field Component for rendering different parameter types
 const ParameterField: React.FC<ParameterFieldProps> = ({
   param,
   value,
@@ -63,7 +59,6 @@ const ParameterField: React.FC<ParameterFieldProps> = ({
   showCondition = true,
   parentValues = {},
 }) => {
-  // Check if this parameter should be shown based on the showWhen condition
   if (hasShowWhen(param) && showCondition) {
     const { parameter, values } = param.showWhen;
     const parentValue = parentValues[parameter];
@@ -78,7 +73,7 @@ const ParameterField: React.FC<ParameterFieldProps> = ({
         <div className="flex-1 min-w-40">
           <InputDropdown
             label={String(param.label)}
-            labelPosition="left"
+            labelPosition="center"
             value={(value as string) || ""}
             onChange={(newValue) => onChange(newValue)}
             options={
@@ -142,7 +137,6 @@ const ParameterField: React.FC<ParameterFieldProps> = ({
   }
 };
 
-// Condition Editor Component
 const ConditionEditor: React.FC<{
   condition: Condition;
   onUpdate: (updates: Partial<Condition>) => void;
@@ -151,18 +145,34 @@ const ConditionEditor: React.FC<{
   currentTrigger: string;
 }> = ({ condition, onUpdate, onDelete, onToggleNegate, currentTrigger }) => {
   const conditionType = getConditionTypeById(condition.type);
-
-  // Get only applicable conditions for the current trigger
   const availableConditions = getConditionsForTrigger(currentTrigger);
 
   if (!conditionType) return null;
 
   return (
     <div className="bg-black-dark border-2 border-black-lighter p-3 rounded-lg mb-3">
-      <div className="mb-2">
+      <div className="flex justify-between">
+        <Button
+          variant={condition.negate ? "danger" : "secondary"}
+          size="sm"
+          onClick={onToggleNegate}
+          className="text-xs py-1 h-8"
+        >
+          {condition.negate ? "NOT" : "IS"}
+        </Button>
+        <Button
+          variant="danger"
+          size="sm"
+          onClick={onDelete}
+          icon={<TrashIcon className="h-4 w-4" />}
+          className="text-xs py-1 h-8 w-8 flex items-center justify-center"
+        />
+      </div>
+
+      <div className="mb-4 -mt-4">
         <InputDropdown
           label="Type"
-          labelPosition="left"
+          labelPosition="center"
           value={condition.type}
           onChange={(newValue) => {
             onUpdate({ type: newValue });
@@ -191,30 +201,10 @@ const ConditionEditor: React.FC<{
           />
         ))}
       </div>
-
-      <div className="flex justify-between mt-3">
-        <Button
-          variant={condition.negate ? "danger" : "secondary"}
-          size="sm"
-          onClick={onToggleNegate}
-          className="text-xs py-1 h-8"
-        >
-          {condition.negate ? "NOT" : "IS"}
-        </Button>
-
-        <Button
-          variant="danger"
-          size="sm"
-          onClick={onDelete}
-          icon={<TrashIcon className="h-4 w-4" />}
-          className="text-xs py-1 h-8 w-8 flex items-center justify-center"
-        />
-      </div>
     </div>
   );
 };
 
-// Condition Group Editor Component
 const ConditionGroupEditor: React.FC<{
   group: ConditionGroup;
   groupIndex: number;
@@ -310,7 +300,6 @@ const ConditionGroupEditor: React.FC<{
   );
 };
 
-// Effect Editor Component
 const EffectEditor: React.FC<{
   effect: Effect;
   onUpdate: (updates: Partial<Effect>) => void;
@@ -322,10 +311,20 @@ const EffectEditor: React.FC<{
 
   return (
     <div className="bg-black-dark border-2 border-black-lighter p-3 rounded-lg mb-3">
-      <div className="mb-2">
+      <div className="flex justify-end mb-2">
+        <Button
+          variant="danger"
+          size="sm"
+          onClick={onDelete}
+          icon={<TrashIcon className="h-4 w-4" />}
+          className="text-xs py-1 h-8 w-8 flex items-center justify-center"
+        />
+      </div>
+
+      <div className="mb-4 -mt-6">
         <InputDropdown
           label="Type"
-          labelPosition="left"
+          labelPosition="center"
           value={effect.type}
           onChange={(newValue) => onUpdate({ type: newValue })}
           options={EFFECT_TYPES.map((type) => ({
@@ -350,27 +349,15 @@ const EffectEditor: React.FC<{
           />
         ))}
       </div>
-
-      <div className="flex justify-end mt-3">
-        <Button
-          variant="danger"
-          size="sm"
-          onClick={onDelete}
-          icon={<TrashIcon className="h-4 w-4" />}
-          className="text-xs py-1 h-8 w-8 flex items-center justify-center"
-        />
-      </div>
     </div>
   );
 };
 
-// Formats a parameter for display in a rule description
 const formatParameterForDescription = (
   param: string,
   value: unknown
 ): string => {
   if (param === "operator") {
-    // Format operator for display
     switch (value) {
       case "equals":
         return "=";
@@ -392,14 +379,12 @@ const formatParameterForDescription = (
   return String(value);
 };
 
-// Generates a detailed rule description
 const generateDetailedRuleDescription = (rule: Rule): string => {
   const trigger = getTriggerById(rule.trigger);
   if (!trigger) return "Invalid rule";
 
   let description = `${trigger.label}`;
 
-  // Add condition groups description
   if (rule.conditionGroups.length > 0) {
     description += ", If ";
 
@@ -419,13 +404,11 @@ const generateDetailedRuleDescription = (rule: Rule): string => {
             description += " AND ";
           }
 
-          // Start building detailed condition description
           let conditionDesc = "";
           if (condition.negate) {
             conditionDesc += "NOT ";
           }
 
-          // Add scope prefix for card-related conditions
           if (condition.params.card_scope) {
             const scope =
               condition.params.card_scope === "scoring" ? "Scoring " : "Any ";
@@ -434,7 +417,6 @@ const generateDetailedRuleDescription = (rule: Rule): string => {
 
           conditionDesc += condType?.label || condition.type;
 
-          // Add specific parameters for more detail
           if (condition.params) {
             const relevantParams = [
               "operator",
@@ -453,14 +435,12 @@ const generateDetailedRuleDescription = (rule: Rule): string => {
                   conditionDesc += " ";
                 }
 
-                // Format based on parameter type
                 if (param === "operator") {
                   conditionDesc += formatParameterForDescription(
                     param,
                     condition.params[param]
                   );
                 } else if (param === "value") {
-                  // Only add the value if there's an operator before it
                   if (condition.params.operator) {
                     conditionDesc += ` ${condition.params[param]}`;
                   } else {
@@ -483,7 +463,6 @@ const generateDetailedRuleDescription = (rule: Rule): string => {
     });
   }
 
-  // Add effects description
   if (rule.effects.length > 0) {
     description += ", Then ";
     rule.effects.forEach((effect, index) => {
@@ -494,7 +473,6 @@ const generateDetailedRuleDescription = (rule: Rule): string => {
 
       let effectDesc = effectType?.label || effect.type;
 
-      // Add value for more detail
       if (effect.params.value !== undefined) {
         effectDesc += `: ${effect.params.value}`;
       }
@@ -506,12 +484,10 @@ const generateDetailedRuleDescription = (rule: Rule): string => {
   return description;
 };
 
-// Shortened version for sidebar
 const generateShortRuleDescription = (rule: Rule): string => {
   const trigger = getTriggerById(rule.trigger);
   if (!trigger) return "Unknown Rule";
 
-  // Keep full trigger text with "When"
   let displayName = trigger.label;
 
   if (
@@ -524,10 +500,8 @@ const generateShortRuleDescription = (rule: Rule): string => {
     if (condType) {
       let conditionText = "";
 
-      // Add value details if available
       if (firstCondition.params.value !== undefined) {
         if (firstCondition.params.operator) {
-          // Format operator
           const operator = formatParameterForDescription(
             "operator",
             firstCondition.params.operator
@@ -547,7 +521,6 @@ const generateShortRuleDescription = (rule: Rule): string => {
     if (firstEffect) {
       displayName += ` → ${firstEffect.label}`;
 
-      // Add a value if available
       if (rule.effects[0].params.value !== undefined) {
         const value = rule.effects[0].params.value;
         displayName += ` ${value}`;
@@ -558,7 +531,6 @@ const generateShortRuleDescription = (rule: Rule): string => {
   return displayName;
 };
 
-// Rule Editor Component
 const RuleEditor: React.FC<{
   rule: Rule;
   onUpdateTrigger: (triggerId: string) => void;
@@ -593,7 +565,6 @@ const RuleEditor: React.FC<{
 }) => {
   return (
     <div>
-      {/* Rule description */}
       <div className="bg-black-dark border-2 border-black-light rounded-lg p-3 mb-4">
         <h3 className="text-white-light text-sm font-light tracking-wider mb-2 flex items-center">
           <BoltIcon className="h-4 w-4 text-mint mr-2" />
@@ -604,7 +575,6 @@ const RuleEditor: React.FC<{
         </p>
       </div>
 
-      {/* Trigger selection */}
       <div className="mb-4">
         <InputDropdown
           label="When (Trigger)"
@@ -624,7 +594,6 @@ const RuleEditor: React.FC<{
         </div>
       </div>
 
-      {/* Condition Groups */}
       <div className="mb-4">
         <div className="flex justify-between items-center mb-3">
           <div className="flex items-center gap-2">
@@ -674,7 +643,6 @@ const RuleEditor: React.FC<{
         )}
       </div>
 
-      {/* Effects */}
       <div>
         <div className="flex justify-between items-center mb-3">
           <div className="flex items-center gap-2">
@@ -715,7 +683,6 @@ const RuleEditor: React.FC<{
   );
 };
 
-// Main Rule Builder Component
 const RuleBuilder: React.FC<RuleBuilderProps> = ({
   isOpen,
   onClose,
@@ -728,10 +695,8 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
   );
   const [saveStatus, setSaveStatus] = useState("");
 
-  // Auto-save timer
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Reset state when opening with new rules
   useEffect(() => {
     if (isOpen) {
       setRules(existingRules);
@@ -750,14 +715,12 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
       onSave(updatedRules);
       setSaveStatus("Changes saved");
 
-      // Clear the message after a few seconds
       setTimeout(() => {
         setSaveStatus("");
       }, 3000);
     }, 1000);
   };
 
-  // Create a new rule
   const addRule = () => {
     const newRule: Rule = {
       id: crypto.randomUUID(),
@@ -796,7 +759,6 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
     autoSave(updatedRules);
   };
 
-  // Delete a rule
   const deleteRule = (index: number) => {
     const newRules = [...rules];
     newRules.splice(index, 1);
@@ -811,7 +773,6 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
     autoSave(newRules);
   };
 
-  // Update trigger
   const updateTrigger = (triggerId: string) => {
     if (activeRuleIndex === null) return;
     const newRules = [...rules];
@@ -820,7 +781,6 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
     autoSave(newRules);
   };
 
-  // Add a condition group
   const addConditionGroup = () => {
     if (activeRuleIndex === null) return;
     const newRules = [...rules];
@@ -833,7 +793,6 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
     autoSave(newRules);
   };
 
-  // Update condition group
   const updateConditionGroup = (
     groupIndex: number,
     updates: Partial<ConditionGroup>
@@ -848,7 +807,6 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
     autoSave(newRules);
   };
 
-  // Delete condition group
   const deleteConditionGroup = (groupIndex: number) => {
     if (activeRuleIndex === null) return;
     const newRules = [...rules];
@@ -857,7 +815,6 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
     autoSave(newRules);
   };
 
-  // Add a condition to a group
   const addCondition = (groupIndex: number) => {
     if (activeRuleIndex === null) return;
     const newRules = [...rules];
@@ -875,7 +832,6 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
     autoSave(newRules);
   };
 
-  // Update a condition
   const updateCondition = (
     groupIndex: number,
     conditionIndex: number,
@@ -888,7 +844,6 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
         conditionIndex
       ];
 
-    // For type change, reset params to match the new type
     if (updates.type && updates.type !== condition.type) {
       const conditionType = getConditionTypeById(updates.type);
       if (conditionType) {
@@ -910,7 +865,6 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
       }
     }
 
-    // Update the condition
     newRules[activeRuleIndex].conditionGroups[groupIndex].conditions[
       conditionIndex
     ] = {
@@ -922,7 +876,6 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
     autoSave(newRules);
   };
 
-  // Delete a condition
   const deleteCondition = (groupIndex: number, conditionIndex: number) => {
     if (activeRuleIndex === null) return;
     const newRules = [...rules];
@@ -934,7 +887,6 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
     autoSave(newRules);
   };
 
-  // Add an effect
   const addEffect = () => {
     if (activeRuleIndex === null) return;
     const newRules = [...rules];
@@ -949,13 +901,11 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
     autoSave(newRules);
   };
 
-  // Update an effect
   const updateEffect = (effectIndex: number, updates: Partial<Effect>) => {
     if (activeRuleIndex === null) return;
     const newRules = [...rules];
     const effect = newRules[activeRuleIndex].effects[effectIndex];
 
-    // For type change, reset params to match the new type
     if (updates.type && updates.type !== effect.type) {
       const effectType = getEffectTypeById(updates.type);
       if (effectType) {
@@ -980,7 +930,6 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
     autoSave(newRules);
   };
 
-  // Delete an effect
   const deleteEffect = (effectIndex: number) => {
     if (activeRuleIndex === null) return;
     const newRules = [...rules];
@@ -989,7 +938,6 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
     autoSave(newRules);
   };
 
-  // Only render if modal is open
   if (!isOpen) return null;
 
   const renderEmptyEditor = () => (
@@ -1030,13 +978,12 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
             onClick={onClose}
             className="text-white-darker hover:text-white transition-colors"
           >
-            <XCircleIcon className="h-6 w-6" />
+            <XCircleIcon className="h-6 w-6 cursor-pointer" />
           </button>
         </div>
 
         <div className="flex-grow flex gap-4 overflow-hidden">
-          {/* Rules List Sidebar */}
-          <div className="w-1/5 bg-black border-2 border-black-lighter rounded-lg p-3 overflow-y-auto">
+          <div className="w-1/5 bg-black border-2 border-black-lighter rounded-lg p-3 overflow-y-auto custom-scrollbar">
             <div className="flex justify-between items-center mb-3">
               <h3 className="text-white-light text-sm font-light tracking-wider">
                 RULES
@@ -1064,9 +1011,13 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
                   onClick={() => setActiveRuleIndex(index)}
                 >
                   <div className="flex justify-between items-center">
-                    <span className="text-white-light text-xs tracking-wide pr-2">
+                    <span className="text-white-light text-xs tracking-wide flex-grow pr-2">
                       {generateShortRuleDescription(rule)}
                     </span>
+
+                    {/* Vertical separator */}
+                    <div className="w-px h-4 bg-black-light mx-2 self-center"></div>
+
                     <button
                       className="text-balatro-red hover:text-balatro-redshadow flex-shrink-0"
                       onClick={(e) => {
@@ -1088,8 +1039,7 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
             </div>
           </div>
 
-          {/* Rule Editor */}
-          <div className="flex-grow bg-black border-2 border-black-lighter rounded-lg p-4 overflow-y-auto h-full">
+          <div className="flex-grow bg-black border-2 border-black-lighter rounded-lg p-4 overflow-y-auto custom-scrollbar h-full">
             {activeRuleIndex !== null && rules[activeRuleIndex] ? (
               <RuleEditor
                 rule={rules[activeRuleIndex]}

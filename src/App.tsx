@@ -85,7 +85,6 @@ function App() {
       const updatedJoker = { ...selectedJoker, rules };
       handleSaveJoker(updatedJoker);
     }
-    setShowRuleBuilderModal(false);
   };
 
   const openGitHub = () => {
