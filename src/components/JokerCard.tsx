@@ -247,19 +247,19 @@ const JokerCard: React.FC<JokerCardProps> = ({ joker, onClick }) => {
         onMouseLeave={() => setIsHovering(false)}
       >
         {/* Card body */}
-        <div className="w-full aspect-[2/3] pixel-corners-medium overflow-hidden">
+        <div className="w-full aspect-[2/3] overflow-hidden">
           {joker.imagePreview ? (
             <img
               src={joker.imagePreview}
               alt={joker.name}
-              className="w-full h-full object-contain pixelated"
+              className="w-full h-full object-contain"
               draggable="false"
             />
           ) : (
             <img
               src="/images/placeholder-joker.png"
               alt="Default Joker"
-              className="w-full h-full object-contain pixelated"
+              className="w-full h-full object-contain"
               draggable="false"
             />
           )}
