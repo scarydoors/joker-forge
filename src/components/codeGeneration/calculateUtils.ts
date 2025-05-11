@@ -13,7 +13,7 @@ export const generateCalculateFunction = (
     return `calculate = function(self, card, context)
     if context.joker_main then
         -- Simple effect with no conditions
-        ${generateReturnFromEffectUtils(joker)}
+        ${generateReturnFromEffectUtils()}
     end
 end`;
   }
@@ -28,18 +28,9 @@ end`;
     });
   });
 
-  // If no effects found in rules, add defaults based on joker properties
-  if (effectTypes.length === 0) {
-    if (joker.chipAddition > 0) effectTypes.push("add_chips");
-    if (joker.multAddition > 0) effectTypes.push("add_mult");
-    if (joker.xMult > 1) effectTypes.push("apply_x_mult");
-  }
-
   // Get return statement from effectUtils
-  const { statement: returnStatement, colour } = generateEffectReturnStatement(
-    joker,
-    effectTypes
-  );
+  const { statement: returnStatement, colour } =
+    generateEffectReturnStatement(effectTypes);
 
   // Build the condition checking part
   let conditionChecks = "";
@@ -72,17 +63,9 @@ end`;
 };
 
 // Helper function that uses effectUtils to get a return statement
-const generateReturnFromEffectUtils = (joker: JokerData): string => {
-  const effectTypes: string[] = [];
-
-  if (joker.chipAddition > 0) effectTypes.push("add_chips");
-  if (joker.multAddition > 0) effectTypes.push("add_mult");
-  if (joker.xMult > 1) effectTypes.push("apply_x_mult");
-
-  const { statement, colour } = generateEffectReturnStatement(
-    joker,
-    effectTypes
-  );
+const generateReturnFromEffectUtils = (): string => {
+  // Just return a simple activation message if no effects
+  const { statement, colour } = generateEffectReturnStatement([]);
 
   return `return {${statement},
             colour = ${colour}

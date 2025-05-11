@@ -44,17 +44,6 @@ export const generateJokerBaseCode = (
 export const extractEffectsConfig = (joker: JokerData): string => {
   const configItems: string[] = [];
 
-  // Add basic effects from joker data
-  if (joker.chipAddition > 0) {
-    configItems.push(`chips = ${joker.chipAddition}`);
-  }
-  if (joker.multAddition > 0) {
-    configItems.push(`mult = ${joker.multAddition}`);
-  }
-  if (joker.xMult > 1) {
-    configItems.push(`Xmult = ${joker.xMult}`);
-  }
-
   // If there are rules, check for additional effects
   if (joker.rules && joker.rules.length > 0) {
     joker.rules.forEach((rule) => {
@@ -118,11 +107,6 @@ export const formatJokerDescription = (joker: JokerData): string => {
 export const generateBasicLocVarsFunction = (joker: JokerData): string => {
   const vars: string[] = [];
 
-  // Check joker properties
-  if (joker.chipAddition > 0) vars.push("card.ability.extra.chips");
-  if (joker.multAddition > 0) vars.push("card.ability.extra.mult");
-  if (joker.xMult > 1) vars.push("card.ability.extra.Xmult");
-
   // Check rules for additional vars
   if (joker.rules && joker.rules.length > 0) {
     joker.rules.forEach((rule) => {
@@ -151,41 +135,5 @@ export const generateBasicLocVarsFunction = (joker: JokerData): string => {
 
   return `loc_vars = function(self, info_queue, card)
         return {vars = {${vars.join(", ")}}}
-    end`;
-};
-
-export const generateBasicCalculateFunction = (joker: JokerData): string => {
-  if (joker.chipAddition <= 0 && joker.multAddition <= 0 && joker.xMult <= 1) {
-    return "calculate = function(self, card, context) end";
-  }
-
-  const returnItems: string[] = [];
-
-  if (joker.chipAddition > 0) {
-    returnItems.push(
-      `message = localize{type='variable',key='a_chips',vars={card.ability.extra.chips}}`
-    );
-    returnItems.push(`chip_mod = card.ability.extra.chips`);
-    returnItems.push(`colour = G.C.CHIPS`);
-  } else if (joker.multAddition > 0) {
-    returnItems.push(
-      `message = localize{type='variable',key='a_mult',vars={card.ability.extra.mult}}`
-    );
-    returnItems.push(`mult_mod = card.ability.extra.mult`);
-    returnItems.push(`colour = G.C.MULT`);
-  } else if (joker.xMult > 1) {
-    returnItems.push(
-      `message = localize{type='variable',key='a_xmult',vars={card.ability.extra.Xmult}}`
-    );
-    returnItems.push(`Xmult_mod = card.ability.extra.Xmult`);
-    returnItems.push(`colour = G.C.MONEY`);
-  }
-
-  return `calculate = function(self, card, context)
-        if context.joker_main then
-            return {
-                ${returnItems.join(",\n                ")}
-            }
-        end
     end`;
 };

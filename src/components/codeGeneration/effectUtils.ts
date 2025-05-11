@@ -1,5 +1,3 @@
-import { JokerData } from "../JokerCard";
-
 export interface ReturnStatementResult {
   statement: string;
   colour: string;
@@ -10,22 +8,10 @@ export interface ReturnStatementResult {
  * Chains multiple effects with their own messages using the 'extra' field
  */
 export function generateEffectReturnStatement(
-  joker: JokerData,
   effectTypes: string[] = []
 ): ReturnStatementResult {
   // Keep track of active effects for chaining
   const activeEffects: string[] = [];
-
-  // Add joker default effects if they're set
-  if (joker.chipAddition > 0 && !effectTypes.includes("add_chips")) {
-    activeEffects.push("add_chips");
-  }
-  if (joker.multAddition > 0 && !effectTypes.includes("add_mult")) {
-    activeEffects.push("add_mult");
-  }
-  if (joker.xMult > 1 && !effectTypes.includes("apply_x_mult")) {
-    activeEffects.push("apply_x_mult");
-  }
 
   // Add explicit effect types if not already included
   effectTypes.forEach((type) => {

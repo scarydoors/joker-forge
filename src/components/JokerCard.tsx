@@ -11,9 +11,6 @@ export interface JokerData {
   id: string;
   name: string;
   description: string;
-  chipAddition: number;
-  multAddition: number;
-  xMult: number;
   imagePreview: string;
   rarity: number; // 1: Common, 2: Uncommon, 3: Rare, 4: Legendary
   cost?: number;
@@ -196,26 +193,6 @@ const JokerCard: React.FC<JokerCardProps> = ({ joker, onClick }) => {
                   />
                 </div>
               </div>
-              {/* Effects Preview */}
-              {(joker.chipAddition > 0 ||
-                joker.multAddition > 0 ||
-                joker.xMult > 1) && (
-                <div className="text-center text-sm mb-2">
-                  {joker.chipAddition > 0 && (
-                    <span className="text-balatro-chips mr-2">
-                      +{joker.chipAddition} Chips
-                    </span>
-                  )}
-                  {joker.multAddition > 0 && (
-                    <span className="text-balatro-mult mr-2">
-                      +{joker.multAddition} Mult
-                    </span>
-                  )}
-                  {joker.xMult > 1 && (
-                    <span className="text-balatro-money">×{joker.xMult}</span>
-                  )}
-                </div>
-              )}
               {/* Rarity indicator */}
               <div className="relative mx-7 mt-2">
                 <div
