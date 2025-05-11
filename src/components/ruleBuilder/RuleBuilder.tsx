@@ -695,6 +695,7 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
   );
   const [saveStatus, setSaveStatus] = useState("");
 
+  const modalRef = useRef<HTMLDivElement>(null);
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
@@ -702,8 +703,25 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
       setRules(existingRules);
       setActiveRuleIndex(existingRules.length > 0 ? 0 : null);
       setSaveStatus("");
+
+      // Add click outside listener when modal opens
+      const handleClickOutside = (event: MouseEvent) => {
+        if (
+          modalRef.current &&
+          !modalRef.current.contains(event.target as Node)
+        ) {
+          onClose();
+        }
+      };
+
+      document.addEventListener("mousedown", handleClickOutside);
+
+      // Clean up the event listener
+      return () => {
+        document.removeEventListener("mousedown", handleClickOutside);
+      };
     }
-  }, [isOpen, existingRules]);
+  }, [isOpen, existingRules, onClose]);
 
   const autoSave = (updatedRules: Rule[]) => {
     if (saveTimeoutRef.current) {
@@ -958,8 +976,11 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
   );
 
   return (
-    <div className="fixed inset-0 bg-black/80 bg-opacity-50 flex items-center justify-center z-50 font-lexend">
-      <div className="bg-black-darker rounded-lg p-4 w-[90vw] h-[90vh] overflow-hidden flex flex-col">
+    <div className="fixed inset-0 bg-balatro-blackshadow/80 flex items-center justify-center z-50 font-lexend">
+      <div
+        ref={modalRef}
+        className="bg-black-darker rounded-lg p-4 w-[90vw] h-[90vh] overflow-hidden flex flex-col"
+      >
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl text-white-light font-extralight tracking-widest">
             RULE BUILDER
