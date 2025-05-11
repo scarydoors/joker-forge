@@ -634,7 +634,7 @@ const RuleEditor: React.FC<{
             </h3>
           </div>
           <Button
-            variant="secondary"
+            variant="primary"
             size="sm"
             onClick={onAddConditionGroup}
             icon={<PlusIcon className="h-3 w-3" />}

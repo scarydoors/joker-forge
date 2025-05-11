@@ -25,10 +25,14 @@ const Button: React.FC<ButtonProps> = ({
   const baseStyles =
     "relative tracking-widest focus:outline-none transition-colors duration-200 font-lexend rounded-lg";
 
+  // Check if it's an icon-only button
+  const isIconOnly = icon && !children;
+
+  // Adjust size styles for icon-only buttons
   const sizeStyles = {
-    sm: "px-3 py-1 text-sm",
-    md: "px-4 py-2 text-base",
-    lg: "px-6 py-3 text-lg",
+    sm: isIconOnly ? "p-1 text-sm" : "px-3 py-1 text-sm",
+    md: isIconOnly ? "p-2 text-base" : "px-4 py-2 text-base",
+    lg: isIconOnly ? "p-3 text-lg" : "px-6 py-3 text-lg",
   }[size];
 
   const variantStyles = {
@@ -62,8 +66,8 @@ const Button: React.FC<ButtonProps> = ({
       disabled={disabled}
       {...props}
     >
-      {icon && <span className="mr-2">{icon}</span>}
-      <span>{children}</span>
+      {icon && <span className={isIconOnly ? "" : "mr-2"}>{icon}</span>}
+      {children && <span>{children}</span>}
     </button>
   );
 };
