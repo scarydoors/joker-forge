@@ -342,7 +342,7 @@ const JokerForm: React.FC<JokerFormProps> = ({
         </div>
       </div>
 
-      <div className="mb-8 w-full h-[2px] bg-black"></div>
+      <div className="mb-8 w-3/4 h-[2px] bg-black mx-auto"></div>
 
       <div className="grid grid-cols-3 gap-4 mb-8">
         <div>
@@ -442,7 +442,7 @@ const JokerForm: React.FC<JokerFormProps> = ({
       </div>
 
       {joker && (
-        <div className="mt-auto pt-6">
+        <div className="mt-auto mb-2">
           <Button
             onClick={handleDelete}
             variant="danger"
