@@ -156,7 +156,7 @@ function App() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-6 pt-6">
             <div className="md:col-span-3 h-full">
               {selectedJoker ? (
                 <JokerForm
