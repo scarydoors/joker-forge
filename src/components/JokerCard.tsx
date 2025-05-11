@@ -241,7 +241,7 @@ const JokerCard: React.FC<JokerCardProps> = ({ joker, onClick }) => {
     <>
       <div
         ref={cardRef}
-        className="relative cursor-pointer w-32 hover:scale-105 transition-transform duration-200"
+        className="relative cursor-pointer w-32"
         onClick={onClick}
         onMouseEnter={() => setIsHovering(true)}
         onMouseLeave={() => setIsHovering(false)}
