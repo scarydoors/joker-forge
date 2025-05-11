@@ -97,7 +97,7 @@ function App() {
 
   return (
     <>
-      <div className="min-h-screen font-game bg-black-darker overflow-hidden p-4">
+      <div className="min-h-screen bg-black-darker overflow-hidden p-4">
         <div className="container mx-auto max-w-6xl">
           <div className="flex justify-between items-center mb-6">
             <div className="flex space-x-4 flex-1">
@@ -128,7 +128,7 @@ function App() {
             <div className="flex bg-black-dark border-2 border-black-light rounded-lg ml-4 h-[42px]">
               <button
                 onClick={openGitHub}
-                className="px-3 flex items-center justify-center group"
+                className="px-3 flex items-center justify-center group cursor-pointer"
                 title="GitHub Repository"
               >
                 <CodeBracketIcon className="h-6 w-6 text-mint stroke-2 group-hover:text-mint-lighter transition-colors" />
@@ -138,7 +138,7 @@ function App() {
 
               <button
                 onClick={handleExport}
-                className="px-3 flex items-center justify-center group"
+                className="px-3 flex items-center justify-center group cursor-pointer"
                 title="Export Mod"
                 disabled={exportLoading}
               >
@@ -148,7 +148,7 @@ function App() {
               <div className="w-px self-stretch my-2 bg-black-light"></div>
 
               <button
-                className="px-3 flex items-center justify-center group"
+                className="px-3 flex items-center justify-center group cursor-pointer"
                 title="Settings"
               >
                 <Cog8ToothIcon className="h-6 w-6 text-mint stroke-2 group-hover:text-mint-lighter transition-colors" />
@@ -156,7 +156,7 @@ function App() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-8 h-[calc(100vh-220px)]">
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-8">
             <div className="md:col-span-3 h-full">
               {selectedJoker ? (
                 <JokerForm
@@ -167,16 +167,20 @@ function App() {
                   onOpenRuleBuilder={handleOpenRuleBuilder}
                 />
               ) : (
-                <div className="h-full flex items-center justify-center bg-balatro-transparentblack pixel-corners-medium">
-                  <p className="text-center text-xl text-balatro-lightgrey p-8">
-                    Select a joker from the collection or create a new one to
-                    begin editing
-                  </p>
+                <div className="h-full flex items-center justify-center">
+                  <div className="text-center">
+                    <p className="text-white-darker text-xl font-light tracking-wide">
+                      No Joker Selected
+                    </p>
+                    <p className="text-white-darker text-sm mt-2 font-light">
+                      Select a joker from the collection or create a new one
+                    </p>
+                  </div>
                 </div>
               )}
             </div>
 
-            <div className="md:col-span-2 h-full pixel-corners-medium p-6">
+            <div className="md:col-span-2 pl-8">
               <JokerCollection
                 jokers={jokers}
                 selectedJokerId={selectedJokerId}
