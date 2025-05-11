@@ -26,8 +26,8 @@ const JokerForm: React.FC<JokerFormProps> = ({
   onDeleteJoker,
   onOpenRuleBuilder,
 }) => {
-  const [formData, setFormData] = useState<JokerData>(
-    joker || {
+  const [formData, setFormData] = useState<JokerData>(() => {
+    const initialData = joker || {
       id: crypto.randomUUID(),
       name: "New Joker",
       description: "A {C:blue}custom{} joker with {C:red}unique{} effects.",
@@ -37,19 +37,21 @@ const JokerForm: React.FC<JokerFormProps> = ({
       imagePreview: "",
       rarity: 1,
       cost: 4,
-      blueprint_compat: true,
-      eternal_compat: true,
-      unlocked: true,
-      discovered: true,
       rules: [],
-    }
-  );
-  const fileInputRef = useRef<HTMLInputElement>(null);
+    };
 
-  // Debounce saving to prevent too many saves
+    return {
+      ...initialData,
+      blueprint_compat: initialData.blueprint_compat !== false,
+      eternal_compat: initialData.eternal_compat !== false,
+      unlocked: initialData.unlocked !== false,
+      discovered: initialData.discovered !== false,
+    };
+  });
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Save changes with a debounce
   const saveChanges = (updatedData: JokerData) => {
     if (saveTimeoutRef.current) {
       clearTimeout(saveTimeoutRef.current);
@@ -57,7 +59,7 @@ const JokerForm: React.FC<JokerFormProps> = ({
 
     saveTimeoutRef.current = setTimeout(() => {
       onSaveJoker(updatedData);
-    }, 500); // 500ms debounce
+    }, 500);
   };
 
   const handleInputChange = (field: string, value: string) => {
@@ -390,7 +392,7 @@ const JokerForm: React.FC<JokerFormProps> = ({
             <Checkbox
               id="blueprint_compat"
               label="Blueprint Compatible"
-              checked={Boolean(formData.blueprint_compat)}
+              checked={formData.blueprint_compat !== false}
               onChange={(checked) =>
                 handleCheckboxChange("blueprint_compat", checked)
               }
@@ -398,7 +400,7 @@ const JokerForm: React.FC<JokerFormProps> = ({
             <Checkbox
               id="eternal_compat"
               label="Eternal Compatible"
-              checked={Boolean(formData.eternal_compat)}
+              checked={formData.eternal_compat !== false}
               onChange={(checked) =>
                 handleCheckboxChange("eternal_compat", checked)
               }
@@ -407,7 +409,7 @@ const JokerForm: React.FC<JokerFormProps> = ({
         </div>
 
         <div>
-          <h3 className="text-lg text-white-light  mb-3 flex items-center tracking-wider">
+          <h3 className="text-lg text-white-light mb-3 flex items-center tracking-wider">
             <LockOpenIcon className="h-5 w-5 mr-2 text-mint" />
             Availability
           </h3>
@@ -415,13 +417,13 @@ const JokerForm: React.FC<JokerFormProps> = ({
             <Checkbox
               id="unlocked"
               label="Unlocked by Default"
-              checked={Boolean(formData.unlocked)}
+              checked={formData.unlocked !== false}
               onChange={(checked) => handleCheckboxChange("unlocked", checked)}
             />
             <Checkbox
               id="discovered"
               label="Discovered by Default"
-              checked={Boolean(formData.discovered)}
+              checked={formData.discovered !== false}
               onChange={(checked) =>
                 handleCheckboxChange("discovered", checked)
               }
