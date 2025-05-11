@@ -1,5 +1,12 @@
 import React from "react";
 import JokerCard, { JokerData } from "./JokerCard";
+import Button from "./generic/Button";
+import {
+  PlusIcon,
+  ArrowUpTrayIcon,
+  DocumentTextIcon,
+  InformationCircleIcon,
+} from "@heroicons/react/24/outline";
 
 interface JokerCollectionProps {
   jokers: JokerData[];
@@ -19,62 +26,69 @@ const JokerCollection: React.FC<JokerCollectionProps> = ({
   modName,
 }) => {
   return (
-    <div className="h-full flex flex-col">
-      <div className="mb-2">
-        <h2 className="text-2xl text-white text-shadow-pixel text-center">
-          Your Jokers ({jokers.length})
-        </h2>
-        <div className="text-center text-balatro-lightgrey text-sm">
-          {modName}
-        </div>
+    <div className="h-full flex flex-col font-lexend">
+      <h2 className="text-xl text-white-darker font-extralight tracking-widest px-4 flex items-center">
+        COLLECTION
+      </h2>
+      <div className="text-white-darker text-sm px-4 pt-1 tracking-wide flex items-center">
+        <DocumentTextIcon className="h-4 w-4 mr-2 text-mint" />
+        {modName} • {jokers.length} Joker{jokers.length !== 1 ? "s" : ""}
       </div>
+      <div className="h-[2px] bg-black w-2/3 mt-4 mx-auto"></div>
 
-      <div className="flex-grow overflow-y-auto custom-scrollbar p-2">
+      <div className="flex-1 px-4 py-4 bg-black-darker">
         {jokers.length === 0 ? (
-          <div className="w-full h-40 flex items-center justify-center">
-            <div className="text-center text-xl text-balatro-lightgrey">
-              Add a joker to get started
-            </div>
+          <div className="flex flex-col items-center justify-center text-center h-140">
+            <InformationCircleIcon className="h-12 w-12 text-mint opacity-60 mb-3" />
+            <p className="text-white-darker text-lg font-light">
+              Your collection is empty
+            </p>
+            <p className="text-white-darker text-sm mt-2 max-w-xs font-light">
+              Create your first custom joker
+            </p>
           </div>
         ) : (
-          <div className="grid grid-cols-2 gap-5">
-            {jokers.map((joker) => (
-              <div
-                key={joker.id}
-                className={`p-2 ${selectedJokerId === joker.id ? "" : ""}`}
-                onClick={() => onSelectJoker(joker.id)}
-              >
-                <JokerCard
-                  joker={joker}
+          <div className="overflow-y-auto pr-2">
+            <div className="grid grid-cols-2 gap-6 ">
+              {jokers.map((joker) => (
+                <div
+                  key={joker.id}
+                  className={`
+                    ${selectedJokerId === joker.id ? "bg-black rounded-lg" : ""}
+                    flex justify-center p-2 items-center hover:bg-black rounded-lg transition-colors
+                    cursor-pointer
+                  `}
                   onClick={() => onSelectJoker(joker.id)}
-                />
-              </div>
-            ))}
+                >
+                  <JokerCard
+                    joker={joker}
+                    onClick={() => onSelectJoker(joker.id)}
+                  />
+                </div>
+              ))}
+            </div>
           </div>
         )}
       </div>
 
-      <div className="mt-4 space-y-3">
-        <button
-          className="w-full text-white text-lg bg-balatro-black hover:bg-balatro-light-black py-2 pixel-corners-medium relative"
+      <div className="h-[2px] bg-black w-2/3 mt-4 mx-auto"></div>
+      <div className="px-4 pb-4 mt-auto pt-4 grid grid-cols-2 gap-4">
+        <Button
+          variant="secondary"
           onClick={onAddNewJoker}
-          style={{ transition: "background-color 0.2s ease" }}
+          icon={<PlusIcon className="h-5 w-5" />}
         >
-          <div className="absolute inset-0 bg-balatro-blackshadow pixel-corners-medium translate-y-1"></div>
-          <span className="relative text-shadow-pixel z-10">
-            + Add New Joker
-          </span>
-        </button>
+          New Joker
+        </Button>
 
-        <button
-          className="w-full text-white text-lg bg-balatro-blue hover:bg-balatro-blueshadow py-2 pixel-corners-medium relative"
+        <Button
+          variant="primary"
           onClick={onExportClick}
           disabled={jokers.length === 0}
-          style={{ transition: "background-color 0.2s ease" }}
+          icon={<ArrowUpTrayIcon className="h-5 w-5" />}
         >
-          <div className="absolute inset-0 bg-balatro-blackshadow pixel-corners-medium translate-y-1"></div>
-          <span className="relative text-shadow-pixel z-10">Export as Mod</span>
-        </button>
+          Export
+        </Button>
       </div>
     </div>
   );
