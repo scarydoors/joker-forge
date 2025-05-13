@@ -5,7 +5,6 @@ export interface RankCondition {
   functionCode: string;
 }
 
-// Helper to get a descriptive function name for rank conditions
 export const getRankFunctionName = (
   rankType: string,
   specificRank: string | null,
@@ -16,7 +15,6 @@ export const getRankFunctionName = (
 ): string => {
   const prefix = "check_rank";
 
-  // Determine rank part of name
   let rankPart = "";
   if (rankType === "specific" && specificRank) {
     rankPart = specificRank.toLowerCase();
@@ -26,7 +24,6 @@ export const getRankFunctionName = (
     rankPart = "unknown";
   }
 
-  // Determine quantifier part
   let quantifierPart = "";
   switch (quantifier) {
     case "at_least_one":
@@ -48,7 +45,6 @@ export const getRankFunctionName = (
       quantifierPart = quantifier;
   }
 
-  // Add scope
   const scopePart = scope === "all_played" ? "played" : "scoring";
 
   return `${prefix}_${rankPart}_${quantifierPart}_${scopePart}`;
@@ -57,7 +53,6 @@ export const getRankFunctionName = (
 export const generateRankCardCondition = (
   rules: Rule[]
 ): RankCondition | null => {
-  // Filter rules related to card ranks
   const rankRules = rules?.filter((rule) => {
     return rule.conditionGroups.some((group) =>
       group.conditions.some(
@@ -71,10 +66,8 @@ export const generateRankCardCondition = (
     return null;
   }
 
-  // Find the first rank condition in any rule condition group
   let rankCondition: Condition | undefined;
 
-  // Search through all rules and all groups for a rank-related condition
   for (const rule of rankRules) {
     for (const group of rule.conditionGroups) {
       const condition = group.conditions.find(
@@ -85,18 +78,16 @@ export const generateRankCardCondition = (
         break;
       }
     }
-    if (rankCondition) break; // Exit once we find a condition
+    if (rankCondition) break;
   }
 
-  // If no suitable condition found, return null
   if (!rankCondition) {
     return null;
   }
 
-  // Extract rank condition parameters
   const params = rankCondition.params;
+  const triggerType = rankRules[0]?.trigger || "hand_played";
 
-  // Default values for parameters
   const rankType = (params.rank_type as string) || "specific";
   const specificRank = (params.specific_rank as string) || null;
   const rankGroup = (params.rank_group as string) || null;
@@ -104,7 +95,6 @@ export const generateRankCardCondition = (
   const count = (params.count as number) || 1;
   const scope = (params.card_scope as string) || "scoring";
 
-  // Generate function name
   const functionName = getRankFunctionName(
     rankType,
     specificRank,
@@ -114,11 +104,9 @@ export const generateRankCardCondition = (
     scope
   );
 
-  // Generate condition code based on rank type, quantifier, and scope
   let conditionCode = "";
   let conditionComment = "";
 
-  // Helper function to get the ranks check logic
   const getRanksCheckLogic = (
     ranks: string[],
     rankGroupType: string | null
@@ -130,7 +118,6 @@ export const generateRankCardCondition = (
     } else if (rankGroupType === "odd") {
       return "(c:get_id() % 2 == 1)";
     } else if (ranks.length === 1) {
-      // For numeric ranks (2-10) or named ranks (J, Q, K, A)
       if (ranks[0] === "J") {
         return "c:get_id() == 11";
       } else if (ranks[0] === "Q") {
@@ -143,7 +130,6 @@ export const generateRankCardCondition = (
         return `c:get_id() == ${ranks[0]}`;
       }
     } else {
-      // Multiple specific ranks
       return ranks
         .map((rank) => {
           if (rank === "J") {
@@ -162,7 +148,6 @@ export const generateRankCardCondition = (
     }
   };
 
-  // Determine the ranks to check based on type
   let ranks: string[] = [];
   let rankGroupType: string | null = null;
 
@@ -180,14 +165,28 @@ export const generateRankCardCondition = (
     }
   }
 
-  // Set up the card collection to check based on scope
   const cardsToCheck =
     scope === "scoring" ? "context.scoring_hand" : "context.full_hand";
 
-  // Generate condition code based on quantifier
-  switch (quantifier) {
-    case "at_least_one":
-      conditionCode = `
+  // Special handling for card_scored trigger type
+  if (triggerType === "card_scored") {
+    // For individual card scoring, we check the other_card directly
+    const checkLogic = getRanksCheckLogic(ranks, rankGroupType).replace(
+      /c:/g,
+      "context.other_card:"
+    );
+
+    conditionCode = `
+    return ${checkLogic}`;
+
+    conditionComment = `-- Check if scored card matches ${
+      rankType === "specific" ? specificRank : rankGroup
+    } rank`;
+  } else {
+    // For hand_played trigger, use the original logic with loops
+    switch (quantifier) {
+      case "at_least_one":
+        conditionCode = `
     local rankFound = false
     for i, c in ipairs(${cardsToCheck}) do
         if ${getRanksCheckLogic(ranks, rankGroupType)} then
@@ -197,10 +196,10 @@ export const generateRankCardCondition = (
     end
     
     return rankFound`;
-      break;
+        break;
 
-    case "all":
-      conditionCode = `
+      case "all":
+        conditionCode = `
     local allMatchRank = true
     for i, c in ipairs(${cardsToCheck}) do
         if not (${getRanksCheckLogic(ranks, rankGroupType)}) then
@@ -210,10 +209,10 @@ export const generateRankCardCondition = (
     end
     
     return allMatchRank and #${cardsToCheck} > 0`;
-      break;
+        break;
 
-    case "exactly":
-      conditionCode = `
+      case "exactly":
+        conditionCode = `
     local rankCount = 0
     for i, c in ipairs(${cardsToCheck}) do
         if ${getRanksCheckLogic(ranks, rankGroupType)} then
@@ -222,10 +221,10 @@ export const generateRankCardCondition = (
     end
     
     return rankCount == ${count}`;
-      break;
+        break;
 
-    case "at_least":
-      conditionCode = `
+      case "at_least":
+        conditionCode = `
     local rankCount = 0
     for i, c in ipairs(${cardsToCheck}) do
         if ${getRanksCheckLogic(ranks, rankGroupType)} then
@@ -234,10 +233,10 @@ export const generateRankCardCondition = (
     end
     
     return rankCount >= ${count}`;
-      break;
+        break;
 
-    case "at_most":
-      conditionCode = `
+      case "at_most":
+        conditionCode = `
     local rankCount = 0
     for i, c in ipairs(${cardsToCheck}) do
         if ${getRanksCheckLogic(ranks, rankGroupType)} then
@@ -246,10 +245,10 @@ export const generateRankCardCondition = (
     end
     
     return rankCount <= ${count} and rankCount > 0`;
-      break;
+        break;
 
-    default:
-      conditionCode = `
+      default:
+        conditionCode = `
     local rankFound = false
     for i, c in ipairs(${cardsToCheck}) do
         if ${getRanksCheckLogic(ranks, rankGroupType)} then
@@ -259,9 +258,9 @@ export const generateRankCardCondition = (
     end
     
     return rankFound`;
+    }
   }
 
-  // Generate the function that checks if the rank condition is met
   const functionCode = `-- Rank condition check
 local function ${functionName}(context)
     ${conditionComment}${conditionCode}

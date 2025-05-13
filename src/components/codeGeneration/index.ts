@@ -279,7 +279,6 @@ const generateJokerCode = (
 
   // Generate the calculate function that combines all conditions
   const calculateCode = generateCalculateFunction(
-    joker,
     joker.rules || [],
     conditionFunctions
   );

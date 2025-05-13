@@ -86,6 +86,7 @@ export const generateSuitCardCondition = (
   }
 
   const params = suitCondition.params;
+  const triggerType = suitRules[0]?.trigger || "hand_played";
 
   const suitType = (params.suit_type as string) || "specific";
   const specificSuit = (params.specific_suit as string) || null;
@@ -131,9 +132,25 @@ export const generateSuitCardCondition = (
   const cardsToCheck =
     scope === "scoring" ? "context.scoring_hand" : "context.full_hand";
 
-  switch (quantifier) {
-    case "at_least_one":
-      conditionCode = `
+  // Special handling for card_scored trigger type
+  if (triggerType === "card_scored") {
+    // For individual card scoring, we check the other_card directly
+    const checkLogic = getSuitsCheckLogic(suits).replace(
+      /c:/g,
+      "context.other_card:"
+    );
+
+    conditionCode = `
+    return ${checkLogic}`;
+
+    conditionComment = `-- Check if scored card is ${
+      suitType === "specific" ? specificSuit : suitGroup
+    } suit`;
+  } else {
+    // For hand_played trigger, use the original logic with loops
+    switch (quantifier) {
+      case "at_least_one":
+        conditionCode = `
     local suitFound = false
     for i, c in ipairs(${cardsToCheck}) do
         if ${getSuitsCheckLogic(suits)} then
@@ -143,10 +160,10 @@ export const generateSuitCardCondition = (
     end
     
     return suitFound`;
-      break;
+        break;
 
-    case "all":
-      conditionCode = `
+      case "all":
+        conditionCode = `
     local allMatchSuit = true
     for i, c in ipairs(${cardsToCheck}) do
         if not (${getSuitsCheckLogic(suits)}) then
@@ -156,10 +173,10 @@ export const generateSuitCardCondition = (
     end
     
     return allMatchSuit and #${cardsToCheck} > 0`;
-      break;
+        break;
 
-    case "exactly":
-      conditionCode = `
+      case "exactly":
+        conditionCode = `
     local suitCount = 0
     for i, c in ipairs(${cardsToCheck}) do
         if ${getSuitsCheckLogic(suits)} then
@@ -168,10 +185,10 @@ export const generateSuitCardCondition = (
     end
     
     return suitCount == ${count}`;
-      break;
+        break;
 
-    case "at_least":
-      conditionCode = `
+      case "at_least":
+        conditionCode = `
     local suitCount = 0
     for i, c in ipairs(${cardsToCheck}) do
         if ${getSuitsCheckLogic(suits)} then
@@ -180,10 +197,10 @@ export const generateSuitCardCondition = (
     end
     
     return suitCount >= ${count}`;
-      break;
+        break;
 
-    case "at_most":
-      conditionCode = `
+      case "at_most":
+        conditionCode = `
     local suitCount = 0
     for i, c in ipairs(${cardsToCheck}) do
         if ${getSuitsCheckLogic(suits)} then
@@ -192,10 +209,10 @@ export const generateSuitCardCondition = (
     end
     
     return suitCount <= ${count} and suitCount > 0`;
-      break;
+        break;
 
-    default:
-      conditionCode = `
+      default:
+        conditionCode = `
     local suitFound = false
     for i, c in ipairs(${cardsToCheck}) do
         if ${getSuitsCheckLogic(suits)} then
@@ -205,6 +222,7 @@ export const generateSuitCardCondition = (
     end
     
     return suitFound`;
+    }
   }
 
   const functionCode = `-- Suit condition check

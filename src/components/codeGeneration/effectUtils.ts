@@ -8,7 +8,8 @@ export interface ReturnStatementResult {
  * Chains multiple effects with their own messages using the 'extra' field
  */
 export function generateEffectReturnStatement(
-  effectTypes: string[] = []
+  effectTypes: string[] = [],
+  triggerType: string = "hand_played"
 ): ReturnStatementResult {
   // Keep track of active effects for chaining
   const activeEffects: string[] = [];
@@ -35,14 +36,26 @@ export function generateEffectReturnStatement(
   // Process the first effect (goes directly in the return table)
   const firstEffect = activeEffects[0];
   if (firstEffect === "add_chips") {
-    returnStatement = `
+    if (triggerType === "card_scored") {
+      returnStatement = `
+                chips = card.ability.extra.chips,
+                message = localize{type='variable',key='a_chips',vars={card.ability.extra.chips}}`;
+    } else {
+      returnStatement = `
                 chip_mod = card.ability.extra.chips,
                 message = localize{type='variable',key='a_chips',vars={card.ability.extra.chips}}`;
+    }
     colour = "G.C.CHIPS";
   } else if (firstEffect === "add_mult") {
-    returnStatement = `
+    if (triggerType === "card_scored") {
+      returnStatement = `
+                mult = card.ability.extra.mult,
+                message = localize{type='variable',key='a_mult',vars={card.ability.extra.mult}}`;
+    } else {
+      returnStatement = `
                 mult_mod = card.ability.extra.mult,
                 message = localize{type='variable',key='a_mult',vars={card.ability.extra.mult}}`;
+    }
     colour = "G.C.MULT";
   } else if (firstEffect === "apply_x_mult") {
     returnStatement = `
@@ -51,7 +64,7 @@ export function generateEffectReturnStatement(
     colour = "G.C.XMULT";
   } else if (firstEffect === "add_dollars") {
     returnStatement = `
-                  dollars = card.ability.extra.dollars`;
+                dollars = card.ability.extra.dollars`;
     colour = "G.C.MONEY";
   }
 
@@ -67,21 +80,30 @@ export function generateEffectReturnStatement(
       let effectColour = "G.C.WHITE";
 
       if (effect === "add_chips") {
-        extraContent = `chip_mod = card.ability.extra.chips,
+        if (triggerType === "card_scored") {
+          extraContent = `chips = card.ability.extra.chips,
                         message = localize{type='variable',key='a_chips',vars={card.ability.extra.chips}}`;
+        } else {
+          extraContent = `chip_mod = card.ability.extra.chips,
+                        message = localize{type='variable',key='a_chips',vars={card.ability.extra.chips}}`;
+        }
         effectColour = "G.C.CHIPS";
       } else if (effect === "add_mult") {
-        extraContent = `mult_mod = card.ability.extra.mult,
+        if (triggerType === "card_scored") {
+          extraContent = `mult = card.ability.extra.mult,
                         message = localize{type='variable',key='a_mult',vars={card.ability.extra.mult}}`;
+        } else {
+          extraContent = `mult_mod = card.ability.extra.mult,
+                        message = localize{type='variable',key='a_mult',vars={card.ability.extra.mult}}`;
+        }
         effectColour = "G.C.MULT";
       } else if (effect === "apply_x_mult") {
         extraContent = `Xmult_mod = card.ability.extra.Xmult,
                         message = localize{type='variable',key='a_xmult',vars={card.ability.extra.Xmult}}`;
+        effectColour = "G.C.XMULT";
+      } else if (effect === "add_dollars") {
+        extraContent = `dollars = card.ability.extra.dollars`;
         effectColour = "G.C.MONEY";
-      } else if (firstEffect === "add_dollars") {
-        returnStatement = `
-                      dollars = card.ability.extra.dollars`;
-        colour = "G.C.MONEY";
       }
 
       // For the second effect, start the extra chain

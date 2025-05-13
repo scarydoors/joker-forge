@@ -1,15 +1,16 @@
-import { JokerData } from "../JokerCard";
 import type { Rule } from "../ruleBuilder/types";
 import { generateEffectReturnStatement } from "./effectUtils";
 
 // Function to generate the main calculate function combining all conditions
 export const generateCalculateFunction = (
-  joker: JokerData,
   rules: Rule[],
   conditionFunctions: string[]
 ): string => {
+  // Get trigger from the first rule (or default to hand_played)
+  const triggerType = rules.length > 0 ? rules[0].trigger : "hand_played";
+
   if (!rules || rules.length === 0) {
-    // If no rules, generate a simple calculate function with no conditions
+    // Simple function with no rules
     return `calculate = function(self, card, context)
     if context.joker_main then
         -- Simple effect with no conditions
@@ -29,32 +30,47 @@ end`;
   });
 
   // Get return statement from effectUtils
-  const { statement: returnStatement, colour } =
-    generateEffectReturnStatement(effectTypes);
+  const { statement: returnStatement, colour } = generateEffectReturnStatement(
+    effectTypes,
+    triggerType
+  );
 
   // Build the condition checking part
   let conditionChecks = "";
-
   if (conditionFunctions.length === 0) {
-    // No condition functions, always trigger
     conditionChecks = "true";
   } else if (conditionFunctions.length === 1) {
-    // One condition function, just call it
     conditionChecks = `${conditionFunctions[0]}(context)`;
   } else {
-    // Multiple condition functions, combine with AND
     conditionChecks = conditionFunctions
       .map((fn) => `${fn}(context)`)
       .join(" and ");
   }
 
+  // Generate context check based on trigger type
+  let contextCheck = "";
+  let description = "";
+
+  if (triggerType === "card_scored") {
+    contextCheck = "context.individual and context.cardarea == G.play";
+    description = "-- Individual card scoring";
+  } else {
+    // Default to hand_played behavior
+    contextCheck = "context.cardarea == G.jokers and context.joker_main";
+    description = "-- Main scoring time for jokers";
+  }
+
   // Generate final calculate function
   return `calculate = function(self, card, context)
-    -- Main scoring time for jokers
-    if context.cardarea == G.jokers and context.joker_main then
+    ${description}
+    if ${contextCheck} then
         -- Check all conditions
         if ${conditionChecks} then
-            return {${returnStatement},
+            return {${returnStatement}${
+    triggerType === "card_scored"
+      ? ",\n                card = context.other_card"
+      : ""
+  },
                 colour = ${colour}
             }
         end
