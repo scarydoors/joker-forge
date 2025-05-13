@@ -37,9 +37,9 @@ export function generateEffectReturnStatement(
   const firstEffect = activeEffects[0];
   if (firstEffect === "add_chips") {
     if (triggerType === "card_scored") {
+      // For card_scored, don't include message as SMODS adds it automatically
       returnStatement = `
-                chips = card.ability.extra.chips,
-                message = localize{type='variable',key='a_chips',vars={card.ability.extra.chips}}`;
+                chips = card.ability.extra.chips`;
     } else {
       returnStatement = `
                 chip_mod = card.ability.extra.chips,
@@ -48,9 +48,9 @@ export function generateEffectReturnStatement(
     colour = "G.C.CHIPS";
   } else if (firstEffect === "add_mult") {
     if (triggerType === "card_scored") {
+      // For card_scored, don't include message as SMODS adds it automatically
       returnStatement = `
-                mult = card.ability.extra.mult,
-                message = localize{type='variable',key='a_mult',vars={card.ability.extra.mult}}`;
+                mult = card.ability.extra.mult`;
     } else {
       returnStatement = `
                 mult_mod = card.ability.extra.mult,
@@ -58,13 +58,26 @@ export function generateEffectReturnStatement(
     }
     colour = "G.C.MULT";
   } else if (firstEffect === "apply_x_mult") {
-    returnStatement = `
+    if (triggerType === "card_scored") {
+      // For card_scored, don't include message as SMODS adds it automatically
+      returnStatement = `
+                Xmult = card.ability.extra.Xmult`;
+    } else {
+      returnStatement = `
                 Xmult_mod = card.ability.extra.Xmult,
                 message = localize{type='variable',key='a_xmult',vars={card.ability.extra.Xmult}}`;
+    }
     colour = "G.C.XMULT";
   } else if (firstEffect === "add_dollars") {
-    returnStatement = `
+    if (triggerType === "card_scored") {
+      // For card_scored, don't include message as SMODS adds it automatically
+      returnStatement = `
                 dollars = card.ability.extra.dollars`;
+    } else {
+      returnStatement = `
+                dollars = card.ability.extra.dollars,
+                message = localize{type='variable',key='a_dollars',vars={card.ability.extra.dollars}}`;
+    }
     colour = "G.C.MONEY";
   }
 
@@ -81,8 +94,8 @@ export function generateEffectReturnStatement(
 
       if (effect === "add_chips") {
         if (triggerType === "card_scored") {
-          extraContent = `chips = card.ability.extra.chips,
-                        message = localize{type='variable',key='a_chips',vars={card.ability.extra.chips}}`;
+          // For card_scored, don't include message as SMODS adds it automatically
+          extraContent = `chips = card.ability.extra.chips`;
         } else {
           extraContent = `chip_mod = card.ability.extra.chips,
                         message = localize{type='variable',key='a_chips',vars={card.ability.extra.chips}}`;
@@ -90,19 +103,30 @@ export function generateEffectReturnStatement(
         effectColour = "G.C.CHIPS";
       } else if (effect === "add_mult") {
         if (triggerType === "card_scored") {
-          extraContent = `mult = card.ability.extra.mult,
-                        message = localize{type='variable',key='a_mult',vars={card.ability.extra.mult}}`;
+          // For card_scored, don't include message as SMODS adds it automatically
+          extraContent = `mult = card.ability.extra.mult`;
         } else {
           extraContent = `mult_mod = card.ability.extra.mult,
                         message = localize{type='variable',key='a_mult',vars={card.ability.extra.mult}}`;
         }
         effectColour = "G.C.MULT";
       } else if (effect === "apply_x_mult") {
-        extraContent = `Xmult_mod = card.ability.extra.Xmult,
+        if (triggerType === "card_scored") {
+          // For card_scored, don't include message as SMODS adds it automatically
+          extraContent = `Xmult = card.ability.extra.Xmult`;
+        } else {
+          extraContent = `Xmult_mod = card.ability.extra.Xmult,
                         message = localize{type='variable',key='a_xmult',vars={card.ability.extra.Xmult}}`;
+        }
         effectColour = "G.C.XMULT";
       } else if (effect === "add_dollars") {
-        extraContent = `dollars = card.ability.extra.dollars`;
+        if (triggerType === "card_scored") {
+          // For card_scored, don't include message as SMODS adds it automatically
+          extraContent = `dollars = card.ability.extra.dollars`;
+        } else {
+          extraContent = `dollars = card.ability.extra.dollars,
+                        message = localize{type='variable',key='a_dollars',vars={card.ability.extra.dollars}}`;
+        }
         effectColour = "G.C.MONEY";
       }
 
