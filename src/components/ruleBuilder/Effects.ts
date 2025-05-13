@@ -46,15 +46,15 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
     ],
   },
   {
-    id: "add_money",
-    label: "Add Money",
-    description: "Add dollars to the player's balance",
+    id: "add_dollars",
+    label: "Add Dollars",
+    description: "Add money directly to your balance when a hand is played",
     params: [
       {
         id: "value",
         type: "number",
         label: "Amount",
-        default: 3,
+        default: 5,
         min: 0,
       },
     ],

@@ -48,6 +48,10 @@ export function generateEffectReturnStatement(
     returnStatement = `
                 Xmult_mod = card.ability.extra.Xmult,
                 message = localize{type='variable',key='a_xmult',vars={card.ability.extra.Xmult}}`;
+    colour = "G.C.XMULT";
+  } else if (firstEffect === "add_dollars") {
+    returnStatement = `
+                  dollars = card.ability.extra.dollars`;
     colour = "G.C.MONEY";
   }
 
@@ -74,6 +78,10 @@ export function generateEffectReturnStatement(
         extraContent = `Xmult_mod = card.ability.extra.Xmult,
                         message = localize{type='variable',key='a_xmult',vars={card.ability.extra.Xmult}}`;
         effectColour = "G.C.MONEY";
+      } else if (firstEffect === "add_dollars") {
+        returnStatement = `
+                      dollars = card.ability.extra.dollars`;
+        colour = "G.C.MONEY";
       }
 
       // For the second effect, start the extra chain

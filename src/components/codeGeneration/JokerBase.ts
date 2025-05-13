@@ -65,6 +65,11 @@ export const extractEffectsConfig = (joker: JokerData): string => {
             configItems.push(`Xmult = ${effect.params.value}`);
           }
         }
+        if (effect.type === "add_dollars" && effect.params.value) {
+          if (!configItems.some((item) => item.startsWith("dollars ="))) {
+            configItems.push(`dollars = ${effect.params.value}`);
+          }
+        }
       });
     });
   }
@@ -128,6 +133,12 @@ export const generateBasicLocVarsFunction = (joker: JokerData): string => {
           !vars.includes("card.ability.extra.Xmult")
         ) {
           vars.push("card.ability.extra.Xmult");
+        }
+        if (
+          effect.type === "add_dollars" &&
+          !vars.includes("card.ability.extra.dollars")
+        ) {
+          vars.push("card.ability.extra.dollars");
         }
       });
     });
