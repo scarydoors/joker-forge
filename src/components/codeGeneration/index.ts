@@ -15,6 +15,8 @@ import { generateRemainingHandsCondition } from "./conditions/RemainingHandsCond
 import { generateRemainingDiscardsCondition } from "./conditions/RemainingDiscardsCondition";
 import { generateJokerCountCondition } from "./conditions/JokerCountCondition";
 import { generateBlindTypeCondition } from "./conditions/BlindTypeCondition";
+import { generateCardEnhancementCondition } from "./conditions/CardEnhancementCondition";
+import { generateCardSealCondition } from "./conditions/CardSealCondition";
 
 export const exportJokersAsMod = async (
   jokers: JokerData[],
@@ -132,6 +134,41 @@ const generateMainLua = (jokers: JokerData[]): string => {
         if (countCondition) {
           helperFunctions.push(countCondition.functionCode);
           functionNames.push(countCondition.functionName);
+        }
+      }
+
+      // Check for card enhancement rules
+      const enhancementRules = joker.rules.filter((rule) => {
+        return rule.conditionGroups.some((group) =>
+          group.conditions.some(
+            (condition) => condition.type === "card_enhancement"
+          )
+        );
+      });
+
+      // Generate card enhancement condition function if needed
+      if (enhancementRules.length > 0) {
+        const enhancementCondition =
+          generateCardEnhancementCondition(enhancementRules);
+        if (enhancementCondition) {
+          helperFunctions.push(enhancementCondition.functionCode);
+          functionNames.push(enhancementCondition.functionName);
+        }
+      }
+
+      // Check for card seal rules
+      const sealRules = joker.rules.filter((rule) => {
+        return rule.conditionGroups.some((group) =>
+          group.conditions.some((condition) => condition.type === "card_seal")
+        );
+      });
+
+      // Generate card seal condition function if needed
+      if (sealRules.length > 0) {
+        const sealCondition = generateCardSealCondition(sealRules);
+        if (sealCondition) {
+          helperFunctions.push(sealCondition.functionCode);
+          functionNames.push(sealCondition.functionName);
         }
       }
     }

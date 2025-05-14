@@ -79,14 +79,11 @@ const ENHANCEMENT_TYPES = [
   { value: "m_lucky", label: "Lucky" },
 ];
 
-// Seal types
 const SEAL_TYPES = [
-  { value: "s_standard", label: "Standard" },
-  { value: "s_lucky", label: "Lucky" },
-  { value: "s_mult", label: "Mult" },
-  { value: "s_wild", label: "Wild" },
-  { value: "s_glass", label: "Glass" },
-  { value: "s_bonus", label: "Bonus" },
+  { value: "gold", label: "Gold Seal ($3 when played)" },
+  { value: "red", label: "Red Seal (Retrigger card)" },
+  { value: "blue", label: "Blue Seal (Creates Planet card)" },
+  { value: "purple", label: "Purple Seal (Creates Tarot when discarded)" },
 ];
 
 // Condition types and their possible parameters
