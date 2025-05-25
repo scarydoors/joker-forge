@@ -25,7 +25,6 @@ import {
   BoltIcon,
   PlusCircleIcon,
   ArchiveBoxXMarkIcon,
-  XCircleIcon,
   CheckCircleIcon,
 } from "@heroicons/react/24/outline";
 
@@ -712,16 +711,26 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
   const [activeRuleIndex, setActiveRuleIndex] = useState<number | null>(
     existingRules.length > 0 ? 0 : null
   );
-  const [saveStatus, setSaveStatus] = useState("");
 
   const modalRef = useRef<HTMLDivElement>(null);
-  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
+  const saveAndCloseRef = useRef<() => void>(null);
+
+  // Update the ref whenever rules change
+  saveAndCloseRef.current = () => {
+    onSave(rules);
+    onClose();
+  };
+
+  const handleSaveAndClose = () => {
+    saveAndCloseRef.current?.();
+  };
+
+  // Initialize rules only when modal opens
   useEffect(() => {
     if (isOpen) {
       setRules(existingRules);
       setActiveRuleIndex(existingRules.length > 0 ? 0 : null);
-      setSaveStatus("");
 
       // Add click outside listener when modal opens
       const handleClickOutside = (event: MouseEvent) => {
@@ -729,7 +738,7 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
           modalRef.current &&
           !modalRef.current.contains(event.target as Node)
         ) {
-          onClose();
+          saveAndCloseRef.current?.(); // Use the ref directly
         }
       };
 
@@ -740,23 +749,7 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
         document.removeEventListener("mousedown", handleClickOutside);
       };
     }
-  }, [isOpen, existingRules, onClose]);
-
-  const autoSave = (updatedRules: Rule[]) => {
-    if (saveTimeoutRef.current) {
-      clearTimeout(saveTimeoutRef.current);
-    }
-
-    setSaveStatus("Saving...");
-    saveTimeoutRef.current = setTimeout(() => {
-      onSave(updatedRules);
-      setSaveStatus("Changes saved");
-
-      setTimeout(() => {
-        setSaveStatus("");
-      }, 3000);
-    }, 1000);
-  };
+  }, [isOpen, existingRules]); // Remove handleSaveAndClose from dependencies
 
   const addRule = () => {
     const newRule: Rule = {
@@ -793,7 +786,6 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
     const updatedRules = [...rules, newRule];
     setRules(updatedRules);
     setActiveRuleIndex(updatedRules.length - 1);
-    autoSave(updatedRules);
   };
 
   const deleteRule = (index: number) => {
@@ -806,8 +798,6 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
     } else if (activeRuleIndex !== null && activeRuleIndex > index) {
       setActiveRuleIndex(activeRuleIndex - 1);
     }
-
-    autoSave(newRules);
   };
 
   const updateTrigger = (triggerId: string) => {
@@ -842,7 +832,6 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
     rule.trigger = triggerId;
 
     setRules(newRules);
-    autoSave(newRules);
   };
 
   const addConditionGroup = () => {
@@ -854,7 +843,6 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
       conditions: [],
     });
     setRules(newRules);
-    autoSave(newRules);
   };
 
   const updateConditionGroup = (
@@ -868,7 +856,6 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
       ...updates,
     };
     setRules(newRules);
-    autoSave(newRules);
   };
 
   const deleteConditionGroup = (groupIndex: number) => {
@@ -876,7 +863,6 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
     const newRules = [...rules];
     newRules[activeRuleIndex].conditionGroups.splice(groupIndex, 1);
     setRules(newRules);
-    autoSave(newRules);
   };
 
   const addCondition = (groupIndex: number) => {
@@ -893,7 +879,6 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
       },
     });
     setRules(newRules);
-    autoSave(newRules);
   };
 
   const updateCondition = (
@@ -937,7 +922,6 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
     };
 
     setRules(newRules);
-    autoSave(newRules);
   };
 
   const deleteCondition = (groupIndex: number, conditionIndex: number) => {
@@ -948,7 +932,6 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
       1
     );
     setRules(newRules);
-    autoSave(newRules);
   };
 
   const addEffect = () => {
@@ -962,7 +945,6 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
       },
     });
     setRules(newRules);
-    autoSave(newRules);
   };
 
   const updateEffect = (effectIndex: number, updates: Partial<Effect>) => {
@@ -991,7 +973,6 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
     };
 
     setRules(newRules);
-    autoSave(newRules);
   };
 
   const deleteEffect = (effectIndex: number) => {
@@ -999,7 +980,6 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
     const newRules = [...rules];
     newRules[activeRuleIndex].effects.splice(effectIndex, 1);
     setRules(newRules);
-    autoSave(newRules);
   };
 
   if (!isOpen) return null;
@@ -1032,21 +1012,14 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
             RULE BUILDER
           </h2>
 
-          {saveStatus && (
-            <div className="flex items-center text-sm text-mint">
-              {saveStatus === "Changes saved" ? (
-                <CheckCircleIcon className="h-4 w-4 mr-1" />
-              ) : null}
-              {saveStatus}
-            </div>
-          )}
-
-          <button
-            onClick={onClose}
-            className="text-white-darker hover:text-white transition-colors"
+          <Button
+            variant="primary"
+            onClick={handleSaveAndClose}
+            icon={<CheckCircleIcon className="h-5 w-5" />}
+            className="text-sm"
           >
-            <XCircleIcon className="h-6 w-6 cursor-pointer" />
-          </button>
+            Save & Close
+          </Button>
         </div>
 
         <div className="flex-grow flex gap-4 overflow-hidden">
@@ -1082,7 +1055,6 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
                       {generateShortRuleDescription(rule)}
                     </span>
 
-                    {/* Vertical separator */}
                     <div className="w-px h-4 bg-black-light mx-2 self-center"></div>
 
                     <button
@@ -1092,7 +1064,7 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
                         deleteRule(index);
                       }}
                     >
-                      <TrashIcon className="h-4 w-4" />
+                      <TrashIcon className="h-4 w-4 cursor-pointer" />
                     </button>
                   </div>
                 </div>
