@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   PhotoIcon,
   ArrowPathIcon,
@@ -45,6 +45,18 @@ const JokerForm: React.FC<JokerFormProps> = ({
       discovered: initialData.discovered !== false,
     };
   });
+
+  useEffect(() => {
+    if (joker) {
+      setFormData({
+        ...joker,
+        blueprint_compat: joker.blueprint_compat !== false,
+        eternal_compat: joker.eternal_compat !== false,
+        unlocked: joker.unlocked !== false,
+        discovered: joker.discovered !== false,
+      });
+    }
+  }, [joker]);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -436,7 +448,12 @@ const JokerForm: React.FC<JokerFormProps> = ({
           onClick={onOpenRuleBuilder}
           size="lg"
         >
-          Edit Rules
+          {(() => {
+            const ruleCount = formData.rules?.length || 0;
+            if (ruleCount === 0) return "Add Rules";
+            if (ruleCount === 1) return "1 Rule │ Edit Rules";
+            return `${ruleCount} Rules │ Edit Rules`;
+          })()}
         </Button>
       </div>
 
