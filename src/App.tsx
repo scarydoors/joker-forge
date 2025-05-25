@@ -93,8 +93,8 @@ function App() {
 
   return (
     <>
-      <div className="min-h-screen bg-black-darker overflow-hidden p-4">
-        <div className="container mx-auto max-w-6xl">
+      <div className="min-h-screen bg-black-darker overflow-hidden p-4 flex flex-col">
+        <div className="container mx-auto max-w-6xl flex-grow flex flex-col">
           <div className="flex justify-between items-center mb-6">
             <div className="flex space-x-4 flex-1">
               <div className="w-1/2">
@@ -152,7 +152,7 @@ function App() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-6 pt-6">
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-6 pt-6 flex-grow">
             <div className="md:col-span-3 h-full">
               {selectedJoker ? (
                 <JokerForm
@@ -188,6 +188,26 @@ function App() {
             </div>
           </div>
         </div>
+
+        {/* Footer */}
+        <footer className="w-full px-4 mt-24">
+          <div className="container mx-auto max-w-6xl flex justify-between items-center">
+            <div className="text-white-darker text-xs font-light tracking-wide">
+              Created by <span className="text-mint">jaydchw</span>
+              {" • "}
+              Icons from <span className="text-mint">Heroicons</span>
+              {" & "}
+              <span className="text-mint">SVGRepo</span>
+              {" • "}
+              Credit to <span className="text-mint">SMODS</span>
+              {" and the "}
+              <span className="text-mint">SMODS team</span>
+            </div>
+            <div className="text-white-darker text-xs font-light tracking-widest">
+              <span className="text-mint font-medium">PRE-ALPHA</span>
+            </div>
+          </div>
+        </footer>
       </div>
 
       <RuleBuilder
