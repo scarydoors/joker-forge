@@ -6,6 +6,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
     id: "add_chips",
     label: "Add Chips",
     description: "Add a flat amount of chips to the hand score",
+    applicableTriggers: ["hand_played", "card_scored", "passive"],
     params: [
       {
         id: "value",
@@ -20,6 +21,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
     id: "add_mult",
     label: "Add Mult",
     description: "Add a flat amount of mult to the hand score",
+    applicableTriggers: ["hand_played", "card_scored", "passive"],
     params: [
       {
         id: "value",
@@ -34,6 +36,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
     id: "apply_x_mult",
     label: "Apply xMult",
     description: "Multiply the score by this value",
+    applicableTriggers: ["hand_played", "card_scored", "passive"],
     params: [
       {
         id: "value",
@@ -48,7 +51,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
   {
     id: "add_dollars",
     label: "Add Dollars",
-    description: "Add money directly to your balance when a hand is played",
+    description: "Add money directly to your balance",
     params: [
       {
         id: "value",
@@ -80,6 +83,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
     id: "level_up_hand",
     label: "Level Up Hand",
     description: "Increase the level of the played hand",
+    applicableTriggers: ["hand_played"],
     params: [
       {
         id: "value",
@@ -205,6 +209,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
     id: "modify_game_rules",
     label: "Modify Game Rules",
     description: "Change fundamental game rules",
+    applicableTriggers: ["hand_played", "blind_selected", "passive"],
     params: [
       {
         id: "rule_type",

@@ -15,18 +15,6 @@ export const TRIGGERS: TriggerDefinition[] = [
       "Triggers for each individual card during scoring. Use this for card-specific properties like suit, rank, or enhancements.",
   },
   {
-    id: "start_of_round",
-    label: "At the Start of Round",
-    description:
-      "Triggers at the beginning of each round, before any hands are played.",
-  },
-  {
-    id: "end_of_round",
-    label: "At the End of Round",
-    description:
-      "Triggers at the end of each round, after all hands and discards are used.",
-  },
-  {
     id: "card_discarded",
     label: "When a Card is Discarded",
     description:

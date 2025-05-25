@@ -62,6 +62,43 @@ end`;
       contextCheck = "context.individual and context.cardarea == G.play";
       description = "-- Individual card scoring";
     }
+  } else if (triggerType === "blind_selected") {
+    contextCheck = "context.setting_blind and not context.blueprint";
+    description = "-- When blind is selected";
+  } else if (triggerType === "blind_skipped") {
+    contextCheck = "context.skip_blind and not context.blueprint";
+    description = "-- When blind is skipped";
+  } else if (triggerType === "boss_defeated") {
+    contextCheck =
+      "context.end_of_round and G.GAME.blind.boss and not context.blueprint";
+    description = "-- After boss blind is defeated";
+  } else if (triggerType === "booster_opened") {
+    contextCheck = "context.open_booster";
+    description = "-- When booster pack is opened";
+  } else if (triggerType === "booster_skipped") {
+    contextCheck = "context.skipping_booster";
+    description = "-- When booster pack is skipped";
+  } else if (triggerType === "consumable_used") {
+    contextCheck = "context.using_consumeable";
+    description = "-- When consumable is used";
+  } else if (triggerType === "hand_drawn") {
+    contextCheck = "context.hand_drawn";
+    description = "-- When hand is drawn";
+  } else if (triggerType === "first_hand_drawn") {
+    contextCheck = "context.first_hand_drawn";
+    description = "-- When first hand is drawn";
+  } else if (triggerType === "shop_entered") {
+    contextCheck = "context.ending_shop and not context.blueprint";
+    description = "-- When entering shop (actually on shop exit in SMODS)";
+  } else if (triggerType === "shop_exited") {
+    contextCheck = "context.ending_shop and not context.blueprint";
+    description = "-- When exiting shop";
+  } else if (triggerType === "card_discarded") {
+    contextCheck = "context.discard and not context.blueprint";
+    description = "-- When card is discarded";
+  } else if (triggerType === "passive") {
+    contextCheck = "context.joker_main";
+    description = "-- Passive effect during scoring";
   } else {
     // Default to hand_played behavior
     contextCheck = "context.cardarea == G.jokers and context.joker_main";
