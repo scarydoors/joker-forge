@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { TRIGGERS, getTriggerById } from "./Triggers";
 import { getConditionTypeById, getConditionsForTrigger } from "./Conditions";
-import { EFFECT_TYPES, getEffectTypeById } from "./Effects";
+import { getEffectTypeById } from "./Effects";
 import { LOGICAL_OPERATORS } from "./types";
 import type {
   Rule,
@@ -12,6 +12,7 @@ import type {
   EffectParameter,
   ShowWhenCondition,
 } from "./types";
+import { getEffectsForTrigger } from "./Effects";
 
 import Button from "../generic/Button";
 import InputField from "../generic/InputField";
@@ -304,8 +305,11 @@ const EffectEditor: React.FC<{
   effect: Effect;
   onUpdate: (updates: Partial<Effect>) => void;
   onDelete: () => void;
-}> = ({ effect, onUpdate, onDelete }) => {
+  currentTrigger: string;
+}> = ({ effect, onUpdate, onDelete, currentTrigger }) => {
+  // ← Add currentTrigger here
   const effectType = getEffectTypeById(effect.type);
+  const availableEffects = getEffectsForTrigger(currentTrigger); // ← Add this line
 
   if (!effectType) return null;
 
@@ -327,7 +331,8 @@ const EffectEditor: React.FC<{
           labelPosition="center"
           value={effect.type}
           onChange={(newValue) => onUpdate({ type: newValue })}
-          options={EFFECT_TYPES.map((type) => ({
+          options={availableEffects.map((type) => ({
+            // ← Now this will work
             value: type.id,
             label: type.label,
           }))}
@@ -674,6 +679,7 @@ const RuleEditor: React.FC<{
                 effect={effect}
                 onUpdate={(updates) => onUpdateEffect(effectIndex, updates)}
                 onDelete={() => onDeleteEffect(effectIndex)}
+                currentTrigger={rule.trigger}
               />
             ))}
           </div>
@@ -794,7 +800,34 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
   const updateTrigger = (triggerId: string) => {
     if (activeRuleIndex === null) return;
     const newRules = [...rules];
-    newRules[activeRuleIndex].trigger = triggerId;
+    const rule = newRules[activeRuleIndex];
+
+    // Get available conditions and effects for the new trigger
+    const availableConditions = getConditionsForTrigger(triggerId);
+    const availableEffects = getEffectsForTrigger(triggerId);
+
+    // Filter out incompatible conditions
+    rule.conditionGroups = rule.conditionGroups
+      .map((group) => ({
+        ...group,
+        conditions: group.conditions.filter((condition) =>
+          availableConditions.some(
+            (availableCondition) => availableCondition.id === condition.type
+          )
+        ),
+      }))
+      .filter((group) => group.conditions.length > 0); // Remove empty groups
+
+    // Filter out incompatible effects
+    rule.effects = rule.effects.filter((effect) =>
+      availableEffects.some(
+        (availableEffect) => availableEffect.id === effect.type
+      )
+    );
+
+    // Update the trigger
+    rule.trigger = triggerId;
+
     setRules(newRules);
     autoSave(newRules);
   };
