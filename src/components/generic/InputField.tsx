@@ -2,7 +2,10 @@ import React, { InputHTMLAttributes, ReactNode, useState } from "react";
 import { PencilIcon } from "@heroicons/react/24/outline";
 
 interface InputFieldProps
-  extends InputHTMLAttributes<HTMLInputElement | HTMLTextAreaElement> {
+  extends Omit<
+    InputHTMLAttributes<HTMLInputElement | HTMLTextAreaElement>,
+    "size"
+  > {
   label?: string;
   icon?: ReactNode;
   error?: string;
@@ -10,6 +13,7 @@ interface InputFieldProps
   separator?: boolean;
   multiline?: boolean;
   height?: string;
+  size?: "sm" | "md" | "lg";
   value: string;
   onChange: (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -24,6 +28,7 @@ const InputField: React.FC<InputFieldProps> = ({
   separator = false,
   multiline = false,
   height = "auto",
+  size = "md",
   className = "",
   value,
   onChange,
@@ -31,11 +36,19 @@ const InputField: React.FC<InputFieldProps> = ({
 }) => {
   const [isFocused, setIsFocused] = useState(false);
 
+  const iconSizeClasses = {
+    sm: "h-4 w-4",
+    md: "h-5 w-5",
+    lg: "h-6 w-6",
+  };
+
   const renderIcon = () => {
     if (icon) {
       return icon;
     }
-    return <PencilIcon className="h-6 w-6 text-mint stroke-2" />;
+    return (
+      <PencilIcon className={`${iconSizeClasses[size]} text-mint stroke-2`} />
+    );
   };
 
   const getSeparatorColor = () => {
