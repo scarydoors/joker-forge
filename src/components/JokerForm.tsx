@@ -267,7 +267,7 @@ const JokerForm: React.FC<JokerFormProps> = ({
                   onClick={() => fileInputRef.current?.click()}
                   className="absolute bottom-8 right-4 bg-black-dark opacity-60 hover:opacity-100 p-2 rounded-xl transition-all"
                 >
-                  <PhotoIcon className="h-6 w-6 text-mint" />
+                  <PhotoIcon className="h-6 w-6 text-mint cursor-pointer" />
                 </button>
               </div>
             </div>

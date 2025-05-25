@@ -93,6 +93,12 @@ function App() {
 
   return (
     <>
+      <div className="fixed top-6 left-5 z-10">
+        <h1 className="text-mint font-lexend tracking-widest font-light">
+          JOKER FORGE TEST BUILD
+        </h1>
+      </div>
+
       <div className="min-h-screen bg-black-darker overflow-hidden p-4 flex flex-col">
         <div className="container mx-auto max-w-6xl flex-grow flex flex-col">
           <div className="flex justify-between items-center mb-6">

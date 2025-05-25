@@ -6,6 +6,16 @@
   src: url("/fonts/m6x11plus.ttf") format("truetype");
 }
 
+body {
+  background-color: #1e2b30;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  background-color: #1e2b30;
+}
+
 @theme {
   --color-balatro-mult: #fe5f55;
   --color-balatro-chips: #009dff;
