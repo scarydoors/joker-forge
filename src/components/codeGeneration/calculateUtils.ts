@@ -86,10 +86,6 @@ end`;
     description = "-- When hand is drawn";
   } else if (triggerType === "first_hand_drawn") {
     contextCheck = "context.first_hand_drawn";
-    description = "-- When first hand is drawn";
-  } else if (triggerType === "shop_entered") {
-    contextCheck = "context.ending_shop and not context.blueprint";
-    description = "-- When entering shop (actually on shop exit in SMODS)";
   } else if (triggerType === "shop_exited") {
     contextCheck = "context.ending_shop and not context.blueprint";
     description = "-- When exiting shop";

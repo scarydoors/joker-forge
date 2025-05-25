@@ -63,11 +63,6 @@ export const TRIGGERS: TriggerDefinition[] = [
     description: "Triggers only for the first hand drawn in each round.",
   },
   {
-    id: "shop_entered",
-    label: "When Shop is Entered",
-    description: "Triggers when the player enters the shop.",
-  },
-  {
     id: "shop_exited",
     label: "When Shop is Exited",
     description: "Triggers when the player exits the shop.",
