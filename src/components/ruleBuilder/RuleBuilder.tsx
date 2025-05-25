@@ -390,16 +390,26 @@ const generateDetailedRuleDescription = (rule: Rule): string => {
 
   let description = `${trigger.label}`;
 
-  if (rule.conditionGroups.length > 0) {
+  // Check if there are any actual conditions (not just empty groups)
+  const hasConditions = rule.conditionGroups.some(
+    (group) => group.conditions.length > 0
+  );
+
+  if (hasConditions) {
     description += ", If ";
 
     rule.conditionGroups.forEach((group, groupIndex) => {
+      if (group.conditions.length === 0) return; // Skip empty groups
+
       if (groupIndex > 0) {
         description += ` ${group.operator === "and" ? "AND" : "OR"} `;
       }
 
       if (group.conditions.length > 0) {
-        if (group.conditions.length > 1 || rule.conditionGroups.length > 1) {
+        if (
+          group.conditions.length > 1 ||
+          rule.conditionGroups.filter((g) => g.conditions.length > 0).length > 1
+        ) {
           description += "(";
         }
 
@@ -461,7 +471,10 @@ const generateDetailedRuleDescription = (rule: Rule): string => {
           description += conditionDesc;
         });
 
-        if (group.conditions.length > 1 || rule.conditionGroups.length > 1) {
+        if (
+          group.conditions.length > 1 ||
+          rule.conditionGroups.filter((g) => g.conditions.length > 0).length > 1
+        ) {
           description += ")";
         }
       }
