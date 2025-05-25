@@ -70,7 +70,7 @@ end`;
     description = "-- When blind is skipped";
   } else if (triggerType === "boss_defeated") {
     contextCheck =
-      "context.end_of_round and G.GAME.blind.boss and not context.blueprint";
+      "context.end_of_round and context.main_eval and G.GAME.blind.boss and not context.blueprint";
     description = "-- After boss blind is defeated";
   } else if (triggerType === "booster_opened") {
     contextCheck = "context.open_booster";
