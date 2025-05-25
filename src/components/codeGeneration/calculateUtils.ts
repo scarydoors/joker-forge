@@ -29,6 +29,9 @@ end`;
     });
   });
 
+  // Check if there are retrigger effects
+  const hasRetriggerEffects = effectTypes.includes("retrigger_cards");
+
   // Get return statement from effectUtils
   const { statement: returnStatement, colour } = generateEffectReturnStatement(
     effectTypes,
@@ -52,8 +55,13 @@ end`;
   let description = "";
 
   if (triggerType === "card_scored") {
-    contextCheck = "context.individual and context.cardarea == G.play";
-    description = "-- Individual card scoring";
+    if (hasRetriggerEffects) {
+      contextCheck = "context.repetition and context.cardarea == G.play";
+      description = "-- Card repetition context for retriggering";
+    } else {
+      contextCheck = "context.individual and context.cardarea == G.play";
+      description = "-- Individual card scoring";
+    }
   } else {
     // Default to hand_played behavior
     contextCheck = "context.cardarea == G.jokers and context.joker_main";
@@ -66,11 +74,7 @@ end`;
     if ${contextCheck} then
         -- Check all conditions
         if ${conditionChecks} then
-            return {${returnStatement}${
-    triggerType === "card_scored"
-      ? ",\n                card = context.other_card"
-      : ""
-  },
+            return {${returnStatement},
                 colour = ${colour}
             }
         end

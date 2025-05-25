@@ -79,6 +79,11 @@ export function generateEffectReturnStatement(
                 message = localize{type='variable',key='a_dollars',vars={card.ability.extra.dollars}}`;
     }
     colour = "G.C.MONEY";
+  } else if (firstEffect === "retrigger_cards") {
+    // Retrigger effect - just repetitions like in the examples
+    returnStatement = `
+                repetitions = card.ability.extra.repetitions`;
+    colour = "G.C.ORANGE";
   }
 
   // If there are more effects, chain them using 'extra'
@@ -128,6 +133,10 @@ export function generateEffectReturnStatement(
                         message = localize{type='variable',key='a_dollars',vars={card.ability.extra.dollars}}`;
         }
         effectColour = "G.C.MONEY";
+      } else if (effect === "retrigger_cards") {
+        // Additional retrigger effects
+        extraContent = `repetitions = card.ability.extra.repetitions`;
+        effectColour = "G.C.ORANGE";
       }
 
       // For the second effect, start the extra chain

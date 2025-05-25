@@ -60,6 +60,23 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
     ],
   },
   {
+    id: "retrigger_cards",
+    label: "Retrigger",
+    description:
+      "Retrigger the scored card (only for 'When a Card is Scored' trigger)",
+    applicableTriggers: ["card_scored"],
+    params: [
+      {
+        id: "repetitions",
+        type: "number",
+        label: "Repetitions",
+        default: 1,
+        min: 1,
+        max: 10,
+      },
+    ],
+  },
+  {
     id: "level_up_hand",
     label: "Level Up Hand",
     description: "Increase the level of the played hand",
@@ -96,69 +113,6 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
         id: "value",
         type: "number",
         label: "Amount",
-        default: 1,
-        min: 1,
-      },
-    ],
-  },
-  {
-    id: "retrigger_cards",
-    label: "Retrigger Cards",
-    description: "Play card effects again",
-    params: [
-      {
-        id: "type",
-        type: "select",
-        label: "Card Type",
-        options: [
-          { value: "all", label: "All Cards" },
-          { value: "specific_rank", label: "Cards of Specific Rank" },
-          { value: "specific_suit", label: "Cards of Specific Suit" },
-        ],
-      },
-      {
-        id: "rank",
-        type: "select",
-        label: "Rank",
-        showWhen: {
-          parameter: "type",
-          values: ["specific_rank"],
-        },
-        options: [
-          { value: "2", label: "2" },
-          { value: "3", label: "3" },
-          { value: "4", label: "4" },
-          { value: "5", label: "5" },
-          { value: "6", label: "6" },
-          { value: "7", label: "7" },
-          { value: "8", label: "8" },
-          { value: "9", label: "9" },
-          { value: "10", label: "10" },
-          { value: "J", label: "Jack" },
-          { value: "Q", label: "Queen" },
-          { value: "K", label: "King" },
-          { value: "A", label: "Ace" },
-        ],
-      },
-      {
-        id: "suit",
-        type: "select",
-        label: "Suit",
-        showWhen: {
-          parameter: "type",
-          values: ["specific_suit"],
-        },
-        options: [
-          { value: "Spades", label: "Spades" },
-          { value: "Hearts", label: "Hearts" },
-          { value: "Diamonds", label: "Diamonds" },
-          { value: "Clubs", label: "Clubs" },
-        ],
-      },
-      {
-        id: "repetitions",
-        type: "number",
-        label: "Repetitions",
         default: 1,
         min: 1,
       },
@@ -322,4 +276,15 @@ export function getEffectTypeById(
   id: string
 ): EffectTypeDefinition | undefined {
   return EFFECT_TYPES.find((effectType) => effectType.id === id);
+}
+
+// Helper function to get effects applicable to a specific trigger
+export function getEffectsForTrigger(
+  triggerId: string
+): EffectTypeDefinition[] {
+  return EFFECT_TYPES.filter(
+    (effect) =>
+      !effect.applicableTriggers ||
+      effect.applicableTriggers.includes(triggerId)
+  );
 }

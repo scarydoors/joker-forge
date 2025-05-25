@@ -70,6 +70,11 @@ export const extractEffectsConfig = (joker: JokerData): string => {
             configItems.push(`dollars = ${effect.params.value}`);
           }
         }
+        if (effect.type === "retrigger_cards" && effect.params.repetitions) {
+          if (!configItems.some((item) => item.startsWith("repetitions ="))) {
+            configItems.push(`repetitions = ${effect.params.repetitions}`);
+          }
+        }
       });
     });
   }
@@ -139,6 +144,12 @@ export const generateBasicLocVarsFunction = (joker: JokerData): string => {
           !vars.includes("card.ability.extra.dollars")
         ) {
           vars.push("card.ability.extra.dollars");
+        }
+        if (
+          effect.type === "retrigger_cards" &&
+          !vars.includes("card.ability.extra.repetitions")
+        ) {
+          vars.push("card.ability.extra.repetitions");
         }
       });
     });

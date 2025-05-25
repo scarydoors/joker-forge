@@ -96,6 +96,7 @@ export interface EffectTypeDefinition {
   label: string;
   description: string;
   params: EffectParameter[];
+  applicableTriggers?: string[];
 }
 
 // Interface for logical operators
