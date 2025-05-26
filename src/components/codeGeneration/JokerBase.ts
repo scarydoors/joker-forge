@@ -43,6 +43,18 @@ export const generateJokerBaseCode = (
 // Extract effect values from joker data and rules to populate the config.extra section
 export const extractEffectsConfig = (joker: JokerData): string => {
   const configItems: string[] = [];
+  const variableCount: Record<string, number> = {};
+
+  // Helper function to get a unique variable name
+  const getUniqueVariableName = (baseName: string): string => {
+    if (variableCount[baseName] === undefined) {
+      variableCount[baseName] = 0;
+      return baseName;
+    } else {
+      variableCount[baseName]++;
+      return `${baseName}${variableCount[baseName]}`;
+    }
+  };
 
   // If there are rules, check for additional effects
   if (joker.rules && joker.rules.length > 0) {
@@ -50,30 +62,35 @@ export const extractEffectsConfig = (joker: JokerData): string => {
       rule.effects.forEach((effect) => {
         // Extract effects from rules
         if (effect.type === "add_chips" && effect.params.value) {
-          // Only add if not already added
-          if (!configItems.some((item) => item.startsWith("chips ="))) {
-            configItems.push(`chips = ${effect.params.value}`);
-          }
+          const varName = getUniqueVariableName("chips");
+          configItems.push(`${varName} = ${effect.params.value}`);
         }
         if (effect.type === "add_mult" && effect.params.value) {
-          if (!configItems.some((item) => item.startsWith("mult ="))) {
-            configItems.push(`mult = ${effect.params.value}`);
-          }
+          const varName = getUniqueVariableName("mult");
+          configItems.push(`${varName} = ${effect.params.value}`);
         }
         if (effect.type === "apply_x_mult" && effect.params.value) {
-          if (!configItems.some((item) => item.startsWith("Xmult ="))) {
-            configItems.push(`Xmult = ${effect.params.value}`);
-          }
+          const varName = getUniqueVariableName("Xmult");
+          configItems.push(`${varName} = ${effect.params.value}`);
         }
         if (effect.type === "add_dollars" && effect.params.value) {
-          if (!configItems.some((item) => item.startsWith("dollars ="))) {
-            configItems.push(`dollars = ${effect.params.value}`);
-          }
+          const varName = getUniqueVariableName("dollars");
+          configItems.push(`${varName} = ${effect.params.value}`);
         }
         if (effect.type === "retrigger_cards" && effect.params.repetitions) {
-          if (!configItems.some((item) => item.startsWith("repetitions ="))) {
-            configItems.push(`repetitions = ${effect.params.repetitions}`);
-          }
+          const varName = getUniqueVariableName("repetitions");
+          configItems.push(`${varName} = ${effect.params.repetitions}`);
+        }
+        if (effect.type === "edit_hand" && effect.params.value !== undefined) {
+          const varName = getUniqueVariableName("hands");
+          configItems.push(`${varName} = ${effect.params.value}`);
+        }
+        if (
+          effect.type === "edit_discard" &&
+          effect.params.value !== undefined
+        ) {
+          const varName = getUniqueVariableName("discards");
+          configItems.push(`${varName} = ${effect.params.value}`);
         }
       });
     });
@@ -116,40 +133,50 @@ export const formatJokerDescription = (joker: JokerData): string => {
 
 export const generateBasicLocVarsFunction = (joker: JokerData): string => {
   const vars: string[] = [];
+  const variableCount: Record<string, number> = {};
+
+  // Helper function to get a unique variable name (same logic as above)
+  const getUniqueVariableName = (baseName: string): string => {
+    if (variableCount[baseName] === undefined) {
+      variableCount[baseName] = 0;
+      return baseName;
+    } else {
+      variableCount[baseName]++;
+      return `${baseName}${variableCount[baseName]}`;
+    }
+  };
 
   // Check rules for additional vars
   if (joker.rules && joker.rules.length > 0) {
     joker.rules.forEach((rule) => {
       rule.effects.forEach((effect) => {
-        if (
-          effect.type === "add_chips" &&
-          !vars.includes("card.ability.extra.chips")
-        ) {
-          vars.push("card.ability.extra.chips");
+        if (effect.type === "add_chips") {
+          const varName = getUniqueVariableName("chips");
+          vars.push(`card.ability.extra.${varName}`);
         }
-        if (
-          effect.type === "add_mult" &&
-          !vars.includes("card.ability.extra.mult")
-        ) {
-          vars.push("card.ability.extra.mult");
+        if (effect.type === "add_mult") {
+          const varName = getUniqueVariableName("mult");
+          vars.push(`card.ability.extra.${varName}`);
         }
-        if (
-          effect.type === "apply_x_mult" &&
-          !vars.includes("card.ability.extra.Xmult")
-        ) {
-          vars.push("card.ability.extra.Xmult");
+        if (effect.type === "apply_x_mult") {
+          const varName = getUniqueVariableName("Xmult");
+          vars.push(`card.ability.extra.${varName}`);
         }
-        if (
-          effect.type === "add_dollars" &&
-          !vars.includes("card.ability.extra.dollars")
-        ) {
-          vars.push("card.ability.extra.dollars");
+        if (effect.type === "add_dollars") {
+          const varName = getUniqueVariableName("dollars");
+          vars.push(`card.ability.extra.${varName}`);
         }
-        if (
-          effect.type === "retrigger_cards" &&
-          !vars.includes("card.ability.extra.repetitions")
-        ) {
-          vars.push("card.ability.extra.repetitions");
+        if (effect.type === "retrigger_cards") {
+          const varName = getUniqueVariableName("repetitions");
+          vars.push(`card.ability.extra.${varName}`);
+        }
+        if (effect.type === "edit_hand") {
+          const varName = getUniqueVariableName("hands");
+          vars.push(`card.ability.extra.${varName}`);
+        }
+        if (effect.type === "edit_discard") {
+          const varName = getUniqueVariableName("discards");
+          vars.push(`card.ability.extra.${varName}`);
         }
       });
     });

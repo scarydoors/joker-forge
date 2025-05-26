@@ -8,6 +8,8 @@ import { generateApplyXMultReturn } from "./effects/ApplyXMultEffect";
 import { generateAddDollarsReturn } from "./effects/AddDollarsEffect";
 import { generateRetriggerReturn } from "./effects/RetriggerEffect";
 import { generateDestroySelfReturn } from "./effects/DestroySelfEffect";
+import { generateEditHandReturn } from "./effects/EditHandEffect";
+import { generateEditDiscardReturn } from "./effects/EditDiscardEffect";
 
 export interface ReturnStatementResult {
   statement: string;
@@ -45,6 +47,10 @@ export function generateEffectReturnStatement(
           return generateRetriggerReturn();
         case "destroy_self":
           return generateDestroySelfReturn();
+        case "edit_hand":
+          return generateEditHandReturn(effect);
+        case "edit_discard":
+          return generateEditDiscardReturn(effect);
         default:
           // Default for unhandled effects
           return {
@@ -125,13 +131,15 @@ export function generateEffectReturnStatementFromTypes(
 ): ReturnStatementResult {
   // Convert effect types to Effect objects with default values
   const effects: Effect[] = effectTypes.map((type) => {
-    const defaultValues: Record<string, Record<string, number>> = {
+    const defaultValues: Record<string, Record<string, unknown>> = {
       add_chips: { value: 10 },
       add_mult: { value: 5 },
       apply_x_mult: { value: 1.5 },
       add_dollars: { value: 5 },
       retrigger_cards: { repetitions: 1 },
       destroy_self: {},
+      edit_hand: { operation: "add", value: 1 },
+      edit_discard: { operation: "add", value: 1 },
     };
 
     return {
