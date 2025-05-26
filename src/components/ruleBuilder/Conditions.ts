@@ -288,7 +288,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
     id: "card_rank",
     label: "Card Rank",
     description: "Check the rank of the card",
-    applicableTriggers: ["card_scored"],
+    applicableTriggers: ["card_scored", "card_discarded"],
     params: [
       {
         id: "rank_type",
@@ -362,7 +362,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
     id: "card_enhancement",
     label: "Card Enhancement",
     description: "Check if the card has a specific enhancement",
-    applicableTriggers: ["card_scored"],
+    applicableTriggers: ["card_scored", "card_discarded"],
     params: [
       {
         id: "enhancement",
