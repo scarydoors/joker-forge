@@ -11,6 +11,7 @@ import { generateDestroySelfReturn } from "./effects/DestroySelfEffect";
 import { generateEditHandReturn } from "./effects/EditHandEffect";
 import { generateEditDiscardReturn } from "./effects/EditDiscardEffect";
 import { generateLevelUpHandReturn } from "./effects/LevelUpHandEffect";
+import { generateAddCardToDeckReturn } from "./effects/AddCardToDeckEffect";
 
 export interface ReturnStatementResult {
   statement: string;
@@ -54,6 +55,8 @@ export function generateEffectReturnStatement(
           return generateEditDiscardReturn(effect);
         case "level_up_hand":
           return generateLevelUpHandReturn();
+        case "add_card_to_deck":
+          return generateAddCardToDeckReturn(effect);
         default:
           // Default for unhandled effects
           return {
@@ -143,6 +146,7 @@ export function generateEffectReturnStatementFromTypes(
       destroy_self: {},
       edit_hand: { operation: "add", value: 1 },
       edit_discard: { operation: "add", value: 1 },
+      level_up_hand: { levels: 1 },
     };
 
     return {
