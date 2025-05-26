@@ -7,6 +7,7 @@ import { generateAddMultReturn } from "./effects/AddMultEffect";
 import { generateApplyXMultReturn } from "./effects/ApplyXMultEffect";
 import { generateAddDollarsReturn } from "./effects/AddDollarsEffect";
 import { generateRetriggerReturn } from "./effects/RetriggerEffect";
+import { generateDestroySelfReturn } from "./effects/DestroySelfEffect";
 
 export interface ReturnStatementResult {
   statement: string;
@@ -42,6 +43,8 @@ export function generateEffectReturnStatement(
           return generateAddDollarsReturn(triggerType);
         case "retrigger_cards":
           return generateRetriggerReturn();
+        case "destroy_self":
+          return generateDestroySelfReturn();
         default:
           // Default for unhandled effects
           return {
@@ -128,6 +131,7 @@ export function generateEffectReturnStatementFromTypes(
       apply_x_mult: { value: 1.5 },
       add_dollars: { value: 5 },
       retrigger_cards: { repetitions: 1 },
+      destroy_self: {},
     };
 
     return {
