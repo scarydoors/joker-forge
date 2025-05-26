@@ -64,7 +64,10 @@ export const generateAddCardToDeckReturn = (effect: Effect): EffectReturn => {
   return {
     statement: `func = function()
             ${cardSelectionCode}
-            local new_card = create_playing_card({front = card_front, center = ${centerParam}}, G.discard, true, false, nil, true)${sealCode}${editionCode}
+            local new_card = create_playing_card({
+                front = card_front,
+                center = ${centerParam}
+            }, G.discard, true, false, nil, true)${sealCode}${editionCode}
             
             G.E_MANAGER:add_event(Event({
                 func = function()
@@ -73,21 +76,13 @@ export const generateAddCardToDeckReturn = (effect: Effect): EffectReturn => {
                     return true
                 end
             }))
-            return {
-                message = "Added Card!",
-                colour = G.C.GREEN,
-                func = function()
-                    G.E_MANAGER:add_event(Event({
-                        func = function()
-                            G.deck.config.card_limit = G.deck.config.card_limit + 1
-                            return true
-                        end
-                    }))
-                    draw_card(G.play, G.deck, 90, 'up')
-                    SMODS.calculate_context({ playing_card_added = true, cards = { new_card } })
-                end
-            }
+            
+            G.deck.config.card_limit = G.deck.config.card_limit + 1
+            draw_card(G.play, G.deck, 90, 'up')
+            SMODS.calculate_context({ playing_card_added = true, cards = { new_card } })
+            return true
         end`,
+    message: `"Added Card!"`,
     colour: "G.C.GREEN",
   };
 };
