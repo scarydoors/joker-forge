@@ -41,52 +41,47 @@ export const generateAddCardToDeckReturn = (effect: Effect): EffectReturn => {
     centerParam = `G.P_CENTERS.${enhancement}`;
   }
 
-  // Generate seal code
+  // Generate seal code inline
   let sealCode = "";
   if (seal === "random") {
-    sealCode = `
-            new_card:set_seal(pseudorandom_element({"Gold", "Red", "Blue", "Purple"}, pseudoseed('add_card_seal')), true)`;
+    sealCode = `\n            new_card:set_seal(pseudorandom_element({"Gold", "Red", "Blue", "Purple"}, pseudoseed('add_card_seal')), true)`;
   } else if (seal !== "none") {
-    sealCode = `
-            new_card:set_seal("${seal}", true)`;
+    sealCode = `\n            new_card:set_seal("${seal}", true)`;
   }
 
-  // Generate edition code
+  // Generate edition code inline
   let editionCode = "";
   if (edition === "random") {
-    editionCode = `
-            new_card:set_edition(pseudorandom_element({"e_foil", "e_holo", "e_polychrome", "e_negative"}, pseudoseed('add_card_edition')), true)`;
+    editionCode = `\n            new_card:set_edition(pseudorandom_element({"e_foil", "e_holo", "e_polychrome", "e_negative"}, pseudoseed('add_card_edition')), true)`;
   } else if (edition !== "none") {
-    editionCode = `
-            new_card:set_edition("${edition}", true)`;
+    editionCode = `\n            new_card:set_edition("${edition}", true)`;
   }
 
-  // Generate everything in a single func to avoid nested return issues
   return {
     statement: `func = function()
-            ${cardSelectionCode}
-            local new_card = create_playing_card({
-                front = card_front,
-                center = ${centerParam}
-            }, G.discard, true, false, nil, true)${sealCode}${editionCode}
-            
-            G.E_MANAGER:add_event(Event({
-                func = function()
-                    new_card:start_materialize()
-                    G.play:emplace(new_card)
-                    return true
-                end
-            }))
-            
-            G.E_MANAGER:add_event(Event({
-                func = function()
-                    G.deck.config.card_limit = G.deck.config.card_limit + 1
-                    return true
-                end
-            }))
-            draw_card(G.play, G.deck, 90, 'up')
-            SMODS.calculate_context({ playing_card_added = true, cards = { new_card } })
-        end`,
+                    ${cardSelectionCode}
+                    local new_card = create_playing_card({
+                        front = card_front,
+                        center = ${centerParam}
+                    }, G.discard, true, false, nil, true)${sealCode}${editionCode}
+                    
+                    G.E_MANAGER:add_event(Event({
+                        func = function()
+                            new_card:start_materialize()
+                            G.play:emplace(new_card)
+                            return true
+                        end
+                    }))
+                    
+                    G.E_MANAGER:add_event(Event({
+                        func = function()
+                            G.deck.config.card_limit = G.deck.config.card_limit + 1
+                            return true
+                        end
+                    }))
+                    draw_card(G.play, G.deck, 90, 'up')
+                    SMODS.calculate_context({ playing_card_added = true, cards = { new_card } })
+                end`,
     message: `"Added Card!"`,
     colour: "G.C.GREEN",
   };
