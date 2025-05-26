@@ -10,6 +10,7 @@ import { generateRetriggerReturn } from "./effects/RetriggerEffect";
 import { generateDestroySelfReturn } from "./effects/DestroySelfEffect";
 import { generateEditHandReturn } from "./effects/EditHandEffect";
 import { generateEditDiscardReturn } from "./effects/EditDiscardEffect";
+import { generateLevelUpHandReturn } from "./effects/LevelUpHandEffect";
 
 export interface ReturnStatementResult {
   statement: string;
@@ -51,6 +52,8 @@ export function generateEffectReturnStatement(
           return generateEditHandReturn(effect);
         case "edit_discard":
           return generateEditDiscardReturn(effect);
+        case "level_up_hand":
+          return generateLevelUpHandReturn();
         default:
           // Default for unhandled effects
           return {
