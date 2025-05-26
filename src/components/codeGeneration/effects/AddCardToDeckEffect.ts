@@ -61,6 +61,7 @@ export const generateAddCardToDeckReturn = (effect: Effect): EffectReturn => {
             new_card:set_edition("${edition}", true)`;
   }
 
+  // Generate everything in a single func to avoid nested return issues
   return {
     statement: `func = function()
             ${cardSelectionCode}
@@ -77,10 +78,14 @@ export const generateAddCardToDeckReturn = (effect: Effect): EffectReturn => {
                 end
             }))
             
-            G.deck.config.card_limit = G.deck.config.card_limit + 1
+            G.E_MANAGER:add_event(Event({
+                func = function()
+                    G.deck.config.card_limit = G.deck.config.card_limit + 1
+                    return true
+                end
+            }))
             draw_card(G.play, G.deck, 90, 'up')
             SMODS.calculate_context({ playing_card_added = true, cards = { new_card } })
-            return true
         end`,
     message: `"Added Card!"`,
     colour: "G.C.GREEN",
