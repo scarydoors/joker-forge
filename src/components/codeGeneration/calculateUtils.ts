@@ -14,27 +14,22 @@ export const generateCalculateFunction = (
     return `calculate = function(self, card, context)
     if context.joker_main then
         -- Simple effect with no conditions
-        ${generateReturnFromEffectUtils()}
+        ${generateReturnFromNoEffects()}
     end
 end`;
   }
 
-  // Get all effect types from rules
-  const effectTypes: string[] = [];
-  rules.forEach((rule) => {
-    rule.effects.forEach((effect) => {
-      if (!effectTypes.includes(effect.type)) {
-        effectTypes.push(effect.type);
-      }
-    });
-  });
+  // Get all effects from the first rule (assuming single rule for now)
+  const effects = rules[0].effects || [];
 
   // Check if there are retrigger effects
-  const hasRetriggerEffects = effectTypes.includes("retrigger_cards");
+  const hasRetriggerEffects = effects.some(
+    (effect) => effect.type === "retrigger_cards"
+  );
 
   // Get return statement from effectUtils
   const { statement: returnStatement, colour } = generateEffectReturnStatement(
-    effectTypes,
+    effects,
     triggerType
   );
 
@@ -115,9 +110,8 @@ end`;
 end`;
 };
 
-// Helper function that uses effectUtils to get a return statement
-const generateReturnFromEffectUtils = (): string => {
-  // Just return a simple activation message if no effects
+// Helper function that generates a simple return for no effects
+const generateReturnFromNoEffects = (): string => {
   const { statement, colour } = generateEffectReturnStatement([]);
 
   return `return {${statement},

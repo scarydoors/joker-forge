@@ -1,205 +1,141 @@
+import type { Effect } from "../ruleBuilder/types";
+import {
+  generateAddChipsReturn,
+  type EffectReturn,
+} from "./effects/AddChipsEffect";
+import { generateAddMultReturn } from "./effects/AddMultEffect";
+import { generateApplyXMultReturn } from "./effects/ApplyXMultEffect";
+import { generateAddDollarsReturn } from "./effects/AddDollarsEffect";
+import { generateRetriggerReturn } from "./effects/RetriggerEffect";
+
 export interface ReturnStatementResult {
   statement: string;
   colour: string;
 }
 
-// List of triggers that use card_eval_status_text for money effects
-const EVAL_STATUS_TEXT_TRIGGERS = [
-  "blind_selected",
-  "blind_skipped",
-  "boss_defeated",
-  "booster_opened",
-  "booster_skipped",
-  "consumable_used",
-  "hand_drawn",
-  "first_hand_drawn",
-  "shop_entered",
-  "shop_exited",
-  "card_discarded",
-];
-
 /**
- * Generate a return statement based on effect types and joker properties
- * Chains multiple effects with their own messages using the 'extra' field
+ * Generate a return statement based on effects and trigger type
  */
 export function generateEffectReturnStatement(
-  effectTypes: string[] = [],
+  effects: Effect[] = [],
   triggerType: string = "hand_played"
 ): ReturnStatementResult {
-  // Keep track of active effects for chaining
-  const activeEffects: string[] = [];
-
-  // Add explicit effect types if not already included
-  effectTypes.forEach((type) => {
-    if (!activeEffects.includes(type)) {
-      activeEffects.push(type);
-    }
-  });
-
-  // If no effects found, return a simple activation message
-  if (activeEffects.length === 0) {
+  // If no effects, return a simple activation message
+  if (effects.length === 0) {
     return {
       statement: '\n                message = "Activated!"',
       colour: "G.C.WHITE",
     };
   }
 
-  // Build the return statement by chaining effects
-  let returnStatement = "";
-  let colour = "G.C.WHITE";
+  // Get the return data for each effect
+  const effectReturns: EffectReturn[] = effects
+    .map((effect) => {
+      switch (effect.type) {
+        case "add_chips":
+          return generateAddChipsReturn(triggerType);
+        case "add_mult":
+          return generateAddMultReturn(triggerType);
+        case "apply_x_mult":
+          return generateApplyXMultReturn(triggerType);
+        case "add_dollars":
+          return generateAddDollarsReturn(triggerType);
+        case "retrigger_cards":
+          return generateRetriggerReturn();
+        default:
+          // Default for unhandled effects
+          return {
+            statement: "",
+            colour: "G.C.WHITE",
+          };
+      }
+    })
+    .filter((ret) => ret.statement); // Filter out empty statements
 
-  // Check if this trigger uses eval_status_text for effects
-  const usesEvalStatusText = EVAL_STATUS_TEXT_TRIGGERS.includes(triggerType);
-
-  // Process the first effect (goes directly in the return table)
-  const firstEffect = activeEffects[0];
-  if (firstEffect === "add_chips") {
-    if (triggerType === "card_scored") {
-      // For card_scored, don't include message as SMODS adds it automatically
-      returnStatement = `
-                chips = card.ability.extra.chips`;
-    } else {
-      returnStatement = `
-                chip_mod = card.ability.extra.chips,
-                message = localize{type='variable',key='a_chips',vars={card.ability.extra.chips}}`;
-    }
-    colour = "G.C.CHIPS";
-  } else if (firstEffect === "add_mult") {
-    if (triggerType === "card_scored") {
-      // For card_scored, don't include message as SMODS adds it automatically
-      returnStatement = `
-                mult = card.ability.extra.mult`;
-    } else {
-      returnStatement = `
-                mult_mod = card.ability.extra.mult,
-                message = localize{type='variable',key='a_mult',vars={card.ability.extra.mult}}`;
-    }
-    colour = "G.C.MULT";
-  } else if (firstEffect === "apply_x_mult") {
-    if (triggerType === "card_scored") {
-      // For card_scored, don't include message as SMODS adds it automatically
-      returnStatement = `
-                Xmult = card.ability.extra.Xmult`;
-    } else {
-      returnStatement = `
-                Xmult_mod = card.ability.extra.Xmult,
-                message = localize{type='variable',key='a_xmult',vars={card.ability.extra.Xmult}}`;
-    }
-    colour = "G.C.XMULT";
-  } else if (firstEffect === "add_dollars") {
-    // For specific triggers, use card_eval_status_text pattern
-    if (usesEvalStatusText) {
-      returnStatement = `
-                func = function()
-                    card_eval_status_text(context.blueprint_card or card, 'extra', nil, nil, nil, {message = "$"..tostring(card.ability.extra.dollars), colour = G.C.MONEY})
-                    ease_dollars(card.ability.extra.dollars)
-                    return true
-                end`;
-    } else {
-      returnStatement = `
-                dollars = card.ability.extra.dollars,
-                message = localize{type='variable',key='a_dollars',vars={card.ability.extra.dollars}}`;
-    }
-    colour = "G.C.MONEY";
-  } else if (firstEffect === "retrigger_cards") {
-    // Retrigger effect - just repetitions like in the examples
-    returnStatement = `
-                repetitions = card.ability.extra.repetitions`;
-    colour = "G.C.ORANGE";
+  if (effectReturns.length === 0) {
+    return {
+      statement: '\n                message = "Activated!"',
+      colour: "G.C.WHITE",
+    };
   }
 
-  // If there are more effects, chain them using 'extra'
-  if (activeEffects.length > 1) {
-    // For triggers that use eval_status_text, we need to handle multiple effects differently
-    if (usesEvalStatusText) {
-      // Build a single function that handles all effects
-      let functionContent = `
-                func = function()`;
+  // Build the return statement
+  let returnStatement = "";
+  const firstEffect = effectReturns[0];
 
-      for (let i = 0; i < activeEffects.length; i++) {
-        const effect = activeEffects[i];
+  // Add the first effect
+  returnStatement = `
+                ${firstEffect.statement}`;
 
-        if (effect === "add_dollars") {
-          functionContent += `
-                    card_eval_status_text(context.blueprint_card or card, 'extra', nil, nil, nil, {message = "$"..tostring(card.ability.extra.dollars), colour = G.C.MONEY})
-                    ease_dollars(card.ability.extra.dollars)`;
-        }
-        // Add other effect types as needed
+  if (firstEffect.message) {
+    returnStatement += `,
+                message = ${firstEffect.message}`;
+  }
+
+  // Handle multiple effects with 'extra' chaining
+  if (effectReturns.length > 1) {
+    let extraChain = "";
+
+    for (let i = 1; i < effectReturns.length; i++) {
+      const effect = effectReturns[i];
+
+      let extraContent = effect.statement;
+      if (effect.message) {
+        extraContent += `,
+                        message = ${effect.message}`;
       }
 
-      functionContent += `
-                    return true
-                end`;
-
-      returnStatement = functionContent;
-    } else {
-      // Original chaining logic for other triggers
-      let extraChain = "";
-
-      // Process each additional effect (goes in nested 'extra' fields)
-      for (let i = 1; i < activeEffects.length; i++) {
-        const effect = activeEffects[i];
-        let extraContent = "";
-        let effectColour = "G.C.WHITE";
-
-        if (effect === "add_chips") {
-          if (triggerType === "card_scored") {
-            extraContent = `chips = card.ability.extra.chips`;
-          } else {
-            extraContent = `chip_mod = card.ability.extra.chips,
-                        message = localize{type='variable',key='a_chips',vars={card.ability.extra.chips}}`;
-          }
-          effectColour = "G.C.CHIPS";
-        } else if (effect === "add_mult") {
-          if (triggerType === "card_scored") {
-            extraContent = `mult = card.ability.extra.mult`;
-          } else {
-            extraContent = `mult_mod = card.ability.extra.mult,
-                        message = localize{type='variable',key='a_mult',vars={card.ability.extra.mult}}`;
-          }
-          effectColour = "G.C.MULT";
-        } else if (effect === "apply_x_mult") {
-          if (triggerType === "card_scored") {
-            extraContent = `Xmult = card.ability.extra.Xmult`;
-          } else {
-            extraContent = `Xmult_mod = card.ability.extra.Xmult,
-                        message = localize{type='variable',key='a_xmult',vars={card.ability.extra.Xmult}}`;
-          }
-          effectColour = "G.C.XMULT";
-        } else if (effect === "add_dollars") {
-          extraContent = `dollars = card.ability.extra.dollars,
-                        message = localize{type='variable',key='a_dollars',vars={card.ability.extra.dollars}}`;
-          effectColour = "G.C.MONEY";
-        } else if (effect === "retrigger_cards") {
-          extraContent = `repetitions = card.ability.extra.repetitions`;
-          effectColour = "G.C.ORANGE";
-        }
-
-        // For the second effect, start the extra chain
-        if (i === 1) {
-          extraChain = `
+      if (i === 1) {
+        extraChain = `
                 extra = {
                     ${extraContent},
-                    colour = ${effectColour}`;
-        } else {
-          // For third+ effects, nest within the previous extra
-          extraChain += `,
+                    colour = ${effect.colour}`;
+      } else {
+        extraChain += `,
                     extra = {
                         ${extraContent},
-                        colour = ${effectColour}`;
-        }
+                        colour = ${effect.colour}`;
       }
-
-      // Close all the extra brackets
-      for (let i = 1; i < activeEffects.length; i++) {
-        extraChain += `
-                    }`;
-      }
-
-      // Add the complete extra chain to the return statement
-      returnStatement += `,${extraChain}`;
     }
+
+    // Close all the extra brackets
+    for (let i = 1; i < effectReturns.length; i++) {
+      extraChain += `
+                    }`;
+    }
+
+    returnStatement += `,${extraChain}`;
   }
 
-  return { statement: returnStatement, colour };
+  return {
+    statement: returnStatement,
+    colour: firstEffect.colour,
+  };
+}
+
+/**
+ * Generate effect return statement from effect types (for backward compatibility)
+ */
+export function generateEffectReturnStatementFromTypes(
+  effectTypes: string[] = [],
+  triggerType: string = "hand_played"
+): ReturnStatementResult {
+  // Convert effect types to Effect objects with default values
+  const effects: Effect[] = effectTypes.map((type) => {
+    const defaultValues: Record<string, Record<string, number>> = {
+      add_chips: { value: 10 },
+      add_mult: { value: 5 },
+      apply_x_mult: { value: 1.5 },
+      add_dollars: { value: 5 },
+      retrigger_cards: { repetitions: 1 },
+    };
+
+    return {
+      id: crypto.randomUUID(),
+      type,
+      params: defaultValues[type] || {},
+    };
+  });
+
+  return generateEffectReturnStatement(effects, triggerType);
 }
