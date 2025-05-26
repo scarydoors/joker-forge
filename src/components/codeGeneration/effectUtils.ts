@@ -15,6 +15,7 @@ const EVAL_STATUS_TEXT_TRIGGERS = [
   "first_hand_drawn",
   "shop_entered",
   "shop_exited",
+  "card_discarded",
 ];
 
 /**

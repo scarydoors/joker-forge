@@ -133,7 +133,7 @@ export const generateSuitCardCondition = (
     scope === "scoring" ? "context.scoring_hand" : "context.full_hand";
 
   // Special handling for card_scored trigger type
-  if (triggerType === "card_scored") {
+  if (triggerType === "card_scored" || triggerType === "card_discarded") {
     // For individual card scoring, we check the other_card directly
     const checkLogic = getSuitsCheckLogic(suits).replace(
       /c:/g,

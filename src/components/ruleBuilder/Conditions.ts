@@ -325,7 +325,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
     id: "card_suit",
     label: "Card Suit",
     description: "Check the suit of the card",
-    applicableTriggers: ["card_scored"],
+    applicableTriggers: ["card_scored", "card_discarded"],
     params: [
       {
         id: "suit_type",
