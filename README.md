@@ -1,6 +1,11 @@
 # Joker Forge
 
-A web app that allows you to make Balatro Jokers using Steammodded with ease.
+A web app that allows you to make Balatro Jokers using Steammodded with ease. It aims to lower the barrier to entry for mod creation, moving beyond simple stat adjustments to enable the creation of truly unique and complex Joker behaviors, all without requiring direct Lua scripting knowledge from the user. The core philosophy is abstraction and empowerment: abstracting the underlying SMODS code into intuitive visual components, thereby empowering users to translate their creative gameplay ideas into functional mods.
+
+[Try It Out](https://jokerforge.jaydchw.com/)
+
+It does this with a Trigger > Condition > Effect system. Most vanilla jokers follow this system. With this system, less complex jokers like Droll Joker become: When a Hand is Played (Trigger) > If Scoring Cards = Flush (Condition) > Then +10 Mult (Effect). Jokers abilities are set using the built-in Rule Builder.
+
 
 ## Implementation Status Checklist
 
@@ -21,7 +26,7 @@ A web app that allows you to make Balatro Jokers using Steammodded with ease.
 - [x] **Card Discarded** - When a card is discarded
 - [x] **Passive** - Always active during scoring
 
-#### ❌ Not Implemented Yet
+#### Not Implemented Yet
 - [ ] **Card Destroyed** - When a card is destroyed
 - [ ] **Round End** - At the end of a round
 - [ ] **Ante Start** - At the start of an ante
@@ -67,15 +72,15 @@ A web app that allows you to make Balatro Jokers using Steammodded with ease.
 - [x] **Apply X Mult** - Multiply score by value
 - [x] **Add Dollars** - Give money to player
 - [x] **Retrigger Cards** - Retrigger scored cards (card_scored trigger only)
-
-#### Not Implemented Yet
 - [ ] **Level Up Hand** - Increase poker hand level
 - [ ] **Add Discard** - Give extra discards
 - [ ] **Add Hand** - Give extra hands
+- [ ] **Destroy Self** - Destroy the joker
+- [ ] **Add Card** - Add new playing cards to deck/hand (this is half done, still an error with scoring triggers)
+
+#### Not Implemented Yet
 - [ ] **Modify Internal State** - Change joker's internal values
 - [ ] **Random Chance Effect** - Probability-based effects
-- [ ] **Destroy Self** - Destroy the joker
-- [ ] **Add Card** - Add new playing cards to deck/hand
 - [ ] **Edit Card** - Modify card properties (rank, suit, enhancement, seal)
 - [ ] **Modify Game Rules** - Change fundamental game mechanics
 - [ ] **Skip Blind** - Automatically skip current blind
@@ -100,6 +105,7 @@ A web app that allows you to make Balatro Jokers using Steammodded with ease.
 - [ ] **Sticker Compatibility** - Perishable, Rental, etc.
 - [ ] **Advanced Lua Functions** - Complex game state modifications
 - [ ] **Localization Support** - Multiple language support
+- [ ] **Mod Metadata Editing** - Edit parameters like description, version, etc.
 
 ---
 
@@ -125,10 +131,6 @@ A web app that allows you to make Balatro Jokers using Steammodded with ease.
 - [ ] **Help System** - Integrated tooltips and documentation
 
 ---
-
-**Overall Implementation Status: ~50% Complete**
-
-The core functionality for basic joker creation is solid, but many advanced features and effect types still need implementation.
 
 # Usage
 
