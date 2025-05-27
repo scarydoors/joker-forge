@@ -56,7 +56,7 @@ export function generateEffectReturnStatement(
         case "level_up_hand":
           return generateLevelUpHandReturn();
         case "add_card_to_deck":
-          return generateAddCardToDeckReturn(effect);
+          return generateAddCardToDeckReturn(effect, triggerType);
         default:
           // Default for unhandled effects
           return {
