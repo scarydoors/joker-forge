@@ -72,16 +72,17 @@ It does this with a Trigger > Condition > Effect system. Most vanilla jokers fol
 - [x] **Apply X Mult** - Multiply score by value
 - [x] **Add Dollars** - Give money to player
 - [x] **Retrigger Cards** - Retrigger scored cards (card_scored trigger only)
-- [ ] **Level Up Hand** - Increase poker hand level
-- [ ] **Add Discard** - Give extra discards
-- [ ] **Add Hand** - Give extra hands
-- [ ] **Destroy Self** - Destroy the joker
-- [ ] **Add Card** - Add new playing cards to deck/hand (this is half done, still an error with scoring triggers)
-
+- [x] **Level Up Hand** - Increase poker hand level
+- [x] **Add Discard** - Give extra discards
+- [x] **Add Hand** - Give extra hands
+- [x] **Destroy Self** - Destroy the joker
+- [x] **Add Card** - Add new playing cards to deck/hand (this is half done, still an error with scoring triggers)
+- [x] **Edit Card** - Modify card properties (rank, suit, enhancement, seal)
+- [x] **Destroy Card** - Destroys/deletes cards when scored/discarded
+      
 #### Not Implemented Yet
 - [ ] **Modify Internal State** - Change joker's internal values
 - [ ] **Random Chance Effect** - Probability-based effects
-- [ ] **Edit Card** - Modify card properties (rank, suit, enhancement, seal)
 - [ ] **Modify Game Rules** - Change fundamental game mechanics
 - [ ] **Skip Blind** - Automatically skip current blind
 - [ ] **Reroll Shop** - Force shop reroll
