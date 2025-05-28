@@ -18,6 +18,7 @@ import { generateBlindTypeCondition } from "./conditions/BlindTypeCondition";
 import { generateCardEnhancementCondition } from "./conditions/CardEnhancementCondition";
 import { generateCardSealCondition } from "./conditions/CardSealCondition";
 import { generateInternalVariableCondition } from "./conditions/InternalVariableCondition";
+import { generateRandomChanceCondition } from "./conditions/RandomChanceCondition";
 
 export const exportJokersAsMod = async (
   jokers: JokerData[],
@@ -251,6 +252,21 @@ const generateMainLua = (jokers: JokerData[]): string => {
           if (internalVariableCondition) {
             helperFunctions.push(internalVariableCondition.functionCode);
             ruleFunctionNames.push(internalVariableCondition.functionName);
+          }
+        }
+
+        // Check for random chance rules in this specific rule
+        if (
+          rule.conditionGroups.some((group) =>
+            group.conditions.some(
+              (condition) => condition.type === "random_chance"
+            )
+          )
+        ) {
+          const randomChanceCondition = generateRandomChanceCondition([rule]);
+          if (randomChanceCondition) {
+            helperFunctions.push(randomChanceCondition.functionCode);
+            ruleFunctionNames.push(randomChanceCondition.functionName);
           }
         }
 
