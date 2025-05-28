@@ -13,6 +13,7 @@ import { generateEditDiscardReturn } from "./effects/EditDiscardEffect";
 import { generateLevelUpHandReturn } from "./effects/LevelUpHandEffect";
 import { generateAddCardToDeckReturn } from "./effects/AddCardToDeckEffect";
 
+// TODO: this file is a bit of a mess, but it works for now which is what matters haha
 export interface ReturnStatementResult {
   statement: string;
   colour: string;
@@ -130,13 +131,28 @@ export function generateEffectReturnStatement(
   let returnStatement = "";
   const firstEffect = processedEffects[0];
 
-  // Add the first effect
-  returnStatement = `
+  // Check if the first effect has a non-empty statement after pre-return code extraction
+  const hasFirstStatement = firstEffect.statement.trim().length > 0;
+
+  // Add the first effect only if it has content
+  if (hasFirstStatement) {
+    returnStatement = `
                 ${firstEffect.statement}`;
 
-  if (firstEffect.message) {
-    returnStatement += `,
+    if (firstEffect.message) {
+      returnStatement += `,
                 message = ${firstEffect.message}`;
+    }
+  } else {
+    // If no statement, start with just the message
+    if (firstEffect.message) {
+      returnStatement = `
+                message = ${firstEffect.message}`;
+    } else {
+      // If neither statement nor message, provide a fallback
+      returnStatement = `
+                message = "Activated!"`;
+    }
   }
 
   // Handle multiple effects with 'extra' chaining
@@ -146,10 +162,24 @@ export function generateEffectReturnStatement(
     for (let i = 1; i < processedEffects.length; i++) {
       const effect = processedEffects[i];
 
-      let extraContent = effect.statement;
-      if (effect.message) {
-        extraContent += `,
+      // Check if this effect has a non-empty statement
+      const hasStatement = effect.statement.trim().length > 0;
+
+      let extraContent = "";
+      if (hasStatement) {
+        extraContent = effect.statement;
+        if (effect.message) {
+          extraContent += `,
                         message = ${effect.message}`;
+        }
+      } else {
+        // If no statement, just add the message
+        if (effect.message) {
+          extraContent = `message = ${effect.message}`;
+        } else {
+          // If neither statement nor message, provide a fallback
+          extraContent = `message = "Activated!"`;
+        }
       }
 
       if (i === 1) {
@@ -171,7 +201,13 @@ export function generateEffectReturnStatement(
                     }`;
     }
 
-    returnStatement += `,${extraChain}`;
+    // Add comma before extra chain only if we have meaningful content in returnStatement
+    const hasReturnContent = returnStatement.replace(/\s/g, "").length > 0;
+    if (hasReturnContent) {
+      returnStatement += `,${extraChain}`;
+    } else {
+      returnStatement = extraChain.trim();
+    }
   }
 
   return {
