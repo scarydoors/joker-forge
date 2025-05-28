@@ -28,10 +28,11 @@ end`;
   );
 
   // Get return statement from effectUtils
-  const { statement: returnStatement, colour } = generateEffectReturnStatement(
-    effects,
-    triggerType
-  );
+  const {
+    statement: returnStatement,
+    colour,
+    preReturnCode,
+  } = generateEffectReturnStatement(effects, triggerType);
 
   // Build the condition checking part
   let conditionChecks = "";
@@ -96,18 +97,31 @@ end`;
     description = "-- Main scoring time for jokers";
   }
 
-  // Generate final calculate function
-  return `calculate = function(self, card, context)
+  // Build the calculate function with pre-return code support
+  let calculateFunction = `calculate = function(self, card, context)
     ${description}
     if ${contextCheck} then
         -- Check all conditions
-        if ${conditionChecks} then
+        if ${conditionChecks} then`;
+
+  // Add pre-return code if it exists
+  if (preReturnCode) {
+    calculateFunction += `
+            -- Pre-return code execution
+            ${preReturnCode}
+            `;
+  }
+
+  // Add the return statement
+  calculateFunction += `
             return {${returnStatement},
                 colour = ${colour}
             }
         end
     end
 end`;
+
+  return calculateFunction;
 };
 
 // Helper function that generates a simple return for no effects

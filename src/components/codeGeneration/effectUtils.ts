@@ -16,6 +16,38 @@ import { generateAddCardToDeckReturn } from "./effects/AddCardToDeckEffect";
 export interface ReturnStatementResult {
   statement: string;
   colour: string;
+  preReturnCode?: string;
+}
+
+/**
+ * Extract pre-return code from an effect statement if it exists
+ */
+function extractPreReturnCode(statement: string): {
+  cleanedStatement: string;
+  preReturnCode?: string;
+} {
+  const preReturnStart = "__PRE_RETURN_CODE__";
+  const preReturnEnd = "__PRE_RETURN_CODE_END__";
+
+  if (statement.includes(preReturnStart) && statement.includes(preReturnEnd)) {
+    const startIndex =
+      statement.indexOf(preReturnStart) + preReturnStart.length;
+    const endIndex = statement.indexOf(preReturnEnd);
+
+    if (startIndex < endIndex) {
+      const preReturnCode = statement.substring(startIndex, endIndex).trim();
+      const cleanedStatement = statement
+        .replace(
+          new RegExp(`${preReturnStart}[\\s\\S]*?${preReturnEnd}`, "g"),
+          ""
+        )
+        .trim();
+
+      return { cleanedStatement, preReturnCode };
+    }
+  }
+
+  return { cleanedStatement: statement };
 }
 
 /**
@@ -74,9 +106,29 @@ export function generateEffectReturnStatement(
     };
   }
 
-  // Build the return statement
+  // Check for pre-return code in any of the effects
+  let combinedPreReturnCode = "";
+  const processedEffects: EffectReturn[] = [];
+
+  effectReturns.forEach((effect) => {
+    const { cleanedStatement, preReturnCode } = extractPreReturnCode(
+      effect.statement
+    );
+
+    if (preReturnCode) {
+      combinedPreReturnCode +=
+        (combinedPreReturnCode ? "\n\n" : "") + preReturnCode;
+    }
+
+    processedEffects.push({
+      ...effect,
+      statement: cleanedStatement,
+    });
+  });
+
+  // Build the return statement using processed effects
   let returnStatement = "";
-  const firstEffect = effectReturns[0];
+  const firstEffect = processedEffects[0];
 
   // Add the first effect
   returnStatement = `
@@ -88,11 +140,11 @@ export function generateEffectReturnStatement(
   }
 
   // Handle multiple effects with 'extra' chaining
-  if (effectReturns.length > 1) {
+  if (processedEffects.length > 1) {
     let extraChain = "";
 
-    for (let i = 1; i < effectReturns.length; i++) {
-      const effect = effectReturns[i];
+    for (let i = 1; i < processedEffects.length; i++) {
+      const effect = processedEffects[i];
 
       let extraContent = effect.statement;
       if (effect.message) {
@@ -114,7 +166,7 @@ export function generateEffectReturnStatement(
     }
 
     // Close all the extra brackets
-    for (let i = 1; i < effectReturns.length; i++) {
+    for (let i = 1; i < processedEffects.length; i++) {
       extraChain += `
                     }`;
     }
@@ -125,6 +177,7 @@ export function generateEffectReturnStatement(
   return {
     statement: returnStatement,
     colour: firstEffect.colour,
+    preReturnCode: combinedPreReturnCode || undefined,
   };
 }
 
