@@ -12,6 +12,7 @@ import { generateEditHandReturn } from "./effects/EditHandEffect";
 import { generateEditDiscardReturn } from "./effects/EditDiscardEffect";
 import { generateLevelUpHandReturn } from "./effects/LevelUpHandEffect";
 import { generateAddCardToDeckReturn } from "./effects/AddCardToDeckEffect";
+import { generateCopyCardToDeckReturn } from "./effects/CopyCardToDeckEffect";
 
 // TODO: this file is a bit of a mess, but it works for now which is what matters haha
 export interface ReturnStatementResult {
@@ -90,6 +91,10 @@ export function generateEffectReturnStatement(
           return generateLevelUpHandReturn();
         case "add_card_to_deck":
           return generateAddCardToDeckReturn(effect, triggerType);
+        case "copy_triggered_card":
+          return generateCopyCardToDeckReturn(effect, triggerType);
+        case "copy_played_card":
+          return generateCopyCardToDeckReturn(effect, triggerType);
         default:
           // Default for unhandled effects
           return {
