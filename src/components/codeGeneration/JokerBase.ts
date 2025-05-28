@@ -1,4 +1,9 @@
 import { JokerData } from "../JokerCard";
+import {
+  extractVariablesFromRules,
+  generateVariableConfig,
+  generateVariableLocVars,
+} from "./VariableUtils";
 
 export const generateJokerBaseCode = (
   joker: JokerData,
@@ -40,7 +45,6 @@ export const generateJokerBaseCode = (
     atlas = '${atlasKey}'`;
 };
 
-// Extract effect values from joker data and rules to populate the config.extra section
 export const extractEffectsConfig = (joker: JokerData): string => {
   const configItems: string[] = [];
   const variableCount: Record<string, number> = {};
@@ -56,45 +60,66 @@ export const extractEffectsConfig = (joker: JokerData): string => {
     }
   };
 
-  // If there are rules, check for additional effects
+  // Extract variables from rules first
   if (joker.rules && joker.rules.length > 0) {
+    const variables = extractVariablesFromRules(joker.rules);
+    const variableConfig = generateVariableConfig(variables);
+    if (variableConfig) {
+      configItems.push(variableConfig);
+    }
+
+    // Process effects but skip adding config for effects that use variables
     joker.rules.forEach((rule) => {
       rule.effects.forEach((effect) => {
-        // Extract effects from rules
-        if (effect.type === "add_chips" && effect.params.value) {
+        // Skip effects that use variables as their value source
+        if (effect.params.value_source === "variable") {
+          return;
+        }
+
+        // Only add config for effects with fixed values
+        if (
+          effect.type === "add_chips" &&
+          effect.params.value_source !== "variable"
+        ) {
           const varName = getUniqueVariableName("chips");
-          configItems.push(`${varName} = ${effect.params.value}`);
-        }
-        if (effect.type === "add_mult" && effect.params.value) {
-          const varName = getUniqueVariableName("mult");
-          configItems.push(`${varName} = ${effect.params.value}`);
-        }
-        if (effect.type === "apply_x_mult" && effect.params.value) {
-          const varName = getUniqueVariableName("Xmult");
-          configItems.push(`${varName} = ${effect.params.value}`);
-        }
-        if (effect.type === "add_dollars" && effect.params.value) {
-          const varName = getUniqueVariableName("dollars");
-          configItems.push(`${varName} = ${effect.params.value}`);
-        }
-        if (effect.type === "retrigger_cards" && effect.params.repetitions) {
-          const varName = getUniqueVariableName("repetitions");
-          configItems.push(`${varName} = ${effect.params.repetitions}`);
-        }
-        if (effect.type === "edit_hand" && effect.params.value !== undefined) {
-          const varName = getUniqueVariableName("hands");
-          configItems.push(`${varName} = ${effect.params.value}`);
+          configItems.push(`${varName} = ${effect.params.value || 10}`);
         }
         if (
-          effect.type === "edit_discard" &&
-          effect.params.value !== undefined
+          effect.type === "add_mult" &&
+          effect.params.value_source !== "variable"
         ) {
-          const varName = getUniqueVariableName("discards");
-          configItems.push(`${varName} = ${effect.params.value}`);
+          const varName = getUniqueVariableName("mult");
+          configItems.push(`${varName} = ${effect.params.value || 5}`);
         }
-        if (effect.type === "level_up_hand" && effect.params.value) {
+        if (
+          effect.type === "apply_x_mult" &&
+          effect.params.value_source !== "variable"
+        ) {
+          const varName = getUniqueVariableName("Xmult");
+          configItems.push(`${varName} = ${effect.params.value || 1.5}`);
+        }
+        if (
+          effect.type === "add_dollars" &&
+          effect.params.value_source !== "variable"
+        ) {
+          const varName = getUniqueVariableName("dollars");
+          configItems.push(`${varName} = ${effect.params.value || 5}`);
+        }
+        if (effect.type === "retrigger_cards") {
+          const varName = getUniqueVariableName("repetitions");
+          configItems.push(`${varName} = ${effect.params.repetitions || 1}`);
+        }
+        if (effect.type === "edit_hand") {
+          const varName = getUniqueVariableName("hands");
+          configItems.push(`${varName} = ${effect.params.value || 1}`);
+        }
+        if (effect.type === "edit_discard") {
+          const varName = getUniqueVariableName("discards");
+          configItems.push(`${varName} = ${effect.params.value || 1}`);
+        }
+        if (effect.type === "level_up_hand") {
           const varName = getUniqueVariableName("levels");
-          configItems.push(`${varName} = ${effect.params.value}`);
+          configItems.push(`${varName} = ${effect.params.value || 1}`);
         }
       });
     });
@@ -138,6 +163,13 @@ export const formatJokerDescription = (joker: JokerData): string => {
 export const generateBasicLocVarsFunction = (joker: JokerData): string => {
   const vars: string[] = [];
   const variableCount: Record<string, number> = {};
+
+  // Add variables from rules
+  if (joker.rules && joker.rules.length > 0) {
+    const variables = extractVariablesFromRules(joker.rules);
+    const variableLocVars = generateVariableLocVars(variables);
+    vars.push(...variableLocVars);
+  }
 
   // Helper function to get a unique variable name (same logic as above)
   const getUniqueVariableName = (baseName: string): string => {

@@ -15,6 +15,7 @@ import { generateAddCardToDeckReturn } from "./effects/AddCardToDeckEffect";
 import { generateCopyCardToDeckReturn } from "./effects/CopyCardToDeckEffect";
 import { generateDeleteCardReturn } from "./effects/DeleteCardEffect";
 import { generateEditCardReturn } from "./effects/EditCardEffect";
+import { generateModifyInternalVariableReturn } from "./effects/ModifyInternalVariableEffect";
 
 // TODO: this file is a bit of a mess, but it works for now which is what matters haha
 export interface ReturnStatementResult {
@@ -74,11 +75,11 @@ export function generateEffectReturnStatement(
     .map((effect) => {
       switch (effect.type) {
         case "add_chips":
-          return generateAddChipsReturn(triggerType);
+          return generateAddChipsReturn(triggerType, effect);
         case "add_mult":
-          return generateAddMultReturn(triggerType);
+          return generateAddMultReturn(triggerType, effect);
         case "apply_x_mult":
-          return generateApplyXMultReturn(triggerType);
+          return generateApplyXMultReturn(triggerType, effect);
         case "add_dollars":
           return generateAddDollarsReturn(triggerType);
         case "retrigger_cards":
@@ -101,6 +102,8 @@ export function generateEffectReturnStatement(
           return generateDeleteCardReturn();
         case "edit_triggered_card":
           return generateEditCardReturn(effect, triggerType);
+        case "modify_internal_variable":
+          return generateModifyInternalVariableReturn(effect, triggerType);
         default:
           // Default for unhandled effects
           return {

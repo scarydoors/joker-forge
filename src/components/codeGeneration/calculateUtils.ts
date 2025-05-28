@@ -1,14 +1,11 @@
 import type { Rule } from "../ruleBuilder/types";
 import { generateEffectReturnStatement } from "./effectUtils";
 
-// Function to generate the main calculate function combining all conditions
+// Function to generate the main calculate function combining all rules
 export const generateCalculateFunction = (
   rules: Rule[],
-  conditionFunctions: string[]
+  conditionFunctionsByRule: { [ruleId: string]: string[] }
 ): string => {
-  // Get trigger from the first rule (or default to hand_played)
-  const triggerType = rules.length > 0 ? rules[0].trigger : "hand_played";
-
   if (!rules || rules.length === 0) {
     // Simple function with no rules
     return `calculate = function(self, card, context)
@@ -19,106 +16,128 @@ export const generateCalculateFunction = (
 end`;
   }
 
-  // Get all effects from the first rule (assuming single rule for now)
-  const effects = rules[0].effects || [];
+  let calculateFunction = `calculate = function(self, card, context)`;
 
-  // Check if there are retrigger effects
-  const hasRetriggerEffects = effects.some(
-    (effect) => effect.type === "retrigger_cards"
-  );
+  // Generate a separate context check for each rule
+  rules.forEach((rule) => {
+    const triggerType = rule.trigger;
+    const effects = rule.effects || [];
+    const conditionFunctions = conditionFunctionsByRule[rule.id] || [];
 
-  // Get return statement from effectUtils
-  const {
-    statement: returnStatement,
-    colour,
-    preReturnCode,
-  } = generateEffectReturnStatement(effects, triggerType);
+    // Check if there are retrigger effects
+    const hasRetriggerEffects = effects.some(
+      (effect) => effect.type === "retrigger_cards"
+    );
 
-  // Build the condition checking part
-  let conditionChecks = "";
-  if (conditionFunctions.length === 0) {
-    conditionChecks = "true";
-  } else if (conditionFunctions.length === 1) {
-    conditionChecks = `${conditionFunctions[0]}(context)`;
-  } else {
-    conditionChecks = conditionFunctions
-      .map((fn) => `${fn}(context)`)
-      .join(" and ");
-  }
+    // Get return statement from effectUtils
+    const {
+      statement: returnStatement,
+      colour,
+      preReturnCode,
+    } = generateEffectReturnStatement(effects, triggerType);
 
-  // Generate context check based on trigger type
-  let contextCheck = "";
-  let description = "";
-
-  if (triggerType === "card_scored") {
-    if (hasRetriggerEffects) {
-      contextCheck = "context.repetition and context.cardarea == G.play";
-      description = "-- Card repetition context for retriggering";
+    // Build the condition checking part
+    let conditionChecks = "";
+    if (conditionFunctions.length === 0) {
+      conditionChecks = "true";
+    } else if (conditionFunctions.length === 1) {
+      conditionChecks = `${conditionFunctions[0]}(context)`;
     } else {
-      contextCheck = "context.individual and context.cardarea == G.play";
-      description = "-- Individual card scoring";
+      conditionChecks = conditionFunctions
+        .map((fn) => `${fn}(context)`)
+        .join(" and ");
     }
-  } else if (triggerType === "blind_selected") {
-    contextCheck = "context.setting_blind and not context.blueprint";
-    description = "-- When blind is selected";
-  } else if (triggerType === "blind_skipped") {
-    contextCheck = "context.skip_blind and not context.blueprint";
-    description = "-- When blind is skipped";
-  } else if (triggerType === "boss_defeated") {
-    contextCheck =
-      "context.end_of_round and context.main_eval and G.GAME.blind.boss and not context.blueprint";
-    description = "-- After boss blind is defeated";
-  } else if (triggerType === "booster_opened") {
-    contextCheck = "context.open_booster";
-    description = "-- When booster pack is opened";
-  } else if (triggerType === "booster_skipped") {
-    contextCheck = "context.skipping_booster";
-    description = "-- When booster pack is skipped";
-  } else if (triggerType === "consumable_used") {
-    contextCheck = "context.using_consumeable";
-    description = "-- When consumable is used";
-  } else if (triggerType === "hand_drawn") {
-    contextCheck = "context.hand_drawn";
-    description = "-- When hand is drawn";
-  } else if (triggerType === "first_hand_drawn") {
-    contextCheck = "context.first_hand_drawn";
-  } else if (triggerType === "shop_exited") {
-    contextCheck = "context.ending_shop and not context.blueprint";
-    description = "-- When exiting shop";
-  } else if (triggerType === "card_discarded") {
-    contextCheck = "context.discard and not context.blueprint";
-    description = "-- When card is discarded";
-  } else if (triggerType === "passive") {
-    contextCheck = "context.joker_main";
-    description = "-- Passive effect during scoring";
-  } else {
-    // Default to hand_played behavior
-    contextCheck = "context.cardarea == G.jokers and context.joker_main";
-    description = "-- Main scoring time for jokers";
-  }
 
-  // Build the calculate function with pre-return code support
-  let calculateFunction = `calculate = function(self, card, context)
-    ${description}
-    if ${contextCheck} then
-        -- Check all conditions
-        if ${conditionChecks} then`;
+    // Generate context check based on trigger type
+    let contextCheck = "";
+    let description = "";
 
-  // Add pre-return code if it exists
-  if (preReturnCode) {
+    if (triggerType === "card_scored") {
+      if (hasRetriggerEffects) {
+        contextCheck = "context.repetition and context.cardarea == G.play";
+        description = "-- Card repetition context for retriggering";
+      } else {
+        contextCheck = "context.individual and context.cardarea == G.play";
+        description = "-- Individual card scoring";
+      }
+    } else if (triggerType === "blind_selected") {
+      contextCheck = "context.setting_blind and not context.blueprint";
+      description = "-- When blind is selected";
+    } else if (triggerType === "blind_skipped") {
+      contextCheck = "context.skip_blind and not context.blueprint";
+      description = "-- When blind is skipped";
+    } else if (triggerType === "boss_defeated") {
+      contextCheck =
+        "context.end_of_round and context.main_eval and G.GAME.blind.boss and not context.blueprint";
+      description = "-- After boss blind is defeated";
+    } else if (triggerType === "booster_opened") {
+      contextCheck = "context.open_booster";
+      description = "-- When booster pack is opened";
+    } else if (triggerType === "booster_skipped") {
+      contextCheck = "context.skipping_booster";
+      description = "-- When booster pack is skipped";
+    } else if (triggerType === "consumable_used") {
+      contextCheck = "context.using_consumeable";
+      description = "-- When consumable is used";
+    } else if (triggerType === "hand_drawn") {
+      contextCheck = "context.hand_drawn";
+      description = "-- When hand is drawn";
+    } else if (triggerType === "first_hand_drawn") {
+      contextCheck = "context.first_hand_drawn";
+      description = "-- When first hand is drawn";
+    } else if (triggerType === "shop_exited") {
+      contextCheck = "context.ending_shop and not context.blueprint";
+      description = "-- When exiting shop";
+    } else if (triggerType === "card_discarded") {
+      contextCheck = "context.discard and not context.blueprint";
+      description = "-- When card is discarded";
+    } else if (triggerType === "passive") {
+      contextCheck = "context.joker_main";
+      description = "-- Passive effect during scoring";
+    } else {
+      // Default to hand_played behavior
+      contextCheck = "context.cardarea == G.jokers and context.joker_main";
+      description = "-- Main scoring time for jokers";
+    }
+
+    // Add this rule's context check
     calculateFunction += `
+    ${description}
+    if ${contextCheck} then`;
+
+    // Add condition checks if any
+    if (conditionChecks !== "true") {
+      calculateFunction += `
+        -- Check conditions for this rule
+        if ${conditionChecks} then`;
+    }
+
+    // Add pre-return code if it exists
+    if (preReturnCode) {
+      calculateFunction += `
             -- Pre-return code execution
             ${preReturnCode}
             `;
-  }
+    }
 
-  // Add the return statement
-  calculateFunction += `
+    // Add the return statement
+    calculateFunction += `
             return {${returnStatement},
                 colour = ${colour}
-            }
-        end
-    end
+            }`;
+
+    // Close condition check if it was added
+    if (conditionChecks !== "true") {
+      calculateFunction += `
+        end`;
+    }
+
+    // Close the context check
+    calculateFunction += `
+    end`;
+  });
+
+  calculateFunction += `
 end`;
 
   return calculateFunction;

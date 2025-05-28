@@ -44,7 +44,7 @@ export interface ShowWhenCondition {
 // Interface for condition parameters
 export interface ConditionParameter {
   id: string;
-  type: "select" | "number" | "range";
+  type: "select" | "number" | "range" | "text";
   label: string;
   description?: string;
   options?: ConditionParameterOption[];

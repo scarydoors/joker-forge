@@ -1,16 +1,30 @@
 import type { EffectReturn } from "./AddChipsEffect";
+import type { Effect } from "../../ruleBuilder/types";
 
-export const generateAddMultReturn = (triggerType: string): EffectReturn => {
+export const generateAddMultReturn = (
+  triggerType: string,
+  effect?: Effect
+): EffectReturn => {
+  const valueSource = effect?.params?.value_source || "fixed";
+  const variableName = effect?.params?.variable_name || "var1";
+
+  let valueReference = "";
+  if (valueSource === "variable") {
+    valueReference = `card.ability.extra.${variableName}`;
+  } else {
+    valueReference = "card.ability.extra.mult";
+  }
+
   if (triggerType === "card_scored") {
     // For card_scored, SMODS adds message automatically
     return {
-      statement: `mult = card.ability.extra.mult`,
+      statement: `mult = ${valueReference}`,
       colour: "G.C.MULT",
     };
   } else {
     return {
-      statement: `mult_mod = card.ability.extra.mult`,
-      message: `localize{type='variable',key='a_mult',vars={card.ability.extra.mult}}`,
+      statement: `mult_mod = ${valueReference}`,
+      message: `localize{type='variable',key='a_mult',vars={${valueReference}}}`,
       colour: "G.C.MULT",
     };
   }

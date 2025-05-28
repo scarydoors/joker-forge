@@ -17,6 +17,7 @@ import { generateJokerCountCondition } from "./conditions/JokerCountCondition";
 import { generateBlindTypeCondition } from "./conditions/BlindTypeCondition";
 import { generateCardEnhancementCondition } from "./conditions/CardEnhancementCondition";
 import { generateCardSealCondition } from "./conditions/CardSealCondition";
+import { generateInternalVariableCondition } from "./conditions/InternalVariableCondition";
 
 export const exportJokersAsMod = async (
   jokers: JokerData[],
@@ -57,211 +58,211 @@ const generateMainLua = (jokers: JokerData[]): string => {
   const jokerGenerationData: {
     joker: JokerData;
     index: number;
-    functionNames: string[];
+    conditionFunctionsByRule: { [ruleId: string]: string[] };
   }[] = [];
 
   // First pass: collect all helper functions
   jokers.forEach((joker, index) => {
-    const functionNames: string[] = [];
+    const conditionFunctionsByRule: { [ruleId: string]: string[] } = {};
 
     console.log("Joker rules:", joker.rules);
 
     if (joker.rules && joker.rules.length > 0) {
-      // Check for poker hand rules
-      const pokerHandRules = joker.rules.filter((rule) => {
-        return rule.conditionGroups.some((group) =>
-          group.conditions.some((condition) => condition.type === "hand_type")
-        );
-      });
+      // Process each rule individually
+      joker.rules.forEach((rule) => {
+        const ruleFunctionNames: string[] = [];
 
-      // Generate poker hand condition function if needed
-      if (pokerHandRules.length > 0) {
-        const pokerHandCondition = generatePokerHandCondition(pokerHandRules);
-        if (pokerHandCondition) {
-          helperFunctions.push(pokerHandCondition.functionCode);
-          functionNames.push(pokerHandCondition.functionName);
-        }
-      }
-
-      // Check for suit rules
-      const suitRules = joker.rules.filter((rule) => {
-        return rule.conditionGroups.some((group) =>
-          group.conditions.some(
-            (condition) =>
-              condition.type === "suit_count" || condition.type === "card_suit"
+        // Check for poker hand rules in this specific rule
+        if (
+          rule.conditionGroups.some((group) =>
+            group.conditions.some((condition) => condition.type === "hand_type")
           )
-        );
-      });
-
-      // Generate suit condition function if needed
-      if (suitRules.length > 0) {
-        const suitCondition = generateSuitCardCondition(suitRules);
-        if (suitCondition) {
-          helperFunctions.push(suitCondition.functionCode);
-          functionNames.push(suitCondition.functionName);
+        ) {
+          const pokerHandCondition = generatePokerHandCondition([rule]);
+          if (pokerHandCondition) {
+            helperFunctions.push(pokerHandCondition.functionCode);
+            ruleFunctionNames.push(pokerHandCondition.functionName);
+          }
         }
-      }
 
-      // Check for rank rules
-      const rankRules = joker.rules.filter((rule) => {
-        return rule.conditionGroups.some((group) =>
-          group.conditions.some(
-            (condition) =>
-              condition.type === "rank_count" || condition.type === "card_rank"
+        // Check for suit rules in this specific rule
+        if (
+          rule.conditionGroups.some((group) =>
+            group.conditions.some(
+              (condition) =>
+                condition.type === "suit_count" ||
+                condition.type === "card_suit"
+            )
           )
-        );
-      });
-
-      // Generate rank condition function if needed
-      if (rankRules.length > 0) {
-        const rankCondition = generateRankCardCondition(rankRules);
-        if (rankCondition) {
-          helperFunctions.push(rankCondition.functionCode);
-          functionNames.push(rankCondition.functionName);
+        ) {
+          const suitCondition = generateSuitCardCondition([rule]);
+          if (suitCondition) {
+            helperFunctions.push(suitCondition.functionCode);
+            ruleFunctionNames.push(suitCondition.functionName);
+          }
         }
-      }
 
-      // Check for card count rules
-      const countRules = joker.rules.filter((rule) => {
-        return rule.conditionGroups.some((group) =>
-          group.conditions.some((condition) => condition.type === "card_count")
-        );
-      });
-
-      // Generate card count condition function if needed
-      if (countRules.length > 0) {
-        const countCondition = generateCountCardCondition(countRules);
-        if (countCondition) {
-          helperFunctions.push(countCondition.functionCode);
-          functionNames.push(countCondition.functionName);
-        }
-      }
-
-      // Check for card enhancement rules
-      const enhancementRules = joker.rules.filter((rule) => {
-        return rule.conditionGroups.some((group) =>
-          group.conditions.some(
-            (condition) => condition.type === "card_enhancement"
+        // Check for rank rules in this specific rule
+        if (
+          rule.conditionGroups.some((group) =>
+            group.conditions.some(
+              (condition) =>
+                condition.type === "rank_count" ||
+                condition.type === "card_rank"
+            )
           )
-        );
-      });
-
-      // Generate card enhancement condition function if needed
-      if (enhancementRules.length > 0) {
-        const enhancementCondition =
-          generateCardEnhancementCondition(enhancementRules);
-        if (enhancementCondition) {
-          helperFunctions.push(enhancementCondition.functionCode);
-          functionNames.push(enhancementCondition.functionName);
+        ) {
+          const rankCondition = generateRankCardCondition([rule]);
+          if (rankCondition) {
+            helperFunctions.push(rankCondition.functionCode);
+            ruleFunctionNames.push(rankCondition.functionName);
+          }
         }
-      }
 
-      // Check for card seal rules
-      const sealRules = joker.rules.filter((rule) => {
-        return rule.conditionGroups.some((group) =>
-          group.conditions.some((condition) => condition.type === "card_seal")
-        );
-      });
-
-      // Generate card seal condition function if needed
-      if (sealRules.length > 0) {
-        const sealCondition = generateCardSealCondition(sealRules);
-        if (sealCondition) {
-          helperFunctions.push(sealCondition.functionCode);
-          functionNames.push(sealCondition.functionName);
+        // Check for card count rules in this specific rule
+        if (
+          rule.conditionGroups.some((group) =>
+            group.conditions.some(
+              (condition) => condition.type === "card_count"
+            )
+          )
+        ) {
+          const countCondition = generateCountCardCondition([rule]);
+          if (countCondition) {
+            helperFunctions.push(countCondition.functionCode);
+            ruleFunctionNames.push(countCondition.functionName);
+          }
         }
-      }
+
+        // Check for card enhancement rules in this specific rule
+        if (
+          rule.conditionGroups.some((group) =>
+            group.conditions.some(
+              (condition) => condition.type === "card_enhancement"
+            )
+          )
+        ) {
+          const enhancementCondition = generateCardEnhancementCondition([rule]);
+          if (enhancementCondition) {
+            helperFunctions.push(enhancementCondition.functionCode);
+            ruleFunctionNames.push(enhancementCondition.functionName);
+          }
+        }
+
+        // Check for card seal rules in this specific rule
+        if (
+          rule.conditionGroups.some((group) =>
+            group.conditions.some((condition) => condition.type === "card_seal")
+          )
+        ) {
+          const sealCondition = generateCardSealCondition([rule]);
+          if (sealCondition) {
+            helperFunctions.push(sealCondition.functionCode);
+            ruleFunctionNames.push(sealCondition.functionName);
+          }
+        }
+
+        // Check for player money rules in this specific rule
+        if (
+          rule.conditionGroups.some((group) =>
+            group.conditions.some(
+              (condition) => condition.type === "player_money"
+            )
+          )
+        ) {
+          const moneyCondition = generatePlayerMoneyCondition([rule]);
+          if (moneyCondition) {
+            helperFunctions.push(moneyCondition.functionCode);
+            ruleFunctionNames.push(moneyCondition.functionName);
+          }
+        }
+
+        // Check for remaining hands rules in this specific rule
+        if (
+          rule.conditionGroups.some((group) =>
+            group.conditions.some(
+              (condition) => condition.type === "remaining_hands"
+            )
+          )
+        ) {
+          const handsCondition = generateRemainingHandsCondition([rule]);
+          if (handsCondition) {
+            helperFunctions.push(handsCondition.functionCode);
+            ruleFunctionNames.push(handsCondition.functionName);
+          }
+        }
+
+        // Check for remaining discards rules in this specific rule
+        if (
+          rule.conditionGroups.some((group) =>
+            group.conditions.some(
+              (condition) => condition.type === "remaining_discards"
+            )
+          )
+        ) {
+          const discardCondition = generateRemainingDiscardsCondition([rule]);
+          if (discardCondition) {
+            helperFunctions.push(discardCondition.functionCode);
+            ruleFunctionNames.push(discardCondition.functionName);
+          }
+        }
+
+        // Check for joker count rules in this specific rule
+        if (
+          rule.conditionGroups.some((group) =>
+            group.conditions.some(
+              (condition) => condition.type === "joker_count"
+            )
+          )
+        ) {
+          const jokerCountCondition = generateJokerCountCondition([rule]);
+          if (jokerCountCondition) {
+            helperFunctions.push(jokerCountCondition.functionCode);
+            ruleFunctionNames.push(jokerCountCondition.functionName);
+          }
+        }
+
+        // Check for blind type rules in this specific rule
+        if (
+          rule.conditionGroups.some((group) =>
+            group.conditions.some(
+              (condition) => condition.type === "blind_type"
+            )
+          )
+        ) {
+          const blindTypeCondition = generateBlindTypeCondition([rule]);
+          if (blindTypeCondition) {
+            helperFunctions.push(blindTypeCondition.functionCode);
+            ruleFunctionNames.push(blindTypeCondition.functionName);
+          }
+        }
+
+        // Check for internal variable rules in this specific rule
+        if (
+          rule.conditionGroups.some((group) =>
+            group.conditions.some(
+              (condition) => condition.type === "internal_variable"
+            )
+          )
+        ) {
+          const internalVariableCondition = generateInternalVariableCondition([
+            rule,
+          ]);
+          if (internalVariableCondition) {
+            helperFunctions.push(internalVariableCondition.functionCode);
+            ruleFunctionNames.push(internalVariableCondition.functionName);
+          }
+        }
+
+        // Store the function names for this rule
+        conditionFunctionsByRule[rule.id] = ruleFunctionNames;
+      });
     }
-
-    // Check for player money rules
-    const moneyRules = (joker.rules ?? []).filter((rule) => {
-      return rule.conditionGroups.some((group) =>
-        group.conditions.some((condition) => condition.type === "player_money")
-      );
-    });
-
-    // Generate player money condition function if needed
-    if (moneyRules.length > 0) {
-      const moneyCondition = generatePlayerMoneyCondition(moneyRules);
-      if (moneyCondition) {
-        helperFunctions.push(moneyCondition.functionCode);
-        functionNames.push(moneyCondition.functionName);
-      }
-    }
-
-    // Check for remaining hands rules
-    const handsRules = (joker.rules ?? []).filter((rule) => {
-      return rule.conditionGroups.some((group) =>
-        group.conditions.some(
-          (condition) => condition.type === "remaining_hands"
-        )
-      );
-    });
-
-    // Generate remaining hands condition function if needed
-    if (handsRules.length > 0) {
-      const handsCondition = generateRemainingHandsCondition(handsRules);
-      if (handsCondition) {
-        helperFunctions.push(handsCondition.functionCode);
-        functionNames.push(handsCondition.functionName);
-      }
-    }
-
-    // Check for remaining discards rules
-    const discardRules = (joker.rules ?? []).filter((rule) => {
-      return rule.conditionGroups.some((group) =>
-        group.conditions.some(
-          (condition) => condition.type === "remaining_discards"
-        )
-      );
-    });
-
-    // Generate remaining discards condition function if needed
-    if (discardRules.length > 0) {
-      const discardCondition = generateRemainingDiscardsCondition(discardRules);
-      if (discardCondition) {
-        helperFunctions.push(discardCondition.functionCode);
-        functionNames.push(discardCondition.functionName);
-      }
-    }
-
-    const jokerCountRules = (joker.rules ?? []).filter((rule) => {
-      return rule.conditionGroups.some((group) =>
-        group.conditions.some((condition) => condition.type === "joker_count")
-      );
-    });
-
-    // Generate joker count condition function if needed
-    if (jokerCountRules.length > 0) {
-      const jokerCountCondition = generateJokerCountCondition(jokerCountRules);
-      if (jokerCountCondition) {
-        helperFunctions.push(jokerCountCondition.functionCode);
-        functionNames.push(jokerCountCondition.functionName);
-      }
-    }
-
-    // Check for blind type rules
-    const blindTypeRules = (joker.rules ?? []).filter((rule) => {
-      return rule.conditionGroups.some((group) =>
-        group.conditions.some((condition) => condition.type === "blind_type")
-      );
-    });
-
-    // Generate blind type condition function if needed
-    if (blindTypeRules.length > 0) {
-      const blindTypeCondition = generateBlindTypeCondition(blindTypeRules);
-      if (blindTypeCondition) {
-        helperFunctions.push(blindTypeCondition.functionCode);
-        functionNames.push(blindTypeCondition.functionName);
-      }
-    }
-
-    // More condition types will be added here in the future
 
     jokerGenerationData.push({
       joker,
       index,
-      functionNames,
+      conditionFunctionsByRule,
     });
   });
 
@@ -291,9 +292,14 @@ SMODS.Atlas({
   }
 
   // Now add all joker definitions
-  jokerGenerationData.forEach(({ joker, index, functionNames }) => {
+  jokerGenerationData.forEach(({ joker, index, conditionFunctionsByRule }) => {
     output +=
-      generateJokerCode(joker, index, "CustomJokers", functionNames) + "\n\n";
+      generateJokerCode(
+        joker,
+        index,
+        "CustomJokers",
+        conditionFunctionsByRule
+      ) + "\n\n";
   });
 
   output += "return mod";
@@ -304,7 +310,7 @@ const generateJokerCode = (
   joker: JokerData,
   index: number,
   atlasKey: string,
-  conditionFunctions: string[]
+  conditionFunctionsByRule: { [ruleId: string]: string[] }
 ): string => {
   console.log(`Generating code for joker: ${joker.name}`);
 
@@ -314,10 +320,10 @@ const generateJokerCode = (
   // Generate loc_vars function
   const locVarsCode = generateBasicLocVarsFunction(joker);
 
-  // Generate the calculate function that combines all conditions
+  // Generate the calculate function that combines all rules
   const calculateCode = generateCalculateFunction(
     joker.rules || [],
-    conditionFunctions
+    conditionFunctionsByRule
   );
 
   // Add the generated code to the joker

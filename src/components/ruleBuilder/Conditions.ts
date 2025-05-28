@@ -568,9 +568,9 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
     ],
   },
   {
-    id: "internal_counter",
-    label: "Internal Counter",
-    description: "Check the value of a joker's internal counter",
+    id: "internal_variable",
+    label: "Internal Variable",
+    description: "Check the value of an internal variable for this joker",
     applicableTriggers: [
       "blind_selected",
       "card_scored",
@@ -588,15 +588,10 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
     ],
     params: [
       {
-        id: "counter_name",
-        type: "select",
-        label: "Counter",
-        options: [
-          { value: "counter", label: "Main Counter" },
-          { value: "chips_counter", label: "Chips Counter" },
-          { value: "mult_counter", label: "Mult Counter" },
-          { value: "xmult_counter", label: "xMult Counter" },
-        ],
+        id: "variable_name",
+        type: "text",
+        label: "Variable Name",
+        default: "var1",
       },
       {
         id: "operator",
@@ -608,7 +603,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
         id: "value",
         type: "number",
         label: "Value",
-        default: 1,
+        default: 0,
       },
     ],
   },

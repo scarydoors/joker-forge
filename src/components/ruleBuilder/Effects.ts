@@ -9,11 +9,35 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
     applicableTriggers: ["hand_played", "card_scored", "passive"],
     params: [
       {
+        id: "value_source",
+        type: "select",
+        label: "Value Source",
+        options: [
+          { value: "fixed", label: "Fixed Value" },
+          { value: "variable", label: "Internal Variable" },
+        ],
+        default: "fixed",
+      },
+      {
         id: "value",
         type: "number",
         label: "Amount",
         default: 10,
         min: 0,
+        showWhen: {
+          parameter: "value_source",
+          values: ["fixed"],
+        },
+      },
+      {
+        id: "variable_name",
+        type: "text",
+        label: "Variable Name",
+        default: "var1",
+        showWhen: {
+          parameter: "value_source",
+          values: ["variable"],
+        },
       },
     ],
   },
@@ -145,20 +169,15 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
     ],
   },
   {
-    id: "modify_internal_state",
-    label: "Modify Internal State",
-    description: "Change an internal counter or value for this joker",
+    id: "modify_internal_variable",
+    label: "Modify Internal Variable",
+    description: "Change an internal variable value for this joker",
     params: [
       {
-        id: "variable",
-        type: "select",
-        label: "Variable",
-        options: [
-          { value: "counter", label: "Counter" },
-          { value: "chips_bonus", label: "Chips Bonus" },
-          { value: "mult_bonus", label: "Mult Bonus" },
-          { value: "xmult_bonus", label: "xMult Bonus" },
-        ],
+        id: "variable_name",
+        type: "text",
+        label: "Variable Name",
+        default: "var1",
       },
       {
         id: "operation",
@@ -170,7 +189,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
           { value: "decrement", label: "Decrement by value" },
           { value: "multiply", label: "Multiply by value" },
           { value: "divide", label: "Divide by value" },
-          { value: "reset", label: "Reset to initial value" },
+          { value: "reset", label: "Reset to 0" },
         ],
       },
       {
@@ -178,6 +197,10 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
         type: "number",
         label: "Value",
         default: 1,
+        showWhen: {
+          parameter: "operation",
+          values: ["set", "increment", "decrement", "multiply", "divide"],
+        },
       },
     ],
   },
