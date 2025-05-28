@@ -52,10 +52,10 @@ It does this with a Trigger > Condition > Effect system. Most vanilla jokers fol
 - [x] **Remaining Discards** - Check discards left in round
 - [x] **Joker Count** - Check number of jokers owned
 - [x] **Blind Type** - Check current blind type (Small, Big, Boss)
-
+- [x] **Random Chance** - Probability-based conditions
+- [x] **Internal Variable** - Check joker's internal variable values
+      
 #### Not Implemented Yet
-- [ ] **Random Chance** - Probability-based conditions
-- [ ] **Internal Counter** - Check joker's internal counters
 - [ ] **Ante Level** - Check current ante level
 - [ ] **Hand Size** - Check current hand size
 - [ ] **Deck Size** - Check remaining deck size
@@ -79,10 +79,10 @@ It does this with a Trigger > Condition > Effect system. Most vanilla jokers fol
 - [x] **Add Card** - Add new playing cards to deck/hand (this is half done, still an error with scoring triggers)
 - [x] **Edit Card** - Modify card properties (rank, suit, enhancement, seal)
 - [x] **Destroy Card** - Destroys/deletes cards when scored/discarded
+- [ ] **Modify Internal Variable** - Change joker's internal variable values
+- [ ] **Random Chance Effect** - Probability-based effects
       
 #### Not Implemented Yet
-- [ ] **Modify Internal State** - Change joker's internal values
-- [ ] **Random Chance Effect** - Probability-based effects
 - [ ] **Modify Game Rules** - Change fundamental game mechanics
 - [ ] **Skip Blind** - Automatically skip current blind
 - [ ] **Reroll Shop** - Force shop reroll
@@ -104,7 +104,6 @@ It does this with a Trigger > Condition > Effect system. Most vanilla jokers fol
 - [ ] **Blueprint Compatibility Logic** - Actual blueprint behavior code
 - [ ] **Unlock Condition Generation** - Custom unlock requirements
 - [ ] **Sticker Compatibility** - Perishable, Rental, etc.
-- [ ] **Advanced Lua Functions** - Complex game state modifications
 - [ ] **Localization Support** - Multiple language support
 - [ ] **Mod Metadata Editing** - Edit parameters like description, version, etc.
 
@@ -124,7 +123,6 @@ It does this with a Trigger > Condition > Effect system. Most vanilla jokers fol
 
 #### Not Implemented Yet
 - [ ] **Dynamic Code Display** - Live preview of generated Lua code in rule builder
-- [ ] **Advanced Validation** - Comprehensive rule validation and error checking
 - [ ] **Undo/Redo System** - History management for rule editing
 - [ ] **Rule Templates** - Pre-made rule templates for common effects
 - [ ] **Import System** - Import existing jokers/rules from files
