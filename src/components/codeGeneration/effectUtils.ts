@@ -18,6 +18,7 @@ import { generateEditCardReturn } from "./effects/EditCardEffect";
 import { generateModifyInternalVariableReturn } from "./effects/ModifyInternalVariableEffect";
 import { generateAddTarotCardReturn } from "./effects/AddTarotCardEffect";
 import { generateAddPlanetCardReturn } from "./effects/AddPlanetCardEffect";
+import { generateAddSpectralCardReturn } from "./effects/AddSpectralCardEffect";
 
 // TODO: this file is a bit of a mess, but it works for now which is what matters haha
 export interface ReturnStatementResult {
@@ -110,6 +111,8 @@ export function generateEffectReturnStatement(
           return generateAddTarotCardReturn(effect, triggerType);
         case "create_planet_card":
           return generateAddPlanetCardReturn(effect, triggerType);
+        case "create_spectral_card":
+          return generateAddSpectralCardReturn(effect, triggerType);
         default:
           // Default for unhandled effects
           return {

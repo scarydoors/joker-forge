@@ -608,6 +608,71 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
     ],
   },
   {
+    id: "create_spectral_card",
+    label: "Create Spectral Card",
+    description: "Create a specific or random Spectral card",
+    params: [
+      {
+        id: "spectral_card",
+        type: "select",
+        label: "Spectral Card",
+        options: [
+          { value: "random", label: "Random Spectral Card" },
+          {
+            value: "familiar",
+            label: "Familiar - Destroy 1 card, add 3 Enhanced face cards",
+          },
+          {
+            value: "grim",
+            label: "Grim - Destroy 1 card, add 2 Enhanced Aces",
+          },
+          {
+            value: "incantation",
+            label:
+              "Incantation - Destroy 1 card, add 4 Enhanced numbered cards",
+          },
+          { value: "talisman", label: "Talisman - Add Gold Seal to 1 card" },
+          { value: "aura", label: "Aura - Add random edition to 1 card" },
+          {
+            value: "wraith",
+            label: "Wraith - Create Rare Joker, set money to $0",
+          },
+          {
+            value: "sigil",
+            label: "Sigil - Convert all cards to single random suit",
+          },
+          {
+            value: "ouija",
+            label: "Ouija - Convert all cards to single rank, -1 Hand Size",
+          },
+          {
+            value: "ectoplasm",
+            label: "Ectoplasm - Add Negative to random Joker, -1 Hand Size",
+          },
+          { value: "immolate", label: "Immolate - Destroy 5 cards, gain $20" },
+          { value: "ankh", label: "Ankh - Copy 1 Joker, destroy others" },
+          { value: "deja_vu", label: "Deja Vu - Add Red Seal to 1 card" },
+          {
+            value: "hex",
+            label: "Hex - Add Polychrome to random Joker, destroy rest",
+          },
+          { value: "trance", label: "Trance - Add Blue Seal to 1 card" },
+          { value: "medium", label: "Medium - Add Purple Seal to 1 card" },
+          {
+            value: "cryptid",
+            label: "Cryptid - Create 2 copies of selected card",
+          },
+          { value: "the_soul", label: "The Soul - Create Legendary Joker" },
+          {
+            value: "black_hole",
+            label: "Black Hole - Upgrade all poker hands by 1 level",
+          },
+        ],
+        default: "random",
+      },
+    ],
+  },
+  {
     id: "destroy_self",
     label: "Destroy Self",
     description: "Destroy this joker",
