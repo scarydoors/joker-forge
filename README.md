@@ -79,13 +79,14 @@ It does this with a Trigger > Condition > Effect system. Most vanilla jokers fol
 - [x] **Add Card** - Add new playing cards to deck/hand (this is half done, still an error with scoring triggers)
 - [x] **Edit Card** - Modify card properties (rank, suit, enhancement, seal)
 - [x] **Destroy Card** - Destroys/deletes cards when scored/discarded
-- [ ] **Modify Internal Variable** - Change joker's internal variable values
-- [ ] **Random Chance Effect** - Probability-based effects
+- [x] **Modify Internal Variable** - Change joker's internal variable values
+- [x] **Random Chance Effect** - Probability-based effects
+- [x] **Create Tarot Card** - Create a random or set tarot card
+- [x] **Create Planet Card** - Create a random or set planet card
+- [x] **Create Spectral Card** - Create a random or set planet card
       
 #### Not Implemented Yet
 - [ ] **Modify Game Rules** - Change fundamental game mechanics
-- [ ] **Skip Blind** - Automatically skip current blind
-- [ ] **Reroll Shop** - Force shop reroll
 
 ---
 
