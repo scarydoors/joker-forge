@@ -16,6 +16,7 @@ import { generateCopyCardToDeckReturn } from "./effects/CopyCardToDeckEffect";
 import { generateDeleteCardReturn } from "./effects/DeleteCardEffect";
 import { generateEditCardReturn } from "./effects/EditCardEffect";
 import { generateModifyInternalVariableReturn } from "./effects/ModifyInternalVariableEffect";
+import { generateAddTarotCardReturn } from "./effects/AddTarotCardEffect";
 
 // TODO: this file is a bit of a mess, but it works for now which is what matters haha
 export interface ReturnStatementResult {
@@ -104,6 +105,8 @@ export function generateEffectReturnStatement(
           return generateEditCardReturn(effect, triggerType);
         case "modify_internal_variable":
           return generateModifyInternalVariableReturn(effect, triggerType);
+        case "create_tarot_card":
+          return generateAddTarotCardReturn(effect, triggerType);
         default:
           // Default for unhandled effects
           return {

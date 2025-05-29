@@ -491,6 +491,89 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
     ],
   },
   {
+    id: "create_tarot_card",
+    label: "Create Tarot Card",
+    description: "Create a specific or random Tarot card",
+    params: [
+      {
+        id: "tarot_card",
+        type: "select",
+        label: "Tarot Card",
+        options: [
+          { value: "random", label: "Random Tarot Card" },
+          {
+            value: "the_fool",
+            label: "The Fool - Creates last Tarot/Planet used",
+          },
+          {
+            value: "the_magician",
+            label: "The Magician - Enhance 2 cards to Lucky",
+          },
+          {
+            value: "the_high_priestess",
+            label: "The High Priestess - Create 2 Planet cards",
+          },
+          {
+            value: "the_empress",
+            label: "The Empress - Enhance 2 cards to Mult",
+          },
+          { value: "the_emperor", label: "The Emperor - Create 2 Tarot cards" },
+          {
+            value: "the_hierophant",
+            label: "The Hierophant - Enhance 2 cards to Bonus",
+          },
+          { value: "the_lovers", label: "The Lovers - Enhance 1 card to Wild" },
+          {
+            value: "the_chariot",
+            label: "The Chariot - Enhance 1 card to Steel",
+          },
+          { value: "justice", label: "Justice - Enhance 1 card to Glass" },
+          { value: "the_hermit", label: "The Hermit - Double money (Max $20)" },
+          {
+            value: "the_wheel_of_fortune",
+            label: "Wheel of Fortune - 1/4 chance add edition to Joker",
+          },
+          {
+            value: "strength",
+            label: "Strength - Increase rank of 2 cards by 1",
+          },
+          {
+            value: "the_hanged_man",
+            label: "The Hanged Man - Destroy 2 cards",
+          },
+          {
+            value: "death",
+            label: "Death - Convert left card into right card",
+          },
+          {
+            value: "temperance",
+            label: "Temperance - Gain Jokers' sell value (Max $50)",
+          },
+          { value: "the_devil", label: "The Devil - Enhance 1 card to Gold" },
+          { value: "the_tower", label: "The Tower - Enhance 1 card to Stone" },
+          {
+            value: "the_star",
+            label: "The Star - Convert 3 cards to Diamonds",
+          },
+          { value: "the_moon", label: "The Moon - Convert 3 cards to Clubs" },
+          { value: "the_sun", label: "The Sun - Convert 3 cards to Hearts" },
+          { value: "judgement", label: "Judgement - Create random Joker" },
+          {
+            value: "the_world",
+            label: "The World - Convert 3 cards to Spades",
+          },
+        ],
+        default: "random",
+      },
+    ],
+  },
+  {
+    id: "destroy_self",
+    label: "Destroy Self",
+    description: "Destroy this joker",
+    params: [],
+  },
+  {
     id: "destroy_self",
     label: "Destroy Self",
     description: "Destroy this joker",
