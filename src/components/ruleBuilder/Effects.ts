@@ -568,6 +568,46 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
     ],
   },
   {
+    id: "create_planet_card",
+    label: "Create Planet Card",
+    description: "Create a specific or random Planet card",
+    params: [
+      {
+        id: "planet_card",
+        type: "select",
+        label: "Planet Card",
+        options: [
+          { value: "random", label: "Random Planet Card" },
+          { value: "pluto", label: "Pluto - High Card (+1 Mult, +10 Chips)" },
+          { value: "mercury", label: "Mercury - Pair (+1 Mult, +15 Chips)" },
+          { value: "uranus", label: "Uranus - Two Pair (+1 Mult, +20 Chips)" },
+          {
+            value: "venus",
+            label: "Venus - Three of a Kind (+2 Mult, +20 Chips)",
+          },
+          { value: "saturn", label: "Saturn - Straight (+3 Mult, +30 Chips)" },
+          { value: "jupiter", label: "Jupiter - Flush (+2 Mult, +15 Chips)" },
+          { value: "earth", label: "Earth - Full House (+2 Mult, +25 Chips)" },
+          {
+            value: "mars",
+            label: "Mars - Four of a Kind (+3 Mult, +30 Chips)",
+          },
+          {
+            value: "neptune",
+            label: "Neptune - Straight Flush (+4 Mult, +40 Chips)",
+          },
+          {
+            value: "planet_x",
+            label: "Planet X - Five of a Kind (+3 Mult, +35 Chips)",
+          },
+          { value: "ceres", label: "Ceres - Flush House (+4 Mult, +40 Chips)" },
+          { value: "eris", label: "Eris - Flush Five (+3 Mult, +50 Chips)" },
+        ],
+        default: "random",
+      },
+    ],
+  },
+  {
     id: "destroy_self",
     label: "Destroy Self",
     description: "Destroy this joker",
