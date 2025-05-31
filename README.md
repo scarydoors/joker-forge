@@ -9,6 +9,8 @@ It does this with a Trigger > Condition > Effect system. Most vanilla jokers fol
 
 ## Implementation Status Checklist
 
+The plan here is to implement enough triggers, conditions, and effects, so as that each vanilla joker in Balatro can be replicated within Joker Forge.
+
 ### Triggers
 
 #### Fully Implemented
@@ -33,6 +35,8 @@ It does this with a Trigger > Condition > Effect system. Most vanilla jokers fol
 - [ ] **Shop Entered** - When entering the shop
 - [ ] **Card Bought** - When a card is purchased
 - [ ] **Card Sold** - When a card is sold
+- [ ] **Shop Reroll** - When the shop is rerolled (Flash Card)
+- [ ] **Joker Added/Removed** - WHhen a Joker is added/removed from your list (Joker Stencil)
 
 ---
 
@@ -79,13 +83,17 @@ It does this with a Trigger > Condition > Effect system. Most vanilla jokers fol
 - [x] **Add Card** - Add new playing cards to deck/hand (this is half done, still an error with scoring triggers)
 - [x] **Edit Card** - Modify card properties (rank, suit, enhancement, seal)
 - [x] **Destroy Card** - Destroys/deletes cards when scored/discarded
-- [ ] **Modify Internal Variable** - Change joker's internal variable values
-- [ ] **Random Chance Effect** - Probability-based effects
+- [x] **Modify Internal Variable** - Change joker's internal variable values
+- [x] **Random Chance Effect** - Probability-based effects
+- [x] **Create Tarot Card** - Create a random or set tarot card
+- [x] **Create Planet Card** - Create a random or set planet card
+- [x] **Create Spectral Card** - Create a random or set planet card
       
 #### Not Implemented Yet
-- [ ] **Modify Game Rules** - Change fundamental game mechanics
-- [ ] **Skip Blind** - Automatically skip current blind
-- [ ] **Reroll Shop** - Force shop reroll
+- [ ] **Modify Game Rules** - Change fundamental game mechanics (Hand size, pareidolia, disable boss blind, etc.)
+- [ ] **Beat Current Blind** - Completes the current blind (Mr. Bones)
+- [ ] **Modify Sell Value** - Change sell value of this or other jokers (Egg, Gift Card)
+- [ ] **Copy Ability of Adjacent Joker** - Blueprint/Brainstorm logic (difficult)
 
 ---
 
@@ -128,6 +136,7 @@ It does this with a Trigger > Condition > Effect system. Most vanilla jokers fol
 - [ ] **Import System** - Import existing jokers/rules from files
 - [ ] **Mobile Responsiveness** - Touch-friendly interface for mobile devices
 - [ ] **Help System** - Integrated tooltips and documentation
+- [ ] **Much Better Variable Management** - This will be annoying and will come with an overhaul
 
 ---
 
