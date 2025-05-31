@@ -43,7 +43,7 @@ const Variables: React.FC<VariablesProps> = ({ joker }) => {
   };
 
   return (
-    <div className="bg-black border-l-2 border-t-2 border-black-light p-4">
+    <div className="bg-black-dark border-l-2 border-t-2 border-black-light p-4">
       <span className="flex items-center justify-center mb-2 gap-2">
         <CommandLineIcon className="h-6 w-6 text-white-light" />
         <h3 className="text-white-light text-lg font-medium tracking-wider">

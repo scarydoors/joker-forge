@@ -28,7 +28,7 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
   existingRules = [],
   joker,
 }) => {
-  const [rules, setRules] = useState<Rule[]>(existingRules);
+  const [rules, setRules] = useState<Rule[]>([]);
   const [selectedItem, setSelectedItem] = useState<SelectedItem>(null);
   const modalRef = useRef<HTMLDivElement>(null);
 
@@ -41,7 +41,11 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
     if (isOpen) {
       setRules(existingRules);
       setSelectedItem(null);
+    }
+  }, [isOpen, existingRules]);
 
+  useEffect(() => {
+    if (isOpen) {
       const handleClickOutside = (event: MouseEvent) => {
         if (
           modalRef.current &&
@@ -55,7 +59,7 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
       return () =>
         document.removeEventListener("mousedown", handleClickOutside);
     }
-  }, [isOpen, existingRules, handleSaveAndClose]);
+  }, [isOpen, handleSaveAndClose]);
 
   const addTrigger = (triggerId: string) => {
     const newRule: Rule = {
@@ -64,44 +68,103 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
       conditionGroups: [],
       effects: [],
     };
-    const updatedRules = [...rules, newRule];
-    setRules(updatedRules);
+    setRules((prev) => [...prev, newRule]);
     setSelectedItem({ type: "trigger", ruleId: newRule.id });
   };
 
-  const addCondition = (conditionType: string) => {
-    if (!selectedItem || selectedItem.type === "effect") return;
+  const addCondition = useCallback(
+    (conditionType: string) => {
+      if (!selectedItem || selectedItem.type === "effect") return;
 
-    const newCondition: Condition = {
+      const newCondition: Condition = {
+        id: crypto.randomUUID(),
+        type: conditionType,
+        negate: false,
+        params: {},
+      };
+
+      setRules((prev) => {
+        return prev.map((rule) => {
+          if (rule.id === selectedItem.ruleId) {
+            if (rule.conditionGroups.length === 0) {
+              return {
+                ...rule,
+                conditionGroups: [
+                  {
+                    id: crypto.randomUUID(),
+                    operator: "and",
+                    conditions: [newCondition],
+                  },
+                ],
+              };
+            } else {
+              return {
+                ...rule,
+                conditionGroups: rule.conditionGroups.map((group, index) => {
+                  if (index === 0) {
+                    return {
+                      ...group,
+                      conditions: [...group.conditions, newCondition],
+                    };
+                  }
+                  return group;
+                }),
+              };
+            }
+          }
+          return rule;
+        });
+      });
+
+      setSelectedItem({
+        type: "condition",
+        ruleId: selectedItem.ruleId,
+        itemId: newCondition.id,
+      });
+    },
+    [selectedItem]
+  );
+
+  const addConditionGroup = (ruleId: string) => {
+    const newGroup = {
       id: crypto.randomUUID(),
-      type: conditionType,
-      negate: false,
-      params: {},
+      operator: "and" as const,
+      conditions: [],
     };
 
-    const updatedRules = rules.map((rule) => {
-      if (rule.id === selectedItem.ruleId) {
-        if (rule.conditionGroups.length === 0) {
-          rule.conditionGroups = [
-            {
-              id: crypto.randomUUID(),
-              operator: "and",
-              conditions: [newCondition],
-            },
-          ];
-        } else {
-          rule.conditionGroups[0].conditions.push(newCondition);
+    setRules((prev) =>
+      prev.map((rule) => {
+        if (rule.id === ruleId) {
+          return {
+            ...rule,
+            conditionGroups: [...rule.conditionGroups, newGroup],
+          };
         }
-      }
-      return rule;
-    });
+        return rule;
+      })
+    );
+  };
 
-    setRules(updatedRules);
-    setSelectedItem({
-      type: "condition",
-      ruleId: selectedItem.ruleId,
-      itemId: newCondition.id,
-    });
+  const toggleGroupOperator = (ruleId: string, groupId: string) => {
+    setRules((prev) =>
+      prev.map((rule) => {
+        if (rule.id === ruleId) {
+          return {
+            ...rule,
+            conditionGroups: rule.conditionGroups.map((group) => {
+              if (group.id === groupId) {
+                return {
+                  ...group,
+                  operator: group.operator === "and" ? "or" : "and",
+                };
+              }
+              return group;
+            }),
+          };
+        }
+        return rule;
+      })
+    );
   };
 
   const addEffect = (effectType: string) => {
@@ -113,14 +176,18 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
       params: {},
     };
 
-    const updatedRules = rules.map((rule) => {
-      if (rule.id === selectedItem.ruleId) {
-        rule.effects.push(newEffect);
-      }
-      return rule;
-    });
+    setRules((prev) =>
+      prev.map((rule) => {
+        if (rule.id === selectedItem.ruleId) {
+          return {
+            ...rule,
+            effects: [...rule.effects, newEffect],
+          };
+        }
+        return rule;
+      })
+    );
 
-    setRules(updatedRules);
     setSelectedItem({
       type: "effect",
       ruleId: selectedItem.ruleId,
@@ -133,20 +200,24 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
     conditionId: string,
     updates: Partial<Condition>
   ) => {
-    const updatedRules = rules.map((rule) => {
-      if (rule.id === ruleId) {
-        rule.conditionGroups = rule.conditionGroups.map((group) => ({
-          ...group,
-          conditions: group.conditions.map((condition) =>
-            condition.id === conditionId
-              ? { ...condition, ...updates }
-              : condition
-          ),
-        }));
-      }
-      return rule;
-    });
-    setRules(updatedRules);
+    setRules((prev) =>
+      prev.map((rule) => {
+        if (rule.id === ruleId) {
+          return {
+            ...rule,
+            conditionGroups: rule.conditionGroups.map((group) => ({
+              ...group,
+              conditions: group.conditions.map((condition) =>
+                condition.id === conditionId
+                  ? { ...condition, ...updates }
+                  : condition
+              ),
+            })),
+          };
+        }
+        return rule;
+      })
+    );
   };
 
   const updateEffect = (
@@ -154,53 +225,64 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
     effectId: string,
     updates: Partial<Effect>
   ) => {
-    const updatedRules = rules.map((rule) => {
-      if (rule.id === ruleId) {
-        rule.effects = rule.effects.map((effect) =>
-          effect.id === effectId ? { ...effect, ...updates } : effect
-        );
-      }
-      return rule;
-    });
-    setRules(updatedRules);
+    setRules((prev) =>
+      prev.map((rule) => {
+        if (rule.id === ruleId) {
+          return {
+            ...rule,
+            effects: rule.effects.map((effect) =>
+              effect.id === effectId ? { ...effect, ...updates } : effect
+            ),
+          };
+        }
+        return rule;
+      })
+    );
   };
 
   const deleteRule = (ruleId: string) => {
-    const updatedRules = rules.filter((rule) => rule.id !== ruleId);
-    setRules(updatedRules);
+    setRules((prev) => prev.filter((rule) => rule.id !== ruleId));
     if (selectedItem && selectedItem.ruleId === ruleId) {
       setSelectedItem(null);
     }
   };
 
   const deleteCondition = (ruleId: string, conditionId: string) => {
-    const updatedRules = rules.map((rule) => {
-      if (rule.id === ruleId) {
-        rule.conditionGroups = rule.conditionGroups
-          .map((group) => ({
-            ...group,
-            conditions: group.conditions.filter(
-              (condition) => condition.id !== conditionId
-            ),
-          }))
-          .filter((group) => group.conditions.length > 0);
-      }
-      return rule;
-    });
-    setRules(updatedRules);
+    setRules((prev) =>
+      prev.map((rule) => {
+        if (rule.id === ruleId) {
+          return {
+            ...rule,
+            conditionGroups: rule.conditionGroups
+              .map((group) => ({
+                ...group,
+                conditions: group.conditions.filter(
+                  (condition) => condition.id !== conditionId
+                ),
+              }))
+              .filter((group) => group.conditions.length > 0),
+          };
+        }
+        return rule;
+      })
+    );
     if (selectedItem && selectedItem.itemId === conditionId) {
       setSelectedItem({ type: "trigger", ruleId });
     }
   };
 
   const deleteEffect = (ruleId: string, effectId: string) => {
-    const updatedRules = rules.map((rule) => {
-      if (rule.id === ruleId) {
-        rule.effects = rule.effects.filter((effect) => effect.id !== effectId);
-      }
-      return rule;
-    });
-    setRules(updatedRules);
+    setRules((prev) =>
+      prev.map((rule) => {
+        if (rule.id === ruleId) {
+          return {
+            ...rule,
+            effects: rule.effects.filter((effect) => effect.id !== effectId),
+          };
+        }
+        return rule;
+      })
+    );
     if (selectedItem && selectedItem.itemId === effectId) {
       setSelectedItem({ type: "trigger", ruleId });
     }
@@ -269,7 +351,7 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
           />
 
           <div
-            className="flex-grow relative overflow-y-auto custom-scrollbar"
+            className="flex-grow relative overflow-y-auto custom-scrollbar border-t-2 border-black-light"
             style={{
               backgroundImage: `radial-gradient(circle, #26353B 1px, transparent 1px)`,
               backgroundSize: "20px 20px",
@@ -290,7 +372,7 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
               </div>
             ) : (
               <div className="p-6">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="flex flex-wrap gap-6">
                   {rules.map((rule, index) => (
                     <RuleCard
                       key={rule.id}
@@ -301,6 +383,9 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
                       onDeleteRule={deleteRule}
                       onDeleteCondition={deleteCondition}
                       onDeleteEffect={deleteEffect}
+                      onAddConditionGroup={addConditionGroup}
+                      onToggleGroupOperator={toggleGroupOperator}
+                      isRuleSelected={selectedItem?.ruleId === rule.id}
                     />
                   ))}
                 </div>

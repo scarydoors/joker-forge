@@ -273,11 +273,11 @@ const Inspector: React.FC<InspectorProps> = ({
   };
 
   return (
-    <div className="bg-black border-l-2 border-t-1 border-black-lighter p-4 flex-grow">
+    <div className="bg-black-dark border-l-2 border-t-1 border-black-lighter p-4 flex-grow">
       <span className="flex items-center justify-center mb-2 gap-2">
         <ChartPieIcon className="h-6 w-6 text-white-light" />
         <h3 className="text-white-light text-lg font-medium tracking-wider">
-          Variables
+          Inspector
         </h3>
       </span>
 

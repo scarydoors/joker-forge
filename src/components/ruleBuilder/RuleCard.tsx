@@ -1,9 +1,14 @@
 import React from "react";
-import type { Rule } from "./types";
+import type { Rule, ConditionGroup, Condition, Effect } from "./types";
 import { getTriggerById } from "./Triggers";
 import { getConditionTypeById } from "./Conditions";
 import { getEffectTypeById } from "./Effects";
-import { TrashIcon, BoltIcon, BeakerIcon } from "@heroicons/react/24/outline";
+import BlockComponent from "./BlockComponent";
+import {
+  TrashIcon,
+  PlusIcon,
+  ChevronDownIcon,
+} from "@heroicons/react/24/outline";
 
 interface RuleCardProps {
   rule: Rule;
@@ -21,80 +26,10 @@ interface RuleCardProps {
   onDeleteRule: (ruleId: string) => void;
   onDeleteCondition: (ruleId: string, conditionId: string) => void;
   onDeleteEffect: (ruleId: string, effectId: string) => void;
+  onAddConditionGroup: (ruleId: string) => void;
+  onToggleGroupOperator: (ruleId: string, groupId: string) => void;
+  isRuleSelected: boolean;
 }
-
-interface BlockComponentProps {
-  type: "trigger" | "condition" | "effect";
-  label: string;
-  isSelected: boolean;
-  onClick: () => void;
-  onDelete?: () => void;
-}
-
-const BlockComponent: React.FC<BlockComponentProps> = ({
-  type,
-  label,
-  isSelected,
-  onClick,
-  onDelete,
-}) => {
-  const getTypeColor = () => {
-    switch (type) {
-      case "trigger":
-        return "bg-mint text-black-darker border-mint-dark";
-      case "condition":
-        return "bg-balatro-blue text-white border-balatro-blueshadow";
-      case "effect":
-        return "bg-balatro-orange text-black-darker border-balatro-red";
-      default:
-        return "bg-black-light text-white border-black-lighter";
-    }
-  };
-
-  const getIcon = () => {
-    switch (type) {
-      case "trigger":
-        return <BoltIcon className="h-4 w-4" />;
-      case "condition":
-        return <BeakerIcon className="h-4 w-4" />;
-      case "effect":
-        return <BoltIcon className="h-4 w-4" />;
-    }
-  };
-
-  return (
-    <div
-      className={`
-        relative p-3 rounded-lg border-2 cursor-pointer transition-all
-        ${getTypeColor()}
-        ${
-          isSelected
-            ? "ring-2 ring-white ring-offset-2 ring-offset-black"
-            : "hover:opacity-80"
-        }
-      `}
-      onClick={onClick}
-    >
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          {getIcon()}
-          <span className="text-sm font-medium tracking-wide">{label}</span>
-        </div>
-        {onDelete && (
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onDelete();
-            }}
-            className="p-1 hover:bg-black/20 rounded transition-colors"
-          >
-            <TrashIcon className="h-4 w-4" />
-          </button>
-        )}
-      </div>
-    </div>
-  );
-};
 
 const RuleCard: React.FC<RuleCardProps> = ({
   rule,
@@ -104,11 +39,16 @@ const RuleCard: React.FC<RuleCardProps> = ({
   onDeleteRule,
   onDeleteCondition,
   onDeleteEffect,
+  onAddConditionGroup,
+  onToggleGroupOperator,
+  isRuleSelected,
 }) => {
   const trigger = getTriggerById(rule.trigger);
   const allConditions = rule.conditionGroups.flatMap(
     (group) => group.conditions
   );
+  const totalConditions = allConditions.length;
+  const totalEffects = rule.effects.length;
 
   const isItemSelected = (
     type: "trigger" | "condition" | "effect",
@@ -120,46 +60,229 @@ const RuleCard: React.FC<RuleCardProps> = ({
     return selectedItem.itemId === itemId;
   };
 
-  return (
-    <div className="bg-black-dark/90 backdrop-blur-sm border-2 border-black-lighter rounded-lg p-4">
-      <div className="flex justify-between items-center mb-4">
-        <h3 className="text-white-light text-lg font-medium tracking-wider">
-          Rule {ruleIndex + 1}
-        </h3>
-        <button
-          onClick={() => onDeleteRule(rule.id)}
-          className="p-2 text-balatro-red hover:bg-balatro-red/20 rounded transition-colors"
-        >
-          <TrashIcon className="h-5 w-5" />
-        </button>
-      </div>
+  const getParameterCount = (params: Record<string, unknown>) => {
+    return Object.keys(params).length;
+  };
 
-      <div className="space-y-3">
-        <div>
-          <div className="text-white-darker text-xs tracking-wider uppercase mb-2">
-            Trigger
-          </div>
-          <BlockComponent
-            type="trigger"
-            label={trigger?.label || "Unknown Trigger"}
-            isSelected={isItemSelected("trigger")}
-            onClick={() => onSelectItem({ type: "trigger", ruleId: rule.id })}
-          />
-        </div>
+  const generateConditionTitle = (condition: Condition) => {
+    const conditionType = getConditionTypeById(condition.type);
+    const baseLabel = conditionType?.label || "Unknown Condition";
 
-        {allConditions.length > 0 && (
-          <div>
-            <div className="text-white-darker text-xs tracking-wider uppercase mb-2">
-              Conditions
+    if (!condition.params || Object.keys(condition.params).length === 0) {
+      return baseLabel;
+    }
+
+    const params = condition.params;
+
+    switch (condition.type) {
+      case "hand_type":
+        if (params.value) {
+          return `If Hand Type = ${params.value}`;
+        }
+        break;
+      case "player_money":
+        if (params.operator && params.value !== undefined) {
+          const op =
+            params.operator === "greater_than"
+              ? ">"
+              : params.operator === "less_than"
+              ? "<"
+              : params.operator === "equals"
+              ? "="
+              : params.operator === "greater_equals"
+              ? ">="
+              : params.operator === "less_equals"
+              ? "<="
+              : "≠";
+          return `If Player Money ${op} $${params.value}`;
+        }
+        break;
+      case "card_count":
+        if (params.operator && params.value !== undefined) {
+          const op =
+            params.operator === "greater_than"
+              ? ">"
+              : params.operator === "less_than"
+              ? "<"
+              : params.operator === "equals"
+              ? "="
+              : params.operator === "greater_equals"
+              ? ">="
+              : params.operator === "less_equals"
+              ? "<="
+              : "≠";
+          return `If Card Count ${op} ${params.value}`;
+        }
+        break;
+      case "card_rank":
+        if (params.specific_rank) {
+          return `If Card Rank = ${params.specific_rank}`;
+        } else if (params.rank_group) {
+          return `If Card Rank = ${params.rank_group}`;
+        }
+        break;
+      case "card_suit":
+        if (params.specific_suit) {
+          return `If Card Suit = ${params.specific_suit}`;
+        } else if (params.suit_group) {
+          return `If Card Suit = ${params.suit_group}`;
+        }
+        break;
+      case "remaining_hands":
+        if (params.operator && params.value !== undefined) {
+          const op =
+            params.operator === "greater_than"
+              ? ">"
+              : params.operator === "less_than"
+              ? "<"
+              : params.operator === "equals"
+              ? "="
+              : params.operator === "greater_equals"
+              ? ">="
+              : params.operator === "less_equals"
+              ? "<="
+              : "≠";
+          return `If Remaining Hands ${op} ${params.value}`;
+        }
+        break;
+      case "remaining_discards":
+        if (params.operator && params.value !== undefined) {
+          const op =
+            params.operator === "greater_than"
+              ? ">"
+              : params.operator === "less_than"
+              ? "<"
+              : params.operator === "equals"
+              ? "="
+              : params.operator === "greater_equals"
+              ? ">="
+              : params.operator === "less_equals"
+              ? "<="
+              : "≠";
+          return `If Remaining Discards ${op} ${params.value}`;
+        }
+        break;
+      case "random_chance":
+        if (params.numerator && params.denominator) {
+          return `If Random ${params.numerator} in ${params.denominator}`;
+        }
+        break;
+    }
+
+    return baseLabel;
+  };
+
+  const generateEffectTitle = (effect: Effect) => {
+    const effectType = getEffectTypeById(effect.type);
+    const baseLabel = effectType?.label || "Unknown Effect";
+
+    if (!effect.params || Object.keys(effect.params).length === 0) {
+      return baseLabel;
+    }
+
+    const params = effect.params;
+
+    switch (effect.type) {
+      case "add_chips":
+        if (params.value !== undefined) {
+          return `Add ${params.value} Chips`;
+        }
+        break;
+      case "add_mult":
+        if (params.value !== undefined) {
+          return `Add ${params.value} Mult`;
+        }
+        break;
+      case "apply_x_mult":
+        if (params.value !== undefined) {
+          return `Apply ${params.value}x Mult`;
+        }
+        break;
+      case "add_dollars":
+        if (params.value !== undefined) {
+          return `Add $${params.value}`;
+        }
+        break;
+      case "retrigger_cards":
+        if (params.repetitions !== undefined) {
+          return `Retrigger ${params.repetitions}x`;
+        }
+        break;
+      case "edit_hand":
+        if (params.operation && params.value !== undefined) {
+          const op =
+            params.operation === "add"
+              ? "+"
+              : params.operation === "subtract"
+              ? "-"
+              : "Set to";
+          return `${op} ${params.value} Hands`;
+        }
+        break;
+      case "edit_discard":
+        if (params.operation && params.value !== undefined) {
+          const op =
+            params.operation === "add"
+              ? "+"
+              : params.operation === "subtract"
+              ? "-"
+              : "Set to";
+          return `${op} ${params.value} Discards`;
+        }
+        break;
+      case "level_up_hand":
+        if (params.value !== undefined) {
+          return `Level Up Hand ${params.value}x`;
+        }
+        break;
+    }
+
+    return baseLabel;
+  };
+
+  const generateDescription = () => {
+    const triggerText = trigger?.label || "Unknown Trigger";
+    const conditionsText =
+      totalConditions > 0
+        ? ` > ${allConditions
+            .map((c) => {
+              const condType = getConditionTypeById(c.type);
+              return condType?.label || "Unknown";
+            })
+            .join(" AND ")}`
+        : "";
+    const effectsText =
+      totalEffects > 0
+        ? ` > ${rule.effects
+            .map((e) => {
+              const effType = getEffectTypeById(e.type);
+              return effType?.label || "Unknown";
+            })
+            .join(", ")}`
+        : "";
+
+    return `${triggerText}${conditionsText}${effectsText}`;
+  };
+
+  const renderConditionGroup = (group: ConditionGroup, groupIndex: number) => {
+    return (
+      <div key={group.id} className="relative">
+        <div className="border-2 border-dashed border-black-lighter rounded-lg p-4 bg-black-darker/30">
+          <div className="flex items-center justify-between mb-3">
+            <div className="text-white-darker text-xs tracking-wider uppercase">
+              Condition Group {groupIndex + 1}
             </div>
-            <div className="space-y-2">
-              {allConditions.map((condition) => {
-                const conditionType = getConditionTypeById(condition.type);
-                return (
+          </div>
+
+          <div className="space-y-3">
+            {group.conditions.map((condition, conditionIndex) => {
+              const conditionType = getConditionTypeById(condition.type);
+              return (
+                <div key={condition.id}>
                   <BlockComponent
-                    key={condition.id}
                     type="condition"
                     label={conditionType?.label || "Unknown Condition"}
+                    dynamicTitle={generateConditionTitle(condition)}
                     isSelected={isItemSelected("condition", condition.id)}
                     onClick={() =>
                       onSelectItem({
@@ -168,42 +291,147 @@ const RuleCard: React.FC<RuleCardProps> = ({
                         itemId: condition.id,
                       })
                     }
+                    showTrash={true}
                     onDelete={() => onDeleteCondition(rule.id, condition.id)}
+                    parameterCount={getParameterCount(condition.params)}
+                    isNegated={condition.negate}
                   />
-                );
-              })}
+                  {conditionIndex < group.conditions.length - 1 && (
+                    <div className="text-center py-2">
+                      <button
+                        onClick={() => onToggleGroupOperator(rule.id, group.id)}
+                        className="px-3 py-1 bg-black-light border border-black-lighter rounded text-white-darker text-sm hover:bg-black transition-colors"
+                      >
+                        {group.operator.toUpperCase()}
+                      </button>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {groupIndex < rule.conditionGroups.length - 1 && (
+          <div className="text-center py-3">
+            <span className="text-white-darker text-sm font-medium tracking-wider">
+              AND
+            </span>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  return (
+    <div
+      className={`
+        w-96 bg-black-dark border-2 rounded-lg overflow-hidden
+        ${isRuleSelected ? "border-mint" : "border-black-lighter"}
+      `}
+    >
+      <div className="bg-black-darker px-4 py-3 border-b border-black-lighter">
+        <div className="flex justify-between items-center">
+          <h3 className="text-white-light text-lg font-medium tracking-wider">
+            Rule {ruleIndex + 1}
+          </h3>
+          <div className="flex items-center gap-4">
+            {totalConditions > 0 && (
+              <span className="text-white-darker text-sm">
+                {totalConditions} Condition{totalConditions !== 1 ? "s" : ""}
+              </span>
+            )}
+            {totalEffects > 0 && (
+              <span className="text-white-darker text-sm">
+                {totalEffects} Effect{totalEffects !== 1 ? "s" : ""}
+              </span>
+            )}
+            <button
+              onClick={() => onDeleteRule(rule.id)}
+              className="p-2 text-balatro-red hover:bg-balatro-red/20 rounded transition-colors"
+            >
+              <TrashIcon className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div className="p-4 space-y-4">
+        <div>
+          <BlockComponent
+            type="trigger"
+            label={trigger?.label || "Unknown Trigger"}
+            isSelected={isItemSelected("trigger")}
+            onClick={() => onSelectItem({ type: "trigger", ruleId: rule.id })}
+          />
+        </div>
+
+        {/* Separator */}
+        {(rule.conditionGroups.length > 0 || rule.effects.length > 0) && (
+          <div className="flex justify-center">
+            <ChevronDownIcon className="h-5 w-5 text-white-darker" />
+          </div>
+        )}
+
+        {rule.conditionGroups.length > 0 && (
+          <div className="space-y-4">
+            {rule.conditionGroups.map((group, index) =>
+              renderConditionGroup(group, index)
+            )}
+            <div className="flex justify-center">
+              <button
+                onClick={() => onAddConditionGroup(rule.id)}
+                className="flex items-center gap-2 px-3 py-2 bg-black-light border border-black-lighter rounded text-white-darker text-sm hover:bg-black transition-colors"
+              >
+                <PlusIcon className="h-4 w-4" />
+                Add Condition Group
+              </button>
             </div>
           </div>
         )}
 
-        {rule.effects.length > 0 && (
-          <div>
-            <div className="text-white-darker text-xs tracking-wider uppercase mb-2">
-              Effects
-            </div>
-            <div className="space-y-2">
-              {rule.effects.map((effect) => {
-                const effectType = getEffectTypeById(effect.type);
-                return (
-                  <BlockComponent
-                    key={effect.id}
-                    type="effect"
-                    label={effectType?.label || "Unknown Effect"}
-                    isSelected={isItemSelected("effect", effect.id)}
-                    onClick={() =>
-                      onSelectItem({
-                        type: "effect",
-                        ruleId: rule.id,
-                        itemId: effect.id,
-                      })
-                    }
-                    onDelete={() => onDeleteEffect(rule.id, effect.id)}
-                  />
-                );
-              })}
-            </div>
+        {/* Separator */}
+        {rule.effects.length > 0 && rule.conditionGroups.length > 0 && (
+          <div className="flex justify-center">
+            <ChevronDownIcon className="h-5 w-5 text-white-darker" />
           </div>
         )}
+
+        {rule.effects.length > 0 && (
+          <div className="space-y-3">
+            {rule.effects.map((effect) => {
+              const effectType = getEffectTypeById(effect.type);
+              return (
+                <BlockComponent
+                  key={effect.id}
+                  type="effect"
+                  label={effectType?.label || "Unknown Effect"}
+                  dynamicTitle={generateEffectTitle(effect)}
+                  isSelected={isItemSelected("effect", effect.id)}
+                  onClick={() =>
+                    onSelectItem({
+                      type: "effect",
+                      ruleId: rule.id,
+                      itemId: effect.id,
+                    })
+                  }
+                  showTrash={true}
+                  onDelete={() => onDeleteEffect(rule.id, effect.id)}
+                  parameterCount={getParameterCount(effect.params)}
+                />
+              );
+            })}
+          </div>
+        )}
+
+        <div className="border-t border-black-lighter pt-4">
+          <div className="text-white-darker text-xs tracking-wider uppercase mb-2">
+            Description
+          </div>
+          <div className="text-white-darker text-sm leading-relaxed">
+            {generateDescription()}
+          </div>
+        </div>
       </div>
     </div>
   );
