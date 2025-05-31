@@ -67,6 +67,14 @@ html {
   --color-black-dark: #26353b;
   --color-black-darker: #1e2b30;
 
+  --color-effect: #c0a435;
+  --color-condition: #1d7bde;
+  --color-trigger: #31b166;
+
+  --color-effect-dark: #9a8029;
+  --color-condition-dark: #155bb8;
+  --color-trigger-dark: #268a52;
+
   /* Font family */
   --font-game: "m6x11plus", sans-serif;
   --font-lexend: "Lexend", sans-serif;
