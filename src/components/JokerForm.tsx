@@ -11,20 +11,20 @@ import InputDropdown from "./generic/InputDropdown";
 import Checkbox from "./generic/Checkbox";
 import Button from "./generic/Button";
 import { JokerData } from "./JokerCard";
+import RuleBuilder from "./ruleBuilder/RuleBuilder";
+import type { Rule } from "./ruleBuilder/types";
 
 interface JokerFormProps {
   joker: JokerData | null;
   onSaveJoker: (joker: JokerData) => void;
   onDeleteJoker: (jokerId: string) => void;
   modName: string;
-  onOpenRuleBuilder: () => void;
 }
 
 const JokerForm: React.FC<JokerFormProps> = ({
   joker,
   onSaveJoker,
   onDeleteJoker,
-  onOpenRuleBuilder,
 }) => {
   const [formData, setFormData] = useState<JokerData>(() => {
     const initialData = joker || {
@@ -45,6 +45,8 @@ const JokerForm: React.FC<JokerFormProps> = ({
       discovered: initialData.discovered !== false,
     };
   });
+
+  const [showRuleBuilder, setShowRuleBuilder] = useState(false);
 
   useEffect(() => {
     if (joker) {
@@ -162,6 +164,17 @@ const JokerForm: React.FC<JokerFormProps> = ({
     }
   };
 
+  const handleOpenRuleBuilder = () => {
+    setShowRuleBuilder(true);
+  };
+
+  const handleSaveRules = (rules: Rule[]) => {
+    const updatedData = { ...formData, rules };
+    setFormData(updatedData);
+    onSaveJoker(updatedData);
+    setShowRuleBuilder(false);
+  };
+
   const insertColorTag = (color: string) => {
     const textArea = document.getElementById(
       "joker-description"
@@ -230,246 +243,258 @@ const JokerForm: React.FC<JokerFormProps> = ({
   ];
 
   return (
-    <div className="w-full font-lexend flex flex-col min-h-full">
-      <h2 className="text-xl text-white-darker font-extralight tracking-widest mb-4">
-        EDIT JOKER
-      </h2>
+    <>
+      <div className="w-full font-lexend flex flex-col min-h-full">
+        <h2 className="text-xl text-white-darker font-extralight tracking-widest mb-4">
+          EDIT JOKER
+        </h2>
 
-      <div className="flex flex-wrap gap-8 mb-6">
-        <div className="w-auto">
-          <div className="flex flex-col items-center">
-            <div className="relative">
-              <div className="aspect-[2/3] w-48 overflow-hidden">
-                {formData.imagePreview ? (
-                  <img
-                    src={formData.imagePreview}
-                    alt={formData.name}
-                    className="w-full h-full object-contain"
-                    draggable="false"
-                  />
-                ) : (
-                  <img
-                    src="/images/placeholder-joker.png"
-                    alt="Default Joker"
-                    className="w-full h-full object-contain"
-                    draggable="false"
-                  />
-                )}
+        <div className="flex flex-wrap gap-8 mb-6">
+          <div className="w-auto">
+            <div className="flex flex-col items-center">
+              <div className="relative">
+                <div className="aspect-[2/3] w-48 overflow-hidden">
+                  {formData.imagePreview ? (
+                    <img
+                      src={formData.imagePreview}
+                      alt={formData.name}
+                      className="w-full h-full object-contain"
+                      draggable="false"
+                    />
+                  ) : (
+                    <img
+                      src="/images/placeholder-joker.png"
+                      alt="Default Joker"
+                      className="w-full h-full object-contain"
+                      draggable="false"
+                    />
+                  )}
 
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageUpload}
-                  className="hidden"
-                  ref={fileInputRef}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    className="hidden"
+                    ref={fileInputRef}
+                  />
+                  <button
+                    onClick={() => fileInputRef.current?.click()}
+                    className="absolute bottom-8 right-4 bg-black-dark opacity-60 hover:opacity-100 p-2 rounded-xl transition-all"
+                  >
+                    <PhotoIcon className="h-6 w-6 text-mint cursor-pointer" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex-1 space-y-6">
+            <div>
+              <InputField
+                value={formData.name}
+                onChange={(e) => handleInputChange("name", e.target.value)}
+                placeholder="Enter joker name"
+                separator={true}
+                useGameFont={true}
+                label="Joker Name"
+              />
+            </div>
+
+            <div>
+              <div className="relative">
+                <InputField
+                  id="joker-description"
+                  value={formData.description}
+                  onChange={(e) =>
+                    handleInputChange("description", e.target.value)
+                  }
+                  multiline={true}
+                  height="100px"
+                  separator={true}
+                  useGameFont={true}
+                  label="Joker Description"
                 />
+              </div>
+
+              <div className="flex flex-wrap gap-2 -mt-3 pt-3 rounded-b-lg justify-cente p-2 border-black-lighter border-2">
                 <button
-                  onClick={() => fileInputRef.current?.click()}
-                  className="absolute bottom-8 right-4 bg-black-dark opacity-60 hover:opacity-100 p-2 rounded-xl transition-all"
+                  onClick={() => insertColorTag("red")}
+                  className="w-8 h-8 bg-balatro-red rounded-md"
+                ></button>
+                <button
+                  onClick={() => insertColorTag("orange")}
+                  className="w-8 h-8 bg-balatro-orange rounded-md"
+                ></button>
+                <button
+                  onClick={() => insertColorTag("blue")}
+                  className="w-8 h-8 bg-balatro-blue rounded-md"
+                ></button>
+                <button
+                  onClick={() => insertColorTag("money")}
+                  className="w-8 h-8 bg-balatro-money rounded-md"
+                ></button>
+                <button
+                  onClick={() => insertColorTag("green")}
+                  className="w-8 h-8 bg-balatro-green rounded-md"
+                ></button>
+                <button
+                  onClick={() => insertColorTag("purple")}
+                  className="w-8 h-8 bg-balatro-purple rounded-md"
+                ></button>
+                <button
+                  onClick={() => insertColorTag("attention")}
+                  className="w-8 h-8 bg-balatro-planet rounded-md"
+                ></button>
+                <button
+                  onClick={() => insertColorTag("chips")}
+                  className="w-8 h-8 bg-balatro-chips rounded-md"
+                ></button>
+                <button
+                  onClick={() => insertColorTag("mult")}
+                  className="w-8 h-8 bg-balatro-mult rounded-md"
+                ></button>
+                <Button
+                  size="sm"
+                  variant="primary"
+                  onClick={addNewLine}
+                  icon={<ArrowPathIcon className="h-4 w-4" />}
+                  height="34px"
                 >
-                  <PhotoIcon className="h-6 w-6 text-mint cursor-pointer" />
-                </button>
+                  NL
+                </Button>
               </div>
             </div>
           </div>
         </div>
 
-        <div className="flex-1 space-y-6">
+        <div className="mb-8 w-3/4 h-[2px] bg-black mx-auto"></div>
+
+        <div className="grid grid-cols-3 gap-4 mb-8">
+          <div>
+            <InputDropdown
+              value={formData.rarity.toString()}
+              onChange={handleRarityChange}
+              options={rarityOptions}
+              separator={true}
+              label="Rarity"
+            />
+          </div>
+
           <div>
             <InputField
-              value={formData.name}
-              onChange={(e) => handleInputChange("name", e.target.value)}
-              placeholder="Enter joker name"
+              value={formData.cost?.toString() || "4"}
+              onChange={(e) =>
+                handleNumberChange("cost", parseInt(e.target.value))
+              }
+              placeholder="Cost"
               separator={true}
-              useGameFont={true}
-              label="Joker Name"
+              type="number"
+              min={1}
+              label="Cost"
             />
           </div>
 
           <div>
-            <div className="relative">
-              <InputField
-                id="joker-description"
-                value={formData.description}
-                onChange={(e) =>
-                  handleInputChange("description", e.target.value)
+            <InputDropdown
+              value={"shop"}
+              onChange={(value) => console.log(value)}
+              options={spawnPoolOptions}
+              separator={true}
+              label="Spawn Pool"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-6 mb-8">
+          <div>
+            <h3 className="text-lg text-white-light mb-3 flex tracking-wider items-center">
+              <PuzzlePieceIcon className="h-5 w-5 mr-2 text-mint" />
+              Compatibility
+            </h3>
+            <div className="space-y-3">
+              <Checkbox
+                id="blueprint_compat"
+                label="Blueprint Compatible"
+                checked={formData.blueprint_compat !== false}
+                onChange={(checked) =>
+                  handleCheckboxChange("blueprint_compat", checked)
                 }
-                multiline={true}
-                height="100px"
-                separator={true}
-                useGameFont={true}
-                label="Joker Description"
+              />
+              <Checkbox
+                id="eternal_compat"
+                label="Eternal Compatible"
+                checked={formData.eternal_compat !== false}
+                onChange={(checked) =>
+                  handleCheckboxChange("eternal_compat", checked)
+                }
               />
             </div>
+          </div>
 
-            <div className="flex flex-wrap gap-2 -mt-3 pt-3 rounded-b-lg justify-cente p-2 border-black-lighter border-2">
-              <button
-                onClick={() => insertColorTag("red")}
-                className="w-8 h-8 bg-balatro-red rounded-md"
-              ></button>
-              <button
-                onClick={() => insertColorTag("orange")}
-                className="w-8 h-8 bg-balatro-orange rounded-md"
-              ></button>
-              <button
-                onClick={() => insertColorTag("blue")}
-                className="w-8 h-8 bg-balatro-blue rounded-md"
-              ></button>
-              <button
-                onClick={() => insertColorTag("money")}
-                className="w-8 h-8 bg-balatro-money rounded-md"
-              ></button>
-              <button
-                onClick={() => insertColorTag("green")}
-                className="w-8 h-8 bg-balatro-green rounded-md"
-              ></button>
-              <button
-                onClick={() => insertColorTag("purple")}
-                className="w-8 h-8 bg-balatro-purple rounded-md"
-              ></button>
-              <button
-                onClick={() => insertColorTag("attention")}
-                className="w-8 h-8 bg-balatro-planet rounded-md"
-              ></button>
-              <button
-                onClick={() => insertColorTag("chips")}
-                className="w-8 h-8 bg-balatro-chips rounded-md"
-              ></button>
-              <button
-                onClick={() => insertColorTag("mult")}
-                className="w-8 h-8 bg-balatro-mult rounded-md"
-              ></button>
-              <Button
-                size="sm"
-                variant="primary"
-                onClick={addNewLine}
-                icon={<ArrowPathIcon className="h-4 w-4" />}
-                height="34px"
-              >
-                NL
-              </Button>
+          <div>
+            <h3 className="text-lg text-white-light mb-3 flex items-center tracking-wider">
+              <LockOpenIcon className="h-5 w-5 mr-2 text-mint" />
+              Availability
+            </h3>
+            <div className="space-y-3">
+              <Checkbox
+                id="unlocked"
+                label="Unlocked by Default"
+                checked={formData.unlocked !== false}
+                onChange={(checked) =>
+                  handleCheckboxChange("unlocked", checked)
+                }
+              />
+              <Checkbox
+                id="discovered"
+                label="Discovered by Default"
+                checked={formData.discovered !== false}
+                onChange={(checked) =>
+                  handleCheckboxChange("discovered", checked)
+                }
+              />
             </div>
           </div>
         </div>
-      </div>
 
-      <div className="mb-8 w-3/4 h-[2px] bg-black mx-auto"></div>
-
-      <div className="grid grid-cols-3 gap-4 mb-8">
-        <div>
-          <InputDropdown
-            value={formData.rarity.toString()}
-            onChange={handleRarityChange}
-            options={rarityOptions}
-            separator={true}
-            label="Rarity"
-          />
-        </div>
-
-        <div>
-          <InputField
-            value={formData.cost?.toString() || "4"}
-            onChange={(e) =>
-              handleNumberChange("cost", parseInt(e.target.value))
-            }
-            placeholder="Cost"
-            separator={true}
-            type="number"
-            min={1}
-            label="Cost"
-          />
-        </div>
-
-        <div>
-          <InputDropdown
-            value={"shop"}
-            onChange={(value) => console.log(value)}
-            options={spawnPoolOptions}
-            separator={true}
-            label="Spawn Pool"
-          />
-        </div>
-      </div>
-
-      <div className="grid grid-cols-2 gap-6 mb-8">
-        <div>
-          <h3 className="text-lg text-white-light mb-3 flex tracking-wider items-center">
-            <PuzzlePieceIcon className="h-5 w-5 mr-2 text-mint" />
-            Compatibility
-          </h3>
-          <div className="space-y-3">
-            <Checkbox
-              id="blueprint_compat"
-              label="Blueprint Compatible"
-              checked={formData.blueprint_compat !== false}
-              onChange={(checked) =>
-                handleCheckboxChange("blueprint_compat", checked)
-              }
-            />
-            <Checkbox
-              id="eternal_compat"
-              label="Eternal Compatible"
-              checked={formData.eternal_compat !== false}
-              onChange={(checked) =>
-                handleCheckboxChange("eternal_compat", checked)
-              }
-            />
-          </div>
-        </div>
-
-        <div>
-          <h3 className="text-lg text-white-light mb-3 flex items-center tracking-wider">
-            <LockOpenIcon className="h-5 w-5 mr-2 text-mint" />
-            Availability
-          </h3>
-          <div className="space-y-3">
-            <Checkbox
-              id="unlocked"
-              label="Unlocked by Default"
-              checked={formData.unlocked !== false}
-              onChange={(checked) => handleCheckboxChange("unlocked", checked)}
-            />
-            <Checkbox
-              id="discovered"
-              label="Discovered by Default"
-              checked={formData.discovered !== false}
-              onChange={(checked) =>
-                handleCheckboxChange("discovered", checked)
-              }
-            />
-          </div>
-        </div>
-      </div>
-
-      <div className="pt-4 mb-6">
-        <Button
-          variant="primary"
-          fullWidth
-          onClick={onOpenRuleBuilder}
-          size="lg"
-        >
-          {(() => {
-            const ruleCount = formData.rules?.length || 0;
-            if (ruleCount === 0) return "Add Rules";
-            if (ruleCount === 1) return "1 Rule │ Edit Rules";
-            return `${ruleCount} Rules │ Edit Rules`;
-          })()}
-        </Button>
-      </div>
-
-      {joker && (
-        <div className="mt-auto mb-2">
+        <div className="pt-4 mb-6">
           <Button
-            onClick={handleDelete}
-            variant="danger"
+            variant="primary"
             fullWidth
-            icon={<TrashIcon className="h-5 w-5 mr-2" />}
+            onClick={handleOpenRuleBuilder}
+            size="lg"
           >
-            Delete Joker
+            {(() => {
+              const ruleCount = formData.rules?.length || 0;
+              if (ruleCount === 0) return "Add Rules";
+              if (ruleCount === 1) return "1 Rule │ Edit Rules";
+              return `${ruleCount} Rules │ Edit Rules`;
+            })()}
           </Button>
         </div>
-      )}
-    </div>
+
+        {joker && (
+          <div className="mt-auto mb-2">
+            <Button
+              onClick={handleDelete}
+              variant="danger"
+              fullWidth
+              icon={<TrashIcon className="h-5 w-5 mr-2" />}
+            >
+              Delete Joker
+            </Button>
+          </div>
+        )}
+      </div>
+
+      <RuleBuilder
+        isOpen={showRuleBuilder}
+        onClose={() => setShowRuleBuilder(false)}
+        onSave={handleSaveRules}
+        existingRules={formData.rules || []}
+        joker={formData}
+      />
+    </>
   );
 };
 

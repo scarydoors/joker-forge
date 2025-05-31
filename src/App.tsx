@@ -3,8 +3,6 @@ import JokerCollection from "./components/JokerCollection";
 import JokerForm from "./components/JokerForm";
 import { JokerData } from "./components/JokerCard";
 import { exportJokersAsMod } from "./components/codeGeneration/index";
-import RuleBuilder from "./components/ruleBuilder/RuleBuilder";
-import type { Rule } from "./components/ruleBuilder/types";
 import InputField from "./components/generic/InputField";
 import {
   DocumentTextIcon,
@@ -20,7 +18,6 @@ function App() {
   const [modName, setModName] = useState("My Custom Mod");
   const [authorName, setAuthorName] = useState("");
   const [exportLoading, setExportLoading] = useState(false);
-  const [showRuleBuilderModal, setShowRuleBuilderModal] = useState(false);
 
   const handleSelectJoker = (jokerId: string) => {
     setSelectedJokerId(jokerId);
@@ -70,17 +67,6 @@ function App() {
       alert("Failed to export mod. Please try again.");
     } finally {
       setExportLoading(false);
-    }
-  };
-
-  const handleOpenRuleBuilder = () => {
-    setShowRuleBuilderModal(true);
-  };
-
-  const handleSaveRules = (rules: Rule[]) => {
-    if (selectedJoker) {
-      const updatedJoker = { ...selectedJoker, rules };
-      handleSaveJoker(updatedJoker);
     }
   };
 
@@ -166,7 +152,6 @@ function App() {
                   onSaveJoker={handleSaveJoker}
                   onDeleteJoker={handleDeleteJoker}
                   modName={modName}
-                  onOpenRuleBuilder={handleOpenRuleBuilder}
                 />
               ) : (
                 <div className="h-full flex items-center justify-center">
@@ -195,7 +180,6 @@ function App() {
           </div>
         </div>
 
-        {/* Footer */}
         <footer className="w-full px-4 mt-24">
           <div className="container mx-auto max-w-6xl flex justify-between items-center">
             <div className="text-white-darker text-xs font-light tracking-wide">
@@ -215,13 +199,6 @@ function App() {
           </div>
         </footer>
       </div>
-
-      <RuleBuilder
-        isOpen={showRuleBuilderModal}
-        onClose={() => setShowRuleBuilderModal(false)}
-        onSave={handleSaveRules}
-        existingRules={selectedJoker?.rules || []}
-      />
     </>
   );
 }

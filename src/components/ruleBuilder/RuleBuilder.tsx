@@ -1,1017 +1,254 @@
-import React, { useState, useEffect, useRef } from "react";
-import { TRIGGERS, getTriggerById } from "./Triggers";
-import { getConditionTypeById, getConditionsForTrigger } from "./Conditions";
-import { getEffectTypeById } from "./Effects";
-import { LOGICAL_OPERATORS } from "./types";
-import type {
-  Rule,
-  ConditionGroup,
-  Condition,
-  Effect,
-  ConditionParameter,
-  EffectParameter,
-  ShowWhenCondition,
-} from "./types";
-import { getEffectsForTrigger } from "./Effects";
-
+import React, { useState, useRef, useEffect, useCallback } from "react";
+import type { Rule, Condition, Effect } from "./types";
+import { JokerData } from "../JokerCard";
+import LeftSidebar from "./LeftSidebar";
+import RightSidebar from "./RightSidebar";
+import RuleCard from "./RuleCard";
 import Button from "../generic/Button";
-import InputField from "../generic/InputField";
-import InputDropdown from "../generic/InputDropdown";
-
-import {
-  PlusIcon,
-  TrashIcon,
-  BeakerIcon,
-  BoltIcon,
-  PlusCircleIcon,
-  ArchiveBoxXMarkIcon,
-  CheckCircleIcon,
-} from "@heroicons/react/24/outline";
+import { CheckCircleIcon } from "@heroicons/react/24/outline";
 
 interface RuleBuilderProps {
   isOpen: boolean;
   onClose: () => void;
   onSave: (rules: Rule[]) => void;
   existingRules: Rule[];
+  joker: JokerData;
 }
 
-interface ParameterFieldProps {
-  param: ConditionParameter | EffectParameter;
-  value: unknown;
-  onChange: (value: unknown) => void;
-  showCondition?: boolean;
-  parentValues?: Record<string, unknown>;
-}
-
-function hasShowWhen(param: ConditionParameter | EffectParameter): param is (
-  | ConditionParameter
-  | EffectParameter
-) & {
-  showWhen: ShowWhenCondition;
-} {
-  return "showWhen" in param && param.showWhen !== undefined;
-}
-
-const ParameterField: React.FC<ParameterFieldProps> = ({
-  param,
-  value,
-  onChange,
-  showCondition = true,
-  parentValues = {},
-}) => {
-  if (hasShowWhen(param) && showCondition) {
-    const { parameter, values } = param.showWhen;
-    const parentValue = parentValues[parameter];
-    if (!values.includes(parentValue as string)) {
-      return null;
-    }
-  }
-
-  switch (param.type) {
-    case "select":
-      return (
-        <div className="flex-1 min-w-40">
-          <InputDropdown
-            label={String(param.label)}
-            labelPosition="center"
-            value={(value as string) || ""}
-            onChange={(newValue) => onChange(newValue)}
-            options={
-              param.options?.map((option) => ({
-                value: option.value,
-                label: option.label,
-              })) || []
-            }
-            className="bg-black-dark"
-            size="sm"
-          />
-        </div>
-      );
-
-    case "number":
-      return (
-        <div className="flex-1 min-w-24">
-          <InputField
-            label={String(param.label)}
-            type="number"
-            value={
-              typeof value === "number"
-                ? value.toString()
-                : typeof param.default === "number"
-                ? param.default.toString()
-                : "0"
-            }
-            onChange={(e) => {
-              const val = parseFloat(e.target.value);
-              onChange(isNaN(val) ? 0 : val);
-            }}
-            min={param.min?.toString()}
-            max={param.max?.toString()}
-            step={
-              param.id === "value" &&
-              typeof value === "number" &&
-              value > 0 &&
-              value < 1
-                ? "0.1"
-                : "1"
-            }
-            className="text-sm py-1 px-2 h-8"
-          />
-        </div>
-      );
-
-    case "text":
-      return (
-        <div className="flex-1 min-w-32">
-          <InputField
-            label={String(param.label)}
-            value={(value as string) || ""}
-            onChange={(e) => onChange(e.target.value)}
-            className="text-sm py-1 px-2 h-8"
-          />
-        </div>
-      );
-
-    default:
-      return null;
-  }
-};
-
-const ConditionEditor: React.FC<{
-  condition: Condition;
-  onUpdate: (updates: Partial<Condition>) => void;
-  onDelete: () => void;
-  onToggleNegate: () => void;
-  currentTrigger: string;
-}> = ({ condition, onUpdate, onDelete, onToggleNegate, currentTrigger }) => {
-  const conditionType = getConditionTypeById(condition.type);
-  const availableConditions = getConditionsForTrigger(currentTrigger);
-
-  if (!conditionType) return null;
-
-  return (
-    <div className="bg-black-dark border-2 border-black-lighter p-3 rounded-lg mb-3">
-      <div className="flex justify-between">
-        <Button
-          variant={condition.negate ? "danger" : "secondary"}
-          size="sm"
-          onClick={onToggleNegate}
-          className="text-xs py-1 h-8"
-        >
-          {condition.negate ? "NOT" : "IS"}
-        </Button>
-        <Button
-          variant="danger"
-          size="sm"
-          onClick={onDelete}
-          icon={<TrashIcon className="h-4 w-4" />}
-          className="text-xs py-1 h-8 w-8 flex items-center justify-center"
-        />
-      </div>
-
-      <div className="mb-4 -mt-4">
-        <InputDropdown
-          label="Type"
-          labelPosition="center"
-          value={condition.type}
-          onChange={(newValue) => {
-            onUpdate({ type: newValue });
-          }}
-          options={
-            availableConditions.map((type) => ({
-              value: type.id,
-              label: type.label,
-            })) || []
-          }
-          size="sm"
-        />
-      </div>
-
-      <div className="flex flex-wrap gap-2 mt-2">
-        {conditionType.params.map((param) => (
-          <ParameterField
-            key={param.id}
-            param={param}
-            value={condition.params[param.id]}
-            onChange={(value) => {
-              const newParams = { ...condition.params, [param.id]: value };
-              onUpdate({ params: newParams });
-            }}
-            parentValues={condition.params}
-          />
-        ))}
-      </div>
-    </div>
-  );
-};
-
-const ConditionGroupEditor: React.FC<{
-  group: ConditionGroup;
-  groupIndex: number;
-  onUpdateGroupOperator: (operator: string) => void;
-  onAddCondition: () => void;
-  onUpdateCondition: (
-    conditionIndex: number,
-    updates: Partial<Condition>
-  ) => void;
-  onDeleteCondition: (conditionIndex: number) => void;
-  onDeleteGroup: () => void;
-  isFirst: boolean;
-  currentTrigger: string;
-}> = ({
-  group,
-  groupIndex,
-  onUpdateGroupOperator,
-  onAddCondition,
-  onUpdateCondition,
-  onDeleteCondition,
-  onDeleteGroup,
-  isFirst,
-  currentTrigger,
-}) => {
-  return (
-    <div className="bg-black border-2 border-black-lighter rounded-lg p-3 mb-4">
-      <div className="flex justify-between items-center mb-2">
-        <div className="flex items-center gap-2">
-          <h3 className="text-white-light text-sm font-light tracking-wider">
-            Group {groupIndex + 1}
-          </h3>
-
-          {!isFirst && (
-            <InputDropdown
-              value={group.operator}
-              onChange={onUpdateGroupOperator}
-              options={LOGICAL_OPERATORS.map((op) => ({
-                value: op.value,
-                label: op.label,
-              }))}
-              className="w-24"
-              size="sm"
-            />
-          )}
-        </div>
-
-        <div className="flex gap-2">
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={onAddCondition}
-            icon={<PlusCircleIcon className="h-4 w-4" />}
-            className="text-xs py-1"
-          >
-            Add
-          </Button>
-
-          {!isFirst && (
-            <Button
-              variant="danger"
-              size="sm"
-              onClick={onDeleteGroup}
-              icon={<ArchiveBoxXMarkIcon className="h-4 w-4" />}
-              className="text-xs py-1"
-            >
-              Delete
-            </Button>
-          )}
-        </div>
-      </div>
-
-      {group.conditions.length === 0 ? (
-        <div className="text-white-darker text-xs p-3 text-center border-2 border-dashed border-black-lighter rounded-lg">
-          No conditions defined. Add a condition to get started.
-        </div>
-      ) : (
-        <div className="space-y-2">
-          {group.conditions.map((condition, condIndex) => (
-            <ConditionEditor
-              key={condition.id}
-              condition={condition}
-              onUpdate={(updates) => onUpdateCondition(condIndex, updates)}
-              onDelete={() => onDeleteCondition(condIndex)}
-              onToggleNegate={() => {
-                onUpdateCondition(condIndex, { negate: !condition.negate });
-              }}
-              currentTrigger={currentTrigger}
-            />
-          ))}
-        </div>
-      )}
-    </div>
-  );
-};
-
-const EffectEditor: React.FC<{
-  effect: Effect;
-  onUpdate: (updates: Partial<Effect>) => void;
-  onDelete: () => void;
-  currentTrigger: string;
-}> = ({ effect, onUpdate, onDelete, currentTrigger }) => {
-  // ← Add currentTrigger here
-  const effectType = getEffectTypeById(effect.type);
-  const availableEffects = getEffectsForTrigger(currentTrigger); // ← Add this line
-
-  if (!effectType) return null;
-
-  return (
-    <div className="bg-black-dark border-2 border-black-lighter p-3 rounded-lg mb-3">
-      <div className="flex justify-end mb-2">
-        <Button
-          variant="danger"
-          size="sm"
-          onClick={onDelete}
-          icon={<TrashIcon className="h-4 w-4" />}
-          className="text-xs py-1 h-8 w-8 flex items-center justify-center"
-        />
-      </div>
-
-      <div className="mb-4 -mt-6">
-        <InputDropdown
-          label="Type"
-          labelPosition="center"
-          value={effect.type}
-          onChange={(newValue) => onUpdate({ type: newValue })}
-          options={availableEffects.map((type) => ({
-            // ← Now this will work
-            value: type.id,
-            label: type.label,
-          }))}
-          size="sm"
-        />
-      </div>
-
-      <div className="flex flex-wrap gap-2 mt-2">
-        {effectType.params.map((param) => (
-          <ParameterField
-            key={param.id}
-            param={param}
-            value={effect.params[param.id]}
-            onChange={(value) => {
-              const newParams = { ...effect.params, [param.id]: value };
-              onUpdate({ params: newParams });
-            }}
-            parentValues={effect.params}
-          />
-        ))}
-      </div>
-    </div>
-  );
-};
-
-const formatParameterForDescription = (
-  param: string,
-  value: unknown
-): string => {
-  if (param === "operator") {
-    switch (value) {
-      case "equals":
-        return "=";
-      case "not_equals":
-        return "≠";
-      case "greater_than":
-        return ">";
-      case "less_than":
-        return "<";
-      case "greater_equals":
-        return "≥";
-      case "less_equals":
-        return "≤";
-      default:
-        return String(value);
-    }
-  }
-
-  return String(value);
-};
-
-const generateDetailedRuleDescription = (rule: Rule): string => {
-  const trigger = getTriggerById(rule.trigger);
-  if (!trigger) return "Invalid rule";
-
-  let description = `${trigger.label}`;
-
-  // Check if there are any actual conditions (not just empty groups)
-  const hasConditions = rule.conditionGroups.some(
-    (group) => group.conditions.length > 0
-  );
-
-  if (hasConditions) {
-    description += ", If ";
-
-    rule.conditionGroups.forEach((group, groupIndex) => {
-      if (group.conditions.length === 0) return; // Skip empty groups
-
-      if (groupIndex > 0) {
-        description += ` ${group.operator === "and" ? "AND" : "OR"} `;
-      }
-
-      if (group.conditions.length > 0) {
-        if (
-          group.conditions.length > 1 ||
-          rule.conditionGroups.filter((g) => g.conditions.length > 0).length > 1
-        ) {
-          description += "(";
-        }
-
-        group.conditions.forEach((condition, condIndex) => {
-          const condType = getConditionTypeById(condition.type);
-          if (condIndex > 0) {
-            description += " AND ";
-          }
-
-          let conditionDesc = "";
-          if (condition.negate) {
-            conditionDesc += "NOT ";
-          }
-
-          if (condition.params.card_scope) {
-            const scope =
-              condition.params.card_scope === "scoring" ? "Scoring " : "Any ";
-            conditionDesc += scope;
-          }
-
-          conditionDesc += condType?.label || condition.type;
-
-          if (condition.params) {
-            const relevantParams = [
-              "operator",
-              "value",
-              "specific_rank",
-              "specific_suit",
-            ];
-            const displayParams = relevantParams.filter(
-              (param) => condition.params[param] !== undefined
-            );
-
-            if (displayParams.length > 0) {
-              conditionDesc += " ";
-              displayParams.forEach((param, i) => {
-                if (i > 0 && param !== "value") {
-                  conditionDesc += " ";
-                }
-
-                if (param === "operator") {
-                  conditionDesc += formatParameterForDescription(
-                    param,
-                    condition.params[param]
-                  );
-                } else if (param === "value") {
-                  if (condition.params.operator) {
-                    conditionDesc += ` ${condition.params[param]}`;
-                  } else {
-                    conditionDesc += `is ${condition.params[param]}`;
-                  }
-                } else {
-                  conditionDesc += `${condition.params[param]}`;
-                }
-              });
-            }
-          }
-
-          description += conditionDesc;
-        });
-
-        if (
-          group.conditions.length > 1 ||
-          rule.conditionGroups.filter((g) => g.conditions.length > 0).length > 1
-        ) {
-          description += ")";
-        }
-      }
-    });
-  }
-
-  if (rule.effects.length > 0) {
-    description += ", Then ";
-    rule.effects.forEach((effect, index) => {
-      const effectType = getEffectTypeById(effect.type);
-      if (index > 0) {
-        description += " + ";
-      }
-
-      let effectDesc = effectType?.label || effect.type;
-
-      if (effect.params.value !== undefined) {
-        effectDesc += `: ${effect.params.value}`;
-      }
-
-      description += effectDesc;
-    });
-  }
-
-  return description;
-};
-
-const generateShortRuleDescription = (rule: Rule): string => {
-  const trigger = getTriggerById(rule.trigger);
-  if (!trigger) return "Unknown Rule";
-
-  let displayName = trigger.label;
-
-  if (
-    rule.conditionGroups.length > 0 &&
-    rule.conditionGroups[0].conditions.length > 0
-  ) {
-    const firstCondition = rule.conditionGroups[0].conditions[0];
-    const condType = getConditionTypeById(firstCondition.type);
-
-    if (condType) {
-      let conditionText = "";
-
-      if (firstCondition.params.value !== undefined) {
-        if (firstCondition.params.operator) {
-          const operator = formatParameterForDescription(
-            "operator",
-            firstCondition.params.operator
-          );
-          conditionText = ` (${operator} ${firstCondition.params.value})`;
-        } else {
-          conditionText = ` (${firstCondition.params.value})`;
-        }
-      }
-
-      displayName += `: ${condType.label}${conditionText}`;
-    }
-  }
-
-  if (rule.effects.length > 0) {
-    const firstEffect = getEffectTypeById(rule.effects[0].type);
-    if (firstEffect) {
-      displayName += ` → ${firstEffect.label}`;
-
-      if (rule.effects[0].params.value !== undefined) {
-        const value = rule.effects[0].params.value;
-        displayName += ` ${value}`;
-      }
-    }
-  }
-
-  return displayName;
-};
-
-const RuleEditor: React.FC<{
-  rule: Rule;
-  onUpdateTrigger: (triggerId: string) => void;
-  onAddConditionGroup: () => void;
-  onUpdateConditionGroup: (
-    groupIndex: number,
-    updates: Partial<ConditionGroup>
-  ) => void;
-  onAddCondition: (groupIndex: number) => void;
-  onUpdateCondition: (
-    groupIndex: number,
-    conditionIndex: number,
-    updates: Partial<Condition>
-  ) => void;
-  onDeleteCondition: (groupIndex: number, conditionIndex: number) => void;
-  onDeleteConditionGroup: (groupIndex: number) => void;
-  onAddEffect: () => void;
-  onUpdateEffect: (effectIndex: number, updates: Partial<Effect>) => void;
-  onDeleteEffect: (effectIndex: number) => void;
-}> = ({
-  rule,
-  onUpdateTrigger,
-  onAddConditionGroup,
-  onUpdateConditionGroup,
-  onAddCondition,
-  onUpdateCondition,
-  onDeleteCondition,
-  onDeleteConditionGroup,
-  onAddEffect,
-  onUpdateEffect,
-  onDeleteEffect,
-}) => {
-  return (
-    <div>
-      <div className="bg-black-dark border-2 border-black-light rounded-lg p-3 mb-4">
-        <h3 className="text-white-light text-sm font-light tracking-wider mb-2 flex items-center">
-          <BoltIcon className="h-4 w-4 text-mint mr-2" />
-          Rule Description
-        </h3>
-        <p className="text-white-darker text-sm font-light tracking-wide">
-          {generateDetailedRuleDescription(rule)}
-        </p>
-      </div>
-
-      <div className="mb-4">
-        <InputDropdown
-          label="When (Trigger)"
-          labelPosition="left"
-          value={rule.trigger}
-          onChange={onUpdateTrigger}
-          options={TRIGGERS.map((trigger) => ({
-            value: trigger.id,
-            label: trigger.label,
-          }))}
-          icon={<BoltIcon className="h-5 w-5 text-mint" />}
-          separator={true}
-          size="sm"
-        />
-        <div className="mt-1 text-xs text-white-darker pl-4">
-          {getTriggerById(rule.trigger)?.description}
-        </div>
-      </div>
-
-      <div className="mb-4">
-        <div className="flex justify-between items-center mb-3">
-          <div className="flex items-center gap-2">
-            <BeakerIcon className="h-4 w-4 text-mint" />
-            <h3 className="text-white-light text-sm font-light tracking-wider">
-              Conditions (If)
-            </h3>
-          </div>
-          <Button
-            variant="primary"
-            size="sm"
-            onClick={onAddConditionGroup}
-            icon={<PlusIcon className="h-3 w-3" />}
-            className="text-xs py-1"
-          >
-            Add Group
-          </Button>
-        </div>
-
-        {rule.conditionGroups.length === 0 ? (
-          <div className="text-white-darker text-xs p-4 text-center border-2 border-dashed border-black-lighter rounded-lg">
-            No conditions defined. This rule will trigger for all instances.
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {rule.conditionGroups.map((group, groupIndex) => (
-              <ConditionGroupEditor
-                key={group.id}
-                group={group}
-                groupIndex={groupIndex}
-                onUpdateGroupOperator={(operator) => {
-                  onUpdateConditionGroup(groupIndex, { operator });
-                }}
-                onAddCondition={() => onAddCondition(groupIndex)}
-                onUpdateCondition={(conditionIndex, updates) => {
-                  onUpdateCondition(groupIndex, conditionIndex, updates);
-                }}
-                onDeleteCondition={(conditionIndex) => {
-                  onDeleteCondition(groupIndex, conditionIndex);
-                }}
-                onDeleteGroup={() => onDeleteConditionGroup(groupIndex)}
-                isFirst={groupIndex === 0}
-                currentTrigger={rule.trigger}
-              />
-            ))}
-          </div>
-        )}
-      </div>
-
-      <div>
-        <div className="flex justify-between items-center mb-3">
-          <div className="flex items-center gap-2">
-            <BoltIcon className="h-4 w-4 text-mint" />
-            <h3 className="text-white-light text-sm font-light tracking-wider">
-              Effects (Then)
-            </h3>
-          </div>
-          <Button
-            variant="primary"
-            size="sm"
-            onClick={onAddEffect}
-            icon={<PlusIcon className="h-3 w-3" />}
-            className="text-xs py-1"
-          >
-            Add Effect
-          </Button>
-        </div>
-
-        {rule.effects.length === 0 ? (
-          <div className="text-white-darker text-xs p-4 text-center border-2 border-dashed border-black-lighter rounded-lg">
-            No effects added. Add an effect to make the rule do something.
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {rule.effects.map((effect, effectIndex) => (
-              <EffectEditor
-                key={effect.id}
-                effect={effect}
-                onUpdate={(updates) => onUpdateEffect(effectIndex, updates)}
-                onDelete={() => onDeleteEffect(effectIndex)}
-                currentTrigger={rule.trigger}
-              />
-            ))}
-          </div>
-        )}
-      </div>
-    </div>
-  );
-};
+type SelectedItem = {
+  type: "trigger" | "condition" | "effect";
+  ruleId: string;
+  itemId?: string;
+} | null;
 
 const RuleBuilder: React.FC<RuleBuilderProps> = ({
   isOpen,
   onClose,
   onSave,
   existingRules = [],
+  joker,
 }) => {
   const [rules, setRules] = useState<Rule[]>(existingRules);
-  const [activeRuleIndex, setActiveRuleIndex] = useState<number | null>(
-    existingRules.length > 0 ? 0 : null
-  );
-
+  const [selectedItem, setSelectedItem] = useState<SelectedItem>(null);
   const modalRef = useRef<HTMLDivElement>(null);
 
-  const saveAndCloseRef = useRef<() => void>(null);
-
-  // Update the ref whenever rules change
-  saveAndCloseRef.current = () => {
+  const handleSaveAndClose = useCallback(() => {
     onSave(rules);
     onClose();
-  };
+  }, [onSave, onClose, rules]);
 
-  const handleSaveAndClose = () => {
-    saveAndCloseRef.current?.();
-  };
-
-  // Initialize rules only when modal opens
   useEffect(() => {
     if (isOpen) {
       setRules(existingRules);
-      setActiveRuleIndex(existingRules.length > 0 ? 0 : null);
+      setSelectedItem(null);
 
-      // Add click outside listener when modal opens
       const handleClickOutside = (event: MouseEvent) => {
         if (
           modalRef.current &&
           !modalRef.current.contains(event.target as Node)
         ) {
-          saveAndCloseRef.current?.(); // Use the ref directly
+          handleSaveAndClose();
         }
       };
 
       document.addEventListener("mousedown", handleClickOutside);
-
-      // Clean up the event listener
-      return () => {
+      return () =>
         document.removeEventListener("mousedown", handleClickOutside);
-      };
     }
-  }, [isOpen, existingRules]); // Remove handleSaveAndClose from dependencies
+  }, [isOpen, existingRules, handleSaveAndClose]);
 
-  const addRule = () => {
+  const addTrigger = (triggerId: string) => {
     const newRule: Rule = {
       id: crypto.randomUUID(),
-      trigger: "hand_played",
-      conditionGroups: [
-        {
-          id: crypto.randomUUID(),
-          operator: "and",
-          conditions: [
-            {
-              id: crypto.randomUUID(),
-              type: "hand_type",
-              negate: false,
-              params: {
-                card_scope: "scoring",
-                operator: "equals",
-                value: "Flush",
-              },
-            },
-          ],
-        },
-      ],
-      effects: [
-        {
-          id: crypto.randomUUID(),
-          type: "add_chips",
-          params: {
-            value: 10,
-          },
-        },
-      ],
+      trigger: triggerId,
+      conditionGroups: [],
+      effects: [],
     };
     const updatedRules = [...rules, newRule];
     setRules(updatedRules);
-    setActiveRuleIndex(updatedRules.length - 1);
+    setSelectedItem({ type: "trigger", ruleId: newRule.id });
   };
 
-  const deleteRule = (index: number) => {
-    const newRules = [...rules];
-    newRules.splice(index, 1);
-    setRules(newRules);
+  const addCondition = (conditionType: string) => {
+    if (!selectedItem || selectedItem.type === "effect") return;
 
-    if (activeRuleIndex === index) {
-      setActiveRuleIndex(newRules.length > 0 ? 0 : null);
-    } else if (activeRuleIndex !== null && activeRuleIndex > index) {
-      setActiveRuleIndex(activeRuleIndex - 1);
-    }
-  };
-
-  const updateTrigger = (triggerId: string) => {
-    if (activeRuleIndex === null) return;
-    const newRules = [...rules];
-    const rule = newRules[activeRuleIndex];
-
-    // Get available conditions and effects for the new trigger
-    const availableConditions = getConditionsForTrigger(triggerId);
-    const availableEffects = getEffectsForTrigger(triggerId);
-
-    // Filter out incompatible conditions
-    rule.conditionGroups = rule.conditionGroups
-      .map((group) => ({
-        ...group,
-        conditions: group.conditions.filter((condition) =>
-          availableConditions.some(
-            (availableCondition) => availableCondition.id === condition.type
-          )
-        ),
-      }))
-      .filter((group) => group.conditions.length > 0); // Remove empty groups
-
-    // Filter out incompatible effects
-    rule.effects = rule.effects.filter((effect) =>
-      availableEffects.some(
-        (availableEffect) => availableEffect.id === effect.type
-      )
-    );
-
-    // Update the trigger
-    rule.trigger = triggerId;
-
-    setRules(newRules);
-  };
-
-  const addConditionGroup = () => {
-    if (activeRuleIndex === null) return;
-    const newRules = [...rules];
-    newRules[activeRuleIndex].conditionGroups.push({
+    const newCondition: Condition = {
       id: crypto.randomUUID(),
-      operator: "and",
-      conditions: [],
-    });
-    setRules(newRules);
-  };
-
-  const updateConditionGroup = (
-    groupIndex: number,
-    updates: Partial<ConditionGroup>
-  ) => {
-    if (activeRuleIndex === null) return;
-    const newRules = [...rules];
-    newRules[activeRuleIndex].conditionGroups[groupIndex] = {
-      ...newRules[activeRuleIndex].conditionGroups[groupIndex],
-      ...updates,
-    };
-    setRules(newRules);
-  };
-
-  const deleteConditionGroup = (groupIndex: number) => {
-    if (activeRuleIndex === null) return;
-    const newRules = [...rules];
-    newRules[activeRuleIndex].conditionGroups.splice(groupIndex, 1);
-    setRules(newRules);
-  };
-
-  const addCondition = (groupIndex: number) => {
-    if (activeRuleIndex === null) return;
-    const newRules = [...rules];
-    newRules[activeRuleIndex].conditionGroups[groupIndex].conditions.push({
-      id: crypto.randomUUID(),
-      type: "hand_type",
+      type: conditionType,
       negate: false,
-      params: {
-        card_scope: "scoring",
-        operator: "equals",
-        value: "Flush",
-      },
+      params: {},
+    };
+
+    const updatedRules = rules.map((rule) => {
+      if (rule.id === selectedItem.ruleId) {
+        if (rule.conditionGroups.length === 0) {
+          rule.conditionGroups = [
+            {
+              id: crypto.randomUUID(),
+              operator: "and",
+              conditions: [newCondition],
+            },
+          ];
+        } else {
+          rule.conditionGroups[0].conditions.push(newCondition);
+        }
+      }
+      return rule;
     });
-    setRules(newRules);
+
+    setRules(updatedRules);
+    setSelectedItem({
+      type: "condition",
+      ruleId: selectedItem.ruleId,
+      itemId: newCondition.id,
+    });
+  };
+
+  const addEffect = (effectType: string) => {
+    if (!selectedItem) return;
+
+    const newEffect: Effect = {
+      id: crypto.randomUUID(),
+      type: effectType,
+      params: {},
+    };
+
+    const updatedRules = rules.map((rule) => {
+      if (rule.id === selectedItem.ruleId) {
+        rule.effects.push(newEffect);
+      }
+      return rule;
+    });
+
+    setRules(updatedRules);
+    setSelectedItem({
+      type: "effect",
+      ruleId: selectedItem.ruleId,
+      itemId: newEffect.id,
+    });
   };
 
   const updateCondition = (
-    groupIndex: number,
-    conditionIndex: number,
+    ruleId: string,
+    conditionId: string,
     updates: Partial<Condition>
   ) => {
-    if (activeRuleIndex === null) return;
-    const newRules = [...rules];
-    const condition =
-      newRules[activeRuleIndex].conditionGroups[groupIndex].conditions[
-        conditionIndex
-      ];
-
-    if (updates.type && updates.type !== condition.type) {
-      const conditionType = getConditionTypeById(updates.type);
-      if (conditionType) {
-        const newParams: Record<string, unknown> = {};
-        conditionType.params.forEach((param) => {
-          if (param.default !== undefined) {
-            newParams[param.id] = param.default;
-          } else if (
-            param.type === "select" &&
-            param.options &&
-            param.options.length > 0
-          ) {
-            newParams[param.id] = param.options[0].value;
-          } else if (param.type === "number") {
-            newParams[param.id] = 0;
-          }
-        });
-        updates.params = newParams;
+    const updatedRules = rules.map((rule) => {
+      if (rule.id === ruleId) {
+        rule.conditionGroups = rule.conditionGroups.map((group) => ({
+          ...group,
+          conditions: group.conditions.map((condition) =>
+            condition.id === conditionId
+              ? { ...condition, ...updates }
+              : condition
+          ),
+        }));
       }
-    }
-
-    newRules[activeRuleIndex].conditionGroups[groupIndex].conditions[
-      conditionIndex
-    ] = {
-      ...condition,
-      ...updates,
-    };
-
-    setRules(newRules);
-  };
-
-  const deleteCondition = (groupIndex: number, conditionIndex: number) => {
-    if (activeRuleIndex === null) return;
-    const newRules = [...rules];
-    newRules[activeRuleIndex].conditionGroups[groupIndex].conditions.splice(
-      conditionIndex,
-      1
-    );
-    setRules(newRules);
-  };
-
-  const addEffect = () => {
-    if (activeRuleIndex === null) return;
-    const newRules = [...rules];
-    newRules[activeRuleIndex].effects.push({
-      id: crypto.randomUUID(),
-      type: "add_chips",
-      params: {
-        value: 10,
-      },
+      return rule;
     });
-    setRules(newRules);
+    setRules(updatedRules);
   };
 
-  const updateEffect = (effectIndex: number, updates: Partial<Effect>) => {
-    if (activeRuleIndex === null) return;
-    const newRules = [...rules];
-    const effect = newRules[activeRuleIndex].effects[effectIndex];
-
-    if (updates.type && updates.type !== effect.type) {
-      const effectType = getEffectTypeById(updates.type);
-      if (effectType) {
-        const newParams: Record<string, unknown> = {};
-        effectType.params.forEach((param) => {
-          if (param.default !== undefined) {
-            newParams[param.id] = param.default;
-          } else if (param.type === "number") {
-            newParams[param.id] = 0;
-          }
-        });
-        updates.params = newParams;
+  const updateEffect = (
+    ruleId: string,
+    effectId: string,
+    updates: Partial<Effect>
+  ) => {
+    const updatedRules = rules.map((rule) => {
+      if (rule.id === ruleId) {
+        rule.effects = rule.effects.map((effect) =>
+          effect.id === effectId ? { ...effect, ...updates } : effect
+        );
       }
-    }
-
-    newRules[activeRuleIndex].effects[effectIndex] = {
-      ...effect,
-      ...updates,
-    };
-
-    setRules(newRules);
+      return rule;
+    });
+    setRules(updatedRules);
   };
 
-  const deleteEffect = (effectIndex: number) => {
-    if (activeRuleIndex === null) return;
-    const newRules = [...rules];
-    newRules[activeRuleIndex].effects.splice(effectIndex, 1);
-    setRules(newRules);
+  const deleteRule = (ruleId: string) => {
+    const updatedRules = rules.filter((rule) => rule.id !== ruleId);
+    setRules(updatedRules);
+    if (selectedItem && selectedItem.ruleId === ruleId) {
+      setSelectedItem(null);
+    }
+  };
+
+  const deleteCondition = (ruleId: string, conditionId: string) => {
+    const updatedRules = rules.map((rule) => {
+      if (rule.id === ruleId) {
+        rule.conditionGroups = rule.conditionGroups
+          .map((group) => ({
+            ...group,
+            conditions: group.conditions.filter(
+              (condition) => condition.id !== conditionId
+            ),
+          }))
+          .filter((group) => group.conditions.length > 0);
+      }
+      return rule;
+    });
+    setRules(updatedRules);
+    if (selectedItem && selectedItem.itemId === conditionId) {
+      setSelectedItem({ type: "trigger", ruleId });
+    }
+  };
+
+  const deleteEffect = (ruleId: string, effectId: string) => {
+    const updatedRules = rules.map((rule) => {
+      if (rule.id === ruleId) {
+        rule.effects = rule.effects.filter((effect) => effect.id !== effectId);
+      }
+      return rule;
+    });
+    setRules(updatedRules);
+    if (selectedItem && selectedItem.itemId === effectId) {
+      setSelectedItem({ type: "trigger", ruleId });
+    }
+  };
+
+  const getSelectedRule = () => {
+    if (!selectedItem) return null;
+    return rules.find((rule) => rule.id === selectedItem.ruleId) || null;
+  };
+
+  const getSelectedCondition = () => {
+    if (
+      !selectedItem ||
+      selectedItem.type !== "condition" ||
+      !selectedItem.itemId
+    )
+      return null;
+    const rule = getSelectedRule();
+    if (!rule) return null;
+    for (const group of rule.conditionGroups) {
+      const condition = group.conditions.find(
+        (c) => c.id === selectedItem.itemId
+      );
+      if (condition) return condition;
+    }
+    return null;
+  };
+
+  const getSelectedEffect = () => {
+    if (!selectedItem || selectedItem.type !== "effect" || !selectedItem.itemId)
+      return null;
+    const rule = getSelectedRule();
+    if (!rule) return null;
+    return rule.effects.find((e) => e.id === selectedItem.itemId) || null;
   };
 
   if (!isOpen) return null;
-
-  const renderEmptyEditor = () => (
-    <div className="flex flex-col items-center justify-center h-full text-center">
-      <div className="text-white-darker text-lg mb-3">No rule selected</div>
-      <p className="text-white-darker text-sm max-w-md">
-        Select a rule from the sidebar or create a new rule to get started.
-      </p>
-      <Button
-        variant="primary"
-        onClick={addRule}
-        icon={<PlusIcon className="h-4 w-4" />}
-        className="mt-4 text-sm"
-      >
-        Create New Rule
-      </Button>
-    </div>
-  );
 
   return (
     <div className="fixed inset-0 bg-balatro-blackshadow/80 flex items-center justify-center z-50 font-lexend">
       <div
         ref={modalRef}
-        className="bg-black-darker rounded-lg p-4 w-[90vw] h-[90vh] overflow-hidden flex flex-col"
+        className="bg-black-darker rounded-lg w-full h-full overflow-hidden border-2 border-black-light flex flex-col"
       >
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl text-white-light font-extralight tracking-widest">
-            RULE BUILDER
+        <div className="flex justify-between items-center p-4">
+          <h2 className="text-lg text-white-light font-extralight tracking-widest">
+            Rule Builder for {joker.name}
           </h2>
-
           <Button
             variant="primary"
             onClick={handleSaveAndClose}
@@ -1022,81 +259,63 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
           </Button>
         </div>
 
-        <div className="flex-grow flex gap-4 overflow-hidden">
-          <div className="w-1/5 bg-black border-2 border-black-lighter rounded-lg p-3 overflow-y-auto custom-scrollbar">
-            <div className="flex justify-between items-center mb-3">
-              <h3 className="text-white-light text-sm font-light tracking-wider">
-                RULES
-              </h3>
-              <Button
-                variant="primary"
-                size="sm"
-                onClick={addRule}
-                icon={<PlusIcon className="h-3 w-3" />}
-                className="text-xs py-1"
-              >
-                New
-              </Button>
-            </div>
+        <div className="flex-grow flex overflow-hidden">
+          <LeftSidebar
+            joker={joker}
+            selectedRule={getSelectedRule()}
+            onAddTrigger={addTrigger}
+            onAddCondition={addCondition}
+            onAddEffect={addEffect}
+          />
 
-            <div className="space-y-1">
-              {rules.map((rule, index) => (
-                <div
-                  key={rule.id}
-                  className={`p-2 cursor-pointer rounded-lg transition-colors ${
-                    activeRuleIndex === index
-                      ? "bg-black-dark border-2 border-mint"
-                      : "bg-black-dark border-2 border-black-lighter hover:border-black-light"
-                  }`}
-                  onClick={() => setActiveRuleIndex(index)}
-                >
-                  <div className="flex justify-between items-center">
-                    <span className="text-white-light text-xs tracking-wide flex-grow pr-2">
-                      {generateShortRuleDescription(rule)}
-                    </span>
-
-                    <div className="w-px h-4 bg-black-light mx-2 self-center"></div>
-
-                    <button
-                      className="text-balatro-red hover:text-balatro-redshadow flex-shrink-0"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        deleteRule(index);
-                      }}
-                    >
-                      <TrashIcon className="h-4 w-4 cursor-pointer" />
-                    </button>
+          <div
+            className="flex-grow relative overflow-y-auto custom-scrollbar"
+            style={{
+              backgroundImage: `radial-gradient(circle, #26353B 1px, transparent 1px)`,
+              backgroundSize: "20px 20px",
+              backgroundColor: "#1E2B30",
+            }}
+          >
+            {rules.length === 0 ? (
+              <div className="flex items-center justify-center h-full">
+                <div className="text-center bg-black-dark/80 backdrop-blur-sm rounded-lg p-8 border-2 border-black-lighter">
+                  <div className="text-white-darker text-lg mb-3">
+                    No Rules Created
                   </div>
+                  <p className="text-white-darker text-sm max-w-md">
+                    Select a trigger from the Block Palette to create your first
+                    rule.
+                  </p>
                 </div>
-              ))}
-
-              {rules.length === 0 && (
-                <div className="text-white-darker text-xs p-3 text-center">
-                  No rules defined.
-                </div>
-              )}
-            </div>
-          </div>
-
-          <div className="flex-grow bg-black border-2 border-black-lighter rounded-lg p-4 overflow-y-auto custom-scrollbar h-full">
-            {activeRuleIndex !== null && rules[activeRuleIndex] ? (
-              <RuleEditor
-                rule={rules[activeRuleIndex]}
-                onUpdateTrigger={updateTrigger}
-                onAddConditionGroup={addConditionGroup}
-                onUpdateConditionGroup={updateConditionGroup}
-                onAddCondition={addCondition}
-                onUpdateCondition={updateCondition}
-                onDeleteCondition={deleteCondition}
-                onDeleteConditionGroup={deleteConditionGroup}
-                onAddEffect={addEffect}
-                onUpdateEffect={updateEffect}
-                onDeleteEffect={deleteEffect}
-              />
+              </div>
             ) : (
-              renderEmptyEditor()
+              <div className="p-6">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {rules.map((rule, index) => (
+                    <RuleCard
+                      key={rule.id}
+                      rule={rule}
+                      ruleIndex={index}
+                      selectedItem={selectedItem}
+                      onSelectItem={setSelectedItem}
+                      onDeleteRule={deleteRule}
+                      onDeleteCondition={deleteCondition}
+                      onDeleteEffect={deleteEffect}
+                    />
+                  ))}
+                </div>
+              </div>
             )}
           </div>
+
+          <RightSidebar
+            joker={joker}
+            selectedRule={getSelectedRule()}
+            selectedCondition={getSelectedCondition()}
+            selectedEffect={getSelectedEffect()}
+            onUpdateCondition={updateCondition}
+            onUpdateEffect={updateEffect}
+          />
         </div>
       </div>
     </div>
