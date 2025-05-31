@@ -5,9 +5,9 @@ import type {
   ConditionTypeDefinition,
   EffectTypeDefinition,
 } from "./types";
-import { TRIGGERS } from "./Triggers";
-import { getConditionsForTrigger } from "./Conditions";
-import { getEffectsForTrigger } from "./Effects";
+import { TRIGGERS } from "./data/Triggers";
+import { getConditionsForTrigger } from "./data/Conditions";
+import { getEffectsForTrigger } from "./data/Effects";
 import BlockComponent from "./BlockComponent";
 import InputField from "../generic/InputField";
 import {

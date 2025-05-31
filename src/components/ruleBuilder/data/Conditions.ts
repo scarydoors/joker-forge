@@ -1,4 +1,4 @@
-import { ConditionTypeDefinition } from "./types";
+import { ConditionTypeDefinition } from "../types";
 
 // Common comparison operators
 const COMPARISON_OPERATORS = [

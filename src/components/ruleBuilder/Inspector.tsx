@@ -7,9 +7,9 @@ import type {
   EffectParameter,
   ShowWhenCondition,
 } from "./types";
-import { getTriggerById } from "./Triggers";
-import { getConditionTypeById } from "./Conditions";
-import { getEffectTypeById } from "./Effects";
+import { getTriggerById } from "./data/Triggers";
+import { getConditionTypeById } from "./data/Conditions";
+import { getEffectTypeById } from "./data/Effects";
 import InputField from "../generic/InputField";
 import InputDropdown from "../generic/InputDropdown";
 import Checkbox from "../generic/Checkbox";

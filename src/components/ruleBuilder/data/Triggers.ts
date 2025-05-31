@@ -1,4 +1,4 @@
-import { TriggerDefinition } from "./types";
+import { TriggerDefinition } from "../types";
 
 // Trigger definitions
 export const TRIGGERS: TriggerDefinition[] = [

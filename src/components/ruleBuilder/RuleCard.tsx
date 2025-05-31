@@ -1,8 +1,8 @@
 import React from "react";
 import type { Rule, ConditionGroup, Condition, Effect } from "./types";
-import { getTriggerById } from "./Triggers";
-import { getConditionTypeById } from "./Conditions";
-import { getEffectTypeById } from "./Effects";
+import { getTriggerById } from "./data/Triggers";
+import { getConditionTypeById } from "./data/Conditions";
+import { getEffectTypeById } from "./data/Effects";
 import BlockComponent from "./BlockComponent";
 import {
   TrashIcon,

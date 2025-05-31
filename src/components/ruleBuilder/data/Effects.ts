@@ -1,4 +1,4 @@
-import { EffectTypeDefinition } from "./types";
+import { EffectTypeDefinition } from "../types";
 
 // Effect types and their possible parameters
 export const EFFECT_TYPES: EffectTypeDefinition[] = [
