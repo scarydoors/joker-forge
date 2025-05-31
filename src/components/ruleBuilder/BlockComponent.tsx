@@ -1,11 +1,14 @@
 import React from "react";
 import {
-  BoltIcon,
-  BeakerIcon,
-  PuzzlePieceIcon,
   TrashIcon,
   ExclamationTriangleIcon,
 } from "@heroicons/react/24/outline";
+
+import {
+  BoltIcon,
+  PuzzlePieceIcon,
+  BeakerIcon,
+} from "@heroicons/react/16/solid";
 
 interface BlockComponentProps {
   label: string;
@@ -34,24 +37,30 @@ const BlockComponent: React.FC<BlockComponentProps> = ({
     switch (type) {
       case "trigger":
         return {
-          borderColor: "border-l-mint",
+          borderColor: "border-l-trigger",
           backgroundColor: "bg-black-light",
-          icon: <BoltIcon className="h-4 w-4 text-mint" />,
+          icon: <BoltIcon className="h-6 w-6 text-trigger -mt-4 -ml-1" />,
           typeLabel: "Trigger",
+          selectColor: "border-trigger",
+          hoverColor: "hover:border-trigger-dark",
         };
       case "condition":
         return {
-          borderColor: "border-l-balatro-blue",
+          borderColor: "border-l-condition",
           backgroundColor: "bg-black-light",
-          icon: <BeakerIcon className="h-4 w-4 text-balatro-blue" />,
+          icon: <BeakerIcon className="h-6 w-6 text-condition -mt-4 -ml-1" />,
           typeLabel: "Condition",
+          selectColor: "border-condition",
+          hoverColor: "hover:border-condition-dark",
         };
       case "effect":
         return {
-          borderColor: "border-l-balatro-orange",
+          borderColor: "border-l-effect",
           backgroundColor: "bg-black-light",
-          icon: <PuzzlePieceIcon className="h-4 w-4 text-balatro-orange" />,
+          icon: <PuzzlePieceIcon className="h-6 w-6 text-effect -mt-4 -ml-1" />,
           typeLabel: "Effect",
+          selectColor: "border-effect",
+          hoverColor: "hover:border-effect-dark",
         };
     }
   };
@@ -65,17 +74,23 @@ const BlockComponent: React.FC<BlockComponentProps> = ({
         relative ${config.backgroundColor} ${
         config.borderColor
       } border-l-4 border-2 
-        ${isSelected ? "border-mint" : "border-black-lighter"} 
-        rounded-lg cursor-pointer transition-all hover:border-mint/50 p-3 pt-6
+        ${isSelected ? config.selectColor : "border-black-lighter"} 
+        rounded-lg cursor-pointer transition-all ${config.hoverColor} p-3 pt-6
       `}
       onClick={onClick}
     >
-      {/* Type label */}
-      <div className="absolute top-1 left-3 text-white-darker text-xs uppercase tracking-wider">
+      <div className="absolute top-2 left-11 text-white-darker text-xs font-medium tracking-wider">
         {config.typeLabel}
       </div>
 
-      {/* Trash icon */}
+      <div className="absolute top-[2px] right-6">
+        {parameterCount !== undefined && parameterCount > 0 && (
+          <span className="text-white-darker text-xs font-medium">
+            {parameterCount} Parameter{parameterCount !== 1 ? "s" : ""}
+          </span>
+        )}
+      </div>
+
       {showTrash && onDelete && (
         <div className="absolute -top-3 -right-3 w-8 h-8 bg-black-darker rounded-lg flex items-center justify-center border-2 border-balatro-redshadow">
           <button
@@ -83,9 +98,9 @@ const BlockComponent: React.FC<BlockComponentProps> = ({
               e.stopPropagation();
               onDelete();
             }}
-            className="w-full h-full flex items-center rounded justify-center transition-colors"
+            className="w-full h-full flex items-center rounded justify-center transition-colors hover:bg-balatro-redshadow active:bg-balatro-blackshadow"
           >
-            <TrashIcon className="h-5 w-5 text-balatro-red" />
+            <TrashIcon className="h-5 w-5 text-balatro-red hover:text-white cursor-pointer active:text-balatro-red transition-colors" />
           </button>
         </div>
       )}
@@ -95,24 +110,16 @@ const BlockComponent: React.FC<BlockComponentProps> = ({
           <div className="flex items-center gap-2">
             <div className="flex-shrink-0">{config.icon}</div>
             {isNegated && (
-              <div className="flex-shrink-0">
+              <div className="flex-shrink-0 -mr-2">
                 <ExclamationTriangleIcon className="h-4 w-4 text-balatro-red" />
               </div>
             )}
           </div>
           <div className="flex-grow min-w-0">
-            <div className="text-white text-sm font-medium tracking-wide">
+            <div className="text-white text-sm tracking-wide truncate">
               {isNegated ? `NOT ${displayTitle}` : displayTitle}
             </div>
           </div>
-        </div>
-
-        <div className="flex items-center gap-2 flex-shrink-0">
-          {parameterCount !== undefined && parameterCount > 0 && (
-            <span className="text-white-darker text-xs">
-              {parameterCount} Parameter{parameterCount !== 1 ? "s" : ""}
-            </span>
-          )}
         </div>
       </div>
     </div>
