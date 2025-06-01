@@ -41,8 +41,20 @@ interface RuleCardProps {
   onDeleteEffect: (ruleId: string, effectId: string) => void;
   onAddConditionGroup: (ruleId: string) => void;
   onToggleGroupOperator?: (ruleId: string, groupId: string) => void;
+  onReorderConditions: (
+    ruleId: string,
+    groupId: string,
+    startIndex: number,
+    endIndex: number
+  ) => void;
+  onReorderEffects: (
+    ruleId: string,
+    startIndex: number,
+    endIndex: number
+  ) => void;
   isRuleSelected: boolean;
   joker: JokerData;
+  canvasScale: number;
 }
 
 const RuleCard: React.FC<RuleCardProps> = ({
@@ -56,7 +68,10 @@ const RuleCard: React.FC<RuleCardProps> = ({
   onDeleteEffect,
   onAddConditionGroup,
   onToggleGroupOperator,
+  onReorderConditions,
+  onReorderEffects,
   isRuleSelected,
+  canvasScale,
 }) => {
   // State management
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -79,6 +94,20 @@ const RuleCard: React.FC<RuleCardProps> = ({
     cardY: 0,
   });
   const [dragFromHeader, setDragFromHeader] = useState(false);
+
+  // Custom drag and drop state
+  const [draggedItem, setDraggedItem] = useState<{
+    type: "condition" | "effect";
+    id: string;
+    groupId?: string;
+    index: number;
+    element: React.ReactElement;
+    mouseOffset: { x: number; y: number };
+  } | null>(null);
+  const [dragPosition, setDragPosition] = useState({ x: 0, y: 0 });
+  const [dropIndex, setDropIndex] = useState<number | null>(null);
+  const [dropType, setDropType] = useState<"condition" | "effect" | null>(null);
+  const [dropGroupId, setDropGroupId] = useState<string | null>(null);
 
   const handleCardClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -105,26 +134,84 @@ const RuleCard: React.FC<RuleCardProps> = ({
 
   const handleMouseMove = useCallback(
     (e: MouseEvent) => {
-      if (!isDragging || !dragFromHeader) return;
+      if (isDragging && dragFromHeader) {
+        const deltaX = (e.clientX - dragStart.x) / canvasScale;
+        const deltaY = (e.clientY - dragStart.y) / canvasScale;
 
-      const deltaX = e.clientX - dragStart.x;
-      const deltaY = e.clientY - dragStart.y;
+        setCardPosition({
+          x: dragStart.cardX + deltaX,
+          y: dragStart.cardY + deltaY,
+        });
+      }
 
-      setCardPosition({
-        x: dragStart.cardX + deltaX,
-        y: dragStart.cardY + deltaY,
-      });
+      if (draggedItem) {
+        // Account for canvas scale when positioning the dragged item
+        const newY = (e.clientY - draggedItem.mouseOffset.y) / canvasScale;
+        setDragPosition({ x: draggedItem.mouseOffset.x, y: newY });
+
+        // Calculate drop position based on Y coordinate
+        const elements = document.querySelectorAll(
+          `[data-drop-zone="${draggedItem.type}"]`
+        );
+        let closestIndex = -1;
+        let closestDistance = Infinity;
+
+        elements.forEach((element, index) => {
+          const rect = element.getBoundingClientRect();
+          const elementCenter = rect.top + rect.height / 2;
+          const distance = Math.abs(e.clientY - elementCenter);
+
+          if (distance < closestDistance) {
+            closestDistance = distance;
+            closestIndex = index;
+          }
+        });
+
+        if (closestIndex !== -1) {
+          setDropIndex(closestIndex);
+          setDropType(draggedItem.type);
+          setDropGroupId(draggedItem.groupId || null);
+        }
+      }
     },
-    [isDragging, dragFromHeader, dragStart]
+    [isDragging, dragFromHeader, dragStart, canvasScale, draggedItem]
   );
 
   const handleMouseUp = useCallback(() => {
-    setIsDragging(false);
-    setDragFromHeader(false);
-  }, []);
+    if (isDragging && dragFromHeader) {
+      setIsDragging(false);
+      setDragFromHeader(false);
+    }
+
+    if (draggedItem && dropIndex !== null && dropIndex !== draggedItem.index) {
+      if (draggedItem.type === "condition" && draggedItem.groupId) {
+        onReorderConditions(
+          rule.id,
+          draggedItem.groupId,
+          draggedItem.index,
+          dropIndex
+        );
+      } else if (draggedItem.type === "effect") {
+        onReorderEffects(rule.id, draggedItem.index, dropIndex);
+      }
+    }
+
+    setDraggedItem(null);
+    setDropIndex(null);
+    setDropType(null);
+    setDropGroupId(null);
+  }, [
+    isDragging,
+    dragFromHeader,
+    draggedItem,
+    dropIndex,
+    onReorderConditions,
+    onReorderEffects,
+    rule.id,
+  ]);
 
   useEffect(() => {
-    if (isDragging && dragFromHeader) {
+    if (isDragging || draggedItem) {
       document.addEventListener("mousemove", handleMouseMove);
       document.addEventListener("mouseup", handleMouseUp);
       return () => {
@@ -132,7 +219,7 @@ const RuleCard: React.FC<RuleCardProps> = ({
         document.removeEventListener("mouseup", handleMouseUp);
       };
     }
-  }, [isDragging, dragFromHeader, handleMouseMove, handleMouseUp]);
+  }, [isDragging, draggedItem, handleMouseMove, handleMouseUp]);
 
   // Handle reopen button visibility with delay
   useEffect(() => {
@@ -249,6 +336,36 @@ const RuleCard: React.FC<RuleCardProps> = ({
     const newOperator = current === "AND" ? "OR" : "AND";
     setGroupOperators((prev) => ({ ...prev, [key]: newOperator }));
     onToggleGroupOperator?.(rule.id, groupId);
+  };
+
+  // Drag and drop handlers
+  const handleDragStart = (
+    e: React.MouseEvent,
+    type: "condition" | "effect",
+    id: string,
+    index: number,
+    groupId?: string,
+    element?: React.ReactElement
+  ) => {
+    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    const mouseOffset = {
+      x: rect.left,
+      y: e.clientY - rect.top,
+    };
+
+    setDraggedItem({
+      type,
+      id,
+      index,
+      groupId,
+      element: element || <div></div>,
+      mouseOffset,
+    });
+
+    setDragPosition({
+      x: rect.left / canvasScale,
+      y: (e.clientY - mouseOffset.y) / canvasScale,
+    });
   };
 
   // Dynamic title generation
@@ -504,14 +621,45 @@ const RuleCard: React.FC<RuleCardProps> = ({
               const conditionType = getConditionTypeById(condition.type);
               const operatorKey = `${group.id}-${conditionIndex}`;
               const currentOperator = conditionOperators[operatorKey] || "AND";
+              const isDraggedCondition = draggedItem?.id === condition.id;
+              const shouldShift =
+                dropType === "condition" &&
+                dropGroupId === group.id &&
+                dropIndex !== null &&
+                !isDraggedCondition;
+
+              let translateY = 0;
+              if (shouldShift) {
+                if (
+                  draggedItem &&
+                  conditionIndex >= dropIndex &&
+                  conditionIndex < draggedItem.index
+                ) {
+                  translateY = 60; // Shift down to make space
+                } else if (
+                  draggedItem &&
+                  conditionIndex <= dropIndex &&
+                  conditionIndex > draggedItem.index
+                ) {
+                  translateY = -60; // Shift up to make space
+                }
+              }
 
               return (
                 <motion.div
                   key={condition.id}
                   variants={snapFadeUp}
                   initial="initial"
-                  animate="animate"
-                  transition={{ duration: 0.12, delay: conditionIndex * 0.02 }}
+                  animate={{
+                    opacity: isDraggedCondition ? 0 : 1,
+                    y: translateY,
+                  }}
+                  transition={{
+                    duration: 0.12,
+                    delay: conditionIndex * 0.02,
+                    y: { duration: 0.2 },
+                  }}
+                  data-drop-zone="condition"
                 >
                   <div onClick={(e) => e.stopPropagation()}>
                     <BlockComponent
@@ -535,6 +683,16 @@ const RuleCard: React.FC<RuleCardProps> = ({
                       onDelete={() => onDeleteCondition(rule.id, condition.id)}
                       parameterCount={getParameterCount(condition.params)}
                       isNegated={condition.negate}
+                      isDraggable={true}
+                      onDragStart={(e) =>
+                        handleDragStart(
+                          e,
+                          "condition",
+                          condition.id,
+                          conditionIndex,
+                          group.id
+                        )
+                      }
                     />
                   </div>
                   {conditionIndex < group.conditions.length - 1 && (
@@ -883,14 +1041,44 @@ const RuleCard: React.FC<RuleCardProps> = ({
                   const effectType = getEffectTypeById(effect.type);
                   const hasRandomChance =
                     effect.params.has_random_chance === "true";
+                  const isDraggedEffect = draggedItem?.id === effect.id;
+                  const shouldShift =
+                    dropType === "effect" &&
+                    dropIndex !== null &&
+                    !isDraggedEffect;
+
+                  let translateY = 0;
+                  if (shouldShift) {
+                    if (
+                      draggedItem &&
+                      index >= dropIndex &&
+                      index < draggedItem.index
+                    ) {
+                      translateY = 60; // Shift down to make space
+                    } else if (
+                      draggedItem &&
+                      index <= dropIndex &&
+                      index > draggedItem.index
+                    ) {
+                      translateY = -60; // Shift up to make space
+                    }
+                  }
 
                   return (
                     <motion.div
                       key={effect.id}
                       variants={snapFadeUp}
                       initial="initial"
-                      animate="animate"
-                      transition={{ duration: 0.12, delay: index * 0.02 }}
+                      animate={{
+                        opacity: isDraggedEffect ? 0 : 1,
+                        y: translateY,
+                      }}
+                      transition={{
+                        duration: 0.12,
+                        delay: index * 0.02,
+                        y: { duration: 0.2 },
+                      }}
+                      data-drop-zone="effect"
                     >
                       <BlockComponent
                         type="effect"
@@ -909,6 +1097,10 @@ const RuleCard: React.FC<RuleCardProps> = ({
                         onDelete={() => onDeleteEffect(rule.id, effect.id)}
                         parameterCount={getParameterCount(effect.params)}
                         hasRandomChance={hasRandomChance}
+                        isDraggable={true}
+                        onDragStart={(e) =>
+                          handleDragStart(e, "effect", effect.id, index)
+                        }
                       />
                     </motion.div>
                   );
@@ -918,58 +1110,127 @@ const RuleCard: React.FC<RuleCardProps> = ({
           </motion.div>
         </motion.div>
 
-        <div className="mt-4">
-          <AnimatePresence mode="wait">
-            {descriptionVisible && (
-              <motion.div
-                className="bg-black-dark border-2 border-black-lighter rounded-lg p-3 relative overflow-hidden"
-                variants={descriptionSlideDown}
-                initial="initial"
-                animate="animate"
-                exit="exit"
-                transition={{ duration: 0.2 }}
-              >
-                <div className="flex justify-between items-start mb-2">
-                  <div className="text-white-darker text-xs tracking-wider uppercase">
-                    Description
-                  </div>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setDescriptionVisible(false);
-                    }}
-                    className="w-6 h-6 bg-black-darker rounded-lg flex items-center justify-center border-2 border-black-lighter hover:bg-black-light transition-colors cursor-pointer"
-                    title="Hide Description"
-                  >
-                    <ChevronUpIcon className="h-3 w-3 text-white-darker" />
-                  </button>
+        {/* Description positioned absolutely to not affect layout */}
+        <AnimatePresence>
+          {descriptionVisible && (
+            <motion.div
+              className="absolute top-full left-0 w-full mt-4 bg-black-dark border-2 border-black-lighter rounded-lg p-3 z-10"
+              variants={descriptionSlideDown}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              transition={{ duration: 0.2 }}
+            >
+              <div className="flex justify-between items-start mb-2">
+                <div className="text-white-darker text-xs tracking-wider uppercase">
+                  Description
                 </div>
-                <div className="text-white-darker text-sm leading-relaxed">
-                  {generateDescription()}
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          {showReopenButton && (
-            <div className="flex justify-center">
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setShowReopenButton(false);
-                  setTimeout(() => {
-                    setDescriptionVisible(true);
-                  }, 50);
-                }}
-                className="w-8 h-8 bg-black-darker rounded-lg flex items-center justify-center border-2 border-black-lighter hover:bg-black-light transition-colors cursor-pointer"
-                title="Show Description"
-              >
-                <ChevronDownIcon className="h-4 w-4 text-white-darker" />
-              </button>
-            </div>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setDescriptionVisible(false);
+                  }}
+                  className="w-6 h-6 bg-black-darker rounded-lg flex items-center justify-center border-2 border-black-lighter hover:bg-black-light transition-colors cursor-pointer"
+                  title="Hide Description"
+                >
+                  <ChevronUpIcon className="h-3 w-3 text-white-darker" />
+                </button>
+              </div>
+              <div className="text-white-darker text-sm leading-relaxed">
+                {generateDescription()}
+              </div>
+            </motion.div>
           )}
-        </div>
+        </AnimatePresence>
+
+        {showReopenButton && (
+          <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-4">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowReopenButton(false);
+                setTimeout(() => {
+                  setDescriptionVisible(true);
+                }, 50);
+              }}
+              className="w-8 h-8 bg-black-darker rounded-lg flex items-center justify-center border-2 border-black-lighter hover:bg-black-light transition-colors cursor-pointer"
+              title="Show Description"
+            >
+              <ChevronDownIcon className="h-4 w-4 text-white-darker" />
+            </button>
+          </div>
+        )}
       </motion.div>
+
+      {/* Dragged item overlay */}
+      {draggedItem && (
+        <div
+          className="fixed pointer-events-none z-50"
+          style={{
+            left: dragPosition.x * canvasScale,
+            top: dragPosition.y * canvasScale,
+            transform: `translateZ(0) scale(${canvasScale})`,
+            transformOrigin: "top left",
+          }}
+        >
+          <div
+            className="w-80"
+            style={{
+              filter: "drop-shadow(0 10px 20px rgba(0, 0, 0, 0.5))",
+            }}
+          >
+            {draggedItem.type === "condition"
+              ? (() => {
+                  const condition = rule.conditionGroups
+                    .flatMap((g) => g.conditions)
+                    .find((c) => c.id === draggedItem.id);
+                  const conditionType = getConditionTypeById(
+                    condition?.type || ""
+                  );
+                  return (
+                    <BlockComponent
+                      type="condition"
+                      label={conditionType?.label || "Unknown Condition"}
+                      dynamicTitle={
+                        condition
+                          ? generateConditionTitle(condition)
+                          : undefined
+                      }
+                      onClick={() => {}}
+                      isDraggable={false}
+                      parameterCount={
+                        condition ? getParameterCount(condition.params) : 0
+                      }
+                      isNegated={condition?.negate}
+                    />
+                  );
+                })()
+              : (() => {
+                  const effect = rule.effects.find(
+                    (e) => e.id === draggedItem.id
+                  );
+                  const effectType = getEffectTypeById(effect?.type || "");
+                  const hasRandomChance =
+                    effect?.params.has_random_chance === "true";
+                  return (
+                    <BlockComponent
+                      type="effect"
+                      label={effectType?.label || "Unknown Effect"}
+                      dynamicTitle={
+                        effect ? generateEffectTitle(effect) : undefined
+                      }
+                      onClick={() => {}}
+                      isDraggable={false}
+                      parameterCount={
+                        effect ? getParameterCount(effect.params) : 0
+                      }
+                      hasRandomChance={hasRandomChance}
+                    />
+                  );
+                })()}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -2,6 +2,7 @@ import React from "react";
 import {
   TrashIcon,
   ExclamationTriangleIcon,
+  Bars3Icon,
 } from "@heroicons/react/24/outline";
 
 import {
@@ -23,6 +24,8 @@ interface BlockComponentProps {
   dynamicTitle?: string;
   variableName?: string;
   hasRandomChance?: boolean;
+  isDraggable?: boolean;
+  onDragStart?: (e: React.MouseEvent) => void;
 }
 
 const BlockComponent: React.FC<BlockComponentProps> = ({
@@ -37,6 +40,8 @@ const BlockComponent: React.FC<BlockComponentProps> = ({
   dynamicTitle,
   variableName,
   hasRandomChance = false,
+  isDraggable = false,
+  onDragStart,
 }) => {
   const getTypeConfig = () => {
     switch (type) {
@@ -78,6 +83,14 @@ const BlockComponent: React.FC<BlockComponentProps> = ({
     onClick(e);
   };
 
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (isDraggable && onDragStart && e.button === 0) {
+      e.preventDefault();
+      e.stopPropagation();
+      onDragStart(e);
+    }
+  };
+
   return (
     <div
       className={`
@@ -86,8 +99,14 @@ const BlockComponent: React.FC<BlockComponentProps> = ({
       } border-l-4 border-2 
         ${isSelected ? config.selectColor : "border-black-light"} 
         rounded-lg cursor-pointer transition-all ${config.hoverColor} p-3 pt-6
+        ${
+          isDraggable
+            ? "cursor-grab active:cursor-grabbing hover:shadow-lg"
+            : ""
+        }
       `}
       onClick={handleClick}
+      onMouseDown={handleMouseDown}
       style={{ pointerEvents: "auto" }}
     >
       <div className="absolute top-2 left-11 text-white-darker text-xs font-medium tracking-wider">
@@ -106,6 +125,12 @@ const BlockComponent: React.FC<BlockComponentProps> = ({
           </span>
         )}
       </div>
+
+      {isDraggable && (
+        <div className="absolute top-2 right-2">
+          <Bars3Icon className="h-4 w-4 text-white-darker opacity-50" />
+        </div>
+      )}
 
       {showTrash && onDelete && (
         <div className="absolute -top-3 -right-3 w-8 h-8 bg-black-darker rounded-lg flex items-center justify-center border-2 border-balatro-redshadow">

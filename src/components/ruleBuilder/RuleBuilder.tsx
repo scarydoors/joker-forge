@@ -96,18 +96,24 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
     (e: MouseEvent) => {
       if (!isPanning) return;
 
-      const deltaX = e.clientX - lastPanPoint.x;
-      const deltaY = e.clientY - lastPanPoint.y;
+      const deltaX = (e.clientX - lastPanPoint.x) / canvasTransform.scale;
+      const deltaY = (e.clientY - lastPanPoint.y) / canvasTransform.scale;
 
       setCanvasTransform((prev) => ({
         ...prev,
-        x: Math.max(-PAN_BOUNDS.x, Math.min(PAN_BOUNDS.x, prev.x + deltaX)),
-        y: Math.max(-PAN_BOUNDS.y, Math.min(PAN_BOUNDS.y, prev.y + deltaY)),
+        x: Math.max(
+          -PAN_BOUNDS.x,
+          Math.min(PAN_BOUNDS.x, prev.x + deltaX * prev.scale)
+        ),
+        y: Math.max(
+          -PAN_BOUNDS.y,
+          Math.min(PAN_BOUNDS.y, prev.y + deltaY * prev.scale)
+        ),
       }));
 
       setLastPanPoint({ x: e.clientX, y: e.clientY });
     },
-    [isPanning, lastPanPoint, PAN_BOUNDS]
+    [isPanning, lastPanPoint, PAN_BOUNDS, canvasTransform.scale]
   );
 
   const handleCanvasMouseUp = useCallback(() => {
@@ -419,6 +425,57 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
     }
   };
 
+  const reorderConditions = (
+    ruleId: string,
+    groupId: string,
+    startIndex: number,
+    endIndex: number
+  ) => {
+    setRules((prev) =>
+      prev.map((rule) => {
+        if (rule.id === ruleId) {
+          return {
+            ...rule,
+            conditionGroups: rule.conditionGroups.map((group) => {
+              if (group.id === groupId) {
+                const newConditions = [...group.conditions];
+                const [removed] = newConditions.splice(startIndex, 1);
+                newConditions.splice(endIndex, 0, removed);
+                return {
+                  ...group,
+                  conditions: newConditions,
+                };
+              }
+              return group;
+            }),
+          };
+        }
+        return rule;
+      })
+    );
+  };
+
+  const reorderEffects = (
+    ruleId: string,
+    startIndex: number,
+    endIndex: number
+  ) => {
+    setRules((prev) =>
+      prev.map((rule) => {
+        if (rule.id === ruleId) {
+          const newEffects = [...rule.effects];
+          const [removed] = newEffects.splice(startIndex, 1);
+          newEffects.splice(endIndex, 0, removed);
+          return {
+            ...rule,
+            effects: newEffects,
+          };
+        }
+        return rule;
+      })
+    );
+  };
+
   const getSelectedRule = () => {
     if (!selectedItem) return null;
     return rules.find((rule) => rule.id === selectedItem.ruleId) || null;
@@ -548,8 +605,11 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
                           onDeleteEffect={deleteEffect}
                           onAddConditionGroup={addConditionGroup}
                           onToggleGroupOperator={toggleGroupOperator}
+                          onReorderConditions={reorderConditions}
+                          onReorderEffects={reorderEffects}
                           isRuleSelected={selectedItem?.ruleId === rule.id}
                           joker={joker}
+                          canvasScale={canvasTransform.scale}
                         />
                       </div>
                     ))}
