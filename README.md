@@ -6,6 +6,7 @@ A web app that allows you to make Balatro Jokers using Steammodded with ease. It
 
 It does this with a Trigger > Condition > Effect system. Most vanilla jokers follow this system. With this system, less complex jokers like Droll Joker become: When a Hand is Played (Trigger) > If Scoring Cards = Flush (Condition) > Then +10 Mult (Effect). Jokers abilities are set using the built-in Rule Builder.
 
+**STILL EARLY IN DEV, EXPECT ISSUES, MISSING FEATURES, AND ANNOYANCES FOR NOW**
 
 ## Implementation Status Checklist
 
