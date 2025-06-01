@@ -105,6 +105,14 @@ export interface LogicalOperator {
   label: string;
 }
 
+// Interface for selected items in the rule builder
+export interface SelectedItem {
+  type: "trigger" | "condition" | "effect";
+  ruleId: string;
+  itemId?: string;
+  groupId?: string;
+}
+
 // Export logical operators
 export const LOGICAL_OPERATORS: LogicalOperator[] = [
   { value: "and", label: "AND" },

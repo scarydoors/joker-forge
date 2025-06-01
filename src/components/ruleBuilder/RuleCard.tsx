@@ -26,22 +26,20 @@ interface RuleCardProps {
     type: "trigger" | "condition" | "effect";
     ruleId: string;
     itemId?: string;
+    groupId?: string;
   } | null;
   onSelectItem: (item: {
     type: "trigger" | "condition" | "effect";
     ruleId: string;
     itemId?: string;
+    groupId?: string;
   }) => void;
   onDeleteRule: (ruleId: string) => void;
   onDeleteCondition: (ruleId: string, conditionId: string) => void;
+  onDeleteConditionGroup: (ruleId: string, groupId: string) => void;
   onDeleteEffect: (ruleId: string, effectId: string) => void;
   onAddConditionGroup: (ruleId: string) => void;
-  onToggleConditionOperator?: (
-    ruleId: string,
-    groupId: string,
-    conditionIndex: number
-  ) => void;
-  onToggleBetweenGroupsOperator?: (ruleId: string, groupIndex: number) => void;
+  onToggleGroupOperator?: (ruleId: string, groupId: string) => void;
   isRuleSelected: boolean;
 }
 
@@ -52,12 +50,13 @@ const RuleCard: React.FC<RuleCardProps> = ({
   onSelectItem,
   onDeleteRule,
   onDeleteCondition,
+  onDeleteConditionGroup,
   onDeleteEffect,
   onAddConditionGroup,
-  onToggleConditionOperator,
-  onToggleBetweenGroupsOperator,
+  onToggleGroupOperator,
   isRuleSelected,
 }) => {
+  // State management
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [descriptionVisible, setDescriptionVisible] = useState(true);
   const [isDisabled, setIsDisabled] = useState(false);
@@ -68,6 +67,7 @@ const RuleCard: React.FC<RuleCardProps> = ({
     {}
   );
 
+  // Data processing
   const trigger = getTriggerById(rule.trigger);
   const allConditions = rule.conditionGroups.flatMap(
     (group) => group.conditions
@@ -75,7 +75,7 @@ const RuleCard: React.FC<RuleCardProps> = ({
   const totalConditions = allConditions.length;
   const totalEffects = rule.effects.length;
 
-  // Snappy animation variants
+  // Animation variants
   const snapFadeUp = {
     initial: { opacity: 0, y: 15 },
     animate: { opacity: 1, y: 0 },
@@ -105,26 +105,38 @@ const RuleCard: React.FC<RuleCardProps> = ({
     exit: { opacity: 0, scale: 0.8, y: -10 },
   };
 
+  // Simple description animation
   const descriptionSlideDown = {
-    initial: { opacity: 0, y: -20, scaleY: 0 },
-    animate: { opacity: 1, y: 0, scaleY: 1 },
-    exit: { opacity: 0, y: -20, scaleY: 0 },
+    initial: { opacity: 0, y: -10 },
+    animate: { opacity: 1, y: 0 },
+    exit: { opacity: 0, y: -10 },
   };
 
+  // Utility functions
   const isItemSelected = (
     type: "trigger" | "condition" | "effect",
-    itemId?: string
+    itemId?: string,
+    groupId?: string
   ) => {
     if (!selectedItem || selectedItem.ruleId !== rule.id) return false;
     if (selectedItem.type !== type) return false;
     if (type === "trigger") return true;
+    if (type === "condition" && groupId && selectedItem.groupId !== groupId)
+      return false;
     return selectedItem.itemId === itemId;
+  };
+
+  const isGroupSelected = (groupId: string) => {
+    return (
+      selectedItem?.ruleId === rule.id && selectedItem?.groupId === groupId
+    );
   };
 
   const getParameterCount = (params: Record<string, unknown>) => {
     return Object.keys(params).length;
   };
 
+  // Event handlers
   const handleEditName = () => {
     console.log("Edit rule name functionality not yet implemented");
   };
@@ -148,17 +160,17 @@ const RuleCard: React.FC<RuleCardProps> = ({
     const current = conditionOperators[key] || "AND";
     const newOperator = current === "AND" ? "OR" : "AND";
     setConditionOperators((prev) => ({ ...prev, [key]: newOperator }));
-    onToggleConditionOperator?.(rule.id, groupId, conditionIndex);
   };
 
-  const handleGroupOperatorToggle = (groupIndex: number) => {
+  const handleGroupOperatorToggle = (groupIndex: number, groupId: string) => {
     const key = `group-${groupIndex}`;
     const current = groupOperators[key] || "AND";
     const newOperator = current === "AND" ? "OR" : "AND";
     setGroupOperators((prev) => ({ ...prev, [key]: newOperator }));
-    onToggleBetweenGroupsOperator?.(rule.id, groupIndex);
+    onToggleGroupOperator?.(rule.id, groupId);
   };
 
+  // Dynamic title generation
   const generateConditionTitle = (condition: Condition) => {
     const conditionType = getConditionTypeById(condition.type);
     const baseLabel = conditionType?.label || "Unknown Condition";
@@ -359,7 +371,10 @@ const RuleCard: React.FC<RuleCardProps> = ({
     return `${triggerText}${conditionsText}${effectsText}`;
   };
 
+  // CONDITION GROUP RENDERING
   const renderConditionGroup = (group: ConditionGroup, groupIndex: number) => {
+    const isSelected = isGroupSelected(group.id);
+
     return (
       <motion.div
         key={group.id}
@@ -369,13 +384,38 @@ const RuleCard: React.FC<RuleCardProps> = ({
         animate="animate"
         transition={{ duration: 0.15, delay: 0.03 }}
       >
-        <div className="border-2 border-dashed border-black-lighter rounded-lg p-4 bg-black-darker/50">
-          <div className="flex items-center justify-center mb-3">
+        <div
+          className={`border-2 border-dashed rounded-lg p-4 bg-black-darker/50 relative ${
+            isSelected ? "border-mint" : "border-black-lighter"
+          }`}
+          onClick={() =>
+            onSelectItem({
+              type: "condition",
+              ruleId: rule.id,
+              groupId: group.id,
+            })
+          }
+        >
+          {/* Condition Group Header */}
+          <div className="flex items-center justify-between mb-6">
             <div className="text-white-darker text-xs tracking-wider">
-              CONDITION GROUP {groupIndex + 1}
+              CONDITION GROUP {groupIndex + 1} {isSelected && "(SELECTED)"}
+            </div>
+            {/* Delete condition group button */}
+            <div onClick={(e) => e.stopPropagation()}>
+              <button
+                onClick={() => {
+                  onDeleteConditionGroup(rule.id, group.id);
+                }}
+                className="w-full h-full flex items-center rounded justify-center"
+                title="Delete Condition Group"
+              >
+                <XMarkIcon className="h-4 w-4 text-white-dark hover:text-white-lighter cursor-pointer transition-colors" />
+              </button>
             </div>
           </div>
 
+          {/* Conditions within the group */}
           <div className="">
             {group.conditions.map((condition, conditionIndex) => {
               const conditionType = getConditionTypeById(condition.type);
@@ -390,32 +430,42 @@ const RuleCard: React.FC<RuleCardProps> = ({
                   animate="animate"
                   transition={{ duration: 0.12, delay: conditionIndex * 0.02 }}
                 >
-                  <BlockComponent
-                    type="condition"
-                    label={conditionType?.label || "Unknown Condition"}
-                    dynamicTitle={generateConditionTitle(condition)}
-                    isSelected={isItemSelected("condition", condition.id)}
-                    onClick={() =>
-                      onSelectItem({
-                        type: "condition",
-                        ruleId: rule.id,
-                        itemId: condition.id,
-                      })
-                    }
-                    showTrash={true}
-                    onDelete={() => onDeleteCondition(rule.id, condition.id)}
-                    parameterCount={getParameterCount(condition.params)}
-                    isNegated={condition.negate}
-                  />
+                  <div onClick={(e) => e.stopPropagation()}>
+                    <BlockComponent
+                      type="condition"
+                      label={conditionType?.label || "Unknown Condition"}
+                      dynamicTitle={generateConditionTitle(condition)}
+                      isSelected={isItemSelected(
+                        "condition",
+                        condition.id,
+                        group.id
+                      )}
+                      onClick={() => {
+                        onSelectItem({
+                          type: "condition",
+                          ruleId: rule.id,
+                          itemId: condition.id,
+                          groupId: group.id,
+                        });
+                      }}
+                      showTrash={true}
+                      onDelete={() => onDeleteCondition(rule.id, condition.id)}
+                      parameterCount={getParameterCount(condition.params)}
+                      isNegated={condition.negate}
+                    />
+                  </div>
                   {conditionIndex < group.conditions.length - 1 && (
-                    <div className="text-center">
+                    <div
+                      className="text-center"
+                      onClick={(e) => e.stopPropagation()}
+                    >
                       <button
-                        onClick={() =>
+                        onClick={() => {
                           handleConditionOperatorToggle(
                             group.id,
                             conditionIndex
-                          )
-                        }
+                          );
+                        }}
                         className="px-3 text-white-darker text-sm font-medium tracking-wider cursor-pointer rounded transition-colors hover:bg-black-light"
                       >
                         {currentOperator}
@@ -428,10 +478,11 @@ const RuleCard: React.FC<RuleCardProps> = ({
           </div>
         </div>
 
+        {/* Operator between groups */}
         {groupIndex < rule.conditionGroups.length - 1 && (
-          <div className="text-center py-1">
+          <div className="text-center py-2">
             <button
-              onClick={() => handleGroupOperatorToggle(groupIndex)}
+              onClick={() => handleGroupOperatorToggle(groupIndex, group.id)}
               className="px-3 text-white-darker text-sm font-medium tracking-wider cursor-pointer rounded transition-colors hover:bg-black-light"
             >
               {groupOperators[`group-${groupIndex}`] || "AND"}
@@ -442,8 +493,10 @@ const RuleCard: React.FC<RuleCardProps> = ({
     );
   };
 
+  // Main component render
   return (
     <div className="w-96 relative pl-16">
+      {/* Rule Actions Sidebar */}
       <AnimatePresence>
         {sidebarOpen && (
           <motion.div
@@ -454,6 +507,7 @@ const RuleCard: React.FC<RuleCardProps> = ({
             exit="exit"
             transition={{ duration: 0.15 }}
           >
+            {/* Delete Rule */}
             <motion.div
               className="w-8 h-8 bg-black-darker rounded-lg flex items-center justify-center border-2 border-balatro-redshadow"
               whileHover={{ scale: 1.1 }}
@@ -468,6 +522,8 @@ const RuleCard: React.FC<RuleCardProps> = ({
                 <TrashIcon className="h-4 w-4 text-balatro-red transition-colors" />
               </button>
             </motion.div>
+
+            {/* Edit Name */}
             <motion.div
               className="w-8 h-8 bg-black-darker rounded-lg flex items-center justify-center border-2 border-balatro-orange"
               whileHover={{ scale: 1.1 }}
@@ -482,6 +538,8 @@ const RuleCard: React.FC<RuleCardProps> = ({
                 <PencilIcon className="h-4 w-4 text-balatro-orange" />
               </button>
             </motion.div>
+
+            {/* Duplicate Rule */}
             <motion.div
               className="w-8 h-8 bg-black-darker rounded-lg flex items-center justify-center border-2 border-balatro-blue"
               whileHover={{ scale: 1.1 }}
@@ -496,6 +554,8 @@ const RuleCard: React.FC<RuleCardProps> = ({
                 <DocumentDuplicateIcon className="h-4 w-4 text-balatro-blue" />
               </button>
             </motion.div>
+
+            {/* Toggle Disabled */}
             <motion.div
               className="w-8 h-8 bg-black-darker rounded-lg flex items-center justify-center border-2 border-balatro-grey"
               whileHover={{ scale: 1.1 }}
@@ -510,6 +570,8 @@ const RuleCard: React.FC<RuleCardProps> = ({
                 <EyeSlashIcon className="h-4 w-4 text-balatro-grey" />
               </button>
             </motion.div>
+
+            {/* Close Menu */}
             <motion.div
               className="w-8 h-8 bg-black-darker rounded-lg flex items-center justify-center border-2 border-white-darker"
               whileHover={{ scale: 1.1 }}
@@ -528,6 +590,7 @@ const RuleCard: React.FC<RuleCardProps> = ({
         )}
       </AnimatePresence>
 
+      {/* Main Rule Card */}
       <motion.div
         className={`w-96 relative ${isDisabled ? "opacity-50" : ""}`}
         variants={cardEntrance}
@@ -535,6 +598,7 @@ const RuleCard: React.FC<RuleCardProps> = ({
         animate="animate"
         transition={{ duration: 0.3 }}
       >
+        {/* Rule Title Tab */}
         <motion.div
           className="flex justify-center relative"
           variants={snapFadeUp}
@@ -543,7 +607,7 @@ const RuleCard: React.FC<RuleCardProps> = ({
           transition={{ duration: 0.15 }}
         >
           <div
-            className={`bg-black border-2 rounded-t-md px-4 pt-2 pb-4 relative ${
+            className={`bg-black border-2 rounded-t-md px-6 pt-2 py-3 relative ${
               isRuleSelected ? "border-mint" : "border-black-light"
             } ${isDisabled ? "opacity-70" : ""}`}
           >
@@ -555,6 +619,7 @@ const RuleCard: React.FC<RuleCardProps> = ({
           </div>
         </motion.div>
 
+        {/* Rule Content */}
         <motion.div
           className={`
             bg-black-dark border-2 rounded-lg overflow-hidden -mt-2 relative
@@ -566,6 +631,7 @@ const RuleCard: React.FC<RuleCardProps> = ({
           animate="animate"
           transition={{ duration: 0.18, delay: 0.05 }}
         >
+          {/* Rule Header */}
           <div className="bg-black-darker px-4 py-3 border-b border-black-lighter">
             <div className="flex justify-between items-center">
               <motion.button
@@ -578,6 +644,7 @@ const RuleCard: React.FC<RuleCardProps> = ({
               >
                 <Bars3Icon className="h-4 w-4" />
               </motion.button>
+
               <motion.div
                 className="flex items-center gap-4"
                 variants={quickFade}
@@ -596,10 +663,24 @@ const RuleCard: React.FC<RuleCardProps> = ({
                     {totalEffects} Effect{totalEffects !== 1 ? "s" : ""}
                   </span>
                 )}
+
+                {/* Add Condition Group Button - moved to header */}
+                {rule.conditionGroups.length > 0 && (
+                  <div onClick={(e) => e.stopPropagation()}>
+                    <button
+                      onClick={() => onAddConditionGroup(rule.id)}
+                      className="w-6 h-6 bg-black-darker rounded-lg flex items-center justify-center border-2 border-mint hover:bg-mint/20 transition-colors cursor-pointer"
+                      title="Add Condition Group"
+                    >
+                      <PlusIcon className="h-3 w-3 text-mint" />
+                    </button>
+                  </div>
+                )}
               </motion.div>
             </div>
           </div>
 
+          {/* Rule Body */}
           <motion.div
             className="p-4 space-y-4"
             variants={quickFade}
@@ -607,6 +688,7 @@ const RuleCard: React.FC<RuleCardProps> = ({
             animate="animate"
             transition={{ duration: 0.15, delay: 0.1 }}
           >
+            {/* Trigger Block */}
             <motion.div
               variants={snapFadeUp}
               initial="initial"
@@ -623,6 +705,7 @@ const RuleCard: React.FC<RuleCardProps> = ({
               />
             </motion.div>
 
+            {/* Flow Arrow */}
             {(rule.conditionGroups.length > 0 || rule.effects.length > 0) && (
               <motion.div
                 className="flex justify-center"
@@ -635,9 +718,10 @@ const RuleCard: React.FC<RuleCardProps> = ({
               </motion.div>
             )}
 
+            {/* Condition Groups Section */}
             {rule.conditionGroups.length > 0 && (
               <motion.div
-                className="space-y-4"
+                className="space-y-3"
                 variants={quickFade}
                 initial="initial"
                 animate="animate"
@@ -646,25 +730,23 @@ const RuleCard: React.FC<RuleCardProps> = ({
                 {rule.conditionGroups.map((group, index) =>
                   renderConditionGroup(group, index)
                 )}
-                <div className="flex justify-center">
-                  <motion.div
-                    className="w-8 h-8 bg-black-darker rounded-lg flex items-center justify-center border-2 border-mint"
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
-                    transition={{ duration: 0.05 }}
-                  >
+
+                {/* Add first condition group button if no groups exist */}
+                {rule.conditionGroups.length === 0 && (
+                  <div className="flex justify-center">
                     <button
                       onClick={() => onAddConditionGroup(rule.id)}
-                      className="w-full h-full flex items-center rounded justify-center transition-colors hover:bg-mint/20 cursor-pointer"
+                      className="w-8 h-8 bg-black-darker rounded-lg flex items-center justify-center border-2 border-mint hover:bg-mint/20 transition-colors cursor-pointer"
                       title="Add Condition Group"
                     >
                       <PlusIcon className="h-4 w-4 text-mint" />
                     </button>
-                  </motion.div>
-                </div>
+                  </div>
+                )}
               </motion.div>
             )}
 
+            {/* Flow Arrow Between Conditions and Effects */}
             {rule.effects.length > 0 && rule.conditionGroups.length > 0 && (
               <motion.div
                 className="flex justify-center"
@@ -677,6 +759,7 @@ const RuleCard: React.FC<RuleCardProps> = ({
               </motion.div>
             )}
 
+            {/* Effects Section */}
             {rule.effects.length > 0 && (
               <motion.div
                 className="space-y-3"
@@ -719,70 +802,50 @@ const RuleCard: React.FC<RuleCardProps> = ({
           </motion.div>
         </motion.div>
 
-        <AnimatePresence>
-          {descriptionVisible && (
-            <motion.div
-              className="mt-4 bg-black-dark border-2 border-black-lighter rounded-lg p-3 relative"
-              variants={descriptionSlideDown}
-              initial="initial"
-              animate="animate"
-              exit="exit"
-              transition={{ duration: 0.18 }}
-              style={{ transformOrigin: "top" }}
-            >
-              <div className="flex justify-between items-start mb-2">
-                <div className="text-white-darker text-xs tracking-wider uppercase">
-                  Description
-                </div>
-                <motion.div
-                  className="w-6 h-6 bg-black-darker rounded-lg flex items-center justify-center border-2 border-black-lighter"
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.9 }}
-                  transition={{ duration: 0.05 }}
-                >
+        {/* Description Section */}
+        <div className="mt-4">
+          <AnimatePresence mode="wait">
+            {descriptionVisible && (
+              <motion.div
+                className="bg-black-dark border-2 border-black-lighter rounded-lg p-3 relative overflow-hidden"
+                variants={descriptionSlideDown}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+                transition={{ duration: 0.2 }}
+              >
+                <div className="flex justify-between items-start mb-2">
+                  <div className="text-white-darker text-xs tracking-wider uppercase">
+                    Description
+                  </div>
                   <button
                     onClick={() => setDescriptionVisible(false)}
-                    className="w-full h-full flex items-center rounded justify-center transition-colors hover:bg-black-light cursor-pointer"
+                    className="w-6 h-6 bg-black-darker rounded-lg flex items-center justify-center border-2 border-black-lighter hover:bg-black-light transition-colors cursor-pointer"
                     title="Hide Description"
                   >
                     <ChevronUpIcon className="h-3 w-3 text-white-darker" />
                   </button>
-                </motion.div>
-              </div>
-              <div className="text-white-darker text-sm leading-relaxed">
-                {generateDescription()}
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        <AnimatePresence>
-          {!descriptionVisible && (
-            <motion.div
-              className="mt-4 flex justify-center"
-              initial={{ opacity: 1 }}
-              exit={{ opacity: 0, scale: 0.8 }}
-              transition={{ duration: 0.1 }}
-            >
-              <motion.div
-                className="w-8 h-8 bg-black-darker rounded-lg flex items-center justify-center border-2 border-black-lighter"
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.15, delay: 0.12 }}
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-              >
-                <button
-                  onClick={() => setDescriptionVisible(true)}
-                  className="w-full h-full flex items-center rounded justify-center transition-colors hover:bg-black-light cursor-pointer"
-                  title="Show Description"
-                >
-                  <ChevronDownIcon className="h-4 w-4 text-white-darker" />
-                </button>
+                </div>
+                <div className="text-white-darker text-sm leading-relaxed">
+                  {generateDescription()}
+                </div>
               </motion.div>
-            </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Show Description Button - separate from animated content */}
+          {!descriptionVisible && (
+            <div className="flex justify-center">
+              <button
+                onClick={() => setDescriptionVisible(true)}
+                className="w-8 h-8 bg-black-darker rounded-lg flex items-center justify-center border-2 border-black-lighter hover:bg-black-light transition-colors cursor-pointer"
+                title="Show Description"
+              >
+                <ChevronDownIcon className="h-4 w-4 text-white-darker" />
+              </button>
+            </div>
           )}
-        </AnimatePresence>
+        </div>
       </motion.div>
     </div>
   );

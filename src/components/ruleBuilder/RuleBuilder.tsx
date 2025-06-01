@@ -19,6 +19,7 @@ type SelectedItem = {
   type: "trigger" | "condition" | "effect";
   ruleId: string;
   itemId?: string;
+  groupId?: string; // Added to track selected condition group
 } | null;
 
 const RuleBuilder: React.FC<RuleBuilderProps> = ({
@@ -74,7 +75,8 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
 
   const addCondition = useCallback(
     (conditionType: string) => {
-      if (!selectedItem || selectedItem.type === "effect") return;
+      // Fixed: Allow adding conditions when an effect is selected
+      if (!selectedItem) return;
 
       const newCondition: Condition = {
         id: crypto.randomUUID(),
@@ -83,21 +85,42 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
         params: {},
       };
 
+      let targetGroupId = selectedItem.groupId;
+
       setRules((prev) => {
         return prev.map((rule) => {
           if (rule.id === selectedItem.ruleId) {
+            // If a specific condition group is selected, add to that group
+            if (selectedItem.groupId && selectedItem.type === "condition") {
+              return {
+                ...rule,
+                conditionGroups: rule.conditionGroups.map((group) =>
+                  group.id === selectedItem.groupId
+                    ? {
+                        ...group,
+                        conditions: [...group.conditions, newCondition],
+                      }
+                    : group
+                ),
+              };
+            }
+
+            // Otherwise, add to the first group or create a new group
             if (rule.conditionGroups.length === 0) {
+              const newGroupId = crypto.randomUUID();
+              targetGroupId = newGroupId;
               return {
                 ...rule,
                 conditionGroups: [
                   {
-                    id: crypto.randomUUID(),
+                    id: newGroupId,
                     operator: "and",
                     conditions: [newCondition],
                   },
                 ],
               };
             } else {
+              targetGroupId = rule.conditionGroups[0].id;
               return {
                 ...rule,
                 conditionGroups: rule.conditionGroups.map((group, index) => {
@@ -116,10 +139,12 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
         });
       });
 
+      // Select the newly created condition with proper groupId
       setSelectedItem({
         type: "condition",
         ruleId: selectedItem.ruleId,
         itemId: newCondition.id,
+        groupId: targetGroupId,
       });
     },
     [selectedItem]
@@ -143,6 +168,34 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
         return rule;
       })
     );
+
+    // Select the new condition group
+    setSelectedItem({
+      type: "condition",
+      ruleId: ruleId,
+      groupId: newGroup.id,
+    });
+  };
+
+  const deleteConditionGroup = (ruleId: string, groupId: string) => {
+    setRules((prev) =>
+      prev.map((rule) => {
+        if (rule.id === ruleId) {
+          return {
+            ...rule,
+            conditionGroups: rule.conditionGroups.filter(
+              (group) => group.id !== groupId
+            ),
+          };
+        }
+        return rule;
+      })
+    );
+
+    // Clear selection if the deleted group was selected
+    if (selectedItem && selectedItem.groupId === groupId) {
+      setSelectedItem({ type: "trigger", ruleId });
+    }
   };
 
   const toggleGroupOperator = (ruleId: string, groupId: string) => {
@@ -382,6 +435,7 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
                       onSelectItem={setSelectedItem}
                       onDeleteRule={deleteRule}
                       onDeleteCondition={deleteCondition}
+                      onDeleteConditionGroup={deleteConditionGroup}
                       onDeleteEffect={deleteEffect}
                       onAddConditionGroup={addConditionGroup}
                       onToggleGroupOperator={toggleGroupOperator}
