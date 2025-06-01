@@ -18,7 +18,7 @@ interface InputFieldProps
   onChange: (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => void;
-  labelPosition?: "left" | "center" | "right"; // Add this
+  labelPosition?: "left" | "center" | "right";
 }
 
 const InputField: React.FC<InputFieldProps> = ({
@@ -33,7 +33,7 @@ const InputField: React.FC<InputFieldProps> = ({
   className = "",
   value,
   onChange,
-  labelPosition = "center", // Add this
+  labelPosition = "center",
   ...props
 }) => {
   const [isFocused, setIsFocused] = useState(false);
@@ -59,14 +59,13 @@ const InputField: React.FC<InputFieldProps> = ({
     return "bg-black-lighter";
   };
 
-  // Size-dependent classes
   const sizeClasses = {
     sm: {
       padding: "px-2 py-1",
       text: "text-sm",
       iconPadding: "left-2",
       separatorPadding: "left-8",
-      contentPadding: "pl-10",
+      contentPadding: "pl-8",
     },
     md: {
       padding: "px-3 py-2",
@@ -84,7 +83,6 @@ const InputField: React.FC<InputFieldProps> = ({
     },
   };
 
-  // Label position classes
   const getLabelPositionClass = () => {
     switch (labelPosition) {
       case "left":
@@ -101,11 +99,7 @@ const InputField: React.FC<InputFieldProps> = ({
     sizeClasses[size].text
   }
     ${useGameFont ? "font-game tracking-widest" : "font-lexend tracking-wide"}
-    ${
-      separator
-        ? sizeClasses[size].contentPadding
-        : sizeClasses[size].iconPadding.replace("left-", "pl-")
-    }
+    ${sizeClasses[size].contentPadding}
     focus:outline-none rounded-lg
     border-2 border-black-lighter focus:border-mint transition-colors w-full
     ${error ? "border-balatro-red" : ""}
