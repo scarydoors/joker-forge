@@ -22,7 +22,7 @@ const LeftSidebar: React.FC<LeftSidebarProps> = ({
   onAddEffect,
 }) => {
   return (
-    <div className="w-80 flex flex-col ">
+    <div className="w-80 flex flex-col h-full">
       <JokerInfo joker={joker} rulesCount={rulesCount} />
       <BlockPalette
         selectedRule={selectedRule}

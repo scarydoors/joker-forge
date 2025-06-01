@@ -32,7 +32,7 @@ const RightSidebar: React.FC<RightSidebarProps> = ({
   onUpdateJoker,
 }) => {
   return (
-    <div className="w-80 flex flex-col">
+    <div className="w-80 flex flex-col h-full">
       <Variables joker={joker} onUpdateJoker={onUpdateJoker} />
       <Inspector
         joker={joker}

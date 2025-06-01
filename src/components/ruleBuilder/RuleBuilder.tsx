@@ -23,6 +23,12 @@ type SelectedItem = {
   groupId?: string;
 } | null;
 
+interface CanvasTransform {
+  x: number;
+  y: number;
+  scale: number;
+}
+
 const RuleBuilder: React.FC<RuleBuilderProps> = ({
   isOpen,
   onClose,
@@ -33,7 +39,20 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
 }) => {
   const [rules, setRules] = useState<Rule[]>([]);
   const [selectedItem, setSelectedItem] = useState<SelectedItem>(null);
+  const [canvasTransform, setCanvasTransform] = useState<CanvasTransform>({
+    x: 0,
+    y: 0,
+    scale: 1,
+  });
+  const [isPanning, setIsPanning] = useState(false);
+  const [lastPanPoint, setLastPanPoint] = useState({ x: 0, y: 0 });
+
   const modalRef = useRef<HTMLDivElement>(null);
+  const canvasRef = useRef<HTMLDivElement>(null);
+
+  const ZOOM_MIN = 0.5;
+  const ZOOM_MAX = 2;
+  const PAN_BOUNDS = React.useMemo(() => ({ x: 1000, y: 1000 }), []);
 
   const handleSaveAndClose = useCallback(() => {
     onSave(rules);
@@ -44,6 +63,7 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
     if (isOpen) {
       setRules(existingRules);
       setSelectedItem(null);
+      setCanvasTransform({ x: 0, y: 0, scale: 1 });
     }
   }, [isOpen, existingRules]);
 
@@ -63,6 +83,68 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
         document.removeEventListener("mousedown", handleClickOutside);
     }
   }, [isOpen, handleSaveAndClose]);
+
+  const handleCanvasMouseDown = (e: React.MouseEvent) => {
+    if (e.button === 0) {
+      setIsPanning(true);
+      setLastPanPoint({ x: e.clientX, y: e.clientY });
+      e.preventDefault();
+    }
+  };
+
+  const handleCanvasMouseMove = useCallback(
+    (e: MouseEvent) => {
+      if (!isPanning) return;
+
+      const deltaX = e.clientX - lastPanPoint.x;
+      const deltaY = e.clientY - lastPanPoint.y;
+
+      setCanvasTransform((prev) => ({
+        ...prev,
+        x: Math.max(-PAN_BOUNDS.x, Math.min(PAN_BOUNDS.x, prev.x + deltaX)),
+        y: Math.max(-PAN_BOUNDS.y, Math.min(PAN_BOUNDS.y, prev.y + deltaY)),
+      }));
+
+      setLastPanPoint({ x: e.clientX, y: e.clientY });
+    },
+    [isPanning, lastPanPoint, PAN_BOUNDS]
+  );
+
+  const handleCanvasMouseUp = useCallback(() => {
+    setIsPanning(false);
+  }, []);
+
+  const handleCanvasWheel = (e: React.WheelEvent) => {
+    e.preventDefault();
+
+    const zoomFactor = e.deltaY > 0 ? 0.9 : 1.1;
+    const newScale = Math.max(
+      ZOOM_MIN,
+      Math.min(ZOOM_MAX, canvasTransform.scale * zoomFactor)
+    );
+
+    if (newScale !== canvasTransform.scale) {
+      setCanvasTransform((prev) => ({
+        ...prev,
+        scale: newScale,
+      }));
+    }
+  };
+
+  useEffect(() => {
+    if (isPanning) {
+      document.addEventListener("mousemove", handleCanvasMouseMove);
+      document.addEventListener("mouseup", handleCanvasMouseUp);
+      return () => {
+        document.removeEventListener("mousemove", handleCanvasMouseMove);
+        document.removeEventListener("mouseup", handleCanvasMouseUp);
+      };
+    }
+  }, [isPanning, handleCanvasMouseMove, handleCanvasMouseUp]);
+
+  const resetCanvas = () => {
+    setCanvasTransform({ x: 0, y: 0, scale: 1 });
+  };
 
   const addTrigger = (triggerId: string) => {
     const newRule: Rule = {
@@ -376,84 +458,118 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
         ref={modalRef}
         className="bg-black-darker rounded-lg w-full h-full overflow-hidden border-2 border-black-light flex flex-col"
       >
-        <div className="flex justify-between items-center p-4">
+        <div className="flex justify-between items-center p-4 relative z-50">
           <h2 className="text-lg text-white-light font-extralight tracking-widest">
             Rule Builder for {joker.name}
           </h2>
-          <Button
-            variant="primary"
-            onClick={handleSaveAndClose}
-            icon={<CheckCircleIcon className="h-5 w-5" />}
-            className="text-sm"
-          >
-            Save & Close
-          </Button>
+          <div className="flex items-center gap-4">
+            <button
+              onClick={resetCanvas}
+              className="text-sm px-3 py-1 bg-black-dark text-white-darker border border-black-lighter rounded hover:bg-black-light transition-colors"
+            >
+              Reset View
+            </button>
+            <div className="text-xs text-white-darker">
+              Zoom: {Math.round(canvasTransform.scale * 100)}% | Pan:{" "}
+              {Math.round(canvasTransform.x)}, {Math.round(canvasTransform.y)}
+            </div>
+            <Button
+              variant="primary"
+              onClick={handleSaveAndClose}
+              icon={<CheckCircleIcon className="h-5 w-5" />}
+              className="text-sm"
+            >
+              Save & Close
+            </Button>
+          </div>
         </div>
 
-        <div className="flex-grow flex overflow-hidden">
-          <LeftSidebar
-            joker={joker}
-            selectedRule={getSelectedRule()}
-            rulesCount={rules.length}
-            onAddTrigger={addTrigger}
-            onAddCondition={addCondition}
-            onAddEffect={addEffect}
-          />
+        <div className="flex-grow flex overflow-hidden relative">
+          <div className="relative z-40 h-full">
+            <LeftSidebar
+              joker={joker}
+              selectedRule={getSelectedRule()}
+              rulesCount={rules.length}
+              onAddTrigger={addTrigger}
+              onAddCondition={addCondition}
+              onAddEffect={addEffect}
+            />
+          </div>
 
           <div
-            className="flex-grow relative overflow-y-auto custom-scrollbar border-t-2 border-black-light"
+            ref={canvasRef}
+            className="flex-grow relative overflow-hidden border-t-2 border-black-light"
             style={{
               backgroundImage: `radial-gradient(circle, #26353B 1px, transparent 1px)`,
               backgroundSize: "20px 20px",
               backgroundColor: "#1E2B30",
             }}
+            onMouseDown={handleCanvasMouseDown}
+            onWheel={handleCanvasWheel}
           >
-            {rules.length === 0 ? (
-              <div className="flex items-center justify-center h-full">
-                <div className="text-center bg-black-dark/80 backdrop-blur-sm rounded-lg p-8 border-2 border-black-lighter">
-                  <div className="text-white-darker text-lg mb-3">
-                    No Rules Created
+            <div
+              className="absolute inset-0 origin-top-left transition-transform duration-75"
+              style={{
+                transform: `translate(${canvasTransform.x}px, ${canvasTransform.y}px) scale(${canvasTransform.scale})`,
+                pointerEvents: isPanning ? "none" : "auto",
+              }}
+            >
+              {rules.length === 0 ? (
+                <div className="flex items-center justify-center h-screen">
+                  <div className="text-center bg-black-dark/80 backdrop-blur-sm rounded-lg p-8 border-2 border-black-lighter">
+                    <div className="text-white-darker text-lg mb-3">
+                      No Rules Created
+                    </div>
+                    <p className="text-white-darker text-sm max-w-md">
+                      Select a trigger from the Block Palette to create your
+                      first rule.
+                    </p>
                   </div>
-                  <p className="text-white-darker text-sm max-w-md">
-                    Select a trigger from the Block Palette to create your first
-                    rule.
-                  </p>
                 </div>
-              </div>
-            ) : (
-              <div className="p-6">
-                <div className="flex flex-wrap gap-6">
-                  {rules.map((rule, index) => (
-                    <RuleCard
-                      key={rule.id}
-                      rule={rule}
-                      ruleIndex={index}
-                      selectedItem={selectedItem}
-                      onSelectItem={setSelectedItem}
-                      onDeleteRule={deleteRule}
-                      onDeleteCondition={deleteCondition}
-                      onDeleteConditionGroup={deleteConditionGroup}
-                      onDeleteEffect={deleteEffect}
-                      onAddConditionGroup={addConditionGroup}
-                      onToggleGroupOperator={toggleGroupOperator}
-                      isRuleSelected={selectedItem?.ruleId === rule.id}
-                      joker={joker}
-                    />
-                  ))}
+              ) : (
+                <div className="p-6 min-h-screen">
+                  <div className="flex flex-wrap gap-6">
+                    {rules.map((rule, index) => (
+                      <div
+                        key={rule.id}
+                        className="relative"
+                        style={{
+                          zIndex: selectedItem?.ruleId === rule.id ? 30 : 20,
+                        }}
+                      >
+                        <RuleCard
+                          rule={rule}
+                          ruleIndex={index}
+                          selectedItem={selectedItem}
+                          onSelectItem={setSelectedItem}
+                          onDeleteRule={deleteRule}
+                          onDeleteCondition={deleteCondition}
+                          onDeleteConditionGroup={deleteConditionGroup}
+                          onDeleteEffect={deleteEffect}
+                          onAddConditionGroup={addConditionGroup}
+                          onToggleGroupOperator={toggleGroupOperator}
+                          isRuleSelected={selectedItem?.ruleId === rule.id}
+                          joker={joker}
+                        />
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
 
-          <RightSidebar
-            joker={joker}
-            selectedRule={getSelectedRule()}
-            selectedCondition={getSelectedCondition()}
-            selectedEffect={getSelectedEffect()}
-            onUpdateCondition={updateCondition}
-            onUpdateEffect={updateEffect}
-            onUpdateJoker={onUpdateJoker}
-          />
+          <div className="relative z-40 h-full">
+            <RightSidebar
+              joker={joker}
+              selectedRule={getSelectedRule()}
+              selectedCondition={getSelectedCondition()}
+              selectedEffect={getSelectedEffect()}
+              onUpdateCondition={updateCondition}
+              onUpdateEffect={updateEffect}
+              onUpdateJoker={onUpdateJoker}
+            />
+          </div>
         </div>
       </div>
     </div>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { Rule, ConditionGroup, Condition, Effect } from "./types";
 import { getTriggerById } from "./data/Triggers";
@@ -69,6 +69,70 @@ const RuleCard: React.FC<RuleCardProps> = ({
   const [groupOperators, setGroupOperators] = useState<Record<string, string>>(
     {}
   );
+
+  const [cardPosition, setCardPosition] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({
+    x: 0,
+    y: 0,
+    cardX: 0,
+    cardY: 0,
+  });
+  const [dragFromHeader, setDragFromHeader] = useState(false);
+
+  const handleCardClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onSelectItem({ type: "trigger", ruleId: rule.id });
+  };
+
+  const handleHeaderMouseDown = (e: React.MouseEvent) => {
+    if (e.button === 0) {
+      e.stopPropagation();
+      setIsDragging(true);
+      setDragFromHeader(true);
+      setDragStart({
+        x: e.clientX,
+        y: e.clientY,
+        cardX: cardPosition.x,
+        cardY: cardPosition.y,
+      });
+    }
+  };
+
+  const handleCardMouseDown = (e: React.MouseEvent) => {
+    e.stopPropagation();
+  };
+
+  const handleMouseMove = useCallback(
+    (e: MouseEvent) => {
+      if (!isDragging || !dragFromHeader) return;
+
+      const deltaX = e.clientX - dragStart.x;
+      const deltaY = e.clientY - dragStart.y;
+
+      setCardPosition({
+        x: dragStart.cardX + deltaX,
+        y: dragStart.cardY + deltaY,
+      });
+    },
+    [isDragging, dragFromHeader, dragStart]
+  );
+
+  const handleMouseUp = useCallback(() => {
+    setIsDragging(false);
+    setDragFromHeader(false);
+  }, []);
+
+  useEffect(() => {
+    if (isDragging && dragFromHeader) {
+      document.addEventListener("mousemove", handleMouseMove);
+      document.addEventListener("mouseup", handleMouseUp);
+      return () => {
+        document.removeEventListener("mousemove", handleMouseMove);
+        document.removeEventListener("mouseup", handleMouseUp);
+      };
+    }
+  }, [isDragging, dragFromHeader, handleMouseMove, handleMouseUp]);
 
   // Handle reopen button visibility with delay
   useEffect(() => {
@@ -405,13 +469,14 @@ const RuleCard: React.FC<RuleCardProps> = ({
           className={`border-2 border-dashed rounded-lg p-4 bg-black-darker/50 relative ${
             isSelected ? "border-mint" : "border-black-lighter"
           }`}
-          onClick={() =>
+          onClick={(e) => {
+            e.stopPropagation();
             onSelectItem({
               type: "condition",
               ruleId: rule.id,
               groupId: group.id,
-            })
-          }
+            });
+          }}
         >
           {/* Condition Group Header */}
           <div className="flex items-center justify-between mb-6">
@@ -421,7 +486,8 @@ const RuleCard: React.FC<RuleCardProps> = ({
             {/* Delete condition group button */}
             <div onClick={(e) => e.stopPropagation()}>
               <button
-                onClick={() => {
+                onClick={(e) => {
+                  e.stopPropagation();
                   onDeleteConditionGroup(rule.id, group.id);
                 }}
                 className="w-full h-full flex items-center rounded justify-center"
@@ -477,7 +543,8 @@ const RuleCard: React.FC<RuleCardProps> = ({
                       onClick={(e) => e.stopPropagation()}
                     >
                       <button
-                        onClick={() => {
+                        onClick={(e) => {
+                          e.stopPropagation();
                           handleConditionOperatorToggle(
                             group.id,
                             conditionIndex
@@ -499,7 +566,10 @@ const RuleCard: React.FC<RuleCardProps> = ({
         {groupIndex < rule.conditionGroups.length - 1 && (
           <div className="text-center py-2">
             <button
-              onClick={() => handleGroupOperatorToggle(groupIndex, group.id)}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleGroupOperatorToggle(groupIndex, group.id);
+              }}
               className="px-3 text-white-darker text-sm font-medium tracking-wider cursor-pointer rounded transition-colors hover:bg-black-light"
             >
               {groupOperators[`group-${groupIndex}`] || "AND"}
@@ -512,8 +582,17 @@ const RuleCard: React.FC<RuleCardProps> = ({
 
   // Main component render
   return (
-    <div className="w-96 relative pl-16">
-      {/* Rule Actions Sidebar */}
+    <div
+      className="w-96 relative pl-16 select-none"
+      style={{
+        zIndex: isRuleSelected ? 30 : 20,
+        pointerEvents: "auto",
+        transform: `translate(${cardPosition.x}px, ${cardPosition.y}px)`,
+        cursor: isDragging && dragFromHeader ? "grabbing" : "default",
+      }}
+      onClick={handleCardClick}
+      onMouseDown={handleCardMouseDown}
+    >
       <AnimatePresence>
         {sidebarOpen && (
           <motion.div
@@ -524,7 +603,6 @@ const RuleCard: React.FC<RuleCardProps> = ({
             exit="exit"
             transition={{ duration: 0.15 }}
           >
-            {/* Delete Rule */}
             <motion.div
               className="w-8 h-8 bg-black-darker rounded-lg flex items-center justify-center border-2 border-balatro-redshadow"
               whileHover={{ scale: 1.1 }}
@@ -532,7 +610,10 @@ const RuleCard: React.FC<RuleCardProps> = ({
               transition={{ duration: 0.05 }}
             >
               <button
-                onClick={() => onDeleteRule(rule.id)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDeleteRule(rule.id);
+                }}
                 className="w-full h-full flex items-center rounded justify-center transition-colors hover:bg-balatro-redshadow active:bg-balatro-blackshadow cursor-pointer"
                 title="Delete Rule"
               >
@@ -540,7 +621,6 @@ const RuleCard: React.FC<RuleCardProps> = ({
               </button>
             </motion.div>
 
-            {/* Edit Name */}
             <motion.div
               className="w-8 h-8 bg-black-darker rounded-lg flex items-center justify-center border-2 border-balatro-orange"
               whileHover={{ scale: 1.1 }}
@@ -548,7 +628,10 @@ const RuleCard: React.FC<RuleCardProps> = ({
               transition={{ duration: 0.05 }}
             >
               <button
-                onClick={handleEditName}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleEditName();
+                }}
                 className="w-full h-full flex items-center rounded justify-center transition-colors hover:bg-balatro-orange/20 cursor-pointer"
                 title="Edit Name"
               >
@@ -556,7 +639,6 @@ const RuleCard: React.FC<RuleCardProps> = ({
               </button>
             </motion.div>
 
-            {/* Duplicate Rule */}
             <motion.div
               className="w-8 h-8 bg-black-darker rounded-lg flex items-center justify-center border-2 border-balatro-blue"
               whileHover={{ scale: 1.1 }}
@@ -564,7 +646,10 @@ const RuleCard: React.FC<RuleCardProps> = ({
               transition={{ duration: 0.05 }}
             >
               <button
-                onClick={handleDuplicateRule}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleDuplicateRule();
+                }}
                 className="w-full h-full flex items-center rounded justify-center transition-colors hover:bg-balatro-blue/20 cursor-pointer"
                 title="Duplicate Rule"
               >
@@ -572,7 +657,6 @@ const RuleCard: React.FC<RuleCardProps> = ({
               </button>
             </motion.div>
 
-            {/* Toggle Disabled */}
             <motion.div
               className="w-8 h-8 bg-black-darker rounded-lg flex items-center justify-center border-2 border-balatro-grey"
               whileHover={{ scale: 1.1 }}
@@ -580,7 +664,10 @@ const RuleCard: React.FC<RuleCardProps> = ({
               transition={{ duration: 0.05 }}
             >
               <button
-                onClick={handleToggleDisabled}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleToggleDisabled();
+                }}
                 className="w-full h-full flex items-center rounded justify-center transition-colors hover:bg-balatro-grey/20 cursor-pointer"
                 title={isDisabled ? "Enable Rule" : "Disable Rule"}
               >
@@ -588,7 +675,6 @@ const RuleCard: React.FC<RuleCardProps> = ({
               </button>
             </motion.div>
 
-            {/* Close Menu */}
             <motion.div
               className="w-8 h-8 bg-black-darker rounded-lg flex items-center justify-center border-2 border-white-darker"
               whileHover={{ scale: 1.1 }}
@@ -596,7 +682,10 @@ const RuleCard: React.FC<RuleCardProps> = ({
               transition={{ duration: 0.05 }}
             >
               <button
-                onClick={() => setSidebarOpen(false)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setSidebarOpen(false);
+                }}
                 className="w-full h-full flex items-center rounded justify-center transition-colors hover:bg-white-darker/20 cursor-pointer"
                 title="Close Menu"
               >
@@ -607,7 +696,6 @@ const RuleCard: React.FC<RuleCardProps> = ({
         )}
       </AnimatePresence>
 
-      {/* Main Rule Card */}
       <motion.div
         className={`w-96 relative ${isDisabled ? "opacity-50" : ""}`}
         variants={cardEntrance}
@@ -615,13 +703,14 @@ const RuleCard: React.FC<RuleCardProps> = ({
         animate="animate"
         transition={{ duration: 0.3 }}
       >
-        {/* Rule Title Tab */}
         <motion.div
           className="flex justify-center relative"
           variants={snapFadeUp}
           initial="initial"
           animate="animate"
           transition={{ duration: 0.15 }}
+          onMouseDown={handleHeaderMouseDown}
+          style={{ cursor: "grab" }}
         >
           <div
             className={`bg-black border-2 rounded-t-md px-6 pt-2 py-3 relative ${
@@ -636,23 +725,29 @@ const RuleCard: React.FC<RuleCardProps> = ({
           </div>
         </motion.div>
 
-        {/* Rule Content */}
         <motion.div
           className={`
             bg-black-dark border-2 rounded-lg overflow-hidden -mt-2 relative
             ${isRuleSelected ? "border-mint" : "border-black-lighter"}
             ${isDisabled ? "bg-balatro-grey/20" : ""}
           `}
+          style={{ pointerEvents: "auto" }}
           variants={snapFadeUp}
           initial="initial"
           animate="animate"
           transition={{ duration: 0.18, delay: 0.05 }}
         >
-          {/* Rule Header */}
-          <div className="bg-black-darker px-4 py-3 border-b border-black-lighter">
+          <div
+            className="bg-black-darker px-4 py-3 border-b border-black-lighter"
+            onMouseDown={handleHeaderMouseDown}
+            style={{ cursor: "grab" }}
+          >
             <div className="flex justify-between items-center">
               <motion.button
-                onClick={() => setSidebarOpen(!sidebarOpen)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setSidebarOpen(!sidebarOpen);
+                }}
                 className="p-1 text-white-darker hover:bg-black-light rounded transition-colors cursor-pointer"
                 title="Open Menu"
                 whileHover={{ scale: 1.1 }}
@@ -681,11 +776,13 @@ const RuleCard: React.FC<RuleCardProps> = ({
                   </span>
                 )}
 
-                {/* Add Condition Group Button - moved to header */}
                 {rule.conditionGroups.length > 0 && (
                   <div onClick={(e) => e.stopPropagation()}>
                     <button
-                      onClick={() => onAddConditionGroup(rule.id)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onAddConditionGroup(rule.id);
+                      }}
                       className="w-6 h-6 bg-black-darker rounded-lg flex items-center justify-center border-2 border-mint hover:bg-mint/20 transition-colors cursor-pointer"
                       title="Add Condition Group"
                     >
@@ -697,7 +794,6 @@ const RuleCard: React.FC<RuleCardProps> = ({
             </div>
           </div>
 
-          {/* Rule Body */}
           <motion.div
             className="p-4 space-y-4"
             variants={quickFade}
@@ -705,7 +801,6 @@ const RuleCard: React.FC<RuleCardProps> = ({
             animate="animate"
             transition={{ duration: 0.15, delay: 0.1 }}
           >
-            {/* Trigger Block */}
             <motion.div
               variants={snapFadeUp}
               initial="initial"
@@ -716,13 +811,13 @@ const RuleCard: React.FC<RuleCardProps> = ({
                 type="trigger"
                 label={trigger?.label || "Unknown Trigger"}
                 isSelected={isItemSelected("trigger")}
-                onClick={() =>
-                  onSelectItem({ type: "trigger", ruleId: rule.id })
-                }
+                onClick={(e) => {
+                  e?.stopPropagation();
+                  onSelectItem({ type: "trigger", ruleId: rule.id });
+                }}
               />
             </motion.div>
 
-            {/* Flow Arrow */}
             {(rule.conditionGroups.length > 0 || rule.effects.length > 0) && (
               <motion.div
                 className="flex justify-center"
@@ -735,7 +830,6 @@ const RuleCard: React.FC<RuleCardProps> = ({
               </motion.div>
             )}
 
-            {/* Condition Groups Section */}
             {rule.conditionGroups.length > 0 && (
               <motion.div
                 className="space-y-3"
@@ -748,11 +842,13 @@ const RuleCard: React.FC<RuleCardProps> = ({
                   renderConditionGroup(group, index)
                 )}
 
-                {/* Add first condition group button if no groups exist */}
                 {rule.conditionGroups.length === 0 && (
                   <div className="flex justify-center">
                     <button
-                      onClick={() => onAddConditionGroup(rule.id)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onAddConditionGroup(rule.id);
+                      }}
                       className="w-8 h-8 bg-black-darker rounded-lg flex items-center justify-center border-2 border-mint hover:bg-mint/20 transition-colors cursor-pointer"
                       title="Add Condition Group"
                     >
@@ -763,7 +859,6 @@ const RuleCard: React.FC<RuleCardProps> = ({
               </motion.div>
             )}
 
-            {/* Flow Arrow Between Conditions and Effects */}
             {rule.effects.length > 0 && rule.conditionGroups.length > 0 && (
               <motion.div
                 className="flex justify-center"
@@ -776,7 +871,6 @@ const RuleCard: React.FC<RuleCardProps> = ({
               </motion.div>
             )}
 
-            {/* Effects Section */}
             {rule.effects.length > 0 && (
               <motion.div
                 className="space-y-3"
@@ -803,13 +897,14 @@ const RuleCard: React.FC<RuleCardProps> = ({
                         label={effectType?.label || "Unknown Effect"}
                         dynamicTitle={generateEffectTitle(effect)}
                         isSelected={isItemSelected("effect", effect.id)}
-                        onClick={() =>
+                        onClick={(e) => {
+                          e?.stopPropagation();
                           onSelectItem({
                             type: "effect",
                             ruleId: rule.id,
                             itemId: effect.id,
-                          })
-                        }
+                          });
+                        }}
                         showTrash={true}
                         onDelete={() => onDeleteEffect(rule.id, effect.id)}
                         parameterCount={getParameterCount(effect.params)}
@@ -823,7 +918,6 @@ const RuleCard: React.FC<RuleCardProps> = ({
           </motion.div>
         </motion.div>
 
-        {/* Description Section */}
         <div className="mt-4">
           <AnimatePresence mode="wait">
             {descriptionVisible && (
@@ -840,7 +934,10 @@ const RuleCard: React.FC<RuleCardProps> = ({
                     Description
                   </div>
                   <button
-                    onClick={() => setDescriptionVisible(false)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setDescriptionVisible(false);
+                    }}
                     className="w-6 h-6 bg-black-darker rounded-lg flex items-center justify-center border-2 border-black-lighter hover:bg-black-light transition-colors cursor-pointer"
                     title="Hide Description"
                   >
@@ -854,12 +951,11 @@ const RuleCard: React.FC<RuleCardProps> = ({
             )}
           </AnimatePresence>
 
-          {/* Show Description Button */}
-          {/* THE TIMING IS A BIT MESSED UP STILL */}
           {showReopenButton && (
             <div className="flex justify-center">
               <button
-                onClick={() => {
+                onClick={(e) => {
+                  e.stopPropagation();
                   setShowReopenButton(false);
                   setTimeout(() => {
                     setDescriptionVisible(true);
