@@ -18,6 +18,7 @@ import {
   EyeSlashIcon,
   XMarkIcon,
 } from "@heroicons/react/16/solid";
+import { JokerData } from "../JokerCard";
 
 interface RuleCardProps {
   rule: Rule;
@@ -41,6 +42,7 @@ interface RuleCardProps {
   onAddConditionGroup: (ruleId: string) => void;
   onToggleGroupOperator?: (ruleId: string, groupId: string) => void;
   isRuleSelected: boolean;
+  joker: JokerData;
 }
 
 const RuleCard: React.FC<RuleCardProps> = ({

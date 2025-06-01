@@ -1,5 +1,5 @@
 import type { Rule } from "../ruleBuilder/types";
-import type { JokerData } from "../JokerCard";
+import type { JokerData, UserVariable } from "../JokerCard";
 
 export interface VariableInfo {
   name: string;
@@ -7,12 +7,19 @@ export interface VariableInfo {
   usedInEffects: string[];
 }
 
-// Extract all variables used in rules
+export interface VariableUsage {
+  variableName: string;
+  ruleId: string;
+  ruleIndex: number;
+  type: "condition" | "effect";
+  itemId: string;
+  count: number;
+}
+
 export const extractVariablesFromRules = (rules: Rule[]): VariableInfo[] => {
   const variableMap = new Map<string, VariableInfo>();
 
   rules.forEach((rule) => {
-    // Check conditions for variable usage
     rule.conditionGroups.forEach((group) => {
       group.conditions.forEach((condition) => {
         if (condition.type === "internal_variable") {
@@ -28,7 +35,6 @@ export const extractVariablesFromRules = (rules: Rule[]): VariableInfo[] => {
       });
     });
 
-    // Check effects for variable usage
     rule.effects.forEach((effect) => {
       if (effect.type === "modify_internal_variable") {
         const varName = (effect.params.variable_name as string) || "var1";
@@ -42,7 +48,6 @@ export const extractVariablesFromRules = (rules: Rule[]): VariableInfo[] => {
         variableMap.get(varName)!.usedInEffects.push(effect.type);
       }
 
-      // Check if any effects use variables as value sources
       if (effect.params.value_source === "variable") {
         const varName = (effect.params.variable_name as string) || "var1";
         if (!variableMap.has(varName)) {
@@ -60,7 +65,6 @@ export const extractVariablesFromRules = (rules: Rule[]): VariableInfo[] => {
   return Array.from(variableMap.values());
 };
 
-// Generate config.extra entries for variables
 export const generateVariableConfig = (variables: VariableInfo[]): string => {
   if (variables.length === 0) return "";
 
@@ -71,14 +75,12 @@ export const generateVariableConfig = (variables: VariableInfo[]): string => {
   return configItems.join(",\n            ");
 };
 
-// Generate loc_vars entries for variables
 export const generateVariableLocVars = (
   variables: VariableInfo[]
 ): string[] => {
   return variables.map((variable) => `card.ability.extra.${variable.name}`);
 };
 
-// Get all variable names used in effects that support variable values
 export const getVariableNamesFromJoker = (joker: JokerData): string[] => {
   if (!joker.rules) return [];
 
@@ -108,4 +110,96 @@ export const getVariableNamesFromJoker = (joker: JokerData): string[] => {
   });
 
   return Array.from(variableNames).sort();
+};
+
+export const getVariableUsageDetails = (joker: JokerData): VariableUsage[] => {
+  if (!joker.rules) return [];
+
+  const usageDetails: VariableUsage[] = [];
+  const usageCount = new Map<string, number>();
+
+  joker.rules.forEach((rule, ruleIndex) => {
+    rule.effects.forEach((effect) => {
+      if (
+        effect.type === "modify_internal_variable" ||
+        effect.params.value_source === "variable"
+      ) {
+        const varName = (effect.params.variable_name as string) || "var1";
+        const currentCount = usageCount.get(varName) || 0;
+        usageCount.set(varName, currentCount + 1);
+
+        usageDetails.push({
+          variableName: varName,
+          ruleId: rule.id,
+          ruleIndex: ruleIndex + 1,
+          type: "effect",
+          itemId: effect.id,
+          count: currentCount + 1,
+        });
+      }
+    });
+
+    rule.conditionGroups.forEach((group) => {
+      group.conditions.forEach((condition) => {
+        if (condition.type === "internal_variable") {
+          const varName = (condition.params.variable_name as string) || "var1";
+          const currentCount = usageCount.get(varName) || 0;
+          usageCount.set(varName, currentCount + 1);
+
+          usageDetails.push({
+            variableName: varName,
+            ruleId: rule.id,
+            ruleIndex: ruleIndex + 1,
+            type: "condition",
+            itemId: condition.id,
+            count: currentCount + 1,
+          });
+        }
+      });
+    });
+  });
+
+  return usageDetails;
+};
+
+export const getAllVariables = (joker: JokerData): UserVariable[] => {
+  const userVars = joker.userVariables || [];
+  const autoVars = getVariableNamesFromJoker(joker)
+    .filter((name) => !userVars.some((uv) => uv.name === name))
+    .map((name) => ({
+      id: `auto_${name}`,
+      name,
+      initialValue: getDefaultVariableValue(name),
+      description: getDefaultVariableDescription(name),
+    }));
+
+  return [...userVars, ...autoVars];
+};
+
+const getDefaultVariableValue = (name: string): number => {
+  const defaults: Record<string, number> = {
+    chips: 10,
+    mult: 5,
+    Xmult: 1.5,
+    dollars: 5,
+    repetitions: 1,
+    hands: 1,
+    discards: 1,
+    levels: 1,
+  };
+  return defaults[name] || 0;
+};
+
+const getDefaultVariableDescription = (name: string): string => {
+  const descriptions: Record<string, string> = {
+    chips: "Chips to add",
+    mult: "Mult to add",
+    Xmult: "X Mult multiplier",
+    dollars: "Money to add",
+    repetitions: "Card repetitions",
+    hands: "Hands to modify",
+    discards: "Discards to modify",
+    levels: "Hand levels to add",
+  };
+  return descriptions[name] || "Custom variable";
 };

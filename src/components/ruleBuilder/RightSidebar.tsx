@@ -19,6 +19,7 @@ interface RightSidebarProps {
     effectId: string,
     updates: Partial<Effect>
   ) => void;
+  onUpdateJoker: (updates: Partial<JokerData>) => void;
 }
 
 const RightSidebar: React.FC<RightSidebarProps> = ({
@@ -28,11 +29,13 @@ const RightSidebar: React.FC<RightSidebarProps> = ({
   selectedEffect,
   onUpdateCondition,
   onUpdateEffect,
+  onUpdateJoker,
 }) => {
   return (
     <div className="w-80 flex flex-col">
-      <Variables joker={joker} />
+      <Variables joker={joker} onUpdateJoker={onUpdateJoker} />
       <Inspector
+        joker={joker}
         selectedRule={selectedRule}
         selectedCondition={selectedCondition}
         selectedEffect={selectedEffect}

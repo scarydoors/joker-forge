@@ -8,6 +8,7 @@ import {
   BoltIcon,
   PuzzlePieceIcon,
   BeakerIcon,
+  PercentBadgeIcon,
 } from "@heroicons/react/16/solid";
 
 interface BlockComponentProps {
@@ -20,6 +21,8 @@ interface BlockComponentProps {
   parameterCount?: number;
   isNegated?: boolean;
   dynamicTitle?: string;
+  variableName?: string;
+  hasRandomChance?: boolean;
 }
 
 const BlockComponent: React.FC<BlockComponentProps> = ({
@@ -32,6 +35,8 @@ const BlockComponent: React.FC<BlockComponentProps> = ({
   parameterCount,
   isNegated = false,
   dynamicTitle,
+  variableName,
+  hasRandomChance = false,
 }) => {
   const getTypeConfig = () => {
     switch (type) {
@@ -83,7 +88,12 @@ const BlockComponent: React.FC<BlockComponentProps> = ({
         {config.typeLabel}
       </div>
 
-      <div className="absolute top-[2px] right-6">
+      <div className="absolute top-[2px] right-6 flex items-center gap-2">
+        {variableName && (
+          <span className="bg-mint/20 text-mint text-xs px-2 py-1 rounded font-medium">
+            ${variableName}
+          </span>
+        )}
         {parameterCount !== undefined && parameterCount > 0 && (
           <span className="text-white-darker text-xs font-medium">
             {parameterCount} Parameter{parameterCount !== 1 ? "s" : ""}
@@ -112,6 +122,11 @@ const BlockComponent: React.FC<BlockComponentProps> = ({
             {isNegated && (
               <div className="flex-shrink-0 -mr-2">
                 <ExclamationTriangleIcon className="h-4 w-4 text-balatro-red" />
+              </div>
+            )}
+            {hasRandomChance && ( // Add this
+              <div className="flex-shrink-0 -mr-2">
+                <PercentBadgeIcon className="h-4 w-4 text-mint" />
               </div>
             )}
           </div>

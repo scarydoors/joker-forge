@@ -1,45 +1,74 @@
-import React from "react";
-import { JokerData } from "../JokerCard";
-import { getVariableNamesFromJoker } from "../codeGeneration/VariableUtils";
+import React, { useState } from "react";
+import { JokerData, UserVariable } from "../JokerCard";
+import {
+  getVariableUsageDetails,
+  getAllVariables,
+} from "../codeGeneration/VariableUtils";
 import { CommandLineIcon } from "@heroicons/react/16/solid";
+import { PlusIcon, TrashIcon, PencilIcon } from "@heroicons/react/24/outline";
+import InputField from "../generic/InputField";
+import Button from "../generic/Button";
 
 interface VariablesProps {
   joker: JokerData;
+  onUpdateJoker: (updates: Partial<JokerData>) => void;
 }
 
-const Variables: React.FC<VariablesProps> = ({ joker }) => {
-  const variableNames = getVariableNamesFromJoker(joker);
+const Variables: React.FC<VariablesProps> = ({ joker, onUpdateJoker }) => {
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [editingVariable, setEditingVariable] = useState<string | null>(null);
+  const [newVariableName, setNewVariableName] = useState("");
+  const [newVariableValue, setNewVariableValue] = useState("0");
+  const [newVariableDescription, setNewVariableDescription] = useState("");
 
-  const getVariableInfo = (name: string) => {
-    const defaultValues: Record<
-      string,
-      { type: string; initial: number; description: string }
-    > = {
-      chips: { type: "number", initial: 10, description: "Chips to add" },
-      mult: { type: "number", initial: 5, description: "Mult to add" },
-      Xmult: { type: "number", initial: 1.5, description: "X Mult multiplier" },
-      dollars: { type: "number", initial: 5, description: "Money to add" },
-      repetitions: {
-        type: "number",
-        initial: 1,
-        description: "Card repetitions",
-      },
-      hands: { type: "number", initial: 1, description: "Hands to modify" },
-      discards: {
-        type: "number",
-        initial: 1,
-        description: "Discards to modify",
-      },
-      levels: { type: "number", initial: 1, description: "Hand levels to add" },
+  const usageDetails = getVariableUsageDetails(joker);
+  const allVariables = getAllVariables(joker);
+  const userVariables = joker.userVariables || [];
+
+  const getUsageInfo = (variableName: string) => {
+    const usages = usageDetails.filter(
+      (usage) => usage.variableName === variableName
+    );
+    const ruleNumbers = [...new Set(usages.map((usage) => usage.ruleIndex))];
+    return {
+      count: usages.length,
+      rules: ruleNumbers,
+    };
+  };
+
+  const handleAddVariable = () => {
+    if (!newVariableName.trim()) return;
+
+    const newVariable: UserVariable = {
+      id: crypto.randomUUID(),
+      name: newVariableName.trim(),
+      initialValue: parseFloat(newVariableValue) || 0,
+      description: newVariableDescription.trim() || undefined,
     };
 
-    return (
-      defaultValues[name] || {
-        type: "number",
-        initial: 0,
-        description: "Custom variable",
-      }
+    const updatedVariables = [...userVariables, newVariable];
+    onUpdateJoker({ userVariables: updatedVariables });
+
+    setNewVariableName("");
+    setNewVariableValue("0");
+    setNewVariableDescription("");
+    setShowAddForm(false);
+  };
+
+  const handleDeleteVariable = (variableId: string) => {
+    const updatedVariables = userVariables.filter((v) => v.id !== variableId);
+    onUpdateJoker({ userVariables: updatedVariables });
+  };
+
+  const handleUpdateVariable = (
+    variableId: string,
+    updates: Partial<UserVariable>
+  ) => {
+    const updatedVariables = userVariables.map((v) =>
+      v.id === variableId ? { ...v, ...updates } : v
     );
+    onUpdateJoker({ userVariables: updatedVariables });
+    setEditingVariable(null);
   };
 
   return (
@@ -53,47 +82,165 @@ const Variables: React.FC<VariablesProps> = ({ joker }) => {
 
       <div className="w-1/4 h-[1px] bg-black-lighter mx-auto mb-4"></div>
 
-      {variableNames.length === 0 ? (
-        <div className="text-white-darker text-xs text-center">
-          No variables defined yet.
-          <br />
-          Variables will appear here when you create effects that use them.
-        </div>
-      ) : (
-        <div className="space-y-3">
-          {variableNames.map((variableName) => {
-            const info = getVariableInfo(variableName);
-            return (
-              <div
-                key={variableName}
-                className="bg-black-dark border border-black-lighter rounded-lg p-3"
-              >
-                <div className="flex items-center justify-between mb-2">
+      <div className="space-y-3">
+        {allVariables.map((variable) => {
+          const usageInfo = getUsageInfo(variable.name);
+          const isUserDefined = userVariables.some(
+            (uv) => uv.id === variable.id
+          );
+          const isEditing = editingVariable === variable.id;
+
+          return (
+            <div
+              key={variable.id}
+              className={`rounded-lg p-3 border-2 ${
+                isUserDefined
+                  ? "bg-mint/10 border-mint/30"
+                  : "bg-black-darker border-black-lighter"
+              }`}
+            >
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2">
                   <span className="text-mint text-sm font-medium tracking-wide">
-                    {variableName}
+                    {variable.name}
                   </span>
-                  <span className="text-white-darker text-xs uppercase">
-                    {info.type}
-                  </span>
+                  {usageInfo.count > 0 && (
+                    <span className="bg-mint/20 text-mint text-xs px-2 py-1 rounded">
+                      {usageInfo.count} uses
+                    </span>
+                  )}
                 </div>
+                <div className="flex items-center gap-1">
+                  {isUserDefined && (
+                    <>
+                      <button
+                        onClick={() =>
+                          setEditingVariable(isEditing ? null : variable.id)
+                        }
+                        className="p-1 text-white-darker hover:text-white transition-colors"
+                      >
+                        <PencilIcon className="h-4 w-4" />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteVariable(variable.id)}
+                        className="p-1 text-balatro-red hover:text-white transition-colors"
+                      >
+                        <TrashIcon className="h-4 w-4" />
+                      </button>
+                    </>
+                  )}
+                </div>
+              </div>
 
+              {variable.description && (
                 <div className="text-white-darker text-xs mb-2">
-                  {info.description}
+                  {variable.description}
                 </div>
+              )}
 
+              {isEditing ? (
+                <div className="space-y-2">
+                  <InputField
+                    value={variable.initialValue.toString()}
+                    onChange={(e) => {
+                      const value = parseFloat(e.target.value) || 0;
+                      handleUpdateVariable(variable.id, {
+                        initialValue: value,
+                      });
+                    }}
+                    type="number"
+                    size="sm"
+                  />
+                </div>
+              ) : (
                 <div className="flex items-center justify-between">
                   <span className="text-white-darker text-xs">
                     Initial Value:
                   </span>
                   <span className="text-white text-sm font-mono">
-                    {info.initial}
+                    {variable.initialValue}
                   </span>
                 </div>
+              )}
+
+              {usageInfo.rules.length > 0 && (
+                <div className="mt-2 text-white-darker text-xs">
+                  Used in rule{usageInfo.rules.length > 1 ? "s" : ""}:{" "}
+                  {usageInfo.rules.join(", ")}
+                </div>
+              )}
+            </div>
+          );
+        })}
+
+        {showAddForm && (
+          <div className="bg-black-darker border-2 border-mint/50 rounded-lg p-3">
+            <div className="space-y-3">
+              <InputField
+                value={newVariableName}
+                onChange={(e) => setNewVariableName(e.target.value)}
+                placeholder="Variable name"
+                label="Name"
+                size="sm"
+              />
+              <InputField
+                value={newVariableValue}
+                onChange={(e) => setNewVariableValue(e.target.value)}
+                placeholder="0"
+                label="Initial Value"
+                type="number"
+                size="sm"
+              />
+              <InputField
+                value={newVariableDescription}
+                onChange={(e) => setNewVariableDescription(e.target.value)}
+                placeholder="Description (optional)"
+                label="Description"
+                size="sm"
+              />
+              <div className="flex gap-2">
+                <Button
+                  variant="primary"
+                  size="sm"
+                  onClick={handleAddVariable}
+                  disabled={!newVariableName.trim()}
+                >
+                  Add
+                </Button>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => {
+                    setShowAddForm(false);
+                    setNewVariableName("");
+                    setNewVariableValue("0");
+                    setNewVariableDescription("");
+                  }}
+                >
+                  Cancel
+                </Button>
               </div>
-            );
-          })}
-        </div>
-      )}
+            </div>
+          </div>
+        )}
+
+        {allVariables.length === 0 && !showAddForm && (
+          <div className="text-white-darker text-xs text-center py-4">
+            No variables defined yet.
+          </div>
+        )}
+
+        <Button
+          variant="secondary"
+          size="sm"
+          fullWidth
+          onClick={() => setShowAddForm(true)}
+          icon={<PlusIcon className="h-4 w-4" />}
+          disabled={showAddForm}
+        >
+          Add Variable
+        </Button>
+      </div>
     </div>
   );
 };

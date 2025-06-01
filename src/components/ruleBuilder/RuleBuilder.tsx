@@ -13,6 +13,7 @@ interface RuleBuilderProps {
   onSave: (rules: Rule[]) => void;
   existingRules: Rule[];
   joker: JokerData;
+  onUpdateJoker: (updates: Partial<JokerData>) => void;
 }
 
 type SelectedItem = {
@@ -28,6 +29,7 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
   onSave,
   existingRules = [],
   joker,
+  onUpdateJoker,
 }) => {
   const [rules, setRules] = useState<Rule[]>([]);
   const [selectedItem, setSelectedItem] = useState<SelectedItem>(null);
@@ -435,6 +437,7 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
                       onAddConditionGroup={addConditionGroup}
                       onToggleGroupOperator={toggleGroupOperator}
                       isRuleSelected={selectedItem?.ruleId === rule.id}
+                      joker={joker}
                     />
                   ))}
                 </div>
@@ -449,6 +452,7 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
             selectedEffect={getSelectedEffect()}
             onUpdateCondition={updateCondition}
             onUpdateEffect={updateEffect}
+            onUpdateJoker={onUpdateJoker}
           />
         </div>
       </div>

@@ -493,6 +493,11 @@ const JokerForm: React.FC<JokerFormProps> = ({
         onSave={handleSaveRules}
         existingRules={formData.rules || []}
         joker={formData}
+        onUpdateJoker={(updates) => {
+          const updatedData = { ...formData, ...updates };
+          setFormData(updatedData);
+          onSaveJoker(updatedData);
+        }}
       />
     </>
   );
