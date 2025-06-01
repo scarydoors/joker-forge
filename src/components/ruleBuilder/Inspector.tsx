@@ -543,7 +543,12 @@ const Inspector: React.FC<InspectorProps> = ({
               <div className="flex flex-col items-center gap-4">
                 <ChanceInput
                   label="Numerator"
-                  value={selectedEffect.params.chance_numerator}
+                  value={
+                    selectedEffect.params.chance_numerator as
+                      | string
+                      | number
+                      | undefined
+                  }
                   onChange={(value) => {
                     const newParams = {
                       ...selectedEffect.params,
@@ -559,7 +564,12 @@ const Inspector: React.FC<InspectorProps> = ({
                 <span className="text-white-light text-sm">in</span>
                 <ChanceInput
                   label="Denominator"
-                  value={selectedEffect.params.chance_denominator}
+                  value={
+                    selectedEffect.params.chance_denominator as
+                      | string
+                      | number
+                      | undefined
+                  }
                   onChange={(value) => {
                     const newParams = {
                       ...selectedEffect.params,
