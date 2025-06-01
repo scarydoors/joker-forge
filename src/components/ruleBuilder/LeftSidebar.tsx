@@ -7,6 +7,7 @@ import BlockPalette from "./BlockPalette";
 interface LeftSidebarProps {
   joker: JokerData;
   selectedRule: Rule | null;
+  rulesCount: number;
   onAddTrigger: (triggerId: string) => void;
   onAddCondition: (conditionType: string) => void;
   onAddEffect: (effectType: string) => void;
@@ -15,15 +16,17 @@ interface LeftSidebarProps {
 const LeftSidebar: React.FC<LeftSidebarProps> = ({
   joker,
   selectedRule,
+  rulesCount,
   onAddTrigger,
   onAddCondition,
   onAddEffect,
 }) => {
   return (
     <div className="w-80 flex flex-col ">
-      <JokerInfo joker={joker} />
+      <JokerInfo joker={joker} rulesCount={rulesCount} />
       <BlockPalette
         selectedRule={selectedRule}
+        rulesCount={rulesCount}
         onAddTrigger={onAddTrigger}
         onAddCondition={onAddCondition}
         onAddEffect={onAddEffect}

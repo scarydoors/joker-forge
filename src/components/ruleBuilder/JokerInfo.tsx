@@ -2,15 +2,12 @@ import React from "react";
 import { JokerData } from "../JokerCard";
 import { IdentificationIcon } from "@heroicons/react/16/solid";
 
-//TODO
-// Button to close the sidebar
-// Dynamic trigger count
-
 interface JokerInfoProps {
   joker: JokerData;
+  rulesCount: number;
 }
 
-const JokerInfo: React.FC<JokerInfoProps> = ({ joker }) => {
+const JokerInfo: React.FC<JokerInfoProps> = ({ joker, rulesCount }) => {
   return (
     <div className="bg-black-dark p-4 border-t-2 border-r-2 border-black-light">
       <div className="flex items-center gap-2 mb-3">
@@ -18,6 +15,12 @@ const JokerInfo: React.FC<JokerInfoProps> = ({ joker }) => {
         <span className="text-white font-light tracking-wide">
           {joker.name}
         </span>
+      </div>
+
+      <div className="text-white-darker text-sm">
+        {rulesCount === 0
+          ? "No Rules"
+          : `${rulesCount} Rule${rulesCount !== 1 ? "s" : ""}`}
       </div>
     </div>
   );

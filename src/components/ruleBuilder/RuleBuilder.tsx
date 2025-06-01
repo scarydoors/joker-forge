@@ -19,7 +19,7 @@ type SelectedItem = {
   type: "trigger" | "condition" | "effect";
   ruleId: string;
   itemId?: string;
-  groupId?: string; // Added to track selected condition group
+  groupId?: string;
 } | null;
 
 const RuleBuilder: React.FC<RuleBuilderProps> = ({
@@ -75,7 +75,6 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
 
   const addCondition = useCallback(
     (conditionType: string) => {
-      // Fixed: Allow adding conditions when an effect is selected
       if (!selectedItem) return;
 
       const newCondition: Condition = {
@@ -90,7 +89,6 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
       setRules((prev) => {
         return prev.map((rule) => {
           if (rule.id === selectedItem.ruleId) {
-            // If a specific condition group is selected, add to that group
             if (selectedItem.groupId && selectedItem.type === "condition") {
               return {
                 ...rule,
@@ -105,7 +103,6 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
               };
             }
 
-            // Otherwise, add to the first group or create a new group
             if (rule.conditionGroups.length === 0) {
               const newGroupId = crypto.randomUUID();
               targetGroupId = newGroupId;
@@ -139,7 +136,6 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
         });
       });
 
-      // Select the newly created condition with proper groupId
       setSelectedItem({
         type: "condition",
         ruleId: selectedItem.ruleId,
@@ -169,7 +165,6 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
       })
     );
 
-    // Select the new condition group
     setSelectedItem({
       type: "condition",
       ruleId: ruleId,
@@ -192,7 +187,6 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
       })
     );
 
-    // Clear selection if the deleted group was selected
     if (selectedItem && selectedItem.groupId === groupId) {
       setSelectedItem({ type: "trigger", ruleId });
     }
@@ -398,6 +392,7 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
           <LeftSidebar
             joker={joker}
             selectedRule={getSelectedRule()}
+            rulesCount={rules.length}
             onAddTrigger={addTrigger}
             onAddCondition={addCondition}
             onAddEffect={addEffect}

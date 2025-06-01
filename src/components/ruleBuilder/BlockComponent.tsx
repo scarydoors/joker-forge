@@ -38,7 +38,7 @@ const BlockComponent: React.FC<BlockComponentProps> = ({
       case "trigger":
         return {
           borderColor: "border-l-trigger",
-          backgroundColor: "bg-black-light",
+          backgroundColor: "bg-black",
           icon: <BoltIcon className="h-6 w-6 text-trigger -mt-4 -ml-1" />,
           typeLabel: "Trigger",
           selectColor: "border-trigger",
@@ -47,7 +47,7 @@ const BlockComponent: React.FC<BlockComponentProps> = ({
       case "condition":
         return {
           borderColor: "border-l-condition",
-          backgroundColor: "bg-black-light",
+          backgroundColor: "bg-black",
           icon: <BeakerIcon className="h-6 w-6 text-condition -mt-4 -ml-1" />,
           typeLabel: "Condition",
           selectColor: "border-condition",
@@ -56,7 +56,7 @@ const BlockComponent: React.FC<BlockComponentProps> = ({
       case "effect":
         return {
           borderColor: "border-l-effect",
-          backgroundColor: "bg-black-light",
+          backgroundColor: "bg-black",
           icon: <PuzzlePieceIcon className="h-6 w-6 text-effect -mt-4 -ml-1" />,
           typeLabel: "Effect",
           selectColor: "border-effect",
@@ -74,7 +74,7 @@ const BlockComponent: React.FC<BlockComponentProps> = ({
         relative ${config.backgroundColor} ${
         config.borderColor
       } border-l-4 border-2 
-        ${isSelected ? config.selectColor : "border-black-lighter"} 
+        ${isSelected ? config.selectColor : "border-black-light"} 
         rounded-lg cursor-pointer transition-all ${config.hoverColor} p-3 pt-6
       `}
       onClick={onClick}
