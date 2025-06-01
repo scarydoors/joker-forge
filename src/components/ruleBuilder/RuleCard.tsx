@@ -787,6 +787,9 @@ const RuleCard: React.FC<RuleCardProps> = ({
               >
                 {rule.effects.map((effect, index) => {
                   const effectType = getEffectTypeById(effect.type);
+                  const hasRandomChance =
+                    effect.params.has_random_chance === "true";
+
                   return (
                     <motion.div
                       key={effect.id}
@@ -810,6 +813,7 @@ const RuleCard: React.FC<RuleCardProps> = ({
                         showTrash={true}
                         onDelete={() => onDeleteEffect(rule.id, effect.id)}
                         parameterCount={getParameterCount(effect.params)}
+                        hasRandomChance={hasRandomChance}
                       />
                     </motion.div>
                   );

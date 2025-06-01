@@ -41,6 +41,7 @@ const RightSidebar: React.FC<RightSidebarProps> = ({
         selectedEffect={selectedEffect}
         onUpdateCondition={onUpdateCondition}
         onUpdateEffect={onUpdateEffect}
+        onUpdateJoker={onUpdateJoker}
       />
     </div>
   );

@@ -124,7 +124,7 @@ const BlockComponent: React.FC<BlockComponentProps> = ({
                 <ExclamationTriangleIcon className="h-4 w-4 text-balatro-red" />
               </div>
             )}
-            {hasRandomChance && ( // Add this
+            {hasRandomChance && (
               <div className="flex-shrink-0 -mr-2">
                 <PercentBadgeIcon className="h-4 w-4 text-mint" />
               </div>

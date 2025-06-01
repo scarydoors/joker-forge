@@ -5,7 +5,13 @@ import {
   getAllVariables,
 } from "../codeGeneration/VariableUtils";
 import { CommandLineIcon } from "@heroicons/react/16/solid";
-import { PlusIcon, TrashIcon, PencilIcon } from "@heroicons/react/24/outline";
+import {
+  PlusIcon,
+  TrashIcon,
+  PencilIcon,
+  EyeSlashIcon,
+  EyeIcon,
+} from "@heroicons/react/24/solid";
 import InputField from "../generic/InputField";
 import Button from "../generic/Button";
 
@@ -20,6 +26,7 @@ const Variables: React.FC<VariablesProps> = ({ joker, onUpdateJoker }) => {
   const [newVariableName, setNewVariableName] = useState("");
   const [newVariableValue, setNewVariableValue] = useState("0");
   const [newVariableDescription, setNewVariableDescription] = useState("");
+  const [isHidden, setIsHidden] = useState(false);
 
   const usageDetails = getVariableUsageDetails(joker);
   const allVariables = getAllVariables(joker);
@@ -71,8 +78,30 @@ const Variables: React.FC<VariablesProps> = ({ joker, onUpdateJoker }) => {
     setEditingVariable(null);
   };
 
+  if (isHidden) {
+    return (
+      <div className="bg-black-dark border-l-2 border-t-2 border-black-light p-2 flex justify-center">
+        <button
+          onClick={() => setIsHidden(false)}
+          className="p-2 bg-black-darker border-2 border-mint rounded-lg cursor-pointer hover:bg-mint/20 transition-colors"
+          title="Show Variables"
+        >
+          <EyeIcon className="h-5 w-5 text-mint" />
+        </button>
+      </div>
+    );
+  }
+
   return (
-    <div className="bg-black-dark border-l-2 border-t-2 border-black-light p-4">
+    <div className="bg-black-dark border-l-2 border-t-2 border-black-light p-4 relative">
+      <button
+        onClick={() => setIsHidden(true)}
+        className="absolute top-4 right-4 p-1 bg-black-darker border-2 border-mint rounded-lg cursor-pointer hover:bg-mint/20 transition-colors z-10"
+        title="Hide Variables"
+      >
+        <EyeSlashIcon className="h-4 w-4 text-mint" />
+      </button>
+
       <span className="flex items-center justify-center mb-2 gap-2">
         <CommandLineIcon className="h-6 w-6 text-white-light" />
         <h3 className="text-white-light text-lg font-medium tracking-wider">
@@ -117,13 +146,13 @@ const Variables: React.FC<VariablesProps> = ({ joker, onUpdateJoker }) => {
                         onClick={() =>
                           setEditingVariable(isEditing ? null : variable.id)
                         }
-                        className="p-1 text-white-darker hover:text-white transition-colors"
+                        className="p-1 text-white-darker hover:text-white transition-colors cursor-pointer"
                       >
                         <PencilIcon className="h-4 w-4" />
                       </button>
                       <button
                         onClick={() => handleDeleteVariable(variable.id)}
-                        className="p-1 text-balatro-red hover:text-white transition-colors"
+                        className="p-1 text-balatro-red hover:text-white transition-colors cursor-pointer"
                       >
                         <TrashIcon className="h-4 w-4" />
                       </button>
@@ -204,6 +233,7 @@ const Variables: React.FC<VariablesProps> = ({ joker, onUpdateJoker }) => {
                   size="sm"
                   onClick={handleAddVariable}
                   disabled={!newVariableName.trim()}
+                  className="cursor-pointer"
                 >
                   Add
                 </Button>
@@ -216,6 +246,7 @@ const Variables: React.FC<VariablesProps> = ({ joker, onUpdateJoker }) => {
                     setNewVariableValue("0");
                     setNewVariableDescription("");
                   }}
+                  className="cursor-pointer"
                 >
                   Cancel
                 </Button>
@@ -237,6 +268,7 @@ const Variables: React.FC<VariablesProps> = ({ joker, onUpdateJoker }) => {
           onClick={() => setShowAddForm(true)}
           icon={<PlusIcon className="h-4 w-4" />}
           disabled={showAddForm}
+          className="cursor-pointer"
         >
           Add Variable
         </Button>

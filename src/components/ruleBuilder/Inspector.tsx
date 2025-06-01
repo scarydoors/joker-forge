@@ -14,9 +14,14 @@ import { getConditionTypeById } from "./data/Conditions";
 import { getEffectTypeById } from "./data/Effects";
 import InputField from "../generic/InputField";
 import InputDropdown from "../generic/InputDropdown";
-import Checkbox from "../generic/Checkbox";
-import { EyeIcon, InformationCircleIcon } from "@heroicons/react/24/outline";
-import { ChartPieIcon } from "@heroicons/react/16/solid";
+import Button from "../generic/Button";
+import {
+  EyeIcon,
+  InformationCircleIcon,
+  VariableIcon,
+  XMarkIcon,
+} from "@heroicons/react/24/outline";
+import { ChartPieIcon, PercentBadgeIcon } from "@heroicons/react/16/solid";
 
 interface InspectorProps {
   joker: JokerData;
@@ -33,6 +38,7 @@ interface InspectorProps {
     effectId: string,
     updates: Partial<Effect>
   ) => void;
+  onUpdateJoker: (updates: Partial<JokerData>) => void;
 }
 
 interface ParameterFieldProps {
@@ -41,6 +47,7 @@ interface ParameterFieldProps {
   onChange: (value: unknown) => void;
   parentValues?: Record<string, unknown>;
   availableVariables?: Array<{ value: string; label: string }>;
+  onCreateVariable?: (name: string, initialValue: number) => void;
 }
 
 function hasShowWhen(param: ConditionParameter | EffectParameter): param is (
@@ -58,7 +65,11 @@ const ParameterField: React.FC<ParameterFieldProps> = ({
   onChange,
   parentValues = {},
   availableVariables = [],
+  onCreateVariable,
 }) => {
+  const [isVariableMode, setIsVariableMode] = React.useState(false);
+  const [newVariableName, setNewVariableName] = React.useState("");
+
   if (hasShowWhen(param)) {
     const { parameter, values } = param.showWhen;
     const parentValue = parentValues[parameter];
@@ -104,38 +115,102 @@ const ParameterField: React.FC<ParameterFieldProps> = ({
         </div>
       );
 
-    case "number":
+    case "number": {
+      const numericValue =
+        typeof value === "number"
+          ? value
+          : typeof param.default === "number"
+          ? param.default
+          : 0;
+
       return (
         <div className="mb-3">
-          <InputField
-            label={String(param.label)}
-            type="number"
-            value={
-              typeof value === "number"
-                ? value.toString()
-                : typeof param.default === "number"
-                ? param.default.toString()
-                : "0"
-            }
-            onChange={(e) => {
-              const val = parseFloat(e.target.value);
-              onChange(isNaN(val) ? 0 : val);
-            }}
-            min={param.min?.toString()}
-            max={param.max?.toString()}
-            step={
-              param.id === "value" &&
-              typeof value === "number" &&
-              value > 0 &&
-              value < 1
-                ? "0.1"
-                : "1"
-            }
-            size="sm"
-            labelPosition="center"
-          />
+          <div className="flex items-center gap-2 mb-2">
+            <span className="text-white-light text-sm">
+              {String(param.label)}
+            </span>
+            <button
+              onClick={() => setIsVariableMode(!isVariableMode)}
+              className={`p-1 rounded transition-colors cursor-pointer ${
+                isVariableMode
+                  ? "bg-mint/20 text-mint"
+                  : "bg-black-lighter text-white-darker hover:text-mint"
+              }`}
+              title="Toggle variable mode"
+            >
+              <VariableIcon className="h-4 w-4" />
+            </button>
+          </div>
+
+          {isVariableMode ? (
+            <div className="space-y-2">
+              {availableVariables.length > 0 ? (
+                <InputDropdown
+                  value={(value as string) || ""}
+                  onChange={(newValue) => onChange(newValue)}
+                  options={availableVariables}
+                  placeholder="Select variable"
+                  className="bg-black-dark"
+                  size="sm"
+                />
+              ) : (
+                <div className="text-white-darker text-xs">
+                  No variables available
+                </div>
+              )}
+
+              <div className="border-t border-black-lighter pt-2">
+                <div className="flex gap-2">
+                  <InputField
+                    value={newVariableName}
+                    onChange={(e) => setNewVariableName(e.target.value)}
+                    placeholder="Variable name"
+                    size="sm"
+                    className="flex-1"
+                  />
+                  <Button
+                    size="sm"
+                    variant="primary"
+                    onClick={() => {
+                      if (newVariableName.trim() && onCreateVariable) {
+                        onCreateVariable(newVariableName.trim(), numericValue);
+                        onChange(newVariableName.trim());
+                        setNewVariableName("");
+                      }
+                    }}
+                    disabled={!newVariableName.trim()}
+                    className="cursor-pointer"
+                  >
+                    Create
+                  </Button>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <InputField
+              type="number"
+              value={numericValue.toString()}
+              onChange={(e) => {
+                const val = parseFloat(e.target.value);
+                onChange(isNaN(val) ? 0 : val);
+              }}
+              min={param.min?.toString()}
+              max={param.max?.toString()}
+              step={
+                param.id === "value" &&
+                typeof value === "number" &&
+                value > 0 &&
+                value < 1
+                  ? "0.1"
+                  : "1"
+              }
+              size="sm"
+              labelPosition="center"
+            />
+          )}
         </div>
       );
+    }
 
     case "text":
       return (
@@ -162,6 +237,7 @@ const Inspector: React.FC<InspectorProps> = ({
   selectedEffect,
   onUpdateCondition,
   onUpdateEffect,
+  onUpdateJoker,
 }) => {
   const availableVariables = getAllVariables(joker).map(
     (variable: { name: string }) => ({
@@ -169,6 +245,17 @@ const Inspector: React.FC<InspectorProps> = ({
       label: variable.name,
     })
   );
+
+  const handleCreateVariable = (name: string, initialValue: number) => {
+    const newVariable = {
+      id: crypto.randomUUID(),
+      name,
+      initialValue,
+    };
+
+    const updatedVariables = [...(joker.userVariables || []), newVariable];
+    onUpdateJoker({ userVariables: updatedVariables });
+  };
 
   const renderTriggerInfo = () => {
     if (!selectedRule) return null;
@@ -228,12 +315,30 @@ const Inspector: React.FC<InspectorProps> = ({
 
     return (
       <div className="space-y-4">
-        <div className="bg-gradient-to-r from-condition/20 to-transparent border border-condition/30 rounded-lg p-4">
+        <div className="bg-gradient-to-r from-condition/20 to-transparent border border-condition/30 rounded-lg p-4 relative">
+          <button
+            onClick={() =>
+              onUpdateCondition(selectedRule.id, selectedCondition.id, {
+                negate: !selectedCondition.negate,
+              })
+            }
+            className={`absolute top-4 right-4 p-2 rounded-lg border-2 transition-colors cursor-pointer z-10 ${
+              selectedCondition.negate
+                ? "bg-balatro-red/20 border-balatro-red text-balatro-red"
+                : "bg-black-darker border-black-lighter text-white-darker hover:border-balatro-red hover:text-balatro-red"
+            }`}
+            title={
+              selectedCondition.negate ? "Remove negation" : "Negate condition"
+            }
+          >
+            <XMarkIcon className="h-4 w-4" />
+          </button>
+
           <div className="flex items-center gap-3 mb-3">
             <div className="w-10 h-10 bg-condition/20 rounded-lg flex items-center justify-center">
               <InformationCircleIcon className="h-5 w-5 text-condition" />
             </div>
-            <div>
+            <div className="flex-1 pr-12">
               <h4 className="text-condition font-medium text-lg">
                 {conditionType.label}
               </h4>
@@ -242,22 +347,9 @@ const Inspector: React.FC<InspectorProps> = ({
               </span>
             </div>
           </div>
-          <p className="text-white-light text-sm leading-relaxed mb-3">
+          <p className="text-white-light text-sm leading-relaxed">
             {conditionType.description}
           </p>
-
-          <div className="bg-black-darker border border-black-lighter rounded-lg p-3">
-            <Checkbox
-              id="negate"
-              label="Negate this condition (NOT)"
-              checked={selectedCondition.negate}
-              onChange={(checked) =>
-                onUpdateCondition(selectedRule.id, selectedCondition.id, {
-                  negate: checked,
-                })
-              }
-            />
-          </div>
         </div>
 
         <div className="space-y-3">
@@ -284,10 +376,103 @@ const Inspector: React.FC<InspectorProps> = ({
                 }}
                 parentValues={selectedCondition.params}
                 availableVariables={availableVariables}
+                onCreateVariable={handleCreateVariable}
               />
             </div>
           ))}
         </div>
+      </div>
+    );
+  };
+
+  const ChanceInput: React.FC<{
+    label: string;
+    value: string | number | undefined;
+    onChange: (value: string | number) => void;
+    availableVariables: Array<{ value: string; label: string }>;
+    onCreateVariable: (name: string, initialValue: number) => void;
+  }> = ({ label, value, onChange, availableVariables, onCreateVariable }) => {
+    const [isVariableMode, setIsVariableMode] = React.useState(
+      typeof value === "string"
+    );
+    const [newVariableName, setNewVariableName] = React.useState("");
+    const numericValue = typeof value === "number" ? value : 1;
+    const actualValue = value || numericValue;
+
+    return (
+      <div className="flex flex-col gap-2 items-center">
+        <div className="flex items-center gap-2">
+          <span className="text-white-light text-sm">{label}</span>
+          <button
+            onClick={() => setIsVariableMode(!isVariableMode)}
+            className={`p-1 rounded transition-colors cursor-pointer ${
+              isVariableMode
+                ? "bg-mint/20 text-mint"
+                : "bg-black-lighter text-white-darker hover:text-mint"
+            }`}
+            title="Toggle variable mode"
+          >
+            <VariableIcon className="h-3 w-3" />
+          </button>
+        </div>
+
+        {isVariableMode ? (
+          <div className="space-y-2 w-full">
+            {availableVariables.length > 0 ? (
+              <InputDropdown
+                value={(actualValue as string) || ""}
+                onChange={(newValue) => onChange(newValue)}
+                options={availableVariables}
+                placeholder="Select variable"
+                className="bg-black-dark"
+                size="sm"
+              />
+            ) : (
+              <div className="text-white-darker text-xs text-center">
+                No variables available
+              </div>
+            )}
+
+            <div className="border-t border-black-lighter pt-2">
+              <div className="flex gap-2">
+                <InputField
+                  value={newVariableName}
+                  onChange={(e) => setNewVariableName(e.target.value)}
+                  placeholder="Variable name"
+                  size="sm"
+                  className="flex-1"
+                />
+                <Button
+                  size="sm"
+                  variant="primary"
+                  onClick={() => {
+                    if (newVariableName.trim() && onCreateVariable) {
+                      onCreateVariable(newVariableName.trim(), numericValue);
+                      onChange(newVariableName.trim());
+                      setNewVariableName("");
+                    }
+                  }}
+                  disabled={!newVariableName.trim()}
+                  className="cursor-pointer"
+                >
+                  Create
+                </Button>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <InputField
+            type="number"
+            value={numericValue.toString()}
+            onChange={(e) => {
+              const val = parseInt(e.target.value);
+              onChange(isNaN(val) ? 1 : val);
+            }}
+            min="1"
+            size="sm"
+            className="w-20"
+          />
+        )}
       </div>
     );
   };
@@ -297,14 +482,50 @@ const Inspector: React.FC<InspectorProps> = ({
     const effectType = getEffectTypeById(selectedEffect.type);
     if (!effectType) return null;
 
+    const hasRandomChance = selectedEffect.params.has_random_chance === "true";
+
     return (
       <div className="space-y-4">
-        <div className="bg-gradient-to-r from-effect/20 to-transparent border border-effect/30 rounded-lg p-4">
+        <div className="bg-gradient-to-r from-effect/20 to-transparent border border-effect/30 rounded-lg p-4 relative">
+          <button
+            onClick={() => {
+              if (hasRandomChance) {
+                const newParams = { ...selectedEffect.params };
+                delete newParams.has_random_chance;
+                delete newParams.chance_numerator;
+                delete newParams.chance_denominator;
+                onUpdateEffect(selectedRule.id, selectedEffect.id, {
+                  params: newParams,
+                });
+              } else {
+                const newParams = {
+                  ...selectedEffect.params,
+                  has_random_chance: "true",
+                  chance_numerator: 1,
+                  chance_denominator: 4,
+                };
+                onUpdateEffect(selectedRule.id, selectedEffect.id, {
+                  params: newParams,
+                });
+              }
+            }}
+            className={`absolute top-4 right-4 p-2 rounded-lg border-2 transition-colors cursor-pointer z-10 ${
+              hasRandomChance
+                ? "bg-mint/20 border-mint text-mint"
+                : "bg-black-darker border-black-lighter text-white-darker hover:border-mint hover:text-mint"
+            }`}
+            title={
+              hasRandomChance ? "Remove random chance" : "Add random chance"
+            }
+          >
+            <PercentBadgeIcon className="h-4 w-4" />
+          </button>
+
           <div className="flex items-center gap-3 mb-3">
             <div className="w-10 h-10 bg-effect/20 rounded-lg flex items-center justify-center">
               <InformationCircleIcon className="h-5 w-5 text-effect" />
             </div>
-            <div>
+            <div className="flex-1 pr-12">
               <h4 className="text-effect font-medium text-lg">
                 {effectType.label}
               </h4>
@@ -316,6 +537,44 @@ const Inspector: React.FC<InspectorProps> = ({
           <p className="text-white-light text-sm leading-relaxed">
             {effectType.description}
           </p>
+
+          {hasRandomChance && (
+            <div className="mt-3 bg-mint/10 border border-mint/30 rounded-lg p-3">
+              <div className="flex flex-col items-center gap-4">
+                <ChanceInput
+                  label="Numerator"
+                  value={selectedEffect.params.chance_numerator}
+                  onChange={(value) => {
+                    const newParams = {
+                      ...selectedEffect.params,
+                      chance_numerator: value,
+                    };
+                    onUpdateEffect(selectedRule.id, selectedEffect.id, {
+                      params: newParams,
+                    });
+                  }}
+                  availableVariables={availableVariables}
+                  onCreateVariable={handleCreateVariable}
+                />
+                <span className="text-white-light text-sm">in</span>
+                <ChanceInput
+                  label="Denominator"
+                  value={selectedEffect.params.chance_denominator}
+                  onChange={(value) => {
+                    const newParams = {
+                      ...selectedEffect.params,
+                      chance_denominator: value,
+                    };
+                    onUpdateEffect(selectedRule.id, selectedEffect.id, {
+                      params: newParams,
+                    });
+                  }}
+                  availableVariables={availableVariables}
+                  onCreateVariable={handleCreateVariable}
+                />
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="space-y-3">
@@ -342,6 +601,7 @@ const Inspector: React.FC<InspectorProps> = ({
                 }}
                 parentValues={selectedEffect.params}
                 availableVariables={availableVariables}
+                onCreateVariable={handleCreateVariable}
               />
             </div>
           ))}
@@ -351,7 +611,7 @@ const Inspector: React.FC<InspectorProps> = ({
   };
 
   return (
-    <div className="bg-black-dark border-l-2 border-t-1 border-black-lighter p-4 flex-grow overflow-y-auto">
+    <div className="bg-black-dark border-l-2 border-t-1 border-black-lighter p-4 flex-grow overflow-y-auto custom-scrollbar">
       <span className="flex items-center justify-center mb-2 gap-2">
         <ChartPieIcon className="h-6 w-6 text-white-light" />
         <h3 className="text-white-light text-lg font-medium tracking-wider">
