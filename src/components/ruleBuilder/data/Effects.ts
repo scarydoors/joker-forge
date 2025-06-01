@@ -9,35 +9,11 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
     applicableTriggers: ["hand_played", "card_scored", "passive"],
     params: [
       {
-        id: "value_source",
-        type: "select",
-        label: "Value Source",
-        options: [
-          { value: "fixed", label: "Fixed Value" },
-          { value: "variable", label: "Internal Variable" },
-        ],
-        default: "fixed",
-      },
-      {
         id: "value",
         type: "number",
         label: "Amount",
         default: 10,
         min: 0,
-        showWhen: {
-          parameter: "value_source",
-          values: ["fixed"],
-        },
-      },
-      {
-        id: "variable_name",
-        type: "text",
-        label: "Variable Name",
-        default: "var1",
-        showWhen: {
-          parameter: "value_source",
-          values: ["variable"],
-        },
       },
     ],
   },
@@ -189,7 +165,6 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
           { value: "decrement", label: "Decrement by value" },
           { value: "multiply", label: "Multiply by value" },
           { value: "divide", label: "Divide by value" },
-          { value: "reset", label: "Reset to 0" },
         ],
       },
       {
@@ -197,10 +172,6 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
         type: "number",
         label: "Value",
         default: 1,
-        showWhen: {
-          parameter: "operation",
-          values: ["set", "increment", "decrement", "multiply", "divide"],
-        },
       },
     ],
   },
@@ -447,46 +418,6 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
           { value: "e_negative", label: "Negative" },
         ],
         default: "none",
-      },
-    ],
-  },
-  {
-    id: "random_chance",
-    label: "Random Chance (Probability)",
-    description: "Apply effect based on random chance",
-    params: [
-      {
-        id: "numerator",
-        type: "number",
-        label: "Numerator",
-        default: 1,
-        min: 1,
-      },
-      {
-        id: "denominator",
-        type: "number",
-        label: "Denominator",
-        default: 3,
-        min: 2,
-      },
-      {
-        id: "effect_type",
-        type: "select",
-        label: "Effect if successful",
-        options: [
-          { value: "add_chips", label: "Add Chips" },
-          { value: "add_mult", label: "Add Mult" },
-          { value: "apply_x_mult", label: "Apply xMult" },
-          { value: "add_money", label: "Add Money" },
-          { value: "level_up_hand", label: "Level Up Hand" },
-        ],
-      },
-      {
-        id: "effect_value",
-        type: "number",
-        label: "Effect Value",
-        default: 10,
-        min: 0,
       },
     ],
   },
