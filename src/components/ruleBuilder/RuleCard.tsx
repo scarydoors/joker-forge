@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { Rule, ConditionGroup, Condition, Effect } from "./types";
 import { getTriggerById } from "./data/Triggers";
@@ -59,6 +59,7 @@ const RuleCard: React.FC<RuleCardProps> = ({
   // State management
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [descriptionVisible, setDescriptionVisible] = useState(true);
+  const [showReopenButton, setShowReopenButton] = useState(false);
   const [isDisabled, setIsDisabled] = useState(false);
   const [conditionOperators, setConditionOperators] = useState<
     Record<string, string>
@@ -66,6 +67,20 @@ const RuleCard: React.FC<RuleCardProps> = ({
   const [groupOperators, setGroupOperators] = useState<Record<string, string>>(
     {}
   );
+
+  // Handle reopen button visibility with delay
+  useEffect(() => {
+    if (!descriptionVisible) {
+      // Wait a bit longer for the description close animation to fully complete
+      const timer = setTimeout(() => {
+        setShowReopenButton(true);
+      }, 250);
+      return () => clearTimeout(timer);
+    } else {
+      // Hide the button immediately when description is shown
+      setShowReopenButton(false);
+    }
+  }, [descriptionVisible]);
 
   // Data processing
   const trigger = getTriggerById(rule.trigger);
@@ -833,11 +848,17 @@ const RuleCard: React.FC<RuleCardProps> = ({
             )}
           </AnimatePresence>
 
-          {/* Show Description Button - separate from animated content */}
-          {!descriptionVisible && (
+          {/* Show Description Button */}
+          {/* THE TIMING IS A BIT MESSED UP STILL */}
+          {showReopenButton && (
             <div className="flex justify-center">
               <button
-                onClick={() => setDescriptionVisible(true)}
+                onClick={() => {
+                  setShowReopenButton(false);
+                  setTimeout(() => {
+                    setDescriptionVisible(true);
+                  }, 50);
+                }}
                 className="w-8 h-8 bg-black-darker rounded-lg flex items-center justify-center border-2 border-black-lighter hover:bg-black-light transition-colors cursor-pointer"
                 title="Show Description"
               >
