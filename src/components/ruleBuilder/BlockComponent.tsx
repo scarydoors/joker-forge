@@ -14,7 +14,7 @@ import {
 interface BlockComponentProps {
   label: string;
   type: "trigger" | "condition" | "effect";
-  onClick: () => void;
+  onClick: (e?: React.MouseEvent) => void;
   isSelected?: boolean;
   showTrash?: boolean;
   onDelete?: () => void;
@@ -73,6 +73,11 @@ const BlockComponent: React.FC<BlockComponentProps> = ({
   const config = getTypeConfig();
   const displayTitle = dynamicTitle || label;
 
+  const handleClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onClick(e);
+  };
+
   return (
     <div
       className={`
@@ -82,7 +87,8 @@ const BlockComponent: React.FC<BlockComponentProps> = ({
         ${isSelected ? config.selectColor : "border-black-light"} 
         rounded-lg cursor-pointer transition-all ${config.hoverColor} p-3 pt-6
       `}
-      onClick={onClick}
+      onClick={handleClick}
+      style={{ pointerEvents: "auto" }}
     >
       <div className="absolute top-2 left-11 text-white-darker text-xs font-medium tracking-wider">
         {config.typeLabel}
