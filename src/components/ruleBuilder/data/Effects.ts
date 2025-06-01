@@ -610,12 +610,6 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
     params: [],
   },
   {
-    id: "destroy_self",
-    label: "Destroy Self",
-    description: "Destroy this joker",
-    params: [],
-  },
-  {
     id: "modify_game_rules",
     label: "Modify Game Rules",
     description: "Change fundamental game rules",
