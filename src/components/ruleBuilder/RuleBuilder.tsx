@@ -1,5 +1,9 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
-import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
+import {
+  TransformWrapper,
+  TransformComponent,
+  ReactZoomPanPinchRef,
+} from "react-zoom-pan-pinch";
 import {
   DndContext,
   DragOverlay,
@@ -22,7 +26,10 @@ import JokerInfo from "./JokerInfo";
 import Variables from "./Variables";
 import Inspector from "./Inspector";
 import Button from "../generic/Button";
-import { CheckCircleIcon } from "@heroicons/react/24/outline";
+import {
+  CheckCircleIcon,
+  ArrowsPointingInIcon,
+} from "@heroicons/react/24/outline";
 import { getConditionTypeById } from "./data/Conditions";
 import { getEffectTypeById } from "./data/Effects";
 
@@ -68,17 +75,19 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
   const [rules, setRules] = useState<Rule[]>([]);
   const [selectedItem, setSelectedItem] = useState<SelectedItem>(null);
   const [draggedItem, setDraggedItem] = useState<DraggedItem | null>(null);
+  const [panState, setPanState] = useState({ x: 0, y: 0, scale: 1 });
+  const [backgroundOffset, setBackgroundOffset] = useState({ x: 0, y: 0 });
   const [panels, setPanels] = useState<Record<string, PanelState>>({
     blockPalette: {
       id: "blockPalette",
       isVisible: true,
       position: { x: 20, y: 20 },
-      size: { width: 320, height: 720 },
+      size: { width: 320, height: 1200 },
     },
     jokerInfo: {
       id: "jokerInfo",
-      isVisible: true,
-      position: { x: 20, y: 760 },
+      isVisible: false,
+      position: { x: 0, y: 0 },
       size: { width: 320, height: 120 },
     },
     variables: {
@@ -95,6 +104,7 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
     },
   });
   const modalRef = useRef<HTMLDivElement>(null);
+  const transformRef = useRef<ReactZoomPanPinchRef>(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -111,6 +121,115 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
     onSave(rules);
     onClose();
   }, [onSave, onClose, rules]);
+
+  const handleRecenter = () => {
+    if (transformRef.current) {
+      transformRef.current.resetTransform();
+      setPanState({ x: 0, y: 0, scale: 1 });
+      setBackgroundOffset({ x: 0, y: 0 });
+    }
+  };
+
+  // Calculate center position in transform space
+  const getCenterPosition = () => {
+    const screenCenterX =
+      (typeof window !== "undefined" ? window.innerWidth : 1200) / 2;
+    const screenCenterY =
+      (typeof window !== "undefined" ? window.innerHeight : 800) / 2;
+
+    // Convert screen center to transform space coordinates
+    const transformCenterX = screenCenterX - panState.x;
+    const transformCenterY = screenCenterY - panState.y;
+
+    return {
+      x: transformCenterX - 160, // Offset by half rule card width (320px / 2)
+      y: transformCenterY - 200, // Offset by approximate half rule card height
+    };
+  };
+
+  const togglePanel = useCallback((panelId: string) => {
+    setPanels((prev) => {
+      const panel = prev[panelId];
+
+      const findPosition = (
+        panels: Record<string, PanelState>,
+        targetPanelId: string
+      ): { x: number; y: number } => {
+        const panelSize = panels[targetPanelId].size;
+        const padding = 20;
+        const viewportWidth = window.innerWidth;
+        const viewportHeight = window.innerHeight - 100;
+
+        const positions = [
+          { x: viewportWidth - panelSize.width - padding, y: padding },
+          { x: padding, y: padding },
+          {
+            x: viewportWidth - panelSize.width - padding,
+            y: viewportHeight - panelSize.height - padding,
+          },
+          { x: viewportWidth / 2 - panelSize.width / 2, y: padding },
+          {
+            x: viewportWidth / 2 - panelSize.width / 2,
+            y: viewportHeight / 2 - panelSize.height / 2,
+          },
+        ];
+
+        const hasOverlap = (
+          position: { x: number; y: number },
+          size: { width: number; height: number },
+          excludePanelId: string
+        ): boolean => {
+          const rect1 = {
+            left: position.x,
+            top: position.y,
+            right: position.x + size.width,
+            bottom: position.y + size.height,
+          };
+
+          return Object.values(panels).some((panel) => {
+            if (panel.id === excludePanelId || !panel.isVisible) return false;
+
+            const rect2 = {
+              left: panel.position.x,
+              top: panel.position.y,
+              right: panel.position.x + panel.size.width,
+              bottom: panel.position.y + panel.size.height,
+            };
+
+            return !(
+              rect1.right < rect2.left ||
+              rect1.left > rect2.right ||
+              rect1.bottom < rect2.top ||
+              rect1.top > rect2.bottom
+            );
+          });
+        };
+
+        for (const position of positions) {
+          if (!hasOverlap(position, panelSize, targetPanelId)) {
+            return position;
+          }
+        }
+
+        return {
+          x: Math.random() * 200 + padding,
+          y: Math.random() * 200 + padding,
+        };
+      };
+
+      const newState = {
+        ...prev,
+        [panelId]: {
+          ...panel,
+          isVisible: !panel.isVisible,
+          position: panel.isVisible
+            ? panel.position
+            : findPosition(prev, panelId),
+        },
+      };
+      return newState;
+    });
+  }, []);
 
   useEffect(() => {
     if (isOpen) {
@@ -130,97 +249,44 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
         }
       };
 
+      const handleKeyPress = (event: KeyboardEvent) => {
+        if (
+          event.target instanceof HTMLInputElement ||
+          event.target instanceof HTMLTextAreaElement
+        ) {
+          return;
+        }
+
+        switch (event.key.toLowerCase()) {
+          case "b":
+            togglePanel("blockPalette");
+            break;
+          case "i":
+            togglePanel("jokerInfo");
+            break;
+          case "v":
+            togglePanel("variables");
+            break;
+          case "p":
+            togglePanel("inspector");
+            break;
+        }
+      };
+
       document.addEventListener("mousedown", handleClickOutside);
-      return () =>
+      document.addEventListener("keydown", handleKeyPress);
+      return () => {
         document.removeEventListener("mousedown", handleClickOutside);
+        document.removeEventListener("keydown", handleKeyPress);
+      };
     }
-  }, [isOpen, handleSaveAndClose]);
+  }, [isOpen, handleSaveAndClose, togglePanel]);
 
   useEffect(() => {
     if (selectedItem && !panels.inspector.isVisible) {
       togglePanel("inspector");
     }
-  }, [selectedItem]);
-
-  const findValidPosition = (panelId: string): { x: number; y: number } => {
-    const panelSize = panels[panelId].size;
-    const padding = 20;
-    const viewportWidth = window.innerWidth;
-    const viewportHeight = window.innerHeight - 100;
-
-    const positions = [
-      { x: viewportWidth - panelSize.width - padding, y: padding },
-      { x: padding, y: padding },
-      {
-        x: viewportWidth - panelSize.width - padding,
-        y: viewportHeight - panelSize.height - padding,
-      },
-      { x: viewportWidth / 2 - panelSize.width / 2, y: padding },
-      {
-        x: viewportWidth / 2 - panelSize.width / 2,
-        y: viewportHeight / 2 - panelSize.height / 2,
-      },
-    ];
-
-    for (const position of positions) {
-      if (!hasOverlap(position, panelSize, panelId)) {
-        return position;
-      }
-    }
-
-    return {
-      x: Math.random() * 200 + padding,
-      y: Math.random() * 200 + padding,
-    };
-  };
-
-  const hasOverlap = (
-    position: { x: number; y: number },
-    size: { width: number; height: number },
-    excludePanelId: string
-  ): boolean => {
-    const rect1 = {
-      left: position.x,
-      top: position.y,
-      right: position.x + size.width,
-      bottom: position.y + size.height,
-    };
-
-    return Object.values(panels).some((panel) => {
-      if (panel.id === excludePanelId || !panel.isVisible) return false;
-
-      const rect2 = {
-        left: panel.position.x,
-        top: panel.position.y,
-        right: panel.position.x + panel.size.width,
-        bottom: panel.position.y + panel.size.height,
-      };
-
-      return !(
-        rect1.right < rect2.left ||
-        rect1.left > rect2.right ||
-        rect1.bottom < rect2.top ||
-        rect1.top > rect2.bottom
-      );
-    });
-  };
-
-  const togglePanel = (panelId: string) => {
-    setPanels((prev) => {
-      const panel = prev[panelId];
-      const newState = {
-        ...prev,
-        [panelId]: {
-          ...panel,
-          isVisible: !panel.isVisible,
-          position: panel.isVisible
-            ? panel.position
-            : findValidPosition(panelId),
-        },
-      };
-      return newState;
-    });
-  };
+  }, [selectedItem, panels.inspector.isVisible, togglePanel]);
 
   const updatePanelPosition = (
     panelId: string,
@@ -236,11 +302,13 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
   };
 
   const addTrigger = (triggerId: string) => {
+    const centerPos = getCenterPosition();
     const newRule: Rule = {
       id: crypto.randomUUID(),
       trigger: triggerId,
       conditionGroups: [],
       effects: [],
+      position: centerPos,
     };
     setRules((prev) => [...prev, newRule]);
     setSelectedItem({ type: "trigger", ruleId: newRule.id });
@@ -584,67 +652,6 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
     return rule.effects.find((e) => e.id === selectedItem.itemId) || null;
   };
 
-  const handleDragStart = (event: DragStartEvent) => {
-    const { active } = event;
-    const activeId = active.id as string;
-
-    console.log("Drag started:", activeId); // Debug log
-
-    if (activeId.startsWith("panel-")) {
-      return;
-    }
-
-    for (const rule of rules) {
-      for (const group of rule.conditionGroups) {
-        const condition = group.conditions.find((c) => c.id === activeId);
-        if (condition) {
-          setDraggedItem({
-            id: condition.id,
-            type: "condition",
-            ruleId: rule.id,
-            groupId: group.id,
-            data: condition,
-          });
-          return;
-        }
-      }
-
-      const effect = rule.effects.find((e) => e.id === activeId);
-      if (effect) {
-        setDraggedItem({
-          id: effect.id,
-          type: "effect",
-          ruleId: rule.id,
-          data: effect,
-        });
-        return;
-      }
-    }
-  };
-
-  const handleDragEnd = (event: DragEndEvent) => {
-    const { active, delta } = event;
-    const activeId = active.id as string;
-
-    console.log("Drag ended:", activeId, delta); // Debug log
-
-    if (activeId.startsWith("panel-")) {
-      const panelId = activeId.replace("panel-", "");
-      const currentPanel = panels[panelId];
-      if (delta && currentPanel) {
-        const newPosition = {
-          x: Math.max(0, currentPanel.position.x + delta.x),
-          y: Math.max(0, currentPanel.position.y + delta.y),
-        };
-        console.log("Updating panel position:", panelId, newPosition); // Debug log
-        updatePanelPosition(panelId, newPosition);
-      }
-      return;
-    }
-
-    setDraggedItem(null);
-  };
-
   const generateConditionTitle = (condition: Condition) => {
     const conditionType = getConditionTypeById(condition.type);
     const baseLabel = conditionType?.label || "Unknown Condition";
@@ -825,31 +832,142 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
     return Object.keys(params).length;
   };
 
+  const handleDragStart = (event: DragStartEvent) => {
+    const { active } = event;
+    const activeId = active.id as string;
+
+    console.log("Drag started:", activeId);
+
+    if (activeId.startsWith("panel-")) {
+      return;
+    }
+
+    for (const rule of rules) {
+      for (const group of rule.conditionGroups) {
+        const condition = group.conditions.find((c) => c.id === activeId);
+        if (condition) {
+          setDraggedItem({
+            id: condition.id,
+            type: "condition",
+            ruleId: rule.id,
+            groupId: group.id,
+            data: condition,
+          });
+          return;
+        }
+      }
+
+      const effect = rule.effects.find((e) => e.id === activeId);
+      if (effect) {
+        setDraggedItem({
+          id: effect.id,
+          type: "effect",
+          ruleId: rule.id,
+          data: effect,
+        });
+        return;
+      }
+    }
+  };
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, delta } = event;
+    const activeId = active.id as string;
+
+    console.log("Drag ended:", activeId, delta);
+
+    if (activeId.startsWith("panel-")) {
+      const panelId = activeId.replace("panel-", "");
+      const currentPanel = panels[panelId];
+      if (delta && currentPanel) {
+        const newPosition = {
+          x: Math.max(0, currentPanel.position.x + delta.x),
+          y: Math.max(0, currentPanel.position.y + delta.y),
+        };
+        console.log("Updating panel position:", panelId, newPosition);
+        updatePanelPosition(panelId, newPosition);
+      }
+      return;
+    }
+
+    setDraggedItem(null);
+  };
+
+  const createAlternatingDotPattern = () => {
+    const dotSize = 3;
+    return `
+      radial-gradient(circle at 0px 0px, #26353B ${dotSize}px, transparent ${dotSize}px),
+      radial-gradient(circle at 0px 0px, #26353B ${dotSize}px, transparent ${dotSize}px)
+    `;
+  };
+
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 bg-balatro-blackshadow/80 flex items-center justify-center z-50 font-lexend">
       <div
         ref={modalRef}
-        className="bg-black-darker rounded-lg w-full h-full overflow-hidden border-2 border-black-light flex flex-col"
+        className="bg-black-dark rounded-lg w-full h-full overflow-hidden border-2 border-black-light flex flex-col"
       >
-        <div className="flex justify-between items-center p-4 relative border-b-2 border-black-light z-50">
-          <h2 className="text-sm text-white-light font-extralight tracking-widest">
+        <div className="flex px-4 py-2 border-b-2 border-black-light z-50">
+          <h2 className="text-xs text-white-light font-extralight tracking-widest mx-auto">
             Rule Builder for {joker.name}
           </h2>
-          <div className="flex items-center gap-4">
+        </div>
+
+        <div className="flex-grow relative overflow-hidden">
+          {/* Fixed background with alternating dots that moves with panning */}
+          <div
+            className="absolute inset-0 w-full h-full pointer-events-none"
+            style={{
+              backgroundImage: createAlternatingDotPattern(),
+              backgroundSize: "40px 40px, 40px 40px",
+              backgroundPosition: `${backgroundOffset.x % 40}px ${
+                backgroundOffset.y % 40
+              }px, ${(backgroundOffset.x + 20) % 40}px ${
+                (backgroundOffset.y + 20) % 40
+              }px`,
+              backgroundColor: "#1E2B30",
+            }}
+          />
+
+          <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-50 bg-black-dark/90 backdrop-blur-md border border-black-lighter rounded-lg px-3 py-1 flex items-center gap-3">
+            <div className="text-white-darker text-xs">
+              Pan: {Math.round(panState.x)}, {Math.round(panState.y)}
+            </div>
+            <button
+              onClick={handleRecenter}
+              className="p-1 text-white-darker hover:text-white transition-colors cursor-pointer"
+              title="Recenter View"
+            >
+              <ArrowsPointingInIcon className="h-4 w-4" />
+            </button>
+            <div className="w-px h-4 bg-black-lighter" />
             <Button
               variant="primary"
+              size="sm"
               onClick={handleSaveAndClose}
-              icon={<CheckCircleIcon className="h-5 w-5" />}
-              className="text-xs"
+              icon={<CheckCircleIcon className="h-4 w-4" />}
+              className="text-xs cursor-pointer"
             >
               Save & Close
             </Button>
           </div>
-        </div>
 
-        <div className="flex-grow relative overflow-hidden">
+          {rules.length === 0 && (
+            <div className="absolute inset-0 flex items-center justify-center z-40">
+              <div className="text-center bg-black-dark/80 backdrop-blur-sm rounded-lg p-8 border-2 border-black-lighter">
+                <div className="text-white-darker text-lg mb-3">
+                  No Rules Created
+                </div>
+                <p className="text-white-darker text-sm max-w-md">
+                  Select a trigger from the Block Palette to create your first
+                  rule.
+                </p>
+              </div>
+            </div>
+          )}
+
           <DndContext
             sensors={sensors}
             collisionDetection={closestCenter}
@@ -857,13 +975,14 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
             onDragEnd={handleDragEnd}
           >
             <TransformWrapper
+              ref={transformRef}
               initialScale={1}
               initialPositionX={0}
               initialPositionY={0}
               minScale={1}
               maxScale={1}
-              limitToBounds={false}
               centerOnInit={false}
+              limitToBounds={false}
               wheel={{
                 disabled: true,
               }}
@@ -875,6 +994,17 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
               }}
               panning={{
                 velocityDisabled: true,
+              }}
+              onTransformed={(_, state) => {
+                setPanState({
+                  x: state.positionX,
+                  y: state.positionY,
+                  scale: state.scale,
+                });
+                setBackgroundOffset({
+                  x: state.positionX,
+                  y: state.positionY,
+                });
               }}
             >
               <TransformComponent
@@ -892,62 +1022,43 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
                   minHeight: "100%",
                 }}
               >
-                <div
-                  className="absolute inset-0 w-full h-full"
-                  style={{
-                    backgroundImage: `radial-gradient(circle, #26353B 1px, transparent 1px)`,
-                    backgroundSize: `20px 20px`,
-                    backgroundColor: "#1E2B30",
-                    backgroundAttachment: "local",
-                  }}
-                />
-
                 <div className="relative z-10">
-                  {rules.length === 0 ? (
-                    <div className="flex items-center justify-center h-screen">
-                      <div className="text-center bg-black-dark/80 backdrop-blur-sm rounded-lg p-8 border-2 border-black-lighter">
-                        <div className="text-white-darker text-lg mb-3">
-                          No Rules Created
+                  {/* Removed the problematic margin calculation */}
+                  <div className="p-6 min-h-screen">
+                    <div className="relative">
+                      {rules.map((rule, index) => (
+                        <div
+                          key={rule.id}
+                          className="absolute"
+                          style={{
+                            left: rule.position?.x || 0,
+                            top: rule.position?.y || 0,
+                            zIndex: selectedItem?.ruleId === rule.id ? 30 : 20,
+                          }}
+                        >
+                          <RuleCard
+                            rule={rule}
+                            ruleIndex={index}
+                            selectedItem={selectedItem}
+                            onSelectItem={setSelectedItem}
+                            onDeleteRule={deleteRule}
+                            onDeleteCondition={deleteCondition}
+                            onDeleteConditionGroup={deleteConditionGroup}
+                            onDeleteEffect={deleteEffect}
+                            onAddConditionGroup={addConditionGroup}
+                            onToggleGroupOperator={toggleGroupOperator}
+                            onReorderConditions={reorderConditions}
+                            onReorderEffects={reorderEffects}
+                            isRuleSelected={selectedItem?.ruleId === rule.id}
+                            joker={joker}
+                            generateConditionTitle={generateConditionTitle}
+                            generateEffectTitle={generateEffectTitle}
+                            getParameterCount={getParameterCount}
+                          />
                         </div>
-                        <p className="text-white-darker text-sm max-w-md">
-                          Select a trigger from the Block Palette to create your
-                          first rule.
-                        </p>
-                      </div>
+                      ))}
                     </div>
-                  ) : (
-                    <div className="p-6 min-h-screen">
-                      <div className="flex flex-wrap gap-6">
-                        {rules.map((rule, index) => (
-                          <div
-                            key={rule.id}
-                            className="relative flex-shrink-0"
-                            style={{
-                              zIndex:
-                                selectedItem?.ruleId === rule.id ? 30 : 20,
-                            }}
-                          >
-                            <RuleCard
-                              rule={rule}
-                              ruleIndex={index}
-                              selectedItem={selectedItem}
-                              onSelectItem={setSelectedItem}
-                              onDeleteRule={deleteRule}
-                              onDeleteCondition={deleteCondition}
-                              onDeleteConditionGroup={deleteConditionGroup}
-                              onDeleteEffect={deleteEffect}
-                              onAddConditionGroup={addConditionGroup}
-                              onToggleGroupOperator={toggleGroupOperator}
-                              onReorderConditions={reorderConditions}
-                              onReorderEffects={reorderEffects}
-                              isRuleSelected={selectedItem?.ruleId === rule.id}
-                              joker={joker}
-                            />
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
+                  </div>
                 </div>
               </TransformComponent>
             </TransformWrapper>

@@ -1,5 +1,6 @@
 // Rule structure for the Rule Builder: Trigger -> Condition(s) -> Effect(s)
 export interface Rule {
+  position: { x: number; y: number };
   id: string;
   trigger: string;
   conditionGroups: ConditionGroup[];

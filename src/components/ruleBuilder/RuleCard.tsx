@@ -70,6 +70,9 @@ interface RuleCardProps {
   ) => void;
   isRuleSelected: boolean;
   joker: JokerData;
+  generateConditionTitle: (condition: Condition) => string;
+  generateEffectTitle: (effect: Effect) => string;
+  getParameterCount: (params: Record<string, unknown>) => number;
 }
 
 const SortableCondition: React.FC<{
@@ -201,6 +204,9 @@ const RuleCard: React.FC<RuleCardProps> = ({
   onReorderConditions,
   onReorderEffects,
   isRuleSelected,
+  generateConditionTitle,
+  generateEffectTitle,
+  getParameterCount,
 }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [descriptionVisible, setDescriptionVisible] = useState(true);
@@ -353,10 +359,6 @@ const RuleCard: React.FC<RuleCardProps> = ({
     );
   };
 
-  const getParameterCount = (params: Record<string, unknown>) => {
-    return Object.keys(params).length;
-  };
-
   const handleEditName = () => {
     console.log("Edit rule name functionality not yet implemented");
   };
@@ -388,182 +390,6 @@ const RuleCard: React.FC<RuleCardProps> = ({
     const newOperator = current === "AND" ? "OR" : "AND";
     setGroupOperators((prev) => ({ ...prev, [key]: newOperator }));
     onToggleGroupOperator?.(rule.id, groupId);
-  };
-
-  const generateConditionTitle = (condition: Condition) => {
-    const conditionType = getConditionTypeById(condition.type);
-    const baseLabel = conditionType?.label || "Unknown Condition";
-
-    if (!condition.params || Object.keys(condition.params).length === 0) {
-      return baseLabel;
-    }
-
-    const params = condition.params;
-
-    switch (condition.type) {
-      case "hand_type":
-        if (params.value) {
-          return `If Hand Type = ${params.value}`;
-        }
-        break;
-      case "player_money":
-        if (params.operator && params.value !== undefined) {
-          const op =
-            params.operator === "greater_than"
-              ? ">"
-              : params.operator === "less_than"
-              ? "<"
-              : params.operator === "equals"
-              ? "="
-              : params.operator === "greater_equals"
-              ? ">="
-              : params.operator === "less_equals"
-              ? "<="
-              : "≠";
-          return `If Player Money ${op} $${params.value}`;
-        }
-        break;
-      case "card_count":
-        if (params.operator && params.value !== undefined) {
-          const op =
-            params.operator === "greater_than"
-              ? ">"
-              : params.operator === "less_than"
-              ? "<"
-              : params.operator === "equals"
-              ? "="
-              : params.operator === "greater_equals"
-              ? ">="
-              : params.operator === "less_equals"
-              ? "<="
-              : "≠";
-          return `If Card Count ${op} ${params.value}`;
-        }
-        break;
-      case "card_rank":
-        if (params.specific_rank) {
-          return `If Card Rank = ${params.specific_rank}`;
-        } else if (params.rank_group) {
-          return `If Card Rank = ${params.rank_group}`;
-        }
-        break;
-      case "card_suit":
-        if (params.specific_suit) {
-          return `If Card Suit = ${params.specific_suit}`;
-        } else if (params.suit_group) {
-          return `If Card Suit = ${params.suit_group}`;
-        }
-        break;
-      case "remaining_hands":
-        if (params.operator && params.value !== undefined) {
-          const op =
-            params.operator === "greater_than"
-              ? ">"
-              : params.operator === "less_than"
-              ? "<"
-              : params.operator === "equals"
-              ? "="
-              : params.operator === "greater_equals"
-              ? ">="
-              : params.operator === "less_equals"
-              ? "<="
-              : "≠";
-          return `If Remaining Hands ${op} ${params.value}`;
-        }
-        break;
-      case "remaining_discards":
-        if (params.operator && params.value !== undefined) {
-          const op =
-            params.operator === "greater_than"
-              ? ">"
-              : params.operator === "less_than"
-              ? "<"
-              : params.operator === "equals"
-              ? "="
-              : params.operator === "greater_equals"
-              ? ">="
-              : params.operator === "less_equals"
-              ? "<="
-              : "≠";
-          return `If Remaining Discards ${op} ${params.value}`;
-        }
-        break;
-      case "random_chance":
-        if (params.numerator && params.denominator) {
-          return `If Random ${params.numerator} in ${params.denominator}`;
-        }
-        break;
-    }
-
-    return baseLabel;
-  };
-
-  const generateEffectTitle = (effect: Effect) => {
-    const effectType = getEffectTypeById(effect.type);
-    const baseLabel = effectType?.label || "Unknown Effect";
-
-    if (!effect.params || Object.keys(effect.params).length === 0) {
-      return baseLabel;
-    }
-
-    const params = effect.params;
-
-    switch (effect.type) {
-      case "add_chips":
-        if (params.value !== undefined) {
-          return `Add ${params.value} Chips`;
-        }
-        break;
-      case "add_mult":
-        if (params.value !== undefined) {
-          return `Add ${params.value} Mult`;
-        }
-        break;
-      case "apply_x_mult":
-        if (params.value !== undefined) {
-          return `Apply ${params.value}x Mult`;
-        }
-        break;
-      case "add_dollars":
-        if (params.value !== undefined) {
-          return `Add $${params.value}`;
-        }
-        break;
-      case "retrigger_cards":
-        if (params.repetitions !== undefined) {
-          return `Retrigger ${params.repetitions}x`;
-        }
-        break;
-      case "edit_hand":
-        if (params.operation && params.value !== undefined) {
-          const op =
-            params.operation === "add"
-              ? "+"
-              : params.operation === "subtract"
-              ? "-"
-              : "Set to";
-          return `${op} ${params.value} Hands`;
-        }
-        break;
-      case "edit_discard":
-        if (params.operation && params.value !== undefined) {
-          const op =
-            params.operation === "add"
-              ? "+"
-              : params.operation === "subtract"
-              ? "-"
-              : "Set to";
-          return `${op} ${params.value} Discards`;
-        }
-        break;
-      case "level_up_hand":
-        if (params.value !== undefined) {
-          return `Level Up Hand ${params.value}x`;
-        }
-        break;
-    }
-
-    return baseLabel;
   };
 
   const generateDescription = () => {
