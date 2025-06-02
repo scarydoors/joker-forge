@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
+import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 import {
   DndContext,
   DragOverlay,
@@ -7,10 +8,10 @@ import {
   PointerSensor,
   KeyboardSensor,
   DragStartEvent,
-  DragEndEvent,
   closestCenter,
 } from "@dnd-kit/core";
-import { sortableKeyboardCoordinates } from "@dnd-kit/sortable";
+import { sortableKeyboardCoordinates, arrayMove } from "@dnd-kit/sortable";
+import { restrictToVerticalAxis } from "@dnd-kit/modifiers";
 import type { Rule, Condition, Effect } from "./types";
 import { JokerData } from "../JokerCard";
 import LeftSidebar from "./LeftSidebar";
@@ -38,12 +39,6 @@ type SelectedItem = {
   groupId?: string;
 } | null;
 
-interface CanvasTransform {
-  x: number;
-  y: number;
-  scale: number;
-}
-
 interface DraggedItem {
   id: string;
   type: "condition" | "effect";
@@ -62,21 +57,8 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
 }) => {
   const [rules, setRules] = useState<Rule[]>([]);
   const [selectedItem, setSelectedItem] = useState<SelectedItem>(null);
-  const [canvasTransform, setCanvasTransform] = useState<CanvasTransform>({
-    x: 0,
-    y: 0,
-    scale: 1,
-  });
-  const [isPanning, setIsPanning] = useState(false);
-  const [lastPanPoint, setLastPanPoint] = useState({ x: 0, y: 0 });
   const [draggedItem, setDraggedItem] = useState<DraggedItem | null>(null);
-
   const modalRef = useRef<HTMLDivElement>(null);
-  const canvasRef = useRef<HTMLDivElement>(null);
-
-  const ZOOM_MIN = 0.5;
-  const ZOOM_MAX = 2;
-  const PAN_BOUNDS = React.useMemo(() => ({ x: 1000, y: 1000 }), []);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -98,7 +80,6 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
     if (isOpen) {
       setRules(existingRules);
       setSelectedItem(null);
-      setCanvasTransform({ x: 0, y: 0, scale: 1 });
     }
   }, [isOpen, existingRules]);
 
@@ -118,81 +99,6 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
         document.removeEventListener("mousedown", handleClickOutside);
     }
   }, [isOpen, handleSaveAndClose]);
-
-  const handleCanvasMouseDown = (e: React.MouseEvent) => {
-    if (e.button === 0 && e.target === e.currentTarget) {
-      setIsPanning(true);
-      setLastPanPoint({ x: e.clientX, y: e.clientY });
-      e.preventDefault();
-    }
-  };
-
-  const handleCanvasMouseMove = useCallback(
-    (e: MouseEvent) => {
-      if (!isPanning) return;
-
-      const deltaX = e.clientX - lastPanPoint.x;
-      const deltaY = e.clientY - lastPanPoint.y;
-
-      setCanvasTransform((prev) => ({
-        ...prev,
-        x: Math.max(-PAN_BOUNDS.x, Math.min(PAN_BOUNDS.x, prev.x + deltaX)),
-        y: Math.max(-PAN_BOUNDS.y, Math.min(PAN_BOUNDS.y, prev.y + deltaY)),
-      }));
-
-      setLastPanPoint({ x: e.clientX, y: e.clientY });
-    },
-    [isPanning, lastPanPoint, PAN_BOUNDS]
-  );
-
-  const handleCanvasMouseUp = useCallback(() => {
-    setIsPanning(false);
-  }, []);
-
-  const handleCanvasWheel = (e: React.WheelEvent) => {
-    e.preventDefault();
-
-    if (!canvasRef.current) return;
-
-    const rect = canvasRef.current.getBoundingClientRect();
-    const mouseX = e.clientX - rect.left;
-    const mouseY = e.clientY - rect.top;
-
-    const canvasMouseX = (mouseX - canvasTransform.x) / canvasTransform.scale;
-    const canvasMouseY = (mouseY - canvasTransform.y) / canvasTransform.scale;
-
-    const zoomFactor = e.deltaY > 0 ? 0.9 : 1.1;
-    const newScale = Math.max(
-      ZOOM_MIN,
-      Math.min(ZOOM_MAX, canvasTransform.scale * zoomFactor)
-    );
-
-    if (newScale !== canvasTransform.scale) {
-      const newX = mouseX - canvasMouseX * newScale;
-      const newY = mouseY - canvasMouseY * newScale;
-
-      setCanvasTransform(() => ({
-        x: Math.max(-PAN_BOUNDS.x, Math.min(PAN_BOUNDS.x, newX)),
-        y: Math.max(-PAN_BOUNDS.y, Math.min(PAN_BOUNDS.y, newY)),
-        scale: newScale,
-      }));
-    }
-  };
-
-  useEffect(() => {
-    if (isPanning) {
-      document.addEventListener("mousemove", handleCanvasMouseMove);
-      document.addEventListener("mouseup", handleCanvasMouseUp);
-      return () => {
-        document.removeEventListener("mousemove", handleCanvasMouseMove);
-        document.removeEventListener("mouseup", handleCanvasMouseUp);
-      };
-    }
-  }, [isPanning, handleCanvasMouseMove, handleCanvasMouseUp]);
-
-  const resetCanvas = () => {
-    setCanvasTransform({ x: 0, y: 0, scale: 1 });
-  };
 
   const addTrigger = (triggerId: string) => {
     const newRule: Rule = {
@@ -470,8 +376,8 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
   const reorderConditions = (
     ruleId: string,
     groupId: string,
-    startIndex: number,
-    endIndex: number
+    oldIndex: number,
+    newIndex: number
   ) => {
     setRules((prev) =>
       prev.map((rule) => {
@@ -480,12 +386,9 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
             ...rule,
             conditionGroups: rule.conditionGroups.map((group) => {
               if (group.id === groupId) {
-                const newConditions = [...group.conditions];
-                const [removed] = newConditions.splice(startIndex, 1);
-                newConditions.splice(endIndex, 0, removed);
                 return {
                   ...group,
-                  conditions: newConditions,
+                  conditions: arrayMove(group.conditions, oldIndex, newIndex),
                 };
               }
               return group;
@@ -499,18 +402,15 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
 
   const reorderEffects = (
     ruleId: string,
-    startIndex: number,
-    endIndex: number
+    oldIndex: number,
+    newIndex: number
   ) => {
     setRules((prev) =>
       prev.map((rule) => {
         if (rule.id === ruleId) {
-          const newEffects = [...rule.effects];
-          const [removed] = newEffects.splice(startIndex, 1);
-          newEffects.splice(endIndex, 0, removed);
           return {
             ...rule,
-            effects: newEffects,
+            effects: arrayMove(rule.effects, oldIndex, newIndex),
           };
         }
         return rule;
@@ -553,108 +453,35 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
     const { active } = event;
     const activeId = active.id as string;
 
-    const [type, ruleId, groupIdOrItemId, itemId] = activeId.split(":");
-
-    if (type === "condition") {
-      const rule = rules.find((r) => r.id === ruleId);
-      if (rule) {
-        const group = rule.conditionGroups.find(
-          (g) => g.id === groupIdOrItemId
-        );
-        if (group) {
-          const condition = group.conditions.find((c) => c.id === itemId);
-          if (condition) {
-            setDraggedItem({
-              id: condition.id,
-              type: "condition",
-              ruleId,
-              groupId: groupIdOrItemId,
-              data: condition,
-            });
-          }
-        }
-      }
-    } else if (type === "effect") {
-      const rule = rules.find((r) => r.id === ruleId);
-      if (rule) {
-        const effect = rule.effects.find((e) => e.id === groupIdOrItemId);
-        if (effect) {
+    // Find which rule and item is being dragged for the overlay
+    for (const rule of rules) {
+      // Check conditions
+      for (const group of rule.conditionGroups) {
+        const condition = group.conditions.find((c) => c.id === activeId);
+        if (condition) {
           setDraggedItem({
-            id: effect.id,
-            type: "effect",
-            ruleId,
-            data: effect,
+            id: condition.id,
+            type: "condition",
+            ruleId: rule.id,
+            groupId: group.id,
+            data: condition,
           });
+          return;
         }
       }
-    }
-  };
 
-  const handleDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event;
-
-    if (!over || !draggedItem) {
-      setDraggedItem(null);
-      return;
-    }
-
-    const activeId = active.id as string;
-    const overId = over.id as string;
-
-    const [activeType, activeRuleId, activeGroupIdOrItemId, activeItemId] =
-      activeId.split(":");
-    const [overType, overRuleId, overGroupIdOrItemId, overItemId] =
-      overId.split(":");
-
-    if (activeType !== overType || activeRuleId !== overRuleId) {
-      setDraggedItem(null);
-      return;
-    }
-
-    if (
-      activeType === "condition" &&
-      activeGroupIdOrItemId === overGroupIdOrItemId
-    ) {
-      const rule = rules.find((r) => r.id === activeRuleId);
-      if (rule) {
-        const group = rule.conditionGroups.find(
-          (g) => g.id === activeGroupIdOrItemId
-        );
-        if (group) {
-          const oldIndex = group.conditions.findIndex(
-            (c) => c.id === activeItemId
-          );
-          const newIndex = group.conditions.findIndex(
-            (c) => c.id === overItemId
-          );
-
-          if (oldIndex !== newIndex && oldIndex !== -1 && newIndex !== -1) {
-            reorderConditions(
-              activeRuleId,
-              activeGroupIdOrItemId,
-              oldIndex,
-              newIndex
-            );
-          }
-        }
-      }
-    } else if (activeType === "effect") {
-      const rule = rules.find((r) => r.id === activeRuleId);
-      if (rule) {
-        const oldIndex = rule.effects.findIndex(
-          (e) => e.id === activeGroupIdOrItemId
-        );
-        const newIndex = rule.effects.findIndex(
-          (e) => e.id === overGroupIdOrItemId
-        );
-
-        if (oldIndex !== newIndex && oldIndex !== -1 && newIndex !== -1) {
-          reorderEffects(activeRuleId, oldIndex, newIndex);
-        }
+      // Check effects
+      const effect = rule.effects.find((e) => e.id === activeId);
+      if (effect) {
+        setDraggedItem({
+          id: effect.id,
+          type: "effect",
+          ruleId: rule.id,
+          data: effect,
+        });
+        return;
       }
     }
-
-    setDraggedItem(null);
   };
 
   const generateConditionTitle = (condition: Condition) => {
@@ -845,26 +672,16 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
         ref={modalRef}
         className="bg-black-darker rounded-lg w-full h-full overflow-hidden border-2 border-black-light flex flex-col"
       >
-        <div className="flex justify-between items-center p-4 relative z-50">
-          <h2 className="text-lg text-white-light font-extralight tracking-widest">
+        <div className="flex justify-between items-center p-4 relative border-b-2 border-black-light z-50">
+          <h2 className="text-sm text-white-light font-extralight tracking-widest">
             Rule Builder for {joker.name}
           </h2>
           <div className="flex items-center gap-4">
-            <button
-              onClick={resetCanvas}
-              className="text-sm px-3 py-1 bg-black-dark text-white-darker border border-black-lighter rounded hover:bg-black-light transition-colors"
-            >
-              Reset View
-            </button>
-            <div className="text-xs text-white-darker">
-              Zoom: {Math.round(canvasTransform.scale * 100)}% | Pan:{" "}
-              {Math.round(canvasTransform.x)}, {Math.round(canvasTransform.y)}
-            </div>
             <Button
               variant="primary"
               onClick={handleSaveAndClose}
               icon={<CheckCircleIcon className="h-5 w-5" />}
-              className="text-sm"
+              className="text-xs"
             >
               Save & Close
             </Button>
@@ -887,103 +704,134 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
             sensors={sensors}
             collisionDetection={closestCenter}
             onDragStart={handleDragStart}
-            onDragEnd={handleDragEnd}
+            modifiers={[restrictToVerticalAxis]}
           >
-            <div
-              ref={canvasRef}
-              className="flex-grow relative overflow-hidden border-t-2 border-black-light"
-              style={{
-                backgroundImage: `radial-gradient(circle, #26353B 1px, transparent 1px)`,
-                backgroundSize: `20px 20px`,
-                backgroundPosition: `${canvasTransform.x}px ${canvasTransform.y}px`,
-                backgroundColor: "#1E2B30",
-              }}
-              onMouseDown={handleCanvasMouseDown}
-              onWheel={handleCanvasWheel}
-            >
-              <div
-                className="absolute inset-0 origin-top-left transition-transform duration-75"
-                style={{
-                  transform: `translate(${canvasTransform.x}px, ${canvasTransform.y}px) scale(${canvasTransform.scale})`,
-                  pointerEvents: isPanning ? "none" : "auto",
+            <div className="flex-grow relative overflow-hidden">
+              <TransformWrapper
+                initialScale={1}
+                initialPositionX={0}
+                initialPositionY={0}
+                minScale={1}
+                maxScale={1}
+                limitToBounds={false}
+                centerOnInit={false}
+                wheel={{
+                  disabled: true,
+                }}
+                pinch={{
+                  disabled: true,
+                }}
+                doubleClick={{
+                  disabled: true,
+                }}
+                panning={{
+                  velocityDisabled: true,
                 }}
               >
-                {rules.length === 0 ? (
-                  <div className="flex items-center justify-center h-screen">
-                    <div className="text-center bg-black-dark/80 backdrop-blur-sm rounded-lg p-8 border-2 border-black-lighter">
-                      <div className="text-white-darker text-lg mb-3">
-                        No Rules Created
-                      </div>
-                      <p className="text-white-darker text-sm max-w-md">
-                        Select a trigger from the Block Palette to create your
-                        first rule.
-                      </p>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="p-6 min-h-screen">
-                    <div className="flex flex-wrap gap-6">
-                      {rules.map((rule, index) => (
-                        <div
-                          key={rule.id}
-                          className="relative"
-                          style={{
-                            zIndex: selectedItem?.ruleId === rule.id ? 30 : 20,
-                          }}
-                        >
-                          <RuleCard
-                            rule={rule}
-                            ruleIndex={index}
-                            selectedItem={selectedItem}
-                            onSelectItem={setSelectedItem}
-                            onDeleteRule={deleteRule}
-                            onDeleteCondition={deleteCondition}
-                            onDeleteConditionGroup={deleteConditionGroup}
-                            onDeleteEffect={deleteEffect}
-                            onAddConditionGroup={addConditionGroup}
-                            onToggleGroupOperator={toggleGroupOperator}
-                            onReorderConditions={reorderConditions}
-                            onReorderEffects={reorderEffects}
-                            isRuleSelected={selectedItem?.ruleId === rule.id}
-                            joker={joker}
-                            canvasScale={canvasTransform.scale}
-                          />
+                <TransformComponent
+                  wrapperClass="w-full h-full"
+                  contentClass="w-full h-full relative"
+                  wrapperStyle={{
+                    width: "100%",
+                    height: "100%",
+                    overflow: "hidden",
+                  }}
+                  contentStyle={{
+                    width: "100%",
+                    height: "100%",
+                    minWidth: "100%",
+                    minHeight: "100%",
+                  }}
+                >
+                  <div
+                    className="absolute inset-0 w-full h-full"
+                    style={{
+                      backgroundImage: `radial-gradient(circle, #26353B 1px, transparent 1px)`,
+                      backgroundSize: `20px 20px`,
+                      backgroundColor: "#1E2B30",
+                      backgroundAttachment: "local",
+                    }}
+                  />
+
+                  <div className="relative z-10">
+                    {rules.length === 0 ? (
+                      <div className="flex items-center justify-center h-screen">
+                        <div className="text-center bg-black-dark/80 backdrop-blur-sm rounded-lg p-8 border-2 border-black-lighter">
+                          <div className="text-white-darker text-lg mb-3">
+                            No Rules Created
+                          </div>
+                          <p className="text-white-darker text-sm max-w-md">
+                            Select a trigger from the Block Palette to create
+                            your first rule.
+                          </p>
                         </div>
-                      ))}
-                    </div>
+                      </div>
+                    ) : (
+                      <div className="p-6 min-h-screen">
+                        <div className="flex flex-wrap gap-6">
+                          {rules.map((rule, index) => (
+                            <div
+                              key={rule.id}
+                              className="relative flex-shrink-0"
+                              style={{
+                                zIndex:
+                                  selectedItem?.ruleId === rule.id ? 30 : 20,
+                              }}
+                            >
+                              <RuleCard
+                                rule={rule}
+                                ruleIndex={index}
+                                selectedItem={selectedItem}
+                                onSelectItem={setSelectedItem}
+                                onDeleteRule={deleteRule}
+                                onDeleteCondition={deleteCondition}
+                                onDeleteConditionGroup={deleteConditionGroup}
+                                onDeleteEffect={deleteEffect}
+                                onAddConditionGroup={addConditionGroup}
+                                onToggleGroupOperator={toggleGroupOperator}
+                                onReorderConditions={reorderConditions}
+                                onReorderEffects={reorderEffects}
+                                isRuleSelected={
+                                  selectedItem?.ruleId === rule.id
+                                }
+                                joker={joker}
+                              />
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
+                </TransformComponent>
+              </TransformWrapper>
             </div>
 
             <DragOverlay>
               {draggedItem ? (
-                <div
-                  className="w-80"
-                  style={{
-                    transform: `scale(${canvasTransform.scale})`,
-                    transformOrigin: "top left",
-                  }}
-                >
+                <div>
                   {draggedItem.type === "condition"
                     ? (() => {
                         const condition = draggedItem.data as Condition;
                         const conditionType = getConditionTypeById(
                           condition.type
                         );
-                        const hasRandomChance =
-                          condition.params.has_random_chance === "true";
                         return (
-                          <BlockComponent
-                            type="condition"
-                            label={conditionType?.label || "Unknown Condition"}
-                            dynamicTitle={generateConditionTitle(condition)}
-                            onClick={() => {}}
-                            isDraggable={false}
-                            parameterCount={getParameterCount(condition.params)}
-                            isNegated={condition.negate}
-                            hasRandomChance={hasRandomChance}
-                          />
+                          <div className="w-72">
+                            <BlockComponent
+                              type="condition"
+                              label={
+                                conditionType?.label || "Unknown Condition"
+                              }
+                              dynamicTitle={generateConditionTitle(condition)}
+                              onClick={() => {}}
+                              isDraggable={false}
+                              parameterCount={getParameterCount(
+                                condition.params
+                              )}
+                              isNegated={condition.negate}
+                              variant="condition"
+                            />
+                          </div>
                         );
                       })()
                     : (() => {
@@ -992,15 +840,18 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
                         const hasRandomChance =
                           effect.params.has_random_chance === "true";
                         return (
-                          <BlockComponent
-                            type="effect"
-                            label={effectType?.label || "Unknown Effect"}
-                            dynamicTitle={generateEffectTitle(effect)}
-                            onClick={() => {}}
-                            isDraggable={false}
-                            parameterCount={getParameterCount(effect.params)}
-                            hasRandomChance={hasRandomChance}
-                          />
+                          <div className="w-80">
+                            <BlockComponent
+                              type="effect"
+                              label={effectType?.label || "Unknown Effect"}
+                              dynamicTitle={generateEffectTitle(effect)}
+                              onClick={() => {}}
+                              isDraggable={false}
+                              parameterCount={getParameterCount(effect.params)}
+                              hasRandomChance={hasRandomChance}
+                              variant="default"
+                            />
+                          </div>
                         );
                       })()}
                 </div>

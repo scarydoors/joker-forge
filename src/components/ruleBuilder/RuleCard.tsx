@@ -4,7 +4,18 @@ import {
   SortableContext,
   verticalListSortingStrategy,
   useSortable,
+  sortableKeyboardCoordinates,
 } from "@dnd-kit/sortable";
+import {
+  DndContext,
+  useSensor,
+  useSensors,
+  PointerSensor,
+  KeyboardSensor,
+  closestCenter,
+} from "@dnd-kit/core";
+import { restrictToVerticalAxis } from "@dnd-kit/modifiers";
+import { CSS } from "@dnd-kit/utilities";
 import type { Rule, ConditionGroup, Condition, Effect } from "./types";
 import { getTriggerById } from "./data/Triggers";
 import { getConditionTypeById } from "./data/Conditions";
@@ -49,17 +60,16 @@ interface RuleCardProps {
   onReorderConditions: (
     ruleId: string,
     groupId: string,
-    startIndex: number,
-    endIndex: number
+    oldIndex: number,
+    newIndex: number
   ) => void;
   onReorderEffects: (
     ruleId: string,
-    startIndex: number,
-    endIndex: number
+    oldIndex: number,
+    newIndex: number
   ) => void;
   isRuleSelected: boolean;
   joker: JokerData;
-  canvasScale: number;
 }
 
 const SortableCondition: React.FC<{
@@ -74,8 +84,6 @@ const SortableCondition: React.FC<{
   dynamicTitle: string;
 }> = ({
   condition,
-  ruleId,
-  groupId,
   isSelected,
   isNegated,
   onSelect,
@@ -84,39 +92,39 @@ const SortableCondition: React.FC<{
   dynamicTitle,
 }) => {
   const conditionType = getConditionTypeById(condition.type);
-  const sortableId = `condition:${ruleId}:${groupId}:${condition.id}`;
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({
-    id: sortableId,
-  });
+  const { attributes, listeners, setNodeRef, transform, transition } =
+    useSortable({ id: condition.id });
 
   const style = {
-    transform: transform ? `translate3d(0, ${transform.y}px, 0)` : undefined,
+    transform: CSS.Transform.toString(transform),
     transition,
-    opacity: isDragging ? 0 : 1,
-    zIndex: isDragging ? 999 : 1,
   };
 
   return (
-    <div ref={setNodeRef} style={style} {...attributes}>
+    <div
+      ref={setNodeRef}
+      style={style}
+      {...attributes}
+      className="flex justify-center -mt-3"
+    >
       <BlockComponent
         type="condition"
         label={conditionType?.label || "Unknown Condition"}
         dynamicTitle={dynamicTitle}
         isSelected={isSelected}
-        onClick={onSelect}
+        onClick={(e) => {
+          e?.stopPropagation();
+          onSelect();
+        }}
         showTrash={true}
-        onDelete={onDelete}
+        onDelete={() => {
+          onDelete();
+        }}
         parameterCount={parameterCount}
         isNegated={isNegated}
         isDraggable={true}
         dragHandleProps={listeners}
+        variant="condition"
       />
     </div>
   );
@@ -133,7 +141,6 @@ const SortableEffect: React.FC<{
   hasRandomChance: boolean;
 }> = ({
   effect,
-  ruleId,
   isSelected,
   onSelect,
   onDelete,
@@ -142,39 +149,39 @@ const SortableEffect: React.FC<{
   hasRandomChance,
 }) => {
   const effectType = getEffectTypeById(effect.type);
-  const sortableId = `effect:${ruleId}:${effect.id}`;
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({
-    id: sortableId,
-  });
+  const { attributes, listeners, setNodeRef, transform, transition } =
+    useSortable({ id: effect.id });
 
   const style = {
-    transform: transform ? `translate3d(0, ${transform.y}px, 0)` : undefined,
+    transform: CSS.Transform.toString(transform),
     transition,
-    opacity: isDragging ? 0 : 1,
-    zIndex: isDragging ? 999 : 1,
   };
 
   return (
-    <div ref={setNodeRef} style={style} {...attributes}>
+    <div
+      ref={setNodeRef}
+      style={style}
+      {...attributes}
+      className="flex justify-center"
+    >
       <BlockComponent
         type="effect"
         label={effectType?.label || "Unknown Effect"}
         dynamicTitle={dynamicTitle}
         isSelected={isSelected}
-        onClick={onSelect}
+        onClick={(e) => {
+          e?.stopPropagation();
+          onSelect();
+        }}
         showTrash={true}
-        onDelete={onDelete}
+        onDelete={() => {
+          onDelete();
+        }}
         parameterCount={parameterCount}
         hasRandomChance={hasRandomChance}
         isDraggable={true}
         dragHandleProps={listeners}
+        variant="default"
       />
     </div>
   );
@@ -191,8 +198,9 @@ const RuleCard: React.FC<RuleCardProps> = ({
   onDeleteEffect,
   onAddConditionGroup,
   onToggleGroupOperator,
+  onReorderConditions,
+  onReorderEffects,
   isRuleSelected,
-  canvasScale,
 }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [descriptionVisible, setDescriptionVisible] = useState(true);
@@ -204,6 +212,16 @@ const RuleCard: React.FC<RuleCardProps> = ({
   const [groupOperators, setGroupOperators] = useState<Record<string, string>>(
     {}
   );
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
 
   const [cardPosition, setCardPosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
@@ -214,9 +232,8 @@ const RuleCard: React.FC<RuleCardProps> = ({
     cardY: 0,
   });
 
-  const handleCardClick = (e: React.MouseEvent) => {
+  const handleCardMouseDown = (e: React.MouseEvent) => {
     e.stopPropagation();
-    onSelectItem({ type: "trigger", ruleId: rule.id });
   };
 
   const handleHeaderMouseDown = (e: React.MouseEvent) => {
@@ -232,15 +249,11 @@ const RuleCard: React.FC<RuleCardProps> = ({
     }
   };
 
-  const handleCardMouseDown = (e: React.MouseEvent) => {
-    e.stopPropagation();
-  };
-
   const handleMouseMove = useCallback(
     (e: MouseEvent) => {
       if (isDragging) {
-        const deltaX = (e.clientX - dragStart.x) / canvasScale;
-        const deltaY = (e.clientY - dragStart.y) / canvasScale;
+        const deltaX = e.clientX - dragStart.x;
+        const deltaY = e.clientY - dragStart.y;
 
         setCardPosition({
           x: dragStart.cardX + deltaX,
@@ -248,7 +261,7 @@ const RuleCard: React.FC<RuleCardProps> = ({
         });
       }
     },
-    [isDragging, dragStart, canvasScale]
+    [isDragging, dragStart]
   );
 
   const handleMouseUp = useCallback(() => {
@@ -577,9 +590,29 @@ const RuleCard: React.FC<RuleCardProps> = ({
     return `${triggerText}${conditionsText}${effectsText}`;
   };
 
+  const handleConditionDragEnd = (
+    groupId: string,
+    activeId: string,
+    overId: string
+  ) => {
+    const group = rule.conditionGroups.find((g) => g.id === groupId);
+    if (group && activeId !== overId) {
+      const oldIndex = group.conditions.findIndex((c) => c.id === activeId);
+      const newIndex = group.conditions.findIndex((c) => c.id === overId);
+      onReorderConditions(rule.id, groupId, oldIndex, newIndex);
+    }
+  };
+
+  const handleEffectDragEnd = (activeId: string, overId: string) => {
+    if (activeId !== overId) {
+      const oldIndex = rule.effects.findIndex((e) => e.id === activeId);
+      const newIndex = rule.effects.findIndex((e) => e.id === overId);
+      onReorderEffects(rule.id, oldIndex, newIndex);
+    }
+  };
+
   const renderConditionGroup = (group: ConditionGroup, groupIndex: number) => {
     const isSelected = isGroupSelected(group.id);
-    const conditionIds = group.conditions.map((c) => c.id);
 
     return (
       <motion.div
@@ -603,7 +636,7 @@ const RuleCard: React.FC<RuleCardProps> = ({
             });
           }}
         >
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center justify-between mb-10">
             <div className="text-white-darker text-xs tracking-wider">
               CONDITION GROUP {groupIndex + 1} {isSelected && "(SELECTED)"}
             </div>
@@ -621,77 +654,85 @@ const RuleCard: React.FC<RuleCardProps> = ({
             </div>
           </div>
 
-          <SortableContext
-            items={conditionIds}
-            strategy={verticalListSortingStrategy}
-          >
-            <div className="">
-              {group.conditions.map((condition, conditionIndex) => {
-                const operatorKey = `${group.id}-${conditionIndex}`;
-                const currentOperator =
-                  conditionOperators[operatorKey] || "AND";
-
-                return (
-                  <motion.div
-                    key={condition.id}
-                    variants={snapFadeUp}
-                    initial="initial"
-                    animate="animate"
-                    transition={{
-                      duration: 0.12,
-                      delay: conditionIndex * 0.02,
-                    }}
-                  >
-                    <div onClick={(e) => e.stopPropagation()}>
-                      <SortableCondition
-                        condition={condition}
-                        ruleId={rule.id}
-                        groupId={group.id}
-                        isSelected={isItemSelected(
-                          "condition",
-                          condition.id,
-                          group.id
-                        )}
-                        isNegated={condition.negate}
-                        onSelect={() => {
-                          onSelectItem({
-                            type: "condition",
-                            ruleId: rule.id,
-                            itemId: condition.id,
-                            groupId: group.id,
-                          });
-                        }}
-                        onDelete={() =>
-                          onDeleteCondition(rule.id, condition.id)
-                        }
-                        parameterCount={getParameterCount(condition.params)}
-                        dynamicTitle={generateConditionTitle(condition)}
-                      />
-                    </div>
-                    {conditionIndex < group.conditions.length - 1 && (
-                      <div
-                        className="text-center"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleConditionOperatorToggle(
-                              group.id,
-                              conditionIndex
-                            );
-                          }}
-                          className="px-3 text-white-darker text-sm font-medium tracking-wider cursor-pointer rounded transition-colors hover:bg-black-light"
-                        >
-                          {currentOperator}
-                        </button>
-                      </div>
-                    )}
-                  </motion.div>
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={(event) => {
+              const { active, over } = event;
+              if (over && active.id !== over.id) {
+                handleConditionDragEnd(
+                  group.id,
+                  active.id as string,
+                  over.id as string
                 );
-              })}
-            </div>
-          </SortableContext>
+              }
+            }}
+            modifiers={[restrictToVerticalAxis]}
+          >
+            <SortableContext
+              items={group.conditions.map((c) => c.id)}
+              strategy={verticalListSortingStrategy}
+            >
+              <div className="space-y-3">
+                {group.conditions.map((condition, conditionIndex) => {
+                  const operatorKey = `${group.id}-${conditionIndex}`;
+                  const currentOperator =
+                    conditionOperators[operatorKey] || "AND";
+
+                  return (
+                    <motion.div key={condition.id}>
+                      <div onClick={(e) => e.stopPropagation()}>
+                        <SortableCondition
+                          condition={condition}
+                          ruleId={rule.id}
+                          groupId={group.id}
+                          isSelected={isItemSelected(
+                            "condition",
+                            condition.id,
+                            group.id
+                          )}
+                          isNegated={condition.negate}
+                          onSelect={() => {
+                            onSelectItem({
+                              type: "condition",
+                              ruleId: rule.id,
+                              itemId: condition.id,
+                              groupId: group.id,
+                            });
+                          }}
+                          onDelete={() =>
+                            onDeleteCondition(rule.id, condition.id)
+                          }
+                          parameterCount={getParameterCount(condition.params)}
+                          dynamicTitle={generateConditionTitle(condition)}
+                        />
+                      </div>
+
+                      {conditionIndex < group.conditions.length - 1 && (
+                        <div
+                          className="text-center py-2"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleConditionOperatorToggle(
+                                group.id,
+                                conditionIndex
+                              );
+                            }}
+                            className="px-3 text-white-darker text-sm font-medium tracking-wider cursor-pointer rounded transition-colors hover:bg-black-light"
+                          >
+                            {currentOperator}
+                          </button>
+                        </div>
+                      )}
+                    </motion.div>
+                  );
+                })}
+              </div>
+            </SortableContext>
+          </DndContext>
         </div>
 
         {groupIndex < rule.conditionGroups.length - 1 && (
@@ -713,20 +754,23 @@ const RuleCard: React.FC<RuleCardProps> = ({
 
   return (
     <div
-      className="w-96 relative pl-16 select-none"
+      className="w-80 relative pl-8 select-none"
       style={{
         zIndex: isRuleSelected ? 30 : 20,
         pointerEvents: "auto",
         transform: `translate(${cardPosition.x}px, ${cardPosition.y}px)`,
         cursor: isDragging ? "grabbing" : "default",
       }}
-      onClick={handleCardClick}
+      onClick={(e) => {
+        e.stopPropagation();
+        onSelectItem({ type: "trigger", ruleId: rule.id });
+      }}
       onMouseDown={handleCardMouseDown}
     >
       <AnimatePresence>
         {sidebarOpen && (
           <motion.div
-            className="absolute left-0 top-11 bg-black-dark border-2 border-black-lighter rounded-xl z-20 flex flex-col gap-2 py-2 p-[6px]"
+            className="absolute left-0 top-9 -ml-6 bg-black-dark border-2 border-black-lighter rounded-lg z-20 flex flex-col gap-2 py-2 p-[6px]"
             variants={slideFromRight}
             initial="initial"
             animate="animate"
@@ -827,7 +871,7 @@ const RuleCard: React.FC<RuleCardProps> = ({
       </AnimatePresence>
 
       <motion.div
-        className={`w-96 relative ${isDisabled ? "opacity-50" : ""}`}
+        className={`w-80 relative ${isDisabled ? "opacity-50" : ""}`}
         variants={cardEntrance}
         initial="initial"
         animate="animate"
@@ -840,10 +884,10 @@ const RuleCard: React.FC<RuleCardProps> = ({
           animate="animate"
           transition={{ duration: 0.15 }}
           onMouseDown={handleHeaderMouseDown}
-          style={{ cursor: "grab" }}
+          style={{ cursor: isDragging ? "grabbing" : "grab" }}
         >
           <div
-            className={`bg-black border-2 rounded-t-md px-6 pt-2 py-3 relative ${
+            className={`bg-black border-2 rounded-t-md px-8 py-2 pt-1 relative ${
               isRuleSelected ? "border-mint" : "border-black-light"
             } ${isDisabled ? "opacity-70" : ""}`}
           >
@@ -868,9 +912,9 @@ const RuleCard: React.FC<RuleCardProps> = ({
           transition={{ duration: 0.18, delay: 0.05 }}
         >
           <div
-            className="bg-black-darker px-4 py-3 border-b border-black-lighter"
+            className="bg-black-darker px-3 py-2 border-b border-black-lighter"
             onMouseDown={handleHeaderMouseDown}
-            style={{ cursor: "grab" }}
+            style={{ cursor: isDragging ? "grabbing" : "grab" }}
           >
             <div className="flex justify-between items-center">
               <motion.button
@@ -888,20 +932,20 @@ const RuleCard: React.FC<RuleCardProps> = ({
               </motion.button>
 
               <motion.div
-                className="flex items-center gap-4"
+                className="flex items-center gap-3"
                 variants={quickFade}
                 initial="initial"
                 animate="animate"
                 transition={{ duration: 0.12, delay: 0.08 }}
               >
                 {totalConditions > 0 && (
-                  <span className="text-white-darker text-sm">
+                  <span className="text-white-darker text-xs">
                     {totalConditions} Condition
                     {totalConditions !== 1 ? "s" : ""}
                   </span>
                 )}
                 {totalEffects > 0 && (
-                  <span className="text-white-darker text-sm">
+                  <span className="text-white-darker text-xs">
                     {totalEffects} Effect{totalEffects !== 1 ? "s" : ""}
                   </span>
                 )}
@@ -925,7 +969,7 @@ const RuleCard: React.FC<RuleCardProps> = ({
           </div>
 
           <motion.div
-            className="p-4 space-y-4"
+            className="p-4 space-y-3"
             variants={quickFade}
             initial="initial"
             animate="animate"
@@ -936,6 +980,7 @@ const RuleCard: React.FC<RuleCardProps> = ({
               initial="initial"
               animate="animate"
               transition={{ duration: 0.12, delay: 0.12 }}
+              className="flex justify-center"
             >
               <BlockComponent
                 type="trigger"
@@ -945,6 +990,7 @@ const RuleCard: React.FC<RuleCardProps> = ({
                   e?.stopPropagation();
                   onSelectItem({ type: "trigger", ruleId: rule.id });
                 }}
+                variant="default"
               />
             </motion.div>
 
@@ -962,7 +1008,6 @@ const RuleCard: React.FC<RuleCardProps> = ({
 
             {rule.conditionGroups.length > 0 && (
               <motion.div
-                className="space-y-3"
                 variants={quickFade}
                 initial="initial"
                 animate="animate"
@@ -1009,45 +1054,51 @@ const RuleCard: React.FC<RuleCardProps> = ({
                 animate="animate"
                 transition={{ duration: 0.1, delay: 0.22 }}
               >
-                <SortableContext
-                  items={rule.effects.map((e) => e.id)}
-                  strategy={verticalListSortingStrategy}
+                <DndContext
+                  sensors={sensors}
+                  collisionDetection={closestCenter}
+                  onDragEnd={(event) => {
+                    const { active, over } = event;
+                    if (over && active.id !== over.id) {
+                      handleEffectDragEnd(
+                        active.id as string,
+                        over.id as string
+                      );
+                    }
+                  }}
+                  modifiers={[restrictToVerticalAxis]}
                 >
-                  {rule.effects.map((effect, index) => {
-                    const hasRandomChance =
-                      effect.params.has_random_chance === "true";
+                  <SortableContext
+                    items={rule.effects.map((e) => e.id)}
+                    strategy={verticalListSortingStrategy}
+                  >
+                    {rule.effects.map((effect) => {
+                      const hasRandomChance =
+                        effect.params.has_random_chance === "true";
 
-                    return (
-                      <motion.div
-                        key={effect.id}
-                        variants={snapFadeUp}
-                        initial="initial"
-                        animate="animate"
-                        transition={{
-                          duration: 0.12,
-                          delay: index * 0.02,
-                        }}
-                      >
-                        <SortableEffect
-                          effect={effect}
-                          ruleId={rule.id}
-                          isSelected={isItemSelected("effect", effect.id)}
-                          onSelect={() => {
-                            onSelectItem({
-                              type: "effect",
-                              ruleId: rule.id,
-                              itemId: effect.id,
-                            });
-                          }}
-                          onDelete={() => onDeleteEffect(rule.id, effect.id)}
-                          parameterCount={getParameterCount(effect.params)}
-                          dynamicTitle={generateEffectTitle(effect)}
-                          hasRandomChance={hasRandomChance}
-                        />
-                      </motion.div>
-                    );
-                  })}
-                </SortableContext>
+                      return (
+                        <motion.div key={effect.id}>
+                          <SortableEffect
+                            effect={effect}
+                            ruleId={rule.id}
+                            isSelected={isItemSelected("effect", effect.id)}
+                            onSelect={() => {
+                              onSelectItem({
+                                type: "effect",
+                                ruleId: rule.id,
+                                itemId: effect.id,
+                              });
+                            }}
+                            onDelete={() => onDeleteEffect(rule.id, effect.id)}
+                            parameterCount={getParameterCount(effect.params)}
+                            dynamicTitle={generateEffectTitle(effect)}
+                            hasRandomChance={hasRandomChance}
+                          />
+                        </motion.div>
+                      );
+                    })}
+                  </SortableContext>
+                </DndContext>
               </motion.div>
             )}
           </motion.div>
@@ -1056,29 +1107,29 @@ const RuleCard: React.FC<RuleCardProps> = ({
         <AnimatePresence>
           {descriptionVisible && (
             <motion.div
-              className="absolute top-full left-0 w-full mt-4 bg-black-dark border-2 border-black-lighter rounded-lg p-3 z-10"
+              className="absolute top-full left-0 w-full mt-2 bg-black-dark border-2 border-black-lighter rounded-lg p-2 z-10"
               variants={descriptionSlideDown}
               initial="initial"
               animate="animate"
               exit="exit"
               transition={{ duration: 0.2 }}
             >
-              <div className="flex justify-between items-start mb-2">
-                <div className="text-white-darker text-xs tracking-wider uppercase">
-                  Description
+              <div className="flex justify-between items-start mb-1">
+                <div className="text-white-darker text-xs tracking-wider">
+                  DESCRIPTION
                 </div>
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
                     setDescriptionVisible(false);
                   }}
-                  className="w-6 h-6 bg-black-darker rounded-lg flex items-center justify-center border-2 border-black-lighter hover:bg-black-light transition-colors cursor-pointer"
+                  className="w-5 h-5 bg-black-darker rounded-lg flex items-center justify-center border-2 border-black-lighter hover:bg-black-light transition-colors cursor-pointer"
                   title="Hide Description"
                 >
                   <ChevronUpIcon className="h-3 w-3 text-white-darker" />
                 </button>
               </div>
-              <div className="text-white-darker text-sm leading-relaxed">
+              <div className="text-white-darker text-xs leading-relaxed">
                 {generateDescription()}
               </div>
             </motion.div>
@@ -1086,7 +1137,7 @@ const RuleCard: React.FC<RuleCardProps> = ({
         </AnimatePresence>
 
         {showReopenButton && (
-          <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-4">
+          <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2">
             <button
               onClick={(e) => {
                 e.stopPropagation();
@@ -1095,7 +1146,7 @@ const RuleCard: React.FC<RuleCardProps> = ({
                   setDescriptionVisible(true);
                 }, 50);
               }}
-              className="w-8 h-8 bg-black-darker rounded-lg flex items-center justify-center border-2 border-black-lighter hover:bg-black-light transition-colors cursor-pointer"
+              className="w-7 h-7 bg-black-darker rounded-lg flex items-center justify-center border-2 border-black-lighter hover:bg-black-light transition-colors cursor-pointer"
               title="Show Description"
             >
               <ChevronDownIcon className="h-4 w-4 text-white-darker" />
