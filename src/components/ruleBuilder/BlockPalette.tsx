@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useEffect } from "react";
+import { useDraggable } from "@dnd-kit/core";
 import type {
   Rule,
   TriggerDefinition,
@@ -14,6 +15,8 @@ import {
   ChevronDownIcon,
   ChevronRightIcon,
   MagnifyingGlassIcon,
+  XMarkIcon,
+  Bars3Icon,
 } from "@heroicons/react/24/outline";
 import {
   BoltIcon,
@@ -22,21 +25,26 @@ import {
 } from "@heroicons/react/16/solid";
 
 interface BlockPaletteProps {
+  position: { x: number; y: number };
   selectedRule: Rule | null;
   rulesCount: number;
   onAddTrigger: (triggerId: string) => void;
   onAddCondition: (conditionType: string) => void;
   onAddEffect: (effectType: string) => void;
+  onClose: () => void;
+  onPositionChange: (position: { x: number; y: number }) => void;
 }
 
 type FilterType = "triggers" | "conditions" | "effects";
 
 const BlockPalette: React.FC<BlockPaletteProps> = ({
+  position,
   selectedRule,
   rulesCount,
   onAddTrigger,
   onAddCondition,
   onAddEffect,
+  onClose,
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [expandedSections, setExpandedSections] = useState({
@@ -45,6 +53,22 @@ const BlockPalette: React.FC<BlockPaletteProps> = ({
     effects: true,
   });
   const [activeFilters, setActiveFilters] = useState<FilterType[]>([]);
+
+  const { attributes, listeners, setNodeRef, transform } = useDraggable({
+    id: "panel-blockPalette",
+  });
+
+  const style = transform
+    ? {
+        position: "absolute" as const,
+        left: position.x + transform.x,
+        top: position.y + transform.y,
+      }
+    : {
+        position: "absolute" as const,
+        left: position.x,
+        top: position.y,
+      };
 
   const showOnlyTriggers = !selectedRule;
 
@@ -185,16 +209,34 @@ const BlockPalette: React.FC<BlockPaletteProps> = ({
   };
 
   return (
-    <div className="bg-black-dark border-black-lighter border-t-1 border-r-2 flex flex-col h-full">
-      <div className="p-3 border-b border-black-lighter">
-        <span className="flex items-center justify-center mb-3 gap-2">
-          <SwatchIcon className="h-6 w-6 text-white-light" />
-          <h3 className="text-white-light text-lg font-medium tracking-wider">
+    <div
+      ref={setNodeRef}
+      style={style}
+      className="w-80 bg-black-dark backdrop-blur-md border-2 border-black-lighter rounded-lg shadow-2xl z-40"
+    >
+      <div
+        className="flex items-center justify-between p-3 border-b border-black-lighter cursor-grab active:cursor-grabbing"
+        {...attributes}
+        {...listeners}
+      >
+        <div className="flex items-center gap-2">
+          <Bars3Icon className="h-4 w-4 text-white-darker" />
+          <SwatchIcon className="h-5 w-5 text-white-light" />
+          <h3 className="text-white-light text-sm font-medium tracking-wider">
             Block Palette
           </h3>
-        </span>
+        </div>
+        <button
+          onClick={onClose}
+          className="p-1 text-white-darker hover:text-white transition-colors cursor-pointer"
+        >
+          <XMarkIcon className="h-4 w-4" />
+        </button>
+      </div>
 
+      <div className="p-3">
         <div className="w-1/4 h-[1px] bg-black-lighter mx-auto mb-4"></div>
+
         {!showOnlyTriggers && (
           <div className="flex justify-center gap-2 mb-4">
             <button
@@ -233,7 +275,7 @@ const BlockPalette: React.FC<BlockPaletteProps> = ({
           </div>
         )}
 
-        <div className="relative mb-2">
+        <div className="relative mb-4">
           <div className="relative">
             <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-mint stroke-2" />
             <input
@@ -245,32 +287,32 @@ const BlockPalette: React.FC<BlockPaletteProps> = ({
             />
           </div>
         </div>
-      </div>
 
-      <div className="flex-grow overflow-y-auto custom-scrollbar p-3">
-        {renderSection(
-          "Triggers",
-          filteredItems.triggers,
-          "trigger",
-          onAddTrigger,
-          "triggers"
-        )}
+        <div className="h-[45rem] overflow-y-auto custom-scrollbar">
+          {renderSection(
+            "Triggers",
+            filteredItems.triggers,
+            "trigger",
+            onAddTrigger,
+            "triggers"
+          )}
 
-        {renderSection(
-          "Conditions",
-          filteredItems.conditions,
-          "condition",
-          onAddCondition,
-          "conditions"
-        )}
+          {renderSection(
+            "Conditions",
+            filteredItems.conditions,
+            "condition",
+            onAddCondition,
+            "conditions"
+          )}
 
-        {renderSection(
-          "Effects",
-          filteredItems.effects,
-          "effect",
-          onAddEffect,
-          "effects"
-        )}
+          {renderSection(
+            "Effects",
+            filteredItems.effects,
+            "effect",
+            onAddEffect,
+            "effects"
+          )}
+        </div>
       </div>
     </div>
   );

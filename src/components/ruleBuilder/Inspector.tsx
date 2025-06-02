@@ -1,4 +1,5 @@
 import React from "react";
+import { useDraggable } from "@dnd-kit/core";
 import type {
   Rule,
   Condition,
@@ -20,10 +21,12 @@ import {
   InformationCircleIcon,
   VariableIcon,
   XMarkIcon,
+  Bars3Icon,
 } from "@heroicons/react/24/outline";
 import { ChartPieIcon, PercentBadgeIcon } from "@heroicons/react/16/solid";
 
 interface InspectorProps {
+  position: { x: number; y: number };
   joker: JokerData;
   selectedRule: Rule | null;
   selectedCondition: Condition | null;
@@ -39,6 +42,8 @@ interface InspectorProps {
     updates: Partial<Effect>
   ) => void;
   onUpdateJoker: (updates: Partial<JokerData>) => void;
+  onClose: () => void;
+  onPositionChange: (position: { x: number; y: number }) => void;
 }
 
 interface ParameterFieldProps {
@@ -231,6 +236,7 @@ const ParameterField: React.FC<ParameterFieldProps> = ({
 };
 
 const Inspector: React.FC<InspectorProps> = ({
+  position,
   joker,
   selectedRule,
   selectedCondition,
@@ -238,7 +244,24 @@ const Inspector: React.FC<InspectorProps> = ({
   onUpdateCondition,
   onUpdateEffect,
   onUpdateJoker,
+  onClose,
 }) => {
+  const { attributes, listeners, setNodeRef, transform } = useDraggable({
+    id: "panel-inspector",
+  });
+
+  const style = transform
+    ? {
+        position: "absolute" as const,
+        left: position.x + transform.x,
+        top: position.y + transform.y,
+      }
+    : {
+        position: "absolute" as const,
+        left: position.x,
+        top: position.y,
+      };
+
   const availableVariables = getAllVariables(joker).map(
     (variable: { name: string }) => ({
       value: variable.name,
@@ -621,33 +644,52 @@ const Inspector: React.FC<InspectorProps> = ({
   };
 
   return (
-    <div className="bg-black-dark border-l-2 border-t-1 border-black-lighter p-4 flex-grow overflow-y-auto custom-scrollbar">
-      <span className="flex items-center justify-center mb-2 gap-2">
-        <ChartPieIcon className="h-6 w-6 text-white-light" />
-        <h3 className="text-white-light text-lg font-medium tracking-wider">
-          Inspector
-        </h3>
-      </span>
-
-      <div className="w-1/4 h-[1px] bg-black-lighter mx-auto mb-6"></div>
-
-      {!selectedRule && (
-        <div className="flex items-center justify-center h-40">
-          <div className="text-center">
-            <InformationCircleIcon className="h-12 w-12 text-white-darker mx-auto mb-3 opacity-50" />
-            <p className="text-white-darker text-sm">
-              Select a rule to view its properties
-            </p>
-          </div>
+    <div
+      ref={setNodeRef}
+      style={style}
+      className="w-96 bg-black-dark backdrop-blur-md border-2 border-black-lighter rounded-lg shadow-2xl z-40"
+    >
+      <div
+        className="flex items-center justify-between p-3 border-b border-black-lighter cursor-grab active:cursor-grabbing"
+        {...attributes}
+        {...listeners}
+      >
+        <div className="flex items-center gap-2">
+          <Bars3Icon className="h-4 w-4 text-white-darker" />
+          <ChartPieIcon className="h-5 w-5 text-white-light" />
+          <h3 className="text-white-light text-sm font-medium tracking-wider">
+            Inspector
+          </h3>
         </div>
-      )}
+        <button
+          onClick={onClose}
+          className="p-1 text-white-darker hover:text-white transition-colors cursor-pointer"
+        >
+          <XMarkIcon className="h-4 w-4" />
+        </button>
+      </div>
 
-      {selectedRule &&
-        !selectedCondition &&
-        !selectedEffect &&
-        renderTriggerInfo()}
-      {selectedCondition && renderConditionEditor()}
-      {selectedEffect && renderEffectEditor()}
+      <div className="p-4 max-h-[calc(100vh-12rem)] overflow-y-auto custom-scrollbar">
+        <div className="w-1/4 h-[1px] bg-black-lighter mx-auto mb-6"></div>
+
+        {!selectedRule && (
+          <div className="flex items-center justify-center h-40">
+            <div className="text-center">
+              <InformationCircleIcon className="h-12 w-12 text-white-darker mx-auto mb-3 opacity-50" />
+              <p className="text-white-darker text-sm">
+                Select a rule to view its properties
+              </p>
+            </div>
+          </div>
+        )}
+
+        {selectedRule &&
+          !selectedCondition &&
+          !selectedEffect &&
+          renderTriggerInfo()}
+        {selectedCondition && renderConditionEditor()}
+        {selectedEffect && renderEffectEditor()}
+      </div>
     </div>
   );
 };

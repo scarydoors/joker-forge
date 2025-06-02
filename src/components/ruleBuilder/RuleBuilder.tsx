@@ -8,16 +8,19 @@ import {
   PointerSensor,
   KeyboardSensor,
   DragStartEvent,
+  DragEndEvent,
   closestCenter,
 } from "@dnd-kit/core";
 import { sortableKeyboardCoordinates, arrayMove } from "@dnd-kit/sortable";
-import { restrictToVerticalAxis } from "@dnd-kit/modifiers";
 import type { Rule, Condition, Effect } from "./types";
 import { JokerData } from "../JokerCard";
-import LeftSidebar from "./LeftSidebar";
-import RightSidebar from "./RightSidebar";
 import RuleCard from "./RuleCard";
 import BlockComponent from "./BlockComponent";
+import FloatingDock from "./FloatingDock";
+import BlockPalette from "./BlockPalette";
+import JokerInfo from "./JokerInfo";
+import Variables from "./Variables";
+import Inspector from "./Inspector";
 import Button from "../generic/Button";
 import { CheckCircleIcon } from "@heroicons/react/24/outline";
 import { getConditionTypeById } from "./data/Conditions";
@@ -47,6 +50,13 @@ interface DraggedItem {
   data: Condition | Effect;
 }
 
+interface PanelState {
+  id: string;
+  isVisible: boolean;
+  position: { x: number; y: number };
+  size: { width: number; height: number };
+}
+
 const RuleBuilder: React.FC<RuleBuilderProps> = ({
   isOpen,
   onClose,
@@ -58,6 +68,32 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
   const [rules, setRules] = useState<Rule[]>([]);
   const [selectedItem, setSelectedItem] = useState<SelectedItem>(null);
   const [draggedItem, setDraggedItem] = useState<DraggedItem | null>(null);
+  const [panels, setPanels] = useState<Record<string, PanelState>>({
+    blockPalette: {
+      id: "blockPalette",
+      isVisible: true,
+      position: { x: 20, y: 20 },
+      size: { width: 320, height: 720 },
+    },
+    jokerInfo: {
+      id: "jokerInfo",
+      isVisible: true,
+      position: { x: 20, y: 760 },
+      size: { width: 320, height: 120 },
+    },
+    variables: {
+      id: "variables",
+      isVisible: false,
+      position: { x: 0, y: 0 },
+      size: { width: 320, height: 400 },
+    },
+    inspector: {
+      id: "inspector",
+      isVisible: false,
+      position: { x: 0, y: 0 },
+      size: { width: 384, height: 600 },
+    },
+  });
   const modalRef = useRef<HTMLDivElement>(null);
 
   const sensors = useSensors(
@@ -99,6 +135,105 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
         document.removeEventListener("mousedown", handleClickOutside);
     }
   }, [isOpen, handleSaveAndClose]);
+
+  useEffect(() => {
+    if (selectedItem && !panels.inspector.isVisible) {
+      togglePanel("inspector");
+    }
+  }, [selectedItem]);
+
+  const findValidPosition = (panelId: string): { x: number; y: number } => {
+    const panelSize = panels[panelId].size;
+    const padding = 20;
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight - 100;
+
+    const positions = [
+      { x: viewportWidth - panelSize.width - padding, y: padding },
+      { x: padding, y: padding },
+      {
+        x: viewportWidth - panelSize.width - padding,
+        y: viewportHeight - panelSize.height - padding,
+      },
+      { x: viewportWidth / 2 - panelSize.width / 2, y: padding },
+      {
+        x: viewportWidth / 2 - panelSize.width / 2,
+        y: viewportHeight / 2 - panelSize.height / 2,
+      },
+    ];
+
+    for (const position of positions) {
+      if (!hasOverlap(position, panelSize, panelId)) {
+        return position;
+      }
+    }
+
+    return {
+      x: Math.random() * 200 + padding,
+      y: Math.random() * 200 + padding,
+    };
+  };
+
+  const hasOverlap = (
+    position: { x: number; y: number },
+    size: { width: number; height: number },
+    excludePanelId: string
+  ): boolean => {
+    const rect1 = {
+      left: position.x,
+      top: position.y,
+      right: position.x + size.width,
+      bottom: position.y + size.height,
+    };
+
+    return Object.values(panels).some((panel) => {
+      if (panel.id === excludePanelId || !panel.isVisible) return false;
+
+      const rect2 = {
+        left: panel.position.x,
+        top: panel.position.y,
+        right: panel.position.x + panel.size.width,
+        bottom: panel.position.y + panel.size.height,
+      };
+
+      return !(
+        rect1.right < rect2.left ||
+        rect1.left > rect2.right ||
+        rect1.bottom < rect2.top ||
+        rect1.top > rect2.bottom
+      );
+    });
+  };
+
+  const togglePanel = (panelId: string) => {
+    setPanels((prev) => {
+      const panel = prev[panelId];
+      const newState = {
+        ...prev,
+        [panelId]: {
+          ...panel,
+          isVisible: !panel.isVisible,
+          position: panel.isVisible
+            ? panel.position
+            : findValidPosition(panelId),
+        },
+      };
+      return newState;
+    });
+  };
+
+  const updatePanelPosition = (
+    panelId: string,
+    position: { x: number; y: number }
+  ) => {
+    setPanels((prev) => ({
+      ...prev,
+      [panelId]: {
+        ...prev[panelId],
+        position,
+      },
+    }));
+  };
 
   const addTrigger = (triggerId: string) => {
     const newRule: Rule = {
@@ -453,9 +588,13 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
     const { active } = event;
     const activeId = active.id as string;
 
-    // Find which rule and item is being dragged for the overlay
+    console.log("Drag started:", activeId); // Debug log
+
+    if (activeId.startsWith("panel-")) {
+      return;
+    }
+
     for (const rule of rules) {
-      // Check conditions
       for (const group of rule.conditionGroups) {
         const condition = group.conditions.find((c) => c.id === activeId);
         if (condition) {
@@ -470,7 +609,6 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
         }
       }
 
-      // Check effects
       const effect = rule.effects.find((e) => e.id === activeId);
       if (effect) {
         setDraggedItem({
@@ -482,6 +620,29 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
         return;
       }
     }
+  };
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, delta } = event;
+    const activeId = active.id as string;
+
+    console.log("Drag ended:", activeId, delta); // Debug log
+
+    if (activeId.startsWith("panel-")) {
+      const panelId = activeId.replace("panel-", "");
+      const currentPanel = panels[panelId];
+      if (delta && currentPanel) {
+        const newPosition = {
+          x: Math.max(0, currentPanel.position.x + delta.x),
+          y: Math.max(0, currentPanel.position.y + delta.y),
+        };
+        console.log("Updating panel position:", panelId, newPosition); // Debug log
+        updatePanelPosition(panelId, newPosition);
+      }
+      return;
+    }
+
+    setDraggedItem(null);
   };
 
   const generateConditionTitle = (condition: Condition) => {
@@ -688,123 +849,108 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
           </div>
         </div>
 
-        <div className="flex-grow flex overflow-hidden relative">
-          <div className="relative z-40 h-full">
-            <LeftSidebar
-              joker={joker}
-              selectedRule={getSelectedRule()}
-              rulesCount={rules.length}
-              onAddTrigger={addTrigger}
-              onAddCondition={addCondition}
-              onAddEffect={addEffect}
-            />
-          </div>
-
+        <div className="flex-grow relative overflow-hidden">
           <DndContext
             sensors={sensors}
             collisionDetection={closestCenter}
             onDragStart={handleDragStart}
-            modifiers={[restrictToVerticalAxis]}
+            onDragEnd={handleDragEnd}
           >
-            <div className="flex-grow relative overflow-hidden">
-              <TransformWrapper
-                initialScale={1}
-                initialPositionX={0}
-                initialPositionY={0}
-                minScale={1}
-                maxScale={1}
-                limitToBounds={false}
-                centerOnInit={false}
-                wheel={{
-                  disabled: true,
+            <TransformWrapper
+              initialScale={1}
+              initialPositionX={0}
+              initialPositionY={0}
+              minScale={1}
+              maxScale={1}
+              limitToBounds={false}
+              centerOnInit={false}
+              wheel={{
+                disabled: true,
+              }}
+              pinch={{
+                disabled: true,
+              }}
+              doubleClick={{
+                disabled: true,
+              }}
+              panning={{
+                velocityDisabled: true,
+              }}
+            >
+              <TransformComponent
+                wrapperClass="w-full h-full"
+                contentClass="w-full h-full relative"
+                wrapperStyle={{
+                  width: "100%",
+                  height: "100%",
+                  overflow: "hidden",
                 }}
-                pinch={{
-                  disabled: true,
-                }}
-                doubleClick={{
-                  disabled: true,
-                }}
-                panning={{
-                  velocityDisabled: true,
+                contentStyle={{
+                  width: "100%",
+                  height: "100%",
+                  minWidth: "100%",
+                  minHeight: "100%",
                 }}
               >
-                <TransformComponent
-                  wrapperClass="w-full h-full"
-                  contentClass="w-full h-full relative"
-                  wrapperStyle={{
-                    width: "100%",
-                    height: "100%",
-                    overflow: "hidden",
+                <div
+                  className="absolute inset-0 w-full h-full"
+                  style={{
+                    backgroundImage: `radial-gradient(circle, #26353B 1px, transparent 1px)`,
+                    backgroundSize: `20px 20px`,
+                    backgroundColor: "#1E2B30",
+                    backgroundAttachment: "local",
                   }}
-                  contentStyle={{
-                    width: "100%",
-                    height: "100%",
-                    minWidth: "100%",
-                    minHeight: "100%",
-                  }}
-                >
-                  <div
-                    className="absolute inset-0 w-full h-full"
-                    style={{
-                      backgroundImage: `radial-gradient(circle, #26353B 1px, transparent 1px)`,
-                      backgroundSize: `20px 20px`,
-                      backgroundColor: "#1E2B30",
-                      backgroundAttachment: "local",
-                    }}
-                  />
+                />
 
-                  <div className="relative z-10">
-                    {rules.length === 0 ? (
-                      <div className="flex items-center justify-center h-screen">
-                        <div className="text-center bg-black-dark/80 backdrop-blur-sm rounded-lg p-8 border-2 border-black-lighter">
-                          <div className="text-white-darker text-lg mb-3">
-                            No Rules Created
+                <div className="relative z-10">
+                  {rules.length === 0 ? (
+                    <div className="flex items-center justify-center h-screen">
+                      <div className="text-center bg-black-dark/80 backdrop-blur-sm rounded-lg p-8 border-2 border-black-lighter">
+                        <div className="text-white-darker text-lg mb-3">
+                          No Rules Created
+                        </div>
+                        <p className="text-white-darker text-sm max-w-md">
+                          Select a trigger from the Block Palette to create your
+                          first rule.
+                        </p>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="p-6 min-h-screen">
+                      <div className="flex flex-wrap gap-6">
+                        {rules.map((rule, index) => (
+                          <div
+                            key={rule.id}
+                            className="relative flex-shrink-0"
+                            style={{
+                              zIndex:
+                                selectedItem?.ruleId === rule.id ? 30 : 20,
+                            }}
+                          >
+                            <RuleCard
+                              rule={rule}
+                              ruleIndex={index}
+                              selectedItem={selectedItem}
+                              onSelectItem={setSelectedItem}
+                              onDeleteRule={deleteRule}
+                              onDeleteCondition={deleteCondition}
+                              onDeleteConditionGroup={deleteConditionGroup}
+                              onDeleteEffect={deleteEffect}
+                              onAddConditionGroup={addConditionGroup}
+                              onToggleGroupOperator={toggleGroupOperator}
+                              onReorderConditions={reorderConditions}
+                              onReorderEffects={reorderEffects}
+                              isRuleSelected={selectedItem?.ruleId === rule.id}
+                              joker={joker}
+                            />
                           </div>
-                          <p className="text-white-darker text-sm max-w-md">
-                            Select a trigger from the Block Palette to create
-                            your first rule.
-                          </p>
-                        </div>
+                        ))}
                       </div>
-                    ) : (
-                      <div className="p-6 min-h-screen">
-                        <div className="flex flex-wrap gap-6">
-                          {rules.map((rule, index) => (
-                            <div
-                              key={rule.id}
-                              className="relative flex-shrink-0"
-                              style={{
-                                zIndex:
-                                  selectedItem?.ruleId === rule.id ? 30 : 20,
-                              }}
-                            >
-                              <RuleCard
-                                rule={rule}
-                                ruleIndex={index}
-                                selectedItem={selectedItem}
-                                onSelectItem={setSelectedItem}
-                                onDeleteRule={deleteRule}
-                                onDeleteCondition={deleteCondition}
-                                onDeleteConditionGroup={deleteConditionGroup}
-                                onDeleteEffect={deleteEffect}
-                                onAddConditionGroup={addConditionGroup}
-                                onToggleGroupOperator={toggleGroupOperator}
-                                onReorderConditions={reorderConditions}
-                                onReorderEffects={reorderEffects}
-                                isRuleSelected={
-                                  selectedItem?.ruleId === rule.id
-                                }
-                                joker={joker}
-                              />
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </TransformComponent>
-              </TransformWrapper>
-            </div>
+                    </div>
+                  )}
+                </div>
+              </TransformComponent>
+            </TransformWrapper>
 
             <DragOverlay>
               {draggedItem ? (
@@ -840,7 +986,7 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
                         const hasRandomChance =
                           effect.params.has_random_chance === "true";
                         return (
-                          <div className="w-80">
+                          <div>
                             <BlockComponent
                               type="effect"
                               label={effectType?.label || "Unknown Effect"}
@@ -857,19 +1003,65 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
                 </div>
               ) : null}
             </DragOverlay>
-          </DndContext>
 
-          <div className="relative z-40 h-full">
-            <RightSidebar
-              joker={joker}
-              selectedRule={getSelectedRule()}
-              selectedCondition={getSelectedCondition()}
-              selectedEffect={getSelectedEffect()}
-              onUpdateCondition={updateCondition}
-              onUpdateEffect={updateEffect}
-              onUpdateJoker={onUpdateJoker}
-            />
-          </div>
+            {panels.blockPalette.isVisible && (
+              <BlockPalette
+                position={panels.blockPalette.position}
+                selectedRule={getSelectedRule()}
+                rulesCount={rules.length}
+                onAddTrigger={addTrigger}
+                onAddCondition={addCondition}
+                onAddEffect={addEffect}
+                onClose={() => togglePanel("blockPalette")}
+                onPositionChange={(position) =>
+                  updatePanelPosition("blockPalette", position)
+                }
+              />
+            )}
+
+            {panels.jokerInfo.isVisible && (
+              <JokerInfo
+                position={panels.jokerInfo.position}
+                joker={joker}
+                rulesCount={rules.length}
+                onClose={() => togglePanel("jokerInfo")}
+                onPositionChange={(position) =>
+                  updatePanelPosition("jokerInfo", position)
+                }
+              />
+            )}
+
+            {panels.variables.isVisible && (
+              <Variables
+                position={panels.variables.position}
+                joker={joker}
+                onUpdateJoker={onUpdateJoker}
+                onClose={() => togglePanel("variables")}
+                onPositionChange={(position) =>
+                  updatePanelPosition("variables", position)
+                }
+              />
+            )}
+
+            {panels.inspector.isVisible && (
+              <Inspector
+                position={panels.inspector.position}
+                joker={joker}
+                selectedRule={getSelectedRule()}
+                selectedCondition={getSelectedCondition()}
+                selectedEffect={getSelectedEffect()}
+                onUpdateCondition={updateCondition}
+                onUpdateEffect={updateEffect}
+                onUpdateJoker={onUpdateJoker}
+                onClose={() => togglePanel("inspector")}
+                onPositionChange={(position) =>
+                  updatePanelPosition("inspector", position)
+                }
+              />
+            )}
+
+            <FloatingDock panels={panels} onTogglePanel={togglePanel} />
+          </DndContext>
         </div>
       </div>
     </div>
