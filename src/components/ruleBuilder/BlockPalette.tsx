@@ -168,12 +168,14 @@ const BlockPalette: React.FC<BlockPaletteProps> = ({
               </div>
             ) : (
               items.map((item) => (
-                <BlockComponent
-                  key={item.id}
-                  label={item.label}
-                  type={type}
-                  onClick={() => onAdd(item.id)}
-                />
+                <div key={item.id} className="px-2">
+                  <BlockComponent
+                    label={item.label}
+                    type={type}
+                    onClick={() => onAdd(item.id)}
+                    variant="palette"
+                  />
+                </div>
               ))
             )}
           </div>
