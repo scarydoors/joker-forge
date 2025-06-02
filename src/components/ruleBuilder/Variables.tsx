@@ -80,7 +80,7 @@ const Variables: React.FC<VariablesProps> = ({ joker, onUpdateJoker }) => {
 
   if (isHidden) {
     return (
-      <div className="bg-black-dark border-l-2 border-t-2 border-black-light p-2 flex justify-center">
+      <div className="bg-black-dark border-l-2 border-black-light p-2 flex justify-center">
         <button
           onClick={() => setIsHidden(false)}
           className="p-2 bg-black-darker border-2 border-mint rounded-lg cursor-pointer hover:bg-mint/20 transition-colors"
@@ -93,7 +93,7 @@ const Variables: React.FC<VariablesProps> = ({ joker, onUpdateJoker }) => {
   }
 
   return (
-    <div className="bg-black-dark border-l-2 border-t-2 border-black-light p-4 relative">
+    <div className="bg-black-dark border-l-2 border-black-light p-4 relative">
       <button
         onClick={() => setIsHidden(true)}
         className="absolute top-4 right-4 p-1 bg-black-darker border-2 border-mint rounded-lg cursor-pointer hover:bg-mint/20 transition-colors z-10"
