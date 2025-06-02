@@ -2,9 +2,7 @@ import React from "react";
 import {
   TrashIcon,
   ExclamationTriangleIcon,
-  Bars3Icon,
 } from "@heroicons/react/24/outline";
-
 import {
   BoltIcon,
   PuzzlePieceIcon,
@@ -25,7 +23,7 @@ interface BlockComponentProps {
   variableName?: string;
   hasRandomChance?: boolean;
   isDraggable?: boolean;
-  onDragStart?: (e: React.MouseEvent) => void;
+  dragHandleProps?: Record<string, unknown>;
 }
 
 const BlockComponent: React.FC<BlockComponentProps> = ({
@@ -41,7 +39,7 @@ const BlockComponent: React.FC<BlockComponentProps> = ({
   variableName,
   hasRandomChance = false,
   isDraggable = false,
-  onDragStart,
+  dragHandleProps,
 }) => {
   const getTypeConfig = () => {
     switch (type) {
@@ -83,14 +81,6 @@ const BlockComponent: React.FC<BlockComponentProps> = ({
     onClick(e);
   };
 
-  const handleMouseDown = (e: React.MouseEvent) => {
-    if (isDraggable && onDragStart && e.button === 0) {
-      e.preventDefault();
-      e.stopPropagation();
-      onDragStart(e);
-    }
-  };
-
   return (
     <div
       className={`
@@ -106,8 +96,8 @@ const BlockComponent: React.FC<BlockComponentProps> = ({
         }
       `}
       onClick={handleClick}
-      onMouseDown={handleMouseDown}
-      style={{ pointerEvents: "auto" }}
+      style={{ pointerEvents: "auto", width: "320px", minWidth: "320px" }}
+      {...(isDraggable ? dragHandleProps : {})}
     >
       <div className="absolute top-2 left-11 text-white-darker text-xs font-medium tracking-wider">
         {config.typeLabel}
@@ -125,12 +115,6 @@ const BlockComponent: React.FC<BlockComponentProps> = ({
           </span>
         )}
       </div>
-
-      {isDraggable && (
-        <div className="absolute top-2 right-2">
-          <Bars3Icon className="h-4 w-4 text-white-darker opacity-50" />
-        </div>
-      )}
 
       {showTrash && onDelete && (
         <div className="absolute -top-3 -right-3 w-8 h-8 bg-black-darker rounded-lg flex items-center justify-center border-2 border-balatro-redshadow">

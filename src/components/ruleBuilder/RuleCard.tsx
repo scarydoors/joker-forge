@@ -1,5 +1,10 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+  useSortable,
+} from "@dnd-kit/sortable";
 import type { Rule, ConditionGroup, Condition, Effect } from "./types";
 import { getTriggerById } from "./data/Triggers";
 import { getConditionTypeById } from "./data/Conditions";
@@ -57,6 +62,124 @@ interface RuleCardProps {
   canvasScale: number;
 }
 
+const SortableCondition: React.FC<{
+  condition: Condition;
+  ruleId: string;
+  groupId: string;
+  isSelected: boolean;
+  isNegated: boolean;
+  onSelect: () => void;
+  onDelete: () => void;
+  parameterCount: number;
+  dynamicTitle: string;
+}> = ({
+  condition,
+  ruleId,
+  groupId,
+  isSelected,
+  isNegated,
+  onSelect,
+  onDelete,
+  parameterCount,
+  dynamicTitle,
+}) => {
+  const conditionType = getConditionTypeById(condition.type);
+  const sortableId = `condition:${ruleId}:${groupId}:${condition.id}`;
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({
+    id: sortableId,
+  });
+
+  const style = {
+    transform: transform ? `translate3d(0, ${transform.y}px, 0)` : undefined,
+    transition,
+    opacity: isDragging ? 0 : 1,
+    zIndex: isDragging ? 999 : 1,
+  };
+
+  return (
+    <div ref={setNodeRef} style={style} {...attributes}>
+      <BlockComponent
+        type="condition"
+        label={conditionType?.label || "Unknown Condition"}
+        dynamicTitle={dynamicTitle}
+        isSelected={isSelected}
+        onClick={onSelect}
+        showTrash={true}
+        onDelete={onDelete}
+        parameterCount={parameterCount}
+        isNegated={isNegated}
+        isDraggable={true}
+        dragHandleProps={listeners}
+      />
+    </div>
+  );
+};
+
+const SortableEffect: React.FC<{
+  effect: Effect;
+  ruleId: string;
+  isSelected: boolean;
+  onSelect: () => void;
+  onDelete: () => void;
+  parameterCount: number;
+  dynamicTitle: string;
+  hasRandomChance: boolean;
+}> = ({
+  effect,
+  ruleId,
+  isSelected,
+  onSelect,
+  onDelete,
+  parameterCount,
+  dynamicTitle,
+  hasRandomChance,
+}) => {
+  const effectType = getEffectTypeById(effect.type);
+  const sortableId = `effect:${ruleId}:${effect.id}`;
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({
+    id: sortableId,
+  });
+
+  const style = {
+    transform: transform ? `translate3d(0, ${transform.y}px, 0)` : undefined,
+    transition,
+    opacity: isDragging ? 0 : 1,
+    zIndex: isDragging ? 999 : 1,
+  };
+
+  return (
+    <div ref={setNodeRef} style={style} {...attributes}>
+      <BlockComponent
+        type="effect"
+        label={effectType?.label || "Unknown Effect"}
+        dynamicTitle={dynamicTitle}
+        isSelected={isSelected}
+        onClick={onSelect}
+        showTrash={true}
+        onDelete={onDelete}
+        parameterCount={parameterCount}
+        hasRandomChance={hasRandomChance}
+        isDraggable={true}
+        dragHandleProps={listeners}
+      />
+    </div>
+  );
+};
+
 const RuleCard: React.FC<RuleCardProps> = ({
   rule,
   ruleIndex,
@@ -68,12 +191,9 @@ const RuleCard: React.FC<RuleCardProps> = ({
   onDeleteEffect,
   onAddConditionGroup,
   onToggleGroupOperator,
-  onReorderConditions,
-  onReorderEffects,
   isRuleSelected,
   canvasScale,
 }) => {
-  // State management
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [descriptionVisible, setDescriptionVisible] = useState(true);
   const [showReopenButton, setShowReopenButton] = useState(false);
@@ -93,21 +213,6 @@ const RuleCard: React.FC<RuleCardProps> = ({
     cardX: 0,
     cardY: 0,
   });
-  const [dragFromHeader, setDragFromHeader] = useState(false);
-
-  // Custom drag and drop state
-  const [draggedItem, setDraggedItem] = useState<{
-    type: "condition" | "effect";
-    id: string;
-    groupId?: string;
-    index: number;
-    element: React.ReactElement;
-    mouseOffset: { x: number; y: number };
-  } | null>(null);
-  const [dragPosition, setDragPosition] = useState({ x: 0, y: 0 });
-  const [dropIndex, setDropIndex] = useState<number | null>(null);
-  const [dropType, setDropType] = useState<"condition" | "effect" | null>(null);
-  const [dropGroupId, setDropGroupId] = useState<string | null>(null);
 
   const handleCardClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -118,7 +223,6 @@ const RuleCard: React.FC<RuleCardProps> = ({
     if (e.button === 0) {
       e.stopPropagation();
       setIsDragging(true);
-      setDragFromHeader(true);
       setDragStart({
         x: e.clientX,
         y: e.clientY,
@@ -134,7 +238,7 @@ const RuleCard: React.FC<RuleCardProps> = ({
 
   const handleMouseMove = useCallback(
     (e: MouseEvent) => {
-      if (isDragging && dragFromHeader) {
+      if (isDragging) {
         const deltaX = (e.clientX - dragStart.x) / canvasScale;
         const deltaY = (e.clientY - dragStart.y) / canvasScale;
 
@@ -143,75 +247,18 @@ const RuleCard: React.FC<RuleCardProps> = ({
           y: dragStart.cardY + deltaY,
         });
       }
-
-      if (draggedItem) {
-        // Account for canvas scale when positioning the dragged item
-        const newY = (e.clientY - draggedItem.mouseOffset.y) / canvasScale;
-        setDragPosition({ x: draggedItem.mouseOffset.x, y: newY });
-
-        // Calculate drop position based on Y coordinate
-        const elements = document.querySelectorAll(
-          `[data-drop-zone="${draggedItem.type}"]`
-        );
-        let closestIndex = -1;
-        let closestDistance = Infinity;
-
-        elements.forEach((element, index) => {
-          const rect = element.getBoundingClientRect();
-          const elementCenter = rect.top + rect.height / 2;
-          const distance = Math.abs(e.clientY - elementCenter);
-
-          if (distance < closestDistance) {
-            closestDistance = distance;
-            closestIndex = index;
-          }
-        });
-
-        if (closestIndex !== -1) {
-          setDropIndex(closestIndex);
-          setDropType(draggedItem.type);
-          setDropGroupId(draggedItem.groupId || null);
-        }
-      }
     },
-    [isDragging, dragFromHeader, dragStart, canvasScale, draggedItem]
+    [isDragging, dragStart, canvasScale]
   );
 
   const handleMouseUp = useCallback(() => {
-    if (isDragging && dragFromHeader) {
+    if (isDragging) {
       setIsDragging(false);
-      setDragFromHeader(false);
     }
-
-    if (draggedItem && dropIndex !== null && dropIndex !== draggedItem.index) {
-      if (draggedItem.type === "condition" && draggedItem.groupId) {
-        onReorderConditions(
-          rule.id,
-          draggedItem.groupId,
-          draggedItem.index,
-          dropIndex
-        );
-      } else if (draggedItem.type === "effect") {
-        onReorderEffects(rule.id, draggedItem.index, dropIndex);
-      }
-    }
-
-    setDraggedItem(null);
-    setDropIndex(null);
-    setDropType(null);
-    setDropGroupId(null);
-  }, [
-    isDragging,
-    dragFromHeader,
-    draggedItem,
-    dropIndex,
-    onReorderConditions,
-    onReorderEffects,
-    rule.id,
-  ]);
+  }, [isDragging]);
 
   useEffect(() => {
-    if (isDragging || draggedItem) {
+    if (isDragging) {
       document.addEventListener("mousemove", handleMouseMove);
       document.addEventListener("mouseup", handleMouseUp);
       return () => {
@@ -219,23 +266,19 @@ const RuleCard: React.FC<RuleCardProps> = ({
         document.removeEventListener("mouseup", handleMouseUp);
       };
     }
-  }, [isDragging, draggedItem, handleMouseMove, handleMouseUp]);
+  }, [isDragging, handleMouseMove, handleMouseUp]);
 
-  // Handle reopen button visibility with delay
   useEffect(() => {
     if (!descriptionVisible) {
-      // Wait a bit longer for the description close animation to fully complete
       const timer = setTimeout(() => {
         setShowReopenButton(true);
       }, 250);
       return () => clearTimeout(timer);
     } else {
-      // Hide the button immediately when description is shown
       setShowReopenButton(false);
     }
   }, [descriptionVisible]);
 
-  // Data processing
   const trigger = getTriggerById(rule.trigger);
   const allConditions = rule.conditionGroups.flatMap(
     (group) => group.conditions
@@ -243,7 +286,6 @@ const RuleCard: React.FC<RuleCardProps> = ({
   const totalConditions = allConditions.length;
   const totalEffects = rule.effects.length;
 
-  // Animation variants
   const snapFadeUp = {
     initial: { opacity: 0, y: 15 },
     animate: { opacity: 1, y: 0 },
@@ -273,14 +315,12 @@ const RuleCard: React.FC<RuleCardProps> = ({
     exit: { opacity: 0, scale: 0.8, y: -10 },
   };
 
-  // Simple description animation
   const descriptionSlideDown = {
     initial: { opacity: 0, y: -10 },
     animate: { opacity: 1, y: 0 },
     exit: { opacity: 0, y: -10 },
   };
 
-  // Utility functions
   const isItemSelected = (
     type: "trigger" | "condition" | "effect",
     itemId?: string,
@@ -304,7 +344,6 @@ const RuleCard: React.FC<RuleCardProps> = ({
     return Object.keys(params).length;
   };
 
-  // Event handlers
   const handleEditName = () => {
     console.log("Edit rule name functionality not yet implemented");
   };
@@ -338,37 +377,6 @@ const RuleCard: React.FC<RuleCardProps> = ({
     onToggleGroupOperator?.(rule.id, groupId);
   };
 
-  // Drag and drop handlers
-  const handleDragStart = (
-    e: React.MouseEvent,
-    type: "condition" | "effect",
-    id: string,
-    index: number,
-    groupId?: string,
-    element?: React.ReactElement
-  ) => {
-    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-    const mouseOffset = {
-      x: rect.left,
-      y: e.clientY - rect.top,
-    };
-
-    setDraggedItem({
-      type,
-      id,
-      index,
-      groupId,
-      element: element || <div></div>,
-      mouseOffset,
-    });
-
-    setDragPosition({
-      x: rect.left / canvasScale,
-      y: (e.clientY - mouseOffset.y) / canvasScale,
-    });
-  };
-
-  // Dynamic title generation
   const generateConditionTitle = (condition: Condition) => {
     const conditionType = getConditionTypeById(condition.type);
     const baseLabel = conditionType?.label || "Unknown Condition";
@@ -569,9 +577,9 @@ const RuleCard: React.FC<RuleCardProps> = ({
     return `${triggerText}${conditionsText}${effectsText}`;
   };
 
-  // CONDITION GROUP RENDERING
   const renderConditionGroup = (group: ConditionGroup, groupIndex: number) => {
     const isSelected = isGroupSelected(group.id);
+    const conditionIds = group.conditions.map((c) => c.id);
 
     return (
       <motion.div
@@ -595,12 +603,10 @@ const RuleCard: React.FC<RuleCardProps> = ({
             });
           }}
         >
-          {/* Condition Group Header */}
           <div className="flex items-center justify-between mb-6">
             <div className="text-white-darker text-xs tracking-wider">
               CONDITION GROUP {groupIndex + 1} {isSelected && "(SELECTED)"}
             </div>
-            {/* Delete condition group button */}
             <div onClick={(e) => e.stopPropagation()}>
               <button
                 onClick={(e) => {
@@ -615,112 +621,79 @@ const RuleCard: React.FC<RuleCardProps> = ({
             </div>
           </div>
 
-          {/* Conditions within the group */}
-          <div className="">
-            {group.conditions.map((condition, conditionIndex) => {
-              const conditionType = getConditionTypeById(condition.type);
-              const operatorKey = `${group.id}-${conditionIndex}`;
-              const currentOperator = conditionOperators[operatorKey] || "AND";
-              const isDraggedCondition = draggedItem?.id === condition.id;
-              const shouldShift =
-                dropType === "condition" &&
-                dropGroupId === group.id &&
-                dropIndex !== null &&
-                !isDraggedCondition;
+          <SortableContext
+            items={conditionIds}
+            strategy={verticalListSortingStrategy}
+          >
+            <div className="">
+              {group.conditions.map((condition, conditionIndex) => {
+                const operatorKey = `${group.id}-${conditionIndex}`;
+                const currentOperator =
+                  conditionOperators[operatorKey] || "AND";
 
-              let translateY = 0;
-              if (shouldShift) {
-                if (
-                  draggedItem &&
-                  conditionIndex >= dropIndex &&
-                  conditionIndex < draggedItem.index
-                ) {
-                  translateY = 60; // Shift down to make space
-                } else if (
-                  draggedItem &&
-                  conditionIndex <= dropIndex &&
-                  conditionIndex > draggedItem.index
-                ) {
-                  translateY = -60; // Shift up to make space
-                }
-              }
-
-              return (
-                <motion.div
-                  key={condition.id}
-                  variants={snapFadeUp}
-                  initial="initial"
-                  animate={{
-                    opacity: isDraggedCondition ? 0 : 1,
-                    y: translateY,
-                  }}
-                  transition={{
-                    duration: 0.12,
-                    delay: conditionIndex * 0.02,
-                    y: { duration: 0.2 },
-                  }}
-                  data-drop-zone="condition"
-                >
-                  <div onClick={(e) => e.stopPropagation()}>
-                    <BlockComponent
-                      type="condition"
-                      label={conditionType?.label || "Unknown Condition"}
-                      dynamicTitle={generateConditionTitle(condition)}
-                      isSelected={isItemSelected(
-                        "condition",
-                        condition.id,
-                        group.id
-                      )}
-                      onClick={() => {
-                        onSelectItem({
-                          type: "condition",
-                          ruleId: rule.id,
-                          itemId: condition.id,
-                          groupId: group.id,
-                        });
-                      }}
-                      showTrash={true}
-                      onDelete={() => onDeleteCondition(rule.id, condition.id)}
-                      parameterCount={getParameterCount(condition.params)}
-                      isNegated={condition.negate}
-                      isDraggable={true}
-                      onDragStart={(e) =>
-                        handleDragStart(
-                          e,
+                return (
+                  <motion.div
+                    key={condition.id}
+                    variants={snapFadeUp}
+                    initial="initial"
+                    animate="animate"
+                    transition={{
+                      duration: 0.12,
+                      delay: conditionIndex * 0.02,
+                    }}
+                  >
+                    <div onClick={(e) => e.stopPropagation()}>
+                      <SortableCondition
+                        condition={condition}
+                        ruleId={rule.id}
+                        groupId={group.id}
+                        isSelected={isItemSelected(
                           "condition",
                           condition.id,
-                          conditionIndex,
                           group.id
-                        )
-                      }
-                    />
-                  </div>
-                  {conditionIndex < group.conditions.length - 1 && (
-                    <div
-                      className="text-center"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleConditionOperatorToggle(
-                            group.id,
-                            conditionIndex
-                          );
+                        )}
+                        isNegated={condition.negate}
+                        onSelect={() => {
+                          onSelectItem({
+                            type: "condition",
+                            ruleId: rule.id,
+                            itemId: condition.id,
+                            groupId: group.id,
+                          });
                         }}
-                        className="px-3 text-white-darker text-sm font-medium tracking-wider cursor-pointer rounded transition-colors hover:bg-black-light"
-                      >
-                        {currentOperator}
-                      </button>
+                        onDelete={() =>
+                          onDeleteCondition(rule.id, condition.id)
+                        }
+                        parameterCount={getParameterCount(condition.params)}
+                        dynamicTitle={generateConditionTitle(condition)}
+                      />
                     </div>
-                  )}
-                </motion.div>
-              );
-            })}
-          </div>
+                    {conditionIndex < group.conditions.length - 1 && (
+                      <div
+                        className="text-center"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleConditionOperatorToggle(
+                              group.id,
+                              conditionIndex
+                            );
+                          }}
+                          className="px-3 text-white-darker text-sm font-medium tracking-wider cursor-pointer rounded transition-colors hover:bg-black-light"
+                        >
+                          {currentOperator}
+                        </button>
+                      </div>
+                    )}
+                  </motion.div>
+                );
+              })}
+            </div>
+          </SortableContext>
         </div>
 
-        {/* Operator between groups */}
         {groupIndex < rule.conditionGroups.length - 1 && (
           <div className="text-center py-2">
             <button
@@ -738,7 +711,6 @@ const RuleCard: React.FC<RuleCardProps> = ({
     );
   };
 
-  // Main component render
   return (
     <div
       className="w-96 relative pl-16 select-none"
@@ -746,7 +718,7 @@ const RuleCard: React.FC<RuleCardProps> = ({
         zIndex: isRuleSelected ? 30 : 20,
         pointerEvents: "auto",
         transform: `translate(${cardPosition.x}px, ${cardPosition.y}px)`,
-        cursor: isDragging && dragFromHeader ? "grabbing" : "default",
+        cursor: isDragging ? "grabbing" : "default",
       }}
       onClick={handleCardClick}
       onMouseDown={handleCardMouseDown}
@@ -1037,80 +1009,50 @@ const RuleCard: React.FC<RuleCardProps> = ({
                 animate="animate"
                 transition={{ duration: 0.1, delay: 0.22 }}
               >
-                {rule.effects.map((effect, index) => {
-                  const effectType = getEffectTypeById(effect.type);
-                  const hasRandomChance =
-                    effect.params.has_random_chance === "true";
-                  const isDraggedEffect = draggedItem?.id === effect.id;
-                  const shouldShift =
-                    dropType === "effect" &&
-                    dropIndex !== null &&
-                    !isDraggedEffect;
+                <SortableContext
+                  items={rule.effects.map((e) => e.id)}
+                  strategy={verticalListSortingStrategy}
+                >
+                  {rule.effects.map((effect, index) => {
+                    const hasRandomChance =
+                      effect.params.has_random_chance === "true";
 
-                  let translateY = 0;
-                  if (shouldShift) {
-                    if (
-                      draggedItem &&
-                      index >= dropIndex &&
-                      index < draggedItem.index
-                    ) {
-                      translateY = 60; // Shift down to make space
-                    } else if (
-                      draggedItem &&
-                      index <= dropIndex &&
-                      index > draggedItem.index
-                    ) {
-                      translateY = -60; // Shift up to make space
-                    }
-                  }
-
-                  return (
-                    <motion.div
-                      key={effect.id}
-                      variants={snapFadeUp}
-                      initial="initial"
-                      animate={{
-                        opacity: isDraggedEffect ? 0 : 1,
-                        y: translateY,
-                      }}
-                      transition={{
-                        duration: 0.12,
-                        delay: index * 0.02,
-                        y: { duration: 0.2 },
-                      }}
-                      data-drop-zone="effect"
-                    >
-                      <BlockComponent
-                        type="effect"
-                        label={effectType?.label || "Unknown Effect"}
-                        dynamicTitle={generateEffectTitle(effect)}
-                        isSelected={isItemSelected("effect", effect.id)}
-                        onClick={(e) => {
-                          e?.stopPropagation();
-                          onSelectItem({
-                            type: "effect",
-                            ruleId: rule.id,
-                            itemId: effect.id,
-                          });
+                    return (
+                      <motion.div
+                        key={effect.id}
+                        variants={snapFadeUp}
+                        initial="initial"
+                        animate="animate"
+                        transition={{
+                          duration: 0.12,
+                          delay: index * 0.02,
                         }}
-                        showTrash={true}
-                        onDelete={() => onDeleteEffect(rule.id, effect.id)}
-                        parameterCount={getParameterCount(effect.params)}
-                        hasRandomChance={hasRandomChance}
-                        isDraggable={true}
-                        onDragStart={(e) =>
-                          handleDragStart(e, "effect", effect.id, index)
-                        }
-                      />
-                    </motion.div>
-                  );
-                })}
+                      >
+                        <SortableEffect
+                          effect={effect}
+                          ruleId={rule.id}
+                          isSelected={isItemSelected("effect", effect.id)}
+                          onSelect={() => {
+                            onSelectItem({
+                              type: "effect",
+                              ruleId: rule.id,
+                              itemId: effect.id,
+                            });
+                          }}
+                          onDelete={() => onDeleteEffect(rule.id, effect.id)}
+                          parameterCount={getParameterCount(effect.params)}
+                          dynamicTitle={generateEffectTitle(effect)}
+                          hasRandomChance={hasRandomChance}
+                        />
+                      </motion.div>
+                    );
+                  })}
+                </SortableContext>
               </motion.div>
             )}
           </motion.div>
         </motion.div>
 
-        {/* Description positioned absolutely to not affect layout */}
         <AnimatePresence>
           {descriptionVisible && (
             <motion.div
@@ -1161,76 +1103,6 @@ const RuleCard: React.FC<RuleCardProps> = ({
           </div>
         )}
       </motion.div>
-
-      {/* Dragged item overlay */}
-      {draggedItem && (
-        <div
-          className="fixed pointer-events-none z-50"
-          style={{
-            left: dragPosition.x * canvasScale,
-            top: dragPosition.y * canvasScale,
-            transform: `translateZ(0) scale(${canvasScale})`,
-            transformOrigin: "top left",
-          }}
-        >
-          <div
-            className="w-80"
-            style={{
-              filter: "drop-shadow(0 10px 20px rgba(0, 0, 0, 0.5))",
-            }}
-          >
-            {draggedItem.type === "condition"
-              ? (() => {
-                  const condition = rule.conditionGroups
-                    .flatMap((g) => g.conditions)
-                    .find((c) => c.id === draggedItem.id);
-                  const conditionType = getConditionTypeById(
-                    condition?.type || ""
-                  );
-                  return (
-                    <BlockComponent
-                      type="condition"
-                      label={conditionType?.label || "Unknown Condition"}
-                      dynamicTitle={
-                        condition
-                          ? generateConditionTitle(condition)
-                          : undefined
-                      }
-                      onClick={() => {}}
-                      isDraggable={false}
-                      parameterCount={
-                        condition ? getParameterCount(condition.params) : 0
-                      }
-                      isNegated={condition?.negate}
-                    />
-                  );
-                })()
-              : (() => {
-                  const effect = rule.effects.find(
-                    (e) => e.id === draggedItem.id
-                  );
-                  const effectType = getEffectTypeById(effect?.type || "");
-                  const hasRandomChance =
-                    effect?.params.has_random_chance === "true";
-                  return (
-                    <BlockComponent
-                      type="effect"
-                      label={effectType?.label || "Unknown Effect"}
-                      dynamicTitle={
-                        effect ? generateEffectTitle(effect) : undefined
-                      }
-                      onClick={() => {}}
-                      isDraggable={false}
-                      parameterCount={
-                        effect ? getParameterCount(effect.params) : 0
-                      }
-                      hasRandomChance={hasRandomChance}
-                    />
-                  );
-                })()}
-          </div>
-        </div>
-      )}
     </div>
   );
 };
