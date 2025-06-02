@@ -24,6 +24,7 @@ interface BlockComponentProps {
   hasRandomChance?: boolean;
   isDraggable?: boolean;
   dragHandleProps?: Record<string, unknown>;
+  variant?: "default" | "palette" | "condition";
 }
 
 const BlockComponent: React.FC<BlockComponentProps> = ({
@@ -40,6 +41,7 @@ const BlockComponent: React.FC<BlockComponentProps> = ({
   hasRandomChance = false,
   isDraggable = false,
   dragHandleProps,
+  variant = "default",
 }) => {
   const getTypeConfig = () => {
     switch (type) {
@@ -73,6 +75,18 @@ const BlockComponent: React.FC<BlockComponentProps> = ({
     }
   };
 
+  const getVariantStyles = () => {
+    switch (variant) {
+      case "palette":
+        return "w-full";
+      case "condition":
+        return "w-62";
+      case "default":
+      default:
+        return "w-71";
+    }
+  };
+
   const config = getTypeConfig();
   const displayTitle = dynamicTitle || label;
 
@@ -89,6 +103,7 @@ const BlockComponent: React.FC<BlockComponentProps> = ({
       } border-l-4 border-2 
         ${isSelected ? config.selectColor : "border-black-light"} 
         rounded-lg cursor-pointer transition-all ${config.hoverColor} p-3 pt-6
+        ${getVariantStyles()}
         ${
           isDraggable
             ? "cursor-grab active:cursor-grabbing hover:shadow-lg"
@@ -96,7 +111,7 @@ const BlockComponent: React.FC<BlockComponentProps> = ({
         }
       `}
       onClick={handleClick}
-      style={{ pointerEvents: "auto", width: "320px", minWidth: "320px" }}
+      style={{ pointerEvents: "auto" }}
       {...(isDraggable ? dragHandleProps : {})}
     >
       <div className="absolute top-2 left-11 text-white-darker text-xs font-medium tracking-wider">
@@ -123,9 +138,9 @@ const BlockComponent: React.FC<BlockComponentProps> = ({
               e.stopPropagation();
               onDelete();
             }}
-            className="w-full h-full flex items-center rounded justify-center transition-colors hover:bg-balatro-redshadow active:bg-balatro-blackshadow"
+            className="w-full h-full flex items-center rounded justify-center transition-colors hover:bg-balatro-redshadow/50 active:bg-balatro-blackshadow cursor-pointer"
           >
-            <TrashIcon className="h-5 w-5 text-balatro-red hover:text-white cursor-pointer active:text-balatro-red transition-colors" />
+            <TrashIcon className="h-5 w-5 text-balatro-red transition-colors" />
           </button>
         </div>
       )}
