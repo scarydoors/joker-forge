@@ -77,6 +77,7 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
   const [draggedItem, setDraggedItem] = useState<DraggedItem | null>(null);
   const [panState, setPanState] = useState({ x: 0, y: 0, scale: 1 });
   const [backgroundOffset, setBackgroundOffset] = useState({ x: 0, y: 0 });
+  // this is just estimated sizes for auto positioning, it doesnt have to be supoer accurate haha
   const [panels, setPanels] = useState<Record<string, PanelState>>({
     blockPalette: {
       id: "blockPalette",
@@ -88,13 +89,13 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
       id: "jokerInfo",
       isVisible: false,
       position: { x: 0, y: 0 },
-      size: { width: 320, height: 120 },
+      size: { width: 320, height: 200 },
     },
     variables: {
       id: "variables",
       isVisible: false,
       position: { x: 0, y: 0 },
-      size: { width: 320, height: 400 },
+      size: { width: 320, height: 300 },
     },
     inspector: {
       id: "inspector",
@@ -299,6 +300,15 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
         position,
       },
     }));
+  };
+
+  const updateRulePosition = (
+    ruleId: string,
+    position: { x: number; y: number }
+  ) => {
+    setRules((prev) =>
+      prev.map((rule) => (rule.id === ruleId ? { ...rule, position } : rule))
+    );
   };
 
   const addTrigger = (triggerId: string) => {
@@ -1033,7 +1043,10 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
                           style={{
                             left: rule.position?.x || 0,
                             top: rule.position?.y || 0,
-                            zIndex: selectedItem?.ruleId === rule.id ? 30 : 20,
+                            zIndex:
+                              selectedItem?.ruleId === rule.id
+                                ? 50 + index
+                                : 20 + index,
                           }}
                         >
                           <RuleCard
@@ -1049,6 +1062,7 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
                             onToggleGroupOperator={toggleGroupOperator}
                             onReorderConditions={reorderConditions}
                             onReorderEffects={reorderEffects}
+                            onUpdatePosition={updateRulePosition}
                             isRuleSelected={selectedItem?.ruleId === rule.id}
                             joker={joker}
                             generateConditionTitle={generateConditionTitle}

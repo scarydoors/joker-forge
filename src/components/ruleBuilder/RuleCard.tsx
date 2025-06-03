@@ -68,6 +68,10 @@ interface RuleCardProps {
     oldIndex: number,
     newIndex: number
   ) => void;
+  onUpdatePosition: (
+    ruleId: string,
+    position: { x: number; y: number }
+  ) => void;
   isRuleSelected: boolean;
   joker: JokerData;
   generateConditionTitle: (condition: Condition) => string;
@@ -203,6 +207,7 @@ const RuleCard: React.FC<RuleCardProps> = ({
   onToggleGroupOperator,
   onReorderConditions,
   onReorderEffects,
+  onUpdatePosition,
   isRuleSelected,
   generateConditionTitle,
   generateEffectTitle,
@@ -229,14 +234,16 @@ const RuleCard: React.FC<RuleCardProps> = ({
     })
   );
 
-  const [cardPosition, setCardPosition] = useState({ x: 0, y: 0 });
+  // Use rule position directly, with temp drag offset
+  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({
     x: 0,
     y: 0,
-    cardX: 0,
-    cardY: 0,
   });
+
+  // Only apply drag offset during dragging, container is already positioned by parent
+  const transformOffset = isDragging ? dragOffset : { x: 0, y: 0 };
 
   const handleCardMouseDown = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -249,8 +256,6 @@ const RuleCard: React.FC<RuleCardProps> = ({
       setDragStart({
         x: e.clientX,
         y: e.clientY,
-        cardX: cardPosition.x,
-        cardY: cardPosition.y,
       });
     }
   };
@@ -261,9 +266,9 @@ const RuleCard: React.FC<RuleCardProps> = ({
         const deltaX = e.clientX - dragStart.x;
         const deltaY = e.clientY - dragStart.y;
 
-        setCardPosition({
-          x: dragStart.cardX + deltaX,
-          y: dragStart.cardY + deltaY,
+        setDragOffset({
+          x: deltaX,
+          y: deltaY,
         });
       }
     },
@@ -273,8 +278,19 @@ const RuleCard: React.FC<RuleCardProps> = ({
   const handleMouseUp = useCallback(() => {
     if (isDragging) {
       setIsDragging(false);
+
+      // Sync the final position back to the parent
+      const finalPosition = {
+        x: (rule.position?.x || 0) + dragOffset.x,
+        y: (rule.position?.y || 0) + dragOffset.y,
+      };
+
+      onUpdatePosition(rule.id, finalPosition);
+
+      // Reset drag offset since position is now synced to parent
+      setDragOffset({ x: 0, y: 0 });
     }
-  }, [isDragging]);
+  }, [isDragging, rule.id, rule.position, dragOffset, onUpdatePosition]);
 
   useEffect(() => {
     if (isDragging) {
@@ -584,7 +600,7 @@ const RuleCard: React.FC<RuleCardProps> = ({
       style={{
         zIndex: isRuleSelected ? 30 : 20,
         pointerEvents: "auto",
-        transform: `translate(${cardPosition.x}px, ${cardPosition.y}px)`,
+        transform: `translate(${transformOffset.x}px, ${transformOffset.y}px)`,
         cursor: isDragging ? "grabbing" : "default",
       }}
       onClick={(e) => {
