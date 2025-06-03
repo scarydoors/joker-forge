@@ -1,57 +1,26 @@
 import { useState } from "react";
-import JokerCollection from "./components/JokerCollection";
-import JokerForm from "./components/JokerForm";
+import Sidebar from "./components/Sidebar";
+import JokersPage from "./components/pages/JokersPage";
+import ModMetadataPage from "./components/pages/ModMetadataPage";
+import ConsumablesPage from "./components/pages/ConsumablesPage";
+import DecksPage from "./components/pages/DecksPage";
+import EditionsPage from "./components/pages/EditionsPage";
+import EnhancementsPage from "./components/pages/EnhancementsPage";
+import DocsPage from "./components/pages/DocsPage";
+import VanillaRemadePage from "./components/pages/VanillaRemadePage";
+import ExtraCreditPage from "./components/pages/ExtraCreditPage";
+import AcknowledgementsPage from "./components/pages/AcknowledgementsPage";
 import { JokerData } from "./components/JokerCard";
 import { exportJokersAsMod } from "./components/codeGeneration/index";
-import InputField from "./components/generic/InputField";
-import {
-  DocumentTextIcon,
-  UserIcon,
-  ArrowUpTrayIcon,
-  Cog8ToothIcon,
-  CodeBracketIcon,
-} from "@heroicons/react/24/outline";
+import { HomeIcon, ChartBarIcon, ClockIcon } from "@heroicons/react/24/outline";
 
 function App() {
+  const [currentSection, setCurrentSection] = useState("overview");
+  const [modName, setModName] = useState("My Custom Mod");
+  const [authorName, setAuthorName] = useState("Anonymous");
   const [jokers, setJokers] = useState<JokerData[]>([]);
   const [selectedJokerId, setSelectedJokerId] = useState<string | null>(null);
-  const [modName, setModName] = useState("My Custom Mod");
-  const [authorName, setAuthorName] = useState("");
   const [exportLoading, setExportLoading] = useState(false);
-
-  const handleSelectJoker = (jokerId: string) => {
-    setSelectedJokerId(jokerId);
-  };
-
-  const handleAddNewJoker = () => {
-    const newJoker: JokerData = {
-      id: crypto.randomUUID(),
-      name: "New Joker",
-      description: "A {C:blue}custom{} joker with {C:red}unique{} effects.",
-      imagePreview: "",
-      rarity: 1,
-      rules: [],
-    };
-    setJokers([...jokers, newJoker]);
-    setSelectedJokerId(newJoker.id);
-  };
-
-  const handleSaveJoker = (updatedJoker: JokerData) => {
-    setJokers((prev) =>
-      prev.map((joker) => (joker.id === updatedJoker.id ? updatedJoker : joker))
-    );
-  };
-
-  const handleDeleteJoker = (jokerId: string) => {
-    setJokers((prev) => prev.filter((joker) => joker.id !== jokerId));
-
-    if (selectedJokerId === jokerId) {
-      const remainingJokers = jokers.filter((joker) => joker.id !== jokerId);
-      setSelectedJokerId(
-        remainingJokers.length > 0 ? remainingJokers[0].id : null
-      );
-    }
-  };
 
   const handleExport = async () => {
     if (!authorName.trim()) {
@@ -70,137 +39,163 @@ function App() {
     }
   };
 
-  const openGitHub = () => {
-    window.open("https://github.com/Jayd-H/joker-forge", "_blank");
+  const renderCurrentPage = () => {
+    switch (currentSection) {
+      case "overview":
+        return <OverviewPage jokerCount={jokers.length} />;
+      case "metadata":
+        return (
+          <ModMetadataPage
+            modName={modName}
+            setModName={setModName}
+            authorName={authorName}
+            setAuthorName={setAuthorName}
+          />
+        );
+      case "jokers":
+        return (
+          <JokersPage
+            modName={modName}
+            authorName={authorName}
+            jokers={jokers}
+            setJokers={setJokers}
+            selectedJokerId={selectedJokerId}
+            setSelectedJokerId={setSelectedJokerId}
+          />
+        );
+      case "consumables":
+        return <ConsumablesPage />;
+      case "decks":
+        return <DecksPage />;
+      case "editions":
+        return <EditionsPage />;
+      case "enhancements":
+        return <EnhancementsPage />;
+      case "docs":
+        return <DocsPage />;
+      case "vanilla":
+        return <VanillaRemadePage />;
+      case "credit":
+        return <ExtraCreditPage />;
+      case "acknowledgements":
+        return <AcknowledgementsPage />;
+      default:
+        return <OverviewPage jokerCount={jokers.length} />;
+    }
   };
 
-  const selectedJoker =
-    jokers.find((joker) => joker.id === selectedJokerId) || null;
-
   return (
-    <>
-      <div className="fixed top-6 left-5 z-10">
-        <h1 className="text-mint font-lexend tracking-widest font-light">
-          JOKER FORGE TEST BUILD
+    <div className="h-screen bg-black-darker flex overflow-hidden">
+      <Sidebar
+        selectedSection={currentSection}
+        onSectionChange={setCurrentSection}
+        projectName="mycustommod"
+        onExport={handleExport}
+        exportLoading={exportLoading}
+        jokers={jokers}
+        modName={modName}
+        authorName={authorName}
+      />
+      <div className="flex-1 flex flex-col overflow-y-auto custom-scrollbar">
+        {renderCurrentPage()}
+      </div>
+    </div>
+  );
+}
+
+const OverviewPage: React.FC<{ jokerCount: number }> = ({ jokerCount }) => {
+  return (
+    <div className="p-8">
+      <div className="flex items-center gap-3 mb-6">
+        <HomeIcon className="h-8 w-8 text-mint" />
+        <h1 className="text-2xl text-white-light font-light tracking-wide">
+          Project Overview
         </h1>
       </div>
 
-      <div className="min-h-screen bg-black-darker overflow-hidden p-4 flex flex-col">
-        <div className="container mx-auto max-w-6xl flex-grow flex flex-col">
-          <div className="flex justify-between items-center mb-6">
-            <div className="flex space-x-4 flex-1">
-              <div className="w-1/2">
-                <InputField
-                  value={modName}
-                  onChange={(e) => setModName(e.target.value)}
-                  placeholder="Enter your mod name"
-                  separator={true}
-                  icon={
-                    <DocumentTextIcon className="h-6 w-6 text-mint stroke-2" />
-                  }
-                  className="h-[42px]"
-                />
-              </div>
-              <div className="w-1/2">
-                <InputField
-                  value={authorName}
-                  onChange={(e) => setAuthorName(e.target.value)}
-                  placeholder="Author name"
-                  separator={true}
-                  icon={<UserIcon className="h-6 w-6 text-mint stroke-2" />}
-                  className="h-[42px]"
-                />
-              </div>
-            </div>
-
-            <div className="flex bg-black-dark border-2 border-black-light rounded-lg ml-4 h-[42px]">
-              <button
-                onClick={openGitHub}
-                className="px-3 flex items-center justify-center group cursor-pointer"
-                title="GitHub Repository"
-              >
-                <CodeBracketIcon className="h-6 w-6 text-mint stroke-2 group-hover:text-mint-lighter transition-colors" />
-              </button>
-
-              <div className="w-px self-stretch my-2 bg-black-light"></div>
-
-              <button
-                onClick={handleExport}
-                className="px-3 flex items-center justify-center group cursor-pointer"
-                title="Export Mod"
-                disabled={exportLoading}
-              >
-                <ArrowUpTrayIcon className="h-6 w-6 text-mint stroke-2 group-hover:text-mint-lighter transition-colors" />
-              </button>
-
-              <div className="w-px self-stretch my-2 bg-black-light"></div>
-
-              <button
-                className="px-3 flex items-center justify-center group cursor-pointer"
-                title="Settings"
-              >
-                <Cog8ToothIcon className="h-6 w-6 text-mint stroke-2 group-hover:text-mint-lighter transition-colors" />
-              </button>
-            </div>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+        <div className="bg-black-dark border-2 border-black-lighter rounded-lg p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-white-light font-medium">Project Stats</h3>
+            <ChartBarIcon className="h-5 w-5 text-mint" />
           </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-6 pt-6 flex-grow">
-            <div className="md:col-span-3 h-full">
-              {selectedJoker ? (
-                <JokerForm
-                  joker={selectedJoker}
-                  onSaveJoker={handleSaveJoker}
-                  onDeleteJoker={handleDeleteJoker}
-                  modName={modName}
-                />
-              ) : (
-                <div className="h-full flex items-center justify-center">
-                  <div className="text-center">
-                    <p className="text-white-darker text-xl font-light tracking-wide">
-                      No Joker Selected
-                    </p>
-                    <p className="text-white-darker text-sm mt-2 font-light">
-                      Select a joker from the collection or create a new one
-                    </p>
-                  </div>
-                </div>
-              )}
+          <div className="space-y-4">
+            <div className="flex justify-between items-center">
+              <span className="text-white-darker text-sm">Jokers</span>
+              <span className="text-mint font-bold">{jokerCount}</span>
             </div>
-
-            <div className="md:col-span-2 pl-8">
-              <JokerCollection
-                jokers={jokers}
-                selectedJokerId={selectedJokerId}
-                onSelectJoker={handleSelectJoker}
-                onAddNewJoker={handleAddNewJoker}
-                modName={modName}
-                onExportClick={handleExport}
-              />
+            <div className="flex justify-between items-center">
+              <span className="text-white-darker text-sm">Consumables</span>
+              <span className="text-mint font-bold">0</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-white-darker text-sm">Custom Decks</span>
+              <span className="text-mint font-bold">0</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-white-darker text-sm">Editions</span>
+              <span className="text-mint font-bold">0</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-white-darker text-sm">Enhancements</span>
+              <span className="text-mint font-bold">0</span>
             </div>
           </div>
         </div>
 
-        <footer className="w-full px-4 mt-24">
-          <div className="container mx-auto max-w-6xl flex justify-between items-center">
-            <div className="text-white-darker text-xs font-light tracking-wide">
-              Created by <span className="text-mint">jaydchw</span>
-              {" • "}
-              Icons from <span className="text-mint">Heroicons</span>
-              {" & "}
-              <span className="text-mint">SVGRepo</span>
-              {" • "}
-              Credit to <span className="text-mint">SMODS</span>
-              {" and the "}
-              <span className="text-mint">SMODS team</span>
-            </div>
-            <div className="text-white-darker text-xs font-light tracking-widest">
-              <span className="text-mint font-medium">PRE-ALPHA</span>
-            </div>
+        <div className="bg-black-dark border-2 border-black-lighter rounded-lg p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-white-light font-medium">Recent Activity</h3>
+            <ClockIcon className="h-5 w-5 text-mint" />
           </div>
-        </footer>
+          <div className="space-y-3">
+            <div className="text-white-darker text-sm">No recent activity</div>
+          </div>
+        </div>
+
+        <div className="bg-black-dark border-2 border-black-lighter rounded-lg p-6">
+          <h3 className="text-white-light font-medium mb-4">Quick Actions</h3>
+          <div className="space-y-3">
+            <button className="w-full text-left px-3 py-2 bg-black-darker border border-black-lighter rounded-lg text-white-light hover:border-mint hover:text-mint transition-colors text-sm cursor-pointer">
+              Create New Joker
+            </button>
+            <button className="w-full text-left px-3 py-2 bg-black-darker border border-black-lighter rounded-lg text-white-light hover:border-mint hover:text-mint transition-colors text-sm cursor-pointer">
+              Import Existing Mod
+            </button>
+            <button className="w-full text-left px-3 py-2 bg-black-darker border border-black-lighter rounded-lg text-white-light hover:border-mint hover:text-mint transition-colors text-sm cursor-pointer">
+              Export Current Project
+            </button>
+          </div>
+        </div>
       </div>
-    </>
+
+      <div className="bg-black-dark border-2 border-black-lighter rounded-lg p-6">
+        <h2 className="text-xl text-white-light font-light mb-4">
+          Welcome to Joker Forge
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <h3 className="text-mint font-medium mb-3">Getting Started</h3>
+            <ul className="space-y-2 text-white-darker text-sm">
+              <li>• Create your first custom joker</li>
+              <li>• Configure mod metadata</li>
+              <li>• Use the Rule Builder for complex effects</li>
+              <li>• Export your mod for Balatro</li>
+            </ul>
+          </div>
+          <div>
+            <h3 className="text-mint font-medium mb-3">Features</h3>
+            <ul className="space-y-2 text-white-darker text-sm">
+              <li>• Visual rule builder</li>
+              <li>• SMODS code generation</li>
+              <li>• Image atlas creation</li>
+              <li>• Mod packaging</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
   );
-}
+};
 
 export default App;
