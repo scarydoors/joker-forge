@@ -56,7 +56,6 @@ function App() {
         return (
           <JokersPage
             modName={modName}
-            authorName={authorName}
             jokers={jokers}
             setJokers={setJokers}
             selectedJokerId={selectedJokerId}

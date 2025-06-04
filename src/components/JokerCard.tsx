@@ -1,11 +1,14 @@
-import React, { useState, useRef, useEffect, useCallback } from "react";
-import { createPortal } from "react-dom";
-import { Rule } from "./ruleBuilder";
-
-interface JokerCardProps {
-  joker: JokerData;
-  onClick: () => void;
-}
+import React, { useState } from "react";
+import {
+  TrashIcon,
+  PencilIcon,
+  PuzzlePieceIcon,
+  DocumentDuplicateIcon,
+  DocumentIcon,
+  StarIcon,
+} from "@heroicons/react/24/solid";
+import Button from "./generic/Button";
+import type { Rule } from "./ruleBuilder/types";
 
 export interface UserVariable {
   id: string;
@@ -19,7 +22,7 @@ export interface JokerData {
   name: string;
   description: string;
   imagePreview: string;
-  rarity: number; // 1: Common, 2: Uncommon, 3: Rare, 4: Legendary
+  rarity: number;
   cost?: number;
   blueprint_compat?: boolean;
   eternal_compat?: boolean;
@@ -27,6 +30,15 @@ export interface JokerData {
   discovered?: boolean;
   rules?: Rule[];
   userVariables?: UserVariable[];
+}
+
+interface JokerCardProps {
+  joker: JokerData;
+  onEditInfo: () => void;
+  onEditRules: () => void;
+  onDelete: () => void;
+  onDuplicate: () => void;
+  onQuickUpdate: (updates: Partial<JokerData>) => void;
 }
 
 const getRarityText = (rarity: number) => {
@@ -40,32 +52,34 @@ const getRarityText = (rarity: number) => {
 };
 
 const getRarityStyles = (rarity: number) => {
-  const styleMap: Record<number, { bg: string; shadow: string }> = {
-    1: {
-      bg: "bg-balatro-blue",
-      shadow: "bg-balatro-blueshadow",
-    },
-    2: {
-      bg: "bg-balatro-green",
-      shadow: "bg-balatro-greenshadow",
-    },
-    3: {
-      bg: "bg-balatro-red",
-      shadow: "bg-balatro-redshadow",
-    },
-    4: {
-      bg: "bg-balatro-purple",
-      shadow: "bg-balatro-purpleshadow",
-    },
-  };
-
+  const styleMap: Record<number, { text: string; bg: string; border: string }> =
+    {
+      1: {
+        text: "text-white-lighter",
+        bg: "bg-balatro-blue",
+        border: "border-balatro-blueshadow",
+      },
+      2: {
+        text: "text-balatro-green",
+        bg: "bg-balatro-green/10",
+        border: "border-balatro-green/30",
+      },
+      3: {
+        text: "text-balatro-red",
+        bg: "bg-balatro-red/10",
+        border: "border-balatro-red/30",
+      },
+      4: {
+        text: "text-balatro-purple",
+        bg: "bg-balatro-purple/10",
+        border: "border-balatro-purple/30",
+      },
+    };
   return styleMap[rarity] || styleMap[1];
 };
 
 const formatDescription = (text: string) => {
   if (!text) return "";
-
-  text = text.replace(/\[s\]/g, "<br />");
 
   let result = text;
 
@@ -100,115 +114,74 @@ const getColorClass = (color: string) => {
   return colorMap[color] || "text-balatro-white";
 };
 
-const JokerCard: React.FC<JokerCardProps> = ({ joker, onClick }) => {
-  const [isHovering, setIsHovering] = useState(false);
-  const [position, setPosition] = useState<{ x: number; y: number } | null>(
-    null
-  );
-  const cardRef = useRef<HTMLDivElement>(null);
-  const [portalRoot, setPortalRoot] = useState<HTMLElement | null>(null);
-
-  useEffect(() => {
-    let root = document.getElementById("joker-info-root");
-    if (!root) {
-      root = document.createElement("div");
-      root.id = "joker-info-root";
-      document.body.appendChild(root);
-    }
-    setPortalRoot(root);
-  }, []);
-
-  const updatePosition = useCallback(() => {
-    if (cardRef.current) {
-      const rect = cardRef.current.getBoundingClientRect();
-      setPosition({
-        x: rect.left + rect.width / 2,
-        y: rect.bottom,
-      });
-    }
-  }, []);
-
-  useEffect(() => {
-    if (isHovering) {
-      updatePosition();
-      window.addEventListener("scroll", updatePosition, true);
-      window.addEventListener("resize", updatePosition);
-      return () => {
-        window.removeEventListener("scroll", updatePosition, true);
-        window.removeEventListener("resize", updatePosition);
-      };
-    }
-  }, [isHovering, updatePosition]);
+const JokerCard: React.FC<JokerCardProps> = ({
+  joker,
+  onEditInfo,
+  onEditRules,
+  onDelete,
+  onDuplicate,
+  onQuickUpdate,
+}) => {
+  const [showRarityMenu, setShowRarityMenu] = useState(false);
+  const [editingName, setEditingName] = useState(false);
+  const [editingCost, setEditingCost] = useState(false);
+  const [editingDescription, setEditingDescription] = useState(false);
+  const [tempName, setTempName] = useState(joker.name);
+  const [tempCost, setTempCost] = useState(joker.cost || 4);
+  const [tempDescription, setTempDescription] = useState(joker.description);
+  const [hoveredIcon, setHoveredIcon] = useState<string | null>(null);
 
   const safeRarity =
     typeof joker.rarity === "number" && joker.rarity >= 1 && joker.rarity <= 4
       ? joker.rarity
       : 1;
-
-  const rarityStyles = getRarityStyles(safeRarity);
   const rarityText = getRarityText(safeRarity);
+  const rarityStyles = getRarityStyles(safeRarity);
+  const rulesCount = joker.rules?.length || 0;
 
-  const renderTooltip = () => {
-    if (!position || !isHovering || !portalRoot) return null;
+  const rarities = [
+    { value: 1, label: "Common", styles: getRarityStyles(1) },
+    { value: 2, label: "Uncommon", styles: getRarityStyles(2) },
+    { value: 3, label: "Rare", styles: getRarityStyles(3) },
+    { value: 4, label: "Legendary", styles: getRarityStyles(4) },
+  ];
 
-    return createPortal(
-      <div
-        className="fixed pointer-events-none font-game z-50"
-        style={{
-          left: position.x,
-          top: position.y + 8,
-          transform: "translate(-50%, 0%)",
-          width: "180px",
-        }}
-      >
-        <div className="relative m-2">
-          <div className="absolute inset-0 bg-balatro-blackshadow pixel-corners-medium translate-y-1" />
-          <div className="relative bg-balatro-lightgrey pixel-corners-medium p-1">
-            <div className="bg-balatro-black pixel-corners-medium p-2">
-              <h3 className="text-2xl mb-1 text-center text-balatro-white text-shadow-pixel">
-                {joker.name}
-              </h3>
-              <div className="relative mb-2">
-                <div className="absolute inset-0 bg-balatro-whiteshadow pixel-corners-small translate-y-1" />
-                <div className="relative bg-balatro-white text-balatro-black font-thin px-2 py-1 pixel-corners-small">
-                  <p
-                    className="text-base text-center leading-4"
-                    dangerouslySetInnerHTML={{
-                      __html: formatDescription(joker.description),
-                    }}
-                  />
-                </div>
-              </div>
-              <div className="relative mx-7 mt-2">
-                <div
-                  className={`absolute inset-0 ${rarityStyles.shadow} pixel-corners-small translate-y-1`}
-                />
-                <div
-                  className={`relative ${rarityStyles.bg} pixel-corners-small text-center text-lg text-balatro-white`}
-                >
-                  <span className="relative text-shadow-pixel">
-                    {rarityText}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>,
-      portalRoot
-    );
+  const handleNameSave = () => {
+    onQuickUpdate({ name: tempName });
+    setEditingName(false);
+  };
+
+  const handleCostSave = () => {
+    onQuickUpdate({ cost: tempCost });
+    setEditingCost(false);
+  };
+
+  const handleDescriptionSave = () => {
+    onQuickUpdate({ description: tempDescription });
+    setEditingDescription(false);
+  };
+
+  const handleRarityChange = (newRarity: number) => {
+    onQuickUpdate({ rarity: newRarity });
+    setShowRarityMenu(false);
   };
 
   return (
-    <>
-      <div
-        ref={cardRef}
-        className="relative cursor-pointer w-32"
-        onClick={onClick}
-        onMouseEnter={() => setIsHovering(true)}
-        onMouseLeave={() => setIsHovering(false)}
-      >
-        <div className="w-full aspect-[2/3] overflow-hidden">
+    <div className="relative bg-black-dark border-2 border-black-lighter rounded-xl p-4 transition-all hover:shadow-lg">
+      <div className="absolute -top-3 -right-3 w-8 h-8 bg-black-darker rounded-lg flex items-center justify-center border-2 border-balatro-redshadow">
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onDelete();
+          }}
+          className="w-full h-full flex items-center rounded justify-center transition-colors hover:bg-balatro-redshadow/50 active:bg-balatro-blackshadow cursor-pointer"
+        >
+          <TrashIcon className="h-5 w-5 text-balatro-red transition-colors" />
+        </button>
+      </div>
+
+      <div className="flex gap-6">
+        <div className="relative w-40 h-56">
           {joker.imagePreview ? (
             <img
               src={joker.imagePreview}
@@ -224,11 +197,190 @@ const JokerCard: React.FC<JokerCardProps> = ({ joker, onClick }) => {
               draggable="false"
             />
           )}
+
+          <div className="absolute -top-2 left-1/2 -translate-x-1/2">
+            {editingCost ? (
+              <input
+                type="number"
+                value={tempCost}
+                onChange={(e) => setTempCost(parseInt(e.target.value))}
+                onBlur={handleCostSave}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") handleCostSave();
+                  if (e.key === "Escape") {
+                    setTempCost(joker.cost || 4);
+                    setEditingCost(false);
+                  }
+                }}
+                className="px-3 py-1 rounded-lg border text-xs font-bold cursor-pointer transition-all  bg-balatro-money/10 border-balatro-money text-balatro-money focus:outline-none text-center min-w-0"
+                autoFocus
+              />
+            ) : (
+              <div
+                className="px-3 py-1 rounded-lg border text-xs font-bold cursor-pointer transition-all bg-balatro-money/10 border-balatro-money text-balatro-money"
+                onClick={() => {
+                  setTempCost(joker.cost || 4);
+                  setEditingCost(true);
+                }}
+              >
+                ${joker.cost || 4}
+              </div>
+            )}
+          </div>
+
+          <div className="absolute -bottom-2 left-1/2 -translate-x-1/2">
+            <div
+              className={`px-3 py-1 rounded-lg border text-xs font-medium cursor-pointer transition-all hover:bg-opacity-20 ${rarityStyles.bg} ${rarityStyles.border} ${rarityStyles.text}`}
+              onClick={() => setShowRarityMenu(!showRarityMenu)}
+            >
+              {rarityText}
+            </div>
+
+            {showRarityMenu && (
+              <div className="absolute bottom-full left-0 mb-1 bg-black-darker border-2 border-black-lighter rounded-lg shadow-lg z-10 overflow-hidden">
+                {rarities.map((rarity) => (
+                  <div
+                    key={rarity.value}
+                    className={`px-3 py-1 text-xs font-medium cursor-pointer transition-all hover:bg-opacity-20 ${rarity.styles.text} ${rarity.styles.bg} border-b border-black-lighter last:border-b-0`}
+                    onClick={() => handleRarityChange(rarity.value)}
+                  >
+                    {rarity.label}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="flex-1 flex flex-col justify-between">
+          <div>
+            <div className="flex items-start mb-4">
+              <div className="flex items-center gap-2 flex-1">
+                {editingName ? (
+                  <input
+                    type="text"
+                    value={tempName}
+                    onChange={(e) => setTempName(e.target.value)}
+                    onBlur={handleNameSave}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") handleNameSave();
+                      if (e.key === "Escape") {
+                        setTempName(joker.name);
+                        setEditingName(false);
+                      }
+                    }}
+                    className="text-white-light font-medium text-xl font-game leading-tight bg-transparent border-none outline-none flex-1 cursor-text"
+                    autoFocus
+                  />
+                ) : (
+                  <h3
+                    className="text-white-light font-medium text-xl font-game leading-tight cursor-pointer flex-1"
+                    onClick={() => {
+                      setTempName(joker.name);
+                      setEditingName(true);
+                    }}
+                  >
+                    {joker.name}
+                  </h3>
+                )}
+              </div>
+            </div>
+
+            {editingDescription ? (
+              <textarea
+                value={tempDescription}
+                onChange={(e) => setTempDescription(e.target.value)}
+                onBlur={handleDescriptionSave}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && e.ctrlKey) handleDescriptionSave();
+                  if (e.key === "Escape") {
+                    setTempDescription(joker.description);
+                    setEditingDescription(false);
+                  }
+                }}
+                className="text-white-darker text-base mb-6 leading-relaxed font-game bg-transparent border-none outline-none resize-none w-full cursor-text"
+                rows={3}
+                autoFocus
+              />
+            ) : (
+              <div
+                className="text-white-darker text-base mb-6 leading-relaxed font-game cursor-pointer"
+                onClick={() => {
+                  setTempDescription(joker.description);
+                  setEditingDescription(true);
+                }}
+                dangerouslySetInnerHTML={{
+                  __html: formatDescription(joker.description),
+                }}
+              />
+            )}
+
+            <div className="flex items-center gap-6 text-base">
+              <div className="flex items-center gap-2">
+                <span className="text-white-darker">Rules:</span>
+                <span className="text-mint font-bold">{rulesCount}</span>
+              </div>
+
+              {(joker.blueprint_compat === false ||
+                joker.eternal_compat === false) && (
+                <div className="flex items-center gap-2">
+                  {joker.blueprint_compat === false && (
+                    <div
+                      className="relative"
+                      onMouseEnter={() => setHoveredIcon("blueprint")}
+                      onMouseLeave={() => setHoveredIcon(null)}
+                    >
+                      <DocumentIcon className="h-5 w-5 text-balatro-red" />
+                      {hoveredIcon === "blueprint" && (
+                        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-black-darker border border-black-lighter rounded text-xs text-white-light whitespace-nowrap z-10">
+                          No Blueprint
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {joker.eternal_compat === false && (
+                    <div
+                      className="relative"
+                      onMouseEnter={() => setHoveredIcon("eternal")}
+                      onMouseLeave={() => setHoveredIcon(null)}
+                    >
+                      <StarIcon className="h-5 w-5 text-balatro-red" />
+                      {hoveredIcon === "eternal" && (
+                        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-black-darker border border-black-lighter rounded text-xs text-white-light whitespace-nowrap z-10">
+                          No Eternal
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="flex gap-3 mt-6">
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={onEditInfo}
+              icon={<PencilIcon className="h-4 w-4" />}
+            />
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={onEditRules}
+              icon={<PuzzlePieceIcon className="h-4 w-4" />}
+            />
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={onDuplicate}
+              icon={<DocumentDuplicateIcon className="h-4 w-4" />}
+            />
+          </div>
         </div>
       </div>
-
-      {renderTooltip()}
-    </>
+    </div>
   );
 };
 

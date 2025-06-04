@@ -164,7 +164,7 @@ const Sidebar: React.FC<SidebarProps> = ({
           <button
             onClick={handleExport}
             disabled={exportLoading || jokers.length === 0}
-            className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-mint border-2 border-mint-dark rounded-lg text-black font-medium hover:bg-mint-light transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-black-darker border-2 border-mint-dark rounded-lg text-mint-light hover:text-black-dark font-medium hover:bg-mint hover:border-mint-darker transition-colors cursor-pointer"
           >
             <ArrowUpTrayIcon className="h-4 w-4" />
             <span className="text-sm tracking-wide">
