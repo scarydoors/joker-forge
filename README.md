@@ -37,7 +37,7 @@ The plan here is to implement enough triggers, conditions, and effects, so as th
 - [ ] **Card Bought** - When a card is purchased
 - [ ] **Card Sold** - When a card is sold
 - [ ] **Shop Reroll** - When the shop is rerolled (Flash Card)
-- [ ] **Joker Added/Removed** - WHhen a Joker is added/removed from your list (Joker Stencil)
+- [ ] **Joker Added/Removed** - When a Joker is added/removed from your list (Joker Stencil)
 
 ---
 
