@@ -1,12 +1,13 @@
 import React, { useState } from "react";
 import {
-  TrashIcon,
   PencilIcon,
   PuzzlePieceIcon,
   DocumentDuplicateIcon,
   DocumentIcon,
   StarIcon,
+  TrashIcon,
 } from "@heroicons/react/24/solid";
+
 import Button from "./generic/Button";
 import type { Rule } from "./ruleBuilder/types";
 
@@ -55,24 +56,24 @@ const getRarityStyles = (rarity: number) => {
   const styleMap: Record<number, { text: string; bg: string; border: string }> =
     {
       1: {
-        text: "text-white-lighter",
-        bg: "bg-balatro-blue",
-        border: "border-balatro-blueshadow",
+        text: "text-balatro-blue",
+        bg: "bg-black",
+        border: "border-balatro-blue",
       },
       2: {
         text: "text-balatro-green",
-        bg: "bg-balatro-green/10",
-        border: "border-balatro-green/30",
+        bg: "bg-black",
+        border: "border-balatro-green",
       },
       3: {
         text: "text-balatro-red",
-        bg: "bg-balatro-red/10",
-        border: "border-balatro-red/30",
+        bg: "bg-black",
+        border: "border-balatro-red",
       },
       4: {
         text: "text-balatro-purple",
-        bg: "bg-balatro-purple/10",
-        border: "border-balatro-purple/30",
+        bg: "bg-black",
+        border: "border-balatro-purple",
       },
     };
   return styleMap[rarity] || styleMap[1];
@@ -98,7 +99,7 @@ const formatDescription = (text: string) => {
 
 const getColorClass = (color: string) => {
   const colorMap: Record<string, string> = {
-    white: "text-balatro-white",
+    white: "text-white-lighter",
     blue: "text-balatro-blue",
     red: "text-balatro-red",
     orange: "text-balatro-orange",
@@ -109,9 +110,8 @@ const getColorClass = (color: string) => {
     mult: "text-balatro-mult",
     money: "text-balatro-money",
     black: "text-balatro-black",
-    lightgrey: "text-balatro-lightgrey",
   };
-  return colorMap[color] || "text-balatro-white";
+  return colorMap[color] || "text-white-lighter";
 };
 
 const JokerCard: React.FC<JokerCardProps> = ({
@@ -167,21 +167,37 @@ const JokerCard: React.FC<JokerCardProps> = ({
   };
 
   return (
-    <div className="relative bg-black-dark border-2 border-black-lighter rounded-xl p-4 transition-all hover:shadow-lg">
-      <div className="absolute -top-3 -right-3 w-8 h-8 bg-black-darker rounded-lg flex items-center justify-center border-2 border-balatro-redshadow">
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            onDelete();
-          }}
-          className="w-full h-full flex items-center rounded justify-center transition-colors hover:bg-balatro-redshadow/50 active:bg-balatro-blackshadow cursor-pointer"
-        >
-          <TrashIcon className="h-5 w-5 text-balatro-red transition-colors" />
-        </button>
-      </div>
+    <div className="flex gap-4">
+      <div className="relative flex flex-col items-center">
+        {editingCost ? (
+          <input
+            type="number"
+            value={tempCost}
+            onChange={(e) => setTempCost(parseInt(e.target.value))}
+            onBlur={handleCostSave}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") handleCostSave();
+              if (e.key === "Escape") {
+                setTempCost(joker.cost || 4);
+                setEditingCost(false);
+              }
+            }}
+            className="px-4 -mb-6 z-20 py-1 rounded-lg border-2 text-xl w-1/2 font-bold cursor-pointer transition-all bg-black font-game tracking-widest border-balatro-money text-balatro-money"
+            autoFocus
+          />
+        ) : (
+          <div
+            className="px-4 -mb-6 z-20 py-1 rounded-lg border-2 text-xl font-bold cursor-pointer transition-all bg-black font-game tracking-widest border-balatro-money text-balatro-money"
+            onClick={() => {
+              setTempCost(joker.cost || 4);
+              setEditingCost(true);
+            }}
+          >
+            ${joker.cost || 4}
+          </div>
+        )}
 
-      <div className="flex gap-6">
-        <div className="relative w-40 h-56">
+        <div className="w-42 z-10">
           {joker.imagePreview ? (
             <img
               src={joker.imagePreview}
@@ -197,93 +213,75 @@ const JokerCard: React.FC<JokerCardProps> = ({
               draggable="false"
             />
           )}
-
-          <div className="absolute -top-2 left-1/2 -translate-x-1/2">
-            {editingCost ? (
-              <input
-                type="number"
-                value={tempCost}
-                onChange={(e) => setTempCost(parseInt(e.target.value))}
-                onBlur={handleCostSave}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") handleCostSave();
-                  if (e.key === "Escape") {
-                    setTempCost(joker.cost || 4);
-                    setEditingCost(false);
-                  }
-                }}
-                className="px-3 py-1 rounded-lg border text-xs font-bold cursor-pointer transition-all  bg-balatro-money/10 border-balatro-money text-balatro-money focus:outline-none text-center min-w-0"
-                autoFocus
-              />
-            ) : (
-              <div
-                className="px-3 py-1 rounded-lg border text-xs font-bold cursor-pointer transition-all bg-balatro-money/10 border-balatro-money text-balatro-money"
-                onClick={() => {
-                  setTempCost(joker.cost || 4);
-                  setEditingCost(true);
-                }}
-              >
-                ${joker.cost || 4}
-              </div>
-            )}
-          </div>
-
-          <div className="absolute -bottom-2 left-1/2 -translate-x-1/2">
-            <div
-              className={`px-3 py-1 rounded-lg border text-xs font-medium cursor-pointer transition-all hover:bg-opacity-20 ${rarityStyles.bg} ${rarityStyles.border} ${rarityStyles.text}`}
-              onClick={() => setShowRarityMenu(!showRarityMenu)}
-            >
-              {rarityText}
-            </div>
-
-            {showRarityMenu && (
-              <div className="absolute bottom-full left-0 mb-1 bg-black-darker border-2 border-black-lighter rounded-lg shadow-lg z-10 overflow-hidden">
-                {rarities.map((rarity) => (
-                  <div
-                    key={rarity.value}
-                    className={`px-3 py-1 text-xs font-medium cursor-pointer transition-all hover:bg-opacity-20 ${rarity.styles.text} ${rarity.styles.bg} border-b border-black-lighter last:border-b-0`}
-                    onClick={() => handleRarityChange(rarity.value)}
-                  >
-                    {rarity.label}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
         </div>
 
-        <div className="flex-1 flex flex-col justify-between">
-          <div>
-            <div className="flex items-start mb-4">
-              <div className="flex items-center gap-2 flex-1">
-                {editingName ? (
-                  <input
-                    type="text"
-                    value={tempName}
-                    onChange={(e) => setTempName(e.target.value)}
-                    onBlur={handleNameSave}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") handleNameSave();
-                      if (e.key === "Escape") {
-                        setTempName(joker.name);
-                        setEditingName(false);
-                      }
-                    }}
-                    className="text-white-light font-medium text-xl font-game leading-tight bg-transparent border-none outline-none flex-1 cursor-text"
-                    autoFocus
-                  />
-                ) : (
-                  <h3
-                    className="text-white-light font-medium text-xl font-game leading-tight cursor-pointer flex-1"
-                    onClick={() => {
+        <div className="relative z-20">
+          <div
+            className={`px-6 py-1 -mt-6 rounded-lg border-2 text-xl font-game tracking-wide font-medium cursor-pointer transition-all ${rarityStyles.bg} ${rarityStyles.border} ${rarityStyles.text}`}
+            onClick={() => setShowRarityMenu(!showRarityMenu)}
+          >
+            {rarityText}
+          </div>
+
+          {showRarityMenu && (
+            <div className="absolute top-full left-1/2 -translate-x-1/2 mt-1 bg-black-darker border-2 border-black-lighter rounded-lg shadow-lg z-20 overflow-hidden">
+              {rarities.map((rarity) => (
+                <div
+                  key={rarity.value}
+                  className={`px-3 py-1 text-xs font-medium cursor-pointer transition-all hover:bg-opacity-20 ${rarity.styles.text} ${rarity.styles.bg} border-b border-black-lighter last:border-b-0`}
+                  onClick={() => handleRarityChange(rarity.value)}
+                >
+                  {rarity.label}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div className="h-1/2 my-auto relative bg-black-dark border-2 border-black-lighter rounded-xl p-4 pl-10 -ml-12 flex-1">
+        <div className="absolute -top-3 -right-3 bg-black-dark border-2 border-balatro-red rounded-lg p-1 hover:bg-balatro-redshadow cursor-pointer transition-colors flex items-center justify-center">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onDelete();
+            }}
+            className="w-full h-full flex items-center cursor-pointer justify-center"
+          >
+            <TrashIcon className="h-5 w-5 text-balatro-red" />
+          </button>
+        </div>
+
+        <div className="flex flex-col">
+          <div className="flex-1">
+            <div className="mb-3">
+              {editingName ? (
+                <input
+                  type="text"
+                  value={tempName}
+                  onChange={(e) => setTempName(e.target.value)}
+                  onBlur={handleNameSave}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") handleNameSave();
+                    if (e.key === "Escape") {
                       setTempName(joker.name);
-                      setEditingName(true);
-                    }}
-                  >
-                    {joker.name}
-                  </h3>
-                )}
-              </div>
+                      setEditingName(false);
+                    }
+                  }}
+                  className="text-white-light font-medium text-lg font-game leading-tight bg-transparent border-none outline-none w-full cursor-text"
+                  autoFocus
+                />
+              ) : (
+                <h3
+                  className="text-white-lighter text-xl tracking-wide font-game leading-tight cursor-pointer"
+                  onClick={() => {
+                    setTempName(joker.name);
+                    setEditingName(true);
+                  }}
+                >
+                  {joker.name}
+                </h3>
+              )}
             </div>
 
             {editingDescription ? (
@@ -298,13 +296,13 @@ const JokerCard: React.FC<JokerCardProps> = ({
                     setEditingDescription(false);
                   }
                 }}
-                className="text-white-darker text-base mb-6 leading-relaxed font-game bg-transparent border-none outline-none resize-none w-full cursor-text"
+                className="text-white-darker text-sm mb-4 leading-relaxed font-game bg-transparent border-none outline-none resize-none w-full cursor-text"
                 rows={3}
                 autoFocus
               />
             ) : (
               <div
-                className="text-white-darker text-base mb-6 leading-relaxed font-game cursor-pointer"
+                className="text-white-darker text-sm mb-4 leading-relaxed font-game cursor-pointer"
                 onClick={() => {
                   setTempDescription(joker.description);
                   setEditingDescription(true);
@@ -315,7 +313,7 @@ const JokerCard: React.FC<JokerCardProps> = ({
               />
             )}
 
-            <div className="flex items-center gap-6 text-base">
+            <div className="flex items-center gap-4 text-sm mb-4">
               <div className="flex items-center gap-2">
                 <span className="text-white-darker">Rules:</span>
                 <span className="text-mint font-bold">{rulesCount}</span>
@@ -330,7 +328,7 @@ const JokerCard: React.FC<JokerCardProps> = ({
                       onMouseEnter={() => setHoveredIcon("blueprint")}
                       onMouseLeave={() => setHoveredIcon(null)}
                     >
-                      <DocumentIcon className="h-5 w-5 text-balatro-red" />
+                      <DocumentIcon className="h-4 w-4 text-balatro-red" />
                       {hoveredIcon === "blueprint" && (
                         <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-black-darker border border-black-lighter rounded text-xs text-white-light whitespace-nowrap z-10">
                           No Blueprint
@@ -345,7 +343,7 @@ const JokerCard: React.FC<JokerCardProps> = ({
                       onMouseEnter={() => setHoveredIcon("eternal")}
                       onMouseLeave={() => setHoveredIcon(null)}
                     >
-                      <StarIcon className="h-5 w-5 text-balatro-red" />
+                      <StarIcon className="h-4 w-4 text-balatro-red" />
                       {hoveredIcon === "eternal" && (
                         <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-black-darker border border-black-lighter rounded text-xs text-white-light whitespace-nowrap z-10">
                           No Eternal
@@ -358,24 +356,24 @@ const JokerCard: React.FC<JokerCardProps> = ({
             </div>
           </div>
 
-          <div className="flex gap-3 mt-6">
+          <div className="flex gap-2">
             <Button
               variant="secondary"
               size="sm"
               onClick={onEditInfo}
-              icon={<PencilIcon className="h-4 w-4" />}
+              icon={<PencilIcon className="h-3 w-3" />}
             />
             <Button
               variant="primary"
               size="sm"
               onClick={onEditRules}
-              icon={<PuzzlePieceIcon className="h-4 w-4" />}
+              icon={<PuzzlePieceIcon className="h-3 w-3" />}
             />
             <Button
               variant="secondary"
               size="sm"
               onClick={onDuplicate}
-              icon={<DocumentDuplicateIcon className="h-4 w-4" />}
+              icon={<DocumentDuplicateIcon className="h-3 w-3" />}
             />
           </div>
         </div>
