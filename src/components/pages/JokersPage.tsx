@@ -490,33 +490,17 @@ const JokersPage: React.FC<JokersPageProps> = ({
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-            {filteredAndSortedJokers.map((joker) => {
-              const validationIssues = validateJoker(joker);
-              return (
-                <div key={joker.id} className="relative">
-                  {validationIssues.length > 0 && (
-                    <div className="absolute -top-2 -left-2 z-10">
-                      <div className="bg-balatro-orange rounded-full p-1.5 shadow-lg border-2 border-black-darker">
-                        <ExclamationTriangleIcon className="h-4 w-4 text-black" />
-                      </div>
-                      <div className="absolute top-8 left-0 bg-black-darker border border-balatro-orange rounded-lg p-2 text-xs text-balatro-orange whitespace-nowrap opacity-0 hover:opacity-100 transition-opacity pointer-events-none">
-                        {validationIssues.join(", ")}
-                      </div>
-                    </div>
-                  )}
-                  <JokerCard
-                    joker={joker}
-                    onEditInfo={() => handleEditInfo(joker)}
-                    onEditRules={() => handleEditRules(joker)}
-                    onDelete={() => handleDeleteJoker(joker.id)}
-                    onDuplicate={() => handleDuplicateJoker(joker)}
-                    onQuickUpdate={(updates) =>
-                      handleQuickUpdate(joker, updates)
-                    }
-                  />
-                </div>
-              );
-            })}
+            {filteredAndSortedJokers.map((joker) => (
+              <JokerCard
+                key={joker.id}
+                joker={joker}
+                onEditInfo={() => handleEditInfo(joker)}
+                onEditRules={() => handleEditRules(joker)}
+                onDelete={() => handleDeleteJoker(joker.id)}
+                onDuplicate={() => handleDuplicateJoker(joker)}
+                onQuickUpdate={(updates) => handleQuickUpdate(joker, updates)}
+              />
+            ))}
           </div>
         )}
 
