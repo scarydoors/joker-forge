@@ -95,6 +95,7 @@ The plan here is to implement enough triggers, conditions, and effects, so as th
 - [ ] **Beat Current Blind** - Completes the current blind (Mr. Bones)
 - [ ] **Modify Sell Value** - Change sell value of this or other jokers (Egg, Gift Card)
 - [ ] **Copy Ability of Adjacent Joker** - Blueprint/Brainstorm logic (difficult)
+- [ ] **Create Joker** - Create a different joker (can probably be implemented as ID)
 
 ---
 
