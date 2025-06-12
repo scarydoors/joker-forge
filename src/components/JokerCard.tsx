@@ -10,6 +10,7 @@ import {
 } from "@heroicons/react/24/solid";
 
 import Tooltip from "./generic/Tooltip";
+import { formatBalatroText } from "./generic/balatroTextFormatter";
 import type { Rule } from "./ruleBuilder/types";
 
 export interface UserVariable {
@@ -78,41 +79,6 @@ const getRarityStyles = (rarity: number) => {
       },
     };
   return styleMap[rarity] || styleMap[1];
-};
-
-const formatDescription = (text: string) => {
-  if (!text) return "";
-
-  let result = text;
-
-  const colorPattern = /\{C:([a-z]+)\}(.*?)(\{\}|$)/g;
-  result = result.replace(colorPattern, (_, colorName, content) => {
-    return `<span class="${getColorClass(colorName)}">${content}</span>`;
-  });
-
-  const xMultPattern = /\{X:mult,C:([a-z]+)\}(.*?)(\{\}|$)/g;
-  result = result.replace(xMultPattern, (_, colorName, content) => {
-    return `<span class="${getColorClass(colorName)}">×${content}</span>`;
-  });
-
-  return result;
-};
-
-const getColorClass = (color: string) => {
-  const colorMap: Record<string, string> = {
-    white: "text-white-lighter",
-    blue: "text-balatro-blue",
-    red: "text-balatro-red",
-    orange: "text-balatro-orange",
-    green: "text-balatro-green",
-    purple: "text-balatro-purple",
-    attention: "text-balatro-planet",
-    chips: "text-balatro-chips",
-    mult: "text-balatro-mult",
-    money: "text-balatro-money",
-    black: "text-balatro-black",
-  };
-  return colorMap[color] || "text-white-lighter";
 };
 
 const JokerCard: React.FC<JokerCardProps> = ({
@@ -257,8 +223,7 @@ const JokerCard: React.FC<JokerCardProps> = ({
             <Tooltip
               content={validationIssues.join(", ")}
               show={hoveredIcon === "warning"}
-              contentClassName="max-w-xs whitespace-normal text-balatro-orange border-balatro-orange"
-              position="right"
+              position="top"
             >
               <div
                 className="absolute top-2 left-2 bg-black border-2 border-balatro-orange rounded-lg p-1 cursor-pointer transition-all flex items-center justify-center z-30"
@@ -386,7 +351,7 @@ const JokerCard: React.FC<JokerCardProps> = ({
                     setEditingDescription(true);
                   }}
                   dangerouslySetInnerHTML={{
-                    __html: formatDescription(joker.description),
+                    __html: formatBalatroText(joker.description),
                   }}
                 />
               )}
@@ -439,7 +404,6 @@ const JokerCard: React.FC<JokerCardProps> = ({
           </div>
 
           <div className="flex items-center justify-center bg-black rounded-lg overflow-hidden">
-            <div className="w-px bg-black-lighter py-3"></div>{" "}
             <Tooltip content="Edit Info" show={hoveredButton === "edit"}>
               <div
                 className="flex flex-1 hover:bg-black-light transition-colors cursor-pointer group"
@@ -485,7 +449,6 @@ const JokerCard: React.FC<JokerCardProps> = ({
                 </div>
               </div>
             </Tooltip>
-            <div className="w-px bg-black-lighter py-3"></div>
           </div>
         </div>
       </div>
