@@ -146,16 +146,18 @@ const Sidebar: React.FC<SidebarProps> = ({
         </nav>
 
         <div className="p-4 border-t border-black-light space-y-3">
-          <button className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-black-darker border-2 border-black-lighter rounded-lg text-white-light hover:border-mint hover:text-mint transition-colors cursor-pointer">
+          <button className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-black-darker border-2 border-black-lighter rounded-lg text-white-light hover:border-mint hover:text-mint transition-colors cursor-pointer ">
             <ArrowDownTrayIcon className="h-4 w-4" />
             <span className="text-sm font-medium tracking-wide">
-              Import Mod
+              Import Mod{" "}
             </span>
+            <span className="text-xs">(JSON)</span>
           </button>
 
           <button className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-black-darker border-2 border-black-lighter rounded-lg text-white-light hover:border-mint hover:text-mint transition-colors cursor-pointer">
             <BookmarkIcon className="h-4 w-4" />
             <span className="text-sm font-medium tracking-wide">Save Mod</span>
+            <span className="text-xs">(JSON)</span>
           </button>
 
           <button
@@ -165,7 +167,7 @@ const Sidebar: React.FC<SidebarProps> = ({
           >
             <ArrowUpTrayIcon className="h-4 w-4" />
             <span className="text-sm tracking-wide">
-              {exportLoading ? "Exporting..." : "Export Mod"}
+              {exportLoading ? "Exporting..." : "Export Mod Files"}
             </span>
           </button>
 
