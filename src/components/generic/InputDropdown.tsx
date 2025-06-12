@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
+import ReactDOM from "react-dom";
 import { ChevronDownIcon } from "@heroicons/react/24/outline";
 
 interface DropdownOption {
@@ -37,13 +38,21 @@ const InputDropdown: React.FC<InputDropdownProps> = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
+  const [dropdownPosition, setDropdownPosition] = useState({
+    top: 0,
+    left: 0,
+    width: 0,
+  });
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
         dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node)
+        !dropdownRef.current.contains(event.target as Node) &&
+        buttonRef.current &&
+        !buttonRef.current.contains(event.target as Node)
       ) {
         setIsOpen(false);
         setIsFocused(false);
@@ -55,6 +64,17 @@ const InputDropdown: React.FC<InputDropdownProps> = ({
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
+
+  useEffect(() => {
+    if (isOpen && buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect();
+      setDropdownPosition({
+        top: rect.bottom + 4,
+        left: rect.left,
+        width: rect.width,
+      });
+    }
+  }, [isOpen]);
 
   const renderIcon = () => {
     if (icon) {
@@ -85,7 +105,6 @@ const InputDropdown: React.FC<InputDropdownProps> = ({
     return "bg-black-lighter";
   };
 
-  // Size-dependent classes
   const sizeClasses = {
     sm: {
       padding: "px-2 py-1",
@@ -110,7 +129,6 @@ const InputDropdown: React.FC<InputDropdownProps> = ({
     },
   };
 
-  // Label position classes
   const getLabelPositionClass = () => {
     switch (labelPosition) {
       case "left":
@@ -123,7 +141,7 @@ const InputDropdown: React.FC<InputDropdownProps> = ({
   };
 
   return (
-    <div className="flex flex-col w-full select-none" ref={dropdownRef}>
+    <div className="flex flex-col w-full select-none">
       {label && (
         <div className={`flex ${getLabelPositionClass()}`}>
           <div className="bg-black border-2 border-black-light rounded-md px-4 pb-2 -mb-2 relative">
@@ -136,6 +154,7 @@ const InputDropdown: React.FC<InputDropdownProps> = ({
 
       <div className="relative">
         <div
+          ref={buttonRef}
           className={`
             relative flex items-center bg-black-dark text-white-light ${
               sizeClasses[size].padding
@@ -184,12 +203,25 @@ const InputDropdown: React.FC<InputDropdownProps> = ({
           </div>
         </div>
 
-        {isOpen && (
-          <div className="absolute z-20 w-full mt-1 bg-black-dark border-2 border-black-lighter rounded-lg shadow-lg max-h-60 overflow-y-auto custom-scrollbar">
-            {options.map((option) => (
-              <div
-                key={option.value}
-                className={`
+        {isOpen &&
+          ReactDOM.createPortal(
+            <div
+              ref={dropdownRef}
+              style={{
+                position: "fixed",
+                top: `${dropdownPosition.top}px`,
+                left: `${dropdownPosition.left}px`,
+                width: `${dropdownPosition.width}px`,
+                zIndex: 9999,
+              }}
+              className="bg-black-dark border-2 border-black-lighter rounded-lg shadow-lg max-h-60 overflow-y-auto custom-scrollbar"
+              onMouseDown={(e) => e.stopPropagation()}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {options.map((option) => (
+                <div
+                  key={option.value}
+                  className={`
                   ${sizeClasses[size].padding} cursor-pointer 
                   ${
                     useGameFont ? "font-game" : "font-lexend"
@@ -201,16 +233,18 @@ const InputDropdown: React.FC<InputDropdownProps> = ({
                   }
                   ${value === option.value ? "font-medium" : "font-light"}
                 `}
-                onClick={() => {
-                  onChange(option.value);
-                  setIsOpen(false);
-                }}
-              >
-                {option.label}
-              </div>
-            ))}
-          </div>
-        )}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onChange(option.value);
+                    setIsOpen(false);
+                  }}
+                >
+                  {option.label}
+                </div>
+              ))}
+            </div>,
+            document.body
+          )}
       </div>
 
       {error && <p className="text-balatro-red text-xs mt-1">{error}</p>}
