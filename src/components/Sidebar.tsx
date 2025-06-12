@@ -73,20 +73,17 @@ const Sidebar: React.FC<SidebarProps> = ({
   ];
 
   return (
-    <div className="w-80 bg-black-dark border-r-2 border-black-light flex flex-col font-lexend">
+    <div className="w-80 bg-black-dark rounded-xl m-4 border-2 border-black-light flex flex-col font-lexend">
       <div className="p-6 border-black-light">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-mint-light rounded-lg flex items-center justify-center">
-            <CodeBracketIcon className="h-5 w-5 text-black" />
+        <div className="flex gap-3 justify-center -ml-6">
+          <div className="w-6 h-6 rounded-lg flex items-center my-auto justify-center">
+            <CodeBracketIcon className="h-5 w-5 text-white" />
           </div>
-          <h1 className="text-white font-medium text-lg tracking-widest">
-            Joker
-          </h1>
-          <h1 className="text-mint-light font-medium text-lg tracking-widest -ml-1">
-            Forge
-          </h1>
+          <h1 className="text-white font-light tracking-widest">Joker Forge</h1>
         </div>
       </div>
+
+      <div className="border-b -mt-1 mb-2 border-black-light"> </div>
 
       <div className="flex-1 flex flex-col">
         <nav className="flex-1 px-4">
@@ -109,7 +106,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                   onClick={() => handleSectionClick(item.id)}
                   className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors cursor-pointer ${
                     isActive
-                      ? "bg-mint text-black font-medium"
+                      ? "bg-mint-light text-black-dark font-medium"
                       : "text-white-light hover:bg-black-light hover:text-white-lighter"
                   }`}
                 >
@@ -135,7 +132,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                     onClick={() => handleSectionClick(item.id)}
                     className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors cursor-pointer ${
                       isActive
-                        ? "bg-mint text-black font-medium"
+                        ? "bg-mint-light text-black-dark font-medium"
                         : "text-white-dark hover:text-white-light hover:bg-black-light"
                     }`}
                   >
