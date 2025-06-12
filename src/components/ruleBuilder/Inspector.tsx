@@ -85,39 +85,35 @@ const ParameterField: React.FC<ParameterFieldProps> = ({
 
   if (param.id === "variable_name" && availableVariables.length > 0) {
     return (
-      <div className="mb-3">
-        <InputDropdown
-          label={String(param.label)}
-          labelPosition="center"
-          value={(value as string) || ""}
-          onChange={(newValue) => onChange(newValue)}
-          options={availableVariables}
-          className="bg-black-dark"
-          size="sm"
-        />
-      </div>
+      <InputDropdown
+        label={String(param.label)}
+        labelPosition="center"
+        value={(value as string) || ""}
+        onChange={(newValue) => onChange(newValue)}
+        options={availableVariables}
+        className="bg-black-dark"
+        size="sm"
+      />
     );
   }
 
   switch (param.type) {
     case "select":
       return (
-        <div className="mb-3">
-          <InputDropdown
-            label={String(param.label)}
-            labelPosition="center"
-            value={(value as string) || ""}
-            onChange={(newValue) => onChange(newValue)}
-            options={
-              param.options?.map((option) => ({
-                value: option.value,
-                label: option.label,
-              })) || []
-            }
-            className="bg-black-dark"
-            size="sm"
-          />
-        </div>
+        <InputDropdown
+          label={String(param.label)}
+          labelPosition="center"
+          value={(value as string) || ""}
+          onChange={(newValue) => onChange(newValue)}
+          options={
+            param.options?.map((option) => ({
+              value: option.value,
+              label: option.label,
+            })) || []
+          }
+          className="bg-black-dark"
+          size="sm"
+        />
       );
 
     case "number": {
@@ -129,7 +125,7 @@ const ParameterField: React.FC<ParameterFieldProps> = ({
           : 0;
 
       return (
-        <div className="mb-3">
+        <>
           <div className="flex items-center gap-2 mb-2">
             <span className="text-white-light text-sm">
               {String(param.label)}
@@ -192,42 +188,42 @@ const ParameterField: React.FC<ParameterFieldProps> = ({
               </div>
             </div>
           ) : (
-            <InputField
-              type="number"
-              value={numericValue.toString()}
-              onChange={(e) => {
-                const val = parseFloat(e.target.value);
-                onChange(isNaN(val) ? 0 : val);
-              }}
-              min={param.min?.toString()}
-              max={param.max?.toString()}
-              step={
-                param.id === "value" &&
-                typeof value === "number" &&
-                value > 0 &&
-                value < 1
-                  ? "0.1"
-                  : "1"
-              }
-              size="sm"
-              labelPosition="center"
-            />
+            <>
+              <InputField
+                type="number"
+                value={numericValue.toString()}
+                onChange={(e) => {
+                  const val = parseFloat(e.target.value);
+                  onChange(isNaN(val) ? 0 : val);
+                }}
+                min={param.min?.toString()}
+                max={param.max?.toString()}
+                step={
+                  param.id === "value" &&
+                  typeof value === "number" &&
+                  value > 0 &&
+                  value < 1
+                    ? "0.1"
+                    : "1"
+                }
+                size="sm"
+                labelPosition="center"
+              />
+            </>
           )}
-        </div>
+        </>
       );
     }
 
     case "text":
       return (
-        <div className="mb-3">
-          <InputField
-            label={String(param.label)}
-            value={(value as string) || ""}
-            onChange={(e) => onChange(e.target.value)}
-            className="text-sm"
-            size="sm"
-          />
-        </div>
+        <InputField
+          label={String(param.label)}
+          value={(value as string) || ""}
+          onChange={(e) => onChange(e.target.value)}
+          className="text-sm"
+          size="sm"
+        />
       );
 
     default:
@@ -336,6 +332,13 @@ const Inspector: React.FC<InspectorProps> = ({
     const conditionType = getConditionTypeById(selectedCondition.type);
     if (!conditionType) return null;
 
+    const paramsToRender = conditionType.params.filter((param) => {
+      if (!hasShowWhen(param)) return true;
+      const { parameter, values } = param.showWhen;
+      const parentValue = selectedCondition.params[parameter];
+      return values.includes(parentValue as string);
+    });
+
     return (
       <div className="space-y-4">
         <div className="bg-gradient-to-r from-condition/20 to-transparent border border-condition/30 rounded-lg p-4 relative">
@@ -375,35 +378,37 @@ const Inspector: React.FC<InspectorProps> = ({
           </p>
         </div>
 
-        <div className="space-y-3">
-          <h5 className="text-white-light font-medium text-sm flex items-center gap-2">
-            <div className="w-2 h-2 bg-condition rounded-full"></div>
-            Parameters
-          </h5>
-          {conditionType.params.map((param) => (
-            <div
-              key={param.id}
-              className="bg-black-darker border border-black-lighter rounded-lg p-3"
-            >
-              <ParameterField
-                param={param}
-                value={selectedCondition.params[param.id]}
-                onChange={(value) => {
-                  const newParams = {
-                    ...selectedCondition.params,
-                    [param.id]: value,
-                  };
-                  onUpdateCondition(selectedRule.id, selectedCondition.id, {
-                    params: newParams,
-                  });
-                }}
-                parentValues={selectedCondition.params}
-                availableVariables={availableVariables}
-                onCreateVariable={handleCreateVariable}
-              />
-            </div>
-          ))}
-        </div>
+        {paramsToRender.length > 0 && (
+          <div className="space-y-3">
+            <h5 className="text-white-light font-medium text-sm flex items-center gap-2">
+              <div className="w-2 h-2 bg-condition rounded-full"></div>
+              Parameters
+            </h5>
+            {paramsToRender.map((param) => (
+              <div
+                key={param.id}
+                className="bg-black-darker border border-black-lighter rounded-lg p-3"
+              >
+                <ParameterField
+                  param={param}
+                  value={selectedCondition.params[param.id]}
+                  onChange={(value) => {
+                    const newParams = {
+                      ...selectedCondition.params,
+                      [param.id]: value,
+                    };
+                    onUpdateCondition(selectedRule.id, selectedCondition.id, {
+                      params: newParams,
+                    });
+                  }}
+                  parentValues={selectedCondition.params}
+                  availableVariables={availableVariables}
+                  onCreateVariable={handleCreateVariable}
+                />
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     );
   };
@@ -506,6 +511,13 @@ const Inspector: React.FC<InspectorProps> = ({
     if (!effectType) return null;
 
     const hasRandomChance = selectedEffect.params.has_random_chance === "true";
+
+    const paramsToRender = effectType.params.filter((param) => {
+      if (!hasShowWhen(param)) return true;
+      const { parameter, values } = param.showWhen;
+      const parentValue = selectedEffect.params[parameter];
+      return values.includes(parentValue as string);
+    });
 
     return (
       <div className="space-y-4">
@@ -610,35 +622,37 @@ const Inspector: React.FC<InspectorProps> = ({
           )}
         </div>
 
-        <div className="space-y-3">
-          <h5 className="text-white-light font-medium text-sm flex items-center gap-2">
-            <div className="w-2 h-2 bg-effect rounded-full"></div>
-            Parameters
-          </h5>
-          {effectType.params.map((param) => (
-            <div
-              key={param.id}
-              className="bg-black-darker border border-black-lighter rounded-lg p-3"
-            >
-              <ParameterField
-                param={param}
-                value={selectedEffect.params[param.id]}
-                onChange={(value) => {
-                  const newParams = {
-                    ...selectedEffect.params,
-                    [param.id]: value,
-                  };
-                  onUpdateEffect(selectedRule.id, selectedEffect.id, {
-                    params: newParams,
-                  });
-                }}
-                parentValues={selectedEffect.params}
-                availableVariables={availableVariables}
-                onCreateVariable={handleCreateVariable}
-              />
-            </div>
-          ))}
-        </div>
+        {paramsToRender.length > 0 && (
+          <div className="space-y-3">
+            <h5 className="text-white-light font-medium text-sm flex items-center gap-2">
+              <div className="w-2 h-2 bg-effect rounded-full"></div>
+              Parameters
+            </h5>
+            {paramsToRender.map((param) => (
+              <div
+                key={param.id}
+                className="bg-black-darker border border-black-lighter rounded-lg p-3"
+              >
+                <ParameterField
+                  param={param}
+                  value={selectedEffect.params[param.id]}
+                  onChange={(value) => {
+                    const newParams = {
+                      ...selectedEffect.params,
+                      [param.id]: value,
+                    };
+                    onUpdateEffect(selectedRule.id, selectedEffect.id, {
+                      params: newParams,
+                    });
+                  }}
+                  parentValues={selectedEffect.params}
+                  availableVariables={availableVariables}
+                  onCreateVariable={handleCreateVariable}
+                />
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     );
   };

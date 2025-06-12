@@ -328,11 +328,22 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
     (conditionType: string) => {
       if (!selectedItem) return;
 
+      const conditionTypeData = getConditionTypeById(conditionType);
+      const defaultParams: Record<string, unknown> = {};
+
+      if (conditionTypeData) {
+        conditionTypeData.params.forEach((param) => {
+          if (param.default !== undefined) {
+            defaultParams[param.id] = param.default;
+          }
+        });
+      }
+
       const newCondition: Condition = {
         id: crypto.randomUUID(),
         type: conditionType,
         negate: false,
-        params: {},
+        params: defaultParams,
       };
 
       let targetGroupId = selectedItem.groupId;
@@ -468,10 +479,21 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
   const addEffect = (effectType: string) => {
     if (!selectedItem) return;
 
+    const effectTypeData = getEffectTypeById(effectType);
+    const defaultParams: Record<string, unknown> = {};
+
+    if (effectTypeData) {
+      effectTypeData.params.forEach((param) => {
+        if (param.default !== undefined) {
+          defaultParams[param.id] = param.default;
+        }
+      });
+    }
+
     const newEffect: Effect = {
       id: crypto.randomUUID(),
       type: effectType,
-      params: {},
+      params: defaultParams,
     };
 
     setRules((prev) =>
@@ -914,7 +936,7 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-balatro-blackshadow/80 flex items-center justify-center z-50 font-lexend">
+    <div className="fixed inset-0 flex bg-black-darker items-center justify-center z-[60] font-lexend">
       <div
         ref={modalRef}
         className="bg-black-dark rounded-lg w-full h-full overflow-hidden border-2 border-black-light flex flex-col"
