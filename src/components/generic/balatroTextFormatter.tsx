@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import React from "react";
 
 interface ParsedSegment {
@@ -8,6 +9,17 @@ interface ParsedSegment {
   motion?: number;
   tooltip?: string;
   isMultiplier?: boolean;
+  stripWhitespace?: boolean;
+}
+
+interface StyleState {
+  textColor?: string;
+  backgroundColor?: string;
+  scale?: number;
+  motion?: number;
+  tooltip?: string;
+  isMultiplier?: boolean;
+  stripWhitespace?: boolean;
 }
 
 const COLOR_MAP: Record<string, string> = {
@@ -37,6 +49,8 @@ const COLOR_MAP: Record<string, string> = {
   legendary: "text-balatro-purple",
   enhanced: "text-indigo-400",
   default: "text-gray-600",
+  edition: "text-rainbow",
+  dark_edition: "text-dark-rainbow",
 };
 
 const BG_COLOR_MAP: Record<string, string> = {
@@ -60,30 +74,33 @@ const BG_COLOR_MAP: Record<string, string> = {
   planet: "bg-blue-400",
   spectral: "bg-blue-500",
   enhanced: "bg-indigo-400",
+  edition: "bg-rainbow",
+  dark_edition: "bg-dark-rainbow",
 };
 
-// eslint-disable-next-line react-refresh/only-export-components
 export const parseBalatroText = (
   text: string,
   locVars?: { colours?: string[] }
 ): ParsedSegment[] => {
   const segments: ParsedSegment[] = [];
-  const regex = /\{([^}]+)\}([^{]*)/g;
-  let lastIndex = 0;
-  let match;
 
-  while ((match = regex.exec(text)) !== null) {
-    if (match.index > lastIndex) {
-      segments.push({ text: text.slice(lastIndex, match.index) });
-    }
+  text = text.replace(/\[s\]/g, "\n");
 
-    const modifiers = match[1];
-    const content = match[2];
+  const parts = text.split(/(\{[^}]*\})/);
+  let currentStyle: StyleState = {};
 
-    if (modifiers === "") {
-      if (content) segments.push({ text: content });
-    } else {
-      const segment: ParsedSegment = { text: content };
+  for (let i = 0; i < parts.length; i++) {
+    const part = parts[i];
+
+    if (part.startsWith("{") && part.endsWith("}")) {
+      const modifiers = part.slice(1, -1);
+
+      if (modifiers === "") {
+        currentStyle = {};
+        continue;
+      }
+
+      const newStyle: StyleState = {};
       const modifierList = modifiers.split(",");
 
       for (const mod of modifierList) {
@@ -91,20 +108,20 @@ export const parseBalatroText = (
 
         switch (type) {
           case "C":
-            segment.textColor = COLOR_MAP[value] || "text-white-lighter";
+            newStyle.textColor = COLOR_MAP[value] || "text-white-lighter";
             break;
           case "X":
-            segment.backgroundColor = BG_COLOR_MAP[value] || "bg-black";
-            segment.text = segment.text.replace(/\s/g, "");
+            newStyle.backgroundColor = BG_COLOR_MAP[value] || "bg-black";
+            newStyle.stripWhitespace = true;
             if (value === "mult" || value === "chips") {
-              segment.isMultiplier = true;
+              newStyle.isMultiplier = true;
             }
             break;
           case "V":
             if (locVars?.colours && locVars.colours[parseInt(value) - 1]) {
               const color = locVars.colours[parseInt(value) - 1];
               if (typeof color === "string" && color.startsWith("#")) {
-                segment.textColor = `text-[${color}]`;
+                newStyle.textColor = `text-[${color}]`;
               }
             }
             break;
@@ -112,30 +129,37 @@ export const parseBalatroText = (
             if (locVars?.colours && locVars.colours[parseInt(value) - 1]) {
               const color = locVars.colours[parseInt(value) - 1];
               if (typeof color === "string" && color.startsWith("#")) {
-                segment.backgroundColor = `bg-[${color}]`;
+                newStyle.backgroundColor = `bg-[${color}]`;
               }
             }
             break;
           case "E":
-            segment.motion = parseInt(value);
+            newStyle.motion = parseInt(value);
             break;
           case "T":
-            segment.tooltip = value;
+            newStyle.tooltip = value;
             break;
           case "s":
-            segment.scale = parseFloat(value);
+            newStyle.scale = parseFloat(value);
             break;
         }
       }
 
-      if (segment.text) segments.push(segment);
+      currentStyle = newStyle;
+    } else if (part) {
+      let processedText = part;
+
+      if (currentStyle.stripWhitespace) {
+        processedText = processedText.replace(/\s/g, "");
+      }
+
+      if (processedText) {
+        segments.push({
+          text: processedText,
+          ...currentStyle,
+        });
+      }
     }
-
-    lastIndex = regex.lastIndex;
-  }
-
-  if (lastIndex < text.length) {
-    segments.push({ text: text.slice(lastIndex) });
   }
 
   return segments;
@@ -181,11 +205,25 @@ export const BalatroText: React.FC<BalatroTextProps> = ({
           classes += " animate-bump";
         }
 
+        let displayText = segment.text;
         if (segment.isMultiplier && segment.text.match(/^[X×]?\d/)) {
-          segment.text = segment.text.replace(/^X?/, "×");
+          displayText = segment.text.replace(/^X?/, "×");
         }
 
-        const content = <span className={classes.trim()}>{segment.text}</span>;
+        if (displayText.includes("\n")) {
+          return (
+            <span key={index}>
+              {displayText.split("\n").map((line, lineIndex) => (
+                <React.Fragment key={lineIndex}>
+                  {lineIndex > 0 && <br />}
+                  <span className={classes.trim()}>{line}</span>
+                </React.Fragment>
+              ))}
+            </span>
+          );
+        }
+
+        const content = <span className={classes.trim()}>{displayText}</span>;
 
         if (segment.tooltip) {
           return (
@@ -204,7 +242,6 @@ export const BalatroText: React.FC<BalatroTextProps> = ({
   );
 };
 
-// eslint-disable-next-line react-refresh/only-export-components
 export const formatBalatroText = (
   text: string,
   locVars?: { colours?: string[] }
