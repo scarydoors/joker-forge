@@ -115,6 +115,11 @@ const InputField = forwardRef<
     focus:outline-none rounded-lg
     border-2 border-black-lighter focus:border-mint transition-colors w-full
     ${error ? "border-balatro-red" : ""}
+    ${
+      props.type === "number"
+        ? "[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+        : ""
+    }
     ${className}
   `;
 
@@ -140,11 +145,11 @@ const InputField = forwardRef<
           {separator && (
             <div
               className={`
-              absolute ${
-                sizeClasses[size].separatorPadding
-              } top-1/2 -translate-y-1/2 h-[60%] w-px 
-              ${getSeparatorColor()}
-            `}
+            absolute ${
+              sizeClasses[size].separatorPadding
+            } top-1/2 -translate-y-1/2 h-[60%] w-px 
+            ${getSeparatorColor()}
+          `}
             />
           )}
 
