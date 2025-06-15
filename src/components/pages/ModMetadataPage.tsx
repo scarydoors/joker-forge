@@ -57,6 +57,10 @@ const ModMetadataPage: React.FC<ModMetadataPageProps> = ({
         <h1 className="text-2xl text-white-light font-light tracking-wide">
           Mod Metadata
         </h1>
+        <p className="text-white-darker text-sm opacity-50">
+          Please note, only mod name and author are editable for now, I need to
+          update the code generation. bare with me haha
+        </p>
       </div>
 
       <div className="space-y-6">
