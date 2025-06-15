@@ -2,14 +2,12 @@ import React, { useState, useRef, useEffect } from "react";
 import {
   PhotoIcon,
   ArrowPathIcon,
-  PuzzlePieceIcon,
-  LockOpenIcon,
-  TrashIcon,
   XMarkIcon,
-  EyeIcon,
   SparklesIcon,
   BoltIcon,
-  HashtagIcon,
+  PencilIcon,
+  CubeIcon,
+  DocumentTextIcon,
 } from "@heroicons/react/24/outline";
 import InputField from "./generic/InputField";
 import InputDropdown from "./generic/InputDropdown";
@@ -34,8 +32,11 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
   onDelete,
 }) => {
   const [formData, setFormData] = useState<JokerData>(joker);
-  const [showPreview, setShowPreview] = useState(true);
+  const [activeTab, setActiveTab] = useState<
+    "visual" | "properties" | "description"
+  >("visual");
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const modalRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (isOpen) {
@@ -48,6 +49,25 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
       });
     }
   }, [isOpen, joker]);
+
+  useEffect(() => {
+    if (isOpen) {
+      const handleClickOutside = (event: MouseEvent) => {
+        if (
+          modalRef.current &&
+          !modalRef.current.contains(event.target as Node)
+        ) {
+          handleSave();
+        }
+      };
+
+      document.addEventListener("mousedown", handleClickOutside);
+      return () => {
+        document.removeEventListener("mousedown", handleClickOutside);
+      };
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -209,14 +229,6 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
     { value: "4", label: "Legendary" },
   ];
 
-  const spawnPoolOptions = [
-    { value: "shop", label: "Shop" },
-    { value: "boss", label: "Boss" },
-    { value: "ante", label: "Ante" },
-    { value: "planet", label: "Planet" },
-    { value: "spectral", label: "Spectral" },
-  ];
-
   const getRarityColor = (rarity: number) => {
     switch (rarity) {
       case 1:
@@ -247,199 +259,285 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
     }
   };
 
+  const tabs = [
+    { id: "visual", label: "Visual", icon: PhotoIcon },
+    { id: "properties", label: "Properties", icon: CubeIcon },
+    { id: "description", label: "Description", icon: DocumentTextIcon },
+  ];
+
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-90 z-50 overflow-hidden">
-      <div className="h-full flex">
-        <div className="flex-1 w-3/4 overflow-y-auto custom-scrollbar">
-          <div className="p-6 font-lexend">
-            <div className="flex items-center justify-between mb-6">
-              <div>
-                <h1 className="text-2xl text-white-light font-light tracking-wide mb-1 bg-gradient-to-r from-white-light to-mint bg-clip-text">
-                  Edit Joker
-                </h1>
-                <p className="text-white-darker text-sm">
-                  Customize appearance, stats, and compatibility
-                </p>
-              </div>
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="secondary"
-                  onClick={() => setShowPreview(!showPreview)}
-                  icon={<EyeIcon className="h-4 w-4" />}
-                  size="sm"
-                  title={showPreview ? "Hide preview" : "Show preview"}
-                />
-                <Button
-                  variant="secondary"
-                  onClick={onClose}
-                  icon={<XMarkIcon className="h-4 w-4" />}
-                  size="sm"
-                  title="Close"
-                />
-              </div>
+    <div className="fixed inset-0 flex bg-black-darker/80 backdrop-blur-sm items-center justify-center z-50 font-lexend">
+      <div
+        ref={modalRef}
+        className="bg-black-dark backdrop-blur-md border-2 border-black-lighter rounded-lg shadow-2xl w-full max-w-5xl max-h-[90vh] flex flex-col"
+      >
+        <div className="flex items-center justify-between p-3 border-b border-black-lighter">
+          <div className="flex items-center gap-2">
+            <PencilIcon className="h-5 w-5 text-white-light" />
+            <h3 className="text-white-light text-sm font-medium tracking-wider">
+              Edit Joker
+            </h3>
+          </div>
+          <button
+            onClick={onClose}
+            className="p-1 text-white-darker hover:text-white transition-colors cursor-pointer"
+          >
+            <XMarkIcon className="h-4 w-4" />
+          </button>
+        </div>
+
+        <div className="flex flex-1 overflow-hidden">
+          <div className="flex-1 flex flex-col">
+            <div className="flex border-b border-black-lighter">
+              {tabs.map((tab) => {
+                const Icon = tab.icon;
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() =>
+                      setActiveTab(
+                        tab.id as "visual" | "properties" | "description"
+                      )
+                    }
+                    className={`flex items-center gap-2 px-4 py-3 text-sm font-medium tracking-wider transition-colors cursor-pointer ${
+                      activeTab === tab.id
+                        ? "text-mint border-b-2 border-mint bg-black-darker/50"
+                        : "text-white-darker hover:text-white-light"
+                    }`}
+                  >
+                    <Icon className="h-4 w-4" />
+                    {tab.label}
+                  </button>
+                );
+              })}
             </div>
 
-            <div className="grid grid-cols-2 gap-6 mb-6">
-              <div>
-                <h2 className="text-lg text-white-light mb-4 flex items-center">
-                  <PhotoIcon className="h-5 w-5 mr-2 text-mint" />
-                  Visual Design
-                </h2>
+            <div className="flex-1 overflow-y-auto custom-scrollbar p-6">
+              <div className="w-1/4 h-[1px] bg-black-lighter mx-auto mb-6"></div>
 
-                <div className="flex gap-4 mb-4">
-                  <div className="flex-shrink-0">
-                    <div className="aspect-[142/190] w-32 bg-black-darker border-2 border-black-lighter rounded-lg overflow-hidden">
-                      {formData.imagePreview ? (
-                        <img
-                          src={formData.imagePreview}
-                          alt={formData.name}
-                          className="w-full h-full object-cover"
-                          draggable="false"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-white-darker">
-                          <PhotoIcon className="h-8 w-8" />
-                        </div>
-                      )}
-                    </div>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleImageUpload}
-                      className="hidden"
-                      ref={fileInputRef}
-                    />
-                    <Button
-                      onClick={() => fileInputRef.current?.click()}
-                      variant="secondary"
-                      className="mt-2 w-full"
-                      size="sm"
-                      icon={<PhotoIcon className="h-3 w-3" />}
-                    >
-                      {formData.imagePreview ? "Change" : "Upload"}
-                    </Button>
-                    <p className="text-xs text-white-darker mt-1 text-center">
-                      142×190px
-                    </p>
-                  </div>
-
-                  <div className="flex-1 space-y-3">
-                    <InputField
-                      value={formData.name}
-                      onChange={(e) =>
-                        handleInputChange("name", e.target.value)
-                      }
-                      placeholder="Enter joker name"
-                      separator={true}
-                      useGameFont={true}
-                      label="Name"
-                      size="md"
-                    />
-
-                    <div className="grid grid-cols-3 gap-2">
-                      <InputDropdown
-                        value={formData.rarity.toString()}
-                        onChange={handleRarityChange}
-                        options={rarityOptions}
-                        separator={true}
-                        label="Rarity"
-                        size="sm"
+              {activeTab === "visual" && (
+                <div className="space-y-6">
+                  <div className="flex gap-6">
+                    <div className="flex-shrink-0">
+                      <div className="aspect-[142/190] w-40 bg-black-darker border-2 border-black-lighter rounded-lg overflow-hidden">
+                        {formData.imagePreview ? (
+                          <img
+                            src={formData.imagePreview}
+                            alt={formData.name}
+                            className="w-full h-full object-cover"
+                            draggable="false"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-white-darker">
+                            <PhotoIcon className="h-10 w-10" />
+                          </div>
+                        )}
+                      </div>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageUpload}
+                        className="hidden"
+                        ref={fileInputRef}
                       />
+                      <Button
+                        onClick={() => fileInputRef.current?.click()}
+                        variant="secondary"
+                        className="mt-3 w-full cursor-pointer"
+                        size="sm"
+                        icon={<PhotoIcon className="h-4 w-4" />}
+                      >
+                        {formData.imagePreview
+                          ? "Change Image"
+                          : "Upload Image"}
+                      </Button>
+                      <p className="text-xs text-white-darker mt-2 text-center">
+                        Required: 142×190px
+                      </p>
+                    </div>
+
+                    <div className="flex-1 space-y-4">
                       <InputField
-                        value={formData.cost?.toString() || "4"}
+                        value={formData.name}
                         onChange={(e) =>
-                          handleNumberChange("cost", parseInt(e.target.value))
+                          handleInputChange("name", e.target.value)
                         }
-                        placeholder="Cost"
+                        placeholder="Enter joker name"
                         separator={true}
-                        type="number"
-                        min={1}
-                        label="Cost"
-                        size="sm"
+                        useGameFont={true}
+                        label="Name"
+                        size="lg"
                       />
-                      <InputDropdown
-                        value={"shop"}
-                        onChange={(value) => console.log(value)}
-                        options={spawnPoolOptions}
-                        separator={true}
-                        label="Pool"
-                        size="sm"
-                      />
+
+                      <div className="grid grid-cols-2 gap-4">
+                        <InputDropdown
+                          value={formData.rarity.toString()}
+                          onChange={handleRarityChange}
+                          options={rarityOptions}
+                          separator={true}
+                          label="Rarity"
+                        />
+                        <InputField
+                          value={formData.cost?.toString() || "4"}
+                          onChange={(e) =>
+                            handleNumberChange("cost", parseInt(e.target.value))
+                          }
+                          placeholder="Cost"
+                          separator={true}
+                          type="number"
+                          min={1}
+                          label="Cost ($)"
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
+              )}
 
-              <div>
-                <h2 className="text-lg text-white-light mb-4 flex items-center">
-                  <PuzzlePieceIcon className="h-5 w-5 mr-2 text-mint" />
-                  Properties
-                </h2>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <h3 className="text-sm text-white-light mb-2">
-                      Compatibility
-                    </h3>
-                    <div className="space-y-2 bg-black-darker p-3 rounded-lg border border-black-lighter">
-                      <Checkbox
-                        id="blueprint_compat_edit"
-                        label="Blueprint"
-                        checked={formData.blueprint_compat !== false}
-                        onChange={(checked) =>
-                          handleCheckboxChange("blueprint_compat", checked)
-                        }
-                        labelClassName="text-sm"
-                      />
-                      <Checkbox
-                        id="eternal_compat_edit"
-                        label="Eternal"
-                        checked={formData.eternal_compat !== false}
-                        onChange={(checked) =>
-                          handleCheckboxChange("eternal_compat", checked)
-                        }
-                        labelClassName="text-sm"
-                      />
+              {activeTab === "properties" && (
+                <div className="space-y-6">
+                  <h1 className="text-balatro-red text-sm font-medium tracking-wider mb-4">
+                    NOT IMPLEMENTED YET INTO CODE GEN, BARE WITH ME HAHA
+                  </h1>
+                  <div className="grid grid-cols-2 gap-6">
+                    <div className="bg-black-darker border border-black-lighter rounded-lg p-4">
+                      <h4 className="text-white-light font-medium text-sm mb-4 tracking-wider">
+                        COMPATIBILITY
+                      </h4>
+                      <div className="space-y-3">
+                        <Checkbox
+                          id="blueprint_compat_edit"
+                          label="Blueprint Compatible"
+                          checked={formData.blueprint_compat !== false}
+                          onChange={(checked) =>
+                            handleCheckboxChange("blueprint_compat", checked)
+                          }
+                        />
+                        <Checkbox
+                          id="eternal_compat_edit"
+                          label="Eternal Compatible"
+                          checked={formData.eternal_compat !== false}
+                          onChange={(checked) =>
+                            handleCheckboxChange("eternal_compat", checked)
+                          }
+                        />
+                      </div>
                     </div>
-                  </div>
 
-                  <div>
-                    <h3 className="text-sm text-white-light mb-2">
-                      Availability
-                    </h3>
-                    <div className="space-y-2 bg-black-darker p-3 rounded-lg border border-black-lighter">
-                      <Checkbox
-                        id="unlocked_edit"
-                        label="Unlocked"
-                        checked={formData.unlocked !== false}
-                        onChange={(checked) =>
-                          handleCheckboxChange("unlocked", checked)
-                        }
-                        labelClassName="text-sm"
-                      />
-                      <Checkbox
-                        id="discovered_edit"
-                        label="Discovered"
-                        checked={formData.discovered !== false}
-                        onChange={(checked) =>
-                          handleCheckboxChange("discovered", checked)
-                        }
-                        labelClassName="text-sm"
-                      />
+                    <div className="bg-black-darker border border-black-lighter rounded-lg p-4">
+                      <h4 className="text-white-light font-medium text-sm mb-4 tracking-wider">
+                        AVAILABILITY
+                      </h4>
+                      <div className="space-y-3">
+                        <Checkbox
+                          id="unlocked_edit"
+                          label="Unlocked by Default"
+                          checked={formData.unlocked !== false}
+                          onChange={(checked) =>
+                            handleCheckboxChange("unlocked", checked)
+                          }
+                        />
+                        <Checkbox
+                          id="discovered_edit"
+                          label="Already Discovered"
+                          checked={formData.discovered !== false}
+                          onChange={(checked) =>
+                            handleCheckboxChange("discovered", checked)
+                          }
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            </div>
+              )}
 
-            <div>
-              <h2 className="text-lg text-white-light mb-4 flex items-center">
-                <HashtagIcon className="h-5 w-5 mr-2 text-mint" />
-                Description & Formatting
-              </h2>
+              {activeTab === "description" && (
+                <div className="space-y-6">
+                  <div className="bg-black-darker border border-black-lighter rounded-lg p-4">
+                    <div className="flex items-center justify-between mb-4">
+                      <h4 className="text-white-light font-medium text-sm tracking-wider">
+                        FORMATTING TOOLS
+                      </h4>
+                    </div>
 
-              <div className="grid grid-cols-3 gap-4">
-                <div className="col-span-2">
+                    <div className="space-y-4">
+                      <div>
+                        <p className="text-white-darker text-xs mb-2">
+                          Text Colors
+                        </p>
+                        <div className="flex flex-wrap gap-2">
+                          {colorButtons.map((item, index) => (
+                            <button
+                              key={index}
+                              onClick={() => insertTag(item.tag)}
+                              title={item.name}
+                              className={`w-8 h-8 ${item.color} rounded border border-black-lighter hover:scale-110 transition-transform cursor-pointer`}
+                            />
+                          ))}
+                        </div>
+                      </div>
+
+                      <div>
+                        <p className="text-white-darker text-xs mb-2">
+                          Backgrounds
+                        </p>
+                        <div className="flex flex-wrap gap-2">
+                          {backgroundButtons.map((item, index) => (
+                            <button
+                              key={index}
+                              onClick={() => insertTag(item.tag)}
+                              title={item.name}
+                              className={`w-8 h-8 ${item.color} rounded border-2 border-white-light hover:scale-110 transition-transform cursor-pointer`}
+                            />
+                          ))}
+                        </div>
+                      </div>
+
+                      <div>
+                        <p className="text-white-darker text-xs mb-2">
+                          Special
+                        </p>
+                        <div className="flex gap-2">
+                          <Button
+                            size="sm"
+                            variant="secondary"
+                            onClick={() => insertTag("[s]", false)}
+                            icon={<ArrowPathIcon className="h-3 w-3" />}
+                            className="cursor-pointer"
+                          >
+                            New Line
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="secondary"
+                            onClick={() => insertTag("{s:1.1}")}
+                            icon={<SparklesIcon className="h-3 w-3" />}
+                            className="cursor-pointer"
+                          >
+                            Scale
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="secondary"
+                            onClick={() => insertTag("{E:1}")}
+                            icon={<BoltIcon className="h-3 w-3" />}
+                            className="cursor-pointer"
+                          >
+                            Float
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="secondary"
+                            onClick={() => insertTag("{}")}
+                            className="cursor-pointer"
+                          >
+                            Reset
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
                   <InputField
                     id="joker-description-edit"
                     value={formData.description}
@@ -447,195 +545,136 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
                       handleInputChange("description", e.target.value)
                     }
                     multiline={true}
-                    height="120px"
+                    height="200px"
                     separator={true}
                     useGameFont={true}
                     label="Description"
                     placeholder="Describe your joker's effects..."
                   />
                 </div>
-
-                <div className="space-y-3">
-                  <div>
-                    <h4 className="text-xs font-medium text-white-light mb-2">
-                      Text Colors
-                    </h4>
-                    <div className="grid grid-cols-4 gap-1">
-                      {colorButtons.slice(0, 8).map((item, index) => (
-                        <button
-                          key={index}
-                          onClick={() => insertTag(item.tag)}
-                          title={item.name}
-                          className={`w-6 h-6 ${item.color} rounded border border-black-lighter hover:scale-110 transition-transform`}
-                        />
-                      ))}
-                    </div>
-                  </div>
-
-                  <div>
-                    <h4 className="text-xs font-medium text-white-light mb-2">
-                      Backgrounds
-                    </h4>
-                    <div className="grid grid-cols-4 gap-1">
-                      {backgroundButtons.map((item, index) => (
-                        <button
-                          key={index}
-                          onClick={() => insertTag(item.tag)}
-                          title={item.name}
-                          className={`w-6 h-6 ${item.color} rounded border-2 border-white-light hover:scale-110 transition-transform`}
-                        />
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="space-y-1">
-                    <Button
-                      size="sm"
-                      variant="secondary"
-                      onClick={() => insertTag("[s]", false)}
-                      icon={<ArrowPathIcon className="h-3 w-3" />}
-                      fullWidth
-                      className="text-xs"
-                    >
-                      New Line
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="secondary"
-                      onClick={() => insertTag("{s:1.1}")}
-                      icon={<SparklesIcon className="h-3 w-3" />}
-                      fullWidth
-                      className="text-xs"
-                    >
-                      Scale Up
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="secondary"
-                      onClick={() => insertTag("{E:1}")}
-                      icon={<BoltIcon className="h-3 w-3" />}
-                      fullWidth
-                      className="text-xs"
-                    >
-                      Float
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="secondary"
-                      onClick={() => insertTag("{}")}
-                      fullWidth
-                      className="text-xs"
-                    >
-                      Reset
-                    </Button>
-                  </div>
-                </div>
-              </div>
+              )}
             </div>
 
-            <div className="flex gap-3 mt-6 pt-4 border-t border-black-lighter">
-              <Button variant="secondary" onClick={onClose} className="flex-1">
+            <div className="flex gap-3 p-4 border-t border-black-lighter">
+              <Button
+                variant="secondary"
+                onClick={onClose}
+                className="flex-1 cursor-pointer"
+              >
                 Cancel
               </Button>
-              <Button variant="primary" onClick={handleSave} className="flex-1">
+              <Button
+                variant="primary"
+                onClick={handleSave}
+                className="flex-1 cursor-pointer"
+              >
                 Save Changes
               </Button>
               <Button
                 onClick={handleDelete}
                 variant="danger"
-                icon={<TrashIcon className="h-4 w-4" />}
+                className="cursor-pointer"
               >
-                Delete
+                Delete Joker
               </Button>
             </div>
           </div>
-        </div>
 
-        {showPreview && (
-          <div className="w-1/4 bg-gradient-to-b from-black-dark to-black border-l-2 border-black-lighter p-6 overflow-y-auto">
-            <div className="sticky top-0">
-              <h2 className="text-lg text-white-light mb-4 text-center">
-                Live Preview
-              </h2>
+          <div className="w-80 bg-black-darker border-l border-black-lighter p-6 overflow-y-auto">
+            <h3 className="text-white-light text-sm font-medium tracking-wider mb-4">
+              PREVIEW
+            </h3>
 
-              <div className="bg-gradient-to-br from-black-darker to-black border-2 border-black-lighter rounded-xl p-4 shadow-xl">
-                <div className="flex flex-col items-center space-y-3">
-                  <div className="aspect-[142/190] w-full max-w-[160px] bg-black border-2 border-black-lighter rounded-lg overflow-hidden">
-                    {formData.imagePreview ? (
-                      <img
-                        src={formData.imagePreview}
-                        alt={formData.name}
-                        className="w-full h-full object-cover"
-                        draggable="false"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-white-darker">
-                        <PhotoIcon className="h-12 w-12" />
-                      </div>
-                    )}
+            <div className="bg-black border-2 border-black-lighter rounded-lg p-4 shadow-lg">
+              <div className="aspect-[142/190] w-full max-w-[200px] mx-auto bg-black-darker border border-black-lighter rounded-lg overflow-hidden mb-4">
+                {formData.imagePreview ? (
+                  <img
+                    src={formData.imagePreview}
+                    alt={formData.name}
+                    className="w-full h-full object-cover"
+                    draggable="false"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-white-darker">
+                    <PhotoIcon className="h-16 w-16" />
                   </div>
+                )}
+              </div>
 
-                  <div className="text-center w-full">
-                    <h3 className="font-game text-lg text-white-light mb-2 tracking-wider">
-                      {formData.name || "New Joker"}
-                    </h3>
+              <div className="text-center">
+                <h4 className="font-game text-xl text-white-light mb-2 tracking-wider">
+                  {formData.name || "New Joker"}
+                </h4>
 
-                    <div className="mb-3 text-sm">
-                      <span
-                        className={`font-medium ${getRarityColor(
-                          formData.rarity
-                        )}`}
-                      >
-                        {getRarityLabel(formData.rarity)}
-                      </span>
-                      <span className="text-white-darker mx-2">•</span>
-                      <span className="text-balatro-money">
-                        ${formData.cost || 4}
-                      </span>
-                    </div>
+                <div className="mb-3 text-sm">
+                  <span
+                    className={`font-medium ${getRarityColor(formData.rarity)}`}
+                  >
+                    {getRarityLabel(formData.rarity)}
+                  </span>
+                  <span className="text-white-darker mx-2">•</span>
+                  <span className="text-balatro-money">
+                    ${formData.cost || 4}
+                  </span>
+                </div>
 
-                    <div className="bg-black-dark p-3 rounded-lg border border-black-lighter min-h-[80px]">
-                      <div className="font-game text-sm text-white-light leading-relaxed">
-                        <BalatroText
-                          text={
-                            formData.description ||
-                            "A custom joker with unique effects."
-                          }
-                        />
-                      </div>
-                    </div>
+                <div className="bg-black-darker p-3 rounded-lg border border-black-lighter">
+                  <div className="font-game text-sm text-white-light leading-relaxed">
+                    <BalatroText
+                      text={
+                        formData.description ||
+                        "A custom joker with unique effects."
+                      }
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
 
-                    <div className="mt-3 flex justify-center space-x-3 text-xs">
-                      {formData.blueprint_compat !== false && (
-                        <div className="flex items-center text-balatro-blue">
-                          <PuzzlePieceIcon className="h-3 w-3 mr-1" />
-                          Blueprint
-                        </div>
-                      )}
-                      {formData.eternal_compat !== false && (
-                        <div className="flex items-center text-balatro-orange">
-                          <LockOpenIcon className="h-3 w-3 mr-1" />
-                          Eternal
-                        </div>
-                      )}
-                    </div>
+            <div className="mt-4 space-y-3">
+              <div className="bg-black-darker/50 rounded-lg p-3 border border-black-lighter">
+                <p className="text-white-darker text-xs mb-2">Compatibility</p>
+                <div className="space-y-1 text-xs">
+                  <div className="flex items-center justify-between">
+                    <span className="text-white-darker">Blueprint</span>
+                    <span
+                      className={
+                        formData.blueprint_compat
+                          ? "text-mint"
+                          : "text-balatro-red"
+                      }
+                    >
+                      {formData.blueprint_compat ? "Yes" : "No"}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-white-darker">Eternal</span>
+                    <span
+                      className={
+                        formData.eternal_compat
+                          ? "text-mint"
+                          : "text-balatro-red"
+                      }
+                    >
+                      {formData.eternal_compat ? "Yes" : "No"}
+                    </span>
                   </div>
                 </div>
               </div>
 
-              <div className="mt-4 p-3 bg-black-darker rounded-lg border border-black-lighter">
-                <h4 className="text-sm font-medium text-white-light mb-2">
-                  Stats
-                </h4>
+              <div className="bg-black-darker/50 rounded-lg p-3 border border-black-lighter">
+                <p className="text-white-darker text-xs mb-2">Statistics</p>
                 <div className="space-y-1 text-xs text-white-darker">
-                  <div>Name: {formData.name?.length || 0} chars</div>
-                  <div>Desc: {formData.description?.length || 0} chars</div>
+                  <div>Name: {formData.name?.length || 0} characters</div>
+                  <div>
+                    Description: {formData.description?.length || 0} characters
+                  </div>
                   <div>Rules: {formData.rules?.length || 0} defined</div>
                 </div>
               </div>
             </div>
           </div>
-        )}
+        </div>
       </div>
     </div>
   );
