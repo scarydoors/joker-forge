@@ -38,6 +38,8 @@ interface ModMetadataValidation {
   warnings: Record<string, string>;
 }
 
+//! wadawedawdawdawdaw
+// eslint-disable-next-line react-refresh/only-export-components
 export const DEFAULT_MOD_METADATA: ModMetadata = {
   id: "",
   name: "",
