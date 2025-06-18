@@ -1,7 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   DocumentTextIcon,
-  UserIcon,
   TagIcon,
   CodeBracketIcon,
   HashtagIcon,
@@ -11,385 +10,657 @@ import {
   PaintBrushIcon,
   ExclamationTriangleIcon,
   CheckCircleIcon,
+  InformationCircleIcon,
 } from "@heroicons/react/24/outline";
 import InputField from "../generic/InputField";
 
+export interface ModMetadata {
+  id: string;
+  name: string;
+  author: string[];
+  description: string;
+  prefix: string;
+  main_file: string;
+  version: string;
+  priority: number;
+  badge_colour: string;
+  badge_text_colour: string;
+  display_name: string;
+  dependencies: string[];
+  conflicts: string[];
+  provides: string[];
+  dump_loc?: boolean;
+}
+
+interface ModMetadataValidation {
+  isValid: boolean;
+  errors: Record<string, string>;
+  warnings: Record<string, string>;
+}
+
+export const DEFAULT_MOD_METADATA: ModMetadata = {
+  id: "",
+  name: "",
+  author: [],
+  description: "",
+  prefix: "",
+  main_file: "main.lua",
+  version: "1.0.0",
+  priority: 0,
+  badge_colour: "666665",
+  badge_text_colour: "FFFFFF",
+  display_name: "",
+  dependencies: ["Steamodded (>=1.0.0~BETA-0404a)"],
+  conflicts: [],
+  provides: [],
+};
+
+const validateModMetadata = (metadata: ModMetadata): ModMetadataValidation => {
+  const errors: Record<string, string> = {};
+  const warnings: Record<string, string> = {};
+
+  if (!metadata.id) {
+    errors.id = "Mod ID is required";
+  } else if (!/^[a-zA-Z][a-zA-Z0-9_]*$/.test(metadata.id)) {
+    errors.id =
+      "Mod ID must start with a letter and contain only letters, numbers, and underscores";
+  } else if (["Steamodded", "Lovely", "Balatro"].includes(metadata.id)) {
+    errors.id = "Mod ID cannot be 'Steamodded', 'Lovely', or 'Balatro'";
+  }
+
+  if (!metadata.name.trim()) {
+    errors.name = "Mod name is required";
+  }
+
+  if (
+    !metadata.author ||
+    metadata.author.length === 0 ||
+    !metadata.author[0].trim()
+  ) {
+    errors.author = "At least one author is required";
+  }
+
+  if (!metadata.description.trim()) {
+    errors.description = "Description is required";
+  }
+
+  if (!metadata.prefix) {
+    errors.prefix = "Prefix is required";
+  } else if (!/^[a-zA-Z][a-zA-Z0-9_]*$/.test(metadata.prefix)) {
+    errors.prefix =
+      "Prefix must start with a letter and contain only letters, numbers, and underscores";
+  }
+
+  if (!metadata.main_file) {
+    errors.main_file = "Main file is required";
+  } else if (!metadata.main_file.endsWith(".lua")) {
+    errors.main_file = "Main file must end with .lua extension";
+  }
+
+  if (metadata.version && !/^\d+\.\d+\.\d+.*$/.test(metadata.version)) {
+    warnings.version = "Version should follow format (major).(minor).(patch)";
+  }
+
+  if (
+    metadata.badge_colour &&
+    !/^[0-9A-Fa-f]{6}([0-9A-Fa-f]{2})?$/.test(metadata.badge_colour)
+  ) {
+    warnings.badge_colour =
+      "Badge colour should be a valid hex color (6 or 8 digits)";
+  }
+
+  if (
+    metadata.badge_text_colour &&
+    !/^[0-9A-Fa-f]{6}([0-9A-Fa-f]{2})?$/.test(metadata.badge_text_colour)
+  ) {
+    warnings.badge_text_colour =
+      "Badge text colour should be a valid hex color (6 or 8 digits)";
+  }
+
+  return {
+    isValid: Object.keys(errors).length === 0,
+    errors,
+    warnings,
+  };
+};
+
+const generateModIdFromName = (name: string): string => {
+  return (
+    name
+      .toLowerCase()
+      .replace(/[^a-zA-Z0-9\s]/g, "")
+      .replace(/\s+/g, "")
+      .replace(/^[0-9]+/, "") || "custommod"
+  );
+};
+
+const generatePrefixFromId = (id: string): string => {
+  return id.toLowerCase().substring(0, 8);
+};
+
+const parseAuthorsString = (authorsString: string): string[] => {
+  return authorsString
+    .split(",")
+    .map((author) => author.trim())
+    .filter((author) => author.length > 0);
+};
+
+const formatAuthorsString = (authors: string[]): string => {
+  return authors.join(", ");
+};
+
+const parseDependenciesString = (dependenciesString: string): string[] => {
+  return dependenciesString
+    .split("\n")
+    .map((dep) => dep.trim())
+    .filter((dep) => dep.length > 0);
+};
+
+const formatDependenciesString = (dependencies: string[]): string => {
+  return dependencies.join("\n");
+};
+
 interface ModMetadataPageProps {
-  modName: string;
-  setModName: (name: string) => void;
-  authorName: string;
-  setAuthorName: (name: string) => void;
+  metadata: ModMetadata;
+  setMetadata: (metadata: ModMetadata) => void;
 }
 
 const ModMetadataPage: React.FC<ModMetadataPageProps> = ({
-  modName,
-  setModName,
-  authorName,
-  setAuthorName,
+  metadata,
+  setMetadata,
 }) => {
-  // Required SMODS fields
-  const [modId, setModId] = useState("");
-  const [modDescription, setModDescription] = useState("");
-  const [modPrefix, setModPrefix] = useState("");
-  const [mainFile, setMainFile] = useState("main.lua");
+  const [authorsString, setAuthorsString] = useState(
+    formatAuthorsString(metadata.author)
+  );
+  const [dependenciesString, setDependenciesString] = useState(
+    formatDependenciesString(metadata.dependencies)
+  );
+  const [conflictsString, setConflictsString] = useState(
+    formatDependenciesString(metadata.conflicts)
+  );
+  const [providesString, setProvidesString] = useState(
+    formatDependenciesString(metadata.provides)
+  );
 
-  // Optional SMODS fields
-  const [modVersion, setModVersion] = useState("1.0.0");
-  const [priority, setPriority] = useState("0");
-  const [badgeColour, setBadgeColour] = useState("666665");
-  const [badgeTextColour, setBadgeTextColour] = useState("FFFFFF");
-  const [displayName, setDisplayName] = useState("");
-  const [dependencies, setDependencies] = useState("");
-  const [conflicts, setConflicts] = useState("");
-  const [provides, setProvides] = useState("");
+  useEffect(() => {
+    if (metadata.name) {
+      const generatedId = generateModIdFromName(metadata.name);
+      const generatedPrefix = generatePrefixFromId(generatedId);
 
-  // Validation helpers
+      setMetadata({
+        ...metadata,
+        id: generatedId,
+        prefix: generatedPrefix,
+        display_name: metadata.name,
+      });
+    }
+    //! needs work
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [metadata.name]);
+
+  const validation = validateModMetadata(metadata);
+
+  const updateMetadata = (updates: Partial<ModMetadata>) => {
+    setMetadata({ ...metadata, ...updates });
+  };
+
+  const handleAuthorsChange = (value: string) => {
+    setAuthorsString(value);
+    updateMetadata({ author: parseAuthorsString(value) });
+  };
+
+  const handleDependenciesChange = (value: string) => {
+    setDependenciesString(value);
+    updateMetadata({ dependencies: parseDependenciesString(value) });
+  };
+
+  const handleConflictsChange = (value: string) => {
+    setConflictsString(value);
+    updateMetadata({ conflicts: parseDependenciesString(value) });
+  };
+
+  const handleProvidesChange = (value: string) => {
+    setProvidesString(value);
+    updateMetadata({ provides: parseDependenciesString(value) });
+  };
+
   const isValidHexColor = (color: string) =>
     /^[0-9A-Fa-f]{6}([0-9A-Fa-f]{2})?$/.test(color);
 
-  const requiredFieldsComplete =
-    modName && authorName && modId && modDescription && modPrefix;
+  const hasErrors = Object.keys(validation.errors).length > 0;
 
   return (
     <div className="p-8">
-      <div className="flex items-center gap-3 mb-6">
+      <div className="flex items-center gap-3 mb-8">
         <DocumentTextIcon className="h-8 w-8 text-mint" />
         <h1 className="text-2xl text-white-light font-light tracking-wide">
           Mod Metadata
         </h1>
-        <p className="text-white-darker text-sm opacity-50">
-          Please note, only mod name and author are editable for now, I need to
-          update the code generation. bare with me haha
-        </p>
       </div>
 
-      <div className="space-y-6">
-        {/* Required Fields */}
+      <div className="max-w-6xl mx-auto space-y-8">
+        <div
+          className={`bg-black-darker border-2 rounded-lg p-6 ${
+            validation.isValid
+              ? "border-mint/30"
+              : hasErrors
+              ? "border-red-900/50"
+              : "border-yellow-600/50"
+          }`}
+        >
+          <div className="flex items-center gap-3 mb-3">
+            <div
+              className={`w-3 h-3 rounded-full ${
+                validation.isValid
+                  ? "bg-mint animate-pulse"
+                  : hasErrors
+                  ? "bg-red-400"
+                  : "bg-yellow-400"
+              }`}
+            ></div>
+            <span className="text-white-light font-medium text-sm">
+              SMODS Status
+            </span>
+          </div>
+
+          <div className="flex items-center gap-2">
+            {validation.isValid ? (
+              <CheckCircleIcon className="h-4 w-4 text-mint" />
+            ) : hasErrors ? (
+              <ExclamationTriangleIcon className="h-4 w-4 text-red-400" />
+            ) : (
+              <InformationCircleIcon className="h-4 w-4 text-yellow-400" />
+            )}
+            <span
+              className={`text-xs ${
+                validation.isValid
+                  ? "text-mint"
+                  : hasErrors
+                  ? "text-red-400"
+                  : "text-yellow-400"
+              }`}
+            >
+              {validation.isValid
+                ? "Export Ready"
+                : hasErrors
+                ? "Has Errors"
+                : "Has Warnings"}
+            </span>
+          </div>
+
+          {hasErrors && (
+            <div className="mt-3 space-y-1">
+              {Object.entries(validation.errors)
+                .slice(0, 3)
+                .map(([field, error]) => (
+                  <p key={field} className="text-red-400 text-xs">
+                    <strong>{field}:</strong> {error}
+                  </p>
+                ))}
+              {Object.keys(validation.errors).length > 3 && (
+                <p className="text-red-400 text-xs">
+                  +{Object.keys(validation.errors).length - 3} more errors
+                </p>
+              )}
+            </div>
+          )}
+        </div>
+
         <div className="bg-black-dark border-2 border-mint-dark rounded-lg p-6">
-          <h2 className="text-lg text-white-light font-medium mb-4 flex items-center gap-2">
+          <h2 className="text-lg text-white-light font-medium mb-6 flex items-center gap-2">
             <ExclamationTriangleIcon className="h-5 w-5 text-red-400" />
             Required Fields
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <InputField
-              value={modName}
-              onChange={(e) => setModName(e.target.value)}
-              placeholder="My Custom Mod"
-              separator={true}
-              icon={<DocumentTextIcon className="h-5 w-5 text-mint stroke-2" />}
-              label="Mod Name"
-            />
-            <InputField
-              value={modId}
-              onChange={(e) => setModId(e.target.value)}
-              placeholder="mycustommod"
-              separator={true}
-              icon={<HashtagIcon className="h-5 w-5 text-mint stroke-2" />}
-              label="Mod ID"
-              disabled
-            />
-            <InputField
-              value={authorName}
-              onChange={(e) => setAuthorName(e.target.value)}
-              placeholder="Anonymous"
-              separator={true}
-              icon={<UserIcon className="h-5 w-5 text-mint stroke-2" />}
-              label="Author"
-            />
-            <InputField
-              value={modPrefix}
-              onChange={(e) => setModPrefix(e.target.value)}
-              placeholder="mycustommod"
-              separator={true}
-              icon={<TagIcon className="h-5 w-5 text-mint stroke-2" />}
-              label="Prefix"
-              disabled
-            />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <InputField
+                value={metadata.name}
+                onChange={(e) => updateMetadata({ name: e.target.value })}
+                placeholder="My Custom Mod"
+                separator={true}
+                icon={
+                  <DocumentTextIcon className="h-5 w-5 text-mint stroke-2" />
+                }
+                label="Mod Name"
+              />
+              {validation.errors.name && (
+                <p className="text-red-400 text-xs mt-1">
+                  {validation.errors.name}
+                </p>
+              )}
+            </div>
+
+            <div>
+              <InputField
+                value={metadata.id}
+                onChange={(e) => updateMetadata({ id: e.target.value })}
+                placeholder="mycustommod"
+                separator={true}
+                icon={<HashtagIcon className="h-5 w-5 text-mint stroke-2" />}
+                label="Mod ID"
+              />
+              {validation.errors.id && (
+                <p className="text-red-400 text-xs mt-1">
+                  {validation.errors.id}
+                </p>
+              )}
+              <p className="text-white-darker text-xs mt-1">
+                Must be unique, start with letter, alphanumeric + underscore
+                only
+              </p>
+            </div>
+
+            <div>
+              <label className="block text-white-light text-sm font-medium mb-2">
+                Authors *
+              </label>
+              <input
+                type="text"
+                value={authorsString}
+                onChange={(e) => handleAuthorsChange(e.target.value)}
+                placeholder="Author One, Author Two"
+                className="w-full px-4 py-3 bg-black-darker border-2 border-black-light rounded-lg text-white-light placeholder-white-darker focus:border-mint focus:outline-none"
+              />
+              {validation.errors.author && (
+                <p className="text-red-400 text-xs mt-1">
+                  {validation.errors.author}
+                </p>
+              )}
+              <p className="text-white-darker text-xs mt-1">
+                Separate multiple authors with commas
+              </p>
+            </div>
+
+            <div>
+              <InputField
+                value={metadata.prefix}
+                onChange={(e) => updateMetadata({ prefix: e.target.value })}
+                placeholder="mycustommod"
+                separator={true}
+                icon={<TagIcon className="h-5 w-5 text-mint stroke-2" />}
+                label="Prefix"
+              />
+              {validation.errors.prefix && (
+                <p className="text-red-400 text-xs mt-1">
+                  {validation.errors.prefix}
+                </p>
+              )}
+              <p className="text-white-darker text-xs mt-1">
+                Added to all object keys, must be unique
+              </p>
+            </div>
+
             <div className="md:col-span-2">
               <label className="block text-white-light text-sm font-medium mb-2">
                 Description *
               </label>
               <textarea
-                value={modDescription}
-                onChange={(e) => setModDescription(e.target.value)}
+                value={metadata.description}
+                onChange={(e) =>
+                  updateMetadata({ description: e.target.value })
+                }
                 placeholder="Custom jokers created with Joker Forge"
-                className="w-full h-24 px-4 py-3 bg-black-darker border-2 border-black-light rounded-lg text-white-light placeholder-white-darker focus:border-mint focus:outline-none resize-none opacity-50"
-                disabled
+                className="w-full h-24 px-4 py-3 bg-black-darker border-2 border-black-light rounded-lg text-white-light placeholder-white-darker focus:border-mint focus:outline-none resize-none"
               />
+              {validation.errors.description && (
+                <p className="text-red-400 text-xs mt-1">
+                  {validation.errors.description}
+                </p>
+              )}
             </div>
-            <InputField
-              value={mainFile}
-              onChange={(e) => setMainFile(e.target.value)}
-              placeholder="main.lua"
-              separator={true}
-              icon={<CodeBracketIcon className="h-5 w-5 text-mint stroke-2" />}
-              label="Main File"
-              disabled
-            />
+
+            <div>
+              <InputField
+                value={metadata.main_file}
+                onChange={(e) => updateMetadata({ main_file: e.target.value })}
+                placeholder="main.lua"
+                separator={true}
+                icon={
+                  <CodeBracketIcon className="h-5 w-5 text-mint stroke-2" />
+                }
+                label="Main File"
+              />
+              {validation.errors.main_file && (
+                <p className="text-red-400 text-xs mt-1">
+                  {validation.errors.main_file}
+                </p>
+              )}
+            </div>
           </div>
-          <p className="text-red-400 text-xs mt-3">
-            * All fields in this section are required by SMODS
-          </p>
-          <p className="text-white-darker text-xs mt-1 opacity-50">
-            ID, prefix, description, and main file coming soon
-          </p>
         </div>
 
-        {/* Appearance & Display */}
         <div className="bg-black-dark border-2 border-black-lighter rounded-lg p-6">
-          <h2 className="text-lg text-white-light font-medium mb-4 flex items-center gap-2">
+          <h2 className="text-lg text-white-light font-medium mb-6 flex items-center gap-2">
             <PaintBrushIcon className="h-5 w-5 text-mint" />
             Appearance & Display
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <InputField
-              value={displayName}
-              onChange={(e) => setDisplayName(e.target.value)}
-              placeholder="Short name for badge"
-              separator={true}
-              icon={<TagIcon className="h-5 w-5 text-mint stroke-2" />}
-              label="Display Name"
-              disabled
-            />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
             <div>
-              <label className="block text-white-light text-sm font-medium mb-2">
-                Badge Color
-              </label>
-              <div className="flex gap-2">
-                <div className="flex-1">
-                  <InputField
-                    value={badgeColour}
-                    onChange={(e) => setBadgeColour(e.target.value)}
-                    placeholder="666665"
-                    separator={true}
-                    icon={<span className="text-mint">#</span>}
-                    disabled
-                  />
-                </div>
-                <div
-                  className="w-10 h-10 rounded border-2 border-black-light"
-                  style={{
-                    backgroundColor: isValidHexColor(badgeColour)
-                      ? `#${badgeColour}`
-                      : "#666665",
-                  }}
+              <InputField
+                value={metadata.display_name}
+                onChange={(e) =>
+                  updateMetadata({ display_name: e.target.value })
+                }
+                placeholder={metadata.name || "Short name for badge"}
+                separator={true}
+                icon={<TagIcon className="h-5 w-5 text-mint stroke-2" />}
+                label="Display Name"
+              />
+              <p className="text-white-darker text-xs mt-1">
+                Shown on mod badge, defaults to mod name
+              </p>
+            </div>
+
+            <div>
+              <InputField
+                value={metadata.badge_colour}
+                onChange={(e) =>
+                  updateMetadata({ badge_colour: e.target.value })
+                }
+                placeholder="666665"
+                separator={true}
+                icon={<span className="text-mint">#</span>}
+                label="Badge Color"
+              />
+              {validation.warnings.badge_colour && (
+                <p className="text-yellow-400 text-xs mt-1">
+                  {validation.warnings.badge_colour}
+                </p>
+              )}
+              <p className="text-white-darker text-xs mt-1">
+                Hex color without #
+              </p>
+            </div>
+
+            <div>
+              <InputField
+                value={metadata.badge_text_colour}
+                onChange={(e) =>
+                  updateMetadata({ badge_text_colour: e.target.value })
+                }
+                placeholder="FFFFFF"
+                separator={true}
+                icon={<span className="text-mint">#</span>}
+                label="Badge Text Color"
+              />
+              {validation.warnings.badge_text_colour && (
+                <p className="text-yellow-400 text-xs mt-1">
+                  {validation.warnings.badge_text_colour}
+                </p>
+              )}
+              <p className="text-white-darker text-xs mt-1">
+                Hex color without #
+              </p>
+            </div>
+          </div>
+
+          <div className="bg-black-darker border border-black-lighter rounded-lg p-4">
+            <h4 className="text-white-light font-medium text-sm mb-3 tracking-wider">
+              BADGE PREVIEW
+            </h4>
+            <div className="flex justify-center">
+              <div
+                className="px-3 py-1 rounded text-xs font-bold border"
+                style={{
+                  backgroundColor: isValidHexColor(metadata.badge_colour)
+                    ? `#${metadata.badge_colour}`
+                    : "#666665",
+                  color: isValidHexColor(metadata.badge_text_colour)
+                    ? `#${metadata.badge_text_colour}`
+                    : "#FFFFFF",
+                  borderColor: isValidHexColor(metadata.badge_colour)
+                    ? `#${metadata.badge_colour}`
+                    : "#666665",
+                }}
+              >
+                {metadata.display_name ||
+                  metadata.name?.substring(0, 8) ||
+                  "MOD"}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div className="bg-black-dark border-2 border-black-lighter rounded-lg p-6">
+            <h2 className="text-lg text-white-light font-medium mb-6 flex items-center gap-2">
+              <ClockIcon className="h-5 w-5 text-mint" />
+              Version & Loading
+            </h2>
+            <div className="space-y-6">
+              <div>
+                <InputField
+                  value={metadata.version}
+                  onChange={(e) => updateMetadata({ version: e.target.value })}
+                  placeholder="1.0.0"
+                  separator={true}
+                  icon={<HashtagIcon className="h-5 w-5 text-mint stroke-2" />}
+                  label="Version"
                 />
+                {validation.warnings.version && (
+                  <p className="text-yellow-400 text-xs mt-1">
+                    {validation.warnings.version}
+                  </p>
+                )}
+                <p className="text-white-darker text-xs mt-1">
+                  Format: (major).(minor).(patch), use ~ for beta
+                </p>
               </div>
-            </div>
-            <div>
-              <label className="block text-white-light text-sm font-medium mb-2">
-                Badge Text Color
-              </label>
-              <div className="flex gap-2">
-                <div className="flex-1">
-                  <InputField
-                    value={badgeTextColour}
-                    onChange={(e) => setBadgeTextColour(e.target.value)}
-                    placeholder="FFFFFF"
-                    separator={true}
-                    icon={<span className="text-mint">#</span>}
-                    disabled
-                  />
-                </div>
-                <div
-                  className="w-10 h-10 rounded border-2 border-black-light flex items-center justify-center text-xs font-bold"
-                  style={{
-                    backgroundColor: isValidHexColor(badgeColour)
-                      ? `#${badgeColour}`
-                      : "#666665",
-                    color: isValidHexColor(badgeTextColour)
-                      ? `#${badgeTextColour}`
-                      : "#FFFFFF",
-                  }}
-                >
-                  {displayName || modName?.substring(0, 2) || "AB"}
-                </div>
+
+              <div>
+                <InputField
+                  value={metadata.priority.toString()}
+                  onChange={(e) =>
+                    updateMetadata({
+                      priority: parseInt(e.target.value) || 0,
+                    })
+                  }
+                  placeholder="0"
+                  separator={true}
+                  icon={<CubeIcon className="h-5 w-5 text-mint stroke-2" />}
+                  label="Priority"
+                />
+                <p className="text-white-darker text-xs mt-1">
+                  Negative values load first, positive load last
+                </p>
               </div>
             </div>
           </div>
-          <p className="text-white-darker text-xs mt-2 opacity-50">
-            Badge customization coming soon
-          </p>
+
+          <div className="bg-black-darker border border-black-lighter rounded-lg p-4">
+            <h4 className="text-white-light font-medium text-sm mb-3 tracking-wider">
+              MOD SUMMARY
+            </h4>
+            <div className="space-y-2 text-xs">
+              <div className="flex justify-between">
+                <span className="text-white-darker">Name:</span>
+                <span className="text-white-light">
+                  {metadata.name || "Unnamed"}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-white-darker">ID:</span>
+                <span className="text-white-light">
+                  {metadata.id || "None"}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-white-darker">Version:</span>
+                <span className="text-white-light">{metadata.version}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-white-darker">Author:</span>
+                <span className="text-white-light">
+                  {metadata.author.join(", ") || "Anonymous"}
+                </span>
+              </div>
+            </div>
+          </div>
         </div>
 
-        {/* Version & Loading */}
         <div className="bg-black-dark border-2 border-black-lighter rounded-lg p-6">
-          <h2 className="text-lg text-white-light font-medium mb-4 flex items-center gap-2">
-            <ClockIcon className="h-5 w-5 text-mint" />
-            Version & Loading
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <InputField
-              value={modVersion}
-              onChange={(e) => setModVersion(e.target.value)}
-              placeholder="1.0.0"
-              separator={true}
-              icon={<HashtagIcon className="h-5 w-5 text-mint stroke-2" />}
-              label="Version"
-              disabled
-            />
-            <InputField
-              value={priority}
-              onChange={(e) => setPriority(e.target.value)}
-              placeholder="1"
-              separator={true}
-              icon={<CubeIcon className="h-5 w-5 text-mint stroke-2" />}
-              label="Priority"
-              disabled
-            />
-          </div>
-          <div className="mt-3 p-3 bg-black-darker border border-black-light rounded-lg">
-            <p className="text-white-darker text-sm">
-              <strong className="text-white-light">Version:</strong> Must follow
-              format (major).(minor).(patch). Use ~ for beta versions.
-            </p>
-            <p className="text-white-darker text-sm mt-1">
-              <strong className="text-white-light">Priority:</strong> Negative
-              values load first, positive values load last. Default: 0
-            </p>
-          </div>
-          <p className="text-white-darker text-xs mt-2 opacity-50">
-            Version and priority management coming soon
-          </p>
-        </div>
-
-        {/* Dependencies & Conflicts */}
-        <div className="bg-black-dark border-2 border-black-lighter rounded-lg p-6">
-          <h2 className="text-lg text-white-light font-medium mb-4 flex items-center gap-2">
+          <h2 className="text-lg text-white-light font-medium mb-6 flex items-center gap-2">
             <ShieldCheckIcon className="h-5 w-5 text-mint" />
             Dependencies & Conflicts
           </h2>
-          <div className="space-y-4">
+          <div className="space-y-6">
             <div>
               <label className="block text-white-light text-sm font-medium mb-2">
                 Dependencies
               </label>
               <textarea
-                value={dependencies}
-                onChange={(e) => setDependencies(e.target.value)}
-                placeholder={`Steamodded (>=1.0.0~BETA-0404a)\nLovely (>=0.6)\nSomeMod (==1.0.*)`}
-                className="w-full h-20 px-4 py-3 bg-black-darker border-2 border-black-light rounded-lg text-white-light placeholder-white-darker focus:border-mint focus:outline-none resize-none opacity-50"
-                disabled
+                value={dependenciesString}
+                onChange={(e) => handleDependenciesChange(e.target.value)}
+                placeholder="Steamodded (>=1.0.0~BETA-0404a)&#10;Lovely (>=0.6)&#10;SomeMod (==1.0.*)"
+                className="w-full h-20 px-4 py-3 bg-black-darker border-2 border-black-light rounded-lg text-white-light placeholder-white-darker focus:border-mint focus:outline-none resize-none"
               />
+              <p className="text-white-darker text-xs mt-1">
+                One dependency per line, with version constraints (&gt;=, ==,
+                &lt;&lt;, etc.)
+              </p>
             </div>
+
             <div>
               <label className="block text-white-light text-sm font-medium mb-2">
                 Conflicts
               </label>
               <textarea
-                value={conflicts}
-                onChange={(e) => setConflicts(e.target.value)}
-                placeholder={`SomeMod (>=1.1) (<<2~)`}
-                className="w-full h-16 px-4 py-3 bg-black-darker border-2 border-black-light rounded-lg text-white-light placeholder-white-darker focus:border-mint focus:outline-none resize-none opacity-50"
-                disabled
+                value={conflictsString}
+                onChange={(e) => handleConflictsChange(e.target.value)}
+                placeholder="SomeMod (>=1.1) (&lt;&lt;2~)"
+                className="w-full h-16 px-4 py-3 bg-black-darker border-2 border-black-light rounded-lg text-white-light placeholder-white-darker focus:border-mint focus:outline-none resize-none"
               />
+              <p className="text-white-darker text-xs mt-1">
+                Mods that cannot be installed alongside this mod
+              </p>
             </div>
+
             <div>
               <label className="block text-white-light text-sm font-medium mb-2">
                 Provides
               </label>
               <textarea
-                value={provides}
-                onChange={(e) => setProvides(e.target.value)}
-                placeholder={`SomeAPIMod (1.0)`}
-                className="w-full h-16 px-4 py-3 bg-black-darker border-2 border-black-light rounded-lg text-white-light placeholder-white-darker focus:border-mint focus:outline-none resize-none opacity-50"
-                disabled
+                value={providesString}
+                onChange={(e) => handleProvidesChange(e.target.value)}
+                placeholder="SomeAPIMod (1.0)"
+                className="w-full h-16 px-4 py-3 bg-black-darker border-2 border-black-light rounded-lg text-white-light placeholder-white-darker focus:border-mint focus:outline-none resize-none"
               />
+              <p className="text-white-darker text-xs mt-1">
+                Alternative mod IDs this mod can fulfill dependencies for
+              </p>
             </div>
           </div>
-          <div className="mt-3 p-3 bg-black-darker border border-black-light rounded-lg">
-            <p className="text-white-darker text-sm">
-              <strong className="text-white-light">Dependencies:</strong>{" "}
-              Required mods with version constraints (&gt;=, ==, &lt;&lt;,
-              &gt;&gt;, etc.)
-            </p>
-            <p className="text-white-darker text-sm mt-1">
-              <strong className="text-white-light">Conflicts:</strong> Mods that
-              cannot be installed alongside this mod
-            </p>
-            <p className="text-white-darker text-sm mt-1">
-              <strong className="text-white-light">Provides:</strong>{" "}
-              Alternative mod IDs this mod can fulfill dependencies for
-            </p>
-          </div>
-          <p className="text-white-darker text-xs mt-2 opacity-50">
-            Dependency management coming soon
-          </p>
         </div>
 
-        {/* Status Indicator */}
-        <div
-          className={`bg-black-dark border-2 rounded-lg p-4 ${
-            requiredFieldsComplete ? "border-mint/30" : "border-red-900/50"
-          }`}
-        >
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div
-                className={`w-3 h-3 rounded-full ${
-                  requiredFieldsComplete
-                    ? "bg-mint animate-pulse"
-                    : "bg-red-400"
-                }`}
-              ></div>
-              <span className="text-white-light font-medium">
-                SMODS Metadata Status (THIS IS BROKEN FOR NOW IGNORE)
-              </span>
-            </div>
-            <div className="flex items-center gap-2">
-              {requiredFieldsComplete ? (
-                <CheckCircleIcon className="h-5 w-5 text-mint" />
-              ) : (
-                <ExclamationTriangleIcon className="h-5 w-5 text-red-400" />
-              )}
-              <span
-                className={`text-sm ${
-                  requiredFieldsComplete ? "text-mint" : "text-red-400"
-                }`}
-              >
-                {requiredFieldsComplete
-                  ? "Export Ready"
-                  : "Missing Required Fields"}
-              </span>
-            </div>
-          </div>
-          {!requiredFieldsComplete && (
-            <p className="text-white-darker text-sm mt-2">
-              Complete mod name and author to prepare for export. Other required
-              fields coming soon.
-            </p>
-          )}
-        </div>
-
-        {/* JSON Preview */}
-        <div className="bg-black-dark border-2 border-black-lighter rounded-lg p-6">
-          <h2 className="text-lg text-white-light font-medium mb-4 flex items-center gap-2">
-            <CodeBracketIcon className="h-5 w-5 text-mint" />
-            Generated Metadata Preview
-          </h2>
-          <div className="bg-black-darker border border-black-light rounded-lg p-4">
-            <pre className="text-white-darker text-sm font-mono overflow-x-auto">
-              {`{
-  "id": "${modId || "your_mod_id"}",
-  "name": "${modName || "Your Mod Name"}",
-  "author": ["${authorName || "Your Name"}"],
-  "description": "${modDescription || "A description of your mod."}",
-  "prefix": "${modPrefix || "prefix"}",
-  "main_file": "${mainFile}",
-  "version": "${modVersion}",
-  "priority": ${priority},
-  "badge_colour": "${badgeColour}",
-  "badge_text_colour": "${badgeTextColour}",
-  "display_name": "${displayName || modName || "Your Mod Name"}",
-  "dependencies": [],
-  "conflicts": [],
-  "provides": []
-}`}
+        <div className="bg-black-darker border border-black-lighter rounded-lg p-4">
+          <h4 className="text-white-light font-medium text-sm mb-3 tracking-wider">
+            JSON PREVIEW
+          </h4>
+          <div className="bg-black border border-black-light rounded p-3 max-h-60 overflow-y-auto custom-scrollbar">
+            <pre className="text-white-darker text-xs font-mono whitespace-pre-wrap">
+              {JSON.stringify(metadata, null, 2)}
             </pre>
           </div>
-          <p className="text-white-darker text-xs mt-2 opacity-50">
-            This preview shows the SMODS metadata JSON that will be generated
-          </p>
         </div>
       </div>
     </div>

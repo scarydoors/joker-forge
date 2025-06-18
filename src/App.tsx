@@ -1,7 +1,10 @@
 import { useState } from "react";
 import Sidebar from "./components/Sidebar";
 import JokersPage from "./components/pages/JokersPage";
-import ModMetadataPage from "./components/pages/ModMetadataPage";
+import ModMetadataPage, {
+  ModMetadata,
+  DEFAULT_MOD_METADATA,
+} from "./components/pages/ModMetadataPage";
 import ConsumablesPage from "./components/pages/ConsumablesPage";
 import DecksPage from "./components/pages/DecksPage";
 import EditionsPage from "./components/pages/EditionsPage";
@@ -16,21 +19,30 @@ import { HomeIcon, ChartBarIcon, ClockIcon } from "@heroicons/react/24/outline";
 
 function App() {
   const [currentSection, setCurrentSection] = useState("overview");
-  const [modName, setModName] = useState("My Custom Mod");
-  const [authorName, setAuthorName] = useState("Anonymous");
+  const [modMetadata, setModMetadata] =
+    useState<ModMetadata>(DEFAULT_MOD_METADATA);
   const [jokers, setJokers] = useState<JokerData[]>([]);
   const [selectedJokerId, setSelectedJokerId] = useState<string | null>(null);
   const [exportLoading, setExportLoading] = useState(false);
 
   const handleExport = async () => {
-    if (!authorName.trim()) {
+    if (
+      !modMetadata.author ||
+      modMetadata.author.length === 0 ||
+      !modMetadata.author[0].trim()
+    ) {
       alert("Please enter an author name");
+      return;
+    }
+
+    if (!modMetadata.name.trim()) {
+      alert("Please enter a mod name");
       return;
     }
 
     setExportLoading(true);
     try {
-      await exportJokersAsMod(jokers, modName, authorName);
+      await exportJokersAsMod(jokers, modMetadata);
     } catch (error) {
       console.error("Export failed:", error);
       alert("Failed to export mod. Please try again.");
@@ -46,16 +58,14 @@ function App() {
       case "metadata":
         return (
           <ModMetadataPage
-            modName={modName}
-            setModName={setModName}
-            authorName={authorName}
-            setAuthorName={setAuthorName}
+            metadata={modMetadata}
+            setMetadata={setModMetadata}
           />
         );
       case "jokers":
         return (
           <JokersPage
-            modName={modName}
+            modName={modMetadata.name}
             jokers={jokers}
             setJokers={setJokers}
             selectedJokerId={selectedJokerId}
@@ -88,12 +98,12 @@ function App() {
       <Sidebar
         selectedSection={currentSection}
         onSectionChange={setCurrentSection}
-        projectName="mycustommod"
+        projectName={modMetadata.id || "mycustommod"}
         onExport={handleExport}
         exportLoading={exportLoading}
         jokers={jokers}
-        modName={modName}
-        authorName={authorName}
+        modName={modMetadata.name}
+        authorName={modMetadata.author.join(", ")}
       />
       <div className="flex-1 flex flex-col overflow-y-auto custom-scrollbar">
         {renderCurrentPage()}

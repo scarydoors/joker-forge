@@ -20,17 +20,34 @@ import { generateCardSealCondition } from "./conditions/CardSealCondition";
 import { generateInternalVariableCondition } from "./conditions/InternalVariableCondition";
 import { generateRandomChanceCondition } from "./conditions/RandomChanceCondition";
 
+// Types
+export interface ModMetadata {
+  id: string;
+  name: string;
+  author: string[];
+  description: string;
+  prefix: string;
+  main_file: string;
+  version: string;
+  priority: number;
+  badge_colour: string;
+  badge_text_colour: string;
+  display_name: string;
+  dependencies: string[];
+  conflicts: string[];
+  provides: string[];
+  dump_loc?: boolean;
+}
+
 export const exportJokersAsMod = async (
   jokers: JokerData[],
-  modName: string,
-  authorName: string
+  metadata: ModMetadata
 ): Promise<boolean> => {
   try {
     const zip = new JSZip();
-    const modId = modName.toLowerCase().replace(/\s+/g, "");
 
-    zip.file("main.lua", generateMainLua(jokers));
-    zip.file(`${modId}.json`, generateModJson(modName, modId, authorName));
+    zip.file(metadata.main_file, generateMainLua(jokers, metadata));
+    zip.file(`${metadata.id}.json`, generateModJson(metadata));
     zip.file("config.lua", "return {}");
 
     await addAtlasToZip(zip, jokers);
@@ -39,7 +56,7 @@ export const exportJokersAsMod = async (
     const url = URL.createObjectURL(content);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `${modId}.zip`;
+    a.download = `${metadata.id}.zip`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -52,28 +69,25 @@ export const exportJokersAsMod = async (
   }
 };
 
-const generateMainLua = (jokers: JokerData[]): string => {
-  // Track all helper functions
+const generateMainLua = (
+  jokers: JokerData[],
+  metadata: ModMetadata
+): string => {
   const helperFunctions: string[] = [];
-  // Track joker-specific data for final generation
   const jokerGenerationData: {
     joker: JokerData;
     index: number;
     conditionFunctionsByRule: { [ruleId: string]: string[] };
   }[] = [];
 
-  // First pass: collect all helper functions
+  // Collect helper functions
   jokers.forEach((joker, index) => {
     const conditionFunctionsByRule: { [ruleId: string]: string[] } = {};
 
-    console.log("Joker rules:", joker.rules);
-
     if (joker.rules && joker.rules.length > 0) {
-      // Process each rule individually
       joker.rules.forEach((rule) => {
         const ruleFunctionNames: string[] = [];
 
-        // Check for poker hand rules in this specific rule
         if (
           rule.conditionGroups.some((group) =>
             group.conditions.some((condition) => condition.type === "hand_type")
@@ -86,7 +100,6 @@ const generateMainLua = (jokers: JokerData[]): string => {
           }
         }
 
-        // Check for suit rules in this specific rule
         if (
           rule.conditionGroups.some((group) =>
             group.conditions.some(
@@ -103,7 +116,6 @@ const generateMainLua = (jokers: JokerData[]): string => {
           }
         }
 
-        // Check for rank rules in this specific rule
         if (
           rule.conditionGroups.some((group) =>
             group.conditions.some(
@@ -120,7 +132,6 @@ const generateMainLua = (jokers: JokerData[]): string => {
           }
         }
 
-        // Check for card count rules in this specific rule
         if (
           rule.conditionGroups.some((group) =>
             group.conditions.some(
@@ -135,7 +146,6 @@ const generateMainLua = (jokers: JokerData[]): string => {
           }
         }
 
-        // Check for card enhancement rules in this specific rule
         if (
           rule.conditionGroups.some((group) =>
             group.conditions.some(
@@ -150,7 +160,6 @@ const generateMainLua = (jokers: JokerData[]): string => {
           }
         }
 
-        // Check for card seal rules in this specific rule
         if (
           rule.conditionGroups.some((group) =>
             group.conditions.some((condition) => condition.type === "card_seal")
@@ -163,7 +172,6 @@ const generateMainLua = (jokers: JokerData[]): string => {
           }
         }
 
-        // Check for player money rules in this specific rule
         if (
           rule.conditionGroups.some((group) =>
             group.conditions.some(
@@ -178,7 +186,6 @@ const generateMainLua = (jokers: JokerData[]): string => {
           }
         }
 
-        // Check for remaining hands rules in this specific rule
         if (
           rule.conditionGroups.some((group) =>
             group.conditions.some(
@@ -193,7 +200,6 @@ const generateMainLua = (jokers: JokerData[]): string => {
           }
         }
 
-        // Check for remaining discards rules in this specific rule
         if (
           rule.conditionGroups.some((group) =>
             group.conditions.some(
@@ -208,7 +214,6 @@ const generateMainLua = (jokers: JokerData[]): string => {
           }
         }
 
-        // Check for joker count rules in this specific rule
         if (
           rule.conditionGroups.some((group) =>
             group.conditions.some(
@@ -223,7 +228,6 @@ const generateMainLua = (jokers: JokerData[]): string => {
           }
         }
 
-        // Check for blind type rules in this specific rule
         if (
           rule.conditionGroups.some((group) =>
             group.conditions.some(
@@ -238,7 +242,6 @@ const generateMainLua = (jokers: JokerData[]): string => {
           }
         }
 
-        // Check for internal variable rules in this specific rule
         if (
           rule.conditionGroups.some((group) =>
             group.conditions.some(
@@ -255,7 +258,6 @@ const generateMainLua = (jokers: JokerData[]): string => {
           }
         }
 
-        // Check for random chance rules in this specific rule
         if (
           rule.conditionGroups.some((group) =>
             group.conditions.some(
@@ -270,7 +272,6 @@ const generateMainLua = (jokers: JokerData[]): string => {
           }
         }
 
-        // Store the function names for this rule
         conditionFunctionsByRule[rule.id] = ruleFunctionNames;
       });
     }
@@ -282,14 +283,18 @@ const generateMainLua = (jokers: JokerData[]): string => {
     });
   });
 
-  // Start building the output
+  // Build output
   let output = `-- FILE GENERATED BY JOKER FORGE
+-- Mod: ${metadata.name}
+-- Author(s): ${metadata.author.join(", ")}
+-- Version: ${metadata.version}
+-- Description: ${metadata.description}
 
 local mod = SMODS.current_mod
 
 mod.config = {}
 
--- Create custom joker atlas
+-- Atlas
 SMODS.Atlas({
     key = "CustomJokers", 
     path = "CustomJokers.png", 
@@ -300,14 +305,14 @@ SMODS.Atlas({
 
 `;
 
-  // Add all helper functions first
+  // Helper functions
   if (helperFunctions.length > 0) {
-    output += "-- Helper functions for joker conditions\n";
+    output += "-- Helper functions\n";
     output += helperFunctions.join("\n\n");
     output += "\n\n";
   }
 
-  // Now add all joker definitions
+  // Joker definitions
   jokerGenerationData.forEach(({ joker, index, conditionFunctionsByRule }) => {
     output +=
       generateJokerCode(
@@ -328,21 +333,13 @@ const generateJokerCode = (
   atlasKey: string,
   conditionFunctionsByRule: { [ruleId: string]: string[] }
 ): string => {
-  console.log(`Generating code for joker: ${joker.name}`);
-
-  // Start with the base joker code
   let jokerCode = generateJokerBaseCode(joker, index, atlasKey);
-
-  // Generate loc_vars function
   const locVarsCode = generateBasicLocVarsFunction(joker);
-
-  // Generate the calculate function that combines all rules
   const calculateCode = generateCalculateFunction(
     joker.rules || [],
     conditionFunctionsByRule
   );
 
-  // Add the generated code to the joker
   jokerCode += `,
 
     ${locVarsCode},
@@ -353,23 +350,39 @@ const generateJokerCode = (
   return jokerCode;
 };
 
-const generateModJson = (
-  modName: string,
-  modId: string,
-  authorName: string
-): string => {
-  const metadata = {
-    id: modId,
-    name: modName,
-    display_name: modName,
-    author: [authorName],
-    description: "Custom jokers created with Joker Forge",
-    prefix: modId,
-    main_file: "main.lua",
-    priority: 1,
-    version: "1.0.0",
-    dependencies: ["Steamodded (>=1.0.0~BETA-0404a)"],
+const generateModJson = (metadata: ModMetadata): string => {
+  const modJson: Record<string, unknown> = {
+    id: metadata.id,
+    name: metadata.name,
+    author: metadata.author,
+    description: metadata.description,
+    prefix: metadata.prefix,
+    main_file: metadata.main_file,
+    version: metadata.version,
+    priority: metadata.priority,
+    badge_colour: metadata.badge_colour,
+    badge_text_colour: metadata.badge_text_colour,
   };
 
-  return JSON.stringify(metadata, null, 2);
+  if (metadata.display_name && metadata.display_name !== metadata.name) {
+    modJson.display_name = metadata.display_name;
+  }
+
+  if (metadata.dependencies && metadata.dependencies.length > 0) {
+    modJson.dependencies = metadata.dependencies;
+  }
+
+  if (metadata.conflicts && metadata.conflicts.length > 0) {
+    modJson.conflicts = metadata.conflicts;
+  }
+
+  if (metadata.provides && metadata.provides.length > 0) {
+    modJson.provides = metadata.provides;
+  }
+
+  if (metadata.dump_loc) {
+    modJson.dump_loc = metadata.dump_loc;
+  }
+
+  return JSON.stringify(modJson, null, 2);
 };
