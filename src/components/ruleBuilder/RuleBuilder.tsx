@@ -860,6 +860,31 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
     return baseLabel;
   };
 
+  const updateConditionOperator = (
+    ruleId: string,
+    conditionId: string,
+    operator: "and" | "or"
+  ) => {
+    setRules((prev) =>
+      prev.map((rule) => {
+        if (rule.id === ruleId) {
+          return {
+            ...rule,
+            conditionGroups: rule.conditionGroups.map((group) => ({
+              ...group,
+              conditions: group.conditions.map((condition) =>
+                condition.id === conditionId
+                  ? { ...condition, operator }
+                  : condition
+              ),
+            })),
+          };
+        }
+        return rule;
+      })
+    );
+  };
+
   const getParameterCount = (params: Record<string, unknown>) => {
     return Object.keys(params).length;
   };
@@ -1090,6 +1115,7 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
                             generateConditionTitle={generateConditionTitle}
                             generateEffectTitle={generateEffectTitle}
                             getParameterCount={getParameterCount}
+                            onUpdateConditionOperator={updateConditionOperator}
                           />
                         </div>
                       ))}

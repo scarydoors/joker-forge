@@ -3,7 +3,7 @@ import { generateEffectReturnStatement } from "./effectUtils";
 
 export const generateCalculateFunction = (
   rules: Rule[],
-  conditionFunctionsByRule: { [ruleId: string]: string[] }
+  conditionCodeByRule: { [ruleId: string]: string[] }
 ): string => {
   if (!rules || rules.length === 0) {
     return `calculate = function(self, card, context)
@@ -18,7 +18,7 @@ end`;
   rules.forEach((rule) => {
     const triggerType = rule.trigger;
     const effects = rule.effects || [];
-    const conditionFunctions = conditionFunctionsByRule[rule.id] || [];
+    const conditionCodes = conditionCodeByRule[rule.id] || [];
 
     const hasRetriggerEffects = effects.some(
       (effect) => effect.type === "retrigger_cards"
@@ -31,25 +31,25 @@ end`;
     } = generateEffectReturnStatement(effects, triggerType);
 
     let conditionChecks = "";
-    if (conditionFunctions.length === 0) {
+    if (conditionCodes.length === 0) {
       conditionChecks = "true";
-    } else if (conditionFunctions.length === 1) {
-      const functionName = conditionFunctions[0];
-      if (functionName.includes("internal_var")) {
-        conditionChecks = `${functionName}(context, card)`;
-      } else {
-        conditionChecks = `${functionName}(context)`;
-      }
+    } else if (conditionCodes.length === 1) {
+      conditionChecks = `(${conditionCodes[0]})`;
     } else {
-      conditionChecks = conditionFunctions
-        .map((fn) => {
-          if (fn.includes("internal_var")) {
-            return `${fn}(context, card)`;
-          } else {
-            return `${fn}(context)`;
+      // Build the condition checks using the actual operators from conditions
+      const allConditions = rule.conditionGroups.flatMap(
+        (group) => group.conditions
+      );
+      conditionChecks = conditionCodes
+        .map((code, index) => {
+          if (index === conditionCodes.length - 1) {
+            return `(${code})`;
           }
+          const condition = allConditions[index];
+          const operator = condition?.operator || "and";
+          return `(${code}) ${operator}`;
         })
-        .join(" and ");
+        .join(" ");
     }
 
     let contextCheck = "";

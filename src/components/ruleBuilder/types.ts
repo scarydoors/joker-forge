@@ -20,6 +20,7 @@ export interface Condition {
   type: string;
   negate: boolean; // For NOT logic
   params: Record<string, unknown>;
+  operator?: string;
 }
 
 // An effect with parameters

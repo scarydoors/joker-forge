@@ -77,6 +77,11 @@ interface RuleCardProps {
   generateConditionTitle: (condition: Condition) => string;
   generateEffectTitle: (effect: Effect) => string;
   getParameterCount: (params: Record<string, unknown>) => number;
+  onUpdateConditionOperator: (
+    ruleId: string,
+    conditionId: string,
+    operator: "and" | "or"
+  ) => void;
 }
 
 const SortableCondition: React.FC<{
@@ -212,14 +217,12 @@ const RuleCard: React.FC<RuleCardProps> = ({
   generateConditionTitle,
   generateEffectTitle,
   getParameterCount,
+  onUpdateConditionOperator,
 }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [descriptionVisible, setDescriptionVisible] = useState(true);
   const [showReopenButton, setShowReopenButton] = useState(false);
   const [isDisabled, setIsDisabled] = useState(false);
-  const [conditionOperators, setConditionOperators] = useState<
-    Record<string, string>
-  >({});
   const [groupOperators, setGroupOperators] = useState<Record<string, string>>(
     {}
   );
@@ -394,10 +397,13 @@ const RuleCard: React.FC<RuleCardProps> = ({
     groupId: string,
     conditionIndex: number
   ) => {
-    const key = `${groupId}-${conditionIndex}`;
-    const current = conditionOperators[key] || "AND";
-    const newOperator = current === "AND" ? "OR" : "AND";
-    setConditionOperators((prev) => ({ ...prev, [key]: newOperator }));
+    const group = rule.conditionGroups.find((g) => g.id === groupId);
+    if (group && group.conditions[conditionIndex]) {
+      const condition = group.conditions[conditionIndex];
+      const currentOperator = condition.operator || "and";
+      const newOperator = currentOperator === "and" ? "or" : "and";
+      onUpdateConditionOperator(rule.id, condition.id, newOperator);
+    }
   };
 
   const handleGroupOperatorToggle = (groupIndex: number, groupId: string) => {
@@ -517,9 +523,7 @@ const RuleCard: React.FC<RuleCardProps> = ({
             >
               <div className="space-y-3">
                 {group.conditions.map((condition, conditionIndex) => {
-                  const operatorKey = `${group.id}-${conditionIndex}`;
-                  const currentOperator =
-                    conditionOperators[operatorKey] || "AND";
+                  const currentOperator = condition.operator || "and";
 
                   return (
                     <motion.div key={condition.id}>
@@ -565,7 +569,7 @@ const RuleCard: React.FC<RuleCardProps> = ({
                             }}
                             className="px-3 text-white-darker text-sm font-medium tracking-wider cursor-pointer rounded transition-colors hover:bg-black-light"
                           >
-                            {currentOperator}
+                            {currentOperator.toUpperCase()}
                           </button>
                         </div>
                       )}
@@ -586,7 +590,9 @@ const RuleCard: React.FC<RuleCardProps> = ({
               }}
               className="px-3 text-white-darker text-sm font-medium tracking-wider cursor-pointer rounded transition-colors hover:bg-black-light"
             >
-              {groupOperators[`group-${groupIndex}`] || "AND"}
+              {groupOperators[`group-${groupIndex}`] ||
+                group.operator?.toUpperCase() ||
+                "AND"}
             </button>
           </div>
         )}
