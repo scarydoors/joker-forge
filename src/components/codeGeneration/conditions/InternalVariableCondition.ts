@@ -5,7 +5,6 @@ export interface InternalVariableCondition {
   functionCode: string;
 }
 
-// Helper to get a descriptive function name for internal variable conditions
 export const getInternalVariableFunctionName = (
   variableName: string,
   operator: string,
@@ -14,7 +13,6 @@ export const getInternalVariableFunctionName = (
   const prefix = "check_internal_var";
   const varPart = variableName.toLowerCase().replace(/[^a-z0-9]/g, "_");
 
-  // Determine operator part of name
   let operatorPart = "";
   switch (operator) {
     case "equals":
@@ -47,7 +45,6 @@ export const getInternalVariableFunctionName = (
 export const generateInternalVariableCondition = (
   rules: Rule[]
 ): InternalVariableCondition | null => {
-  // Filter rules related to internal variables
   const variableRules = rules?.filter((rule) => {
     return rule.conditionGroups.some((group) =>
       group.conditions.some(
@@ -60,7 +57,6 @@ export const generateInternalVariableCondition = (
     return null;
   }
 
-  // Find the first internal variable condition in any rule condition group
   let variableCondition: Condition | undefined;
 
   for (const rule of variableRules) {
@@ -80,26 +76,21 @@ export const generateInternalVariableCondition = (
     return null;
   }
 
-  // Extract variable condition parameters
   const params = variableCondition.params;
 
-  // Default values for parameters
   const variableName = (params.variable_name as string) || "var1";
   const operator = (params.operator as string) || "equals";
   const value = (params.value as number) || 0;
 
-  // Generate function name
   const functionName = getInternalVariableFunctionName(
     variableName,
     operator,
     value
   );
 
-  // Generate condition code based on operator
   let conditionCode = "";
   let conditionComment = "";
 
-  // Generate the comparison based on the operator
   let comparison = "";
   switch (operator) {
     case "equals":
@@ -131,13 +122,11 @@ export const generateInternalVariableCondition = (
       conditionComment = `-- Check if internal variable '${variableName}' equals ${value}`;
   }
 
-  // Generate the final code
   conditionCode = `
     return (card.ability.extra.${variableName} or 0) ${comparison}`;
 
-  // Generate the function that checks the internal variable condition
   const functionCode = `-- Internal variable condition check
-local function ${functionName}(context)
+local function ${functionName}(context, card)
     ${conditionComment}${conditionCode}
 end`;
 
