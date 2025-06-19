@@ -8,7 +8,6 @@ import {
   CheckCircleIcon,
   ClockIcon,
   CodeBracketIcon,
-  SparklesIcon,
   WrenchScrewdriverIcon,
   EyeIcon,
   BeakerIcon,
@@ -310,27 +309,6 @@ const OverviewPage: React.FC<OverviewPageProps> = ({
               </div>
             )}
           </div>
-
-          <div className="bg-black-dark border-2 border-black-lighter rounded-lg p-6 flex-1">
-            <div className="flex items-center gap-2 mb-4">
-              <SparklesIcon className="h-5 w-5 text-mint" />
-              <h3 className="text-lg text-white-light font-medium">Tips</h3>
-            </div>
-            <div className="space-y-3 text-sm text-white-darker">
-              <div className="flex items-start gap-2">
-                <div className="w-1 h-1 bg-mint rounded-full mt-2 flex-shrink-0"></div>
-                <span>Use the Rule Builder for complex joker behaviors</span>
-              </div>
-              <div className="flex items-start gap-2">
-                <div className="w-1 h-1 bg-mint rounded-full mt-2 flex-shrink-0"></div>
-                <span>Upload 142x190px images for best results</span>
-              </div>
-              <div className="flex items-start gap-2">
-                <div className="w-1 h-1 bg-mint rounded-full mt-2 flex-shrink-0"></div>
-                <span>Test your jokers in Balatro after export</span>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
 
@@ -353,26 +331,11 @@ const OverviewPage: React.FC<OverviewPageProps> = ({
                 code, but rather to provide a functional and flexible tool for
                 modders.
               </p>
-              <div className="space-y-2">
-                <div className="flex items-center gap-2 text-sm">
-                  <CheckCircleIcon className="h-4 w-4 text-mint" />
-                  <span className="text-white-light">
-                    Visual Rule Builder System
-                  </span>
-                </div>
-                <div className="flex items-center gap-2 text-sm">
-                  <CheckCircleIcon className="h-4 w-4 text-mint" />
-                  <span className="text-white-light">
-                    SMODS Code Generation
-                  </span>
-                </div>
-                <div className="flex items-center gap-2 text-sm">
-                  <CheckCircleIcon className="h-4 w-4 text-mint" />
-                  <span className="text-white-light">
-                    Complete Mod Packaging
-                  </span>
-                </div>
-              </div>
+              <p className="text-white-light text-sm leading-relaxed mb-4">
+                Please note that I am not a wizard with the SMODS API, so if you
+                find any bugs with the generated code or with the UI, feel free
+                to open an issue on the Github repository.
+              </p>
             </div>
             <div className="bg-black-darker border border-black-lighter rounded-lg p-4">
               <h4 className="text-white-light font-medium text-sm mb-3">
@@ -503,7 +466,7 @@ const OverviewPage: React.FC<OverviewPageProps> = ({
               <div className="flex items-center gap-3">
                 <CheckCircleIcon className="h-4 w-4 text-mint" />
                 <span className="text-sm text-white-light">
-                  Random chance conditions
+                  Random chance effects
                 </span>
               </div>
             </div>
