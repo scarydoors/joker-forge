@@ -262,7 +262,7 @@ const JokersPage: React.FC<JokersPageProps> = ({
         {/* Header Section */}
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-4xl text-white-light font-light tracking-wide mb-3 bg-gradient-to-r from-white-light to-mint bg-clip-text text-transparent">
+            <h1 className="text-4xl text-white-light font-light tracking-wide mb-3 bg-gradient-to-r from-white-light to-mint bg-clip-text">
               Jokers
             </h1>
             <div className="flex items-center gap-6 text-white-darker text-sm">

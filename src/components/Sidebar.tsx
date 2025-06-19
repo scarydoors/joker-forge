@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import {
   HomeIcon,
   DocumentTextIcon,
@@ -40,15 +40,12 @@ const Sidebar: React.FC<SidebarProps> = ({
   exportLoading = false,
   jokers = [],
 }) => {
-  const [activeSection, setActiveSection] = useState(selectedSection);
-
   const handleSectionClick = (section: string) => {
     if (section === "github") {
       window.open("https://github.com/Jayd-H/joker-forge", "_blank");
       return;
     }
 
-    setActiveSection(section);
     onSectionChange?.(section);
   };
 
@@ -114,7 +111,7 @@ const Sidebar: React.FC<SidebarProps> = ({
           <div className="space-y-2">
             {navigationItems.map((item) => {
               const Icon = item.icon;
-              const isActive = activeSection === item.id;
+              const isActive = selectedSection === item.id;
 
               return (
                 <button
@@ -140,7 +137,7 @@ const Sidebar: React.FC<SidebarProps> = ({
             <div className="space-y-1">
               {resourceItems.map((item) => {
                 const Icon = item.icon;
-                const isActive = activeSection === item.id;
+                const isActive = selectedSection === item.id;
 
                 return (
                   <button

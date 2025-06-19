@@ -204,7 +204,19 @@ function App() {
       case "docs":
         return <DocsPage />;
       case "vanilla":
-        return <VanillaRemadePage />;
+        return (
+          <VanillaRemadePage
+            onDuplicateToProject={(joker) => {
+              setJokers([...jokers, joker]);
+            }}
+            onNavigateToJokers={() => {
+              setCurrentSection("jokers");
+              setTimeout(() => {
+                setCurrentSection("jokers");
+              }, 0);
+            }}
+          />
+        );
       case "credit":
         return <ExtraCreditPage />;
       case "acknowledgements":
