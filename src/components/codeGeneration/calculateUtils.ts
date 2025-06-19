@@ -24,19 +24,12 @@ end`;
       (effect) => effect.type === "retrigger_cards"
     );
 
-    const {
-      statement: returnStatement,
-      colour,
-      preReturnCode,
-    } = generateEffectReturnStatement(effects, triggerType);
-
     let conditionChecks = "";
     if (conditionCodes.length === 0) {
       conditionChecks = "true";
     } else if (conditionCodes.length === 1) {
       conditionChecks = `(${conditionCodes[0]})`;
     } else {
-      // Build the condition checks using the actual operators from conditions
       const allConditions = rule.conditionGroups.flatMap(
         (group) => group.conditions
       );
@@ -112,17 +105,70 @@ end`;
         if ${conditionChecks} then`;
     }
 
-    if (preReturnCode) {
-      calculateFunction += `
+    // Handle effects - separate random chance from normal
+    const randomChanceEffects = effects.filter(
+      (effect) => effect.params.has_random_chance === "true"
+    );
+    const normalEffects = effects.filter(
+      (effect) => effect.params.has_random_chance !== "true"
+    );
+
+    // Handle normal effects first
+    if (normalEffects.length > 0) {
+      const {
+        statement: returnStatement,
+        colour,
+        preReturnCode,
+      } = generateEffectReturnStatement(normalEffects, triggerType);
+
+      if (preReturnCode) {
+        calculateFunction += `
             -- Pre-return code execution
             ${preReturnCode}
             `;
-    }
+      }
 
-    calculateFunction += `
+      calculateFunction += `
             return {${returnStatement},
                 colour = ${colour}
             }`;
+    }
+
+    // Handle random chance effects
+    randomChanceEffects.forEach((effect, index) => {
+      const numerator = effect.params.chance_numerator || 1;
+      const denominator = effect.params.chance_denominator || 4;
+      const effectKey = `effect_${index}_${effect.type}`;
+
+      const numeratorRef =
+        typeof numerator === "string"
+          ? `card.ability.extra.${numerator}`
+          : numerator;
+      const denominatorRef =
+        typeof denominator === "string"
+          ? `card.ability.extra.${denominator}`
+          : denominator;
+
+      const {
+        statement: returnStatement,
+        colour,
+        preReturnCode,
+      } = generateEffectReturnStatement([effect], triggerType);
+
+      if (preReturnCode) {
+        calculateFunction += `
+            -- Pre-return code execution for random effect
+            ${preReturnCode}
+            `;
+      }
+
+      calculateFunction += `
+        if pseudorandom('${effectKey}') < G.GAME.probabilities.normal * ${numeratorRef} / ${denominatorRef} then
+            return {${returnStatement},
+                colour = ${colour}
+            }
+        end`;
+    });
 
     if (conditionChecks !== "true") {
       calculateFunction += `
