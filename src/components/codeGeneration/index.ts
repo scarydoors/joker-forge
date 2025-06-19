@@ -88,189 +88,88 @@ const generateMainLua = (
       joker.rules.forEach((rule) => {
         const ruleFunctionNames: string[] = [];
 
-        if (
-          rule.conditionGroups.some((group) =>
-            group.conditions.some((condition) => condition.type === "hand_type")
-          )
-        ) {
-          const pokerHandCondition = generatePokerHandCondition([rule]);
-          if (pokerHandCondition) {
-            helperFunctions.push(pokerHandCondition.functionCode);
-            ruleFunctionNames.push(pokerHandCondition.functionName);
-          }
-        }
+        // Process each condition individually
+        rule.conditionGroups.forEach((group) => {
+          group.conditions.forEach((condition) => {
+            // Create a single-condition rule for each condition
+            const singleConditionRule = {
+              ...rule,
+              conditionGroups: [
+                {
+                  ...group,
+                  conditions: [condition],
+                },
+              ],
+            };
 
-        if (
-          rule.conditionGroups.some((group) =>
-            group.conditions.some(
-              (condition) =>
-                condition.type === "suit_count" ||
-                condition.type === "card_suit"
-            )
-          )
-        ) {
-          const suitCondition = generateSuitCardCondition([rule]);
-          if (suitCondition) {
-            helperFunctions.push(suitCondition.functionCode);
-            ruleFunctionNames.push(suitCondition.functionName);
-          }
-        }
+            let conditionFunction = null;
 
-        if (
-          rule.conditionGroups.some((group) =>
-            group.conditions.some(
-              (condition) =>
-                condition.type === "rank_count" ||
-                condition.type === "card_rank"
-            )
-          )
-        ) {
-          const rankCondition = generateRankCardCondition([rule]);
-          if (rankCondition) {
-            helperFunctions.push(rankCondition.functionCode);
-            ruleFunctionNames.push(rankCondition.functionName);
-          }
-        }
+            if (condition.type === "hand_type") {
+              conditionFunction = generatePokerHandCondition([
+                singleConditionRule,
+              ]);
+            } else if (
+              condition.type === "suit_count" ||
+              condition.type === "card_suit"
+            ) {
+              conditionFunction = generateSuitCardCondition([
+                singleConditionRule,
+              ]);
+            } else if (
+              condition.type === "rank_count" ||
+              condition.type === "card_rank"
+            ) {
+              conditionFunction = generateRankCardCondition([
+                singleConditionRule,
+              ]);
+            } else if (condition.type === "card_count") {
+              conditionFunction = generateCountCardCondition([
+                singleConditionRule,
+              ]);
+            } else if (condition.type === "card_enhancement") {
+              conditionFunction = generateCardEnhancementCondition([
+                singleConditionRule,
+              ]);
+            } else if (condition.type === "card_seal") {
+              conditionFunction = generateCardSealCondition([
+                singleConditionRule,
+              ]);
+            } else if (condition.type === "player_money") {
+              conditionFunction = generatePlayerMoneyCondition([
+                singleConditionRule,
+              ]);
+            } else if (condition.type === "remaining_hands") {
+              conditionFunction = generateRemainingHandsCondition([
+                singleConditionRule,
+              ]);
+            } else if (condition.type === "remaining_discards") {
+              conditionFunction = generateRemainingDiscardsCondition([
+                singleConditionRule,
+              ]);
+            } else if (condition.type === "joker_count") {
+              conditionFunction = generateJokerCountCondition([
+                singleConditionRule,
+              ]);
+            } else if (condition.type === "blind_type") {
+              conditionFunction = generateBlindTypeCondition([
+                singleConditionRule,
+              ]);
+            } else if (condition.type === "internal_variable") {
+              conditionFunction = generateInternalVariableCondition([
+                singleConditionRule,
+              ]);
+            } else if (condition.type === "random_chance") {
+              conditionFunction = generateRandomChanceCondition([
+                singleConditionRule,
+              ]);
+            }
 
-        if (
-          rule.conditionGroups.some((group) =>
-            group.conditions.some(
-              (condition) => condition.type === "card_count"
-            )
-          )
-        ) {
-          const countCondition = generateCountCardCondition([rule]);
-          if (countCondition) {
-            helperFunctions.push(countCondition.functionCode);
-            ruleFunctionNames.push(countCondition.functionName);
-          }
-        }
-
-        if (
-          rule.conditionGroups.some((group) =>
-            group.conditions.some(
-              (condition) => condition.type === "card_enhancement"
-            )
-          )
-        ) {
-          const enhancementCondition = generateCardEnhancementCondition([rule]);
-          if (enhancementCondition) {
-            helperFunctions.push(enhancementCondition.functionCode);
-            ruleFunctionNames.push(enhancementCondition.functionName);
-          }
-        }
-
-        if (
-          rule.conditionGroups.some((group) =>
-            group.conditions.some((condition) => condition.type === "card_seal")
-          )
-        ) {
-          const sealCondition = generateCardSealCondition([rule]);
-          if (sealCondition) {
-            helperFunctions.push(sealCondition.functionCode);
-            ruleFunctionNames.push(sealCondition.functionName);
-          }
-        }
-
-        if (
-          rule.conditionGroups.some((group) =>
-            group.conditions.some(
-              (condition) => condition.type === "player_money"
-            )
-          )
-        ) {
-          const moneyCondition = generatePlayerMoneyCondition([rule]);
-          if (moneyCondition) {
-            helperFunctions.push(moneyCondition.functionCode);
-            ruleFunctionNames.push(moneyCondition.functionName);
-          }
-        }
-
-        if (
-          rule.conditionGroups.some((group) =>
-            group.conditions.some(
-              (condition) => condition.type === "remaining_hands"
-            )
-          )
-        ) {
-          const handsCondition = generateRemainingHandsCondition([rule]);
-          if (handsCondition) {
-            helperFunctions.push(handsCondition.functionCode);
-            ruleFunctionNames.push(handsCondition.functionName);
-          }
-        }
-
-        if (
-          rule.conditionGroups.some((group) =>
-            group.conditions.some(
-              (condition) => condition.type === "remaining_discards"
-            )
-          )
-        ) {
-          const discardCondition = generateRemainingDiscardsCondition([rule]);
-          if (discardCondition) {
-            helperFunctions.push(discardCondition.functionCode);
-            ruleFunctionNames.push(discardCondition.functionName);
-          }
-        }
-
-        if (
-          rule.conditionGroups.some((group) =>
-            group.conditions.some(
-              (condition) => condition.type === "joker_count"
-            )
-          )
-        ) {
-          const jokerCountCondition = generateJokerCountCondition([rule]);
-          if (jokerCountCondition) {
-            helperFunctions.push(jokerCountCondition.functionCode);
-            ruleFunctionNames.push(jokerCountCondition.functionName);
-          }
-        }
-
-        if (
-          rule.conditionGroups.some((group) =>
-            group.conditions.some(
-              (condition) => condition.type === "blind_type"
-            )
-          )
-        ) {
-          const blindTypeCondition = generateBlindTypeCondition([rule]);
-          if (blindTypeCondition) {
-            helperFunctions.push(blindTypeCondition.functionCode);
-            ruleFunctionNames.push(blindTypeCondition.functionName);
-          }
-        }
-
-        if (
-          rule.conditionGroups.some((group) =>
-            group.conditions.some(
-              (condition) => condition.type === "internal_variable"
-            )
-          )
-        ) {
-          const internalVariableCondition = generateInternalVariableCondition([
-            rule,
-          ]);
-          if (internalVariableCondition) {
-            helperFunctions.push(internalVariableCondition.functionCode);
-            ruleFunctionNames.push(internalVariableCondition.functionName);
-          }
-        }
-
-        if (
-          rule.conditionGroups.some((group) =>
-            group.conditions.some(
-              (condition) => condition.type === "random_chance"
-            )
-          )
-        ) {
-          const randomChanceCondition = generateRandomChanceCondition([rule]);
-          if (randomChanceCondition) {
-            helperFunctions.push(randomChanceCondition.functionCode);
-            ruleFunctionNames.push(randomChanceCondition.functionName);
-          }
-        }
+            if (conditionFunction) {
+              helperFunctions.push(conditionFunction.functionCode);
+              ruleFunctionNames.push(conditionFunction.functionName);
+            }
+          });
+        });
 
         conditionFunctionsByRule[rule.id] = ruleFunctionNames;
       });
