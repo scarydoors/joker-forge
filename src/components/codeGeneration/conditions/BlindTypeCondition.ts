@@ -1,25 +1,11 @@
 import type { Rule, Condition } from "../../ruleBuilder/types";
 
-export interface BlindTypeCondition {
-  functionName: string;
-  functionCode: string;
-}
-
 /**
- * Creates a function name for blind type conditions
+ * Generates inline condition code to check blind types
  */
-export const getBlindTypeFunctionName = (blindType: string): string => {
-  const prefix = "check_blind_type";
-  const typeParam = blindType.toLowerCase().replace(/\s+/g, "_");
-  return `${prefix}_${typeParam}`;
-};
-
-/**
- * Generates a Lua function to check blind types
- */
-export const generateBlindTypeCondition = (
+export const generateBlindTypeConditionCode = (
   rules: Rule[]
-): BlindTypeCondition | null => {
+): string | null => {
   // Filter rules related to blind type
   const blindRules = rules?.filter((rule) => {
     return rule.conditionGroups.some((group) =>
@@ -52,43 +38,15 @@ export const generateBlindTypeCondition = (
   const params = blindCondition.params;
   const blindType = (params.blind_type as string) || "small";
 
-  // Generate function name
-  const functionName = getBlindTypeFunctionName(blindType);
-
   // Generate condition code based on blind type
-  let conditionCode = "";
-  let conditionComment = "";
-
   switch (blindType) {
     case "small":
-      conditionComment = `-- Check if current blind is a Small Blind`;
-      conditionCode = `
-    return G.GAME.blind:get_type() == 'Small'`;
-      break;
+      return `G.GAME.blind:get_type() == 'Small'`;
     case "big":
-      conditionComment = `-- Check if current blind is a Big Blind`;
-      conditionCode = `
-    return G.GAME.blind:get_type() == 'Big'`;
-      break;
+      return `G.GAME.blind:get_type() == 'Big'`;
     case "boss":
-      conditionComment = `-- Check if current blind is a Boss Blind`;
-      conditionCode = `
-    return G.GAME.blind.boss`;
-      break;
+      return `G.GAME.blind.boss`;
     default:
-      conditionComment = `-- Check if current blind is a Small Blind (default)`;
-      conditionCode = `
-    return G.GAME.blind.small`;
+      return `G.GAME.blind.small`;
   }
-
-  // Generate the function that checks the blind type condition
-  const functionCode = `-- Blind type condition check
-local function ${functionName}(context)
-    ${conditionComment}${conditionCode}
-end`;
-
-  return {
-    functionName,
-    functionCode,
-  };
 };

@@ -1,21 +1,6 @@
 import type { Rule, Condition } from "../../ruleBuilder/types";
 
-export interface CardSealCondition {
-  functionName: string;
-  functionCode: string;
-}
-
-// Helper to get a descriptive function name for seal conditions
-export const getSealFunctionName = (sealType: string): string => {
-  const prefix = "check_seal";
-  const sealPart = sealType.toLowerCase().replace(/\s+/g, "_");
-
-  return `${prefix}_${sealPart}`;
-};
-
-export const generateCardSealCondition = (
-  rules: Rule[]
-): CardSealCondition | null => {
+export const generateCardSealConditionCode = (rules: Rule[]): string | null => {
   // Filter rules related to card seals
   const sealRules = rules?.filter((rule) => {
     return rule.conditionGroups.some((group) =>
@@ -55,23 +40,8 @@ export const generateCardSealCondition = (
       ? "any"
       : sealType.charAt(0).toUpperCase() + sealType.slice(1).toLowerCase();
 
-  // Generate function name
-  const functionName = getSealFunctionName(sealType);
-
-  // Generate the seal condition function with minimal comments
-  const functionCode =
-    sealType === "any"
-      ? `-- Card seal condition check
-local function ${functionName}(context)
-    return context.other_card.seal ~= nil
-end`
-      : `-- Card seal condition check
-local function ${functionName}(context)
-    return context.other_card.seal == "${capitalizedSealType}"
-end`;
-
-  return {
-    functionName,
-    functionCode,
-  };
+  // Generate the seal condition code
+  return sealType === "any"
+    ? `context.other_card.seal ~= nil`
+    : `context.other_card.seal == "${capitalizedSealType}"`;
 };

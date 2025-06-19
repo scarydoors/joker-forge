@@ -1,21 +1,8 @@
 import type { Rule, Condition } from "../../ruleBuilder/types";
 
-export interface CardEnhancementCondition {
-  functionName: string;
-  functionCode: string;
-}
-
-// Helper to get a descriptive function name for enhancement conditions
-export const getEnhancementFunctionName = (enhancementType: string): string => {
-  const prefix = "check_enhancement";
-  const enhancementPart = enhancementType.toLowerCase().replace(/\s+/g, "_");
-
-  return `${prefix}_${enhancementPart.replace("m_", "")}`;
-};
-
-export const generateCardEnhancementCondition = (
+export const generateCardEnhancementConditionCode = (
   rules: Rule[]
-): CardEnhancementCondition | null => {
+): string | null => {
   // Filter rules related to card enhancements
   const enhancementRules = rules?.filter((rule) => {
     return rule.conditionGroups.some((group) =>
@@ -53,32 +40,18 @@ export const generateCardEnhancementCondition = (
   const params = enhancementCondition.params;
   const enhancementType = (params.enhancement as string) || "any";
 
-  // Generate function name
-  const functionName = getEnhancementFunctionName(enhancementType);
-
-  // Generate enhancement check function
-  let functionCode = "";
-
+  // Generate enhancement check code
   if (enhancementType === "any") {
-    functionCode = `-- Card enhancement condition check
-local function ${functionName}(context)
-    local enhancements = SMODS.get_enhancements(context.other_card)
-    for k, v in pairs(enhancements) do
-        if v then
-            return true
+    return `(function()
+        local enhancements = SMODS.get_enhancements(context.other_card)
+        for k, v in pairs(enhancements) do
+            if v then
+                return true
+            end
         end
-    end
-    return false
-end`;
+        return false
+    end)()`;
   } else {
-    functionCode = `-- Card enhancement condition check
-local function ${functionName}(context)
-    return SMODS.get_enhancements(context.other_card)["${enhancementType}"] == true
-end`;
+    return `SMODS.get_enhancements(context.other_card)["${enhancementType}"] == true`;
   }
-
-  return {
-    functionName,
-    functionCode,
-  };
 };

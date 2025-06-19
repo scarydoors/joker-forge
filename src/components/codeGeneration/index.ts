@@ -5,20 +5,20 @@ import {
   generateJokerBaseCode,
   generateBasicLocVarsFunction,
 } from "./JokerBase";
-import { generatePokerHandCondition } from "./conditions/PokerHandCondition";
+import { generatePokerHandConditionCode } from "./conditions/PokerHandCondition";
 import { generateCalculateFunction } from "./calculateUtils";
-import { generateSuitCardCondition } from "./conditions/SuitCardCondition";
-import { generateRankCardCondition } from "./conditions/RankCardCondition";
-import { generateCountCardCondition } from "./conditions/CountHandCondition";
-import { generatePlayerMoneyCondition } from "./conditions/PlayerMoneyCondition";
-import { generateRemainingHandsCondition } from "./conditions/RemainingHandsCondition";
-import { generateRemainingDiscardsCondition } from "./conditions/RemainingDiscardsCondition";
-import { generateJokerCountCondition } from "./conditions/JokerCountCondition";
-import { generateBlindTypeCondition } from "./conditions/BlindTypeCondition";
-import { generateCardEnhancementCondition } from "./conditions/CardEnhancementCondition";
-import { generateCardSealCondition } from "./conditions/CardSealCondition";
-import { generateInternalVariableCondition } from "./conditions/InternalVariableCondition";
-import { generateRandomChanceCondition } from "./conditions/RandomChanceCondition";
+import { generateSuitCardConditionCode } from "./conditions/SuitCardCondition";
+import { generateRankCardConditionCode } from "./conditions/RankCardCondition";
+import { generateCountCardConditionCode } from "./conditions/CountHandCondition";
+import { generatePlayerMoneyConditionCode } from "./conditions/PlayerMoneyCondition";
+import { generateRemainingHandsConditionCode } from "./conditions/RemainingHandsCondition";
+import { generateRemainingDiscardsConditionCode } from "./conditions/RemainingDiscardsCondition";
+import { generateJokerCountConditionCode } from "./conditions/JokerCountCondition";
+import { generateBlindTypeConditionCode } from "./conditions/BlindTypeCondition";
+import { generateCardEnhancementConditionCode } from "./conditions/CardEnhancementCondition";
+import { generateCardSealConditionCode } from "./conditions/CardSealCondition";
+import { generateInternalVariableConditionCode } from "./conditions/InternalVariableCondition";
+import { generateRandomChanceConditionCode } from "./conditions/RandomChanceCondition";
 
 // Types
 export interface ModMetadata {
@@ -73,20 +73,19 @@ const generateMainLua = (
   jokers: JokerData[],
   metadata: ModMetadata
 ): string => {
-  const helperFunctions: string[] = [];
   const jokerGenerationData: {
     joker: JokerData;
     index: number;
-    conditionFunctionsByRule: { [ruleId: string]: string[] };
+    conditionCodeByRule: { [ruleId: string]: string[] };
   }[] = [];
 
-  // Collect helper functions
+  // Collect condition codes
   jokers.forEach((joker, index) => {
-    const conditionFunctionsByRule: { [ruleId: string]: string[] } = {};
+    const conditionCodeByRule: { [ruleId: string]: string[] } = {};
 
     if (joker.rules && joker.rules.length > 0) {
       joker.rules.forEach((rule) => {
-        const ruleFunctionNames: string[] = [];
+        const ruleConditionCodes: string[] = [];
 
         // Process each condition individually
         rule.conditionGroups.forEach((group) => {
@@ -102,83 +101,82 @@ const generateMainLua = (
               ],
             };
 
-            let conditionFunction = null;
+            let conditionCode = null;
 
             if (condition.type === "hand_type") {
-              conditionFunction = generatePokerHandCondition([
+              conditionCode = generatePokerHandConditionCode([
                 singleConditionRule,
               ]);
             } else if (
               condition.type === "suit_count" ||
               condition.type === "card_suit"
             ) {
-              conditionFunction = generateSuitCardCondition([
+              conditionCode = generateSuitCardConditionCode([
                 singleConditionRule,
               ]);
             } else if (
               condition.type === "rank_count" ||
               condition.type === "card_rank"
             ) {
-              conditionFunction = generateRankCardCondition([
+              conditionCode = generateRankCardConditionCode([
                 singleConditionRule,
               ]);
             } else if (condition.type === "card_count") {
-              conditionFunction = generateCountCardCondition([
+              conditionCode = generateCountCardConditionCode([
                 singleConditionRule,
               ]);
             } else if (condition.type === "card_enhancement") {
-              conditionFunction = generateCardEnhancementCondition([
+              conditionCode = generateCardEnhancementConditionCode([
                 singleConditionRule,
               ]);
             } else if (condition.type === "card_seal") {
-              conditionFunction = generateCardSealCondition([
+              conditionCode = generateCardSealConditionCode([
                 singleConditionRule,
               ]);
             } else if (condition.type === "player_money") {
-              conditionFunction = generatePlayerMoneyCondition([
+              conditionCode = generatePlayerMoneyConditionCode([
                 singleConditionRule,
               ]);
             } else if (condition.type === "remaining_hands") {
-              conditionFunction = generateRemainingHandsCondition([
+              conditionCode = generateRemainingHandsConditionCode([
                 singleConditionRule,
               ]);
             } else if (condition.type === "remaining_discards") {
-              conditionFunction = generateRemainingDiscardsCondition([
+              conditionCode = generateRemainingDiscardsConditionCode([
                 singleConditionRule,
               ]);
             } else if (condition.type === "joker_count") {
-              conditionFunction = generateJokerCountCondition([
+              conditionCode = generateJokerCountConditionCode([
                 singleConditionRule,
               ]);
             } else if (condition.type === "blind_type") {
-              conditionFunction = generateBlindTypeCondition([
+              conditionCode = generateBlindTypeConditionCode([
                 singleConditionRule,
               ]);
             } else if (condition.type === "internal_variable") {
-              conditionFunction = generateInternalVariableCondition([
+              conditionCode = generateInternalVariableConditionCode([
                 singleConditionRule,
               ]);
             } else if (condition.type === "random_chance") {
-              conditionFunction = generateRandomChanceCondition([
+              conditionCode = generateRandomChanceConditionCode([
                 singleConditionRule,
               ]);
             }
 
-            if (conditionFunction) {
-              helperFunctions.push(conditionFunction.functionCode);
-              ruleFunctionNames.push(conditionFunction.functionName);
+            if (conditionCode) {
+              ruleConditionCodes.push(conditionCode);
             }
           });
         });
 
-        conditionFunctionsByRule[rule.id] = ruleFunctionNames;
+        conditionCodeByRule[rule.id] = ruleConditionCodes;
       });
     }
 
     jokerGenerationData.push({
       joker,
       index,
-      conditionFunctionsByRule,
+      conditionCodeByRule,
     });
   });
 
@@ -204,22 +202,10 @@ SMODS.Atlas({
 
 `;
 
-  // Helper functions
-  if (helperFunctions.length > 0) {
-    output += "-- Helper functions\n";
-    output += helperFunctions.join("\n\n");
-    output += "\n\n";
-  }
-
-  // Joker definitions
-  jokerGenerationData.forEach(({ joker, index, conditionFunctionsByRule }) => {
+  jokerGenerationData.forEach(({ joker, index, conditionCodeByRule }) => {
     output +=
-      generateJokerCode(
-        joker,
-        index,
-        "CustomJokers",
-        conditionFunctionsByRule
-      ) + "\n\n";
+      generateJokerCode(joker, index, "CustomJokers", conditionCodeByRule) +
+      "\n\n";
   });
 
   output += "return mod";
@@ -230,13 +216,13 @@ const generateJokerCode = (
   joker: JokerData,
   index: number,
   atlasKey: string,
-  conditionFunctionsByRule: { [ruleId: string]: string[] }
+  conditionCodeByRule: { [ruleId: string]: string[] }
 ): string => {
   let jokerCode = generateJokerBaseCode(joker, index, atlasKey);
   const locVarsCode = generateBasicLocVarsFunction(joker);
   const calculateCode = generateCalculateFunction(
     joker.rules || [],
-    conditionFunctionsByRule
+    conditionCodeByRule
   );
 
   jokerCode += `,

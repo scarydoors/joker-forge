@@ -1,50 +1,8 @@
 import type { Rule, Condition } from "../../ruleBuilder/types";
 
-export interface InternalVariableCondition {
-  functionName: string;
-  functionCode: string;
-}
-
-export const getInternalVariableFunctionName = (
-  variableName: string,
-  operator: string,
-  value: number
-): string => {
-  const prefix = "check_internal_var";
-  const varPart = variableName.toLowerCase().replace(/[^a-z0-9]/g, "_");
-
-  let operatorPart = "";
-  switch (operator) {
-    case "equals":
-      operatorPart = "eq";
-      break;
-    case "not_equals":
-      operatorPart = "neq";
-      break;
-    case "greater_than":
-      operatorPart = "gt";
-      break;
-    case "less_than":
-      operatorPart = "lt";
-      break;
-    case "greater_equals":
-      operatorPart = "gte";
-      break;
-    case "less_equals":
-      operatorPart = "lte";
-      break;
-    default:
-      operatorPart = operator;
-  }
-
-  const valuePart = value.toString().replace(/[.-]/g, "_");
-
-  return `${prefix}_${varPart}_${operatorPart}_${valuePart}`;
-};
-
-export const generateInternalVariableCondition = (
+export const generateInternalVariableConditionCode = (
   rules: Rule[]
-): InternalVariableCondition | null => {
+): string | null => {
   const variableRules = rules?.filter((rule) => {
     return rule.conditionGroups.some((group) =>
       group.conditions.some(
@@ -82,56 +40,29 @@ export const generateInternalVariableCondition = (
   const operator = (params.operator as string) || "equals";
   const value = (params.value as number) || 0;
 
-  const functionName = getInternalVariableFunctionName(
-    variableName,
-    operator,
-    value
-  );
-
-  let conditionCode = "";
-  let conditionComment = "";
-
   let comparison = "";
   switch (operator) {
     case "equals":
       comparison = `== ${value}`;
-      conditionComment = `-- Check if internal variable '${variableName}' equals ${value}`;
       break;
     case "not_equals":
       comparison = `~= ${value}`;
-      conditionComment = `-- Check if internal variable '${variableName}' does not equal ${value}`;
       break;
     case "greater_than":
       comparison = `> ${value}`;
-      conditionComment = `-- Check if internal variable '${variableName}' is greater than ${value}`;
       break;
     case "less_than":
       comparison = `< ${value}`;
-      conditionComment = `-- Check if internal variable '${variableName}' is less than ${value}`;
       break;
     case "greater_equals":
       comparison = `>= ${value}`;
-      conditionComment = `-- Check if internal variable '${variableName}' is greater than or equal to ${value}`;
       break;
     case "less_equals":
       comparison = `<= ${value}`;
-      conditionComment = `-- Check if internal variable '${variableName}' is less than or equal to ${value}`;
       break;
     default:
       comparison = `== ${value}`;
-      conditionComment = `-- Check if internal variable '${variableName}' equals ${value}`;
   }
 
-  conditionCode = `
-    return (card.ability.extra.${variableName} or 0) ${comparison}`;
-
-  const functionCode = `-- Internal variable condition check
-local function ${functionName}(context, card)
-    ${conditionComment}${conditionCode}
-end`;
-
-  return {
-    functionName,
-    functionCode,
-  };
+  return `(card.ability.extra.${variableName} or 0) ${comparison}`;
 };

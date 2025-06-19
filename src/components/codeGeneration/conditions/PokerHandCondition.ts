@@ -1,27 +1,8 @@
 import type { Rule } from "../../ruleBuilder/types";
 
-export interface PokerHandCondition {
-  functionName: string;
-  functionCode: string;
-}
-
-// Return descriptive function name based on condition
-export const getPokerHandFunctionName = (
-  handType: string,
-  scope: string,
-  negate: boolean
-): string => {
-  const prefix = "check_poker_hand";
-  const handTypePart = handType.toLowerCase().replace(/\s+/g, "_");
-  const scopePart = scope === "all_played" ? "any" : "scoring";
-  const negatePart = negate ? "not_" : "";
-
-  return `${prefix}_${negatePart}${handTypePart}_${scopePart}`;
-};
-
-export const generatePokerHandCondition = (
+export const generatePokerHandConditionCode = (
   rules: Rule[]
-): PokerHandCondition | null => {
+): string | null => {
   const pokerHandRules =
     rules?.filter((rule) => rule.trigger === "hand_played") || [];
   if (pokerHandRules.length === 0) return null;
@@ -60,96 +41,48 @@ export const generatePokerHandCondition = (
   if (handConditions.length === 0) return null;
 
   // Generate code for hand conditions
-  let conditionChecks = "";
-  let conditionComment = "";
-
-  // Create the condition check code and appropriate comment
   if (handConditions.length === 1) {
     // Single condition case
     const condition = handConditions[0];
 
-    // Generate descriptive function name
-    const functionName = getPokerHandFunctionName(
-      condition.handType,
-      condition.scope,
-      condition.negate
-    );
-
     if (condition.scope === "scoring") {
       // For scoring cards, check the scoring_name
       if (condition.negate) {
-        conditionChecks = `context.scoring_name ~= "${condition.handType}"`;
-        conditionComment = `-- Check if scoring hand is NOT a ${condition.handType}`;
+        return `context.scoring_name ~= "${condition.handType}"`;
       } else {
-        conditionChecks = `context.scoring_name == "${condition.handType}"`;
-        conditionComment = `-- Check if scoring hand is a ${condition.handType}`;
+        return `context.scoring_name == "${condition.handType}"`;
       }
     } else if (condition.scope === "all_played") {
       // For all played cards, check if the poker hand exists in context.poker_hands
       if (condition.negate) {
-        conditionChecks = `not next(context.poker_hands["${condition.handType}"] or {})`;
-        conditionComment = `-- Check if NO ${condition.handType} exists in played cards`;
+        return `not next(context.poker_hands["${condition.handType}"] or {})`;
       } else {
-        conditionChecks = `next(context.poker_hands["${condition.handType}"] or {})`;
-        conditionComment = `-- Check if a ${condition.handType} exists in played cards`;
+        return `next(context.poker_hands["${condition.handType}"] or {})`;
       }
     }
-
-    // Generate the function that checks if the hand condition is met
-    const functionCode = `-- Poker hand condition check
-local function ${functionName}(context)
-    ${conditionComment}
-    return ${conditionChecks}
-end`;
-
-    return { functionName, functionCode };
   } else {
     // Multiple conditions case - using AND logic between them
-    conditionComment = `-- Check that ALL of the following poker hand conditions are true:`;
-
-    // Generate a compound function name
-    const functionName =
-      "check_poker_hand_compound_" +
-      handConditions
-        .map((c) => c.handType.toLowerCase().replace(/\s+/g, "_"))
-        .join("_and_");
-
-    handConditions.forEach((condition, index) => {
-      if (index > 0) conditionChecks += " and "; // AND logic between conditions
-
-      // Different check based on card scope
+    const conditionChecks = handConditions.map((condition) => {
       if (condition.scope === "scoring") {
         // For scoring cards, check the scoring_name
         if (condition.negate) {
-          conditionChecks += `context.scoring_name ~= "${condition.handType}"`;
+          return `context.scoring_name ~= "${condition.handType}"`;
         } else {
-          conditionChecks += `context.scoring_name == "${condition.handType}"`;
+          return `context.scoring_name == "${condition.handType}"`;
         }
-
-        conditionComment += `\n    -- ${index + 1}. ${
-          condition.negate ? "NOT " : ""
-        }${condition.handType} (scoring hand)`;
       } else if (condition.scope === "all_played") {
         // For all played cards, check if the poker hand exists in context.poker_hands
         if (condition.negate) {
-          conditionChecks += `not next(context.poker_hands["${condition.handType}"] or {})`;
+          return `not next(context.poker_hands["${condition.handType}"] or {})`;
         } else {
-          conditionChecks += `next(context.poker_hands["${condition.handType}"] or {})`;
+          return `next(context.poker_hands["${condition.handType}"] or {})`;
         }
-
-        conditionComment += `\n    -- ${index + 1}. ${
-          condition.negate ? "NO " : ""
-        }${condition.handType} (any played cards)`;
       }
+      return "true";
     });
 
-    // Generate the function that checks if the compound hand condition is met
-    const functionCode = `-- Poker hand condition check (compound)
-local function ${functionName}(context)
-    ${conditionComment}
-    return ${conditionChecks}
-end`;
-
-    return { functionName, functionCode };
+    return conditionChecks.join(" and ");
   }
+
+  return "true";
 };

@@ -1,51 +1,8 @@
 import type { Rule, Condition } from "../../ruleBuilder/types";
 
-export interface JokerCountCondition {
-  functionName: string;
-  functionCode: string;
-}
-
-// Helper to get a descriptive function name for joker count conditions
-export const getJokerCountFunctionName = (
-  operator: string,
-  value: number
-): string => {
-  const prefix = "check_joker_count";
-
-  // Determine operator part of name
-  let operatorPart = "";
-  switch (operator) {
-    case "equals":
-      operatorPart = "eq";
-      break;
-    case "not_equals":
-      operatorPart = "neq";
-      break;
-    case "greater_than":
-      operatorPart = "gt";
-      break;
-    case "less_than":
-      operatorPart = "lt";
-      break;
-    case "greater_equals":
-      operatorPart = "gte";
-      break;
-    case "less_equals":
-      operatorPart = "lte";
-      break;
-    default:
-      operatorPart = operator;
-  }
-
-  // Add value to name
-  const valuePart = value.toString();
-
-  return `${prefix}_${operatorPart}_${valuePart}`;
-};
-
-export const generateJokerCountCondition = (
+export const generateJokerCountConditionCode = (
   rules: Rule[]
-): JokerCountCondition | null => {
+): string | null => {
   // Filter rules related to joker count
   const jokerRules = rules?.filter((rule) => {
     return rule.conditionGroups.some((group) =>
@@ -84,57 +41,31 @@ export const generateJokerCountCondition = (
   const operator = (params.operator as string) || "equals";
   const value = (params.value as number) || 1;
 
-  // Generate function name
-  const functionName = getJokerCountFunctionName(operator, value);
-
-  // Generate condition code based on operator
-  let conditionCode = "";
-  let conditionComment = "";
-
   // Generate the comparison based on the operator
   let comparison = "";
   switch (operator) {
     case "equals":
       comparison = `== ${value}`;
-      conditionComment = `-- Check if joker count equals ${value}`;
       break;
     case "not_equals":
       comparison = `~= ${value}`;
-      conditionComment = `-- Check if joker count does not equal ${value}`;
       break;
     case "greater_than":
       comparison = `> ${value}`;
-      conditionComment = `-- Check if joker count is greater than ${value}`;
       break;
     case "less_than":
       comparison = `< ${value}`;
-      conditionComment = `-- Check if joker count is less than ${value}`;
       break;
     case "greater_equals":
       comparison = `>= ${value}`;
-      conditionComment = `-- Check if joker count is greater than or equal to ${value}`;
       break;
     case "less_equals":
       comparison = `<= ${value}`;
-      conditionComment = `-- Check if joker count is less than or equal to ${value}`;
       break;
     default:
       comparison = `== ${value}`;
-      conditionComment = `-- Check if joker count equals ${value}`;
   }
 
   // Generate the final code - using #G.jokers.cards to get the count of jokers
-  conditionCode = `
-    return #G.jokers.cards ${comparison}`;
-
-  // Generate the function that checks the joker count condition
-  const functionCode = `-- Joker count condition check
-local function ${functionName}(context)
-    ${conditionComment}${conditionCode}
-end`;
-
-  return {
-    functionName,
-    functionCode,
-  };
+  return `#G.jokers.cards ${comparison}`;
 };
