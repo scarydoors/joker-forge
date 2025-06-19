@@ -16,6 +16,18 @@ import ExtraCreditPage from "./components/pages/ExtraCreditPage";
 import AcknowledgementsPage from "./components/pages/AcknowledgementsPage";
 import { JokerData } from "./components/JokerCard";
 import { exportJokersAsMod } from "./components/codeGeneration/index";
+import {
+  exportModAsJSON,
+  importModFromJSON,
+} from "./components/JSONImportExport";
+import Alert from "./components/generic/Alert";
+
+interface AlertState {
+  isVisible: boolean;
+  type: "success" | "warning" | "error";
+  title: string;
+  content: string;
+}
 
 function App() {
   const [currentSection, setCurrentSection] = useState("overview");
@@ -24,6 +36,29 @@ function App() {
   const [jokers, setJokers] = useState<JokerData[]>([]);
   const [selectedJokerId, setSelectedJokerId] = useState<string | null>(null);
   const [exportLoading, setExportLoading] = useState(false);
+  const [alert, setAlert] = useState<AlertState>({
+    isVisible: false,
+    type: "success",
+    title: "",
+    content: "",
+  });
+
+  const showAlert = (
+    type: "success" | "warning" | "error",
+    title: string,
+    content: string
+  ) => {
+    setAlert({
+      isVisible: true,
+      type,
+      title,
+      content,
+    });
+  };
+
+  const hideAlert = () => {
+    setAlert((prev) => ({ ...prev, isVisible: false }));
+  };
 
   const handleExport = async () => {
     if (
@@ -31,23 +66,81 @@ function App() {
       modMetadata.author.length === 0 ||
       !modMetadata.author[0].trim()
     ) {
-      alert("Please enter an author name");
+      showAlert(
+        "error",
+        "Export Failed",
+        "Please enter an author name before exporting."
+      );
       return;
     }
 
     if (!modMetadata.name.trim()) {
-      alert("Please enter a mod name");
+      showAlert(
+        "error",
+        "Export Failed",
+        "Please enter a mod name before exporting."
+      );
       return;
     }
 
     setExportLoading(true);
     try {
       await exportJokersAsMod(jokers, modMetadata);
+      showAlert(
+        "success",
+        "Export Successful",
+        "Your mod files have been exported successfully!"
+      );
     } catch (error) {
       console.error("Export failed:", error);
-      alert("Failed to export mod. Please try again.");
+      showAlert(
+        "error",
+        "Export Failed",
+        "Failed to export mod files. Please try again."
+      );
     } finally {
       setExportLoading(false);
+    }
+  };
+
+  const handleExportJSON = () => {
+    try {
+      exportModAsJSON(modMetadata, jokers);
+      showAlert(
+        "success",
+        "Mod Saved",
+        "Your mod has been saved as a JSON file successfully!"
+      );
+    } catch (error) {
+      console.error("JSON export failed:", error);
+      showAlert(
+        "error",
+        "Save Failed",
+        "Failed to save mod as JSON. Please try again."
+      );
+    }
+  };
+
+  const handleImportJSON = async () => {
+    try {
+      const importedData = await importModFromJSON();
+      if (importedData) {
+        setModMetadata(importedData.metadata);
+        setJokers(importedData.jokers);
+        setSelectedJokerId(null);
+        showAlert(
+          "success",
+          "Mod Imported",
+          "Your mod has been imported successfully!"
+        );
+      }
+    } catch (error) {
+      console.error("JSON import failed:", error);
+      showAlert(
+        "error",
+        "Import Failed",
+        "Failed to import mod. Please check the file format and try again."
+      );
     }
   };
 
@@ -138,6 +231,8 @@ function App() {
         onSectionChange={setCurrentSection}
         projectName={modMetadata.id || "mycustommod"}
         onExport={handleExport}
+        onExportJSON={handleExportJSON}
+        onImportJSON={handleImportJSON}
         exportLoading={exportLoading}
         jokers={jokers}
         modName={modMetadata.name}
@@ -146,6 +241,14 @@ function App() {
       <div className="flex-1 flex flex-col overflow-y-auto custom-scrollbar">
         {renderCurrentPage()}
       </div>
+
+      <Alert
+        isVisible={alert.isVisible}
+        type={alert.type}
+        title={alert.title}
+        content={alert.content}
+        onClose={hideAlert}
+      />
     </div>
   );
 }
