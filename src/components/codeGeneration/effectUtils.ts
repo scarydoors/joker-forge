@@ -94,7 +94,7 @@ export function generateEffectReturnStatement(
         case "edit_discard":
           return generateEditDiscardReturn(effect);
         case "level_up_hand":
-          return generateLevelUpHandReturn();
+          return generateLevelUpHandReturn(triggerType);
         case "add_card_to_deck":
           return generateAddCardToDeckReturn(effect, triggerType);
         case "copy_triggered_card":
@@ -235,7 +235,7 @@ export function generateEffectReturnStatement(
 
   return {
     statement: returnStatement,
-    colour: firstEffect.colour,
+    colour: firstEffect.colour ?? "G.C.WHITE",
     preReturnCode: combinedPreReturnCode || undefined,
   };
 }

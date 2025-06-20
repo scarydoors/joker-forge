@@ -82,8 +82,8 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
   {
     id: "level_up_hand",
     label: "Level Up Hand",
-    description: "Increase the level of the played hand",
-    applicableTriggers: ["hand_played"],
+    description: "Increase the level of the played/discarded hand",
+    applicableTriggers: ["hand_played", "hand_discarded"],
     params: [
       {
         id: "value",
