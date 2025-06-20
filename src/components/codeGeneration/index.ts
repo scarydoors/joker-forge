@@ -24,6 +24,7 @@ import { generateFirstDiscardedHandConditionCode } from "./conditions/FirstDisca
 import { generateAnteLevelConditionCode } from "./conditions/AnteLevelCondition";
 import { generateHandSizeConditionCode } from "./conditions/HandSizeCondition";
 import { generateDeckSizeConditionCode } from "./conditions/DeckSizeCondition";
+import { generateDeckCountConditionCode } from "./conditions/DeckCountCondition";
 
 // Types
 export interface ModMetadata {
@@ -180,6 +181,10 @@ const generateMainLua = (
               ]);
             } else if (condition.type === "deck_size") {
               conditionCode = generateDeckSizeConditionCode([
+                singleConditionRule,
+              ]);
+            } else if (condition.type === "deck_count") {
+              conditionCode = generateDeckCountConditionCode([
                 singleConditionRule,
               ]);
             }
