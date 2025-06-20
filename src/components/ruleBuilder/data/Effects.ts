@@ -1,12 +1,11 @@
 import { EffectTypeDefinition } from "../types";
 
-// Effect types and their possible parameters
 export const EFFECT_TYPES: EffectTypeDefinition[] = [
   {
     id: "add_chips",
     label: "Add Chips",
     description: "Add a flat amount of chips to the hand score",
-    applicableTriggers: ["hand_played", "card_scored", "passive"],
+    applicableTriggers: ["hand_played", "card_scored"],
     params: [
       {
         id: "value",
@@ -21,7 +20,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
     id: "add_mult",
     label: "Add Mult",
     description: "Add a flat amount of mult to the hand score",
-    applicableTriggers: ["hand_played", "card_scored", "passive"],
+    applicableTriggers: ["hand_played", "card_scored"],
     params: [
       {
         id: "value",
@@ -36,7 +35,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
     id: "apply_x_mult",
     label: "Apply xMult",
     description: "Multiply the score by this value",
-    applicableTriggers: ["hand_played", "card_scored", "passive"],
+    applicableTriggers: ["hand_played", "card_scored"],
     params: [
       {
         id: "value",
@@ -98,6 +97,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
     id: "edit_hand",
     label: "Edit Hands",
     description: "Modify the number of hands available",
+    applicableTriggers: ["passive"],
     params: [
       {
         id: "operation",
@@ -123,6 +123,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
     id: "edit_discard",
     label: "Edit Discards",
     description: "Modify the number of discards available",
+    applicableTriggers: ["passive"],
     params: [
       {
         id: "operation",
@@ -148,6 +149,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
     id: "edit_hand_size",
     label: "Edit Hand Size",
     description: "Modify the hand size (number of cards you can hold)",
+    applicableTriggers: ["passive"],
     params: [
       {
         id: "operation",
@@ -706,14 +708,12 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
   },
 ];
 
-// Helper function to get a specific effect type by ID
 export function getEffectTypeById(
   id: string
 ): EffectTypeDefinition | undefined {
   return EFFECT_TYPES.find((effectType) => effectType.id === id);
 }
 
-// Helper function to get effects applicable to a specific trigger
 export function getEffectsForTrigger(
   triggerId: string
 ): EffectTypeDefinition[] {

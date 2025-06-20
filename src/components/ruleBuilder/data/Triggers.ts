@@ -77,7 +77,7 @@ export const TRIGGERS: TriggerDefinition[] = [
     id: "passive",
     label: "Passive (Always Active)",
     description:
-      "This joker's effect is always active and checked during scoring. Use for constant bonuses based on conditions.",
+      "Permanent effects that modify game rules or state while the joker is in play.",
   },
 ];
 

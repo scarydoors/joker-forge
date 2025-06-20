@@ -4,17 +4,18 @@ import {
   generateVariableConfig,
   generateVariableLocVars,
 } from "./VariableUtils";
+import type { PassiveEffectResult } from "./PassiveEffects";
 
 export const generateJokerBaseCode = (
   joker: JokerData,
   index: number,
-  atlasKey: string
+  atlasKey: string,
+  passiveEffects: PassiveEffectResult[] = []
 ): string => {
   const x = index % 10;
   const y = Math.floor(index / 10);
 
-  // Extract effect values from joker data and rules
-  const effectsConfig = extractEffectsConfig(joker);
+  const effectsConfig = extractEffectsConfig(joker, passiveEffects);
 
   return `SMODS.Joker{ --${joker.name}
     name = "${joker.name}",
@@ -45,11 +46,13 @@ export const generateJokerBaseCode = (
     atlas = '${atlasKey}'`;
 };
 
-export const extractEffectsConfig = (joker: JokerData): string => {
+export const extractEffectsConfig = (
+  joker: JokerData,
+  passiveEffects: PassiveEffectResult[] = []
+): string => {
   const configItems: string[] = [];
   const variableCount: Record<string, number> = {};
 
-  // Helper function to get a unique variable name
   const getUniqueVariableName = (baseName: string): string => {
     if (variableCount[baseName] === undefined) {
       variableCount[baseName] = 0;
@@ -60,23 +63,28 @@ export const extractEffectsConfig = (joker: JokerData): string => {
     }
   };
 
-  // Extract variables from rules first
+  passiveEffects.forEach((effect) => {
+    if (effect.configVariables) {
+      configItems.push(...effect.configVariables);
+    }
+  });
+
   if (joker.rules && joker.rules.length > 0) {
-    const variables = extractVariablesFromRules(joker.rules);
+    const nonPassiveRules = joker.rules.filter(
+      (rule) => rule.trigger !== "passive"
+    );
+    const variables = extractVariablesFromRules(nonPassiveRules);
     const variableConfig = generateVariableConfig(variables);
     if (variableConfig) {
       configItems.push(variableConfig);
     }
 
-    // Process effects but skip adding config for effects that use variables
-    joker.rules.forEach((rule) => {
+    nonPassiveRules.forEach((rule) => {
       rule.effects.forEach((effect) => {
-        // Skip effects that use variables as their value source
         if (effect.params.value_source === "variable") {
           return;
         }
 
-        // Only add config for effects with fixed values
         if (
           effect.type === "add_chips" &&
           effect.params.value_source !== "variable"
@@ -121,10 +129,6 @@ export const extractEffectsConfig = (joker: JokerData): string => {
           const varName = getUniqueVariableName("levels");
           configItems.push(`${varName} = ${effect.params.value || 1}`);
         }
-        if (effect.type === "edit_hand_size") {
-          const varName = getUniqueVariableName("hand_size_change");
-          configItems.push(`${varName} = ${effect.params.value || 1}`);
-        }
       });
     });
   }
@@ -164,18 +168,28 @@ export const formatJokerDescription = (joker: JokerData): string => {
     .join(",\n")}\n        }`;
 };
 
-export const generateBasicLocVarsFunction = (joker: JokerData): string => {
+export const generateBasicLocVarsFunction = (
+  joker: JokerData,
+  passiveEffects: PassiveEffectResult[] = []
+): string => {
   const vars: string[] = [];
   const variableCount: Record<string, number> = {};
 
-  // Add variables from rules
+  passiveEffects.forEach((effect) => {
+    if (effect.locVars) {
+      vars.push(...effect.locVars);
+    }
+  });
+
   if (joker.rules && joker.rules.length > 0) {
-    const variables = extractVariablesFromRules(joker.rules);
+    const nonPassiveRules = joker.rules.filter(
+      (rule) => rule.trigger !== "passive"
+    );
+    const variables = extractVariablesFromRules(nonPassiveRules);
     const variableLocVars = generateVariableLocVars(variables);
     vars.push(...variableLocVars);
   }
 
-  // Helper function to get a unique variable name (same logic as above)
   const getUniqueVariableName = (baseName: string): string => {
     if (variableCount[baseName] === undefined) {
       variableCount[baseName] = 0;
@@ -186,9 +200,11 @@ export const generateBasicLocVarsFunction = (joker: JokerData): string => {
     }
   };
 
-  // Check rules for additional vars
   if (joker.rules && joker.rules.length > 0) {
-    joker.rules.forEach((rule) => {
+    const nonPassiveRules = joker.rules.filter(
+      (rule) => rule.trigger !== "passive"
+    );
+    nonPassiveRules.forEach((rule) => {
       rule.effects.forEach((effect) => {
         if (effect.type === "add_chips") {
           const varName = getUniqueVariableName("chips");
@@ -216,10 +232,6 @@ export const generateBasicLocVarsFunction = (joker: JokerData): string => {
         }
         if (effect.type === "edit_discard") {
           const varName = getUniqueVariableName("discards");
-          vars.push(`card.ability.extra.${varName}`);
-        }
-        if (effect.type === "edit_hand_size") {
-          const varName = getUniqueVariableName("hand_size_change");
           vars.push(`card.ability.extra.${varName}`);
         }
         if (effect.type === "level_up_hand") {

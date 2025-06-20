@@ -25,8 +25,11 @@ import { generateAnteLevelConditionCode } from "./conditions/AnteLevelCondition"
 import { generateHandSizeConditionCode } from "./conditions/HandSizeCondition";
 import { generateDeckSizeConditionCode } from "./conditions/DeckSizeCondition";
 import { generateDeckCountConditionCode } from "./conditions/DeckCountCondition";
+import {
+  generatePassiveEffect,
+  type PassiveEffectResult,
+} from "./PassiveEffects";
 
-// Types
 export interface ModMetadata {
   id: string;
   name: string;
@@ -83,119 +86,125 @@ const generateMainLua = (
     joker: JokerData;
     index: number;
     conditionCodeByRule: { [ruleId: string]: string[] };
+    passiveEffects: PassiveEffectResult[];
   }[] = [];
 
-  // Collect condition codes
   jokers.forEach((joker, index) => {
     const conditionCodeByRule: { [ruleId: string]: string[] } = {};
+    const passiveEffects: PassiveEffectResult[] = [];
 
     if (joker.rules && joker.rules.length > 0) {
       joker.rules.forEach((rule) => {
-        const ruleConditionCodes: string[] = [];
+        if (rule.trigger === "passive") {
+          const passiveEffect = generatePassiveEffect(rule);
+          if (passiveEffect) {
+            passiveEffects.push(passiveEffect);
+          }
+        } else {
+          const ruleConditionCodes: string[] = [];
 
-        // Process each condition individually
-        rule.conditionGroups.forEach((group) => {
-          group.conditions.forEach((condition) => {
-            // Create a single-condition rule for each condition
-            const singleConditionRule = {
-              ...rule,
-              conditionGroups: [
-                {
-                  ...group,
-                  conditions: [condition],
-                },
-              ],
-            };
+          rule.conditionGroups.forEach((group) => {
+            group.conditions.forEach((condition) => {
+              const singleConditionRule = {
+                ...rule,
+                conditionGroups: [
+                  {
+                    ...group,
+                    conditions: [condition],
+                  },
+                ],
+              };
 
-            let conditionCode = null;
+              let conditionCode = null;
 
-            if (condition.type === "hand_type") {
-              conditionCode = generatePokerHandConditionCode([
-                singleConditionRule,
-              ]);
-            } else if (
-              condition.type === "suit_count" ||
-              condition.type === "card_suit"
-            ) {
-              conditionCode = generateSuitCardConditionCode([
-                singleConditionRule,
-              ]);
-            } else if (
-              condition.type === "rank_count" ||
-              condition.type === "card_rank"
-            ) {
-              conditionCode = generateRankCardConditionCode([
-                singleConditionRule,
-              ]);
-            } else if (condition.type === "card_count") {
-              conditionCode = generateCountCardConditionCode([
-                singleConditionRule,
-              ]);
-            } else if (condition.type === "card_enhancement") {
-              conditionCode = generateCardEnhancementConditionCode([
-                singleConditionRule,
-              ]);
-            } else if (condition.type === "card_seal") {
-              conditionCode = generateCardSealConditionCode([
-                singleConditionRule,
-              ]);
-            } else if (condition.type === "player_money") {
-              conditionCode = generatePlayerMoneyConditionCode([
-                singleConditionRule,
-              ]);
-            } else if (condition.type === "remaining_hands") {
-              conditionCode = generateRemainingHandsConditionCode([
-                singleConditionRule,
-              ]);
-            } else if (condition.type === "remaining_discards") {
-              conditionCode = generateRemainingDiscardsConditionCode([
-                singleConditionRule,
-              ]);
-            } else if (condition.type === "joker_count") {
-              conditionCode = generateJokerCountConditionCode([
-                singleConditionRule,
-              ]);
-            } else if (condition.type === "blind_type") {
-              conditionCode = generateBlindTypeConditionCode([
-                singleConditionRule,
-              ]);
-            } else if (condition.type === "internal_variable") {
-              conditionCode = generateInternalVariableConditionCode([
-                singleConditionRule,
-              ]);
-            } else if (condition.type === "random_chance") {
-              conditionCode = generateRandomChanceConditionCode([
-                singleConditionRule,
-              ]);
-            } else if (condition.type === "first_played_hand") {
-              conditionCode = generateFirstPlayedHandConditionCode();
-            } else if (condition.type === "first_discarded_hand") {
-              conditionCode = generateFirstDiscardedHandConditionCode();
-            } else if (condition.type === "ante_level") {
-              conditionCode = generateAnteLevelConditionCode([
-                singleConditionRule,
-              ]);
-            } else if (condition.type === "hand_size") {
-              conditionCode = generateHandSizeConditionCode([
-                singleConditionRule,
-              ]);
-            } else if (condition.type === "deck_size") {
-              conditionCode = generateDeckSizeConditionCode([
-                singleConditionRule,
-              ]);
-            } else if (condition.type === "deck_count") {
-              conditionCode = generateDeckCountConditionCode([
-                singleConditionRule,
-              ]);
-            }
+              if (condition.type === "hand_type") {
+                conditionCode = generatePokerHandConditionCode([
+                  singleConditionRule,
+                ]);
+              } else if (
+                condition.type === "suit_count" ||
+                condition.type === "card_suit"
+              ) {
+                conditionCode = generateSuitCardConditionCode([
+                  singleConditionRule,
+                ]);
+              } else if (
+                condition.type === "rank_count" ||
+                condition.type === "card_rank"
+              ) {
+                conditionCode = generateRankCardConditionCode([
+                  singleConditionRule,
+                ]);
+              } else if (condition.type === "card_count") {
+                conditionCode = generateCountCardConditionCode([
+                  singleConditionRule,
+                ]);
+              } else if (condition.type === "card_enhancement") {
+                conditionCode = generateCardEnhancementConditionCode([
+                  singleConditionRule,
+                ]);
+              } else if (condition.type === "card_seal") {
+                conditionCode = generateCardSealConditionCode([
+                  singleConditionRule,
+                ]);
+              } else if (condition.type === "player_money") {
+                conditionCode = generatePlayerMoneyConditionCode([
+                  singleConditionRule,
+                ]);
+              } else if (condition.type === "remaining_hands") {
+                conditionCode = generateRemainingHandsConditionCode([
+                  singleConditionRule,
+                ]);
+              } else if (condition.type === "remaining_discards") {
+                conditionCode = generateRemainingDiscardsConditionCode([
+                  singleConditionRule,
+                ]);
+              } else if (condition.type === "joker_count") {
+                conditionCode = generateJokerCountConditionCode([
+                  singleConditionRule,
+                ]);
+              } else if (condition.type === "blind_type") {
+                conditionCode = generateBlindTypeConditionCode([
+                  singleConditionRule,
+                ]);
+              } else if (condition.type === "internal_variable") {
+                conditionCode = generateInternalVariableConditionCode([
+                  singleConditionRule,
+                ]);
+              } else if (condition.type === "random_chance") {
+                conditionCode = generateRandomChanceConditionCode([
+                  singleConditionRule,
+                ]);
+              } else if (condition.type === "first_played_hand") {
+                conditionCode = generateFirstPlayedHandConditionCode();
+              } else if (condition.type === "first_discarded_hand") {
+                conditionCode = generateFirstDiscardedHandConditionCode();
+              } else if (condition.type === "ante_level") {
+                conditionCode = generateAnteLevelConditionCode([
+                  singleConditionRule,
+                ]);
+              } else if (condition.type === "hand_size") {
+                conditionCode = generateHandSizeConditionCode([
+                  singleConditionRule,
+                ]);
+              } else if (condition.type === "deck_size") {
+                conditionCode = generateDeckSizeConditionCode([
+                  singleConditionRule,
+                ]);
+              } else if (condition.type === "deck_count") {
+                conditionCode = generateDeckCountConditionCode([
+                  singleConditionRule,
+                ]);
+              }
 
-            if (conditionCode) {
-              ruleConditionCodes.push(conditionCode);
-            }
+              if (conditionCode) {
+                ruleConditionCodes.push(conditionCode);
+              }
+            });
           });
-        });
 
-        conditionCodeByRule[rule.id] = ruleConditionCodes;
+          conditionCodeByRule[rule.id] = ruleConditionCodes;
+        }
       });
     }
 
@@ -203,10 +212,10 @@ const generateMainLua = (
       joker,
       index,
       conditionCodeByRule,
+      passiveEffects,
     });
   });
 
-  // Build output
   let output = `-- FILE GENERATED BY JOKER FORGE
 -- Mod: ${metadata.name}
 -- Author(s): ${metadata.author.join(", ")}
@@ -228,11 +237,18 @@ SMODS.Atlas({
 
 `;
 
-  jokerGenerationData.forEach(({ joker, index, conditionCodeByRule }) => {
-    output +=
-      generateJokerCode(joker, index, "CustomJokers", conditionCodeByRule) +
-      "\n\n";
-  });
+  jokerGenerationData.forEach(
+    ({ joker, index, conditionCodeByRule, passiveEffects }) => {
+      output +=
+        generateJokerCode(
+          joker,
+          index,
+          "CustomJokers",
+          conditionCodeByRule,
+          passiveEffects
+        ) + "\n\n";
+    }
+  );
 
   output += "return mod";
   return output;
@@ -242,20 +258,48 @@ const generateJokerCode = (
   joker: JokerData,
   index: number,
   atlasKey: string,
-  conditionCodeByRule: { [ruleId: string]: string[] }
+  conditionCodeByRule: { [ruleId: string]: string[] },
+  passiveEffects: PassiveEffectResult[]
 ): string => {
-  let jokerCode = generateJokerBaseCode(joker, index, atlasKey);
-  const locVarsCode = generateBasicLocVarsFunction(joker);
+  const nonPassiveRules =
+    joker.rules?.filter((rule) => rule.trigger !== "passive") || [];
+
+  let jokerCode = generateJokerBaseCode(joker, index, atlasKey, passiveEffects);
+  const locVarsCode = generateBasicLocVarsFunction(joker, passiveEffects);
   const calculateCode = generateCalculateFunction(
-    joker.rules || [],
+    nonPassiveRules,
     conditionCodeByRule
   );
 
   jokerCode += `,
 
-    ${locVarsCode},
+    ${locVarsCode}`;
 
-    ${calculateCode}
+  if (calculateCode) {
+    jokerCode += `,
+
+    ${calculateCode}`;
+  }
+
+  passiveEffects.forEach((effect) => {
+    if (effect.addToDeck) {
+      jokerCode += `,
+
+    add_to_deck = function(self, card, from_debuff)
+        ${effect.addToDeck}
+    end`;
+    }
+
+    if (effect.removeFromDeck) {
+      jokerCode += `,
+
+    remove_from_deck = function(self, card, from_debuff)
+        ${effect.removeFromDeck}
+    end`;
+    }
+  });
+
+  jokerCode += `
 }`;
 
   return jokerCode;

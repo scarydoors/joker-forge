@@ -1,6 +1,5 @@
 import { ConditionTypeDefinition } from "../types";
 
-// Common comparison operators
 const COMPARISON_OPERATORS = [
   { value: "equals", label: "equals" },
   { value: "not_equals", label: "not equals" },
@@ -10,13 +9,11 @@ const COMPARISON_OPERATORS = [
   { value: "less_equals", label: "less than or equal to" },
 ];
 
-// Card scope options
 const CARD_SCOPE = [
   { value: "scoring", label: "Scoring cards only" },
   { value: "all_played", label: "All played cards" },
 ];
 
-// Card ranks for selection
 const CARD_RANKS = [
   { value: "2", label: "2" },
   { value: "3", label: "3" },
@@ -33,14 +30,12 @@ const CARD_RANKS = [
   { value: "A", label: "Ace" },
 ];
 
-// Card rank groups
 const CARD_RANK_GROUPS = [
   { value: "face", label: "Face Card (J,Q,K)" },
   { value: "even", label: "Even Card (2,4,6,8,10,Q)" },
   { value: "odd", label: "Odd Card (A,3,5,7,9,J,K)" },
 ];
 
-// Card suits for selection
 const CARD_SUITS = [
   { value: "Spades", label: "Spades" },
   { value: "Hearts", label: "Hearts" },
@@ -48,13 +43,11 @@ const CARD_SUITS = [
   { value: "Clubs", label: "Clubs" },
 ];
 
-// Card suit groups
 const CARD_SUIT_GROUPS = [
   { value: "red", label: "Red Suit (Hearts, Diamonds)" },
   { value: "black", label: "Black Suit (Spades, Clubs)" },
 ];
 
-// Hand types for selection
 const HAND_TYPES = [
   { value: "High Card", label: "High Card" },
   { value: "Pair", label: "Pair" },
@@ -69,7 +62,6 @@ const HAND_TYPES = [
   { value: "Royal Flush", label: "Royal Flush" },
 ];
 
-// Enhancement types
 const ENHANCEMENT_TYPES = [
   { value: "m_gold", label: "Gold" },
   { value: "m_steel", label: "Steel" },
@@ -86,9 +78,7 @@ const SEAL_TYPES = [
   { value: "purple", label: "Purple Seal (Creates Tarot when discarded)" },
 ];
 
-// Condition types and their possible parameters
 export const CONDITION_TYPES: ConditionTypeDefinition[] = [
-  // Hand-level conditions (ONLY for hand_played trigger)
   {
     id: "hand_type",
     label: "Hand Type",
@@ -282,8 +272,6 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
       },
     ],
   },
-
-  // Card-level conditions (for card_scored trigger)
   {
     id: "card_rank",
     label: "Card Rank",
@@ -389,8 +377,6 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
       },
     ],
   },
-
-  // Player/Game state conditions (applicable to all triggers
   {
     id: "player_money",
     label: "Player Money",
@@ -398,7 +384,6 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
     applicableTriggers: [
       "blind_selected",
       "card_scored",
-      "passive",
       "hand_played",
       "blind_skipped",
       "boss_defeated",
@@ -434,7 +419,6 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
     applicableTriggers: [
       "blind_selected",
       "card_scored",
-      "passive",
       "hand_played",
       "blind_skipped",
       "boss_defeated",
@@ -470,7 +454,6 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
     applicableTriggers: [
       "blind_selected",
       "card_scored",
-      "passive",
       "hand_played",
       "blind_skipped",
       "boss_defeated",
@@ -506,7 +489,6 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
     applicableTriggers: [
       "blind_selected",
       "card_scored",
-      "passive",
       "hand_played",
       "blind_skipped",
       "boss_defeated",
@@ -542,7 +524,6 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
     applicableTriggers: [
       "blind_selected",
       "card_scored",
-      "passive",
       "hand_played",
       "blind_skipped",
       "boss_defeated",
@@ -583,7 +564,6 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
     applicableTriggers: [
       "blind_selected",
       "card_scored",
-      "passive",
       "hand_played",
       "blind_skipped",
       "boss_defeated",
@@ -616,7 +596,6 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
     applicableTriggers: [
       "blind_selected",
       "card_scored",
-      "passive",
       "hand_played",
       "blind_skipped",
       "boss_defeated",
@@ -667,7 +646,6 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
     applicableTriggers: [
       "blind_selected",
       "card_scored",
-      "passive",
       "hand_played",
       "blind_skipped",
       "boss_defeated",
@@ -704,7 +682,6 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
     applicableTriggers: [
       "blind_selected",
       "card_scored",
-      "passive",
       "hand_played",
       "blind_skipped",
       "boss_defeated",
@@ -751,7 +728,6 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
     applicableTriggers: [
       "blind_selected",
       "card_scored",
-      "passive",
       "hand_played",
       "blind_skipped",
       "boss_defeated",
@@ -893,14 +869,12 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
   },
 ];
 
-// Helper function to get a specific condition type by ID
 export function getConditionTypeById(
   id: string
 ): ConditionTypeDefinition | undefined {
   return CONDITION_TYPES.find((conditionType) => conditionType.id === id);
 }
 
-// Helper function to get conditions applicable to a specific trigger
 export function getConditionsForTrigger(
   triggerId: string
 ): ConditionTypeDefinition[] {

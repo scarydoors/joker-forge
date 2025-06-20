@@ -1,5 +1,6 @@
 import type { EffectReturn } from "./AddChipsEffect";
 import type { Effect } from "../../ruleBuilder/types";
+import type { PassiveEffectResult } from "../PassiveEffects";
 
 export const generateEditHandSizeReturn = (effect: Effect): EffectReturn => {
   const operation = effect.params?.operation || "add";
@@ -41,5 +42,45 @@ export const generateEditHandSizeReturn = (effect: Effect): EffectReturn => {
   return {
     statement,
     colour: "G.C.BLUE",
+  };
+};
+
+export const generatePassiveHandSize = (
+  effect: Effect
+): PassiveEffectResult => {
+  const operation = effect.params?.operation || "add";
+  const value = effect.params?.value || 1;
+
+  let addToDeck = "";
+  let removeFromDeck = "";
+
+  switch (operation) {
+    case "add":
+      addToDeck = `G.hand:change_size(card.ability.extra.hand_size_change)`;
+      removeFromDeck = `G.hand:change_size(-card.ability.extra.hand_size_change)`;
+      break;
+    case "subtract":
+      addToDeck = `G.hand:change_size(-card.ability.extra.hand_size_change)`;
+      removeFromDeck = `G.hand:change_size(card.ability.extra.hand_size_change)`;
+      break;
+    case "set":
+      addToDeck = `card.ability.extra.original_hand_size = G.hand.config.card_limit
+        local difference = card.ability.extra.hand_size_change - G.hand.config.card_limit
+        G.hand:change_size(difference)`;
+      removeFromDeck = `if card.ability.extra.original_hand_size then
+            local difference = card.ability.extra.original_hand_size - G.hand.config.card_limit
+            G.hand:change_size(difference)
+        end`;
+      break;
+    default:
+      addToDeck = `G.hand:change_size(card.ability.extra.hand_size_change)`;
+      removeFromDeck = `G.hand:change_size(-card.ability.extra.hand_size_change)`;
+  }
+
+  return {
+    addToDeck,
+    removeFromDeck,
+    configVariables: [`hand_size_change = ${value}`],
+    locVars: [`card.ability.extra.hand_size_change`],
   };
 };

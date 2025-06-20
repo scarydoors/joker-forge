@@ -5,17 +5,15 @@ export const generateCalculateFunction = (
   rules: Rule[],
   conditionCodeByRule: { [ruleId: string]: string[] }
 ): string => {
-  if (!rules || rules.length === 0) {
-    return `calculate = function(self, card, context)
-    if context.joker_main then
-        ${generateReturnFromNoEffects()}
-    end
-end`;
+  const nonPassiveRules = rules.filter((rule) => rule.trigger !== "passive");
+
+  if (!nonPassiveRules || nonPassiveRules.length === 0) {
+    return "";
   }
 
   let calculateFunction = `calculate = function(self, card, context)`;
 
-  rules.forEach((rule) => {
+  nonPassiveRules.forEach((rule) => {
     const triggerType = rule.trigger;
     const effects = rule.effects || [];
     const conditionCodes = conditionCodeByRule[rule.id] || [];
@@ -87,9 +85,6 @@ end`;
     } else if (triggerType === "card_discarded") {
       contextCheck = "context.discard and not context.blueprint";
       description = "-- When card is discarded";
-    } else if (triggerType === "passive") {
-      contextCheck = "context.joker_main";
-      description = "-- Passive effect during scoring";
     } else if (triggerType === "hand_discarded") {
       contextCheck = "context.pre_discard and not context.blueprint";
       description = "-- When hand is discarded";
@@ -108,7 +103,6 @@ end`;
         if ${conditionChecks} then`;
     }
 
-    // Handle effects - separate random chance from normal
     const randomChanceEffects = effects.filter(
       (effect) => effect.params.has_random_chance === "true"
     );
@@ -116,7 +110,6 @@ end`;
       (effect) => effect.params.has_random_chance !== "true"
     );
 
-    // Handle normal effects first
     if (normalEffects.length > 0) {
       const {
         statement: returnStatement,
@@ -137,7 +130,6 @@ end`;
             }`;
     }
 
-    // Handle random chance effects
     randomChanceEffects.forEach((effect, index) => {
       const numerator = effect.params.chance_numerator || 1;
       const denominator = effect.params.chance_denominator || 4;
@@ -186,12 +178,4 @@ end`;
 end`;
 
   return calculateFunction;
-};
-
-const generateReturnFromNoEffects = (): string => {
-  const { statement, colour } = generateEffectReturnStatement([]);
-
-  return `return {${statement},
-            colour = ${colour}
-        }`;
 };
