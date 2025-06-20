@@ -121,6 +121,10 @@ export const extractEffectsConfig = (joker: JokerData): string => {
           const varName = getUniqueVariableName("levels");
           configItems.push(`${varName} = ${effect.params.value || 1}`);
         }
+        if (effect.type === "edit_hand_size") {
+          const varName = getUniqueVariableName("hand_size_change");
+          configItems.push(`${varName} = ${effect.params.value || 1}`);
+        }
       });
     });
   }
@@ -212,6 +216,10 @@ export const generateBasicLocVarsFunction = (joker: JokerData): string => {
         }
         if (effect.type === "edit_discard") {
           const varName = getUniqueVariableName("discards");
+          vars.push(`card.ability.extra.${varName}`);
+        }
+        if (effect.type === "edit_hand_size") {
+          const varName = getUniqueVariableName("hand_size_change");
           vars.push(`card.ability.extra.${varName}`);
         }
         if (effect.type === "level_up_hand") {

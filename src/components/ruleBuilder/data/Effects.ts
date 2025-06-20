@@ -145,6 +145,32 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
     ],
   },
   {
+    id: "edit_hand_size",
+    label: "Edit Hand Size",
+    description: "Modify the hand size (number of cards you can hold)",
+    params: [
+      {
+        id: "operation",
+        type: "select",
+        label: "Operation",
+        options: [
+          { value: "add", label: "Add" },
+          { value: "subtract", label: "Subtract" },
+          { value: "set", label: "Set to" },
+        ],
+        default: "add",
+      },
+      {
+        id: "value",
+        type: "number",
+        label: "Amount",
+        default: 1,
+        min: 1,
+        max: 10,
+      },
+    ],
+  },
+  {
     id: "modify_internal_variable",
     label: "Modify Internal Variable",
     description: "Change an internal variable value for this joker",
