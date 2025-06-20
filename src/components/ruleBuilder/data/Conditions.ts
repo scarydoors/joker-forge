@@ -409,6 +409,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
       "first_hand_drawn",
       "shop_exited",
       "card_discarded",
+      "hand_discarded",
     ],
     params: [
       {
@@ -444,6 +445,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
       "first_hand_drawn",
       "shop_exited",
       "card_discarded",
+      "hand_discarded",
     ],
     params: [
       {
@@ -479,6 +481,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
       "first_hand_drawn",
       "shop_exited",
       "card_discarded",
+      "hand_discarded",
     ],
     params: [
       {
@@ -514,6 +517,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
       "first_hand_drawn",
       "shop_exited",
       "card_discarded",
+      "hand_discarded",
     ],
     params: [
       {
@@ -549,6 +553,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
       "first_hand_drawn",
       "shop_exited",
       "card_discarded",
+      "hand_discarded",
     ],
     params: [
       {
@@ -589,6 +594,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
       "first_hand_drawn",
       "shop_exited",
       "card_discarded",
+      "hand_discarded",
     ],
     params: [
       {
@@ -621,6 +627,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
       "first_hand_drawn",
       "shop_exited",
       "card_discarded",
+      "hand_discarded",
     ],
     params: [
       {
