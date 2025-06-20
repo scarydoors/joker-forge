@@ -65,13 +65,13 @@ The plan here is to implement enough triggers, conditions, and effects, so as th
 - [x] **Internal Variable** - Check joker's internal variable values
 - [x] **First Played Hand** - Check if this is the first hand played in the round
 - [x] **First Discarded Hand** - Check if this is the first hand discarded in the round
+- [x] **Ante Level** - Check current ante level
+- [x] **Hand Size** - Check current hand size
+- [x] **Deck Size** - Check remaining deck size
+- [x] **Deck Count By Rank, Suit, Enhancement, Seal, Edition** - Check the specifics of the cards in your full deck
 
 #### Not Implemented Yet
 
-- [ ] **Ante Level** - Check current ante level
-- [ ] **Hand Size** - Check current hand size
-- [ ] **Deck Size** - Check remaining deck size
-- [ ] **Deck Count By Rank, Suit, Enhancement, Seal, Edition** - Check the specifics of the cards in your full deck
 - [ ] **Consumable Count** - Check number of consumables owned
 - [ ] **Score Threshold** - Check if score meets requirement
 - [ ] **Held Card Conditions** - Check cards currently held in hand (Rank, Suit, Count)
