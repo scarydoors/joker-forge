@@ -21,6 +21,7 @@ import { generateInternalVariableConditionCode } from "./conditions/InternalVari
 import { generateRandomChanceConditionCode } from "./conditions/RandomChanceCondition";
 import { generateFirstPlayedHandConditionCode } from "./conditions/FirstHandPlayedCondition";
 import { generateFirstDiscardedHandConditionCode } from "./conditions/FirstDiscardedHandCondition";
+import { generateAnteLevelConditionCode } from "./conditions/AnteLevelCondition";
 
 // Types
 export interface ModMetadata {
@@ -167,6 +168,10 @@ const generateMainLua = (
               conditionCode = generateFirstPlayedHandConditionCode();
             } else if (condition.type === "first_discarded_hand") {
               conditionCode = generateFirstDiscardedHandConditionCode();
+            } else if (condition.type === "ante_level") {
+              conditionCode = generateAnteLevelConditionCode([
+                singleConditionRule,
+              ]);
             }
 
             if (conditionCode) {
