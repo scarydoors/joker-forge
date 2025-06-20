@@ -1,5 +1,6 @@
 import type { EffectReturn } from "./AddChipsEffect";
 import type { Effect } from "../../ruleBuilder/types";
+import type { PassiveEffectResult } from "../PassiveEffects";
 
 export const generateEditHandReturn = (effect: Effect): EffectReturn => {
   const operation = effect.params?.operation || "add";
@@ -38,5 +39,41 @@ export const generateEditHandReturn = (effect: Effect): EffectReturn => {
   return {
     statement,
     colour: "G.C.GREEN",
+  };
+};
+
+export const generatePassiveHand = (effect: Effect): PassiveEffectResult => {
+  const operation = effect.params?.operation || "add";
+  const value = effect.params?.value || 1;
+
+  let addToDeck = "";
+  let removeFromDeck = "";
+
+  switch (operation) {
+    case "add":
+      addToDeck = `G.GAME.round_resets.hands = G.GAME.round_resets.hands + card.ability.extra.hand_change`;
+      removeFromDeck = `G.GAME.round_resets.hands = G.GAME.round_resets.hands - card.ability.extra.hand_change`;
+      break;
+    case "subtract":
+      addToDeck = `G.GAME.round_resets.hands = math.max(1, G.GAME.round_resets.hands - card.ability.extra.hand_change)`;
+      removeFromDeck = `G.GAME.round_resets.hands = G.GAME.round_resets.hands + card.ability.extra.hand_change`;
+      break;
+    case "set":
+      addToDeck = `card.ability.extra.original_hands = G.GAME.round_resets.hands
+        G.GAME.round_resets.hands = card.ability.extra.hand_change`;
+      removeFromDeck = `if card.ability.extra.original_hands then
+            G.GAME.round_resets.hands = card.ability.extra.original_hands
+        end`;
+      break;
+    default:
+      addToDeck = `G.GAME.round_resets.hands = G.GAME.round_resets.hands + card.ability.extra.hand_change`;
+      removeFromDeck = `G.GAME.round_resets.hands = G.GAME.round_resets.hands - card.ability.extra.hand_change`;
+  }
+
+  return {
+    addToDeck,
+    removeFromDeck,
+    configVariables: [`hand_change = ${value}`],
+    locVars: [`card.ability.extra.hand_change`],
   };
 };

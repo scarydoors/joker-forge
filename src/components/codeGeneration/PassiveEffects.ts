@@ -1,5 +1,8 @@
 import type { Rule } from "../ruleBuilder/types";
 import { generatePassiveHandSize } from "./effects/EditHandSizeEffect";
+import { generatePassiveHand } from "./effects/EditHandEffect";
+import { generatePassiveDiscard } from "./effects/EditDiscardEffect";
+import { generatePassiveCombineRanks } from "./effects/CombineRanksEffect";
 
 export interface PassiveEffectResult {
   addToDeck?: string;
@@ -24,6 +27,12 @@ export const generatePassiveEffect = (
   switch (effect.type) {
     case "edit_hand_size":
       return generatePassiveHandSize(effect);
+    case "edit_hand":
+      return generatePassiveHand(effect);
+    case "edit_discard":
+      return generatePassiveDiscard(effect);
+    case "combine_ranks":
+      return generatePassiveCombineRanks(effect);
     default:
       return null;
   }
