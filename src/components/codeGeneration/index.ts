@@ -19,6 +19,7 @@ import { generateCardEnhancementConditionCode } from "./conditions/CardEnhanceme
 import { generateCardSealConditionCode } from "./conditions/CardSealCondition";
 import { generateInternalVariableConditionCode } from "./conditions/InternalVariableCondition";
 import { generateRandomChanceConditionCode } from "./conditions/RandomChanceCondition";
+import { generateFirstPlayedHandConditionCode } from "./conditions/FirstHandPlayedCondition";
 
 // Types
 export interface ModMetadata {
@@ -159,6 +160,10 @@ const generateMainLua = (
               ]);
             } else if (condition.type === "random_chance") {
               conditionCode = generateRandomChanceConditionCode([
+                singleConditionRule,
+              ]);
+            } else if (condition.type === "first_played_hand") {
+              conditionCode = generateFirstPlayedHandConditionCode([
                 singleConditionRule,
               ]);
             }

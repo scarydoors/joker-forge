@@ -638,6 +638,13 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
       },
     ],
   },
+  {
+    id: "first_played_hand",
+    label: "First Played Hand",
+    description: "Check if this is the first hand played in the current round",
+    applicableTriggers: ["hand_played", "card_scored"],
+    params: [],
+  },
 ];
 
 // Helper function to get a specific condition type by ID
