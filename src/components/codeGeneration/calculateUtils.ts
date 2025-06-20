@@ -90,6 +90,9 @@ end`;
     } else if (triggerType === "passive") {
       contextCheck = "context.joker_main";
       description = "-- Passive effect during scoring";
+    } else if (triggerType === "hand_discarded") {
+      contextCheck = "context.pre_discard and not context.blueprint";
+      description = "-- When hand is discarded";
     } else {
       contextCheck = "context.cardarea == G.jokers and context.joker_main";
       description = "-- Main scoring time for jokers";

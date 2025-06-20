@@ -3,7 +3,7 @@ import type { Effect } from "../../ruleBuilder/types";
 export interface EffectReturn {
   statement: string;
   message?: string;
-  colour: string;
+  colour?: string;
 }
 
 export const generateAddChipsReturn = (

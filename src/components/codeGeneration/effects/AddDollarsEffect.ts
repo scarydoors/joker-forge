@@ -28,8 +28,6 @@ export const generateAddDollarsReturn = (triggerType: string): EffectReturn => {
   } else {
     return {
       statement: `dollars = card.ability.extra.dollars`,
-      message: `localize{type='variable',key='a_dollars',vars={card.ability.extra.dollars}}`,
-      colour: "G.C.MONEY",
     };
   }
 };

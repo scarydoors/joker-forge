@@ -20,6 +20,7 @@ import { generateCardSealConditionCode } from "./conditions/CardSealCondition";
 import { generateInternalVariableConditionCode } from "./conditions/InternalVariableCondition";
 import { generateRandomChanceConditionCode } from "./conditions/RandomChanceCondition";
 import { generateFirstPlayedHandConditionCode } from "./conditions/FirstHandPlayedCondition";
+import { generateFirstDiscardedHandConditionCode } from "./conditions/FirstDiscardedHandCondition";
 
 // Types
 export interface ModMetadata {
@@ -164,6 +165,8 @@ const generateMainLua = (
               ]);
             } else if (condition.type === "first_played_hand") {
               conditionCode = generateFirstPlayedHandConditionCode();
+            } else if (condition.type === "first_discarded_hand") {
+              conditionCode = generateFirstDiscardedHandConditionCode();
             }
 
             if (conditionCode) {

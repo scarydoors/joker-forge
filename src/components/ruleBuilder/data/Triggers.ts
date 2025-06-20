@@ -15,6 +15,12 @@ export const TRIGGERS: TriggerDefinition[] = [
       "Triggers for each individual card during scoring. Use this for card-specific properties like suit, rank, or enhancements.",
   },
   {
+    id: "hand_discarded",
+    label: "When a Hand is Discarded",
+    description:
+      "Triggers when the player discards a hand of cards (before the discard happens). Different from 'When a Card is Discarded' which triggers per individual card.",
+  },
+  {
     id: "card_discarded",
     label: "When a Card is Discarded",
     description:

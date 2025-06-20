@@ -645,6 +645,14 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
     applicableTriggers: ["hand_played", "card_scored"],
     params: [],
   },
+  {
+    id: "first_discarded_hand",
+    label: "First Discarded Hand",
+    description:
+      "Check if this is the first hand discarded in the current round",
+    applicableTriggers: ["card_discarded", "hand_discarded"],
+    params: [],
+  },
 ];
 
 // Helper function to get a specific condition type by ID
