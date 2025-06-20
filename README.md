@@ -15,10 +15,13 @@ The plan here is to implement enough triggers, conditions, and effects, so as th
 ### Triggers
 
 #### Fully Implemented
+
 - [x] **Hand Played** - When a hand is played (default trigger)
 - [x] **Card Scored** - When an individual card is scored
+- [x] **Hand Discarded** - When a hand is discarded (before discard happens)
+- [x] **Card Discarded** - When a card is discarded
 - [x] **Blind Selected** - When a blind is selected
-- [x] **Blind Skipped** - When a blind is skipped  
+- [x] **Blind Skipped** - When a blind is skipped
 - [x] **Boss Defeated** - When a boss blind is defeated
 - [x] **Booster Opened** - When a booster pack is opened
 - [x] **Booster Skipped** - When a booster pack is skipped
@@ -26,10 +29,10 @@ The plan here is to implement enough triggers, conditions, and effects, so as th
 - [x] **Hand Drawn** - When a hand is drawn
 - [x] **First Hand Drawn** - When the first hand is drawn
 - [x] **Shop Exited** - When exiting the shop
-- [x] **Card Discarded** - When a card is discarded
 - [x] **Passive** - Always active during scoring
 
 #### Not Implemented Yet
+
 - [ ] **Card Destroyed** - When a card is destroyed
 - [ ] **Round End** - At the end of a round
 - [ ] **Ante Start** - At the start of an ante
@@ -44,10 +47,11 @@ The plan here is to implement enough triggers, conditions, and effects, so as th
 ### Conditions
 
 #### Fully Implemented
+
 - [x] **Hand Type** - Check poker hand type (Flush, Straight, etc.)
 - [x] **Card Count** - Check number of cards in hand
 - [x] **Suit Count** - Check cards of specific suits
-- [x] **Rank Count** - Check cards of specific ranks  
+- [x] **Rank Count** - Check cards of specific ranks
 - [x] **Card Rank** - Check individual card rank (for card_scored trigger)
 - [x] **Card Suit** - Check individual card suit (for card_scored trigger)
 - [x] **Card Enhancement** - Check for card enhancements (Gold, Steel, etc.)
@@ -59,49 +63,62 @@ The plan here is to implement enough triggers, conditions, and effects, so as th
 - [x] **Blind Type** - Check current blind type (Small, Big, Boss)
 - [x] **Random Chance** - Probability-based conditions
 - [x] **Internal Variable** - Check joker's internal variable values
-      
+- [x] **First Played Hand** - Check if this is the first hand played in the round
+- [x] **First Discarded Hand** - Check if this is the first hand discarded in the round
+
 #### Not Implemented Yet
+
 - [ ] **Ante Level** - Check current ante level
 - [ ] **Hand Size** - Check current hand size
 - [ ] **Deck Size** - Check remaining deck size
+- [ ] **Deck Count By Rank, Suit, Enhancement, Seal, Edition** - Check the specifics of the cards in your full deck
 - [ ] **Consumable Count** - Check number of consumables owned
 - [ ] **Score Threshold** - Check if score meets requirement
+- [ ] **Held Card Conditions** - Check cards currently held in hand (Rank, Suit, Count)
+- [ ] **Hand History** - Check previous hands played this round/run
+- [ ] **Consecutive Hand Tracking** - Track consecutive hands without certain conditions
 
 ---
 
 ### Effects
 
-#### Fully Implemented  
+#### Fully Implemented
+
 - [x] **Add Chips** - Add flat chips to score
 - [x] **Add Mult** - Add flat mult to score
 - [x] **Apply X Mult** - Multiply score by value
 - [x] **Add Dollars** - Give money to player
 - [x] **Retrigger Cards** - Retrigger scored cards (card_scored trigger only)
 - [x] **Level Up Hand** - Increase poker hand level
-- [x] **Add Discard** - Give extra discards
-- [x] **Add Hand** - Give extra hands
+- [x] **Edit Discard** - Give/take/set discards
+- [x] **Edit Hand** - Give/take/set hands
 - [x] **Destroy Self** - Destroy the joker
-- [x] **Add Card** - Add new playing cards to deck/hand (this is half done, still an error with scoring triggers)
-- [x] **Edit Card** - Modify card properties (rank, suit, enhancement, seal)
-- [x] **Destroy Card** - Destroys/deletes cards when scored/discarded
+- [x] **Add Card to Deck** - Add new playing cards to deck/hand (this is half done, still an error with scoring triggers)
+- [x] **Copy Triggered Card** - Copy the card that triggered the effect
+- [x] **Copy Played Card** - Copy specific cards from played hand
+- [x] **Edit Triggered Card** - Modify card properties (rank, suit, enhancement, seal)
+- [x] **Delete Triggered Card** - Destroys/deletes cards when scored/discarded
 - [x] **Modify Internal Variable** - Change joker's internal variable values
-- [x] **Random Chance Effect** - Probability-based effects
 - [x] **Create Tarot Card** - Create a random or set tarot card
 - [x] **Create Planet Card** - Create a random or set planet card
-- [x] **Create Spectral Card** - Create a random or set planet card
-      
+- [x] **Create Spectral Card** - Create a random or set spectral card
+
 #### Not Implemented Yet
+
 - [ ] **Modify Game Rules** - Change fundamental game mechanics (Hand size, pareidolia, disable boss blind, etc.)
 - [ ] **Beat Current Blind** - Completes the current blind (Mr. Bones)
 - [ ] **Modify Sell Value** - Change sell value of this or other jokers (Egg, Gift Card)
 - [ ] **Copy Ability of Adjacent Joker** - Blueprint/Brainstorm logic (difficult)
 - [ ] **Create Joker** - Create a different joker (can probably be implemented as ID)
+- [ ] **Permanent Card Modifications** - Add permanent bonuses to cards (Hiker)
+- [ ] **Modify Hand/Deck Size Permanently** - Change base hand size or deck limits
 
 ---
 
 ### Code Generation Features
 
 #### Implemented
+
 - [x] **Condition Function Generation** - Creates helper functions for conditions
 - [x] **Effect Chaining** - Multiple effects in one rule using `extra` field
 - [x] **Context-Aware Generation** - Different code for different triggers
@@ -111,6 +128,7 @@ The plan here is to implement enough triggers, conditions, and effects, so as th
 - [x] **Mod Packaging** - Complete mod folder structure with JSON metadata
 
 #### Not Implemented Yet
+
 - [ ] **Blueprint Compatibility Logic** - Actual blueprint behavior code
 - [ ] **Unlock Condition Generation** - Custom unlock requirements
 - [ ] **Sticker Compatibility** - Perishable, Rental, etc.
@@ -122,6 +140,7 @@ The plan here is to implement enough triggers, conditions, and effects, so as th
 ### UI Features
 
 #### Implemented
+
 - [x] **Rule Builder Modal** - Visual rule creation interface
 - [x] **Condition Groups** - AND/OR logic between condition groups
 - [x] **Parameter Fields** - Dynamic form fields based on condition/effect type
@@ -132,6 +151,7 @@ The plan here is to implement enough triggers, conditions, and effects, so as th
 - [x] **Export System** - Generate and download complete mod packages
 
 #### Not Implemented Yet
+
 - [ ] **Dynamic Code Display** - Live preview of generated Lua code in rule builder
 - [ ] **Undo/Redo System** - History management for rule editing
 - [ ] **Rule Templates** - Pre-made rule templates for common effects
@@ -149,10 +169,12 @@ Go to [the website](https://jokerforge.jaydchw.com/) to start creating jokers
 ### Running Locally
 
 1. **Prerequisites**
+
    - Node.js (v16 or higher)
    - npm
 
 2. **Setup**
+
    ```bash
    # Clone the repository
    git clone https://github.com/Jayd-H/joker-forge.git
