@@ -29,7 +29,7 @@ The plan here is to implement enough triggers, conditions, and effects, so as th
 - [x] **Hand Drawn** - When a hand is drawn
 - [x] **First Hand Drawn** - When the first hand is drawn
 - [x] **Shop Exited** - When exiting the shop
-- [x] **Passive** - Always active during scoring
+- [x] **Passive** - Always active, for specific effects like Pareidolia, and game rules like hand size
 
 #### Not Implemented Yet
 
@@ -105,13 +105,16 @@ The plan here is to implement enough triggers, conditions, and effects, so as th
 
 #### Not Implemented Yet
 
-- [ ] **Modify Game Rules** - Change fundamental game mechanics (Hand size, pareidolia, disable boss blind, etc.)
+- [ ] **Disable Boss Blind** - Disables the boss blinds unique effect (Luchador, Chicot)
+- [ ] **Combine Suits** - Treat two or more suits as the same suit (Smeared Joker)
+- [ ] **Combine Ranks** - Treat two or more ranks as the same rank
+- [ ] **All Cards Are Face Cards** - Literally just for Pareidolia
+- [ ] **Edit Hand Size** - Give/take/set hand size (Turtle Bean)
 - [ ] **Beat Current Blind** - Completes the current blind (Mr. Bones)
 - [ ] **Modify Sell Value** - Change sell value of this or other jokers (Egg, Gift Card)
 - [ ] **Copy Ability of Adjacent Joker** - Blueprint/Brainstorm logic (difficult)
 - [ ] **Create Joker** - Create a different joker (can probably be implemented as ID)
 - [ ] **Permanent Card Modifications** - Add permanent bonuses to cards (Hiker)
-- [ ] **Modify Hand/Deck Size Permanently** - Change base hand size or deck limits
 
 ---
 
@@ -126,6 +129,7 @@ The plan here is to implement enough triggers, conditions, and effects, so as th
 - [x] **Lua Code Output** - Generates proper SMODS-compatible Lua
 - [x] **Atlas Generation** - Creates sprite atlases from uploaded images
 - [x] **Mod Packaging** - Complete mod folder structure with JSON metadata
+- [x] **Mod Metadata Editing** - Edit parameters like description, version, etc.
 
 #### Not Implemented Yet
 
@@ -133,7 +137,6 @@ The plan here is to implement enough triggers, conditions, and effects, so as th
 - [ ] **Unlock Condition Generation** - Custom unlock requirements
 - [ ] **Sticker Compatibility** - Perishable, Rental, etc.
 - [ ] **Localization Support** - Multiple language support
-- [ ] **Mod Metadata Editing** - Edit parameters like description, version, etc.
 
 ---
 
@@ -149,13 +152,13 @@ The plan here is to implement enough triggers, conditions, and effects, so as th
 - [x] **Joker Card Preview** - Visual joker card with hover tooltips
 - [x] **Image Upload** - Custom joker sprite upload with validation
 - [x] **Export System** - Generate and download complete mod packages
+- [x] **Import System** - Import existing jokers/rules from files
 
 #### Not Implemented Yet
 
 - [ ] **Dynamic Code Display** - Live preview of generated Lua code in rule builder
 - [ ] **Undo/Redo System** - History management for rule editing
 - [ ] **Rule Templates** - Pre-made rule templates for common effects
-- [ ] **Import System** - Import existing jokers/rules from files
 - [ ] **Mobile Responsiveness** - Touch-friendly interface for mobile devices
 - [ ] **Help System** - Integrated tooltips and documentation
 - [ ] **Much Better Variable Management** - This will be annoying and will come with an overhaul
