@@ -1,46 +1,11 @@
-import type { Rule, Condition } from "../../ruleBuilder/types";
+import type { Rule } from "../../ruleBuilder/types";
 
 export const generateCardEnhancementConditionCode = (
   rules: Rule[]
 ): string | null => {
-  // Filter rules related to card enhancements
-  const enhancementRules = rules?.filter((rule) => {
-    return rule.conditionGroups.some((group) =>
-      group.conditions.some(
-        (condition) => condition.type === "card_enhancement"
-      )
-    );
-  });
+  const condition = rules[0].conditionGroups[0].conditions[0];
+  const enhancementType = (condition.params.enhancement as string) || "any";
 
-  if (!enhancementRules || enhancementRules.length === 0) {
-    return null;
-  }
-
-  // Find the first enhancement condition in any rule condition group
-  let enhancementCondition: Condition | undefined;
-
-  for (const rule of enhancementRules) {
-    for (const group of rule.conditionGroups) {
-      const condition = group.conditions.find(
-        (c) => c.type === "card_enhancement"
-      );
-      if (condition) {
-        enhancementCondition = condition;
-        break;
-      }
-    }
-    if (enhancementCondition) break;
-  }
-
-  if (!enhancementCondition) {
-    return null;
-  }
-
-  // Extract enhancement params
-  const params = enhancementCondition.params;
-  const enhancementType = (params.enhancement as string) || "any";
-
-  // Generate enhancement check code
   if (enhancementType === "any") {
     return `(function()
         local enhancements = SMODS.get_enhancements(context.other_card)

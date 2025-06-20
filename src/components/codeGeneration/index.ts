@@ -163,9 +163,7 @@ const generateMainLua = (
                 singleConditionRule,
               ]);
             } else if (condition.type === "first_played_hand") {
-              conditionCode = generateFirstPlayedHandConditionCode([
-                singleConditionRule,
-              ]);
+              conditionCode = generateFirstPlayedHandConditionCode();
             }
 
             if (conditionCode) {

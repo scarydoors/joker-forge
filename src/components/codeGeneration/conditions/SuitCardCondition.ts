@@ -1,47 +1,15 @@
-import type { Rule, Condition } from "../../ruleBuilder/types";
+import type { Rule } from "../../ruleBuilder/types";
 
 export const generateSuitCardConditionCode = (rules: Rule[]): string | null => {
-  const suitRules = rules?.filter((rule) => {
-    return rule.conditionGroups.some((group) =>
-      group.conditions.some(
-        (condition) =>
-          condition.type === "suit_count" || condition.type === "card_suit"
-      )
-    );
-  });
+  const condition = rules[0].conditionGroups[0].conditions[0];
+  const triggerType = rules[0].trigger || "hand_played";
 
-  if (!suitRules || suitRules.length === 0) {
-    return null;
-  }
-
-  let suitCondition: Condition | undefined;
-
-  for (const rule of suitRules) {
-    for (const group of rule.conditionGroups) {
-      const condition = group.conditions.find(
-        (c) => c.type === "suit_count" || c.type === "card_suit"
-      );
-      if (condition) {
-        suitCondition = condition;
-        break;
-      }
-    }
-    if (suitCondition) break;
-  }
-
-  if (!suitCondition) {
-    return null;
-  }
-
-  const params = suitCondition.params;
-  const triggerType = suitRules[0]?.trigger || "hand_played";
-
-  const suitType = (params.suit_type as string) || "specific";
-  const specificSuit = (params.specific_suit as string) || null;
-  const suitGroup = (params.suit_group as string) || null;
-  const quantifier = (params.quantifier as string) || "at_least_one";
-  const count = (params.count as number) || 1;
-  const scope = (params.card_scope as string) || "scoring";
+  const suitType = (condition.params.suit_type as string) || "specific";
+  const specificSuit = (condition.params.specific_suit as string) || null;
+  const suitGroup = (condition.params.suit_group as string) || null;
+  const quantifier = (condition.params.quantifier as string) || "at_least_one";
+  const count = (condition.params.count as number) || 1;
+  const scope = (condition.params.card_scope as string) || "scoring";
 
   const getSuitsCheckLogic = (suits: string[]): string => {
     if (suits.length === 1) {
@@ -65,17 +33,13 @@ export const generateSuitCardConditionCode = (rules: Rule[]): string | null => {
   const cardsToCheck =
     scope === "scoring" ? "context.scoring_hand" : "context.full_hand";
 
-  // Special handling for card_scored trigger type
   if (triggerType === "card_scored" || triggerType === "card_discarded") {
-    // For individual card scoring, we check the other_card directly
     const checkLogic = getSuitsCheckLogic(suits).replace(
       /c:/g,
       "context.other_card:"
     );
-
     return checkLogic;
   } else {
-    // For hand_played trigger, use the original logic with loops
     switch (quantifier) {
       case "at_least_one":
         return `(function()

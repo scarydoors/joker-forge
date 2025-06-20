@@ -1,47 +1,15 @@
-import type { Rule, Condition } from "../../ruleBuilder/types";
+import type { Rule } from "../../ruleBuilder/types";
 
 export const generateRankCardConditionCode = (rules: Rule[]): string | null => {
-  const rankRules = rules?.filter((rule) => {
-    return rule.conditionGroups.some((group) =>
-      group.conditions.some(
-        (condition) =>
-          condition.type === "rank_count" || condition.type === "card_rank"
-      )
-    );
-  });
+  const condition = rules[0].conditionGroups[0].conditions[0];
+  const triggerType = rules[0].trigger || "hand_played";
 
-  if (!rankRules || rankRules.length === 0) {
-    return null;
-  }
-
-  let rankCondition: Condition | undefined;
-
-  for (const rule of rankRules) {
-    for (const group of rule.conditionGroups) {
-      const condition = group.conditions.find(
-        (c) => c.type === "rank_count" || c.type === "card_rank"
-      );
-      if (condition) {
-        rankCondition = condition;
-        break;
-      }
-    }
-    if (rankCondition) break;
-  }
-
-  if (!rankCondition) {
-    return null;
-  }
-
-  const params = rankCondition.params;
-  const triggerType = rankRules[0]?.trigger || "hand_played";
-
-  const rankType = (params.rank_type as string) || "specific";
-  const specificRank = (params.specific_rank as string) || null;
-  const rankGroup = (params.rank_group as string) || null;
-  const quantifier = (params.quantifier as string) || "at_least_one";
-  const count = (params.count as number) || 1;
-  const scope = (params.card_scope as string) || "scoring";
+  const rankType = (condition.params.rank_type as string) || "specific";
+  const specificRank = (condition.params.specific_rank as string) || null;
+  const rankGroup = (condition.params.rank_group as string) || null;
+  const quantifier = (condition.params.quantifier as string) || "at_least_one";
+  const count = (condition.params.count as number) || 1;
+  const scope = (condition.params.card_scope as string) || "scoring";
 
   const getRanksCheckLogic = (
     ranks: string[],
@@ -97,15 +65,12 @@ export const generateRankCardConditionCode = (rules: Rule[]): string | null => {
     scope === "scoring" ? "context.scoring_hand" : "context.full_hand";
 
   if (triggerType === "card_scored" || triggerType === "card_discarded") {
-    // For individual card scoring, we check the other_card directly
     const checkLogic = getRanksCheckLogic(ranks, rankGroupType).replace(
       /c:/g,
       "context.other_card:"
     );
-
     return checkLogic;
   } else {
-    // For hand_played trigger, use the original logic with loops
     switch (quantifier) {
       case "at_least_one":
         return `(function()

@@ -1,44 +1,12 @@
-import type { Rule, Condition } from "../../ruleBuilder/types";
+import type { Rule } from "../../ruleBuilder/types";
 
 export const generateInternalVariableConditionCode = (
   rules: Rule[]
 ): string | null => {
-  const variableRules = rules?.filter((rule) => {
-    return rule.conditionGroups.some((group) =>
-      group.conditions.some(
-        (condition) => condition.type === "internal_variable"
-      )
-    );
-  });
-
-  if (!variableRules || variableRules.length === 0) {
-    return null;
-  }
-
-  let variableCondition: Condition | undefined;
-
-  for (const rule of variableRules) {
-    for (const group of rule.conditionGroups) {
-      const condition = group.conditions.find(
-        (c) => c.type === "internal_variable"
-      );
-      if (condition) {
-        variableCondition = condition;
-        break;
-      }
-    }
-    if (variableCondition) break;
-  }
-
-  if (!variableCondition) {
-    return null;
-  }
-
-  const params = variableCondition.params;
-
-  const variableName = (params.variable_name as string) || "var1";
-  const operator = (params.operator as string) || "equals";
-  const value = (params.value as number) || 0;
+  const condition = rules[0].conditionGroups[0].conditions[0];
+  const variableName = (condition.params.variable_name as string) || "var1";
+  const operator = (condition.params.operator as string) || "equals";
+  const value = (condition.params.value as number) || 0;
 
   let comparison = "";
   switch (operator) {
