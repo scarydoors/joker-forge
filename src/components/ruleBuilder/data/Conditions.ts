@@ -660,6 +660,43 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
     applicableTriggers: ["card_discarded", "hand_discarded"],
     params: [],
   },
+  {
+    id: "hand_size",
+    label: "Hand Size",
+    description: "Check the current hand size",
+    applicableTriggers: [
+      "blind_selected",
+      "card_scored",
+      "passive",
+      "hand_played",
+      "blind_skipped",
+      "boss_defeated",
+      "booster_opened",
+      "booster_skipped",
+      "consumable_used",
+      "hand_drawn",
+      "first_hand_drawn",
+      "shop_exited",
+      "card_discarded",
+      "hand_discarded",
+    ],
+    params: [
+      {
+        id: "operator",
+        type: "select",
+        label: "Operator",
+        options: COMPARISON_OPERATORS,
+      },
+      {
+        id: "value",
+        type: "number",
+        label: "Hand Size",
+        min: 1,
+        max: 20,
+        default: 8,
+      },
+    ],
+  },
 ];
 
 // Helper function to get a specific condition type by ID

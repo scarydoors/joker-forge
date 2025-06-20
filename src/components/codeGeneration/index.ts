@@ -22,6 +22,7 @@ import { generateRandomChanceConditionCode } from "./conditions/RandomChanceCond
 import { generateFirstPlayedHandConditionCode } from "./conditions/FirstHandPlayedCondition";
 import { generateFirstDiscardedHandConditionCode } from "./conditions/FirstDiscardedHandCondition";
 import { generateAnteLevelConditionCode } from "./conditions/AnteLevelCondition";
+import { generateHandSizeConditionCode } from "./conditions/HandSizeCondition";
 
 // Types
 export interface ModMetadata {
@@ -170,6 +171,10 @@ const generateMainLua = (
               conditionCode = generateFirstDiscardedHandConditionCode();
             } else if (condition.type === "ante_level") {
               conditionCode = generateAnteLevelConditionCode([
+                singleConditionRule,
+              ]);
+            } else if (condition.type === "hand_size") {
+              conditionCode = generateHandSizeConditionCode([
                 singleConditionRule,
               ]);
             }
