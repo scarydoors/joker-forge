@@ -697,6 +697,53 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
       },
     ],
   },
+  {
+    id: "deck_size",
+    label: "Deck Size",
+    description: "Check the size of the deck",
+    applicableTriggers: [
+      "blind_selected",
+      "card_scored",
+      "passive",
+      "hand_played",
+      "blind_skipped",
+      "boss_defeated",
+      "booster_opened",
+      "booster_skipped",
+      "consumable_used",
+      "hand_drawn",
+      "first_hand_drawn",
+      "shop_exited",
+      "card_discarded",
+      "hand_discarded",
+    ],
+    params: [
+      {
+        id: "size_type",
+        type: "select",
+        label: "Size Type",
+        options: [
+          { value: "remaining", label: "Remaining in Deck" },
+          { value: "total", label: "Total Deck Size" },
+        ],
+        default: "remaining",
+      },
+      {
+        id: "operator",
+        type: "select",
+        label: "Operator",
+        options: COMPARISON_OPERATORS,
+      },
+      {
+        id: "value",
+        type: "number",
+        label: "Number of Cards",
+        min: 0,
+        max: 200,
+        default: 52,
+      },
+    ],
+  },
 ];
 
 // Helper function to get a specific condition type by ID
