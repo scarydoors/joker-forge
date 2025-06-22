@@ -20,6 +20,8 @@ import { generateModifyInternalVariableReturn } from "./effects/ModifyInternalVa
 import { generateAddTarotCardReturn } from "./effects/AddTarotCardEffect";
 import { generateAddPlanetCardReturn } from "./effects/AddPlanetCardEffect";
 import { generateAddSpectralCardReturn } from "./effects/AddSpectralCardEffect";
+import { generateDestroyConsumableReturn } from "./effects/DestroyConsumableEffect";
+import { generateCopyConsumableReturn } from "./effects/CopyConsumableEffect";
 
 export interface ReturnStatementResult {
   statement: string;
@@ -61,7 +63,7 @@ export function generateEffectReturnStatement(
 ): ReturnStatementResult {
   if (effects.length === 0) {
     return {
-      statement: '\n                message = "Activated!"',
+      statement: "",
       colour: "G.C.WHITE",
     };
   }
@@ -107,6 +109,10 @@ export function generateEffectReturnStatement(
           return generateAddPlanetCardReturn(effect, triggerType);
         case "create_spectral_card":
           return generateAddSpectralCardReturn(effect, triggerType);
+        case "destroy_consumable":
+          return generateDestroyConsumableReturn(effect, triggerType);
+        case "copy_consumable":
+          return generateCopyConsumableReturn(effect, triggerType);
         default:
           return {
             statement: "",
@@ -114,11 +120,11 @@ export function generateEffectReturnStatement(
           };
       }
     })
-    .filter((ret) => ret.statement);
+    .filter((ret) => ret.statement || ret.message);
 
   if (effectReturns.length === 0) {
     return {
-      statement: '\n                message = "Activated!"',
+      statement: "",
       colour: "G.C.WHITE",
     };
   }
@@ -159,9 +165,6 @@ export function generateEffectReturnStatement(
     if (firstEffect.message) {
       returnStatement = `
                 message = ${firstEffect.message}`;
-    } else {
-      returnStatement = `
-                message = "Activated!"`;
     }
   }
 
@@ -183,8 +186,9 @@ export function generateEffectReturnStatement(
       } else {
         if (effect.message) {
           extraContent = `message = ${effect.message}`;
-        } else {
-          extraContent = `message = "Activated!"`;
+        }
+        if (!effect.message) {
+          continue;
         }
       }
 
@@ -201,17 +205,31 @@ export function generateEffectReturnStatement(
       }
     }
 
+    // Count how many effects were actually added to extraChain
+    let extraCount = 0;
     for (let i = 1; i < processedEffects.length; i++) {
+      const effect = processedEffects[i];
+      if (effect.statement.trim().length > 0 || effect.message) {
+        extraCount++;
+      }
+    }
+
+    for (let i = 0; i < extraCount; i++) {
       extraChain += `
                     }`;
     }
 
-    const hasReturnContent = returnStatement.replace(/\s/g, "").length > 0;
-    if (hasReturnContent) {
+    const hasReturnContent = returnStatement.trim().length > 0;
+    if (hasReturnContent && extraChain) {
       returnStatement += `,${extraChain}`;
-    } else {
+    } else if (extraChain) {
       returnStatement = extraChain.trim();
     }
+  }
+
+  if (returnStatement.trim().length === 0) {
+    returnStatement = `
+                colour = ${firstEffect.colour}`;
   }
 
   return {

@@ -111,11 +111,8 @@ export const generateCalculateFunction = (
     );
 
     if (normalEffects.length > 0) {
-      const {
-        statement: returnStatement,
-        colour,
-        preReturnCode,
-      } = generateEffectReturnStatement(normalEffects, triggerType);
+      const { statement: returnStatement, preReturnCode } =
+        generateEffectReturnStatement(normalEffects, triggerType);
 
       if (preReturnCode) {
         calculateFunction += `
@@ -125,8 +122,7 @@ export const generateCalculateFunction = (
       }
 
       calculateFunction += `
-            return {${returnStatement},
-                colour = ${colour}
+            return {${returnStatement}
             }`;
     }
 
@@ -144,11 +140,8 @@ export const generateCalculateFunction = (
           ? `card.ability.extra.${denominator}`
           : denominator;
 
-      const {
-        statement: returnStatement,
-        colour,
-        preReturnCode,
-      } = generateEffectReturnStatement([effect], triggerType);
+      const { statement: returnStatement, preReturnCode } =
+        generateEffectReturnStatement([effect], triggerType);
 
       if (preReturnCode) {
         calculateFunction += `
@@ -159,8 +152,7 @@ export const generateCalculateFunction = (
 
       calculateFunction += `
         if pseudorandom('${effectKey}') < G.GAME.probabilities.normal * ${numeratorRef} / ${denominatorRef} then
-            return {${returnStatement},
-                colour = ${colour}
+            return {${returnStatement}
             }
         end`;
     });
