@@ -617,6 +617,16 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
         ],
         default: "random",
       },
+      {
+        id: "is_negative",
+        type: "select",
+        label: "Edition",
+        options: [
+          { value: "none", label: "No Edition" },
+          { value: "negative", label: "Negative Edition" },
+        ],
+        default: "none",
+      },
     ],
   },
   {
@@ -671,6 +681,16 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
           { value: "eris", label: "Eris - Flush Five (+3 Mult, +50 Chips)" },
         ],
         default: "random",
+      },
+      {
+        id: "is_negative",
+        type: "select",
+        label: "Edition",
+        options: [
+          { value: "none", label: "No Edition" },
+          { value: "negative", label: "Negative Edition" },
+        ],
+        default: "none",
       },
     ],
   },
@@ -751,6 +771,16 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
           },
         ],
         default: "random",
+      },
+      {
+        id: "is_negative",
+        type: "select",
+        label: "Edition",
+        options: [
+          { value: "none", label: "No Edition" },
+          { value: "negative", label: "Negative Edition" },
+        ],
+        default: "none",
       },
     ],
   },

@@ -1,7 +1,6 @@
 import type { EffectReturn } from "./AddChipsEffect";
 import type { Effect } from "../../ruleBuilder/types";
 
-// Mapping of planet card names to their Balatro keys COULD BE WRONG?
 const PLANET_CARD_KEYS: Record<string, string> = {
   pluto: "c_pluto",
   mercury: "c_mercury",
@@ -22,18 +21,27 @@ export const generateAddPlanetCardReturn = (
   triggerType: string
 ): EffectReturn => {
   const planetCard = (effect.params?.planet_card as string) || "random";
+  const isNegative = (effect.params?.is_negative as string) === "negative";
 
-  // Define scoring triggers that need the pre-return code approach
   const scoringTriggers = ["hand_played", "card_scored"];
   const isScoring = scoringTriggers.includes(triggerType);
 
-  // Generate the planet card creation code
   let planetCreationCode = "";
 
   if (planetCard === "random") {
-    // Create a random planet card using SMODS.add_card
-    planetCreationCode = `
-            -- Create random planet card
+    if (isNegative) {
+      planetCreationCode = `
+            G.E_MANAGER:add_event(Event({
+                func = function()
+                    local planet_card = create_card('Planet', G.consumeables, nil, nil, nil, nil, nil, 'joker_forge_planet')
+                    planet_card:set_edition("e_negative", true)
+                    planet_card:add_to_deck()
+                    G.consumeables:emplace(planet_card)
+                    return true
+                end
+            }))`;
+    } else {
+      planetCreationCode = `
             if #G.consumeables.cards + G.GAME.consumeable_buffer < G.consumeables.config.card_limit then
                 G.GAME.consumeable_buffer = G.GAME.consumeable_buffer + 1
                 G.E_MANAGER:add_event(Event({
@@ -47,11 +55,23 @@ export const generateAddPlanetCardReturn = (
                     end
                 }))
             end`;
+    }
   } else {
-    // Create a specific planet card
     const planetKey = PLANET_CARD_KEYS[planetCard] || "c_pluto";
-    planetCreationCode = `
-            -- Create specific planet card: ${planetCard}
+
+    if (isNegative) {
+      planetCreationCode = `
+            G.E_MANAGER:add_event(Event({
+                func = function()
+                    local planet_card = create_card('Planet', G.consumeables, nil, nil, nil, nil, '${planetKey}')
+                    planet_card:set_edition("e_negative", true)
+                    planet_card:add_to_deck()
+                    G.consumeables:emplace(planet_card)
+                    return true
+                end
+            }))`;
+    } else {
+      planetCreationCode = `
             if #G.consumeables.cards + G.GAME.consumeable_buffer < G.consumeables.config.card_limit then
                 G.GAME.consumeable_buffer = G.GAME.consumeable_buffer + 1
                 G.E_MANAGER:add_event(Event({
@@ -64,10 +84,10 @@ export const generateAddPlanetCardReturn = (
                     end
                 }))
             end`;
+    }
   }
 
   if (isScoring) {
-    // For scoring triggers, use pre-return code
     return {
       statement: `__PRE_RETURN_CODE__${planetCreationCode}
                 __PRE_RETURN_CODE_END__`,
@@ -75,7 +95,6 @@ export const generateAddPlanetCardReturn = (
       colour: "G.C.SECONDARY_SET.Planet",
     };
   } else {
-    // For non-scoring triggers, use func approach
     return {
       statement: `func = function()${planetCreationCode}
                     card_eval_status_text(context.blueprint_card or card, 'extra', nil, nil, nil, {message = localize('k_plus_planet'), colour = G.C.SECONDARY_SET.Planet})

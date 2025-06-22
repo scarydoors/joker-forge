@@ -1,7 +1,6 @@
 import type { EffectReturn } from "./AddChipsEffect";
 import type { Effect } from "../../ruleBuilder/types";
 
-// Mapping of tarot card names to their Balatro keys THESE MAY BE WRONG?
 const TAROT_CARD_KEYS: Record<string, string> = {
   the_fool: "c_fool",
   the_magician: "c_magician",
@@ -32,18 +31,27 @@ export const generateAddTarotCardReturn = (
   triggerType: string
 ): EffectReturn => {
   const tarotCard = (effect.params?.tarot_card as string) || "random";
+  const isNegative = (effect.params?.is_negative as string) === "negative";
 
-  // Define scoring triggers that need the pre-return code approach
   const scoringTriggers = ["hand_played", "card_scored"];
   const isScoring = scoringTriggers.includes(triggerType);
 
-  // Generate the tarot card creation code
   let tarotCreationCode = "";
 
   if (tarotCard === "random") {
-    // Create a random tarot card using SMODS.add_card
-    tarotCreationCode = `
-            -- Create random tarot card
+    if (isNegative) {
+      tarotCreationCode = `
+            G.E_MANAGER:add_event(Event({
+                func = function()
+                    local tarot_card = create_card('Tarot', G.consumeables, nil, nil, nil, nil, nil, 'joker_forge_tarot')
+                    tarot_card:set_edition("e_negative", true)
+                    tarot_card:add_to_deck()
+                    G.consumeables:emplace(tarot_card)
+                    return true
+                end
+            }))`;
+    } else {
+      tarotCreationCode = `
             if #G.consumeables.cards + G.GAME.consumeable_buffer < G.consumeables.config.card_limit then
                 G.GAME.consumeable_buffer = G.GAME.consumeable_buffer + 1
                 G.E_MANAGER:add_event(Event({
@@ -57,11 +65,23 @@ export const generateAddTarotCardReturn = (
                     end
                 }))
             end`;
+    }
   } else {
-    // Create a specific tarot card
     const tarotKey = TAROT_CARD_KEYS[tarotCard] || "c_fool";
-    tarotCreationCode = `
-            -- Create specific tarot card: ${tarotCard}
+
+    if (isNegative) {
+      tarotCreationCode = `
+            G.E_MANAGER:add_event(Event({
+                func = function()
+                    local tarot_card = create_card('Tarot', G.consumeables, nil, nil, nil, nil, '${tarotKey}')
+                    tarot_card:set_edition("e_negative", true)
+                    tarot_card:add_to_deck()
+                    G.consumeables:emplace(tarot_card)
+                    return true
+                end
+            }))`;
+    } else {
+      tarotCreationCode = `
             if #G.consumeables.cards + G.GAME.consumeable_buffer < G.consumeables.config.card_limit then
                 G.GAME.consumeable_buffer = G.GAME.consumeable_buffer + 1
                 G.E_MANAGER:add_event(Event({
@@ -74,10 +94,10 @@ export const generateAddTarotCardReturn = (
                     end
                 }))
             end`;
+    }
   }
 
   if (isScoring) {
-    // For scoring triggers, use pre-return code
     return {
       statement: `__PRE_RETURN_CODE__${tarotCreationCode}
                 __PRE_RETURN_CODE_END__`,
@@ -85,7 +105,6 @@ export const generateAddTarotCardReturn = (
       colour: "G.C.PURPLE",
     };
   } else {
-    // For non-scoring triggers, use func approach
     return {
       statement: `func = function()${tarotCreationCode}
                     card_eval_status_text(context.blueprint_card or card, 'extra', nil, nil, nil, {message = localize('k_plus_tarot'), colour = G.C.PURPLE})
