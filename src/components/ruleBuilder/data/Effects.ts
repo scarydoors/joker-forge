@@ -434,8 +434,8 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
   },
   {
     id: "delete_triggered_card",
-    label: "Delete Triggered Card",
-    description: "Delete the card that triggered this effect",
+    label: "Destroy Triggered Card",
+    description: "Destroy the card that triggered this effect",
     applicableTriggers: ["card_scored", "card_discarded"],
     params: [],
   },
