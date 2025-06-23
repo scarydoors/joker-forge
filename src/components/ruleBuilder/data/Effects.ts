@@ -66,6 +66,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
       "card_discarded",
       "hand_discarded",
       "round_end",
+      "shop_reroll",
     ],
     params: [
       {
@@ -126,6 +127,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
       "shop_exited",
       "round_end",
       "round_end",
+      "shop_reroll",
     ],
     params: [
       {
@@ -164,6 +166,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
       "first_hand_drawn",
       "shop_exited",
       "round_end",
+      "shop_reroll",
     ],
     params: [
       {
@@ -202,6 +205,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
       "first_hand_drawn",
       "shop_exited",
       "round_end",
+      "shop_reroll",
     ],
     params: [
       {
@@ -243,6 +247,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
       "shop_exited",
       "card_discarded",
       "hand_discarded",
+      "shop_reroll",
     ],
     params: [
       {
@@ -290,6 +295,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
       "card_discarded",
       "hand_discarded",
       "round_end",
+      "shop_reroll",
     ],
     params: [
       {
@@ -552,6 +558,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
       "card_discarded",
       "hand_discarded",
       "round_end",
+      "shop_reroll",
     ],
     params: [
       {
@@ -655,6 +662,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
       "card_discarded",
       "hand_discarded",
       "round_end",
+      "shop_reroll",
     ],
     params: [
       {
@@ -721,6 +729,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
       "card_discarded",
       "hand_discarded",
       "round_end",
+      "shop_reroll",
     ],
     params: [
       {
@@ -811,6 +820,8 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
       "shop_exited",
       "card_discarded",
       "hand_discarded",
+      "round_end",
+      "shop_reroll",
     ],
     params: [
       {
@@ -909,6 +920,8 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
       "shop_exited",
       "card_discarded",
       "hand_discarded",
+      "round_end",
+      "shop_reroll",
     ],
     params: [
       {
@@ -1018,6 +1031,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
       "card_discarded",
       "hand_discarded",
       "round_end",
+      "shop_reroll",
     ],
     params: [],
   },

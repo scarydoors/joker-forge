@@ -88,6 +88,9 @@ export const generateCalculateFunction = (
     } else if (triggerType === "hand_discarded") {
       contextCheck = "context.pre_discard and not context.blueprint";
       description = "-- When hand is discarded";
+    } else if (triggerType === "shop_reroll") {
+      contextCheck = "context.reroll_shop and not context.blueprint";
+      description = "-- When shop is rerolled";
     } else if (triggerType === "round_end") {
       contextCheck =
         "context.end_of_round and context.game_over == false and context.main_eval and not context.blueprint";

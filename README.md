@@ -31,16 +31,15 @@ The plan here is to implement enough triggers, conditions, and effects, so as th
 - [x] **Shop Exited** - When exiting the shop
 - [x] **Passive** - Always active, for specific effects like Pareidolia, and game rules like hand size
 - [x] **Round End** - At the end of a round
+- [x] **Shop Reroll** - When the shop is rerolled (Flash Card)
 
 #### Not Implemented Yet
 
 - [ ] **Card Destroyed** - When a card is destroyed
-- [ ] **Round End** - At the end of a round
 - [ ] **Ante Start** - At the start of an ante
 - [ ] **Shop Entered** - When entering the shop
 - [ ] **Card Bought** - When a card is purchased
 - [ ] **Card Sold** - When a card is sold
-- [ ] **Shop Reroll** - When the shop is rerolled (Flash Card)
 - [ ] **Joker Added/Removed** - When a Joker is added/removed from your list (Joker Stencil)
 
 ---

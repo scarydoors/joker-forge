@@ -396,6 +396,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
       "card_discarded",
       "hand_discarded",
       "round_end",
+      "shop_reroll",
     ],
     params: [
       {
@@ -432,6 +433,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
       "card_discarded",
       "hand_discarded",
       "round_end",
+      "shop_reroll",
     ],
     params: [
       {
@@ -468,6 +470,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
       "card_discarded",
       "hand_discarded",
       "round_end",
+      "shop_reroll",
     ],
     params: [
       {
@@ -504,6 +507,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
       "card_discarded",
       "hand_discarded",
       "round_end",
+      "shop_reroll",
     ],
     params: [
       {
@@ -540,6 +544,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
       "card_discarded",
       "hand_discarded",
       "round_end",
+      "shop_reroll",
     ],
     params: [
       {
@@ -614,6 +619,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
       "card_discarded",
       "hand_discarded",
       "round_end",
+      "shop_reroll",
     ],
     params: [
       {
@@ -665,6 +671,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
       "card_discarded",
       "hand_discarded",
       "round_end",
+      "shop_reroll",
     ],
     params: [
       {
@@ -702,6 +709,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
       "card_discarded",
       "hand_discarded",
       "round_end",
+      "shop_reroll",
     ],
     params: [
       {
@@ -749,6 +757,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
       "card_discarded",
       "hand_discarded",
       "round_end",
+      "shop_reroll",
     ],
     params: [
       {

@@ -59,6 +59,12 @@ export const TRIGGERS: TriggerDefinition[] = [
     description: "Triggers when the player chooses to skip a booster pack.",
   },
   {
+    id: "shop_reroll",
+    label: "When Shop is Rerolled",
+    description:
+      "Triggers whenever the player rerolls the shop to get new items. Perfect for gaining benefits from spending money or building up values through shop interaction.",
+  },
+  {
     id: "consumable_used",
     label: "When a Consumable is Used",
     description:
