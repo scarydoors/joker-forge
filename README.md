@@ -30,6 +30,7 @@ The plan here is to implement enough triggers, conditions, and effects, so as th
 - [x] **First Hand Drawn** - When the first hand is drawn
 - [x] **Shop Exited** - When exiting the shop
 - [x] **Passive** - Always active, for specific effects like Pareidolia, and game rules like hand size
+- [x] **Round End** - At the end of a round
 
 #### Not Implemented Yet
 
@@ -102,14 +103,16 @@ The plan here is to implement enough triggers, conditions, and effects, so as th
 - [x] **Create Tarot Card** - Create a random or set tarot card
 - [x] **Create Planet Card** - Create a random or set planet card
 - [x] **Create Spectral Card** - Create a random or set spectral card
+- [x] **Destroy Consumable** - Destroy a random or specific spectral/tarot/planet card
+- [x] **Copy Consumable** - Copy a random or specific spectral/tarot/planet card
+- [x] **Edit Hand Size** - Give/take/set hand size (Turtle Bean)
 
 #### Not Implemented Yet
 
 - [ ] **Disable Boss Blind** - Disables the boss blinds unique effect (Luchador, Chicot)
 - [ ] **Combine Suits** - Treat two or more suits as the same suit (Smeared Joker)
 - [ ] **Combine Ranks** - Treat two or more ranks as the same rank
-- [ ] **All Cards Are Face Cards** - Literally just for Pareidolia
-- [ ] **Edit Hand Size** - Give/take/set hand size (Turtle Bean)
+- [ ] **All Cards Are Face Cards** - Literally just for Pareidolia (this could probably just be the combine ranks effect)
 - [ ] **Beat Current Blind** - Completes the current blind (Mr. Bones)
 - [ ] **Modify Sell Value** - Change sell value of this or other jokers (Egg, Gift Card)
 - [ ] **Copy Ability of Adjacent Joker** - Blueprint/Brainstorm logic (difficult)
