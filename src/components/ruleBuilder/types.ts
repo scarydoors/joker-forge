@@ -28,6 +28,7 @@ export interface Effect {
   id: string;
   type: string;
   params: Record<string, unknown>;
+  customMessage?: string;
 }
 
 // Interface for trigger definitions

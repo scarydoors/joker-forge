@@ -622,6 +622,26 @@ const Inspector: React.FC<InspectorProps> = ({
           )}
         </div>
 
+        <div className="space-y-3">
+          <h5 className="text-white-light font-medium text-sm flex items-center gap-2">
+            <div className="w-2 h-2 bg-effect rounded-full"></div>
+            Custom Message
+          </h5>
+          <div className="bg-black-darker border border-black-lighter rounded-lg p-3">
+            <InputField
+              label="Message"
+              value={selectedEffect.customMessage || ""}
+              onChange={(e) => {
+                onUpdateEffect(selectedRule.id, selectedEffect.id, {
+                  customMessage: e.target.value || undefined,
+                });
+              }}
+              placeholder="Leave blank for default message"
+              size="sm"
+            />
+          </div>
+        </div>
+
         {paramsToRender.length > 0 && (
           <div className="space-y-3">
             <h5 className="text-white-light font-medium text-sm flex items-center gap-2">
