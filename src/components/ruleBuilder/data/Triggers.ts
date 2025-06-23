@@ -34,7 +34,7 @@ export const TRIGGERS: TriggerDefinition[] = [
   },
   {
     id: "round_end",
-    label: "At Round End",
+    label: "When the Round Ends",
     description:
       "Triggers at the end of each round, after all hands have been played and the blind is completed. Perfect for gaining money, upgrading the joker, or resetting states.",
   },
