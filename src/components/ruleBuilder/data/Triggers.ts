@@ -27,6 +27,12 @@ export const TRIGGERS: TriggerDefinition[] = [
       "Triggers whenever a card is discarded. Use conditions to check properties of the discarded card.",
   },
   {
+    id: "card_held_in_hand",
+    label: "When a Card is Held in Hand",
+    description:
+      "Triggers for each individual card currently held in your hand. Perfect for effects that scale with specific cards you're holding, like gaining money for each Ace or mult for each face card.",
+  },
+  {
     id: "round_end",
     label: "At Round End",
     description:

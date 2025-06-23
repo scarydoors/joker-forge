@@ -54,6 +54,16 @@ export const generateCalculateFunction = (
         contextCheck = "context.individual and context.cardarea == G.play";
         description = "-- Individual card scoring";
       }
+    } else if (triggerType === "card_held_in_hand") {
+      if (hasRetriggerEffects) {
+        contextCheck =
+          "context.repetition and context.cardarea == G.hand and (next(context.card_effects[1]) or #context.card_effects > 1)";
+        description = "-- Card repetition context for held cards";
+      } else {
+        contextCheck =
+          "context.individual and context.cardarea == G.hand and not context.end_of_round";
+        description = "-- Individual card held in hand";
+      }
     } else if (triggerType === "blind_selected") {
       contextCheck = "context.setting_blind and not context.blueprint";
       description = "-- When blind is selected";
@@ -82,12 +92,6 @@ export const generateCalculateFunction = (
     } else if (triggerType === "shop_exited") {
       contextCheck = "context.ending_shop and not context.blueprint";
       description = "-- When exiting shop";
-    } else if (triggerType === "card_discarded") {
-      contextCheck = "context.discard and not context.blueprint";
-      description = "-- When card is discarded";
-    } else if (triggerType === "hand_discarded") {
-      contextCheck = "context.pre_discard and not context.blueprint";
-      description = "-- When hand is discarded";
     } else if (triggerType === "shop_reroll") {
       contextCheck = "context.reroll_shop and not context.blueprint";
       description = "-- When shop is rerolled";
@@ -95,6 +99,12 @@ export const generateCalculateFunction = (
       contextCheck =
         "context.end_of_round and context.game_over == false and context.main_eval and not context.blueprint";
       description = "-- At the end of the round";
+    } else if (triggerType === "card_discarded") {
+      contextCheck = "context.discard and not context.blueprint";
+      description = "-- When card is discarded";
+    } else if (triggerType === "hand_discarded") {
+      contextCheck = "context.pre_discard and not context.blueprint";
+      description = "-- When hand is discarded";
     } else {
       contextCheck = "context.cardarea == G.jokers and context.joker_main";
       description = "-- Main scoring time for jokers";

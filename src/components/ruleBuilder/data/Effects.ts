@@ -5,7 +5,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
     id: "add_chips",
     label: "Add Chips",
     description: "Add a flat amount of chips to the hand score",
-    applicableTriggers: ["hand_played", "card_scored"],
+    applicableTriggers: ["hand_played", "card_scored", "card_held_in_hand"],
     params: [
       {
         id: "value",
@@ -20,7 +20,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
     id: "add_mult",
     label: "Add Mult",
     description: "Add a flat amount of mult to the hand score",
-    applicableTriggers: ["hand_played", "card_scored"],
+    applicableTriggers: ["hand_played", "card_scored", "card_held_in_hand"],
     params: [
       {
         id: "value",
@@ -35,7 +35,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
     id: "apply_x_mult",
     label: "Apply xMult",
     description: "Multiply the score by this value",
-    applicableTriggers: ["hand_played", "card_scored"],
+    applicableTriggers: ["hand_played", "card_scored", "card_held_in_hand"],
     params: [
       {
         id: "value",
@@ -67,6 +67,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
       "hand_discarded",
       "round_end",
       "shop_reroll",
+      "card_held_in_hand",
     ],
     params: [
       {
@@ -81,9 +82,8 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
   {
     id: "retrigger_cards",
     label: "Retrigger",
-    description:
-      "Retrigger the scored card (only for 'When a Card is Scored' trigger)",
-    applicableTriggers: ["card_scored"],
+    description: "Retrigger the scored/activated card",
+    applicableTriggers: ["card_scored", "card_discarded", "card_held_in_hand"],
     params: [
       {
         id: "repetitions",
@@ -128,6 +128,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
       "round_end",
       "round_end",
       "shop_reroll",
+      "card_held_in_hand",
     ],
     params: [
       {
@@ -167,6 +168,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
       "shop_exited",
       "round_end",
       "shop_reroll",
+      "card_held_in_hand",
     ],
     params: [
       {
@@ -206,6 +208,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
       "shop_exited",
       "round_end",
       "shop_reroll",
+      "card_held_in_hand",
     ],
     params: [
       {
@@ -248,6 +251,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
       "card_discarded",
       "hand_discarded",
       "shop_reroll",
+      "card_held_in_hand",
     ],
     params: [
       {
@@ -296,6 +300,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
       "hand_discarded",
       "round_end",
       "shop_reroll",
+      "card_held_in_hand",
     ],
     params: [
       {
@@ -384,7 +389,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
     id: "copy_triggered_card",
     label: "Copy Triggered Card",
     description: "Copy the card that triggered this effect to your deck",
-    applicableTriggers: ["card_scored", "card_discarded"],
+    applicableTriggers: ["card_scored", "card_discarded", "card_held_in_hand"],
     params: [],
   },
   {
@@ -448,14 +453,14 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
     id: "delete_triggered_card",
     label: "Destroy Triggered Card",
     description: "Destroy the card that triggered this effect",
-    applicableTriggers: ["card_scored", "card_discarded"],
+    applicableTriggers: ["card_scored", "card_discarded", "card_held_in_hand"],
     params: [],
   },
   {
     id: "edit_triggered_card",
     label: "Edit Triggered Card",
     description: "Modify the properties of the card that triggered this effect",
-    applicableTriggers: ["card_scored", "card_discarded"],
+    applicableTriggers: ["card_scored", "card_discarded", "card_held_in_hand"],
     params: [
       {
         id: "new_rank",
@@ -559,6 +564,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
       "hand_discarded",
       "round_end",
       "shop_reroll",
+      "card_held_in_hand",
     ],
     params: [
       {
@@ -663,6 +669,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
       "hand_discarded",
       "round_end",
       "shop_reroll",
+      "card_held_in_hand",
     ],
     params: [
       {
@@ -730,6 +737,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
       "hand_discarded",
       "round_end",
       "shop_reroll",
+      "card_held_in_hand",
     ],
     params: [
       {
@@ -822,6 +830,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
       "hand_discarded",
       "round_end",
       "shop_reroll",
+      "card_held_in_hand",
     ],
     params: [
       {
@@ -922,6 +931,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
       "hand_discarded",
       "round_end",
       "shop_reroll",
+      "card_held_in_hand",
     ],
     params: [
       {
@@ -1032,6 +1042,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
       "hand_discarded",
       "round_end",
       "shop_reroll",
+      "card_held_in_hand",
     ],
     params: [],
   },

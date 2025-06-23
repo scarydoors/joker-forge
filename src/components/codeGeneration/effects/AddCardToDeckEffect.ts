@@ -11,34 +11,29 @@ export const generateAddCardToDeckReturn = (
   const seal = (effect.params?.seal as string) || "none";
   const edition = (effect.params?.edition as string) || "none";
 
-  // Define scoring triggers that need the copy_card method
   const scoringTriggers = ["hand_played", "card_scored"];
+  const heldInHandTriggers = ["card_held_in_hand"];
 
   const isScoring = scoringTriggers.includes(triggerType);
+  const isHeldInHand = heldInHandTriggers.includes(triggerType);
 
-  // Generate the card selection logic
   let cardSelectionCode = "";
 
   if (suit === "random" && rank === "random") {
-    // Both random - pick any card
     cardSelectionCode =
       "local card_front = pseudorandom_element(G.P_CARDS, pseudoseed('add_card'))";
   } else if (suit !== "random" && rank !== "random") {
-    // Both specific - pick exact card
     const cardRank = rank === "10" ? "T" : rank;
     const cardKey = `${suit.charAt(0)}_${cardRank}`;
     cardSelectionCode = `local card_front = G.P_CARDS.${cardKey}`;
   } else if (suit === "random" && rank !== "random") {
-    // Random suit, specific rank
     const cardRank = rank === "10" ? "T" : rank;
     cardSelectionCode = `local card_front = pseudorandom_element({G.P_CARDS.S_${cardRank}, G.P_CARDS.H_${cardRank}, G.P_CARDS.D_${cardRank}, G.P_CARDS.C_${cardRank}}, pseudoseed('add_card_suit'))`;
   } else if (suit !== "random" && rank === "random") {
-    // Specific suit, random rank
     const suitCode = suit.charAt(0);
     cardSelectionCode = `local card_front = pseudorandom_element({G.P_CARDS.${suitCode}_2, G.P_CARDS.${suitCode}_3, G.P_CARDS.${suitCode}_4, G.P_CARDS.${suitCode}_5, G.P_CARDS.${suitCode}_6, G.P_CARDS.${suitCode}_7, G.P_CARDS.${suitCode}_8, G.P_CARDS.${suitCode}_9, G.P_CARDS.${suitCode}_T, G.P_CARDS.${suitCode}_J, G.P_CARDS.${suitCode}_Q, G.P_CARDS.${suitCode}_K, G.P_CARDS.${suitCode}_A}, pseudoseed('add_card_rank'))`;
   }
 
-  // Handle enhancement/center
   let centerParam = "";
   if (enhancement === "none") {
     centerParam = "G.P_CENTERS.c_base";
@@ -49,7 +44,6 @@ export const generateAddCardToDeckReturn = (
     centerParam = `G.P_CENTERS.${enhancement}`;
   }
 
-  // Generate seal code inline
   let sealCode = "";
   if (seal === "random") {
     sealCode = `\n            new_card:set_seal(pseudorandom_element({"Gold", "Red", "Blue", "Purple"}, pseudoseed('add_card_seal')), true)`;
@@ -57,7 +51,6 @@ export const generateAddCardToDeckReturn = (
     sealCode = `\n            new_card:set_seal("${seal}", true)`;
   }
 
-  // Generate edition code inline
   let editionCode = "";
   if (edition === "random") {
     editionCode = `\n            new_card:set_edition(pseudorandom_element({"e_foil", "e_holo", "e_polychrome", "e_negative"}, pseudoseed('add_card_edition')), true)`;
@@ -65,11 +58,9 @@ export const generateAddCardToDeckReturn = (
     editionCode = `\n            new_card:set_edition("${edition}", true)`;
   }
 
-  if (isScoring) {
-    // For scoring triggers, use the existing copy_card method
+  if (isScoring || isHeldInHand) {
     return {
       statement: `__PRE_RETURN_CODE__
-                -- Create a temporary base card to copy from
                 ${cardSelectionCode}
                 local base_card = create_playing_card({
                     front = card_front,
@@ -79,7 +70,6 @@ export const generateAddCardToDeckReturn = (
                   "base_card"
                 )}${editionCode.replace(/new_card/g, "base_card")}
                 
-                -- Now copy it like Ship of Theseus does
                 G.playing_card = (G.playing_card and G.playing_card + 1) or 1
                 local new_card = copy_card(base_card, nil, nil, G.playing_card)
                 new_card:add_to_deck()
@@ -87,7 +77,6 @@ export const generateAddCardToDeckReturn = (
                 G.deck:emplace(new_card)
                 table.insert(G.playing_cards, new_card)
                 
-                -- Clean up the temporary card
                 base_card:remove()
                 
                 G.E_MANAGER:add_event(Event({
@@ -101,7 +90,6 @@ export const generateAddCardToDeckReturn = (
       colour: "G.C.GREEN",
     };
   } else {
-    // For non-scoring triggers
     return {
       statement: `__PRE_RETURN_CODE__
             ${cardSelectionCode}

@@ -15,7 +15,11 @@ export const generateAddMultReturn = (
     valueReference = "card.ability.extra.mult";
   }
 
-  if (triggerType === "card_scored") {
+  if (
+    triggerType === "card_scored" ||
+    triggerType === "card_discarded" ||
+    triggerType === "card_held_in_hand"
+  ) {
     // For card_scored, SMODS adds message automatically
     return {
       statement: `mult = ${valueReference}`,

@@ -276,7 +276,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
     id: "card_rank",
     label: "Card Rank",
     description: "Check the rank of the card",
-    applicableTriggers: ["card_scored", "card_discarded"],
+    applicableTriggers: ["card_scored", "card_discarded", "card_held_in_hand"],
     params: [
       {
         id: "rank_type",
@@ -313,7 +313,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
     id: "card_suit",
     label: "Card Suit",
     description: "Check the suit of the card",
-    applicableTriggers: ["card_scored", "card_discarded"],
+    applicableTriggers: ["card_scored", "card_discarded", "card_held_in_hand"],
     params: [
       {
         id: "suit_type",
@@ -350,7 +350,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
     id: "card_enhancement",
     label: "Card Enhancement",
     description: "Check if the card has a specific enhancement",
-    applicableTriggers: ["card_scored", "card_discarded"],
+    applicableTriggers: ["card_scored", "card_discarded", "card_held_in_hand"],
     params: [
       {
         id: "enhancement",
@@ -434,6 +434,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
       "hand_discarded",
       "round_end",
       "shop_reroll",
+      "card_held_in_hand",
     ],
     params: [
       {
@@ -471,6 +472,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
       "hand_discarded",
       "round_end",
       "shop_reroll",
+      "card_held_in_hand",
     ],
     params: [
       {
@@ -508,6 +510,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
       "hand_discarded",
       "round_end",
       "shop_reroll",
+      "card_held_in_hand",
     ],
     params: [
       {
@@ -545,6 +548,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
       "hand_discarded",
       "round_end",
       "shop_reroll",
+      "card_held_in_hand",
     ],
     params: [
       {
@@ -586,6 +590,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
       "card_discarded",
       "hand_discarded",
       "round_end",
+      "card_held_in_hand",
     ],
     params: [
       {
@@ -620,6 +625,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
       "hand_discarded",
       "round_end",
       "shop_reroll",
+      "card_held_in_hand",
     ],
     params: [
       {
@@ -641,7 +647,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
     id: "first_played_hand",
     label: "First Played Hand",
     description: "Check if this is the first hand played in the current round",
-    applicableTriggers: ["hand_played", "card_scored"],
+    applicableTriggers: ["hand_played", "card_scored", "card_discarded"],
     params: [],
   },
   {
@@ -672,6 +678,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
       "hand_discarded",
       "round_end",
       "shop_reroll",
+      "card_held_in_hand",
     ],
     params: [
       {
@@ -710,6 +717,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
       "hand_discarded",
       "round_end",
       "shop_reroll",
+      "card_held_in_hand",
     ],
     params: [
       {
@@ -758,6 +766,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
       "hand_discarded",
       "round_end",
       "shop_reroll",
+      "card_held_in_hand",
     ],
     params: [
       {

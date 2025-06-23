@@ -64,7 +64,11 @@ export const generateRankCardConditionCode = (rules: Rule[]): string | null => {
   const cardsToCheck =
     scope === "scoring" ? "context.scoring_hand" : "context.full_hand";
 
-  if (triggerType === "card_scored" || triggerType === "card_discarded") {
+  if (
+    triggerType === "card_scored" ||
+    triggerType === "card_discarded" ||
+    triggerType === "card_held_in_hand"
+  ) {
     const checkLogic = getRanksCheckLogic(ranks, rankGroupType).replace(
       /c:/g,
       "context.other_card:"
