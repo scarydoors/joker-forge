@@ -32,12 +32,12 @@ The plan here is to implement enough triggers, conditions, and effects, so as th
 - [x] **Passive** - Always active, for specific effects like Pareidolia, and game rules like hand size
 - [x] **Round End** - At the end of a round
 - [x] **Shop Reroll** - When the shop is rerolled (Flash Card)
+- [ ] **Card Held in Hand** - Triggers for each card held in hand
 
 #### Not Implemented Yet
 
 - [ ] **Card Destroyed** - When a card is destroyed
 - [ ] **Ante Start** - At the start of an ante
-- [ ] **Shop Entered** - When entering the shop
 - [ ] **Card Bought** - When a card is purchased
 - [ ] **Card Sold** - When a card is sold
 - [ ] **Joker Added/Removed** - When a Joker is added/removed from your list (Joker Stencil)
@@ -73,8 +73,7 @@ The plan here is to implement enough triggers, conditions, and effects, so as th
 #### Not Implemented Yet
 
 - [ ] **Consumable Count** - Check number of consumables owned
-- [ ] **Score Threshold** - Check if score meets requirement
-- [ ] **Held Card Conditions** - Check cards currently held in hand (Rank, Suit, Count)
+- [ ] **Score Threshold** - Check if score meets requirement (Mr. Bones)
 - [ ] **Hand History** - Check previous hands played this round/run
 - [ ] **Consecutive Hand Tracking** - Track consecutive hands without certain conditions
 
