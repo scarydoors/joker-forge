@@ -28,6 +28,7 @@ export const generateAddSpectralCardReturn = (
 ): EffectReturn => {
   const spectralCard = (effect.params?.spectral_card as string) || "random";
   const isNegative = (effect.params?.is_negative as string) === "negative";
+  const customMessage = effect.customMessage;
 
   const scoringTriggers = ["hand_played", "card_scored"];
   const isScoring = scoringTriggers.includes(triggerType);
@@ -97,13 +98,18 @@ export const generateAddSpectralCardReturn = (
     return {
       statement: `__PRE_RETURN_CODE__${spectralCreationCode}
                 __PRE_RETURN_CODE_END__`,
-      message: `localize('k_plus_spectral')`,
+      message: customMessage
+        ? `"${customMessage}"`
+        : `localize('k_plus_spectral')`,
       colour: "G.C.SECONDARY_SET.Spectral",
     };
   } else {
+    const messageText = customMessage
+      ? `"${customMessage}"`
+      : `localize('k_plus_spectral')`;
     return {
       statement: `func = function()${spectralCreationCode}
-                    card_eval_status_text(context.blueprint_card or card, 'extra', nil, nil, nil, {message = localize('k_plus_spectral'), colour = G.C.SECONDARY_SET.Spectral})
+                    card_eval_status_text(context.blueprint_card or card, 'extra', nil, nil, nil, {message = ${messageText}, colour = G.C.SECONDARY_SET.Spectral})
                     return true
                 end`,
       colour: "G.C.SECONDARY_SET.Spectral",

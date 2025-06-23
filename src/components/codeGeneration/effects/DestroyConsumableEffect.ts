@@ -68,6 +68,7 @@ export const generateDestroyConsumableReturn = (
 ): EffectReturn => {
   const consumableType = (effect.params?.consumable_type as string) || "random";
   const specificCard = (effect.params?.specific_card as string) || "random";
+  const customMessage = effect.customMessage;
 
   const scoringTriggers = ["hand_played", "card_scored"];
   const isScoring = scoringTriggers.includes(triggerType);
@@ -75,6 +76,9 @@ export const generateDestroyConsumableReturn = (
   let destroyCode = "";
 
   if (consumableType === "random") {
+    const messageText = customMessage
+      ? `"${customMessage}"`
+      : `"Destroyed Consumable!"`;
     destroyCode = `
             local target_cards = {}
             for i, consumable in ipairs(G.consumeables.cards) do
@@ -88,7 +92,7 @@ export const generateDestroyConsumableReturn = (
                         return true
                     end
                 }))
-                card_eval_status_text(context.blueprint_card or card, 'extra', nil, nil, nil, {message = "Destroyed Consumable!", colour = G.C.RED})
+                card_eval_status_text(context.blueprint_card or card, 'extra', nil, nil, nil, {message = ${messageText}, colour = G.C.RED})
             end`;
   } else {
     let cardKeys: string[] = [];
@@ -117,6 +121,10 @@ export const generateDestroyConsumableReturn = (
       }
     }
 
+    const messageText = customMessage
+      ? `"${customMessage}"`
+      : `"Destroyed Consumable!"`;
+
     if (specificCard === "random") {
       destroyCode = `
             local target_cards = {}
@@ -133,7 +141,7 @@ export const generateDestroyConsumableReturn = (
                         return true
                     end
                 }))
-                card_eval_status_text(context.blueprint_card or card, 'extra', nil, nil, nil, {message = "Destroyed Consumable!", colour = G.C.RED})
+                card_eval_status_text(context.blueprint_card or card, 'extra', nil, nil, nil, {message = ${messageText}, colour = G.C.RED})
             end`;
     } else {
       const targetKey = cardKeys[0];
@@ -152,7 +160,7 @@ export const generateDestroyConsumableReturn = (
                         return true
                     end
                 }))
-                card_eval_status_text(context.blueprint_card or card, 'extra', nil, nil, nil, {message = "Destroyed Consumable!", colour = G.C.RED})
+                card_eval_status_text(context.blueprint_card or card, 'extra', nil, nil, nil, {message = ${messageText}, colour = G.C.RED})
             end`;
     }
   }

@@ -1,4 +1,5 @@
 import type { EffectReturn } from "./AddChipsEffect";
+import type { Effect } from "../../ruleBuilder/types";
 
 const EVAL_STATUS_TEXT_TRIGGERS = [
   "blind_selected",
@@ -14,12 +15,19 @@ const EVAL_STATUS_TEXT_TRIGGERS = [
   "card_discarded",
 ];
 
-export const generateAddDollarsReturn = (triggerType: string): EffectReturn => {
-  // For specific triggers, use card_eval_status_text pattern
+export const generateAddDollarsReturn = (
+  triggerType: string,
+  effect?: Effect
+): EffectReturn => {
+  const customMessage = effect?.customMessage;
+
   if (EVAL_STATUS_TEXT_TRIGGERS.includes(triggerType)) {
+    const messageText = customMessage
+      ? `"${customMessage}"`
+      : `"$"..tostring(card.ability.extra.dollars)`;
     return {
       statement: `func = function()
-                    card_eval_status_text(context.blueprint_card or card, 'extra', nil, nil, nil, {message = "$"..tostring(card.ability.extra.dollars), colour = G.C.MONEY})
+                    card_eval_status_text(context.blueprint_card or card, 'extra', nil, nil, nil, {message = ${messageText}, colour = G.C.MONEY})
                     ease_dollars(card.ability.extra.dollars)
                     return true
                 end`,
@@ -28,6 +36,7 @@ export const generateAddDollarsReturn = (triggerType: string): EffectReturn => {
   } else {
     return {
       statement: `dollars = card.ability.extra.dollars`,
+      message: customMessage ? `"${customMessage}"` : undefined,
     };
   }
 };

@@ -22,6 +22,7 @@ export const generateAddPlanetCardReturn = (
 ): EffectReturn => {
   const planetCard = (effect.params?.planet_card as string) || "random";
   const isNegative = (effect.params?.is_negative as string) === "negative";
+  const customMessage = effect.customMessage;
 
   const scoringTriggers = ["hand_played", "card_scored"];
   const isScoring = scoringTriggers.includes(triggerType);
@@ -91,13 +92,18 @@ export const generateAddPlanetCardReturn = (
     return {
       statement: `__PRE_RETURN_CODE__${planetCreationCode}
                 __PRE_RETURN_CODE_END__`,
-      message: `localize('k_plus_planet')`,
+      message: customMessage
+        ? `"${customMessage}"`
+        : `localize('k_plus_planet')`,
       colour: "G.C.SECONDARY_SET.Planet",
     };
   } else {
+    const messageText = customMessage
+      ? `"${customMessage}"`
+      : `localize('k_plus_planet')`;
     return {
       statement: `func = function()${planetCreationCode}
-                    card_eval_status_text(context.blueprint_card or card, 'extra', nil, nil, nil, {message = localize('k_plus_planet'), colour = G.C.SECONDARY_SET.Planet})
+                    card_eval_status_text(context.blueprint_card or card, 'extra', nil, nil, nil, {message = ${messageText}, colour = G.C.SECONDARY_SET.Planet})
                     return true
                 end`,
       colour: "G.C.SECONDARY_SET.Planet",

@@ -69,6 +69,7 @@ export const generateCopyConsumableReturn = (
   const consumableType = (effect.params?.consumable_type as string) || "random";
   const specificCard = (effect.params?.specific_card as string) || "random";
   const isNegative = (effect.params?.is_negative as string) === "negative";
+  const customMessage = effect.customMessage;
 
   const scoringTriggers = ["hand_played", "card_scored"];
   const isScoring = scoringTriggers.includes(triggerType);
@@ -87,6 +88,9 @@ export const generateCopyConsumableReturn = (
       ? `
                         copied_card:set_edition("e_negative", true)`
       : "";
+    const messageText = customMessage
+      ? `"${customMessage}"`
+      : `"Copied Consumable!"`;
 
     copyCode = `
             local target_cards = {}
@@ -105,7 +109,7 @@ export const generateCopyConsumableReturn = (
                         return true
                     end
                 }))
-                card_eval_status_text(context.blueprint_card or card, 'extra', nil, nil, nil, {message = "Copied Consumable!", colour = G.C.GREEN})
+                card_eval_status_text(context.blueprint_card or card, 'extra', nil, nil, nil, {message = ${messageText}, colour = G.C.GREEN})
             end`;
   } else {
     let cardKeys: string[] = [];
@@ -145,6 +149,9 @@ export const generateCopyConsumableReturn = (
       ? `
                         copied_card:set_edition("e_negative", true)`
       : "";
+    const messageText = customMessage
+      ? `"${customMessage}"`
+      : `"Copied Consumable!"`;
 
     if (specificCard === "random") {
       copyCode = `
@@ -166,7 +173,7 @@ export const generateCopyConsumableReturn = (
                         return true
                     end
                 }))
-                card_eval_status_text(context.blueprint_card or card, 'extra', nil, nil, nil, {message = "Copied Consumable!", colour = G.C.GREEN})
+                card_eval_status_text(context.blueprint_card or card, 'extra', nil, nil, nil, {message = ${messageText}, colour = G.C.GREEN})
             end`;
     } else {
       const targetKey = cardKeys[0];
@@ -189,7 +196,7 @@ export const generateCopyConsumableReturn = (
                         return true
                     end
                 }))
-                card_eval_status_text(context.blueprint_card or card, 'extra', nil, nil, nil, {message = "Copied Consumable!", colour = G.C.GREEN})
+                card_eval_status_text(context.blueprint_card or card, 'extra', nil, nil, nil, {message = ${messageText}, colour = G.C.GREEN})
             end`;
     }
   }

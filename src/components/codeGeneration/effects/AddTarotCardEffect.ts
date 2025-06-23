@@ -32,6 +32,7 @@ export const generateAddTarotCardReturn = (
 ): EffectReturn => {
   const tarotCard = (effect.params?.tarot_card as string) || "random";
   const isNegative = (effect.params?.is_negative as string) === "negative";
+  const customMessage = effect.customMessage;
 
   const scoringTriggers = ["hand_played", "card_scored"];
   const isScoring = scoringTriggers.includes(triggerType);
@@ -101,13 +102,18 @@ export const generateAddTarotCardReturn = (
     return {
       statement: `__PRE_RETURN_CODE__${tarotCreationCode}
                 __PRE_RETURN_CODE_END__`,
-      message: `localize('k_plus_tarot')`,
+      message: customMessage
+        ? `"${customMessage}"`
+        : `localize('k_plus_tarot')`,
       colour: "G.C.PURPLE",
     };
   } else {
+    const messageText = customMessage
+      ? `"${customMessage}"`
+      : `localize('k_plus_tarot')`;
     return {
       statement: `func = function()${tarotCreationCode}
-                    card_eval_status_text(context.blueprint_card or card, 'extra', nil, nil, nil, {message = localize('k_plus_tarot'), colour = G.C.PURPLE})
+                    card_eval_status_text(context.blueprint_card or card, 'extra', nil, nil, nil, {message = ${messageText}, colour = G.C.PURPLE})
                     return true
                 end`,
       colour: "G.C.PURPLE",

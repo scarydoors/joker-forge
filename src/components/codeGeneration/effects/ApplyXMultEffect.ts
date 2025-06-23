@@ -7,6 +7,7 @@ export const generateApplyXMultReturn = (
 ): EffectReturn => {
   const valueSource = effect?.params?.value_source || "fixed";
   const variableName = effect?.params?.variable_name || "var1";
+  const customMessage = effect?.customMessage;
 
   let valueReference = "";
   if (valueSource === "variable") {
@@ -16,15 +17,17 @@ export const generateApplyXMultReturn = (
   }
 
   if (triggerType === "card_scored" || triggerType === "card_discarded") {
-    // For card_scored and card_discarded, SMODS adds message automatically
     return {
       statement: `Xmult = ${valueReference}`,
+      message: customMessage ? `"${customMessage}"` : undefined,
       colour: "G.C.XMULT",
     };
   } else {
     return {
       statement: `Xmult_mod = ${valueReference}`,
-      message: `localize{type='variable',key='a_xmult',vars={${valueReference}}}`,
+      message: customMessage
+        ? `"${customMessage}"`
+        : `localize{type='variable',key='a_xmult',vars={${valueReference}}}`,
       colour: "G.C.XMULT",
     };
   }

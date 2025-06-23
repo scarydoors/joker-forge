@@ -78,11 +78,11 @@ export function generateEffectReturnStatement(
         case "apply_x_mult":
           return generateApplyXMultReturn(triggerType, effect);
         case "add_dollars":
-          return generateAddDollarsReturn(triggerType);
+          return generateAddDollarsReturn(triggerType, effect);
         case "retrigger_cards":
-          return generateRetriggerReturn();
+          return generateRetriggerReturn(effect);
         case "destroy_self":
-          return generateDestroySelfReturn();
+          return generateDestroySelfReturn(effect);
         case "edit_hand":
           return generateEditHandReturn(effect);
         case "edit_discard":
@@ -90,7 +90,7 @@ export function generateEffectReturnStatement(
         case "edit_hand_size":
           return generateEditHandSizeReturn(effect);
         case "level_up_hand":
-          return generateLevelUpHandReturn(triggerType);
+          return generateLevelUpHandReturn(triggerType, effect);
         case "add_card_to_deck":
           return generateAddCardToDeckReturn(effect, triggerType);
         case "copy_triggered_card":
@@ -98,7 +98,7 @@ export function generateEffectReturnStatement(
         case "copy_played_card":
           return generateCopyCardToDeckReturn(effect, triggerType);
         case "delete_triggered_card":
-          return generateDeleteCardReturn();
+          return generateDeleteCardReturn(effect);
         case "edit_triggered_card":
           return generateEditCardReturn(effect, triggerType);
         case "modify_internal_variable":
@@ -205,7 +205,6 @@ export function generateEffectReturnStatement(
       }
     }
 
-    // Count how many effects were actually added to extraChain
     let extraCount = 0;
     for (let i = 1; i < processedEffects.length; i++) {
       const effect = processedEffects[i];

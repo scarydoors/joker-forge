@@ -8,8 +8,8 @@ export const generateModifyInternalVariableReturn = (
   const variableName = (effect.params?.variable_name as string) || "var1";
   const operation = (effect.params?.operation as string) || "increment";
   const value = (effect.params?.value as number) || 1;
+  const customMessage = effect.customMessage;
 
-  // Define scoring triggers that need pre-return code
   const scoringTriggers = ["hand_played", "card_scored"];
   const isScoring = scoringTriggers.includes(triggerType);
 
@@ -20,41 +20,50 @@ export const generateModifyInternalVariableReturn = (
   switch (operation) {
     case "set":
       operationCode = `card.ability.extra.${variableName} = ${value}`;
-      messageText = `"Set to ${value}!"`;
+      messageText = customMessage ? `"${customMessage}"` : `"Set to ${value}!"`;
       messageColor = "G.C.BLUE";
       break;
     case "increment":
       operationCode = `card.ability.extra.${variableName} = (card.ability.extra.${variableName} or 0) + ${value}`;
-      messageText = `"+"..tostring(${value})`;
+      messageText = customMessage
+        ? `"${customMessage}"`
+        : `"+"..tostring(${value})`;
       messageColor = "G.C.GREEN";
       break;
     case "decrement":
       operationCode = `card.ability.extra.${variableName} = math.max(0, (card.ability.extra.${variableName} or 0) - ${value})`;
-      messageText = `"-"..tostring(${value})`;
+      messageText = customMessage
+        ? `"${customMessage}"`
+        : `"-"..tostring(${value})`;
       messageColor = "G.C.RED";
       break;
     case "multiply":
       operationCode = `card.ability.extra.${variableName} = (card.ability.extra.${variableName} or 0) * ${value}`;
-      messageText = `"x"..tostring(${value})`;
+      messageText = customMessage
+        ? `"${customMessage}"`
+        : `"x"..tostring(${value})`;
       messageColor = "G.C.MULT";
       break;
     case "divide":
       operationCode = `card.ability.extra.${variableName} = (card.ability.extra.${variableName} or 0) / ${value}`;
-      messageText = `"÷"..tostring(${value})`;
+      messageText = customMessage
+        ? `"${customMessage}"`
+        : `"÷"..tostring(${value})`;
       messageColor = "G.C.MULT";
       break;
     case "reset":
       operationCode = `card.ability.extra.${variableName} = 0`;
-      messageText = `"Reset!"`;
+      messageText = customMessage ? `"${customMessage}"` : `"Reset!"`;
       messageColor = "G.C.WHITE";
       break;
     default:
       operationCode = `card.ability.extra.${variableName} = (card.ability.extra.${variableName} or 0) + ${value}`;
-      messageText = `"+"..tostring(${value})`;
+      messageText = customMessage
+        ? `"${customMessage}"`
+        : `"+"..tostring(${value})`;
       messageColor = "G.C.GREEN";
   }
 
-  // Use pre-return code for scoring contexts to ensure variables are updated before other effects
   if (isScoring) {
     return {
       statement: `__PRE_RETURN_CODE__

@@ -7,6 +7,7 @@ export const generateAddMultReturn = (
 ): EffectReturn => {
   const valueSource = effect?.params?.value_source || "fixed";
   const variableName = effect?.params?.variable_name || "var1";
+  const customMessage = effect?.customMessage;
 
   let valueReference = "";
   if (valueSource === "variable") {
@@ -20,15 +21,17 @@ export const generateAddMultReturn = (
     triggerType === "card_discarded" ||
     triggerType === "card_held_in_hand"
   ) {
-    // For card_scored, SMODS adds message automatically
     return {
       statement: `mult = ${valueReference}`,
+      message: customMessage ? `"${customMessage}"` : undefined,
       colour: "G.C.MULT",
     };
   } else {
     return {
       statement: `mult_mod = ${valueReference}`,
-      message: `localize{type='variable',key='a_mult',vars={${valueReference}}}`,
+      message: customMessage
+        ? `"${customMessage}"`
+        : `localize{type='variable',key='a_mult',vars={${valueReference}}}`,
       colour: "G.C.MULT",
     };
   }

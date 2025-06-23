@@ -4,36 +4,53 @@ import type { PassiveEffectResult } from "../PassiveEffects";
 
 export const generateEditDiscardReturn = (effect: Effect): EffectReturn => {
   const operation = effect.params?.operation || "add";
+  const customMessage = effect.customMessage;
   let statement = "";
 
   switch (operation) {
-    case "add":
+    case "add": {
+      const addMessage = customMessage
+        ? `"${customMessage}"`
+        : `"+"..tostring(card.ability.extra.discards).." Discard"`;
       statement = `func = function()
-                card_eval_status_text(context.blueprint_card or card, 'extra', nil, nil, nil, {message = "+"..tostring(card.ability.extra.discards).." Discard", colour = G.C.ORANGE})
+                card_eval_status_text(context.blueprint_card or card, 'extra', nil, nil, nil, {message = ${addMessage}, colour = G.C.ORANGE})
                 G.GAME.current_round.discards_left = G.GAME.current_round.discards_left + card.ability.extra.discards
                 return true
             end`;
       break;
-    case "subtract":
+    }
+    case "subtract": {
+      const subtractMessage = customMessage
+        ? `"${customMessage}"`
+        : `"-"..tostring(card.ability.extra.discards).." Discard"`;
       statement = `func = function()
-                card_eval_status_text(context.blueprint_card or card, 'extra', nil, nil, nil, {message = "-"..tostring(card.ability.extra.discards).." Discard", colour = G.C.RED})
+                card_eval_status_text(context.blueprint_card or card, 'extra', nil, nil, nil, {message = ${subtractMessage}, colour = G.C.RED})
                 G.GAME.current_round.discards_left = math.max(0, G.GAME.current_round.discards_left - card.ability.extra.discards)
                 return true
             end`;
       break;
-    case "set":
+    }
+    case "set": {
+      const setMessage = customMessage
+        ? `"${customMessage}"`
+        : `"Set to "..tostring(card.ability.extra.discards).." Discards"`;
       statement = `func = function()
-                card_eval_status_text(context.blueprint_card or card, 'extra', nil, nil, nil, {message = "Set to "..tostring(card.ability.extra.discards).." Discards", colour = G.C.BLUE})
+                card_eval_status_text(context.blueprint_card or card, 'extra', nil, nil, nil, {message = ${setMessage}, colour = G.C.BLUE})
                 G.GAME.current_round.discards_left = card.ability.extra.discards
                 return true
             end`;
       break;
-    default:
+    }
+    default: {
+      const defaultMessage = customMessage
+        ? `"${customMessage}"`
+        : `"+"..tostring(card.ability.extra.discards).." Discard"`;
       statement = `func = function()
-                card_eval_status_text(context.blueprint_card or card, 'extra', nil, nil, nil, {message = "+"..tostring(card.ability.extra.discards).." Discard", colour = G.C.ORANGE})
+                card_eval_status_text(context.blueprint_card or card, 'extra', nil, nil, nil, {message = ${defaultMessage}, colour = G.C.ORANGE})
                 G.GAME.current_round.discards_left = G.GAME.current_round.discards_left + card.ability.extra.discards
                 return true
             end`;
+    }
   }
 
   return {

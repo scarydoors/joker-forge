@@ -11,6 +11,8 @@ export const generateAddCardToDeckReturn = (
   const seal = (effect.params?.seal as string) || "none";
   const edition = (effect.params?.edition as string) || "none";
 
+  const customMessage = effect.customMessage;
+
   const scoringTriggers = ["hand_played", "card_scored"];
   const heldInHandTriggers = ["card_held_in_hand"];
 
@@ -115,7 +117,7 @@ export const generateAddCardToDeckReturn = (
                 draw_card(G.play, G.deck, 90, 'up')
                 SMODS.calculate_context({ playing_card_added = true, cards = { new_card } })
             end`,
-      message: `"Added Card!"`,
+      message: customMessage ? `"${customMessage}"` : "Added Card!",
       colour: "G.C.GREEN",
     };
   }

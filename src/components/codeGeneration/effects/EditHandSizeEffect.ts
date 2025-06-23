@@ -4,39 +4,56 @@ import type { PassiveEffectResult } from "../PassiveEffects";
 
 export const generateEditHandSizeReturn = (effect: Effect): EffectReturn => {
   const operation = effect.params?.operation || "add";
+  const customMessage = effect.customMessage;
   let statement = "";
 
   switch (operation) {
-    case "add":
+    case "add": {
+      const addMessage = customMessage
+        ? `"${customMessage}"`
+        : `"+"..tostring(card.ability.extra.hand_size_change).." Hand Size"`;
       statement = `func = function()
-                card_eval_status_text(context.blueprint_card or card, 'extra', nil, nil, nil, {message = "+"..tostring(card.ability.extra.hand_size_change).." Hand Size", colour = G.C.BLUE})
+                card_eval_status_text(context.blueprint_card or card, 'extra', nil, nil, nil, {message = ${addMessage}, colour = G.C.BLUE})
                 G.hand:change_size(card.ability.extra.hand_size_change)
                 return true
             end`;
       break;
-    case "subtract":
+    }
+    case "subtract": {
+      const subtractMessage = customMessage
+        ? `"${customMessage}"`
+        : `"-"..tostring(card.ability.extra.hand_size_change).." Hand Size"`;
       statement = `func = function()
-                card_eval_status_text(context.blueprint_card or card, 'extra', nil, nil, nil, {message = "-"..tostring(card.ability.extra.hand_size_change).." Hand Size", colour = G.C.RED})
+                card_eval_status_text(context.blueprint_card or card, 'extra', nil, nil, nil, {message = ${subtractMessage}, colour = G.C.RED})
                 G.hand:change_size(-card.ability.extra.hand_size_change)
                 return true
             end`;
       break;
-    case "set":
+    }
+    case "set": {
+      const setMessage = customMessage
+        ? `"${customMessage}"`
+        : `"Hand Size set to "..tostring(target_hand_size)`;
       statement = `func = function()
                 local current_hand_size = G.hand.config.card_limit
                 local target_hand_size = card.ability.extra.hand_size_change
                 local difference = target_hand_size - current_hand_size
-                card_eval_status_text(context.blueprint_card or card, 'extra', nil, nil, nil, {message = "Hand Size set to "..tostring(target_hand_size), colour = G.C.BLUE})
+                card_eval_status_text(context.blueprint_card or card, 'extra', nil, nil, nil, {message = ${setMessage}, colour = G.C.BLUE})
                 G.hand:change_size(difference)
                 return true
             end`;
       break;
-    default:
+    }
+    default: {
+      const defaultMessage = customMessage
+        ? `"${customMessage}"`
+        : `"+"..tostring(card.ability.extra.hand_size_change).." Hand Size"`;
       statement = `func = function()
-                card_eval_status_text(context.blueprint_card or card, 'extra', nil, nil, nil, {message = "+"..tostring(card.ability.extra.hand_size_change).." Hand Size", colour = G.C.BLUE})
+                card_eval_status_text(context.blueprint_card or card, 'extra', nil, nil, nil, {message = ${defaultMessage}, colour = G.C.BLUE})
                 G.hand:change_size(card.ability.extra.hand_size_change)
                 return true
             end`;
+    }
   }
 
   return {
