@@ -395,6 +395,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
       "shop_exited",
       "card_discarded",
       "hand_discarded",
+      "round_end",
     ],
     params: [
       {
@@ -430,6 +431,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
       "shop_exited",
       "card_discarded",
       "hand_discarded",
+      "round_end",
     ],
     params: [
       {
@@ -465,6 +467,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
       "shop_exited",
       "card_discarded",
       "hand_discarded",
+      "round_end",
     ],
     params: [
       {
@@ -500,6 +503,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
       "shop_exited",
       "card_discarded",
       "hand_discarded",
+      "round_end",
     ],
     params: [
       {
@@ -535,6 +539,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
       "shop_exited",
       "card_discarded",
       "hand_discarded",
+      "round_end",
     ],
     params: [
       {
@@ -575,6 +580,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
       "shop_exited",
       "card_discarded",
       "hand_discarded",
+      "round_end",
     ],
     params: [
       {
@@ -607,6 +613,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
       "shop_exited",
       "card_discarded",
       "hand_discarded",
+      "round_end",
     ],
     params: [
       {
@@ -657,6 +664,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
       "shop_exited",
       "card_discarded",
       "hand_discarded",
+      "round_end",
     ],
     params: [
       {
@@ -693,6 +701,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
       "shop_exited",
       "card_discarded",
       "hand_discarded",
+      "round_end",
     ],
     params: [
       {
@@ -739,6 +748,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
       "shop_exited",
       "card_discarded",
       "hand_discarded",
+      "round_end",
     ],
     params: [
       {

@@ -27,6 +27,12 @@ export const TRIGGERS: TriggerDefinition[] = [
       "Triggers whenever a card is discarded. Use conditions to check properties of the discarded card.",
   },
   {
+    id: "round_end",
+    label: "At Round End",
+    description:
+      "Triggers at the end of each round, after all hands have been played and the blind is completed. Perfect for gaining money, upgrading the joker, or resetting states.",
+  },
+  {
     id: "blind_selected",
     label: "When a Blind is Selected",
     description:

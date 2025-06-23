@@ -88,6 +88,10 @@ export const generateCalculateFunction = (
     } else if (triggerType === "hand_discarded") {
       contextCheck = "context.pre_discard and not context.blueprint";
       description = "-- When hand is discarded";
+    } else if (triggerType === "round_end") {
+      contextCheck =
+        "context.end_of_round and context.game_over == false and context.main_eval and not context.blueprint";
+      description = "-- At the end of the round";
     } else {
       contextCheck = "context.cardarea == G.jokers and context.joker_main";
       description = "-- Main scoring time for jokers";
