@@ -104,6 +104,9 @@ The plan here is to implement enough triggers, conditions, and effects, so as th
 - [x] **Destroy Consumable** - Destroy a random or specific spectral/tarot/planet card
 - [x] **Copy Consumable** - Copy a random or specific spectral/tarot/planet card
 - [x] **Edit Hand Size** - Give/take/set hand size (Turtle Bean)
+- [x] **Create Joker** - Create a different joker (Random, By ID)
+- [x] **Copy Joker** - Make a copy of another joker (Random, By ID, By Index)
+- [x] **Destroy Joker** - Destroy another joker (Random, By ID, By Index)
 
 #### Not Implemented Yet
 
@@ -114,8 +117,9 @@ The plan here is to implement enough triggers, conditions, and effects, so as th
 - [ ] **Beat Current Blind** - Completes the current blind (Mr. Bones)
 - [ ] **Modify Sell Value** - Change sell value of this or other jokers (Egg, Gift Card)
 - [ ] **Copy Ability of Adjacent Joker** - Blueprint/Brainstorm logic (difficult)
-- [ ] **Create Joker** - Create a different joker (can probably be implemented as ID)
 - [ ] **Permanent Card Modifications** - Add permanent bonuses to cards (Hiker)
+- [ ] **Required Suit Changes** - For jokers that alternate between their required suit (Ancient Joker)
+- [ ] **Required Rank Changes** - For jokers that alternate between their required rank
 
 ---
 
@@ -159,8 +163,6 @@ The plan here is to implement enough triggers, conditions, and effects, so as th
 
 - [ ] **Dynamic Code Display** - Live preview of generated Lua code in rule builder
 - [ ] **Undo/Redo System** - History management for rule editing
-- [ ] **Rule Templates** - Pre-made rule templates for common effects
-- [ ] **Mobile Responsiveness** - Touch-friendly interface for mobile devices
 - [ ] **Help System** - Integrated tooltips and documentation
 - [ ] **Much Better Variable Management** - This will be annoying and will come with an overhaul
 
