@@ -254,7 +254,8 @@ SMODS.Atlas({
           index,
           "CustomJokers",
           ruleConditionData,
-          passiveEffects
+          passiveEffects,
+          jokers
         ) + "\n\n";
     }
   );
@@ -268,11 +269,18 @@ const generateJokerCode = (
   index: number,
   atlasKey: string,
   ruleConditionData: Record<string, RuleConditionData>,
-  passiveEffects: PassiveEffectResult[]
+  passiveEffects: PassiveEffectResult[],
+  jokers: JokerData[]
 ): string => {
   const rules = Object.values(ruleConditionData).map((data) => data.rule);
 
-  let jokerCode = generateJokerBaseCode(joker, index, atlasKey, passiveEffects);
+  let jokerCode = generateJokerBaseCode(
+    joker,
+    index,
+    atlasKey,
+    passiveEffects,
+    jokers
+  );
   const locVarsCode = generateBasicLocVarsFunction(joker, passiveEffects);
   const calculateCode = generateCalculateFunction(rules, ruleConditionData);
 

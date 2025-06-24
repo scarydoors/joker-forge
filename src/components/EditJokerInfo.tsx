@@ -36,6 +36,7 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
     "visual" | "properties" | "description"
   >("visual");
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const overlayFileInputRef = useRef<HTMLInputElement>(null);
   const modalRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -70,6 +71,30 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
   }, [isOpen]);
 
   if (!isOpen) return null;
+
+  const handleOverlayImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null;
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const img = new Image();
+        img.onload = () => {
+          if (img.width === 142 && img.height === 190) {
+            setFormData({
+              ...formData,
+              overlayImagePreview: reader.result as string,
+            });
+          } else {
+            alert(
+              `Overlay image dimensions must be 142x190 pixels. Your image is ${img.width}x${img.height}.`
+            );
+          }
+        };
+        img.src = reader.result as string;
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const handleInputChange = (field: string, value: string) => {
     setFormData({
@@ -319,14 +344,24 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
                 <div className="space-y-6">
                   <div className="flex gap-6">
                     <div className="flex-shrink-0">
-                      <div className="aspect-[142/190] w-40 bg-black-darker border-2 border-black-lighter rounded-lg overflow-hidden">
+                      <div className="aspect-[142/190] w-40 bg-black-darker border-2 border-black-lighter rounded-lg overflow-hidden relative">
                         {formData.imagePreview ? (
-                          <img
-                            src={formData.imagePreview}
-                            alt={formData.name}
-                            className="w-full h-full object-cover"
-                            draggable="false"
-                          />
+                          <>
+                            <img
+                              src={formData.imagePreview}
+                              alt={formData.name}
+                              className="w-full h-full object-cover"
+                              draggable="false"
+                            />
+                            {formData.overlayImagePreview && (
+                              <img
+                                src={formData.overlayImagePreview}
+                                alt={`${formData.name} overlay`}
+                                className="absolute inset-0 w-full h-full object-cover"
+                                draggable="false"
+                              />
+                            )}
+                          </>
                         ) : (
                           <div className="w-full h-full flex items-center justify-center text-white-darker">
                             <PhotoIcon className="h-10 w-10" />
@@ -340,19 +375,55 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
                         className="hidden"
                         ref={fileInputRef}
                       />
-                      <Button
-                        onClick={() => fileInputRef.current?.click()}
-                        variant="secondary"
-                        className="mt-3 w-full cursor-pointer"
-                        size="sm"
-                        icon={<PhotoIcon className="h-4 w-4" />}
-                      >
-                        {formData.imagePreview
-                          ? "Change Image"
-                          : "Upload Image"}
-                      </Button>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleOverlayImageUpload}
+                        className="hidden"
+                        ref={overlayFileInputRef}
+                      />
+                      <div className="space-y-2 mt-3">
+                        <Button
+                          onClick={() => fileInputRef.current?.click()}
+                          variant="secondary"
+                          className="w-full cursor-pointer"
+                          size="sm"
+                          icon={<PhotoIcon className="h-4 w-4" />}
+                        >
+                          {formData.imagePreview
+                            ? "Change Main Image"
+                            : "Upload Main Image"}
+                        </Button>
+                        <Button
+                          onClick={() => overlayFileInputRef.current?.click()}
+                          variant={
+                            formData.overlayImagePreview
+                              ? "secondary"
+                              : "secondary"
+                          }
+                          className="w-full cursor-pointer"
+                          size="sm"
+                          icon={<SparklesIcon className="h-4 w-4" />}
+                        >
+                          {formData.overlayImagePreview
+                            ? "Change Overlay"
+                            : "Add Overlay"}
+                        </Button>
+                        {formData.overlayImagePreview && (
+                          <Button
+                            onClick={() =>
+                              handleInputChange("overlayImagePreview", "")
+                            }
+                            variant="danger"
+                            className="w-full cursor-pointer"
+                            size="sm"
+                          >
+                            Remove Overlay
+                          </Button>
+                        )}
+                      </div>
                       <p className="text-xs text-white-darker mt-2 text-center">
-                        Required: 142×190px
+                        Required: 142×190px each
                       </p>
                     </div>
 
@@ -586,14 +657,24 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
             </h3>
 
             <div className="bg-black border-2 border-black-lighter rounded-lg p-4 shadow-lg">
-              <div className="aspect-[142/190] w-full max-w-[200px] mx-auto bg-black-darker border border-black-lighter rounded-lg overflow-hidden mb-4">
+              <div className="aspect-[142/190] w-full max-w-[200px] mx-auto bg-black-darker border border-black-lighter rounded-lg overflow-hidden mb-4 relative">
                 {formData.imagePreview ? (
-                  <img
-                    src={formData.imagePreview}
-                    alt={formData.name}
-                    className="w-full h-full object-cover"
-                    draggable="false"
-                  />
+                  <>
+                    <img
+                      src={formData.imagePreview}
+                      alt={formData.name}
+                      className="w-full h-full object-cover"
+                      draggable="false"
+                    />
+                    {formData.overlayImagePreview && (
+                      <img
+                        src={formData.overlayImagePreview}
+                        alt={`${formData.name} overlay`}
+                        className="absolute inset-0 w-full h-full object-cover"
+                        draggable="false"
+                      />
+                    )}
+                  </>
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-white-darker">
                     <PhotoIcon className="h-16 w-16" />

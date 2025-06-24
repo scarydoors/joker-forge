@@ -17,15 +17,27 @@ export const generateJokerBaseCode = (
   joker: JokerData,
   index: number,
   atlasKey: string,
-  passiveEffects: PassiveEffectResult[] = []
+  passiveEffects: PassiveEffectResult[] = [],
+  allJokers?: JokerData[]
 ): string => {
-  const x = index % 10;
-  const y = Math.floor(index / 10);
+  // Calculate the atlas position by counting slots used by previous jokers
+  let totalSlotsUsed = 0;
+  if (allJokers) {
+    for (let i = 0; i < index; i++) {
+      totalSlotsUsed += allJokers[i].overlayImagePreview ? 2 : 1;
+    }
+  } else {
+    // Fallback to simple calculation if allJokers not provided
+    totalSlotsUsed = index;
+  }
+
+  const x = totalSlotsUsed % 10;
+  const y = Math.floor(totalSlotsUsed / 10);
 
   globalEffectVariableMapping = {};
   const effectsConfig = extractEffectsConfig(joker, passiveEffects);
 
-  return `SMODS.Joker{ --${joker.name}
+  let jokerCode = `SMODS.Joker{ --${joker.name}
     name = "${joker.name}",
     key = "${slugify(joker.name)}",
     config = {
@@ -52,6 +64,19 @@ export const generateJokerBaseCode = (
     unlocked = ${joker.unlocked !== undefined ? joker.unlocked : true},
     discovered = ${joker.discovered !== undefined ? joker.discovered : true},
     atlas = '${atlasKey}'`;
+
+  // If this joker has an overlay, add soul_pos (directly to the right)
+  if (joker.overlayImagePreview) {
+    const soulX = (totalSlotsUsed + 1) % 10;
+    const soulY = Math.floor((totalSlotsUsed + 1) / 10);
+    jokerCode += `,
+    soul_pos = {
+        x = ${soulX},
+        y = ${soulY}
+    }`;
+  }
+
+  return jokerCode;
 };
 
 export const getEffectVariableName = (

@@ -1,19 +1,14 @@
 import JSZip from "jszip";
 import { JokerData } from "../JokerCard";
 
-/**
- * Process uploaded joker images for the mod
- * Creates properly sized images for the atlas
- * @param images - Array of image data URLs
- * @param scale - Scale factor (1 for 1x, 2 for 2x)
- * @returns - Promise that resolves with processed image for the atlas
- */
 export const processJokerImages = async (
-  images: string[],
+  jokers: JokerData[],
   scale: number = 1
-): Promise<string> => {
+): Promise<{
+  atlasDataUrl: string;
+  soulPositions: Record<number, { x: number; y: number }>;
+}> => {
   try {
-    // Create a canvas for the atlas
     const canvas = document.createElement("canvas");
     const ctx = canvas.getContext("2d");
 
@@ -21,80 +16,128 @@ export const processJokerImages = async (
       throw new Error("Failed to get canvas context");
     }
 
-    // Calculate the atlas size based on number of jokers
-    // Each joker is 71x95 pixels in the 1x atlas
     const jokersPerRow = 10;
-    const rows = Math.ceil(images.length / jokersPerRow);
+
+    // Calculate total positions needed: each joker with overlay needs 2 slots, others need 1
+    const totalPositions = jokers.reduce((total, joker) => {
+      return total + (joker.overlayImagePreview ? 2 : 1);
+    }, 0);
+
+    const rows = Math.ceil(totalPositions / jokersPerRow);
 
     canvas.width = jokersPerRow * 71 * scale;
     canvas.height = rows * 95 * scale;
 
-    // Fill with transparent background
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Load and draw each image
-    const imagePromises = images.map((src, index) => {
-      return new Promise<void>((resolve) => {
-        // Use default placeholder if no image provided
-        const imageSrc = src || "/images/placeholder-joker.png";
+    const soulPositions: Record<number, { x: number; y: number }> = {};
+    let currentPosition = 0;
 
-        const img = new Image();
-        img.onload = () => {
-          // Calculate position in the atlas
-          const col = index % jokersPerRow;
-          const row = Math.floor(index / jokersPerRow);
-          const x = col * 71 * scale;
-          const y = row * 95 * scale;
+    // Process each joker in order, placing main image followed by overlay if it exists
+    const imagePromises = jokers.map((joker, index) => {
+      const promises: Promise<void>[] = [];
 
-          // Draw at appropriate size based on scale
-          ctx.drawImage(
-            img,
-            0,
-            0,
-            img.width,
-            img.height, // Source rectangle
-            x,
-            y,
-            71 * scale,
-            95 * scale // Destination rectangle
-          );
+      // Draw main image
+      promises.push(
+        new Promise<void>((resolve) => {
+          const imageSrc =
+            joker.imagePreview || "/images/placeholder-joker.png";
+          const img = new Image();
+          img.onload = () => {
+            const col = currentPosition % jokersPerRow;
+            const row = Math.floor(currentPosition / jokersPerRow);
+            const x = col * 71 * scale;
+            const y = row * 95 * scale;
 
-          resolve();
-        };
+            ctx.drawImage(
+              img,
+              0,
+              0,
+              img.width,
+              img.height,
+              x,
+              y,
+              71 * scale,
+              95 * scale
+            );
 
-        img.onerror = () => {
-          console.error(
-            `Error loading image at index ${index}, using placeholder`
-          );
-          // Try loading placeholder on error
-          if (imageSrc !== "/images/placeholder-joker.png") {
-            img.src = "/images/placeholder-joker.png";
-          } else {
-            // If placeholder also fails, just resolve with empty spot
+            currentPosition++;
             resolve();
-          }
-        };
+          };
 
-        img.src = imageSrc;
-      });
+          img.onerror = () => {
+            console.error(
+              `Error loading main image at index ${index}, using placeholder`
+            );
+            if (imageSrc !== "/images/placeholder-joker.png") {
+              img.src = "/images/placeholder-joker.png";
+            } else {
+              currentPosition++;
+              resolve();
+            }
+          };
+
+          img.src = imageSrc;
+        })
+      );
+
+      // Draw overlay image if it exists (directly to the right of main image)
+      if (joker.overlayImagePreview) {
+        promises.push(
+          new Promise<void>((resolve) => {
+            const img = new Image();
+            img.onload = () => {
+              const col = currentPosition % jokersPerRow;
+              const row = Math.floor(currentPosition / jokersPerRow);
+              const x = col * 71 * scale;
+              const y = row * 95 * scale;
+
+              // Record the soul position for this joker
+              soulPositions[index] = { x: col, y: row };
+
+              ctx.drawImage(
+                img,
+                0,
+                0,
+                img.width,
+                img.height,
+                x,
+                y,
+                71 * scale,
+                95 * scale
+              );
+
+              currentPosition++;
+              resolve();
+            };
+
+            img.onerror = () => {
+              console.error(`Error loading overlay image at index ${index}`);
+              currentPosition++;
+              resolve();
+            };
+
+            img.src =
+              joker.overlayImagePreview || "/images/placeholder-joker.png";
+          })
+        );
+      }
+
+      return Promise.all(promises);
     });
 
-    // Wait for all images to be drawn
     await Promise.all(imagePromises);
 
-    // Convert canvas to data URL
-    return canvas.toDataURL("image/png");
+    return {
+      atlasDataUrl: canvas.toDataURL("image/png"),
+      soulPositions,
+    };
   } catch (error) {
     console.error("Error processing joker images:", error);
     throw error;
   }
 };
 
-/**
- * Convert a data URL to a Blob for file saving
- * @param dataUrl - Data URL string
- * @returns - Blob object
- */
 export const dataURLToBlob = (dataUrl: string): Blob => {
   const arr = dataUrl.split(",");
   const mime = arr[0].match(/:(.*?);/)?.[1] || "image/png";
@@ -109,34 +152,24 @@ export const dataURLToBlob = (dataUrl: string): Blob => {
   return new Blob([u8arr], { type: mime });
 };
 
-/**
- * Add the atlas image to a JSZip archive with proper structure
- * @param zip - JSZip instance
- * @param jokers - Array of joker objects with imagePreview properties
- * @returns - Promise that resolves when the atlas is added
- */
 export const addAtlasToZip = async (
   zip: JSZip,
   jokers: JokerData[]
-): Promise<void> => {
+): Promise<Record<number, { x: number; y: number }>> => {
   try {
-    // Get preview images
-    const images = jokers.map((joker) => joker.imagePreview);
-
-    // Create the directory structure
     const assetsFolder = zip.folder("assets");
     const assets1xFolder = assetsFolder!.folder("1x");
     const assets2xFolder = assetsFolder!.folder("2x");
 
-    // Process images and create 1x atlas
-    const atlas1xDataUrl = await processJokerImages(images, 1);
-    const atlas1xBlob = dataURLToBlob(atlas1xDataUrl);
+    const atlas1xResult = await processJokerImages(jokers, 1);
+    const atlas1xBlob = dataURLToBlob(atlas1xResult.atlasDataUrl);
     assets1xFolder!.file("CustomJokers.png", atlas1xBlob);
 
-    // Process images and create 2x atlas
-    const atlas2xDataUrl = await processJokerImages(images, 2);
-    const atlas2xBlob = dataURLToBlob(atlas2xDataUrl);
+    const atlas2xResult = await processJokerImages(jokers, 2);
+    const atlas2xBlob = dataURLToBlob(atlas2xResult.atlasDataUrl);
     assets2xFolder!.file("CustomJokers.png", atlas2xBlob);
+
+    return atlas1xResult.soulPositions;
   } catch (error) {
     console.error("Error adding atlas to zip:", error);
     throw error;

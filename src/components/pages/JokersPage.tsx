@@ -115,6 +115,7 @@ const JokersPage: React.FC<JokersPageProps> = ({
       name: "New Joker",
       description: "A {C:blue}custom{} joker with {C:red}unique{} effects.",
       imagePreview: "",
+      overlayImagePreview: "",
       rarity: 1,
       cost: 4,
       blueprint_compat: true,

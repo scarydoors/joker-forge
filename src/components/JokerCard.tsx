@@ -25,6 +25,7 @@ export interface JokerData {
   name: string;
   description: string;
   imagePreview: string;
+  overlayImagePreview?: string;
   rarity: number;
   cost?: number;
   blueprint_compat?: boolean;
@@ -34,7 +35,6 @@ export interface JokerData {
   rules?: Rule[];
   userVariables?: UserVariable[];
 }
-
 interface JokerCardProps {
   joker: JokerData;
   onEditInfo: () => void;
@@ -234,21 +234,33 @@ const JokerCard: React.FC<JokerCardProps> = ({
               </div>
             </Tooltip>
           )}
-          {joker.imagePreview ? (
-            <img
-              src={joker.imagePreview}
-              alt={joker.name}
-              className="w-full h-full object-contain"
-              draggable="false"
-            />
-          ) : (
-            <img
-              src="/images/placeholder-joker.png"
-              alt="Default Joker"
-              className="w-full h-full object-contain"
-              draggable="false"
-            />
-          )}
+          <div className="relative">
+            {joker.imagePreview ? (
+              <>
+                <img
+                  src={joker.imagePreview}
+                  alt={joker.name}
+                  className="w-full h-full object-contain"
+                  draggable="false"
+                />
+                {joker.overlayImagePreview && (
+                  <img
+                    src={joker.overlayImagePreview}
+                    alt={`${joker.name} overlay`}
+                    className="absolute inset-0 w-full h-full object-contain"
+                    draggable="false"
+                  />
+                )}
+              </>
+            ) : (
+              <img
+                src="/images/placeholder-joker.png"
+                alt="Default Joker"
+                className="w-full h-full object-contain"
+                draggable="false"
+              />
+            )}
+          </div>
         </div>
 
         <div className="relative z-30">
