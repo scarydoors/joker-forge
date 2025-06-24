@@ -1,4 +1,11 @@
 import { useState } from "react";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  useLocation,
+  useNavigate,
+} from "react-router-dom";
 import Sidebar from "./components/Sidebar";
 import OverviewPage from "./components/pages/OverviewPage";
 import JokersPage from "./components/pages/JokersPage";
@@ -14,6 +21,7 @@ import DocsPage from "./components/pages/DocsPage";
 import VanillaRemadePage from "./components/pages/VanillaRemadePage";
 import ExtraCreditPage from "./components/pages/ExtraCreditPage";
 import AcknowledgementsPage from "./components/pages/AcknowledgementsPage";
+import NotFoundPage from "./components/pages/NotFoundPage";
 import { JokerData } from "./components/JokerCard";
 import { exportJokersAsMod } from "./components/codeGeneration/index";
 import {
@@ -29,8 +37,12 @@ interface AlertState {
   content: string;
 }
 
-function App() {
-  const [currentSection, setCurrentSection] = useState("overview");
+function AppContent() {
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const currentSection = location.pathname.slice(1) || "overview";
+
   const [modMetadata, setModMetadata] =
     useState<ModMetadata>(DEFAULT_MOD_METADATA);
   const [jokers, setJokers] = useState<JokerData[]>([]);
@@ -58,6 +70,10 @@ function App() {
 
   const hideAlert = () => {
     setAlert((prev) => ({ ...prev, isVisible: false }));
+  };
+
+  const handleNavigate = (section: string) => {
+    navigate(`/${section}`);
   };
 
   const handleExport = async () => {
@@ -160,88 +176,14 @@ function App() {
       rules: [],
     };
     setJokers([...jokers, newJoker]);
-    setCurrentSection("jokers");
-  };
-
-  const renderCurrentPage = () => {
-    switch (currentSection) {
-      case "overview":
-        return (
-          <OverviewPage
-            jokerCount={jokers.length}
-            jokers={jokers}
-            modName={modMetadata.name}
-            authorName={modMetadata.author.join(", ")}
-            onAddJoker={handleAddNewJoker}
-            onExport={handleExport}
-            onNavigate={setCurrentSection}
-          />
-        );
-      case "metadata":
-        return (
-          <ModMetadataPage
-            metadata={modMetadata}
-            setMetadata={setModMetadata}
-          />
-        );
-      case "jokers":
-        return (
-          <JokersPage
-            modName={modMetadata.name}
-            jokers={jokers}
-            setJokers={setJokers}
-            selectedJokerId={selectedJokerId}
-            setSelectedJokerId={setSelectedJokerId}
-          />
-        );
-      case "consumables":
-        return <ConsumablesPage />;
-      case "decks":
-        return <DecksPage />;
-      case "editions":
-        return <EditionsPage />;
-      case "enhancements":
-        return <EnhancementsPage />;
-      case "docs":
-        return <DocsPage />;
-      case "vanilla":
-        return (
-          <VanillaRemadePage
-            onDuplicateToProject={(joker) => {
-              setJokers([...jokers, joker]);
-            }}
-            onNavigateToJokers={() => {
-              setCurrentSection("jokers");
-              setTimeout(() => {
-                setCurrentSection("jokers");
-              }, 0);
-            }}
-          />
-        );
-      case "credit":
-        return <ExtraCreditPage />;
-      case "acknowledgements":
-        return <AcknowledgementsPage />;
-      default:
-        return (
-          <OverviewPage
-            jokerCount={jokers.length}
-            jokers={jokers}
-            modName={modMetadata.name}
-            authorName={modMetadata.author.join(", ")}
-            onAddJoker={handleAddNewJoker}
-            onExport={handleExport}
-            onNavigate={setCurrentSection}
-          />
-        );
-    }
+    navigate("/jokers");
   };
 
   return (
     <div className="h-screen bg-black-darker flex overflow-hidden">
       <Sidebar
         selectedSection={currentSection}
-        onSectionChange={setCurrentSection}
+        onSectionChange={handleNavigate}
         projectName={modMetadata.id || "mycustommod"}
         onExport={handleExport}
         onExportJSON={handleExportJSON}
@@ -252,7 +194,91 @@ function App() {
         authorName={modMetadata.author.join(", ")}
       />
       <div className="flex-1 flex flex-col overflow-y-auto custom-scrollbar">
-        {renderCurrentPage()}
+        <Routes>
+          <Route
+            path="/"
+            element={
+              <OverviewPage
+                jokerCount={jokers.length}
+                jokers={jokers}
+                modName={modMetadata.name}
+                authorName={modMetadata.author.join(", ")}
+                onAddJoker={handleAddNewJoker}
+                onExport={handleExport}
+                onNavigate={handleNavigate}
+              />
+            }
+          />
+          <Route
+            path="/overview"
+            element={
+              <OverviewPage
+                jokerCount={jokers.length}
+                jokers={jokers}
+                modName={modMetadata.name}
+                authorName={modMetadata.author.join(", ")}
+                onAddJoker={handleAddNewJoker}
+                onExport={handleExport}
+                onNavigate={handleNavigate}
+              />
+            }
+          />
+          <Route
+            path="/metadata"
+            element={
+              <ModMetadataPage
+                metadata={modMetadata}
+                setMetadata={setModMetadata}
+              />
+            }
+          />
+          <Route
+            path="/jokers"
+            element={
+              <JokersPage
+                modName={modMetadata.name}
+                jokers={jokers}
+                setJokers={setJokers}
+                selectedJokerId={selectedJokerId}
+                setSelectedJokerId={setSelectedJokerId}
+              />
+            }
+          />
+          <Route path="/consumables" element={<ConsumablesPage />} />
+          <Route path="/decks" element={<DecksPage />} />
+          <Route path="/editions" element={<EditionsPage />} />
+          <Route path="/enhancements" element={<EnhancementsPage />} />
+          <Route path="/docs" element={<DocsPage />} />
+          <Route
+            path="/vanilla"
+            element={
+              <VanillaRemadePage
+                onDuplicateToProject={(joker) => {
+                  setJokers([...jokers, joker]);
+                }}
+                onNavigateToJokers={() => {
+                  navigate("/jokers");
+                }}
+              />
+            }
+          />
+          <Route
+            path="/credit"
+            element={
+              <ExtraCreditPage
+                onDuplicateToProject={(joker) => {
+                  setJokers([...jokers, joker]);
+                }}
+                onNavigateToJokers={() => {
+                  navigate("/jokers");
+                }}
+              />
+            }
+          />
+          <Route path="/acknowledgements" element={<AcknowledgementsPage />} />
+          {/* Catch-all route for 404 */}
+          <Route path="*" element={<NotFoundPage />} />
+        </Routes>
       </div>
 
       <Alert
@@ -263,6 +289,15 @@ function App() {
         onClose={hideAlert}
       />
     </div>
+  );
+}
+
+// Main App component with Router wrapper
+function App() {
+  return (
+    <Router>
+      <AppContent />
+    </Router>
   );
 }
 
