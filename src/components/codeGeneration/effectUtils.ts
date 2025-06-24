@@ -72,6 +72,33 @@ export function generateEffectReturnStatement(
     };
   }
 
+  // Special handling for modify_internal_variable followed by add_mult pattern
+  if (
+    effects.length === 2 &&
+    effects[0].type === "modify_internal_variable" &&
+    effects[1].type === "add_mult" &&
+    typeof effects[1].params.value === "string"
+  ) {
+    const variableName = effects[0].params.variable_name as string;
+    const operation = effects[0].params.operation as string;
+    const incrementValue =
+      typeof effects[0].params.value === "string"
+        ? `card.ability.extra.${effects[0].params.value}`
+        : ((effects[0].params.value as number) || 1).toString();
+
+    if (operation === "increment") {
+      return {
+        statement: `local mult_to_give = card.ability.extra.${variableName}
+                card.ability.extra.${variableName} = card.ability.extra.${variableName} + ${incrementValue}
+                return {
+                    mult = mult_to_give,
+                    card = context.other_card
+                }`,
+        colour: "G.C.MULT",
+      };
+    }
+  }
+
   const effectReturns: EffectReturn[] = effects
     .map((effect, index) => {
       const effectWithContext = {
@@ -161,7 +188,7 @@ export function generateEffectReturnStatement(
 
     if (preReturnCode) {
       combinedPreReturnCode +=
-        (combinedPreReturnCode ? "\n\n" : "") + preReturnCode;
+        (combinedPreReturnCode ? "\n            " : "") + preReturnCode;
     }
 
     processedEffects.push({
@@ -215,7 +242,7 @@ export function generateEffectReturnStatement(
       }
 
       if (i === 1) {
-        extraChain = `
+        extraChain = `,
                 extra = {
                     ${extraContent},
                     colour = ${effect.colour}`;
@@ -240,12 +267,7 @@ export function generateEffectReturnStatement(
                     }`;
     }
 
-    const hasReturnContent = returnStatement.trim().length > 0;
-    if (hasReturnContent && extraChain) {
-      returnStatement += `,${extraChain}`;
-    } else if (extraChain) {
-      returnStatement = extraChain.trim();
-    }
+    returnStatement += extraChain;
   }
 
   if (returnStatement.trim().length === 0) {

@@ -48,17 +48,24 @@ export const extractVariablesFromRules = (rules: Rule[]): VariableInfo[] => {
         variableMap.get(varName)!.usedInEffects.push(effect.type);
       }
 
-      if (effect.params.value_source === "variable") {
-        const varName = (effect.params.variable_name as string) || "var1";
-        if (!variableMap.has(varName)) {
-          variableMap.set(varName, {
-            name: varName,
-            initialValue: 0,
-            usedInEffects: [],
-          });
+      // Check if any parameter uses a variable reference
+      Object.entries(effect.params).forEach(([key, value]) => {
+        if (
+          typeof value === "string" &&
+          key !== "operation" &&
+          key !== "variable_name"
+        ) {
+          // This might be a variable reference
+          if (!variableMap.has(value)) {
+            variableMap.set(value, {
+              name: value,
+              initialValue: 0,
+              usedInEffects: [],
+            });
+          }
+          variableMap.get(value)!.usedInEffects.push(effect.type);
         }
-        variableMap.get(varName)!.usedInEffects.push(effect.type);
-      }
+      });
     });
   });
 
@@ -93,10 +100,16 @@ export const getVariableNamesFromJoker = (joker: JokerData): string[] => {
         variableNames.add(varName);
       }
 
-      if (effect.params.value_source === "variable") {
-        const varName = (effect.params.variable_name as string) || "var1";
-        variableNames.add(varName);
-      }
+      // Check if any parameter uses a variable reference
+      Object.entries(effect.params).forEach(([key, value]) => {
+        if (
+          typeof value === "string" &&
+          key !== "operation" &&
+          key !== "variable_name"
+        ) {
+          variableNames.add(value);
+        }
+      });
     });
 
     rule.conditionGroups.forEach((group) => {
@@ -120,10 +133,7 @@ export const getVariableUsageDetails = (joker: JokerData): VariableUsage[] => {
 
   joker.rules.forEach((rule, ruleIndex) => {
     rule.effects.forEach((effect) => {
-      if (
-        effect.type === "modify_internal_variable" ||
-        effect.params.value_source === "variable"
-      ) {
+      if (effect.type === "modify_internal_variable") {
         const varName = (effect.params.variable_name as string) || "var1";
         const currentCount = usageCount.get(varName) || 0;
         usageCount.set(varName, currentCount + 1);
@@ -137,6 +147,27 @@ export const getVariableUsageDetails = (joker: JokerData): VariableUsage[] => {
           count: currentCount + 1,
         });
       }
+
+      // Check if any parameter uses a variable reference
+      Object.entries(effect.params).forEach(([key, value]) => {
+        if (
+          typeof value === "string" &&
+          key !== "operation" &&
+          key !== "variable_name"
+        ) {
+          const currentCount = usageCount.get(value) || 0;
+          usageCount.set(value, currentCount + 1);
+
+          usageDetails.push({
+            variableName: value,
+            ruleId: rule.id,
+            ruleIndex: ruleIndex + 1,
+            type: "effect",
+            itemId: effect.id,
+            count: currentCount + 1,
+          });
+        }
+      });
     });
 
     rule.conditionGroups.forEach((group) => {

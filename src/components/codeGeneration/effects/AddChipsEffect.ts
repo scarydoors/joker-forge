@@ -11,12 +11,14 @@ export const generateAddChipsReturn = (
   triggerType: string,
   effect?: Effect
 ): EffectReturn => {
-  const valueSource = effect?.params?.value_source || "fixed";
-  const variableName = effect?.params?.variable_name || "var1";
   const customMessage = effect?.customMessage;
 
+  // Check if value is a variable reference (string) or a literal value
+  const isVariableReference = typeof effect?.params?.value === "string";
+
   let valueReference = "";
-  if (valueSource === "variable") {
+  if (isVariableReference) {
+    const variableName = effect?.params?.value as string;
     valueReference = `card.ability.extra.${variableName}`;
   } else {
     const configVarName = effect

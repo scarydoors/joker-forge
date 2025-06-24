@@ -20,14 +20,12 @@ export const generateJokerBaseCode = (
   passiveEffects: PassiveEffectResult[] = [],
   allJokers?: JokerData[]
 ): string => {
-  // Calculate the atlas position by counting slots used by previous jokers
   let totalSlotsUsed = 0;
   if (allJokers) {
     for (let i = 0; i < index; i++) {
       totalSlotsUsed += allJokers[i].overlayImagePreview ? 2 : 1;
     }
   } else {
-    // Fallback to simple calculation if allJokers not provided
     totalSlotsUsed = index;
   }
 
@@ -65,7 +63,6 @@ export const generateJokerBaseCode = (
     discovered = ${joker.discovered !== undefined ? joker.discovered : true},
     atlas = '${atlasKey}'`;
 
-  // If this joker has an overlay, add soul_pos (directly to the right)
   if (joker.overlayImagePreview) {
     const soulX = (totalSlotsUsed + 1) % 10;
     const soulY = Math.floor((totalSlotsUsed + 1) / 10);
@@ -103,20 +100,55 @@ export const extractEffectsConfig = (
     }
   };
 
+  // Get all variable names for checking
+  const allVariableNames = new Set<string>();
+  if (joker.userVariables) {
+    joker.userVariables.forEach((v) => allVariableNames.add(v.name));
+  }
+  if (joker.rules) {
+    const nonPassiveRules = joker.rules.filter(
+      (rule) => rule.trigger !== "passive"
+    );
+    const autoVariables = extractVariablesFromRules(nonPassiveRules);
+    autoVariables.forEach((v) => allVariableNames.add(v.name));
+  }
+
+  const isVariableReference = (value: unknown): boolean => {
+    return typeof value === "string" && allVariableNames.has(value);
+  };
+
   passiveEffects.forEach((effect) => {
     if (effect.configVariables) {
       configItems.push(...effect.configVariables);
     }
   });
 
+  // Add user-defined variables
+  if (joker.userVariables && joker.userVariables.length > 0) {
+    joker.userVariables.forEach((variable) => {
+      configItems.push(`${variable.name} = ${variable.initialValue}`);
+    });
+  }
+
   if (joker.rules && joker.rules.length > 0) {
     const nonPassiveRules = joker.rules.filter(
       (rule) => rule.trigger !== "passive"
     );
     const variables = extractVariablesFromRules(nonPassiveRules);
-    const variableConfig = generateVariableConfig(variables);
-    if (variableConfig) {
-      configItems.push(variableConfig);
+
+    // Only add auto-detected variables that aren't already user-defined
+    const userVariableNames = new Set(
+      joker.userVariables?.map((v) => v.name) || []
+    );
+    const autoVariables = variables.filter(
+      (v) => !userVariableNames.has(v.name)
+    );
+
+    if (autoVariables.length > 0) {
+      const variableConfig = generateVariableConfig(autoVariables);
+      if (variableConfig) {
+        configItems.push(variableConfig);
+      }
     }
 
     const rulesByTrigger: Record<string, Rule[]> = {};
@@ -130,13 +162,14 @@ export const extractEffectsConfig = (
     Object.values(rulesByTrigger).forEach((rulesWithSameTrigger) => {
       rulesWithSameTrigger.forEach((rule) => {
         rule.effects.forEach((effect) => {
-          if (effect.params.value_source === "variable") {
+          // Skip effects that use variables as their value
+          if (isVariableReference(effect.params.value)) {
             return;
           }
 
           if (
             effect.type === "add_chips" &&
-            effect.params.value_source !== "variable"
+            !isVariableReference(effect.params.value)
           ) {
             const varName = getUniqueVariableName("chips");
             configItems.push(`${varName} = ${effect.params.value || 10}`);
@@ -144,7 +177,7 @@ export const extractEffectsConfig = (
           }
           if (
             effect.type === "add_mult" &&
-            effect.params.value_source !== "variable"
+            !isVariableReference(effect.params.value)
           ) {
             const varName = getUniqueVariableName("mult");
             configItems.push(`${varName} = ${effect.params.value || 5}`);
@@ -152,7 +185,7 @@ export const extractEffectsConfig = (
           }
           if (
             effect.type === "apply_x_mult" &&
-            effect.params.value_source !== "variable"
+            !isVariableReference(effect.params.value)
           ) {
             const varName = getUniqueVariableName("Xmult");
             configItems.push(`${varName} = ${effect.params.value || 1.5}`);
@@ -160,7 +193,7 @@ export const extractEffectsConfig = (
           }
           if (
             effect.type === "add_dollars" &&
-            effect.params.value_source !== "variable"
+            !isVariableReference(effect.params.value)
           ) {
             const varName = getUniqueVariableName("dollars");
             configItems.push(`${varName} = ${effect.params.value || 5}`);
@@ -243,9 +276,28 @@ export const generateBasicLocVarsFunction = (
     const nonPassiveRules = joker.rules.filter(
       (rule) => rule.trigger !== "passive"
     );
+
+    // Add user-defined variables
+    if (joker.userVariables && joker.userVariables.length > 0) {
+      joker.userVariables.forEach((variable) => {
+        if (!processedVarNames.has(variable.name)) {
+          vars.push(`card.ability.extra.${variable.name}`);
+          processedVarNames.add(variable.name);
+        }
+      });
+    }
+
     const variables = extractVariablesFromRules(nonPassiveRules);
     const variableLocVars = generateVariableLocVars(variables);
-    vars.push(...variableLocVars);
+
+    // Only add auto-detected variables that aren't already processed
+    variableLocVars.forEach((locVar) => {
+      const varName = locVar.split(".").pop() || "";
+      if (!processedVarNames.has(varName)) {
+        vars.push(locVar);
+        processedVarNames.add(varName);
+      }
+    });
 
     const rulesByTrigger: Record<string, Rule[]> = {};
     nonPassiveRules.forEach((rule) => {
@@ -258,6 +310,11 @@ export const generateBasicLocVarsFunction = (
     Object.values(rulesByTrigger).forEach((rulesWithSameTrigger) => {
       rulesWithSameTrigger.forEach((rule) => {
         rule.effects.forEach((effect) => {
+          // Skip effects that use variables as their value source
+          if (effect.params.value_source === "variable") {
+            return;
+          }
+
           const configVarName = globalEffectVariableMapping[effect.id];
           if (configVarName && !processedVarNames.has(configVarName)) {
             vars.push(`card.ability.extra.${configVarName}`);

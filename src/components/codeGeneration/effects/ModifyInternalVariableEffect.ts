@@ -7,7 +7,7 @@ export const generateModifyInternalVariableReturn = (
 ): EffectReturn => {
   const variableName = (effect.params?.variable_name as string) || "var1";
   const operation = (effect.params?.operation as string) || "increment";
-  const value = (effect.params?.value as number) || 1;
+  const value = (effect.params?.value as number | string) || 1;
   const customMessage = effect.customMessage;
 
   const scoringTriggers = ["hand_played", "card_scored"];
@@ -17,38 +17,46 @@ export const generateModifyInternalVariableReturn = (
   let messageText = "";
   let messageColor = "G.C.WHITE";
 
+  // Handle value - if it's a string, treat it as a variable reference
+  const valueRef =
+    typeof value === "string"
+      ? `card.ability.extra.${value}`
+      : value.toString();
+
   switch (operation) {
     case "set":
-      operationCode = `card.ability.extra.${variableName} = ${value}`;
-      messageText = customMessage ? `"${customMessage}"` : `"Set to ${value}!"`;
+      operationCode = `card.ability.extra.${variableName} = ${valueRef}`;
+      messageText = customMessage
+        ? `"${customMessage}"`
+        : `"Set to "..tostring(${valueRef}).."!"`;
       messageColor = "G.C.BLUE";
       break;
     case "increment":
-      operationCode = `card.ability.extra.${variableName} = (card.ability.extra.${variableName} or 0) + ${value}`;
+      operationCode = `card.ability.extra.${variableName} = (card.ability.extra.${variableName} or 0) + ${valueRef}`;
       messageText = customMessage
         ? `"${customMessage}"`
-        : `"+"..tostring(${value})`;
+        : `"+"..tostring(${valueRef})`;
       messageColor = "G.C.GREEN";
       break;
     case "decrement":
-      operationCode = `card.ability.extra.${variableName} = math.max(0, (card.ability.extra.${variableName} or 0) - ${value})`;
+      operationCode = `card.ability.extra.${variableName} = math.max(0, (card.ability.extra.${variableName} or 0) - ${valueRef})`;
       messageText = customMessage
         ? `"${customMessage}"`
-        : `"-"..tostring(${value})`;
+        : `"-"..tostring(${valueRef})`;
       messageColor = "G.C.RED";
       break;
     case "multiply":
-      operationCode = `card.ability.extra.${variableName} = (card.ability.extra.${variableName} or 0) * ${value}`;
+      operationCode = `card.ability.extra.${variableName} = (card.ability.extra.${variableName} or 0) * ${valueRef}`;
       messageText = customMessage
         ? `"${customMessage}"`
-        : `"x"..tostring(${value})`;
+        : `"x"..tostring(${valueRef})`;
       messageColor = "G.C.MULT";
       break;
     case "divide":
-      operationCode = `card.ability.extra.${variableName} = (card.ability.extra.${variableName} or 0) / ${value}`;
+      operationCode = `card.ability.extra.${variableName} = (card.ability.extra.${variableName} or 0) / ${valueRef}`;
       messageText = customMessage
         ? `"${customMessage}"`
-        : `"÷"..tostring(${value})`;
+        : `"÷"..tostring(${valueRef})`;
       messageColor = "G.C.MULT";
       break;
     case "reset":
@@ -57,10 +65,10 @@ export const generateModifyInternalVariableReturn = (
       messageColor = "G.C.WHITE";
       break;
     default:
-      operationCode = `card.ability.extra.${variableName} = (card.ability.extra.${variableName} or 0) + ${value}`;
+      operationCode = `card.ability.extra.${variableName} = (card.ability.extra.${variableName} or 0) + ${valueRef}`;
       messageText = customMessage
         ? `"${customMessage}"`
-        : `"+"..tostring(${value})`;
+        : `"+"..tostring(${valueRef})`;
       messageColor = "G.C.GREEN";
   }
 

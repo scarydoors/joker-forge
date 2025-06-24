@@ -103,8 +103,8 @@ export const generateCalculateFunction = (
     }
 
     calculateFunction += `
-    ${description}
-    if ${contextCheck} then`;
+        ${description}
+        if ${contextCheck} then`;
 
     const rulesWithoutConditions = triggerRules.filter((rule) => {
       const conditionCodes = ruleConditionData[rule.id]?.conditionCodes || [];
@@ -151,7 +151,7 @@ export const generateCalculateFunction = (
       if (normalEffects.length > 0 || randomChanceEffects.length > 0) {
         const conditional = hasGeneratedAnyLogic ? "elseif" : "if";
         calculateFunction += `
-        ${conditional} ${conditionChecks} then`;
+            ${conditional} ${conditionChecks} then`;
 
         if (normalEffects.length > 0) {
           const { statement: returnStatement, preReturnCode } =
@@ -159,12 +159,11 @@ export const generateCalculateFunction = (
 
           if (preReturnCode) {
             calculateFunction += `
-            ${preReturnCode}`;
+                ${preReturnCode}`;
           }
 
           calculateFunction += `
-            return {${returnStatement}
-            }`;
+                ${returnStatement}`;
         }
 
         randomChanceEffects.forEach((effect, effectIndex) => {
@@ -186,16 +185,17 @@ export const generateCalculateFunction = (
 
           if (preReturnCode) {
             calculateFunction += `
-            ${preReturnCode}`;
+                ${preReturnCode}`;
           }
 
           calculateFunction += `
-            if pseudorandom('${effectKey}') < G.GAME.probabilities.normal * ${numeratorRef} / ${denominatorRef} then
-                return {${returnStatement}
-                }
-            end`;
+                if pseudorandom('${effectKey}') < G.GAME.probabilities.normal * ${numeratorRef} / ${denominatorRef} then
+                    ${returnStatement}
+                end`;
         });
 
+        calculateFunction += `
+            end`;
         hasGeneratedAnyLogic = true;
       }
     });
@@ -203,7 +203,7 @@ export const generateCalculateFunction = (
     if (rulesWithoutConditions.length > 0) {
       if (hasGeneratedAnyLogic) {
         calculateFunction += `
-        else`;
+            else`;
       }
 
       rulesWithoutConditions.forEach((rule, ruleIndex) => {
@@ -222,12 +222,11 @@ export const generateCalculateFunction = (
 
           if (preReturnCode) {
             calculateFunction += `
-            ${preReturnCode}`;
+                ${preReturnCode}`;
           }
 
           calculateFunction += `
-            return {${returnStatement}
-            }`;
+                ${returnStatement}`;
         }
 
         randomChanceEffects.forEach((effect, effectIndex) => {
@@ -249,29 +248,28 @@ export const generateCalculateFunction = (
 
           if (preReturnCode) {
             calculateFunction += `
-            ${preReturnCode}`;
+                ${preReturnCode}`;
           }
 
           calculateFunction += `
-        if pseudorandom('${effectKey}') < G.GAME.probabilities.normal * ${numeratorRef} / ${denominatorRef} then
-            return {${returnStatement}
-            }
-        end`;
+                if pseudorandom('${effectKey}') < G.GAME.probabilities.normal * ${numeratorRef} / ${denominatorRef} then
+                    ${returnStatement}
+                end`;
         });
       });
 
       if (hasGeneratedAnyLogic) {
         calculateFunction += `
-        end`;
+            end`;
       }
     }
 
     calculateFunction += `
-    end`;
+        end`;
   });
 
   calculateFunction += `
-end`;
+    end`;
 
   return calculateFunction;
 };
