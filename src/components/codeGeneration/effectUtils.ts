@@ -22,6 +22,9 @@ import { generateAddPlanetCardReturn } from "./effects/AddPlanetCardEffect";
 import { generateAddSpectralCardReturn } from "./effects/AddSpectralCardEffect";
 import { generateDestroyConsumableReturn } from "./effects/DestroyConsumableEffect";
 import { generateCopyConsumableReturn } from "./effects/CopyConsumableEffect";
+import { generateCreateJokerReturn } from "./effects/CreateJokerEffect";
+import { generateCopyJokerReturn } from "./effects/CopyJokerEffect";
+import { generateDestroyJokerReturn } from "./effects/DestroyJokerEffect";
 
 export interface ReturnStatementResult {
   statement: string;
@@ -126,6 +129,12 @@ export function generateEffectReturnStatement(
           );
         case "copy_consumable":
           return generateCopyConsumableReturn(effectWithContext, triggerType);
+        case "create_joker":
+          return generateCreateJokerReturn(effectWithContext, triggerType);
+        case "copy_joker":
+          return generateCopyJokerReturn(effectWithContext, triggerType);
+        case "destroy_joker":
+          return generateDestroyJokerReturn(effectWithContext, triggerType);
         default:
           return {
             statement: "",

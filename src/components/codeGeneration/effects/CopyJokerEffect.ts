@@ -1,0 +1,129 @@
+import type { EffectReturn } from "./AddChipsEffect";
+import type { Effect } from "../../ruleBuilder/types";
+
+export const generateCopyJokerReturn = (
+  effect: Effect,
+  triggerType: string
+): EffectReturn => {
+  const selectionMethod =
+    (effect.params?.selection_method as string) || "random";
+  const jokerKey = (effect.params?.joker_key as string) || "";
+  const position = (effect.params?.position as string) || "first";
+  const specificIndex = (effect.params?.specific_index as number) || 1;
+  const edition = (effect.params?.edition as string) || "none";
+  const customMessage = effect.customMessage;
+
+  const scoringTriggers = ["hand_played", "card_scored"];
+  const isScoring = scoringTriggers.includes(triggerType);
+
+  const isNegative = edition === "e_negative";
+  const hasEdition = edition !== "none";
+
+  let jokerSelectionCode = "";
+  let spaceCheckCode = "";
+  let copyCode = "";
+
+  // Generate joker selection logic
+  if (selectionMethod === "specific" && jokerKey) {
+    jokerSelectionCode = `
+                local target_joker = nil
+                for i, joker in ipairs(G.jokers.cards) do
+                    if joker.config.center.key == "${jokerKey}" then
+                        target_joker = joker
+                        break
+                    end
+                end`;
+  } else if (selectionMethod === "position") {
+    if (position === "first") {
+      jokerSelectionCode = `
+                local target_joker = G.jokers.cards[1] or nil`;
+    } else if (position === "last") {
+      jokerSelectionCode = `
+                local target_joker = G.jokers.cards[#G.jokers.cards] or nil`;
+    } else if (position === "left") {
+      jokerSelectionCode = `
+                local my_pos = nil
+                for i = 1, #G.jokers.cards do
+                    if G.jokers.cards[i] == card then
+                        my_pos = i
+                        break
+                    end
+                end
+                local target_joker = (my_pos and my_pos > 1) and G.jokers.cards[my_pos - 1] or nil`;
+    } else if (position === "right") {
+      jokerSelectionCode = `
+                local my_pos = nil
+                for i = 1, #G.jokers.cards do
+                    if G.jokers.cards[i] == card then
+                        my_pos = i
+                        break
+                    end
+                end
+                local target_joker = (my_pos and my_pos < #G.jokers.cards) and G.jokers.cards[my_pos + 1] or nil`;
+    } else if (position === "specific") {
+      jokerSelectionCode = `
+                local target_joker = G.jokers.cards[${specificIndex}] or nil`;
+    }
+  } else {
+    jokerSelectionCode = `
+                local available_jokers = {}
+                for i, joker in ipairs(G.jokers.cards) do
+                    table.insert(available_jokers, joker)
+                end
+                local target_joker = #available_jokers > 0 and pseudorandom_element(available_jokers, pseudoseed('copy_joker')) or nil`;
+  }
+
+  // Generate space check logic
+  if (isNegative) {
+    spaceCheckCode = `if target_joker then`;
+  } else {
+    spaceCheckCode = `if target_joker and #G.jokers.cards + G.GAME.joker_buffer < G.jokers.config.card_limit then`;
+  }
+
+  // Generate copy logic
+  const editionCode = hasEdition
+    ? `
+                        copied_joker:set_edition("${edition}", true)`
+    : "";
+  const bufferCode = isNegative
+    ? ""
+    : `
+                        G.GAME.joker_buffer = G.GAME.joker_buffer + 1`;
+  const bufferReset = isNegative
+    ? ""
+    : `
+                        G.GAME.joker_buffer = 0`;
+
+  copyCode = `${jokerSelectionCode}
+                
+                ${spaceCheckCode}${bufferCode}
+                    G.E_MANAGER:add_event(Event({
+                        func = function()
+                            local copied_joker = copy_card(target_joker, nil, nil, nil, target_joker.edition and target_joker.edition.negative)${editionCode}
+                            copied_joker:add_to_deck()
+                            G.jokers:emplace(copied_joker)${bufferReset}
+                            return true
+                        end
+                    }))
+                    card_eval_status_text(context.blueprint_card or card, 'extra', nil, nil, nil, {message = ${
+                      customMessage
+                        ? `"${customMessage}"`
+                        : `localize('k_duplicated_ex')`
+                    }, colour = G.C.GREEN})
+                end`;
+
+  if (isScoring) {
+    return {
+      statement: `__PRE_RETURN_CODE__${copyCode}
+                __PRE_RETURN_CODE_END__`,
+      colour: "G.C.GREEN",
+    };
+  } else {
+    return {
+      statement: `func = function()${copyCode}
+                    return true
+                end`,
+      colour: "G.C.GREEN",
+    };
+  }
+};
