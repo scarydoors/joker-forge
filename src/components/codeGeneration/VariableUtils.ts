@@ -1,4 +1,4 @@
-import type { Rule } from "../ruleBuilder/types";
+import type { Rule, Effect } from "../ruleBuilder/types";
 import type { JokerData, UserVariable } from "../JokerCard";
 
 export interface VariableInfo {
@@ -15,6 +15,61 @@ export interface VariableUsage {
   itemId: string;
   count: number;
 }
+
+export const coordinateVariableConflicts = (
+  effects: Effect[]
+): {
+  preReturnCode?: string;
+  modifiedEffects: Effect[];
+} => {
+  const readVars = new Set<string>();
+  const writeVars = new Set<string>();
+
+  effects.forEach((effect) => {
+    if (effect.type === "modify_internal_variable") {
+      writeVars.add(effect.params.variable_name as string);
+    }
+
+    Object.entries(effect.params).forEach(([key, value]) => {
+      if (
+        typeof value === "string" &&
+        key !== "operation" &&
+        key !== "variable_name"
+      ) {
+        readVars.add(value);
+      }
+    });
+  });
+
+  const conflicts = Array.from(readVars).filter((varName) =>
+    writeVars.has(varName)
+  );
+
+  if (conflicts.length === 0) {
+    return { modifiedEffects: effects };
+  }
+
+  const preReturnCode = conflicts
+    .map((varName) => `local ${varName}_value = card.ability.extra.${varName}`)
+    .join("\n                ");
+
+  const modifiedEffects = effects.map((effect) => {
+    if (effect.type === "modify_internal_variable") {
+      return effect;
+    }
+
+    const modifiedParams = { ...effect.params };
+    Object.entries(effect.params).forEach(([key, value]) => {
+      if (typeof value === "string" && conflicts.includes(value)) {
+        modifiedParams[key] = `${value}_value`;
+      }
+    });
+
+    return { ...effect, params: modifiedParams };
+  });
+
+  return { preReturnCode, modifiedEffects };
+};
 
 export const extractVariablesFromRules = (rules: Rule[]): VariableInfo[] => {
   const variableMap = new Map<string, VariableInfo>();
@@ -48,14 +103,12 @@ export const extractVariablesFromRules = (rules: Rule[]): VariableInfo[] => {
         variableMap.get(varName)!.usedInEffects.push(effect.type);
       }
 
-      // Check if any parameter uses a variable reference
       Object.entries(effect.params).forEach(([key, value]) => {
         if (
           typeof value === "string" &&
           key !== "operation" &&
           key !== "variable_name"
         ) {
-          // This might be a variable reference
           if (!variableMap.has(value)) {
             variableMap.set(value, {
               name: value,
@@ -100,7 +153,6 @@ export const getVariableNamesFromJoker = (joker: JokerData): string[] => {
         variableNames.add(varName);
       }
 
-      // Check if any parameter uses a variable reference
       Object.entries(effect.params).forEach(([key, value]) => {
         if (
           typeof value === "string" &&
@@ -148,7 +200,6 @@ export const getVariableUsageDetails = (joker: JokerData): VariableUsage[] => {
         });
       }
 
-      // Check if any parameter uses a variable reference
       Object.entries(effect.params).forEach(([key, value]) => {
         if (
           typeof value === "string" &&

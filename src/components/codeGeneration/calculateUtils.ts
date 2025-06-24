@@ -194,8 +194,6 @@ export const generateCalculateFunction = (
                 end`;
         });
 
-        calculateFunction += `
-            end`;
         hasGeneratedAnyLogic = true;
       }
     });
@@ -262,6 +260,12 @@ export const generateCalculateFunction = (
         calculateFunction += `
             end`;
       }
+    }
+
+    // Only add one end for the entire conditional chain
+    if (hasGeneratedAnyLogic) {
+      calculateFunction += `
+            end`;
     }
 
     calculateFunction += `

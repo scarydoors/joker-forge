@@ -8,13 +8,14 @@ export const generateAddMultReturn = (
 ): EffectReturn => {
   const customMessage = effect?.customMessage;
 
-  // Check if value is a variable reference (string) or a literal value
   const isVariableReference = typeof effect?.params?.value === "string";
 
   let valueReference = "";
   if (isVariableReference) {
     const variableName = effect?.params?.value as string;
-    valueReference = `card.ability.extra.${variableName}`;
+    valueReference = variableName.includes("_value")
+      ? variableName
+      : `card.ability.extra.${variableName}`;
   } else {
     const configVarName = effect
       ? getEffectVariableName(effect.id, "mult")
