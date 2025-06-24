@@ -29,6 +29,7 @@ import {
   generatePassiveEffect,
   type PassiveEffectResult,
 } from "./PassiveEffects";
+import type { Rule } from "../ruleBuilder/types";
 
 export interface ModMetadata {
   id: string;
@@ -46,6 +47,11 @@ export interface ModMetadata {
   conflicts: string[];
   provides: string[];
   dump_loc?: boolean;
+}
+
+interface RuleConditionData {
+  conditionCodes: string[];
+  rule: Rule;
 }
 
 export const exportJokersAsMod = async (
@@ -85,12 +91,12 @@ const generateMainLua = (
   const jokerGenerationData: {
     joker: JokerData;
     index: number;
-    conditionCodeByRule: { [ruleId: string]: string[] };
+    ruleConditionData: Record<string, RuleConditionData>;
     passiveEffects: PassiveEffectResult[];
   }[] = [];
 
   jokers.forEach((joker, index) => {
-    const conditionCodeByRule: { [ruleId: string]: string[] } = {};
+    const ruleConditionData: Record<string, RuleConditionData> = {};
     const passiveEffects: PassiveEffectResult[] = [];
 
     if (joker.rules && joker.rules.length > 0) {
@@ -203,7 +209,10 @@ const generateMainLua = (
             });
           });
 
-          conditionCodeByRule[rule.id] = ruleConditionCodes;
+          ruleConditionData[rule.id] = {
+            conditionCodes: ruleConditionCodes,
+            rule: rule,
+          };
         }
       });
     }
@@ -211,7 +220,7 @@ const generateMainLua = (
     jokerGenerationData.push({
       joker,
       index,
-      conditionCodeByRule,
+      ruleConditionData,
       passiveEffects,
     });
   });
@@ -238,13 +247,13 @@ SMODS.Atlas({
 `;
 
   jokerGenerationData.forEach(
-    ({ joker, index, conditionCodeByRule, passiveEffects }) => {
+    ({ joker, index, ruleConditionData, passiveEffects }) => {
       output +=
         generateJokerCode(
           joker,
           index,
           "CustomJokers",
-          conditionCodeByRule,
+          ruleConditionData,
           passiveEffects
         ) + "\n\n";
     }
@@ -258,18 +267,14 @@ const generateJokerCode = (
   joker: JokerData,
   index: number,
   atlasKey: string,
-  conditionCodeByRule: { [ruleId: string]: string[] },
+  ruleConditionData: Record<string, RuleConditionData>,
   passiveEffects: PassiveEffectResult[]
 ): string => {
-  const nonPassiveRules =
-    joker.rules?.filter((rule) => rule.trigger !== "passive") || [];
+  const rules = Object.values(ruleConditionData).map((data) => data.rule);
 
   let jokerCode = generateJokerBaseCode(joker, index, atlasKey, passiveEffects);
   const locVarsCode = generateBasicLocVarsFunction(joker, passiveEffects);
-  const calculateCode = generateCalculateFunction(
-    nonPassiveRules,
-    conditionCodeByRule
-  );
+  const calculateCode = generateCalculateFunction(rules, ruleConditionData);
 
   jokerCode += `,
 

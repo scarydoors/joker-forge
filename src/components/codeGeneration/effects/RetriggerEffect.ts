@@ -1,11 +1,15 @@
 import type { EffectReturn } from "./AddChipsEffect";
 import type { Effect } from "../../ruleBuilder/types";
+import { getEffectVariableName } from "../JokerBase";
 
 export const generateRetriggerReturn = (effect?: Effect): EffectReturn => {
   const customMessage = effect?.customMessage;
+  const configVarName = effect
+    ? getEffectVariableName(effect.id, "repetitions")
+    : "repetitions";
 
   return {
-    statement: `repetitions = card.ability.extra.repetitions`,
+    statement: `repetitions = card.ability.extra.${configVarName}`,
     message: customMessage ? `"${customMessage}"` : undefined,
     colour: "G.C.ORANGE",
   };

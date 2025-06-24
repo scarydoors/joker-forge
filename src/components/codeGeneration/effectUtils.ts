@@ -59,7 +59,8 @@ function extractPreReturnCode(statement: string): {
 
 export function generateEffectReturnStatement(
   effects: Effect[] = [],
-  triggerType: string = "hand_played"
+  triggerType: string = "hand_played",
+  ruleId?: string
 ): ReturnStatementResult {
   if (effects.length === 0) {
     return {
@@ -69,50 +70,62 @@ export function generateEffectReturnStatement(
   }
 
   const effectReturns: EffectReturn[] = effects
-    .map((effect) => {
+    .map((effect, index) => {
+      const effectWithContext = {
+        ...effect,
+        _ruleContext: ruleId,
+        _effectIndex: index,
+      };
+
       switch (effect.type) {
         case "add_chips":
-          return generateAddChipsReturn(triggerType, effect);
+          return generateAddChipsReturn(triggerType, effectWithContext);
         case "add_mult":
-          return generateAddMultReturn(triggerType, effect);
+          return generateAddMultReturn(triggerType, effectWithContext);
         case "apply_x_mult":
-          return generateApplyXMultReturn(triggerType, effect);
+          return generateApplyXMultReturn(triggerType, effectWithContext);
         case "add_dollars":
-          return generateAddDollarsReturn(triggerType, effect);
+          return generateAddDollarsReturn(triggerType, effectWithContext);
         case "retrigger_cards":
-          return generateRetriggerReturn(effect);
+          return generateRetriggerReturn(effectWithContext);
         case "destroy_self":
-          return generateDestroySelfReturn(effect);
+          return generateDestroySelfReturn(effectWithContext);
         case "edit_hand":
-          return generateEditHandReturn(effect);
+          return generateEditHandReturn(effectWithContext);
         case "edit_discard":
-          return generateEditDiscardReturn(effect);
+          return generateEditDiscardReturn(effectWithContext);
         case "edit_hand_size":
-          return generateEditHandSizeReturn(effect);
+          return generateEditHandSizeReturn(effectWithContext);
         case "level_up_hand":
-          return generateLevelUpHandReturn(triggerType, effect);
+          return generateLevelUpHandReturn(triggerType, effectWithContext);
         case "add_card_to_deck":
-          return generateAddCardToDeckReturn(effect, triggerType);
+          return generateAddCardToDeckReturn(effectWithContext, triggerType);
         case "copy_triggered_card":
-          return generateCopyCardToDeckReturn(effect, triggerType);
+          return generateCopyCardToDeckReturn(effectWithContext, triggerType);
         case "copy_played_card":
-          return generateCopyCardToDeckReturn(effect, triggerType);
+          return generateCopyCardToDeckReturn(effectWithContext, triggerType);
         case "delete_triggered_card":
-          return generateDeleteCardReturn(effect);
+          return generateDeleteCardReturn(effectWithContext);
         case "edit_triggered_card":
-          return generateEditCardReturn(effect, triggerType);
+          return generateEditCardReturn(effectWithContext, triggerType);
         case "modify_internal_variable":
-          return generateModifyInternalVariableReturn(effect, triggerType);
+          return generateModifyInternalVariableReturn(
+            effectWithContext,
+            triggerType
+          );
         case "create_tarot_card":
-          return generateAddTarotCardReturn(effect, triggerType);
+          return generateAddTarotCardReturn(effectWithContext, triggerType);
         case "create_planet_card":
-          return generateAddPlanetCardReturn(effect, triggerType);
+          return generateAddPlanetCardReturn(effectWithContext, triggerType);
         case "create_spectral_card":
-          return generateAddSpectralCardReturn(effect, triggerType);
+          return generateAddSpectralCardReturn(effectWithContext, triggerType);
         case "destroy_consumable":
-          return generateDestroyConsumableReturn(effect, triggerType);
+          return generateDestroyConsumableReturn(
+            effectWithContext,
+            triggerType
+          );
         case "copy_consumable":
-          return generateCopyConsumableReturn(effect, triggerType);
+          return generateCopyConsumableReturn(effectWithContext, triggerType);
         default:
           return {
             statement: "",

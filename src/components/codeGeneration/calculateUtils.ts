@@ -1,9 +1,14 @@
 import type { Rule } from "../ruleBuilder/types";
 import { generateEffectReturnStatement } from "./effectUtils";
 
+interface RuleConditionData {
+  conditionCodes: string[];
+  rule: Rule;
+}
+
 export const generateCalculateFunction = (
   rules: Rule[],
-  conditionCodeByRule: { [ruleId: string]: string[] }
+  ruleConditionData: Record<string, RuleConditionData>
 ): string => {
   const nonPassiveRules = rules.filter((rule) => rule.trigger !== "passive");
 
@@ -11,42 +16,25 @@ export const generateCalculateFunction = (
     return "";
   }
 
+  const rulesByTrigger: { [trigger: string]: Rule[] } = {};
+  nonPassiveRules.forEach((rule) => {
+    if (!rulesByTrigger[rule.trigger]) {
+      rulesByTrigger[rule.trigger] = [];
+    }
+    rulesByTrigger[rule.trigger].push(rule);
+  });
+
   let calculateFunction = `calculate = function(self, card, context)`;
 
-  nonPassiveRules.forEach((rule) => {
-    const triggerType = rule.trigger;
-    const effects = rule.effects || [];
-    const conditionCodes = conditionCodeByRule[rule.id] || [];
-
-    const hasRetriggerEffects = effects.some(
-      (effect) => effect.type === "retrigger_cards"
-    );
-
-    let conditionChecks = "";
-    if (conditionCodes.length === 0) {
-      conditionChecks = "true";
-    } else if (conditionCodes.length === 1) {
-      conditionChecks = `(${conditionCodes[0]})`;
-    } else {
-      const allConditions = rule.conditionGroups.flatMap(
-        (group) => group.conditions
-      );
-      conditionChecks = conditionCodes
-        .map((code, index) => {
-          if (index === conditionCodes.length - 1) {
-            return `(${code})`;
-          }
-          const condition = allConditions[index];
-          const operator = condition?.operator || "and";
-          return `(${code}) ${operator}`;
-        })
-        .join(" ");
-    }
-
+  Object.entries(rulesByTrigger).forEach(([triggerType, triggerRules]) => {
     let contextCheck = "";
     let description = "";
 
     if (triggerType === "card_scored") {
+      const hasRetriggerEffects = triggerRules.some((rule) =>
+        rule.effects.some((effect) => effect.type === "retrigger_cards")
+      );
+
       if (hasRetriggerEffects) {
         contextCheck = "context.repetition and context.cardarea == G.play";
         description = "-- Card repetition context for retriggering";
@@ -55,6 +43,10 @@ export const generateCalculateFunction = (
         description = "-- Individual card scoring";
       }
     } else if (triggerType === "card_held_in_hand") {
+      const hasRetriggerEffects = triggerRules.some((rule) =>
+        rule.effects.some((effect) => effect.type === "retrigger_cards")
+      );
+
       if (hasRetriggerEffects) {
         contextCheck =
           "context.repetition and context.cardarea == G.hand and (next(context.card_effects[1]) or #context.card_effects > 1)";
@@ -114,69 +106,164 @@ export const generateCalculateFunction = (
     ${description}
     if ${contextCheck} then`;
 
-    if (conditionChecks !== "true") {
-      calculateFunction += `
-        -- Check conditions for this rule
-        if ${conditionChecks} then`;
-    }
+    const rulesWithoutConditions = triggerRules.filter((rule) => {
+      const conditionCodes = ruleConditionData[rule.id]?.conditionCodes || [];
+      return conditionCodes.length === 0;
+    });
 
-    const randomChanceEffects = effects.filter(
-      (effect) => effect.params.has_random_chance === "true"
-    );
-    const normalEffects = effects.filter(
-      (effect) => effect.params.has_random_chance !== "true"
-    );
+    const rulesWithConditions = triggerRules.filter((rule) => {
+      const conditionCodes = ruleConditionData[rule.id]?.conditionCodes || [];
+      return conditionCodes.length > 0;
+    });
 
-    if (normalEffects.length > 0) {
-      const { statement: returnStatement, preReturnCode } =
-        generateEffectReturnStatement(normalEffects, triggerType);
+    let hasGeneratedAnyLogic = false;
 
-      if (preReturnCode) {
-        calculateFunction += `
-            -- Pre-return code execution
-            ${preReturnCode}
-            `;
+    rulesWithConditions.forEach((rule, index) => {
+      const effects = rule.effects || [];
+      const conditionCodes = ruleConditionData[rule.id]?.conditionCodes || [];
+
+      let conditionChecks = "";
+      if (conditionCodes.length === 1) {
+        conditionChecks = `(${conditionCodes[0]})`;
+      } else if (conditionCodes.length > 1) {
+        const allConditions = rule.conditionGroups.flatMap(
+          (group) => group.conditions
+        );
+        conditionChecks = conditionCodes
+          .map((code, codeIndex) => {
+            if (codeIndex === conditionCodes.length - 1) {
+              return `(${code})`;
+            }
+            const condition = allConditions[codeIndex];
+            const operator = condition?.operator || "and";
+            return `(${code}) ${operator}`;
+          })
+          .join(" ");
       }
 
-      calculateFunction += `
+      const randomChanceEffects = effects.filter(
+        (effect) => effect.params.has_random_chance === "true"
+      );
+      const normalEffects = effects.filter(
+        (effect) => effect.params.has_random_chance !== "true"
+      );
+
+      if (normalEffects.length > 0 || randomChanceEffects.length > 0) {
+        const conditional = hasGeneratedAnyLogic ? "elseif" : "if";
+        calculateFunction += `
+        ${conditional} ${conditionChecks} then`;
+
+        if (normalEffects.length > 0) {
+          const { statement: returnStatement, preReturnCode } =
+            generateEffectReturnStatement(normalEffects, triggerType, rule.id);
+
+          if (preReturnCode) {
+            calculateFunction += `
+            ${preReturnCode}`;
+          }
+
+          calculateFunction += `
             return {${returnStatement}
             }`;
-    }
+        }
 
-    randomChanceEffects.forEach((effect, index) => {
-      const numerator = effect.params.chance_numerator || 1;
-      const denominator = effect.params.chance_denominator || 4;
-      const effectKey = `effect_${index}_${effect.type}`;
+        randomChanceEffects.forEach((effect, effectIndex) => {
+          const numerator = effect.params.chance_numerator || 1;
+          const denominator = effect.params.chance_denominator || 4;
+          const effectKey = `effect_${index}_${effectIndex}_${effect.type}`;
 
-      const numeratorRef =
-        typeof numerator === "string"
-          ? `card.ability.extra.${numerator}`
-          : numerator;
-      const denominatorRef =
-        typeof denominator === "string"
-          ? `card.ability.extra.${denominator}`
-          : denominator;
+          const numeratorRef =
+            typeof numerator === "string"
+              ? `card.ability.extra.${numerator}`
+              : numerator;
+          const denominatorRef =
+            typeof denominator === "string"
+              ? `card.ability.extra.${denominator}`
+              : denominator;
 
-      const { statement: returnStatement, preReturnCode } =
-        generateEffectReturnStatement([effect], triggerType);
+          const { statement: returnStatement, preReturnCode } =
+            generateEffectReturnStatement([effect], triggerType, rule.id);
 
-      if (preReturnCode) {
+          if (preReturnCode) {
+            calculateFunction += `
+            ${preReturnCode}`;
+          }
+
+          calculateFunction += `
+            if pseudorandom('${effectKey}') < G.GAME.probabilities.normal * ${numeratorRef} / ${denominatorRef} then
+                return {${returnStatement}
+                }
+            end`;
+        });
+
+        hasGeneratedAnyLogic = true;
+      }
+    });
+
+    if (rulesWithoutConditions.length > 0) {
+      if (hasGeneratedAnyLogic) {
         calculateFunction += `
-            -- Pre-return code execution for random effect
-            ${preReturnCode}
-            `;
+        else`;
       }
 
-      calculateFunction += `
+      rulesWithoutConditions.forEach((rule, ruleIndex) => {
+        const effects = rule.effects || [];
+
+        const randomChanceEffects = effects.filter(
+          (effect) => effect.params.has_random_chance === "true"
+        );
+        const normalEffects = effects.filter(
+          (effect) => effect.params.has_random_chance !== "true"
+        );
+
+        if (normalEffects.length > 0) {
+          const { statement: returnStatement, preReturnCode } =
+            generateEffectReturnStatement(normalEffects, triggerType, rule.id);
+
+          if (preReturnCode) {
+            calculateFunction += `
+            ${preReturnCode}`;
+          }
+
+          calculateFunction += `
+            return {${returnStatement}
+            }`;
+        }
+
+        randomChanceEffects.forEach((effect, effectIndex) => {
+          const numerator = effect.params.chance_numerator || 1;
+          const denominator = effect.params.chance_denominator || 4;
+          const effectKey = `effect_unconditional_${ruleIndex}_${effectIndex}_${effect.type}`;
+
+          const numeratorRef =
+            typeof numerator === "string"
+              ? `card.ability.extra.${numerator}`
+              : numerator;
+          const denominatorRef =
+            typeof denominator === "string"
+              ? `card.ability.extra.${denominator}`
+              : denominator;
+
+          const { statement: returnStatement, preReturnCode } =
+            generateEffectReturnStatement([effect], triggerType, rule.id);
+
+          if (preReturnCode) {
+            calculateFunction += `
+            ${preReturnCode}`;
+          }
+
+          calculateFunction += `
         if pseudorandom('${effectKey}') < G.GAME.probabilities.normal * ${numeratorRef} / ${denominatorRef} then
             return {${returnStatement}
             }
         end`;
-    });
+        });
+      });
 
-    if (conditionChecks !== "true") {
-      calculateFunction += `
+      if (hasGeneratedAnyLogic) {
+        calculateFunction += `
         end`;
+      }
     }
 
     calculateFunction += `

@@ -1,5 +1,6 @@
 import type { EffectReturn } from "./AddChipsEffect";
 import type { Effect } from "../../ruleBuilder/types";
+import { getEffectVariableName } from "../JokerBase";
 
 export const generateAddMultReturn = (
   triggerType: string,
@@ -13,7 +14,10 @@ export const generateAddMultReturn = (
   if (valueSource === "variable") {
     valueReference = `card.ability.extra.${variableName}`;
   } else {
-    valueReference = "card.ability.extra.mult";
+    const configVarName = effect
+      ? getEffectVariableName(effect.id, "mult")
+      : "mult";
+    valueReference = `card.ability.extra.${configVarName}`;
   }
 
   if (
