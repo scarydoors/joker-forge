@@ -40,6 +40,7 @@ export interface ReturnStatementResult {
   statement: string;
   colour: string;
   preReturnCode?: string;
+  isRandomChance?: boolean;
 }
 
 export interface PassiveEffectResult {
@@ -50,7 +51,6 @@ export interface PassiveEffectResult {
   calculateFunction?: string;
 }
 
-// Main effect return statement generation
 export function generateEffectReturnStatement(
   effects: Effect[] = [],
   triggerType: string = "hand_played",
@@ -104,21 +104,32 @@ export function generateEffectReturnStatement(
     });
   });
 
-  const effectsToProcess = processRandomChanceEffects(
-    processedEffects,
-    effects
+  const hasRandomChance = effects.some(
+    (effect) => effect.params.has_random_chance === "true"
   );
 
-  const returnStatement = buildReturnStatement(effectsToProcess);
+  if (hasRandomChance) {
+    const randomChanceResults = processRandomChanceEffects(
+      processedEffects,
+      effects
+    );
+    return {
+      statement: randomChanceResults,
+      colour: processedEffects[0]?.colour ?? "G.C.WHITE",
+      preReturnCode: combinedPreReturnCode || undefined,
+      isRandomChance: true,
+    };
+  }
+
+  const returnStatement = buildReturnStatement(processedEffects);
 
   return {
     statement: returnStatement,
-    colour: effectsToProcess[0]?.colour ?? "G.C.WHITE",
+    colour: processedEffects[0]?.colour ?? "G.C.WHITE",
     preReturnCode: combinedPreReturnCode || undefined,
   };
 }
 
-// Individual effect generation
 const generateSingleEffect = (
   effect: Effect,
   triggerType: string
@@ -180,55 +191,38 @@ const generateSingleEffect = (
   }
 };
 
-// Random chance handling
 const processRandomChanceEffects = (
   processedEffects: EffectReturn[],
   originalEffects: Effect[]
-): EffectReturn[] => {
-  const finalEffects: EffectReturn[] = [];
+): string => {
+  const effect = processedEffects[0];
+  const originalEffect = originalEffects[0];
 
-  processedEffects.forEach((processedEffect, index) => {
-    const originalEffect = originalEffects[index];
+  const numerator = originalEffect.params.chance_numerator || 1;
+  const denominator = originalEffect.params.chance_denominator || 4;
+  const effectKey = `effect_0_${originalEffect.type}`;
 
-    if (originalEffect.params.has_random_chance === "true") {
-      const numerator = originalEffect.params.chance_numerator || 1;
-      const denominator = originalEffect.params.chance_denominator || 4;
-      const effectKey = `effect_${index}_${originalEffect.type}`;
+  const numeratorRef =
+    typeof numerator === "string"
+      ? `card.ability.extra.${numerator}`
+      : numerator;
+  const denominatorRef =
+    typeof denominator === "string"
+      ? `card.ability.extra.${denominator}`
+      : denominator;
 
-      const numeratorRef =
-        typeof numerator === "string"
-          ? `card.ability.extra.${numerator}`
-          : numerator;
-      const denominatorRef =
-        typeof denominator === "string"
-          ? `card.ability.extra.${denominator}`
-          : denominator;
-
-      const randomCheckStatement = `if pseudorandom('${effectKey}') < G.GAME.probabilities.normal * ${numeratorRef} / ${denominatorRef} then
-                    return {
-                        ${processedEffect.statement}${
-        processedEffect.message
-          ? `,
-                        message = ${processedEffect.message}`
-          : ""
-      }
-                    }
-                end`;
-
-      finalEffects.push({
-        ...processedEffect,
-        statement: randomCheckStatement,
-        message: undefined,
-      });
-    } else {
-      finalEffects.push(processedEffect);
-    }
-  });
-
-  return finalEffects;
+  return `if pseudorandom('${effectKey}') < G.GAME.probabilities.normal * ${numeratorRef} / ${denominatorRef} then
+                return {
+                    ${effect.statement}${
+    effect.message
+      ? `,
+                    message = ${effect.message}`
+      : ""
+  }
+                }
+            end`;
 };
 
-// Return statement building
 const buildReturnStatement = (effects: EffectReturn[]): string => {
   if (effects.length === 0) return "";
 
@@ -239,15 +233,15 @@ const buildReturnStatement = (effects: EffectReturn[]): string => {
 
   if (hasFirstStatement) {
     returnStatement = `return {
-                ${firstEffect.statement}`;
+                    ${firstEffect.statement}`;
 
     if (firstEffect.message) {
       returnStatement += `,
-                message = ${firstEffect.message}`;
+                    message = ${firstEffect.message}`;
     }
   } else if (firstEffect.message) {
     returnStatement = `return {
-                message = ${firstEffect.message}`;
+                    message = ${firstEffect.message}`;
   }
 
   if (effects.length > 1) {
@@ -262,7 +256,7 @@ const buildReturnStatement = (effects: EffectReturn[]): string => {
         extraContent = effect.statement;
         if (effect.message) {
           extraContent += `,
-                        message = ${effect.message}`;
+                            message = ${effect.message}`;
         }
       } else if (effect.message) {
         extraContent = `message = ${effect.message}`;
@@ -272,14 +266,14 @@ const buildReturnStatement = (effects: EffectReturn[]): string => {
 
       if (i === 1) {
         extraChain = `,
-                extra = {
-                    ${extraContent},
-                    colour = ${effect.colour}`;
-      } else {
-        extraChain += `,
                     extra = {
                         ${extraContent},
                         colour = ${effect.colour}`;
+      } else {
+        extraChain += `,
+                        extra = {
+                            ${extraContent},
+                            colour = ${effect.colour}`;
       }
     }
 
@@ -289,7 +283,7 @@ const buildReturnStatement = (effects: EffectReturn[]): string => {
 
     for (let i = 0; i < extraCount; i++) {
       extraChain += `
-                    }`;
+                        }`;
     }
 
     returnStatement += extraChain;
@@ -297,16 +291,15 @@ const buildReturnStatement = (effects: EffectReturn[]): string => {
 
   if (returnStatement.trim().length === 0) {
     returnStatement = `return {
-                colour = ${firstEffect.colour}`;
+                    colour = ${firstEffect.colour}`;
   }
 
   returnStatement += `
-            }`;
+                }`;
 
   return returnStatement;
 };
 
-// Passive effect processing
 export const processPassiveEffects = (
   joker: JokerData
 ): PassiveEffectResult[] => {
@@ -403,7 +396,6 @@ export const processPassiveEffects = (
   return passiveEffects;
 };
 
-// Utility functions
 function extractPreReturnCode(statement: string): {
   cleanedStatement: string;
   preReturnCode?: string;

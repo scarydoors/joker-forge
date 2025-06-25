@@ -39,7 +39,6 @@ interface EffectVariableMapping {
 
 let globalEffectVariableMapping: EffectVariableMapping = {};
 
-// Main export
 export const exportJokersAsMod = async (
   jokers: JokerData[],
   metadata: ModMetadata
@@ -52,6 +51,8 @@ export const exportJokersAsMod = async (
     zip.file("config.lua", "return {}");
 
     await addAtlasToZip(zip, jokers);
+
+    console.log(jokers);
 
     const content = await zip.generateAsync({ type: "blob" });
     const url = URL.createObjectURL(content);
@@ -70,7 +71,6 @@ export const exportJokersAsMod = async (
   }
 };
 
-// Main Lua generation
 const generateMainLua = (
   jokers: JokerData[],
   metadata: ModMetadata
@@ -104,7 +104,6 @@ SMODS.Atlas({
   return output;
 };
 
-// Joker generation
 const generateJokerCode = (
   joker: JokerData,
   index: number,
@@ -154,7 +153,6 @@ const generateJokerCode = (
   return jokerCode;
 };
 
-// JokerBase functionality
 const generateJokerBase = (
   joker: JokerData,
   index: number,
@@ -214,7 +212,6 @@ const generateJokerBase = (
   return jokerCode;
 };
 
-// Config extraction
 const extractEffectsConfig = (
   joker: JokerData,
   passiveEffects: PassiveEffectResult[]
@@ -291,12 +288,9 @@ const extractEffectsConfig = (
     Object.values(rulesByTrigger).forEach((rulesWithSameTrigger) => {
       rulesWithSameTrigger.forEach((rule) => {
         rule.effects.forEach((effect) => {
-          if (isVariableReference(effect.params.value)) {
-            return;
-          }
-
           if (
             effect.type === "add_chips" &&
+            typeof effect.params.value === "number" &&
             !isVariableReference(effect.params.value)
           ) {
             const varName = getUniqueVariableName("chips");
@@ -305,6 +299,7 @@ const extractEffectsConfig = (
           }
           if (
             effect.type === "add_mult" &&
+            typeof effect.params.value === "number" &&
             !isVariableReference(effect.params.value)
           ) {
             const varName = getUniqueVariableName("mult");
@@ -313,6 +308,7 @@ const extractEffectsConfig = (
           }
           if (
             effect.type === "apply_x_mult" &&
+            typeof effect.params.value === "number" &&
             !isVariableReference(effect.params.value)
           ) {
             const varName = getUniqueVariableName("Xmult");
@@ -321,6 +317,7 @@ const extractEffectsConfig = (
           }
           if (
             effect.type === "add_dollars" &&
+            typeof effect.params.value === "number" &&
             !isVariableReference(effect.params.value)
           ) {
             const varName = getUniqueVariableName("dollars");
@@ -355,7 +352,6 @@ const extractEffectsConfig = (
   return configItems.join(",\n            ");
 };
 
-// Calculate function generation
 const generateCalculateFunction = (rules: Rule[]): string => {
   const rulesByTrigger: Record<string, Rule[]> = {};
   rules.forEach((rule) => {
@@ -391,19 +387,21 @@ const generateCalculateFunction = (rules: Rule[]): string => {
         calculateFunction += `
             ${conditional} ${conditionCode} then`;
 
-        const { statement, preReturnCode } = generateEffectReturnStatement(
-          rule.effects,
-          triggerType,
-          rule.id
-        );
+        const { statement, preReturnCode, isRandomChance } =
+          generateEffectReturnStatement(rule.effects, triggerType, rule.id);
 
         if (preReturnCode) {
           calculateFunction += `
                 ${preReturnCode}`;
         }
 
-        calculateFunction += `
+        if (isRandomChance) {
+          calculateFunction += `
                 ${statement}`;
+        } else {
+          calculateFunction += `
+                ${statement}`;
+        }
 
         hasGeneratedLogic = true;
       }
@@ -416,19 +414,21 @@ const generateCalculateFunction = (rules: Rule[]): string => {
       }
 
       rulesWithoutConditions.forEach((rule) => {
-        const { statement, preReturnCode } = generateEffectReturnStatement(
-          rule.effects,
-          triggerType,
-          rule.id
-        );
+        const { statement, preReturnCode, isRandomChance } =
+          generateEffectReturnStatement(rule.effects, triggerType, rule.id);
 
         if (preReturnCode) {
           calculateFunction += `
                 ${preReturnCode}`;
         }
 
-        calculateFunction += `
+        if (isRandomChance) {
+          calculateFunction += `
+            ${statement}`;
+        } else {
+          calculateFunction += `
                 ${statement}`;
+        }
       });
     }
 
@@ -447,7 +447,6 @@ const generateCalculateFunction = (rules: Rule[]): string => {
   return calculateFunction;
 };
 
-// Loc vars generation
 const generateLocVarsFunction = (
   joker: JokerData,
   passiveEffects: PassiveEffectResult[]
@@ -497,10 +496,6 @@ const generateLocVarsFunction = (
     Object.values(rulesByTrigger).forEach((rulesWithSameTrigger) => {
       rulesWithSameTrigger.forEach((rule) => {
         rule.effects.forEach((effect) => {
-          if (effect.params.value_source === "variable") {
-            return;
-          }
-
           const configVarName = globalEffectVariableMapping[effect.id];
           if (configVarName && !processedVarNames.has(configVarName)) {
             vars.push(`card.ability.extra.${configVarName}`);
@@ -516,7 +511,6 @@ const generateLocVarsFunction = (
     end`;
 };
 
-// Utilities
 const slugify = (text: string): string => {
   return (
     text
