@@ -18,7 +18,6 @@ import { generateHandSizeConditionCode } from "./conditions/HandSizeCondition";
 import { generateDeckSizeConditionCode } from "./conditions/DeckSizeCondition";
 import { generateDeckCountConditionCode } from "./conditions/DeckCountCondition";
 
-// Main condition chain generation
 export const generateConditionChain = (rule: Rule): string => {
   if (!rule.conditionGroups || rule.conditionGroups.length === 0) {
     return "";
@@ -44,7 +43,6 @@ export const generateConditionChain = (rule: Rule): string => {
   return `(${groupConditions.join(") and (")})`;
 };
 
-// Condition group processing
 const generateConditionGroupCode = (
   group: ConditionGroup,
   rule: Rule
@@ -78,7 +76,6 @@ const generateConditionGroupCode = (
     : `(${conditionCodes.join(operator)})`;
 };
 
-// Single condition code generation
 const generateSingleConditionCode = (
   condition: Condition,
   rule: Rule

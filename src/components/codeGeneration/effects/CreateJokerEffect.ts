@@ -25,23 +25,19 @@ export const generateCreateJokerReturn = (
       : "";
 
     if (isNegative) {
-      jokerCreationCode = `
-                G.E_MANAGER:add_event(Event({
-                    func = function()
-                        local joker_card = create_card('Joker', G.jokers, nil, nil, nil, nil, '${jokerKey}')${editionCode}
-                        joker_card:add_to_deck()
-                        G.jokers:emplace(joker_card)
-                        return true
-                    end
-                }))
-                card_eval_status_text(context.blueprint_card or card, 'extra', nil, nil, nil, {message = ${
-                  customMessage
-                    ? `"${customMessage}"`
-                    : `localize('k_plus_joker')`
-                }, colour = G.C.BLUE})`;
+      jokerCreationCode = `G.E_MANAGER:add_event(Event({
+                func = function()
+                    local joker_card = create_card('Joker', G.jokers, nil, nil, nil, nil, '${jokerKey}')${editionCode}
+                    joker_card:add_to_deck()
+                    G.jokers:emplace(joker_card)
+                    return true
+                end
+            }))
+            card_eval_status_text(context.blueprint_card or card, 'extra', nil, nil, nil, {message = ${
+              customMessage ? `"${customMessage}"` : `localize('k_plus_joker')`
+            }, colour = G.C.BLUE})`;
     } else {
-      jokerCreationCode = `
-            if #G.jokers.cards + G.GAME.joker_buffer < G.jokers.config.card_limit then
+      jokerCreationCode = `if #G.jokers.cards + G.GAME.joker_buffer < G.jokers.config.card_limit then
                 G.GAME.joker_buffer = G.GAME.joker_buffer + 1
                 G.E_MANAGER:add_event(Event({
                     func = function()
@@ -82,41 +78,40 @@ export const generateCreateJokerReturn = (
     }
 
     if (isNegative) {
-      jokerCreationCode = `
-                G.E_MANAGER:add_event(Event({
-                    func = function()
-                        local joker_card = create_card('Joker', G.jokers, nil, ${rarityNumber}, nil, nil, nil, 'joker_forge_random')
-                        joker_card:set_edition("e_negative", true)
-                        joker_card:add_to_deck()
-                        G.jokers:emplace(joker_card)
-                        return true
-                    end
-                }))
-                card_eval_status_text(context.blueprint_card or card, 'extra', nil, nil, nil, {message = ${
-                  customMessage
-                    ? `"${customMessage}"`
-                    : `localize('k_plus_joker')`
-                }, colour = G.C.BLUE})`;
+      jokerCreationCode = `G.E_MANAGER:add_event(Event({
+                func = function()
+                    local joker_card = create_card('Joker', G.jokers, nil, ${rarityNumber}, nil, nil, nil, 'joker_forge_random')
+                    joker_card:set_edition("e_negative", true)
+                    joker_card:add_to_deck()
+                    G.jokers:emplace(joker_card)
+                    return true
+                end
+            }))
+            card_eval_status_text(context.blueprint_card or card, 'extra', nil, nil, nil, {message = ${
+              customMessage ? `"${customMessage}"` : `localize('k_plus_joker')`
+            }, colour = G.C.BLUE})`;
     } else {
       const editionCode = hasEdition
         ? `\n                        joker_card:set_edition("${edition}", true)`
         : "";
 
-      jokerCreationCode = `
-            if #G.jokers.cards + G.GAME.joker_buffer < G.jokers.config.card_limit then
-                G.GAME.joker_buffer = G.GAME.joker_buffer + 1
+      jokerCreationCode = `local jokers_to_create = math.min(2, G.jokers.config.card_limit - (#G.jokers.cards + G.GAME.joker_buffer))
+            if jokers_to_create > 0 then
+                G.GAME.joker_buffer = G.GAME.joker_buffer + jokers_to_create
                 G.E_MANAGER:add_event(Event({
                     func = function()
-                        ${
-                          hasEdition
-                            ? `local joker_card = create_card('Joker', G.jokers, nil, ${rarityNumber}, nil, nil, nil, 'joker_forge_random')${editionCode}
-                        joker_card:add_to_deck()
-                        G.jokers:emplace(joker_card)`
-                            : `SMODS.add_card {
-                            set = 'Joker'${rarityParam},
-                            key_append = 'joker_forge_random'
-                        }`
-                        }
+                        for i = 1, jokers_to_create do
+                            ${
+                              hasEdition
+                                ? `local joker_card = create_card('Joker', G.jokers, nil, ${rarityNumber}, nil, nil, nil, 'joker_forge_random')${editionCode}
+                            joker_card:add_to_deck()
+                            G.jokers:emplace(joker_card)`
+                                : `SMODS.add_card {
+                                set = 'Joker'${rarityParam},
+                                key_append = 'joker_forge_random'
+                            }`
+                            }
+                        end
                         G.GAME.joker_buffer = 0
                         return true
                     end
@@ -132,15 +127,15 @@ export const generateCreateJokerReturn = (
 
   if (isScoring) {
     return {
-      statement: `__PRE_RETURN_CODE__${jokerCreationCode}
-                __PRE_RETURN_CODE_END__`,
+      statement: `__PRE_RETURN_CODE__${jokerCreationCode}__PRE_RETURN_CODE_END__`,
       colour: "G.C.BLUE",
     };
   } else {
     return {
-      statement: `func = function()${jokerCreationCode}
-                    return true
-                end`,
+      statement: `func = function()
+            ${jokerCreationCode}
+            return true
+        end`,
       colour: "G.C.BLUE",
     };
   }

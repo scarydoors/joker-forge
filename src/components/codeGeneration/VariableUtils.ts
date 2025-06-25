@@ -93,14 +93,18 @@ export const coordinateVariableConflicts = (
 
   effects.forEach((effect) => {
     if (effect.type === "modify_internal_variable") {
-      writeVars.add(effect.params.variable_name as string);
+      const varName = effect.params.variable_name as string;
+      if (varName) {
+        writeVars.add(varName);
+      }
     }
 
     Object.entries(effect.params).forEach(([key, value]) => {
       if (
         typeof value === "string" &&
         !INTERNAL_PARAMETERS.has(key) &&
-        key !== "variable_name"
+        key !== "variable_name" &&
+        isValidVariableName(value)
       ) {
         readVars.add(value);
       }
@@ -141,6 +145,10 @@ export const coordinateVariableConflicts = (
   return { preReturnCode, modifiedEffects };
 };
 
+const isValidVariableName = (str: string): boolean => {
+  return /^[a-zA-Z_][a-zA-Z0-9_]*$/.test(str);
+};
+
 export const extractVariablesFromRules = (rules: Rule[]): VariableInfo[] => {
   const variableMap = new Map<string, VariableInfo>();
 
@@ -177,7 +185,8 @@ export const extractVariablesFromRules = (rules: Rule[]): VariableInfo[] => {
         if (
           typeof value === "string" &&
           !INTERNAL_PARAMETERS.has(key) &&
-          key !== "variable_name"
+          key !== "variable_name" &&
+          isValidVariableName(value)
         ) {
           if (!variableMap.has(value)) {
             variableMap.set(value, {
@@ -227,7 +236,8 @@ export const getVariableNamesFromJoker = (joker: JokerData): string[] => {
         if (
           typeof value === "string" &&
           !INTERNAL_PARAMETERS.has(key) &&
-          key !== "variable_name"
+          key !== "variable_name" &&
+          isValidVariableName(value)
         ) {
           variableNames.add(value);
         }
@@ -274,7 +284,8 @@ export const getVariableUsageDetails = (joker: JokerData): VariableUsage[] => {
         if (
           typeof value === "string" &&
           !INTERNAL_PARAMETERS.has(key) &&
-          key !== "variable_name"
+          key !== "variable_name" &&
+          isValidVariableName(value)
         ) {
           const currentCount = usageCount.get(value) || 0;
           usageCount.set(value, currentCount + 1);

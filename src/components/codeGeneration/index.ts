@@ -233,17 +233,14 @@ const extractEffectsConfig = (
   if (joker.userVariables) {
     joker.userVariables.forEach((v) => allVariableNames.add(v.name));
   }
-  if (joker.rules) {
-    const nonPassiveRules = joker.rules.filter(
-      (rule) => rule.trigger !== "passive"
-    );
-    const autoVariables = extractVariablesFromRules(nonPassiveRules);
-    autoVariables.forEach((v) => allVariableNames.add(v.name));
-  }
 
   passiveEffects.forEach((effect) => {
     if (effect.configVariables) {
-      configItems.push(...effect.configVariables);
+      effect.configVariables.forEach((configVar) => {
+        if (configVar.trim()) {
+          configItems.push(configVar);
+        }
+      });
     }
   });
 
@@ -369,67 +366,41 @@ const generateCalculateFunction = (rules: Rule[]): string => {
         ${triggerContext.comment}
         if ${triggerContext.check} then`;
 
-    const rulesWithConditions = triggerRules.filter((rule) =>
-      rule.conditionGroups.some((group) => group.conditions.length > 0)
-    );
-    const rulesWithoutConditions = triggerRules.filter((rule) =>
-      rule.conditionGroups.every((group) => group.conditions.length === 0)
-    );
+    let hasAnyConditions = false;
 
-    let hasGeneratedLogic = false;
-
-    rulesWithConditions.forEach((rule) => {
+    triggerRules.forEach((rule) => {
       const conditionCode = generateConditionChain(rule);
 
       if (conditionCode) {
-        const conditional = hasGeneratedLogic ? "elseif" : "if";
+        const conditional = hasAnyConditions ? "elseif" : "if";
         calculateFunction += `
             ${conditional} ${conditionCode} then`;
-
-        const { statement, preReturnCode } = generateEffectReturnStatement(
-          rule.effects,
-          triggerType,
-          rule.id
-        );
-
-        if (preReturnCode) {
+        hasAnyConditions = true;
+      } else {
+        if (hasAnyConditions) {
           calculateFunction += `
+            else`;
+        }
+      }
+
+      const { statement, preReturnCode } = generateEffectReturnStatement(
+        rule.effects,
+        triggerType,
+        rule.id
+      );
+
+      if (preReturnCode) {
+        calculateFunction += `
                 ${preReturnCode}`;
-        }
+      }
 
-        if (statement) {
-          calculateFunction += `
+      if (statement) {
+        calculateFunction += `
                 ${statement}`;
-        }
-
-        hasGeneratedLogic = true;
       }
     });
 
-    if (rulesWithoutConditions.length > 0) {
-      if (hasGeneratedLogic && rulesWithConditions.length > 0) {
-        calculateFunction += `
-            end`;
-      }
-
-      rulesWithoutConditions.forEach((rule) => {
-        const { statement, preReturnCode } = generateEffectReturnStatement(
-          rule.effects,
-          triggerType,
-          rule.id
-        );
-
-        if (preReturnCode) {
-          calculateFunction += `
-                ${preReturnCode}`;
-        }
-
-        if (statement) {
-          calculateFunction += `
-                ${statement}`;
-        }
-      });
-    } else if (hasGeneratedLogic) {
+    if (hasAnyConditions) {
       calculateFunction += `
             end`;
     }
@@ -453,7 +424,11 @@ const generateLocVarsFunction = (
 
   passiveEffects.forEach((effect) => {
     if (effect.locVars) {
-      vars.push(...effect.locVars);
+      effect.locVars.forEach((locVar) => {
+        if (locVar.trim()) {
+          vars.push(locVar);
+        }
+      });
     }
   });
 

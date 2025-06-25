@@ -5,7 +5,6 @@ interface TriggerContext {
   comment: string;
 }
 
-// Trigger context generation
 export const generateTriggerContext = (
   triggerType: string,
   rules: Rule[]
