@@ -38,56 +38,33 @@ export const generateAddTarotCardReturn = (
   const isScoring = scoringTriggers.includes(triggerType);
 
   let tarotCreationCode = "";
+  let tarotKey = "";
 
   if (tarotCard === "random") {
-    if (isNegative) {
-      tarotCreationCode = `
-            G.E_MANAGER:add_event(Event({
-                func = function()
-                    local tarot_card = create_card('Tarot', G.consumeables, nil, nil, nil, nil, nil, 'joker_forge_tarot')
-                    tarot_card:set_edition("e_negative", true)
-                    tarot_card:add_to_deck()
-                    G.consumeables:emplace(tarot_card)
-                    return true
-                end
-            }))`;
-    } else {
-      tarotCreationCode = `
-            if #G.consumeables.cards + G.GAME.consumeable_buffer < G.consumeables.config.card_limit then
-                G.GAME.consumeable_buffer = G.GAME.consumeable_buffer + 1
-                G.E_MANAGER:add_event(Event({
-                    func = function()
-                        SMODS.add_card {
-                            set = 'Tarot',
-                            key_append = 'joker_forge_tarot'
-                        }
-                        G.GAME.consumeable_buffer = 0
-                        return true
-                    end
-                }))
-            end`;
-    }
+    tarotKey = "nil, nil, nil, nil, nil, nil, nil, 'joker_forge_tarot'";
   } else {
-    const tarotKey = TAROT_CARD_KEYS[tarotCard] || "c_fool";
+    const specificKey = TAROT_CARD_KEYS[tarotCard] || "c_fool";
+    tarotKey = `nil, nil, nil, nil, nil, nil, '${specificKey}'`;
+  }
 
-    if (isNegative) {
-      tarotCreationCode = `
+  if (isNegative) {
+    tarotCreationCode = `
             G.E_MANAGER:add_event(Event({
                 func = function()
-                    local tarot_card = create_card('Tarot', G.consumeables, nil, nil, nil, nil, '${tarotKey}')
+                    local tarot_card = create_card('Tarot', G.consumeables, ${tarotKey})
                     tarot_card:set_edition("e_negative", true)
                     tarot_card:add_to_deck()
                     G.consumeables:emplace(tarot_card)
                     return true
                 end
             }))`;
-    } else {
-      tarotCreationCode = `
+  } else {
+    tarotCreationCode = `
             if #G.consumeables.cards + G.GAME.consumeable_buffer < G.consumeables.config.card_limit then
                 G.GAME.consumeable_buffer = G.GAME.consumeable_buffer + 1
                 G.E_MANAGER:add_event(Event({
                     func = function()
-                        local tarot_card = create_card('Tarot', G.consumeables, nil, nil, nil, nil, '${tarotKey}')
+                        local tarot_card = create_card('Tarot', G.consumeables, ${tarotKey})
                         tarot_card:add_to_deck()
                         G.consumeables:emplace(tarot_card)
                         G.GAME.consumeable_buffer = 0
@@ -95,22 +72,20 @@ export const generateAddTarotCardReturn = (
                     end
                 }))
             end`;
-    }
   }
+
+  const messageText = customMessage
+    ? `"${customMessage}"`
+    : `localize('k_plus_tarot')`;
 
   if (isScoring) {
     return {
       statement: `__PRE_RETURN_CODE__${tarotCreationCode}
                 __PRE_RETURN_CODE_END__`,
-      message: customMessage
-        ? `"${customMessage}"`
-        : `localize('k_plus_tarot')`,
+      message: messageText,
       colour: "G.C.PURPLE",
     };
   } else {
-    const messageText = customMessage
-      ? `"${customMessage}"`
-      : `localize('k_plus_tarot')`;
     return {
       statement: `func = function()${tarotCreationCode}
                     card_eval_status_text(context.blueprint_card or card, 'extra', nil, nil, nil, {message = ${messageText}, colour = G.C.PURPLE})
