@@ -211,14 +211,21 @@ const processRandomChanceEffects = (
       ? `card.ability.extra.${denominator}`
       : denominator;
 
+  const hasStatement = effect.statement && effect.statement.trim().length > 0;
+
+  let returnContent = "";
+  if (hasStatement && effect.message) {
+    returnContent = `${effect.statement},
+                    message = ${effect.message}`;
+  } else if (hasStatement) {
+    returnContent = effect.statement;
+  } else if (effect.message) {
+    returnContent = `message = ${effect.message}`;
+  }
+
   return `if pseudorandom('${effectKey}') < G.GAME.probabilities.normal * ${numeratorRef} / ${denominatorRef} then
                 return {
-                    ${effect.statement}${
-    effect.message
-      ? `,
-                    message = ${effect.message}`
-      : ""
-  }
+                    ${returnContent}
                 }
             end`;
 };
