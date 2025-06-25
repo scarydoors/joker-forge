@@ -236,10 +236,27 @@ const processRandomChanceEffects = (
                 `;
   }
 
-  // Add return statement with message
-  if (effect.message) {
-    content += `return {
-                    message = ${effect.message}
+  // Generate return statement with both statement and message
+  const hasStatement = effect.statement && effect.statement.trim().length > 0;
+  const hasMessage = effect.message;
+
+  if (hasStatement || hasMessage) {
+    content += `return {`;
+
+    if (hasStatement) {
+      content += `
+                    ${effect.statement}`;
+    }
+
+    if (hasMessage) {
+      if (hasStatement) {
+        content += `,`;
+      }
+      content += `
+                    message = ${effect.message}`;
+    }
+
+    content += `
                 }`;
   }
 
