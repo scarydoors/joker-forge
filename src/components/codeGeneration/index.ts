@@ -175,8 +175,14 @@ const generateJokerBase = (
     name = "${joker.name}",
     key = "${slugify(joker.name)}",
     config = {
-        extra = {
-            ${effectsConfig}
+        extra = {`;
+
+  if (effectsConfig.trim()) {
+    jokerCode += `
+            ${effectsConfig}`;
+  }
+
+  jokerCode += `
         }
     },
     loc_txt = {

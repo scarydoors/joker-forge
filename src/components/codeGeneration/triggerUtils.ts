@@ -22,7 +22,8 @@ export const generateTriggerContext = (
         };
       } else {
         return {
-          check: "context.individual and context.cardarea == G.play",
+          check:
+            "context.individual and context.cardarea == G.play and not context.blueprint",
           comment: "-- Individual card scoring",
         };
       }
@@ -37,7 +38,7 @@ export const generateTriggerContext = (
       } else {
         return {
           check:
-            "context.individual and context.cardarea == G.hand and not context.end_of_round",
+            "context.individual and context.cardarea == G.hand and not context.end_of_round and not context.blueprint",
           comment: "-- Individual card held in hand",
         };
       }
@@ -63,31 +64,31 @@ export const generateTriggerContext = (
 
     case "booster_opened":
       return {
-        check: "context.open_booster",
+        check: "context.open_booster and not context.blueprint",
         comment: "-- When booster pack is opened",
       };
 
     case "booster_skipped":
       return {
-        check: "context.skipping_booster",
+        check: "context.skipping_booster and not context.blueprint",
         comment: "-- When booster pack is skipped",
       };
 
     case "consumable_used":
       return {
-        check: "context.using_consumeable",
+        check: "context.using_consumeable and not context.blueprint",
         comment: "-- When consumable is used",
       };
 
     case "hand_drawn":
       return {
-        check: "context.hand_drawn",
+        check: "context.hand_drawn and not context.blueprint",
         comment: "-- When hand is drawn",
       };
 
     case "first_hand_drawn":
       return {
-        check: "context.first_hand_drawn",
+        check: "context.first_hand_drawn and not context.blueprint",
         comment: "-- When first hand is drawn",
       };
 
