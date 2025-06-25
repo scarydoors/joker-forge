@@ -199,17 +199,7 @@ const processRandomChanceEffects = (
   const originalEffect = originalEffects[0];
 
   const numerator = originalEffect.params.chance_numerator || 1;
-  const denominator = originalEffect.params.chance_denominator || 4;
   const effectKey = `effect_0_${originalEffect.type}`;
-
-  const numeratorRef =
-    typeof numerator === "string"
-      ? `card.ability.extra.${numerator}`
-      : numerator;
-  const denominatorRef =
-    typeof denominator === "string"
-      ? `card.ability.extra.${denominator}`
-      : denominator;
 
   const hasStatement = effect.statement && effect.statement.trim().length > 0;
 
@@ -223,7 +213,7 @@ const processRandomChanceEffects = (
     returnContent = `message = ${effect.message}`;
   }
 
-  return `if pseudorandom('${effectKey}') < G.GAME.probabilities.normal * ${numeratorRef} / ${denominatorRef} then
+  return `if pseudorandom('${effectKey}') < G.GAME.probabilities.normal * ${numerator} / card.ability.extra.odds then
                 return {
                     ${returnContent}
                 }

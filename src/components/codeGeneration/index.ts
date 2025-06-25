@@ -276,8 +276,17 @@ const extractEffectsConfig = (
       }
     }
 
+    // Check for random chance effects and add odds to config
+    let hasAddedOdds = false;
     nonPassiveRules.forEach((rule) => {
       rule.effects.forEach((effect) => {
+        // Add odds for random chance effects
+        if (effect.params.has_random_chance === "true" && !hasAddedOdds) {
+          const denominator = effect.params.chance_denominator || 4;
+          configItems.push(`odds = ${denominator}`);
+          hasAddedOdds = true;
+        }
+
         const effectValue = effect.params.value;
 
         if (
@@ -427,6 +436,24 @@ const generateLocVarsFunction = (
 ): string => {
   const vars: string[] = [];
   const processedVarNames = new Set<string>();
+
+  // Check if any effects have random chance and add probability variables
+  let hasRandomChance = false;
+  if (joker.rules) {
+    joker.rules.forEach((rule) => {
+      rule.effects.forEach((effect) => {
+        if (effect.params.has_random_chance === "true") {
+          hasRandomChance = true;
+        }
+      });
+    });
+  }
+
+  if (hasRandomChance) {
+    vars.push("(G.GAME and G.GAME.probabilities.normal or 1)");
+    vars.push("card.ability.extra.odds");
+    processedVarNames.add("odds");
+  }
 
   passiveEffects.forEach((effect) => {
     if (effect.locVars) {
