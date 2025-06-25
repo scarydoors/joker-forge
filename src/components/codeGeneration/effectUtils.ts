@@ -66,6 +66,10 @@ export function generateEffectReturnStatement(
   const { preReturnCode: variablePreCode, modifiedEffects } =
     coordinateVariableConflicts(effects);
 
+  const hasRandomChance = effects.some(
+    (effect) => effect.params.has_random_chance === "true"
+  );
+
   const effectReturns: EffectReturn[] = modifiedEffects
     .map((effect, index) => {
       const effectWithContext = {
@@ -82,6 +86,39 @@ export function generateEffectReturnStatement(
     return {
       statement: "",
       colour: "G.C.WHITE",
+    };
+  }
+
+  if (hasRandomChance) {
+    const processedEffects: EffectReturn[] = [];
+    let randomChancePreReturnCode = variablePreCode || "";
+
+    effectReturns.forEach((effect) => {
+      const { cleanedStatement, preReturnCode } = extractPreReturnCode(
+        effect.statement
+      );
+
+      if (preReturnCode) {
+        randomChancePreReturnCode +=
+          (randomChancePreReturnCode ? "\n                " : "") +
+          preReturnCode;
+      }
+
+      processedEffects.push({
+        ...effect,
+        statement: cleanedStatement,
+      });
+    });
+
+    const randomChanceResults = processRandomChanceEffects(
+      processedEffects,
+      effects,
+      randomChancePreReturnCode
+    );
+    return {
+      statement: randomChanceResults,
+      colour: processedEffects[0]?.colour ?? "G.C.WHITE",
+      isRandomChance: true,
     };
   }
 
@@ -103,23 +140,6 @@ export function generateEffectReturnStatement(
       statement: cleanedStatement,
     });
   });
-
-  const hasRandomChance = effects.some(
-    (effect) => effect.params.has_random_chance === "true"
-  );
-
-  if (hasRandomChance) {
-    const randomChanceResults = processRandomChanceEffects(
-      processedEffects,
-      effects
-    );
-    return {
-      statement: randomChanceResults,
-      colour: processedEffects[0]?.colour ?? "G.C.WHITE",
-      preReturnCode: combinedPreReturnCode || undefined,
-      isRandomChance: true,
-    };
-  }
 
   const returnStatement = buildReturnStatement(processedEffects);
 
@@ -193,7 +213,8 @@ const generateSingleEffect = (
 
 const processRandomChanceEffects = (
   processedEffects: EffectReturn[],
-  originalEffects: Effect[]
+  originalEffects: Effect[],
+  preReturnCode?: string
 ): string => {
   const effect = processedEffects[0];
   const originalEffect = originalEffects[0];
@@ -201,22 +222,29 @@ const processRandomChanceEffects = (
   const numerator = originalEffect.params.chance_numerator || 1;
   const effectKey = `effect_0_${originalEffect.type}`;
 
-  const hasStatement = effect.statement && effect.statement.trim().length > 0;
+  // Use the Balatro standard probability formula
+  const probabilityCheck =
+    numerator === 1
+      ? `G.GAME.probabilities.normal / card.ability.extra.odds`
+      : `G.GAME.probabilities.normal * ${numerator} / card.ability.extra.odds`;
 
-  let returnContent = "";
-  if (hasStatement && effect.message) {
-    returnContent = `${effect.statement},
-                    message = ${effect.message}`;
-  } else if (hasStatement) {
-    returnContent = effect.statement;
-  } else if (effect.message) {
-    returnContent = `message = ${effect.message}`;
+  let content = "";
+
+  // Add pre-return code first
+  if (preReturnCode && preReturnCode.trim()) {
+    content += `${preReturnCode}
+                `;
   }
 
-  return `if pseudorandom('${effectKey}') < G.GAME.probabilities.normal * ${numerator} / card.ability.extra.odds then
-                return {
-                    ${returnContent}
-                }
+  // Add return statement with message
+  if (effect.message) {
+    content += `return {
+                    message = ${effect.message}
+                }`;
+  }
+
+  return `if pseudorandom('${effectKey}') < ${probabilityCheck} then
+                ${content}
             end`;
 };
 

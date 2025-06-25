@@ -437,9 +437,12 @@ const generateLocVarsFunction = (
   const vars: string[] = [];
   const processedVarNames = new Set<string>();
 
-  // Check if any effects have random chance and add probability variables
+  // Check if the joker description actually contains variable placeholders
+  const descriptionHasVariables = joker.description.includes("#");
+
+  // Only add random chance variables if the description uses them
   let hasRandomChance = false;
-  if (joker.rules) {
+  if (joker.rules && descriptionHasVariables) {
     joker.rules.forEach((rule) => {
       rule.effects.forEach((effect) => {
         if (effect.params.has_random_chance === "true") {
@@ -449,8 +452,13 @@ const generateLocVarsFunction = (
     });
   }
 
-  if (hasRandomChance) {
-    vars.push("(G.GAME and G.GAME.probabilities.normal or 1)");
+  // Only add probability variables if description contains #1# and #2# for random chance
+  if (
+    hasRandomChance &&
+    joker.description.includes("#1#") &&
+    joker.description.includes("#2#")
+  ) {
+    vars.push("G.GAME.probabilities.normal");
     vars.push("card.ability.extra.odds");
     processedVarNames.add("odds");
   }
@@ -474,7 +482,7 @@ const generateLocVarsFunction = (
     });
   }
 
-  if (joker.rules && joker.rules.length > 0) {
+  if (joker.rules && joker.rules.length > 0 && descriptionHasVariables) {
     const nonPassiveRules = joker.rules.filter(
       (rule) => rule.trigger !== "passive"
     );
@@ -494,8 +502,12 @@ const generateLocVarsFunction = (
       rule.effects.forEach((effect) => {
         const configVarName = globalEffectVariableMapping[effect.id];
         if (configVarName && !processedVarNames.has(configVarName)) {
-          vars.push(`card.ability.extra.${configVarName}`);
-          processedVarNames.add(configVarName);
+          // Only add if the description actually uses variables
+          const effectValue = effect.params.value;
+          if (typeof effectValue === "number" && descriptionHasVariables) {
+            vars.push(`card.ability.extra.${configVarName}`);
+            processedVarNames.add(configVarName);
+          }
         }
       });
     });
