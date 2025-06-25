@@ -35,7 +35,7 @@ export const generateAddChipsReturn = (
     };
   } else {
     return {
-      statement: `chip_mod = ${valueReference}`,
+      statement: `chip = ${valueReference}`,
       message: customMessage
         ? `"${customMessage}"`
         : `localize{type='variable',key='a_chips',vars={${valueReference}}}`,

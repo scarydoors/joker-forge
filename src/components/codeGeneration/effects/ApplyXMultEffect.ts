@@ -30,7 +30,7 @@ export const generateApplyXMultReturn = (
     };
   } else {
     return {
-      statement: `Xmult_mod = ${valueReference}`,
+      statement: `Xmult = ${valueReference}`,
       message: customMessage
         ? `"${customMessage}"`
         : `localize{type='variable',key='a_xmult',vars={${valueReference}}}`,
