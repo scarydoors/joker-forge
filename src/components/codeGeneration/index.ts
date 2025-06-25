@@ -241,10 +241,6 @@ const extractEffectsConfig = (
     autoVariables.forEach((v) => allVariableNames.add(v.name));
   }
 
-  const isVariableReference = (value: unknown): boolean => {
-    return typeof value === "string" && allVariableNames.has(value);
-  };
-
   passiveEffects.forEach((effect) => {
     if (effect.configVariables) {
       configItems.push(...effect.configVariables);
@@ -277,74 +273,77 @@ const extractEffectsConfig = (
       }
     }
 
-    const rulesByTrigger: Record<string, Rule[]> = {};
     nonPassiveRules.forEach((rule) => {
-      if (!rulesByTrigger[rule.trigger]) {
-        rulesByTrigger[rule.trigger] = [];
-      }
-      rulesByTrigger[rule.trigger].push(rule);
-    });
+      rule.effects.forEach((effect) => {
+        const effectValue = effect.params.value;
 
-    Object.values(rulesByTrigger).forEach((rulesWithSameTrigger) => {
-      rulesWithSameTrigger.forEach((rule) => {
-        rule.effects.forEach((effect) => {
-          if (
-            effect.type === "add_chips" &&
-            typeof effect.params.value === "number" &&
-            !isVariableReference(effect.params.value)
-          ) {
-            const varName = getUniqueVariableName("chips");
-            configItems.push(`${varName} = ${effect.params.value || 10}`);
-            globalEffectVariableMapping[effect.id] = varName;
-          }
-          if (
-            effect.type === "add_mult" &&
-            typeof effect.params.value === "number" &&
-            !isVariableReference(effect.params.value)
-          ) {
-            const varName = getUniqueVariableName("mult");
-            configItems.push(`${varName} = ${effect.params.value || 5}`);
-            globalEffectVariableMapping[effect.id] = varName;
-          }
-          if (
-            effect.type === "apply_x_mult" &&
-            typeof effect.params.value === "number" &&
-            !isVariableReference(effect.params.value)
-          ) {
-            const varName = getUniqueVariableName("Xmult");
-            configItems.push(`${varName} = ${effect.params.value || 1.5}`);
-            globalEffectVariableMapping[effect.id] = varName;
-          }
-          if (
-            effect.type === "add_dollars" &&
-            typeof effect.params.value === "number" &&
-            !isVariableReference(effect.params.value)
-          ) {
-            const varName = getUniqueVariableName("dollars");
-            configItems.push(`${varName} = ${effect.params.value || 5}`);
-            globalEffectVariableMapping[effect.id] = varName;
-          }
-          if (effect.type === "retrigger_cards") {
-            const varName = getUniqueVariableName("repetitions");
-            configItems.push(`${varName} = ${effect.params.repetitions || 1}`);
-            globalEffectVariableMapping[effect.id] = varName;
-          }
-          if (effect.type === "edit_hand") {
-            const varName = getUniqueVariableName("hands");
-            configItems.push(`${varName} = ${effect.params.value || 1}`);
-            globalEffectVariableMapping[effect.id] = varName;
-          }
-          if (effect.type === "edit_discard") {
-            const varName = getUniqueVariableName("discards");
-            configItems.push(`${varName} = ${effect.params.value || 1}`);
-            globalEffectVariableMapping[effect.id] = varName;
-          }
-          if (effect.type === "level_up_hand") {
-            const varName = getUniqueVariableName("levels");
-            configItems.push(`${varName} = ${effect.params.value || 1}`);
-            globalEffectVariableMapping[effect.id] = varName;
-          }
-        });
+        if (
+          effect.type === "add_chips" &&
+          typeof effectValue === "number" &&
+          !allVariableNames.has(String(effectValue))
+        ) {
+          const varName = getUniqueVariableName("chips");
+          configItems.push(`${varName} = ${effectValue}`);
+          globalEffectVariableMapping[effect.id] = varName;
+        }
+
+        if (
+          effect.type === "add_mult" &&
+          typeof effectValue === "number" &&
+          !allVariableNames.has(String(effectValue))
+        ) {
+          const varName = getUniqueVariableName("mult");
+          configItems.push(`${varName} = ${effectValue}`);
+          globalEffectVariableMapping[effect.id] = varName;
+        }
+
+        if (
+          effect.type === "apply_x_mult" &&
+          typeof effectValue === "number" &&
+          !allVariableNames.has(String(effectValue))
+        ) {
+          const varName = getUniqueVariableName("Xmult");
+          configItems.push(`${varName} = ${effectValue}`);
+          globalEffectVariableMapping[effect.id] = varName;
+        }
+
+        if (
+          effect.type === "add_dollars" &&
+          typeof effectValue === "number" &&
+          !allVariableNames.has(String(effectValue))
+        ) {
+          const varName = getUniqueVariableName("dollars");
+          configItems.push(`${varName} = ${effectValue}`);
+          globalEffectVariableMapping[effect.id] = varName;
+        }
+
+        if (effect.type === "retrigger_cards") {
+          const repetitions = effect.params.repetitions || 1;
+          const varName = getUniqueVariableName("repetitions");
+          configItems.push(`${varName} = ${repetitions}`);
+          globalEffectVariableMapping[effect.id] = varName;
+        }
+
+        if (effect.type === "edit_hand") {
+          const value = effect.params.value || 1;
+          const varName = getUniqueVariableName("hands");
+          configItems.push(`${varName} = ${value}`);
+          globalEffectVariableMapping[effect.id] = varName;
+        }
+
+        if (effect.type === "edit_discard") {
+          const value = effect.params.value || 1;
+          const varName = getUniqueVariableName("discards");
+          configItems.push(`${varName} = ${value}`);
+          globalEffectVariableMapping[effect.id] = varName;
+        }
+
+        if (effect.type === "level_up_hand") {
+          const value = effect.params.value || 1;
+          const varName = getUniqueVariableName("levels");
+          configItems.push(`${varName} = ${value}`);
+          globalEffectVariableMapping[effect.id] = varName;
+        }
       });
     });
   }
@@ -387,18 +386,18 @@ const generateCalculateFunction = (rules: Rule[]): string => {
         calculateFunction += `
             ${conditional} ${conditionCode} then`;
 
-        const { statement, preReturnCode, isRandomChance } =
-          generateEffectReturnStatement(rule.effects, triggerType, rule.id);
+        const { statement, preReturnCode } = generateEffectReturnStatement(
+          rule.effects,
+          triggerType,
+          rule.id
+        );
 
         if (preReturnCode) {
           calculateFunction += `
                 ${preReturnCode}`;
         }
 
-        if (isRandomChance) {
-          calculateFunction += `
-                ${statement}`;
-        } else {
+        if (statement) {
           calculateFunction += `
                 ${statement}`;
         }
@@ -408,31 +407,29 @@ const generateCalculateFunction = (rules: Rule[]): string => {
     });
 
     if (rulesWithoutConditions.length > 0) {
-      if (hasGeneratedLogic) {
+      if (hasGeneratedLogic && rulesWithConditions.length > 0) {
         calculateFunction += `
-            else`;
+            end`;
       }
 
       rulesWithoutConditions.forEach((rule) => {
-        const { statement, preReturnCode, isRandomChance } =
-          generateEffectReturnStatement(rule.effects, triggerType, rule.id);
+        const { statement, preReturnCode } = generateEffectReturnStatement(
+          rule.effects,
+          triggerType,
+          rule.id
+        );
 
         if (preReturnCode) {
           calculateFunction += `
                 ${preReturnCode}`;
         }
 
-        if (isRandomChance) {
-          calculateFunction += `
-            ${statement}`;
-        } else {
+        if (statement) {
           calculateFunction += `
                 ${statement}`;
         }
       });
-    }
-
-    if (hasGeneratedLogic) {
+    } else if (hasGeneratedLogic) {
       calculateFunction += `
             end`;
     }
@@ -460,19 +457,19 @@ const generateLocVarsFunction = (
     }
   });
 
+  if (joker.userVariables && joker.userVariables.length > 0) {
+    joker.userVariables.forEach((variable) => {
+      if (!processedVarNames.has(variable.name)) {
+        vars.push(`card.ability.extra.${variable.name}`);
+        processedVarNames.add(variable.name);
+      }
+    });
+  }
+
   if (joker.rules && joker.rules.length > 0) {
     const nonPassiveRules = joker.rules.filter(
       (rule) => rule.trigger !== "passive"
     );
-
-    if (joker.userVariables && joker.userVariables.length > 0) {
-      joker.userVariables.forEach((variable) => {
-        if (!processedVarNames.has(variable.name)) {
-          vars.push(`card.ability.extra.${variable.name}`);
-          processedVarNames.add(variable.name);
-        }
-      });
-    }
 
     const variables = extractVariablesFromRules(nonPassiveRules);
     const variableLocVars = generateVariableLocVars(variables);
@@ -485,23 +482,13 @@ const generateLocVarsFunction = (
       }
     });
 
-    const rulesByTrigger: Record<string, Rule[]> = {};
     nonPassiveRules.forEach((rule) => {
-      if (!rulesByTrigger[rule.trigger]) {
-        rulesByTrigger[rule.trigger] = [];
-      }
-      rulesByTrigger[rule.trigger].push(rule);
-    });
-
-    Object.values(rulesByTrigger).forEach((rulesWithSameTrigger) => {
-      rulesWithSameTrigger.forEach((rule) => {
-        rule.effects.forEach((effect) => {
-          const configVarName = globalEffectVariableMapping[effect.id];
-          if (configVarName && !processedVarNames.has(configVarName)) {
-            vars.push(`card.ability.extra.${configVarName}`);
-            processedVarNames.add(configVarName);
-          }
-        });
+      rule.effects.forEach((effect) => {
+        const configVarName = globalEffectVariableMapping[effect.id];
+        if (configVarName && !processedVarNames.has(configVarName)) {
+          vars.push(`card.ability.extra.${configVarName}`);
+          processedVarNames.add(configVarName);
+        }
       });
     });
   }

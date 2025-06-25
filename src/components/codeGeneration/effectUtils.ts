@@ -226,6 +226,64 @@ const processRandomChanceEffects = (
 const buildReturnStatement = (effects: EffectReturn[]): string => {
   if (effects.length === 0) return "";
 
+  const functionalEffects = effects.filter(
+    (effect) =>
+      effect.statement.includes("func = function()") ||
+      effect.statement.includes("__PRE_RETURN_CODE__")
+  );
+
+  const nonFunctionalEffects = effects.filter(
+    (effect) =>
+      !effect.statement.includes("func = function()") &&
+      !effect.statement.includes("__PRE_RETURN_CODE__")
+  );
+
+  if (functionalEffects.length > 0) {
+    if (functionalEffects.length === 1 && nonFunctionalEffects.length === 0) {
+      const effect = functionalEffects[0];
+      return `return {
+                    ${effect.statement}${
+        effect.message
+          ? `,
+                    message = ${effect.message}`
+          : ""
+      }
+                }`;
+    }
+
+    let statement = "return {\n";
+
+    functionalEffects.forEach((effect, index) => {
+      statement += `                    ${effect.statement}`;
+      if (effect.message) {
+        statement += `,
+                    message = ${effect.message}`;
+      }
+      if (
+        index < functionalEffects.length - 1 ||
+        nonFunctionalEffects.length > 0
+      ) {
+        statement += ",";
+      }
+      statement += "\n";
+    });
+
+    nonFunctionalEffects.forEach((effect, index) => {
+      statement += `                    ${effect.statement}`;
+      if (effect.message) {
+        statement += `,
+                    message = ${effect.message}`;
+      }
+      if (index < nonFunctionalEffects.length - 1) {
+        statement += ",";
+      }
+      statement += "\n";
+    });
+
+    statement += "                }";
+    return statement;
+  }
+
   const firstEffect = effects[0];
   const hasFirstStatement = firstEffect.statement.trim().length > 0;
 
