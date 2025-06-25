@@ -9,7 +9,7 @@ import type {
   ShowWhenCondition,
 } from "./types";
 import { JokerData } from "../JokerCard";
-import { getAllVariables } from "../codeGeneration/VariableUtils";
+import { getAllVariables } from "../codeGeneration/variableUtils";
 import { getTriggerById } from "./data/Triggers";
 import { getConditionTypeById } from "./data/Conditions";
 import { getEffectTypeById } from "./data/Effects";

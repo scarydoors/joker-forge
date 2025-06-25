@@ -16,6 +16,7 @@ export interface VariableUsage {
   count: number;
 }
 
+// Coordinate variable conflicts to prevent read-before-write issues
 export const coordinateVariableConflicts = (
   effects: Effect[]
 ): {
@@ -71,6 +72,7 @@ export const coordinateVariableConflicts = (
   return { preReturnCode, modifiedEffects };
 };
 
+// Extract variables from rules
 export const extractVariablesFromRules = (rules: Rule[]): VariableInfo[] => {
   const variableMap = new Map<string, VariableInfo>();
 
@@ -125,6 +127,7 @@ export const extractVariablesFromRules = (rules: Rule[]): VariableInfo[] => {
   return Array.from(variableMap.values());
 };
 
+// Generate variable config
 export const generateVariableConfig = (variables: VariableInfo[]): string => {
   if (variables.length === 0) return "";
 
@@ -135,12 +138,14 @@ export const generateVariableConfig = (variables: VariableInfo[]): string => {
   return configItems.join(",\n            ");
 };
 
+// Generate variable loc vars
 export const generateVariableLocVars = (
   variables: VariableInfo[]
 ): string[] => {
   return variables.map((variable) => `card.ability.extra.${variable.name}`);
 };
 
+// Get variable names from joker
 export const getVariableNamesFromJoker = (joker: JokerData): string[] => {
   if (!joker.rules) return [];
 
@@ -177,6 +182,7 @@ export const getVariableNamesFromJoker = (joker: JokerData): string[] => {
   return Array.from(variableNames).sort();
 };
 
+// Get variable usage details
 export const getVariableUsageDetails = (joker: JokerData): VariableUsage[] => {
   if (!joker.rules) return [];
 
@@ -244,6 +250,7 @@ export const getVariableUsageDetails = (joker: JokerData): VariableUsage[] => {
   return usageDetails;
 };
 
+// Get all variables
 export const getAllVariables = (joker: JokerData): UserVariable[] => {
   const userVars = joker.userVariables || [];
   const autoVars = getVariableNamesFromJoker(joker)

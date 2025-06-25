@@ -1,6 +1,6 @@
 import type { EffectReturn } from "./AddChipsEffect";
 import type { Effect } from "../../ruleBuilder/types";
-import { getEffectVariableName } from "../JokerBase";
+import { getEffectVariableName } from "../index";
 
 export const generateAddMultReturn = (
   triggerType: string,

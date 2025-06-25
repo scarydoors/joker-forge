@@ -1,5 +1,6 @@
 import type { Effect } from "../ruleBuilder/types";
-import { coordinateVariableConflicts } from "./VariableUtils";
+import type { JokerData } from "../JokerCard";
+import { coordinateVariableConflicts } from "./variableUtils";
 import {
   generateAddChipsReturn,
   type EffectReturn,
@@ -26,6 +27,14 @@ import { generateCopyConsumableReturn } from "./effects/CopyConsumableEffect";
 import { generateCreateJokerReturn } from "./effects/CreateJokerEffect";
 import { generateCopyJokerReturn } from "./effects/CopyJokerEffect";
 import { generateDestroyJokerReturn } from "./effects/DestroyJokerEffect";
+import { generatePassiveHandSize } from "./effects/EditHandSizeEffect";
+import { generatePassiveHand } from "./effects/EditHandEffect";
+import { generatePassiveDiscard } from "./effects/EditDiscardEffect";
+import { generatePassiveCombineRanks } from "./effects/CombineRanksEffect";
+import {
+  generatePassiveConsideredAs,
+  type ConsideredAsResult,
+} from "./effects/ConsideredAsEffect";
 
 export interface ReturnStatementResult {
   statement: string;
@@ -33,34 +42,15 @@ export interface ReturnStatementResult {
   preReturnCode?: string;
 }
 
-function extractPreReturnCode(statement: string): {
-  cleanedStatement: string;
-  preReturnCode?: string;
-} {
-  const preReturnStart = "__PRE_RETURN_CODE__";
-  const preReturnEnd = "__PRE_RETURN_CODE_END__";
-
-  if (statement.includes(preReturnStart) && statement.includes(preReturnEnd)) {
-    const startIndex =
-      statement.indexOf(preReturnStart) + preReturnStart.length;
-    const endIndex = statement.indexOf(preReturnEnd);
-
-    if (startIndex < endIndex) {
-      const preReturnCode = statement.substring(startIndex, endIndex).trim();
-      const cleanedStatement = statement
-        .replace(
-          new RegExp(`${preReturnStart}[\\s\\S]*?${preReturnEnd}`, "g"),
-          ""
-        )
-        .trim();
-
-      return { cleanedStatement, preReturnCode };
-    }
-  }
-
-  return { cleanedStatement: statement };
+export interface PassiveEffectResult {
+  addToDeck?: string;
+  removeFromDeck?: string;
+  configVariables?: string[];
+  locVars?: string[];
+  calculateFunction?: string;
 }
 
+// Main effect return statement generation
 export function generateEffectReturnStatement(
   effects: Effect[] = [],
   triggerType: string = "hand_played",
@@ -84,67 +74,7 @@ export function generateEffectReturnStatement(
         _effectIndex: index,
       };
 
-      switch (effect.type) {
-        case "add_chips":
-          return generateAddChipsReturn(triggerType, effectWithContext);
-        case "add_mult":
-          return generateAddMultReturn(triggerType, effectWithContext);
-        case "apply_x_mult":
-          return generateApplyXMultReturn(triggerType, effectWithContext);
-        case "add_dollars":
-          return generateAddDollarsReturn(triggerType, effectWithContext);
-        case "retrigger_cards":
-          return generateRetriggerReturn(effectWithContext);
-        case "destroy_self":
-          return generateDestroySelfReturn(effectWithContext);
-        case "edit_hand":
-          return generateEditHandReturn(effectWithContext);
-        case "edit_discard":
-          return generateEditDiscardReturn(effectWithContext);
-        case "edit_hand_size":
-          return generateEditHandSizeReturn(effectWithContext);
-        case "level_up_hand":
-          return generateLevelUpHandReturn(triggerType, effectWithContext);
-        case "add_card_to_deck":
-          return generateAddCardToDeckReturn(effectWithContext, triggerType);
-        case "copy_triggered_card":
-          return generateCopyCardToDeckReturn(effectWithContext, triggerType);
-        case "copy_played_card":
-          return generateCopyCardToDeckReturn(effectWithContext, triggerType);
-        case "delete_triggered_card":
-          return generateDeleteCardReturn(effectWithContext);
-        case "edit_triggered_card":
-          return generateEditCardReturn(effectWithContext, triggerType);
-        case "modify_internal_variable":
-          return generateModifyInternalVariableReturn(
-            effectWithContext,
-            triggerType
-          );
-        case "create_tarot_card":
-          return generateAddTarotCardReturn(effectWithContext, triggerType);
-        case "create_planet_card":
-          return generateAddPlanetCardReturn(effectWithContext, triggerType);
-        case "create_spectral_card":
-          return generateAddSpectralCardReturn(effectWithContext, triggerType);
-        case "destroy_consumable":
-          return generateDestroyConsumableReturn(
-            effectWithContext,
-            triggerType
-          );
-        case "copy_consumable":
-          return generateCopyConsumableReturn(effectWithContext, triggerType);
-        case "create_joker":
-          return generateCreateJokerReturn(effectWithContext, triggerType);
-        case "copy_joker":
-          return generateCopyJokerReturn(effectWithContext, triggerType);
-        case "destroy_joker":
-          return generateDestroyJokerReturn(effectWithContext, triggerType);
-        default:
-          return {
-            statement: "",
-            colour: "G.C.WHITE",
-          };
-      }
+      return generateSingleEffect(effectWithContext, triggerType);
     })
     .filter((ret) => ret.statement || ret.message);
 
@@ -174,10 +104,138 @@ export function generateEffectReturnStatement(
     });
   });
 
-  let returnStatement = "";
-  const firstEffect = processedEffects[0];
+  const effectsToProcess = processRandomChanceEffects(
+    processedEffects,
+    effects
+  );
 
+  const returnStatement = buildReturnStatement(effectsToProcess);
+
+  return {
+    statement: returnStatement,
+    colour: effectsToProcess[0]?.colour ?? "G.C.WHITE",
+    preReturnCode: combinedPreReturnCode || undefined,
+  };
+}
+
+// Individual effect generation
+const generateSingleEffect = (
+  effect: Effect,
+  triggerType: string
+): EffectReturn => {
+  switch (effect.type) {
+    case "add_chips":
+      return generateAddChipsReturn(triggerType, effect);
+    case "add_mult":
+      return generateAddMultReturn(triggerType, effect);
+    case "apply_x_mult":
+      return generateApplyXMultReturn(triggerType, effect);
+    case "add_dollars":
+      return generateAddDollarsReturn(triggerType, effect);
+    case "retrigger_cards":
+      return generateRetriggerReturn(effect);
+    case "destroy_self":
+      return generateDestroySelfReturn(effect);
+    case "edit_hand":
+      return generateEditHandReturn(effect);
+    case "edit_discard":
+      return generateEditDiscardReturn(effect);
+    case "edit_hand_size":
+      return generateEditHandSizeReturn(effect);
+    case "level_up_hand":
+      return generateLevelUpHandReturn(triggerType, effect);
+    case "add_card_to_deck":
+      return generateAddCardToDeckReturn(effect, triggerType);
+    case "copy_triggered_card":
+      return generateCopyCardToDeckReturn(effect, triggerType);
+    case "copy_played_card":
+      return generateCopyCardToDeckReturn(effect, triggerType);
+    case "delete_triggered_card":
+      return generateDeleteCardReturn(effect);
+    case "edit_triggered_card":
+      return generateEditCardReturn(effect, triggerType);
+    case "modify_internal_variable":
+      return generateModifyInternalVariableReturn(effect, triggerType);
+    case "create_tarot_card":
+      return generateAddTarotCardReturn(effect, triggerType);
+    case "create_planet_card":
+      return generateAddPlanetCardReturn(effect, triggerType);
+    case "create_spectral_card":
+      return generateAddSpectralCardReturn(effect, triggerType);
+    case "destroy_consumable":
+      return generateDestroyConsumableReturn(effect, triggerType);
+    case "copy_consumable":
+      return generateCopyConsumableReturn(effect, triggerType);
+    case "create_joker":
+      return generateCreateJokerReturn(effect, triggerType);
+    case "copy_joker":
+      return generateCopyJokerReturn(effect, triggerType);
+    case "destroy_joker":
+      return generateDestroyJokerReturn(effect, triggerType);
+    default:
+      return {
+        statement: "",
+        colour: "G.C.WHITE",
+      };
+  }
+};
+
+// Random chance handling
+const processRandomChanceEffects = (
+  processedEffects: EffectReturn[],
+  originalEffects: Effect[]
+): EffectReturn[] => {
+  const finalEffects: EffectReturn[] = [];
+
+  processedEffects.forEach((processedEffect, index) => {
+    const originalEffect = originalEffects[index];
+
+    if (originalEffect.params.has_random_chance === "true") {
+      const numerator = originalEffect.params.chance_numerator || 1;
+      const denominator = originalEffect.params.chance_denominator || 4;
+      const effectKey = `effect_${index}_${originalEffect.type}`;
+
+      const numeratorRef =
+        typeof numerator === "string"
+          ? `card.ability.extra.${numerator}`
+          : numerator;
+      const denominatorRef =
+        typeof denominator === "string"
+          ? `card.ability.extra.${denominator}`
+          : denominator;
+
+      const randomCheckStatement = `if pseudorandom('${effectKey}') < G.GAME.probabilities.normal * ${numeratorRef} / ${denominatorRef} then
+                    return {
+                        ${processedEffect.statement}${
+        processedEffect.message
+          ? `,
+                        message = ${processedEffect.message}`
+          : ""
+      }
+                    }
+                end`;
+
+      finalEffects.push({
+        ...processedEffect,
+        statement: randomCheckStatement,
+        message: undefined,
+      });
+    } else {
+      finalEffects.push(processedEffect);
+    }
+  });
+
+  return finalEffects;
+};
+
+// Return statement building
+const buildReturnStatement = (effects: EffectReturn[]): string => {
+  if (effects.length === 0) return "";
+
+  const firstEffect = effects[0];
   const hasFirstStatement = firstEffect.statement.trim().length > 0;
+
+  let returnStatement = "";
 
   if (hasFirstStatement) {
     returnStatement = `return {
@@ -187,19 +245,16 @@ export function generateEffectReturnStatement(
       returnStatement += `,
                 message = ${firstEffect.message}`;
     }
-  } else {
-    if (firstEffect.message) {
-      returnStatement = `return {
+  } else if (firstEffect.message) {
+    returnStatement = `return {
                 message = ${firstEffect.message}`;
-    }
   }
 
-  if (processedEffects.length > 1) {
+  if (effects.length > 1) {
     let extraChain = "";
 
-    for (let i = 1; i < processedEffects.length; i++) {
-      const effect = processedEffects[i];
-
+    for (let i = 1; i < effects.length; i++) {
+      const effect = effects[i];
       const hasStatement = effect.statement.trim().length > 0;
 
       let extraContent = "";
@@ -209,14 +264,11 @@ export function generateEffectReturnStatement(
           extraContent += `,
                         message = ${effect.message}`;
         }
-      } else {
-        if (effect.message) {
-          extraContent = `message = ${effect.message}`;
-        }
-        if (!effect.message) {
-          continue;
-        }
+      } else if (effect.message) {
+        extraContent = `message = ${effect.message}`;
       }
+
+      if (!extraContent) continue;
 
       if (i === 1) {
         extraChain = `,
@@ -231,13 +283,9 @@ export function generateEffectReturnStatement(
       }
     }
 
-    let extraCount = 0;
-    for (let i = 1; i < processedEffects.length; i++) {
-      const effect = processedEffects[i];
-      if (effect.statement.trim().length > 0 || effect.message) {
-        extraCount++;
-      }
-    }
+    const extraCount = effects
+      .slice(1)
+      .filter((e) => e.statement.trim().length > 0 || e.message).length;
 
     for (let i = 0; i < extraCount; i++) {
       extraChain += `
@@ -252,37 +300,134 @@ export function generateEffectReturnStatement(
                 colour = ${firstEffect.colour}`;
   }
 
-  return {
-    statement: returnStatement,
-    colour: firstEffect.colour ?? "G.C.WHITE",
-    preReturnCode: combinedPreReturnCode || undefined,
-  };
-}
+  returnStatement += `
+            }`;
 
-export function generateEffectReturnStatementFromTypes(
-  effectTypes: string[] = [],
-  triggerType: string = "hand_played"
-): ReturnStatementResult {
-  const effects: Effect[] = effectTypes.map((type) => {
-    const defaultValues: Record<string, Record<string, unknown>> = {
-      add_chips: { value: 10 },
-      add_mult: { value: 5 },
-      apply_x_mult: { value: 1.5 },
-      add_dollars: { value: 5 },
-      retrigger_cards: { repetitions: 1 },
-      destroy_self: {},
-      edit_hand: { operation: "add", value: 1 },
-      edit_discard: { operation: "add", value: 1 },
-      edit_hand_size: { operation: "add", value: 1 },
-      level_up_hand: { levels: 1 },
-    };
+  return returnStatement;
+};
 
-    return {
-      id: crypto.randomUUID(),
-      type,
-      params: defaultValues[type] || {},
-    };
-  });
+// Passive effect processing
+export const processPassiveEffects = (
+  joker: JokerData
+): PassiveEffectResult[] => {
+  const passiveEffects: PassiveEffectResult[] = [];
 
-  return generateEffectReturnStatement(effects, triggerType);
+  if (!joker.rules) return passiveEffects;
+
+  joker.rules
+    .filter((rule) => rule.trigger === "passive" && rule.effects?.length === 1)
+    .forEach((rule) => {
+      const effect = rule.effects[0];
+      let passiveResult: PassiveEffectResult | null = null;
+
+      switch (effect.type) {
+        case "edit_hand_size":
+          passiveResult = generatePassiveHandSize(effect);
+          break;
+        case "edit_hand":
+          passiveResult = generatePassiveHand(effect);
+          break;
+        case "edit_discard":
+          passiveResult = generatePassiveDiscard(effect);
+          break;
+        case "combine_ranks":
+          passiveResult = generatePassiveCombineRanks(effect);
+          break;
+        case "considered_as": {
+          const consideredAsResult: ConsideredAsResult =
+            generatePassiveConsideredAs(effect);
+
+          const sourceType =
+            (effect.params?.source_type as string) || "enhancement";
+          const targetType =
+            (effect.params?.target_type as string) || "enhancement";
+
+          let sourceValue = "";
+          let targetValue = "";
+
+          switch (sourceType) {
+            case "rank":
+              sourceValue = (effect.params?.source_rank as string) || "A";
+              break;
+            case "suit":
+              sourceValue = (effect.params?.source_suit as string) || "Spades";
+              break;
+            case "enhancement":
+              sourceValue =
+                (effect.params?.source_enhancement as string) || "m_gold";
+              break;
+            case "seal":
+              sourceValue = (effect.params?.source_seal as string) || "Gold";
+              break;
+            case "edition":
+              sourceValue =
+                (effect.params?.source_edition as string) || "e_foil";
+              break;
+          }
+
+          switch (targetType) {
+            case "enhancement":
+              targetValue =
+                (effect.params?.target_enhancement as string) || "m_steel";
+              break;
+            case "seal":
+              targetValue = (effect.params?.target_seal as string) || "Gold";
+              break;
+            case "edition":
+              targetValue =
+                (effect.params?.target_edition as string) || "e_foil";
+              break;
+          }
+
+          const updatedConfigVariables = [
+            `source_type = "${sourceType}"`,
+            `source_value = "${sourceValue}"`,
+            `target_type = "${targetType}"`,
+            `target_value = "${targetValue}"`,
+          ];
+
+          passiveResult = {
+            calculateFunction: consideredAsResult.calculateFunction,
+            configVariables: updatedConfigVariables,
+            locVars: consideredAsResult.locVars,
+          };
+          break;
+        }
+      }
+
+      if (passiveResult) {
+        passiveEffects.push(passiveResult);
+      }
+    });
+
+  return passiveEffects;
+};
+
+// Utility functions
+function extractPreReturnCode(statement: string): {
+  cleanedStatement: string;
+  preReturnCode?: string;
+} {
+  const preReturnStart = "__PRE_RETURN_CODE__";
+  const preReturnEnd = "__PRE_RETURN_CODE_END__";
+
+  if (statement.includes(preReturnStart) && statement.includes(preReturnEnd)) {
+    const startIndex =
+      statement.indexOf(preReturnStart) + preReturnStart.length;
+    const endIndex = statement.indexOf(preReturnEnd);
+
+    if (startIndex < endIndex) {
+      const preReturnCode = statement.substring(startIndex, endIndex).trim();
+      const cleanedStatement = statement
+        .replace(
+          new RegExp(`${preReturnStart}[\\s\\S]*?${preReturnEnd}`, "g"),
+          ""
+        )
+        .trim();
+
+      return { cleanedStatement, preReturnCode };
+    }
+  }
+
+  return { cleanedStatement: statement };
 }

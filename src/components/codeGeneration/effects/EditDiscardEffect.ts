@@ -1,7 +1,7 @@
 import type { EffectReturn } from "./AddChipsEffect";
 import type { Effect } from "../../ruleBuilder/types";
-import type { PassiveEffectResult } from "../PassiveEffects";
-import { getEffectVariableName } from "../JokerBase";
+import type { PassiveEffectResult } from "../effectUtils";
+import { getEffectVariableName } from "../index";
 
 export const generateEditDiscardReturn = (effect: Effect): EffectReturn => {
   const operation = effect.params?.operation || "add";

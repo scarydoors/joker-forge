@@ -1,5 +1,5 @@
 import type { Effect } from "../../ruleBuilder/types";
-import { getEffectVariableName } from "../JokerBase";
+import { getEffectVariableName } from "../index";
 
 export interface EffectReturn {
   statement: string;

@@ -4,7 +4,7 @@ import { JokerData, UserVariable } from "../JokerCard";
 import {
   getVariableUsageDetails,
   getAllVariables,
-} from "../codeGeneration/VariableUtils";
+} from "../codeGeneration/variableUtils";
 import {
   CommandLineIcon,
   XMarkIcon,

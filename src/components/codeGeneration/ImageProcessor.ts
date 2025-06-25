@@ -18,7 +18,6 @@ export const processJokerImages = async (
 
     const jokersPerRow = 10;
 
-    // Calculate total positions needed: each joker with overlay needs 2 slots, others need 1
     const totalPositions = jokers.reduce((total, joker) => {
       return total + (joker.overlayImagePreview ? 2 : 1);
     }, 0);
@@ -33,11 +32,9 @@ export const processJokerImages = async (
     const soulPositions: Record<number, { x: number; y: number }> = {};
     let currentPosition = 0;
 
-    // Process each joker in order, placing main image followed by overlay if it exists
     const imagePromises = jokers.map((joker, index) => {
       const promises: Promise<void>[] = [];
 
-      // Draw main image
       promises.push(
         new Promise<void>((resolve) => {
           const imageSrc =
@@ -81,7 +78,6 @@ export const processJokerImages = async (
         })
       );
 
-      // Draw overlay image if it exists (directly to the right of main image)
       if (joker.overlayImagePreview) {
         promises.push(
           new Promise<void>((resolve) => {
@@ -92,7 +88,6 @@ export const processJokerImages = async (
               const x = col * 71 * scale;
               const y = row * 95 * scale;
 
-              // Record the soul position for this joker
               soulPositions[index] = { x: col, y: row };
 
               ctx.drawImage(

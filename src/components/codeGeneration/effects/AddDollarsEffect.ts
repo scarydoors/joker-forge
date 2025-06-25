@@ -1,6 +1,6 @@
 import type { EffectReturn } from "./AddChipsEffect";
 import type { Effect } from "../../ruleBuilder/types";
-import { getEffectVariableName } from "../JokerBase";
+import { getEffectVariableName } from "../index";
 
 const EVAL_STATUS_TEXT_TRIGGERS = [
   "blind_selected",

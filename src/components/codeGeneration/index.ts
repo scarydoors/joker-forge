@@ -1,35 +1,19 @@
 import { JokerData } from "../JokerCard";
 import JSZip from "jszip";
 import { addAtlasToZip } from "./ImageProcessor";
+import { generateTriggerContext } from "./triggerUtils";
+import { generateConditionChain } from "./conditionUtils";
 import {
-  generateJokerBaseCode,
-  generateBasicLocVarsFunction,
-} from "./JokerBase";
-import { generatePokerHandConditionCode } from "./conditions/PokerHandCondition";
-import { generateCalculateFunction } from "./calculateUtils";
-import { generateSuitCardConditionCode } from "./conditions/SuitCardCondition";
-import { generateRankCardConditionCode } from "./conditions/RankCardCondition";
-import { generateCountCardConditionCode } from "./conditions/CountHandCondition";
-import { generatePlayerMoneyConditionCode } from "./conditions/PlayerMoneyCondition";
-import { generateRemainingHandsConditionCode } from "./conditions/RemainingHandsCondition";
-import { generateRemainingDiscardsConditionCode } from "./conditions/RemainingDiscardsCondition";
-import { generateJokerCountConditionCode } from "./conditions/JokerCountCondition";
-import { generateBlindTypeConditionCode } from "./conditions/BlindTypeCondition";
-import { generateCardEnhancementConditionCode } from "./conditions/CardEnhancementCondition";
-import { generateCardSealConditionCode } from "./conditions/CardSealCondition";
-import { generateInternalVariableConditionCode } from "./conditions/InternalVariableCondition";
-import { generateRandomChanceConditionCode } from "./conditions/RandomChanceCondition";
-import { generateFirstPlayedHandConditionCode } from "./conditions/FirstHandPlayedCondition";
-import { generateFirstDiscardedHandConditionCode } from "./conditions/FirstDiscardedHandCondition";
-import { generateAnteLevelConditionCode } from "./conditions/AnteLevelCondition";
-import { generateHandSizeConditionCode } from "./conditions/HandSizeCondition";
-import { generateDeckSizeConditionCode } from "./conditions/DeckSizeCondition";
-import { generateDeckCountConditionCode } from "./conditions/DeckCountCondition";
+  generateEffectReturnStatement,
+  processPassiveEffects,
+} from "./effectUtils";
 import {
-  generatePassiveEffect,
-  type PassiveEffectResult,
-} from "./PassiveEffects";
+  extractVariablesFromRules,
+  generateVariableConfig,
+  generateVariableLocVars,
+} from "./variableUtils";
 import type { Rule } from "../ruleBuilder/types";
+import type { PassiveEffectResult } from "./effectUtils";
 
 export interface ModMetadata {
   id: string;
@@ -49,11 +33,13 @@ export interface ModMetadata {
   dump_loc?: boolean;
 }
 
-interface RuleConditionData {
-  conditionCodes: string[];
-  rule: Rule;
+interface EffectVariableMapping {
+  [effectId: string]: string;
 }
 
+let globalEffectVariableMapping: EffectVariableMapping = {};
+
+// Main export
 export const exportJokersAsMod = async (
   jokers: JokerData[],
   metadata: ModMetadata
@@ -84,147 +70,11 @@ export const exportJokersAsMod = async (
   }
 };
 
+// Main Lua generation
 const generateMainLua = (
   jokers: JokerData[],
   metadata: ModMetadata
 ): string => {
-  const jokerGenerationData: {
-    joker: JokerData;
-    index: number;
-    ruleConditionData: Record<string, RuleConditionData>;
-    passiveEffects: PassiveEffectResult[];
-  }[] = [];
-
-  jokers.forEach((joker, index) => {
-    const ruleConditionData: Record<string, RuleConditionData> = {};
-    const passiveEffects: PassiveEffectResult[] = [];
-
-    if (joker.rules && joker.rules.length > 0) {
-      joker.rules.forEach((rule) => {
-        if (rule.trigger === "passive") {
-          const passiveEffect = generatePassiveEffect(rule);
-          if (passiveEffect) {
-            passiveEffects.push(passiveEffect);
-          }
-        } else {
-          const ruleConditionCodes: string[] = [];
-
-          rule.conditionGroups.forEach((group) => {
-            group.conditions.forEach((condition) => {
-              const singleConditionRule = {
-                ...rule,
-                conditionGroups: [
-                  {
-                    ...group,
-                    conditions: [condition],
-                  },
-                ],
-              };
-
-              let conditionCode = null;
-
-              if (condition.type === "hand_type") {
-                conditionCode = generatePokerHandConditionCode([
-                  singleConditionRule,
-                ]);
-              } else if (
-                condition.type === "suit_count" ||
-                condition.type === "card_suit"
-              ) {
-                conditionCode = generateSuitCardConditionCode([
-                  singleConditionRule,
-                ]);
-              } else if (
-                condition.type === "rank_count" ||
-                condition.type === "card_rank"
-              ) {
-                conditionCode = generateRankCardConditionCode([
-                  singleConditionRule,
-                ]);
-              } else if (condition.type === "card_count") {
-                conditionCode = generateCountCardConditionCode([
-                  singleConditionRule,
-                ]);
-              } else if (condition.type === "card_enhancement") {
-                conditionCode = generateCardEnhancementConditionCode([
-                  singleConditionRule,
-                ]);
-              } else if (condition.type === "card_seal") {
-                conditionCode = generateCardSealConditionCode([
-                  singleConditionRule,
-                ]);
-              } else if (condition.type === "player_money") {
-                conditionCode = generatePlayerMoneyConditionCode([
-                  singleConditionRule,
-                ]);
-              } else if (condition.type === "remaining_hands") {
-                conditionCode = generateRemainingHandsConditionCode([
-                  singleConditionRule,
-                ]);
-              } else if (condition.type === "remaining_discards") {
-                conditionCode = generateRemainingDiscardsConditionCode([
-                  singleConditionRule,
-                ]);
-              } else if (condition.type === "joker_count") {
-                conditionCode = generateJokerCountConditionCode([
-                  singleConditionRule,
-                ]);
-              } else if (condition.type === "blind_type") {
-                conditionCode = generateBlindTypeConditionCode([
-                  singleConditionRule,
-                ]);
-              } else if (condition.type === "internal_variable") {
-                conditionCode = generateInternalVariableConditionCode([
-                  singleConditionRule,
-                ]);
-              } else if (condition.type === "random_chance") {
-                conditionCode = generateRandomChanceConditionCode([
-                  singleConditionRule,
-                ]);
-              } else if (condition.type === "first_played_hand") {
-                conditionCode = generateFirstPlayedHandConditionCode();
-              } else if (condition.type === "first_discarded_hand") {
-                conditionCode = generateFirstDiscardedHandConditionCode();
-              } else if (condition.type === "ante_level") {
-                conditionCode = generateAnteLevelConditionCode([
-                  singleConditionRule,
-                ]);
-              } else if (condition.type === "hand_size") {
-                conditionCode = generateHandSizeConditionCode([
-                  singleConditionRule,
-                ]);
-              } else if (condition.type === "deck_size") {
-                conditionCode = generateDeckSizeConditionCode([
-                  singleConditionRule,
-                ]);
-              } else if (condition.type === "deck_count") {
-                conditionCode = generateDeckCountConditionCode([
-                  singleConditionRule,
-                ]);
-              }
-
-              if (conditionCode) {
-                ruleConditionCodes.push(conditionCode);
-              }
-            });
-          });
-
-          ruleConditionData[rule.id] = {
-            conditionCodes: ruleConditionCodes,
-            rule: rule,
-          };
-        }
-      });
-    }
-
-    jokerGenerationData.push({
-      joker,
-      index,
-      ruleConditionData,
-      passiveEffects,
-    });
-  });
-
   let output = `-- FILE GENERATED BY JOKER FORGE
 -- Mod: ${metadata.name}
 -- Author(s): ${metadata.author.join(", ")}
@@ -246,76 +96,464 @@ SMODS.Atlas({
 
 `;
 
-  jokerGenerationData.forEach(
-    ({ joker, index, ruleConditionData, passiveEffects }) => {
-      output +=
-        generateJokerCode(
-          joker,
-          index,
-          "CustomJokers",
-          ruleConditionData,
-          passiveEffects,
-          jokers
-        ) + "\n\n";
-    }
-  );
+  jokers.forEach((joker, index) => {
+    output += generateJokerCode(joker, index, "CustomJokers", jokers) + "\n\n";
+  });
 
   output += "return mod";
   return output;
 };
 
+// Joker generation
 const generateJokerCode = (
   joker: JokerData,
   index: number,
   atlasKey: string,
-  ruleConditionData: Record<string, RuleConditionData>,
-  passiveEffects: PassiveEffectResult[],
-  jokers: JokerData[]
+  allJokers: JokerData[]
 ): string => {
-  const rules = Object.values(ruleConditionData).map((data) => data.rule);
+  const passiveEffects = processPassiveEffects(joker);
 
-  let jokerCode = generateJokerBaseCode(
+  let jokerCode = generateJokerBase(
     joker,
     index,
     atlasKey,
     passiveEffects,
-    jokers
+    allJokers
   );
-  const locVarsCode = generateBasicLocVarsFunction(joker, passiveEffects);
-  const calculateCode = generateCalculateFunction(rules, ruleConditionData);
 
-  jokerCode += `,
+  const locVarsCode = generateLocVarsFunction(joker, passiveEffects);
+  jokerCode += `,\n\n    ${locVarsCode}`;
 
-    ${locVarsCode}`;
+  const nonPassiveRules =
+    joker.rules?.filter((rule) => rule.trigger !== "passive") || [];
 
-  if (calculateCode) {
-    jokerCode += `,
-
-    ${calculateCode}`;
+  if (nonPassiveRules.length > 0) {
+    const calculateCode = generateCalculateFunction(nonPassiveRules);
+    jokerCode += `,\n\n    ${calculateCode}`;
   }
 
   passiveEffects.forEach((effect) => {
     if (effect.addToDeck) {
-      jokerCode += `,
-
-    add_to_deck = function(self, card, from_debuff)
+      jokerCode += `,\n\n    add_to_deck = function(self, card, from_debuff)
         ${effect.addToDeck}
     end`;
     }
 
     if (effect.removeFromDeck) {
-      jokerCode += `,
-
-    remove_from_deck = function(self, card, from_debuff)
+      jokerCode += `,\n\n    remove_from_deck = function(self, card, from_debuff)
         ${effect.removeFromDeck}
     end`;
     }
+
+    if (effect.calculateFunction) {
+      jokerCode += `,\n\n    ${effect.calculateFunction}`;
+    }
   });
 
-  jokerCode += `
-}`;
+  jokerCode += `\n}`;
+  return jokerCode;
+};
+
+// JokerBase functionality
+const generateJokerBase = (
+  joker: JokerData,
+  index: number,
+  atlasKey: string,
+  passiveEffects: PassiveEffectResult[],
+  allJokers: JokerData[]
+): string => {
+  let totalSlotsUsed = 0;
+  for (let i = 0; i < index; i++) {
+    totalSlotsUsed += allJokers[i].overlayImagePreview ? 2 : 1;
+  }
+
+  const x = totalSlotsUsed % 10;
+  const y = Math.floor(totalSlotsUsed / 10);
+
+  globalEffectVariableMapping = {};
+  const effectsConfig = extractEffectsConfig(joker, passiveEffects);
+
+  let jokerCode = `SMODS.Joker{ --${joker.name}
+    name = "${joker.name}",
+    key = "${slugify(joker.name)}",
+    config = {
+        extra = {
+            ${effectsConfig}
+        }
+    },
+    loc_txt = {
+        ['name'] = '${joker.name}',
+        ['text'] = ${formatJokerDescription(joker)}
+    },
+    pos = {
+        x = ${x},
+        y = ${y}
+    },
+    cost = ${joker.cost !== undefined ? joker.cost : 4},
+    rarity = ${joker.rarity},
+    blueprint_compat = ${
+      joker.blueprint_compat !== undefined ? joker.blueprint_compat : true
+    },
+    eternal_compat = ${
+      joker.eternal_compat !== undefined ? joker.eternal_compat : true
+    },
+    unlocked = ${joker.unlocked !== undefined ? joker.unlocked : true},
+    discovered = ${joker.discovered !== undefined ? joker.discovered : true},
+    atlas = '${atlasKey}'`;
+
+  if (joker.overlayImagePreview) {
+    const soulX = (totalSlotsUsed + 1) % 10;
+    const soulY = Math.floor((totalSlotsUsed + 1) / 10);
+    jokerCode += `,
+    soul_pos = {
+        x = ${soulX},
+        y = ${soulY}
+    }`;
+  }
 
   return jokerCode;
+};
+
+// Config extraction
+const extractEffectsConfig = (
+  joker: JokerData,
+  passiveEffects: PassiveEffectResult[]
+): string => {
+  const configItems: string[] = [];
+  const variableCountByType: Record<string, number> = {};
+
+  const getUniqueVariableName = (baseName: string): string => {
+    if (variableCountByType[baseName] === undefined) {
+      variableCountByType[baseName] = 0;
+      return baseName;
+    } else {
+      variableCountByType[baseName]++;
+      return `${baseName}${variableCountByType[baseName]}`;
+    }
+  };
+
+  const allVariableNames = new Set<string>();
+  if (joker.userVariables) {
+    joker.userVariables.forEach((v) => allVariableNames.add(v.name));
+  }
+  if (joker.rules) {
+    const nonPassiveRules = joker.rules.filter(
+      (rule) => rule.trigger !== "passive"
+    );
+    const autoVariables = extractVariablesFromRules(nonPassiveRules);
+    autoVariables.forEach((v) => allVariableNames.add(v.name));
+  }
+
+  const isVariableReference = (value: unknown): boolean => {
+    return typeof value === "string" && allVariableNames.has(value);
+  };
+
+  passiveEffects.forEach((effect) => {
+    if (effect.configVariables) {
+      configItems.push(...effect.configVariables);
+    }
+  });
+
+  if (joker.userVariables && joker.userVariables.length > 0) {
+    joker.userVariables.forEach((variable) => {
+      configItems.push(`${variable.name} = ${variable.initialValue}`);
+    });
+  }
+
+  if (joker.rules && joker.rules.length > 0) {
+    const nonPassiveRules = joker.rules.filter(
+      (rule) => rule.trigger !== "passive"
+    );
+    const variables = extractVariablesFromRules(nonPassiveRules);
+
+    const userVariableNames = new Set(
+      joker.userVariables?.map((v) => v.name) || []
+    );
+    const autoVariables = variables.filter(
+      (v) => !userVariableNames.has(v.name)
+    );
+
+    if (autoVariables.length > 0) {
+      const variableConfig = generateVariableConfig(autoVariables);
+      if (variableConfig) {
+        configItems.push(variableConfig);
+      }
+    }
+
+    const rulesByTrigger: Record<string, Rule[]> = {};
+    nonPassiveRules.forEach((rule) => {
+      if (!rulesByTrigger[rule.trigger]) {
+        rulesByTrigger[rule.trigger] = [];
+      }
+      rulesByTrigger[rule.trigger].push(rule);
+    });
+
+    Object.values(rulesByTrigger).forEach((rulesWithSameTrigger) => {
+      rulesWithSameTrigger.forEach((rule) => {
+        rule.effects.forEach((effect) => {
+          if (isVariableReference(effect.params.value)) {
+            return;
+          }
+
+          if (
+            effect.type === "add_chips" &&
+            !isVariableReference(effect.params.value)
+          ) {
+            const varName = getUniqueVariableName("chips");
+            configItems.push(`${varName} = ${effect.params.value || 10}`);
+            globalEffectVariableMapping[effect.id] = varName;
+          }
+          if (
+            effect.type === "add_mult" &&
+            !isVariableReference(effect.params.value)
+          ) {
+            const varName = getUniqueVariableName("mult");
+            configItems.push(`${varName} = ${effect.params.value || 5}`);
+            globalEffectVariableMapping[effect.id] = varName;
+          }
+          if (
+            effect.type === "apply_x_mult" &&
+            !isVariableReference(effect.params.value)
+          ) {
+            const varName = getUniqueVariableName("Xmult");
+            configItems.push(`${varName} = ${effect.params.value || 1.5}`);
+            globalEffectVariableMapping[effect.id] = varName;
+          }
+          if (
+            effect.type === "add_dollars" &&
+            !isVariableReference(effect.params.value)
+          ) {
+            const varName = getUniqueVariableName("dollars");
+            configItems.push(`${varName} = ${effect.params.value || 5}`);
+            globalEffectVariableMapping[effect.id] = varName;
+          }
+          if (effect.type === "retrigger_cards") {
+            const varName = getUniqueVariableName("repetitions");
+            configItems.push(`${varName} = ${effect.params.repetitions || 1}`);
+            globalEffectVariableMapping[effect.id] = varName;
+          }
+          if (effect.type === "edit_hand") {
+            const varName = getUniqueVariableName("hands");
+            configItems.push(`${varName} = ${effect.params.value || 1}`);
+            globalEffectVariableMapping[effect.id] = varName;
+          }
+          if (effect.type === "edit_discard") {
+            const varName = getUniqueVariableName("discards");
+            configItems.push(`${varName} = ${effect.params.value || 1}`);
+            globalEffectVariableMapping[effect.id] = varName;
+          }
+          if (effect.type === "level_up_hand") {
+            const varName = getUniqueVariableName("levels");
+            configItems.push(`${varName} = ${effect.params.value || 1}`);
+            globalEffectVariableMapping[effect.id] = varName;
+          }
+        });
+      });
+    });
+  }
+
+  return configItems.join(",\n            ");
+};
+
+// Calculate function generation
+const generateCalculateFunction = (rules: Rule[]): string => {
+  const rulesByTrigger: Record<string, Rule[]> = {};
+  rules.forEach((rule) => {
+    if (!rulesByTrigger[rule.trigger]) {
+      rulesByTrigger[rule.trigger] = [];
+    }
+    rulesByTrigger[rule.trigger].push(rule);
+  });
+
+  let calculateFunction = `calculate = function(self, card, context)`;
+
+  Object.entries(rulesByTrigger).forEach(([triggerType, triggerRules]) => {
+    const triggerContext = generateTriggerContext(triggerType, triggerRules);
+
+    calculateFunction += `
+        ${triggerContext.comment}
+        if ${triggerContext.check} then`;
+
+    const rulesWithConditions = triggerRules.filter((rule) =>
+      rule.conditionGroups.some((group) => group.conditions.length > 0)
+    );
+    const rulesWithoutConditions = triggerRules.filter((rule) =>
+      rule.conditionGroups.every((group) => group.conditions.length === 0)
+    );
+
+    let hasGeneratedLogic = false;
+
+    rulesWithConditions.forEach((rule) => {
+      const conditionCode = generateConditionChain(rule);
+
+      if (conditionCode) {
+        const conditional = hasGeneratedLogic ? "elseif" : "if";
+        calculateFunction += `
+            ${conditional} ${conditionCode} then`;
+
+        const { statement, preReturnCode } = generateEffectReturnStatement(
+          rule.effects,
+          triggerType,
+          rule.id
+        );
+
+        if (preReturnCode) {
+          calculateFunction += `
+                ${preReturnCode}`;
+        }
+
+        calculateFunction += `
+                ${statement}`;
+
+        hasGeneratedLogic = true;
+      }
+    });
+
+    if (rulesWithoutConditions.length > 0) {
+      if (hasGeneratedLogic) {
+        calculateFunction += `
+            else`;
+      }
+
+      rulesWithoutConditions.forEach((rule) => {
+        const { statement, preReturnCode } = generateEffectReturnStatement(
+          rule.effects,
+          triggerType,
+          rule.id
+        );
+
+        if (preReturnCode) {
+          calculateFunction += `
+                ${preReturnCode}`;
+        }
+
+        calculateFunction += `
+                ${statement}`;
+      });
+    }
+
+    if (hasGeneratedLogic) {
+      calculateFunction += `
+            end`;
+    }
+
+    calculateFunction += `
+        end`;
+  });
+
+  calculateFunction += `
+    end`;
+
+  return calculateFunction;
+};
+
+// Loc vars generation
+const generateLocVarsFunction = (
+  joker: JokerData,
+  passiveEffects: PassiveEffectResult[]
+): string => {
+  const vars: string[] = [];
+  const processedVarNames = new Set<string>();
+
+  passiveEffects.forEach((effect) => {
+    if (effect.locVars) {
+      vars.push(...effect.locVars);
+    }
+  });
+
+  if (joker.rules && joker.rules.length > 0) {
+    const nonPassiveRules = joker.rules.filter(
+      (rule) => rule.trigger !== "passive"
+    );
+
+    if (joker.userVariables && joker.userVariables.length > 0) {
+      joker.userVariables.forEach((variable) => {
+        if (!processedVarNames.has(variable.name)) {
+          vars.push(`card.ability.extra.${variable.name}`);
+          processedVarNames.add(variable.name);
+        }
+      });
+    }
+
+    const variables = extractVariablesFromRules(nonPassiveRules);
+    const variableLocVars = generateVariableLocVars(variables);
+
+    variableLocVars.forEach((locVar) => {
+      const varName = locVar.split(".").pop() || "";
+      if (!processedVarNames.has(varName)) {
+        vars.push(locVar);
+        processedVarNames.add(varName);
+      }
+    });
+
+    const rulesByTrigger: Record<string, Rule[]> = {};
+    nonPassiveRules.forEach((rule) => {
+      if (!rulesByTrigger[rule.trigger]) {
+        rulesByTrigger[rule.trigger] = [];
+      }
+      rulesByTrigger[rule.trigger].push(rule);
+    });
+
+    Object.values(rulesByTrigger).forEach((rulesWithSameTrigger) => {
+      rulesWithSameTrigger.forEach((rule) => {
+        rule.effects.forEach((effect) => {
+          if (effect.params.value_source === "variable") {
+            return;
+          }
+
+          const configVarName = globalEffectVariableMapping[effect.id];
+          if (configVarName && !processedVarNames.has(configVarName)) {
+            vars.push(`card.ability.extra.${configVarName}`);
+            processedVarNames.add(configVarName);
+          }
+        });
+      });
+    });
+  }
+
+  return `loc_vars = function(self, info_queue, card)
+        return {vars = {${vars.join(", ")}}}
+    end`;
+};
+
+// Utilities
+const slugify = (text: string): string => {
+  return (
+    text
+      .toLowerCase()
+      .replace(/[\s\W_]+/g, "")
+      .replace(/^[\d]/, "_$&") ||
+    `joker_${Math.random().toString(36).substring(2, 8)}`
+  );
+};
+
+const formatJokerDescription = (joker: JokerData): string => {
+  const formatted = joker.description.replace(/<br\s*\/?>/gi, "[s]");
+
+  const words = formatted.split(" ");
+  const lines = [];
+  let line = "";
+
+  words.forEach((word) => {
+    if (line.length + word.length + 1 > 28 || word.includes("[s]")) {
+      lines.push(line.trim());
+      line = "";
+    }
+    line += (line ? " " : "") + word.replace("[s]", "");
+  });
+
+  if (line) lines.push(line.trim());
+
+  return `{\n${lines
+    .map((line, i) => `            [${i + 1}] = '${line.replace(/'/g, "\\'")}'`)
+    .join(",\n")}\n        }`;
+};
+
+export const getEffectVariableName = (
+  effectId: string,
+  fallback: string
+): string => {
+  return globalEffectVariableMapping[effectId] || fallback;
 };
 
 const generateModJson = (metadata: ModMetadata): string => {
