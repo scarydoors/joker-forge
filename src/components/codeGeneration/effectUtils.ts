@@ -268,22 +268,6 @@ const processRandomChanceEffects = (
 const buildReturnStatement = (effects: EffectReturn[]): string => {
   if (effects.length === 0) return "";
 
-  const functionalEffects = effects.filter((effect) =>
-    effect.statement.includes("func = function()")
-  );
-
-  if (functionalEffects.length > 0) {
-    const effect = functionalEffects[0];
-    return `return {
-                    ${effect.statement}${
-      effect.message
-        ? `,
-                    message = ${effect.message}`
-        : ""
-    }
-                }`;
-  }
-
   // Find the first effect that actually has content to return
   let firstContentEffectIndex = -1;
   for (let i = 0; i < effects.length; i++) {
