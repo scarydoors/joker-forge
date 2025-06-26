@@ -31,56 +31,62 @@ export const generateAddPlanetCardReturn = (
 
   if (planetCard === "random") {
     if (isNegative) {
-      planetCreationCode = `G.E_MANAGER:add_event(Event({
-                func = function()
-                    local planet_card = create_card('Planet', G.consumeables, nil, nil, nil, nil, nil, 'joker_forge_planet')
-                    planet_card:set_edition("e_negative", true)
-                    planet_card:add_to_deck()
-                    G.consumeables:emplace(planet_card)
-                    return true
-                end
-            }))`;
-    } else {
-      planetCreationCode = `if #G.consumeables.cards + G.GAME.consumeable_buffer < G.consumeables.config.card_limit then
-                G.GAME.consumeable_buffer = G.GAME.consumeable_buffer + 1
+      planetCreationCode = `local created_planet = true
                 G.E_MANAGER:add_event(Event({
                     func = function()
-                        SMODS.add_card {
-                            set = 'Planet',
-                            key_append = 'joker_forge_planet'
-                        }
-                        G.GAME.consumeable_buffer = 0
+                        local planet_card = create_card('Planet', G.consumeables, nil, nil, nil, nil, nil, 'joker_forge_planet')
+                        planet_card:set_edition("e_negative", true)
+                        planet_card:add_to_deck()
+                        G.consumeables:emplace(planet_card)
                         return true
                     end
-                }))
-            end`;
+                }))`;
+    } else {
+      planetCreationCode = `local created_planet = false
+                if #G.consumeables.cards + G.GAME.consumeable_buffer < G.consumeables.config.card_limit then
+                    created_planet = true
+                    G.GAME.consumeable_buffer = G.GAME.consumeable_buffer + 1
+                    G.E_MANAGER:add_event(Event({
+                        func = function()
+                            SMODS.add_card {
+                                set = 'Planet',
+                                key_append = 'joker_forge_planet'
+                            }
+                            G.GAME.consumeable_buffer = 0
+                            return true
+                        end
+                    }))
+                end`;
     }
   } else {
     const planetKey = PLANET_CARD_KEYS[planetCard] || "c_pluto";
 
     if (isNegative) {
-      planetCreationCode = `G.E_MANAGER:add_event(Event({
-                func = function()
-                    local planet_card = create_card('Planet', G.consumeables, nil, nil, nil, nil, '${planetKey}')
-                    planet_card:set_edition("e_negative", true)
-                    planet_card:add_to_deck()
-                    G.consumeables:emplace(planet_card)
-                    return true
-                end
-            }))`;
-    } else {
-      planetCreationCode = `if #G.consumeables.cards + G.GAME.consumeable_buffer < G.consumeables.config.card_limit then
-                G.GAME.consumeable_buffer = G.GAME.consumeable_buffer + 1
+      planetCreationCode = `local created_planet = true
                 G.E_MANAGER:add_event(Event({
                     func = function()
                         local planet_card = create_card('Planet', G.consumeables, nil, nil, nil, nil, '${planetKey}')
+                        planet_card:set_edition("e_negative", true)
                         planet_card:add_to_deck()
                         G.consumeables:emplace(planet_card)
-                        G.GAME.consumeable_buffer = 0
                         return true
                     end
-                }))
-            end`;
+                }))`;
+    } else {
+      planetCreationCode = `local created_planet = false
+                if #G.consumeables.cards + G.GAME.consumeable_buffer < G.consumeables.config.card_limit then
+                    created_planet = true
+                    G.GAME.consumeable_buffer = G.GAME.consumeable_buffer + 1
+                    G.E_MANAGER:add_event(Event({
+                        func = function()
+                            local planet_card = create_card('Planet', G.consumeables, nil, nil, nil, nil, '${planetKey}')
+                            planet_card:add_to_deck()
+                            G.consumeables:emplace(planet_card)
+                            G.GAME.consumeable_buffer = 0
+                            return true
+                        end
+                    }))
+                end`;
     }
   }
 
@@ -90,16 +96,19 @@ export const generateAddPlanetCardReturn = (
                 __PRE_RETURN_CODE_END__`,
       message: customMessage
         ? `"${customMessage}"`
-        : `localize('k_plus_planet')`,
+        : `created_planet and localize('k_plus_planet') or nil`,
       colour: "G.C.SECONDARY_SET.Planet",
     };
   } else {
-    const messageText = customMessage
-      ? `"${customMessage}"`
-      : `localize('k_plus_planet')`;
     return {
       statement: `func = function()${planetCreationCode}
-                    card_eval_status_text(context.blueprint_card or card, 'extra', nil, nil, nil, {message = ${messageText}, colour = G.C.SECONDARY_SET.Planet})
+                    if created_planet then
+                        card_eval_status_text(context.blueprint_card or card, 'extra', nil, nil, nil, {message = ${
+                          customMessage
+                            ? `"${customMessage}"`
+                            : `localize('k_plus_planet')`
+                        }, colour = G.C.SECONDARY_SET.Planet})
+                    end
                     return true
                 end`,
       colour: "G.C.SECONDARY_SET.Planet",

@@ -48,45 +48,52 @@ export const generateAddTarotCardReturn = (
   }
 
   if (isNegative) {
-    tarotCreationCode = `G.E_MANAGER:add_event(Event({
-                func = function()
-                    local tarot_card = create_card('Tarot', G.consumeables, ${tarotKey})
-                    tarot_card:set_edition("e_negative", true)
-                    tarot_card:add_to_deck()
-                    G.consumeables:emplace(tarot_card)
-                    return true
-                end
-            }))`;
-  } else {
-    tarotCreationCode = `if #G.consumeables.cards + G.GAME.consumeable_buffer < G.consumeables.config.card_limit then
-                G.GAME.consumeable_buffer = G.GAME.consumeable_buffer + 1
+    tarotCreationCode = `local created_tarot = true
                 G.E_MANAGER:add_event(Event({
                     func = function()
                         local tarot_card = create_card('Tarot', G.consumeables, ${tarotKey})
+                        tarot_card:set_edition("e_negative", true)
                         tarot_card:add_to_deck()
                         G.consumeables:emplace(tarot_card)
-                        G.GAME.consumeable_buffer = 0
                         return true
                     end
-                }))
-            end`;
+                }))`;
+  } else {
+    tarotCreationCode = `local created_tarot = false
+                if #G.consumeables.cards + G.GAME.consumeable_buffer < G.consumeables.config.card_limit then
+                    created_tarot = true
+                    G.GAME.consumeable_buffer = G.GAME.consumeable_buffer + 1
+                    G.E_MANAGER:add_event(Event({
+                        func = function()
+                            local tarot_card = create_card('Tarot', G.consumeables, ${tarotKey})
+                            tarot_card:add_to_deck()
+                            G.consumeables:emplace(tarot_card)
+                            G.GAME.consumeable_buffer = 0
+                            return true
+                        end
+                    }))
+                end`;
   }
-
-  const messageText = customMessage
-    ? `"${customMessage}"`
-    : `localize('k_plus_tarot')`;
 
   if (isScoring) {
     return {
       statement: `__PRE_RETURN_CODE__${tarotCreationCode}
                 __PRE_RETURN_CODE_END__`,
-      message: messageText,
+      message: customMessage
+        ? `"${customMessage}"`
+        : `created_tarot and localize('k_plus_tarot') or nil`,
       colour: "G.C.PURPLE",
     };
   } else {
     return {
       statement: `func = function()${tarotCreationCode}
-                    card_eval_status_text(context.blueprint_card or card, 'extra', nil, nil, nil, {message = ${messageText}, colour = G.C.PURPLE})
+                    if created_tarot then
+                        card_eval_status_text(context.blueprint_card or card, 'extra', nil, nil, nil, {message = ${
+                          customMessage
+                            ? `"${customMessage}"`
+                            : `localize('k_plus_tarot')`
+                        }, colour = G.C.PURPLE})
+                    end
                     return true
                 end`,
       colour: "G.C.PURPLE",
