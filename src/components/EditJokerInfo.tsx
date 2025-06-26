@@ -324,7 +324,7 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
           <div className="flex-1 overflow-hidden relative">
             <div className="h-full overflow-y-auto custom-scrollbar">
               {activeTab === "visual" && (
-                <div className="p-4 space-y-6">
+                <div className="p-6 space-y-6">
                   {/* Background Icons */}
                   <PuzzlePieceIcon className="absolute top-4 right-8 h-32 w-32 text-black-lighter/20 -rotate-12" />
 
@@ -596,7 +596,7 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
                     </div>
                   </div>
 
-                  <div className="max-w-2xl">
+                  <div className="w-full">
                     <InputField
                       id="joker-description-edit"
                       value={formData.description}
@@ -649,8 +649,8 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
         </div>
 
         {/* Preview Section */}
-        <div className="flex-shrink-0 relative my-auto ">
-          <div className="relative" style={{ zIndex: 1000 }}>
+        <div className="flex-shrink-0 relative my-auto pb-40">
+          <div className="relative pl-24" style={{ zIndex: 1000 }}>
             <BalatroJokerCard joker={formData} size="lg" />
           </div>
         </div>

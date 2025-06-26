@@ -32,7 +32,6 @@ const BalatroJokerCard: React.FC<BalatroJokerCardProps> = ({
   const [imageError, setImageError] = useState(false);
   const [placeholderError, setPlaceholderError] = useState(false);
 
-  // Reset error states when joker image changes
   useEffect(() => {
     setImageError(false);
   }, [joker.imagePreview]);
@@ -49,7 +48,6 @@ const BalatroJokerCard: React.FC<BalatroJokerCardProps> = ({
 
   const getRarityStyles = (rarity: number) => {
     const styleMap: Record<number, { bg: string; shadow: string }> = {
-      // these are reversed because im silly and i cant be bothered to rewrite
       1: {
         bg: "bg-balatro-blueshadow",
         shadow: "bg-balatro-blue",
@@ -95,26 +93,24 @@ const BalatroJokerCard: React.FC<BalatroJokerCardProps> = ({
 
   return (
     <div
-      className={`select-none font-game ${className} ${
+      className={`select-none font-game relative ${className} ${
         onClick ? "cursor-pointer" : ""
       }`}
       onClick={onClick}
     >
       <div className="flex flex-col items-center">
-        {/* Cost Display - positioned above image */}
         {joker.cost !== undefined && (
-          <div className="bg-cost-bg border-4 border-cost-border rounded-t-2xl px-4 py-1 -mb-1 -z-10 relative">
+          <div className="bg-cost-bg border-4 border-cost-border rounded-t-2xl px-4 py-1 -mb-1 z-10 relative">
             <span className="text-cost-text font-bold text-shadow-cost text-2xl">
               ${joker.cost}
             </span>
           </div>
         )}
 
-        {/* Image Section */}
         <div
           className={`${
             currentSize.image
-          } mb-2 flex items-center justify-center overflow-hidden ${
+          } mb-2 flex items-center justify-center overflow-hidden relative z-10 ${
             joker.cost !== undefined ? "rounded-t-none" : ""
           } `}
         >
@@ -151,8 +147,9 @@ const BalatroJokerCard: React.FC<BalatroJokerCardProps> = ({
           )}
         </div>
 
-        {/* Info Section - separate from image */}
-        <div className={`${currentSize.infoWidth} flex-shrink-0`}>
+        <div
+          className={`${currentSize.infoWidth} flex-shrink-0 absolute top-full left-1/2 transform -translate-x-1/2 z-20`}
+        >
           <div className="relative m-2">
             <div className="absolute inset-0 bg-balatro-lightgreyshadow rounded-2xl translate-y-1" />
             <div className="relative">
@@ -162,7 +159,6 @@ const BalatroJokerCard: React.FC<BalatroJokerCardProps> = ({
                     {joker.name || "New Joker"}
                   </h3>
 
-                  {/* Description Box - positioned to grow independently */}
                   <div className="relative mb-3">
                     <div className="absolute inset-0 bg-balatro-whiteshadow rounded-xl translate-y-1" />
                     <div className="bg-balatro-white text-balatro-black font-thin px-3 py-2 rounded-xl relative overflow-visible">
