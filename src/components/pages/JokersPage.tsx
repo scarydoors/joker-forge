@@ -28,6 +28,138 @@ type SortOption = {
   sortFn: (a: JokerData, b: JokerData) => number;
 };
 
+let availablePlaceholders: string[] | null = null;
+let upscaledPlaceholders: string[] | null = null;
+
+const upscaleImage = (imageSrc: string): Promise<string> => {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => {
+      if (img.width === 71 && img.height === 95) {
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+
+        canvas.width = 142;
+        canvas.height = 190;
+
+        if (ctx) {
+          ctx.imageSmoothingEnabled = false;
+          ctx.drawImage(img, 0, 0, 142, 190);
+        }
+
+        resolve(canvas.toDataURL("image/png"));
+      } else {
+        resolve(imageSrc);
+      }
+    };
+    img.onerror = () => resolve(imageSrc);
+    img.src = imageSrc;
+  });
+};
+
+const getRandomPlaceholderJoker = async (): Promise<string> => {
+  if (upscaledPlaceholders && upscaledPlaceholders.length > 0) {
+    const randomIndex = Math.floor(Math.random() * upscaledPlaceholders.length);
+    return upscaledPlaceholders[randomIndex];
+  }
+
+  if (availablePlaceholders && availablePlaceholders.length > 0) {
+    const upscaled = await Promise.all(
+      availablePlaceholders.map((placeholder) => upscaleImage(placeholder))
+    );
+    upscaledPlaceholders = upscaled;
+    const randomIndex = Math.floor(Math.random() * upscaled.length);
+    return upscaled[randomIndex];
+  }
+
+  const checkImage = (src: string): Promise<boolean> => {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => resolve(true);
+      img.onerror = () => resolve(false);
+      img.src = src;
+    });
+  };
+
+  const placeholders: string[] = [];
+
+  for (let counter = 1; counter <= 10; counter++) {
+    const imagePath =
+      counter === 1
+        ? `/images/placeholderjokers/placeholder-joker.png`
+        : `/images/placeholderjokers/placeholder-joker-${counter}.png`;
+
+    if (await checkImage(imagePath)) {
+      placeholders.push(imagePath);
+    }
+  }
+
+  console.log(`Found ${placeholders.length} placeholder images.`);
+  console.log("Available placeholders:", placeholders);
+
+  availablePlaceholders = placeholders;
+
+  if (placeholders.length === 0) {
+    return "/images/placeholder-joker.png";
+  }
+
+  const upscaled = await Promise.all(
+    placeholders.map((placeholder) => upscaleImage(placeholder))
+  );
+  upscaledPlaceholders = upscaled;
+
+  const randomIndex = Math.floor(Math.random() * upscaled.length);
+  return upscaled[randomIndex];
+};
+
+const getRandomPlaceholderJokerSync = (): string => {
+  if (upscaledPlaceholders && upscaledPlaceholders.length > 0) {
+    const randomIndex = Math.floor(Math.random() * upscaledPlaceholders.length);
+    return upscaledPlaceholders[randomIndex];
+  }
+
+  if (availablePlaceholders && availablePlaceholders.length > 0) {
+    const randomIndex = Math.floor(
+      Math.random() * availablePlaceholders.length
+    );
+    return availablePlaceholders[randomIndex];
+  }
+
+  return "/images/placeholderjokers/placeholder-joker.png";
+};
+
+const isPlaceholderJoker = (imagePath: string): boolean => {
+  return (
+    imagePath.includes("/images/placeholderjokers/") ||
+    imagePath.includes("placeholder-joker") ||
+    imagePath.startsWith("data:image")
+  );
+};
+
+const validateJoker = (
+  joker: JokerData,
+  isPlaceholderJoker: (imagePath: string) => boolean
+) => {
+  const issues = [];
+
+  if (
+    !joker.imagePreview ||
+    (!isPlaceholderJoker(joker.imagePreview) && !joker.imagePreview)
+  ) {
+    issues.push("Missing image");
+  }
+
+  if (!joker.name || joker.name.trim() === "" || joker.name === "New Joker") {
+    issues.push("Generic or missing name");
+  }
+
+  if (!joker.rules || joker.rules.length === 0) {
+    issues.push("No rules defined");
+  }
+
+  return issues;
+};
+
 const JokersPage: React.FC<JokersPageProps> = ({
   modName,
   jokers,
@@ -91,30 +223,14 @@ const JokersPage: React.FC<JokersPageProps> = ({
     []
   );
 
-  const validateJoker = (joker: JokerData) => {
-    const issues = [];
+  const handleAddNewJoker = async () => {
+    const placeholderImage = await getRandomPlaceholderJoker();
 
-    if (!joker.imagePreview) {
-      issues.push("Missing image");
-    }
-
-    if (!joker.name || joker.name.trim() === "" || joker.name === "New Joker") {
-      issues.push("Generic or missing name");
-    }
-
-    if (!joker.rules || joker.rules.length === 0) {
-      issues.push("No rules defined");
-    }
-
-    return issues;
-  };
-
-  const handleAddNewJoker = () => {
     const newJoker: JokerData = {
       id: crypto.randomUUID(),
       name: "New Joker",
       description: "A {C:blue}custom{} joker with {C:red}unique{} effects.",
-      imagePreview: "",
+      imagePreview: placeholderImage,
       overlayImagePreview: "",
       rarity: 1,
       cost: 4,
@@ -150,6 +266,9 @@ const JokersPage: React.FC<JokersPageProps> = ({
       ...joker,
       id: crypto.randomUUID(),
       name: `${joker.name} Copy`,
+      imagePreview: isPlaceholderJoker(joker.imagePreview)
+        ? getRandomPlaceholderJokerSync()
+        : joker.imagePreview,
     };
     setJokers([...jokers, duplicatedJoker]);
   };
@@ -229,7 +348,7 @@ const JokersPage: React.FC<JokersPageProps> = ({
 
   const validationStats = useMemo(() => {
     const incompleteJokers = jokers.filter(
-      (joker) => validateJoker(joker).length > 0
+      (joker) => validateJoker(joker, isPlaceholderJoker).length > 0
     );
     return {
       total: jokers.length,
@@ -260,7 +379,6 @@ const JokersPage: React.FC<JokersPageProps> = ({
   return (
     <div className="min-h-screen">
       <div className="p-8 font-lexend max-w-7xl mx-auto">
-        {/* Header Section */}
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-4xl text-white-light font-light tracking-wide mb-3 bg-gradient-to-r from-white-light to-mint bg-clip-text">
@@ -292,10 +410,8 @@ const JokersPage: React.FC<JokersPageProps> = ({
           </Button>
         </div>
 
-        {/* Search and Filter Panel */}
         <div className="mb-8 bg-gradient-to-r from-black-dark to-black border-2 border-black-lighter rounded-2xl p-6 shadow-lg backdrop-blur-sm">
           <div className="flex flex-col lg:flex-row gap-4">
-            {/* Search Bar */}
             <div className="flex-1 relative group">
               <MagnifyingGlassIcon className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-white-darker group-focus-within:text-mint transition-colors" />
               <input
@@ -307,9 +423,7 @@ const JokersPage: React.FC<JokersPageProps> = ({
               />
             </div>
 
-            {/* Controls */}
             <div className="flex gap-3">
-              {/* Sort Menu */}
               <div className="relative">
                 <Button
                   variant="secondary"
@@ -349,7 +463,6 @@ const JokersPage: React.FC<JokersPageProps> = ({
                 )}
               </div>
 
-              {/* Filter Menu */}
               <div className="relative">
                 <Button
                   variant={showFilters ? "primary" : "secondary"}
@@ -412,7 +525,6 @@ const JokersPage: React.FC<JokersPageProps> = ({
             </div>
           </div>
 
-          {/* Active Filters */}
           {(searchTerm || rarityFilter !== null) && (
             <div className="mt-4 flex flex-wrap gap-2">
               {searchTerm && (
@@ -444,7 +556,6 @@ const JokersPage: React.FC<JokersPageProps> = ({
           )}
         </div>
 
-        {/* Content Area */}
         {filteredAndSortedJokers.length === 0 && jokers.length > 0 ? (
           <div className="flex flex-col items-center justify-center text-center py-20">
             <div className="bg-gradient-to-br from-black-dark to-black border-2 border-black-lighter rounded-2xl p-8 max-w-md shadow-lg">
@@ -505,7 +616,6 @@ const JokersPage: React.FC<JokersPageProps> = ({
           </div>
         )}
 
-        {/* Modals */}
         {editingJoker && (
           <EditJokerInfo
             isOpen={!!editingJoker}

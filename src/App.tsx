@@ -160,25 +160,6 @@ function AppContent() {
     }
   };
 
-  const handleAddNewJoker = () => {
-    const newJoker: JokerData = {
-      id: crypto.randomUUID(),
-      name: "New Joker",
-      description: "A {C:blue}custom{} joker with {C:red}unique{} effects.",
-      imagePreview: "",
-      overlayImagePreview: "",
-      rarity: 1,
-      cost: 4,
-      blueprint_compat: true,
-      eternal_compat: true,
-      unlocked: true,
-      discovered: true,
-      rules: [],
-    };
-    setJokers([...jokers, newJoker]);
-    navigate("/jokers");
-  };
-
   return (
     <div className="h-screen bg-black-darker flex overflow-hidden">
       <Sidebar
@@ -203,7 +184,6 @@ function AppContent() {
                 jokers={jokers}
                 modName={modMetadata.name}
                 authorName={modMetadata.author.join(", ")}
-                onAddJoker={handleAddNewJoker}
                 onExport={handleExport}
                 onNavigate={handleNavigate}
               />
@@ -217,7 +197,6 @@ function AppContent() {
                 jokers={jokers}
                 modName={modMetadata.name}
                 authorName={modMetadata.author.join(", ")}
-                onAddJoker={handleAddNewJoker}
                 onExport={handleExport}
                 onNavigate={handleNavigate}
               />

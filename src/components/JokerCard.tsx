@@ -43,7 +43,6 @@ interface JokerCardProps {
   onDuplicate: () => void;
   onQuickUpdate: (updates: Partial<JokerData>) => void;
 }
-
 const getRarityText = (rarity: number) => {
   const rarityMap: Record<number, string> = {
     1: "Common",
@@ -101,6 +100,9 @@ const JokerCard: React.FC<JokerCardProps> = ({
   const [hoveredTrash, setHoveredTrash] = useState(false);
   const [tooltipDelayTimeout, setTooltipDelayTimeout] =
     useState<NodeJS.Timeout | null>(null);
+
+  const [imageLoadError, setImageLoadError] = useState(false);
+  const [fallbackAttempted, setFallbackAttempted] = useState(false);
 
   const safeRarity =
     typeof joker.rarity === "number" && joker.rarity >= 1 && joker.rarity <= 4
@@ -235,13 +237,14 @@ const JokerCard: React.FC<JokerCardProps> = ({
             </Tooltip>
           )}
           <div className="relative">
-            {joker.imagePreview ? (
+            {joker.imagePreview && !imageLoadError ? (
               <>
                 <img
                   src={joker.imagePreview}
                   alt={joker.name}
                   className="w-full h-full object-contain"
                   draggable="false"
+                  onError={() => setImageLoadError(true)}
                 />
                 {joker.overlayImagePreview && (
                   <img
@@ -254,10 +257,19 @@ const JokerCard: React.FC<JokerCardProps> = ({
               </>
             ) : (
               <img
-                src="/images/placeholder-joker.png"
+                src={
+                  !fallbackAttempted
+                    ? "/images/placeholderjokers/placeholder-joker.png"
+                    : "/images/placeholder-joker.png"
+                }
                 alt="Default Joker"
                 className="w-full h-full object-contain"
                 draggable="false"
+                onError={() => {
+                  if (!fallbackAttempted) {
+                    setFallbackAttempted(true);
+                  }
+                }}
               />
             )}
           </div>

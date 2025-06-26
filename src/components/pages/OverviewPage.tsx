@@ -19,7 +19,6 @@ interface OverviewPageProps {
   jokers: JokerData[];
   modName: string;
   authorName: string;
-  onAddJoker: () => void;
   onExport: () => void;
   onNavigate: (section: string) => void;
 }
@@ -122,7 +121,6 @@ const OverviewPage: React.FC<OverviewPageProps> = ({
   jokers,
   modName,
   authorName,
-  onAddJoker,
   onExport,
   onNavigate,
 }) => {
@@ -248,11 +246,11 @@ const OverviewPage: React.FC<OverviewPageProps> = ({
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                 <button
-                  onClick={onAddJoker}
+                  onClick={() => onNavigate("jokers")}
                   className="flex items-center gap-2 p-3 bg-black-darker border border-black-lighter rounded-lg text-white-light hover:border-mint hover:text-mint transition-colors cursor-pointer text-sm"
                 >
                   <PlusIcon className="h-4 w-4" />
-                  <span>Create New Joker</span>
+                  <span>Add New Joker</span>
                 </button>
                 <button
                   onClick={() => onNavigate("metadata")}

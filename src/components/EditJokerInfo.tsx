@@ -40,6 +40,8 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
   const overlayFileInputRef = useRef<HTMLInputElement>(null);
   const modalRef = useRef<HTMLDivElement>(null);
 
+  const [fallbackAttempted, setFallbackAttempted] = useState(false);
+
   useEffect(() => {
     if (isOpen) {
       setFormData({
@@ -381,6 +383,7 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
                                   alt={formData.name}
                                   className="w-full h-full object-cover"
                                   draggable="false"
+                                  onError={() => setPlaceholderError(true)}
                                 />
                                 {formData.overlayImagePreview && (
                                   <img
@@ -393,11 +396,21 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
                               </>
                             ) : !placeholderError ? (
                               <img
-                                src="/images/placeholder-joker.png"
+                                src={
+                                  !fallbackAttempted
+                                    ? "/images/placeholderjokers/placeholder-joker.png"
+                                    : "/images/placeholder-joker.png"
+                                }
                                 alt="Placeholder Joker"
                                 className="w-full h-full object-cover"
                                 draggable="false"
-                                onError={() => setPlaceholderError(true)}
+                                onError={() => {
+                                  if (!fallbackAttempted) {
+                                    setFallbackAttempted(true);
+                                  } else {
+                                    setPlaceholderError(true);
+                                  }
+                                }}
                               />
                             ) : (
                               <PhotoIcon className="h-16 w-16 text-white-darker opacity-50 mx-auto my-auto" />
