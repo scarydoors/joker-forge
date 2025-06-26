@@ -31,8 +31,7 @@ export const generateAddPlanetCardReturn = (
 
   if (planetCard === "random") {
     if (isNegative) {
-      planetCreationCode = `
-            G.E_MANAGER:add_event(Event({
+      planetCreationCode = `G.E_MANAGER:add_event(Event({
                 func = function()
                     local planet_card = create_card('Planet', G.consumeables, nil, nil, nil, nil, nil, 'joker_forge_planet')
                     planet_card:set_edition("e_negative", true)
@@ -42,8 +41,7 @@ export const generateAddPlanetCardReturn = (
                 end
             }))`;
     } else {
-      planetCreationCode = `
-            if #G.consumeables.cards + G.GAME.consumeable_buffer < G.consumeables.config.card_limit then
+      planetCreationCode = `if #G.consumeables.cards + G.GAME.consumeable_buffer < G.consumeables.config.card_limit then
                 G.GAME.consumeable_buffer = G.GAME.consumeable_buffer + 1
                 G.E_MANAGER:add_event(Event({
                     func = function()
@@ -61,8 +59,7 @@ export const generateAddPlanetCardReturn = (
     const planetKey = PLANET_CARD_KEYS[planetCard] || "c_pluto";
 
     if (isNegative) {
-      planetCreationCode = `
-            G.E_MANAGER:add_event(Event({
+      planetCreationCode = `G.E_MANAGER:add_event(Event({
                 func = function()
                     local planet_card = create_card('Planet', G.consumeables, nil, nil, nil, nil, '${planetKey}')
                     planet_card:set_edition("e_negative", true)
@@ -72,8 +69,7 @@ export const generateAddPlanetCardReturn = (
                 end
             }))`;
     } else {
-      planetCreationCode = `
-            if #G.consumeables.cards + G.GAME.consumeable_buffer < G.consumeables.config.card_limit then
+      planetCreationCode = `if #G.consumeables.cards + G.GAME.consumeable_buffer < G.consumeables.config.card_limit then
                 G.GAME.consumeable_buffer = G.GAME.consumeable_buffer + 1
                 G.E_MANAGER:add_event(Event({
                     func = function()

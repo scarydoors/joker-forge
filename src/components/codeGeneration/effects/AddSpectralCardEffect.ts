@@ -37,8 +37,7 @@ export const generateAddSpectralCardReturn = (
 
   if (spectralCard === "random") {
     if (isNegative) {
-      spectralCreationCode = `
-            G.E_MANAGER:add_event(Event({
+      spectralCreationCode = `G.E_MANAGER:add_event(Event({
                 func = function()
                     local spectral_card = create_card('Spectral', G.consumeables, nil, nil, nil, nil, nil, 'joker_forge_spectral')
                     spectral_card:set_edition("e_negative", true)
@@ -48,8 +47,7 @@ export const generateAddSpectralCardReturn = (
                 end
             }))`;
     } else {
-      spectralCreationCode = `
-            if #G.consumeables.cards + G.GAME.consumeable_buffer < G.consumeables.config.card_limit then
+      spectralCreationCode = `if #G.consumeables.cards + G.GAME.consumeable_buffer < G.consumeables.config.card_limit then
                 G.GAME.consumeable_buffer = G.GAME.consumeable_buffer + 1
                 G.E_MANAGER:add_event(Event({
                     func = function()
@@ -67,8 +65,7 @@ export const generateAddSpectralCardReturn = (
     const spectralKey = SPECTRAL_CARD_KEYS[spectralCard] || "c_familiar";
 
     if (isNegative) {
-      spectralCreationCode = `
-            G.E_MANAGER:add_event(Event({
+      spectralCreationCode = `G.E_MANAGER:add_event(Event({
                 func = function()
                     local spectral_card = create_card('Spectral', G.consumeables, nil, nil, nil, nil, '${spectralKey}')
                     spectral_card:set_edition("e_negative", true)
@@ -78,8 +75,7 @@ export const generateAddSpectralCardReturn = (
                 end
             }))`;
     } else {
-      spectralCreationCode = `
-            if #G.consumeables.cards + G.GAME.consumeable_buffer < G.consumeables.config.card_limit then
+      spectralCreationCode = `if #G.consumeables.cards + G.GAME.consumeable_buffer < G.consumeables.config.card_limit then
                 G.GAME.consumeable_buffer = G.GAME.consumeable_buffer + 1
                 G.E_MANAGER:add_event(Event({
                     func = function()

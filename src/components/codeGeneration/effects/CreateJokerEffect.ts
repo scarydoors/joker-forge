@@ -32,10 +32,7 @@ export const generateCreateJokerReturn = (
                     G.jokers:emplace(joker_card)
                     return true
                 end
-            }))
-            card_eval_status_text(context.blueprint_card or card, 'extra', nil, nil, nil, {message = ${
-              customMessage ? `"${customMessage}"` : `localize('k_plus_joker')`
-            }, colour = G.C.BLUE})`;
+            }))`;
     } else {
       jokerCreationCode = `if #G.jokers.cards + G.GAME.joker_buffer < G.jokers.config.card_limit then
                 G.GAME.joker_buffer = G.GAME.joker_buffer + 1
@@ -48,26 +45,12 @@ export const generateCreateJokerReturn = (
                         return true
                     end
                 }))
-                card_eval_status_text(context.blueprint_card or card, 'extra', nil, nil, nil, {message = ${
-                  customMessage
-                    ? `"${customMessage}"`
-                    : `localize('k_plus_joker')`
-                }, colour = G.C.BLUE})
             end`;
     }
   } else {
-    let rarityParam = "";
+    // Random joker creation
     let rarityNumber = "nil";
-
     if (rarity !== "random") {
-      const rarityMap: Record<string, string> = {
-        common: "Common",
-        uncommon: "Uncommon",
-        rare: "Rare",
-        legendary: "Legendary",
-      };
-      rarityParam = `, rarity = '${rarityMap[rarity] || ""}'`;
-
       const rarityNumberMap: Record<string, string> = {
         common: "1",
         uncommon: "2",
@@ -86,54 +69,59 @@ export const generateCreateJokerReturn = (
                     G.jokers:emplace(joker_card)
                     return true
                 end
-            }))
-            card_eval_status_text(context.blueprint_card or card, 'extra', nil, nil, nil, {message = ${
-              customMessage ? `"${customMessage}"` : `localize('k_plus_joker')`
-            }, colour = G.C.BLUE})`;
+            }))`;
     } else {
       const editionCode = hasEdition
         ? `\n                        joker_card:set_edition("${edition}", true)`
         : "";
 
-      jokerCreationCode = `local jokers_to_create = math.min(2, G.jokers.config.card_limit - (#G.jokers.cards + G.GAME.joker_buffer))
-            if jokers_to_create > 0 then
-                G.GAME.joker_buffer = G.GAME.joker_buffer + jokers_to_create
+      if (hasEdition) {
+        jokerCreationCode = `if #G.jokers.cards + G.GAME.joker_buffer < G.jokers.config.card_limit then
+                G.GAME.joker_buffer = G.GAME.joker_buffer + 1
                 G.E_MANAGER:add_event(Event({
                     func = function()
-                        for i = 1, jokers_to_create do
-                            ${
-                              hasEdition
-                                ? `local joker_card = create_card('Joker', G.jokers, nil, ${rarityNumber}, nil, nil, nil, 'joker_forge_random')${editionCode}
-                            joker_card:add_to_deck()
-                            G.jokers:emplace(joker_card)`
-                                : `SMODS.add_card {
-                                set = 'Joker'${rarityParam},
-                                key_append = 'joker_forge_random'
-                            }`
-                            }
-                        end
+                        local joker_card = create_card('Joker', G.jokers, nil, ${rarityNumber}, nil, nil, nil, 'joker_forge_random')${editionCode}
+                        joker_card:add_to_deck()
+                        G.jokers:emplace(joker_card)
                         G.GAME.joker_buffer = 0
                         return true
                     end
                 }))
-                card_eval_status_text(context.blueprint_card or card, 'extra', nil, nil, nil, {message = ${
-                  customMessage
-                    ? `"${customMessage}"`
-                    : `localize('k_plus_joker')`
-                }, colour = G.C.BLUE})
             end`;
+      } else {
+        jokerCreationCode = `if #G.jokers.cards + G.GAME.joker_buffer < G.jokers.config.card_limit then
+                G.GAME.joker_buffer = G.GAME.joker_buffer + 1
+                G.E_MANAGER:add_event(Event({
+                    func = function()
+                        SMODS.add_card {
+                            set = 'Joker',
+                            key_append = 'joker_forge_random'
+                        }
+                        G.GAME.joker_buffer = 0
+                        return true
+                    end
+                }))
+            end`;
+      }
     }
   }
 
   if (isScoring) {
     return {
-      statement: `__PRE_RETURN_CODE__${jokerCreationCode}__PRE_RETURN_CODE_END__`,
+      statement: `__PRE_RETURN_CODE__${jokerCreationCode}
+                __PRE_RETURN_CODE_END__`,
+      message: customMessage
+        ? `"${customMessage}"`
+        : `localize('k_plus_joker')`,
       colour: "G.C.BLUE",
     };
   } else {
     return {
       statement: `func = function()
             ${jokerCreationCode}
+            card_eval_status_text(context.blueprint_card or card, 'extra', nil, nil, nil, {message = ${
+              customMessage ? `"${customMessage}"` : `localize('k_plus_joker')`
+            }, colour = G.C.BLUE})
             return true
         end`,
       colour: "G.C.BLUE",

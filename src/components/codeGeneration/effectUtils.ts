@@ -284,29 +284,50 @@ const buildReturnStatement = (effects: EffectReturn[]): string => {
                 }`;
   }
 
-  const firstEffect = effects[0];
-  const hasFirstStatement = firstEffect.statement.trim().length > 0;
+  // Find the first effect that actually has content to return
+  let firstContentEffectIndex = -1;
+  for (let i = 0; i < effects.length; i++) {
+    const effect = effects[i];
+    if (effect.statement.trim().length > 0 || effect.message) {
+      firstContentEffectIndex = i;
+      break;
+    }
+  }
+
+  // If no effects have content, return empty
+  if (firstContentEffectIndex === -1) {
+    return `return {
+                    colour = ${effects[0]?.colour || "G.C.WHITE"}
+                }`;
+  }
+
+  const firstContentEffect = effects[firstContentEffectIndex];
+  const hasFirstStatement = firstContentEffect.statement.trim().length > 0;
 
   let returnStatement = "";
 
+  // Build the main return statement from the first content-bearing effect
   if (hasFirstStatement) {
     returnStatement = `return {
-                    ${firstEffect.statement}`;
+                    ${firstContentEffect.statement}`;
 
-    if (firstEffect.message) {
+    if (firstContentEffect.message) {
       returnStatement += `,
-                    message = ${firstEffect.message}`;
+                    message = ${firstContentEffect.message}`;
     }
-  } else if (firstEffect.message) {
+  } else if (firstContentEffect.message) {
     returnStatement = `return {
-                    message = ${firstEffect.message}`;
+                    message = ${firstContentEffect.message}`;
   }
 
-  if (effects.length > 1) {
+  // Handle additional effects after the first content-bearing effect
+  const remainingEffects = effects.slice(firstContentEffectIndex + 1);
+  if (remainingEffects.length > 0) {
     let extraChain = "";
+    let extraCount = 0;
 
-    for (let i = 1; i < effects.length; i++) {
-      const effect = effects[i];
+    for (let i = 0; i < remainingEffects.length; i++) {
+      const effect = remainingEffects[i];
       const hasStatement = effect.statement.trim().length > 0;
 
       let extraContent = "";
@@ -322,7 +343,7 @@ const buildReturnStatement = (effects: EffectReturn[]): string => {
 
       if (!extraContent) continue;
 
-      if (i === 1) {
+      if (extraCount === 0) {
         extraChain = `,
                     extra = {
                         ${extraContent},
@@ -333,23 +354,16 @@ const buildReturnStatement = (effects: EffectReturn[]): string => {
                             ${extraContent},
                             colour = ${effect.colour}`;
       }
+      extraCount++;
     }
 
-    const extraCount = effects
-      .slice(1)
-      .filter((e) => e.statement.trim().length > 0 || e.message).length;
-
+    // Close all the extra blocks
     for (let i = 0; i < extraCount; i++) {
       extraChain += `
                         }`;
     }
 
     returnStatement += extraChain;
-  }
-
-  if (returnStatement.trim().length === 0) {
-    returnStatement = `return {
-                    colour = ${firstEffect.colour}`;
   }
 
   returnStatement += `
