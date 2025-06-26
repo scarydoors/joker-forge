@@ -70,10 +70,18 @@ const generateConditionGroupCode = (
     return "";
   }
 
-  const operator = group.operator === "or" ? " or " : " and ";
-  return conditionCodes.length === 1
-    ? conditionCodes[0]
-    : `(${conditionCodes.join(operator)})`;
+  if (conditionCodes.length === 1) {
+    return conditionCodes[0];
+  }
+
+  let result = conditionCodes[0];
+  for (let i = 1; i < conditionCodes.length; i++) {
+    const prevCondition = group.conditions[i - 1];
+    const operator = prevCondition.operator === "or" ? " or " : " and ";
+    result += operator + conditionCodes[i];
+  }
+
+  return `(${result})`;
 };
 
 const generateSingleConditionCode = (
