@@ -13,7 +13,7 @@ import InputField from "./generic/InputField";
 import InputDropdown from "./generic/InputDropdown";
 import Checkbox from "./generic/Checkbox";
 import Button from "./generic/Button";
-import { BalatroText } from "./generic/balatroTextFormatter";
+import BalatroJokerCard from "./generic/BalatroJokerCard";
 import { JokerData } from "./JokerCard";
 
 interface EditJokerInfoProps {
@@ -67,7 +67,6 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
         document.removeEventListener("mousedown", handleClickOutside);
       };
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
 
   if (!isOpen) return null;
@@ -254,36 +253,6 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
     { value: "4", label: "Legendary" },
   ];
 
-  const getRarityColor = (rarity: number) => {
-    switch (rarity) {
-      case 1:
-        return "text-balatro-blue";
-      case 2:
-        return "text-balatro-green";
-      case 3:
-        return "text-balatro-red";
-      case 4:
-        return "text-balatro-purple";
-      default:
-        return "text-white-light";
-    }
-  };
-
-  const getRarityLabel = (rarity: number) => {
-    switch (rarity) {
-      case 1:
-        return "Common";
-      case 2:
-        return "Uncommon";
-      case 3:
-        return "Rare";
-      case 4:
-        return "Legendary";
-      default:
-        return "Common";
-    }
-  };
-
   const tabs = [
     { id: "visual", label: "Visual", icon: PhotoIcon },
     { id: "properties", label: "Properties", icon: CubeIcon },
@@ -294,7 +263,7 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
     <div className="fixed inset-0 flex bg-black-darker/80 backdrop-blur-sm items-center justify-center z-50 font-lexend">
       <div
         ref={modalRef}
-        className="bg-black-dark backdrop-blur-md border-2 border-black-lighter rounded-lg shadow-2xl w-full max-w-5xl max-h-[90vh] flex flex-col"
+        className="bg-black-dark backdrop-blur-md border-2 border-black-lighter rounded-lg shadow-2xl w-full max-w-6xl max-h-[90vh] flex flex-col"
       >
         <div className="flex items-center justify-between p-3 border-b border-black-lighter">
           <div className="flex items-center gap-2">
@@ -651,109 +620,8 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
             </div>
           </div>
 
-          <div className="w-80 bg-black-darker border-l border-black-lighter p-6 overflow-y-auto">
-            <h3 className="text-white-light text-sm font-medium tracking-wider mb-4">
-              PREVIEW
-            </h3>
-
-            <div className="bg-black border-2 border-black-lighter rounded-lg p-4 shadow-lg">
-              <div className="aspect-[142/190] w-full max-w-[200px] mx-auto bg-black-darker border border-black-lighter rounded-lg overflow-hidden mb-4 relative">
-                {formData.imagePreview ? (
-                  <>
-                    <img
-                      src={formData.imagePreview}
-                      alt={formData.name}
-                      className="w-full h-full object-cover"
-                      draggable="false"
-                    />
-                    {formData.overlayImagePreview && (
-                      <img
-                        src={formData.overlayImagePreview}
-                        alt={`${formData.name} overlay`}
-                        className="absolute inset-0 w-full h-full object-cover"
-                        draggable="false"
-                      />
-                    )}
-                  </>
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center text-white-darker">
-                    <PhotoIcon className="h-16 w-16" />
-                  </div>
-                )}
-              </div>
-
-              <div className="text-center">
-                <h4 className="font-game text-xl text-white-light mb-2 tracking-wider">
-                  {formData.name || "New Joker"}
-                </h4>
-
-                <div className="mb-3 text-sm">
-                  <span
-                    className={`font-medium ${getRarityColor(formData.rarity)}`}
-                  >
-                    {getRarityLabel(formData.rarity)}
-                  </span>
-                  <span className="text-white-darker mx-2">•</span>
-                  <span className="text-balatro-money">
-                    ${formData.cost || 4}
-                  </span>
-                </div>
-
-                <div className="bg-black-darker p-3 rounded-lg border border-black-lighter">
-                  <div className="font-game text-sm text-white-light leading-relaxed">
-                    <BalatroText
-                      text={
-                        formData.description ||
-                        "A custom joker with unique effects."
-                      }
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-4 space-y-3">
-              <div className="bg-black-darker/50 rounded-lg p-3 border border-black-lighter">
-                <p className="text-white-darker text-xs mb-2">Compatibility</p>
-                <div className="space-y-1 text-xs">
-                  <div className="flex items-center justify-between">
-                    <span className="text-white-darker">Blueprint</span>
-                    <span
-                      className={
-                        formData.blueprint_compat
-                          ? "text-mint"
-                          : "text-balatro-red"
-                      }
-                    >
-                      {formData.blueprint_compat ? "Yes" : "No"}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-white-darker">Eternal</span>
-                    <span
-                      className={
-                        formData.eternal_compat
-                          ? "text-mint"
-                          : "text-balatro-red"
-                      }
-                    >
-                      {formData.eternal_compat ? "Yes" : "No"}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-black-darker/50 rounded-lg p-3 border border-black-lighter">
-                <p className="text-white-darker text-xs mb-2">Statistics</p>
-                <div className="space-y-1 text-xs text-white-darker">
-                  <div>Name: {formData.name?.length || 0} characters</div>
-                  <div>
-                    Description: {formData.description?.length || 0} characters
-                  </div>
-                  <div>Rules: {formData.rules?.length || 0} defined</div>
-                </div>
-              </div>
-            </div>
+          <div className="w-96 border-l border-black-lighter overflow-y-auto flex items-center justify-center">
+            <BalatroJokerCard joker={formData} size="lg" />
           </div>
         </div>
       </div>
