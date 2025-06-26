@@ -81,14 +81,25 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
       reader.onload = () => {
         const img = new Image();
         img.onload = () => {
-          if (img.width === 142 && img.height === 190) {
+          let finalImageData: string;
+
+          if (
+            (img.width === 71 && img.height === 95) ||
+            (img.width === 142 && img.height === 190)
+          ) {
+            if (img.width === 71 && img.height === 95) {
+              finalImageData = upscaleImage(img);
+            } else {
+              finalImageData = reader.result as string;
+            }
+
             setFormData({
               ...formData,
-              overlayImagePreview: reader.result as string,
+              overlayImagePreview: finalImageData,
             });
           } else {
             alert(
-              `Overlay image dimensions must be 142x190 pixels. Your image is ${img.width}x${img.height}.`
+              `Overlay image dimensions must be either 71x95 or 142x190 pixels. Your image is ${img.width}x${img.height}.`
             );
           }
         };
@@ -131,6 +142,21 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
     });
   };
 
+  const upscaleImage = (img: HTMLImageElement): string => {
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
+
+    canvas.width = 142;
+    canvas.height = 190;
+
+    if (ctx) {
+      ctx.imageSmoothingEnabled = false;
+      ctx.drawImage(img, 0, 0, 142, 190);
+    }
+
+    return canvas.toDataURL("image/png");
+  };
+
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] || null;
     if (file) {
@@ -138,15 +164,26 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
       reader.onload = () => {
         const img = new Image();
         img.onload = () => {
-          if (img.width === 142 && img.height === 190) {
+          let finalImageData: string;
+
+          if (
+            (img.width === 71 && img.height === 95) ||
+            (img.width === 142 && img.height === 190)
+          ) {
+            if (img.width === 71 && img.height === 95) {
+              finalImageData = upscaleImage(img);
+            } else {
+              finalImageData = reader.result as string;
+            }
+
             setFormData({
               ...formData,
-              imagePreview: reader.result as string,
+              imagePreview: finalImageData,
             });
             setPlaceholderError(false);
           } else {
             alert(
-              `Image dimensions must be 142x190 pixels. Your image is ${img.width}x${img.height}.`
+              `Image dimensions must be either 71x95 or 142x190 pixels. Your image is ${img.width}x${img.height}.`
             );
           }
         };
@@ -419,7 +456,7 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
                             )}
                           </div>
                           <p className="text-xs text-white-darker mt-2 text-center">
-                            Required: 142×190px each
+                            Accepted: 71×95px or 142×190px each
                           </p>
                         </div>
 
