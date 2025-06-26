@@ -115,6 +115,8 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
     label: "Edit Hands",
     description: "Modify the number of hands available",
     applicableTriggers: [
+      "hand_played",
+      "hand_discarded",
       "passive",
       "blind_selected",
       "blind_skipped",
@@ -156,6 +158,8 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
     label: "Edit Discards",
     description: "Modify the number of discards available",
     applicableTriggers: [
+      "hand_played",
+      "hand_discarded",
       "passive",
       "blind_selected",
       "blind_skipped",
@@ -196,6 +200,8 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
     label: "Edit Hand Size",
     description: "Modify the hand size (number of cards you can hold)",
     applicableTriggers: [
+      "hand_played",
+      "hand_discarded",
       "passive",
       "blind_selected",
       "blind_skipped",
