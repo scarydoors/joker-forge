@@ -23,7 +23,7 @@ interface StyleState {
 }
 
 const COLOR_MAP: Record<string, string> = {
-  white: "text-white-lighter",
+  white: "text-balatro-white",
   blue: "text-balatro-blue",
   red: "text-balatro-red",
   orange: "text-balatro-orange",
