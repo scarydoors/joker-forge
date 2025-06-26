@@ -529,21 +529,19 @@ const slugify = (text: string): string => {
 };
 
 const formatJokerDescription = (joker: JokerData): string => {
+  // First convert any HTML breaks to [s] tags
   const formatted = joker.description.replace(/<br\s*\/?>/gi, "[s]");
 
-  const words = formatted.split(" ");
-  const lines = [];
-  let line = "";
+  // Split only on [s] tags, removing the [s] markers
+  const lines = formatted
+    .split("[s]")
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0);
 
-  words.forEach((word) => {
-    if (line.length + word.length + 1 > 28 || word.includes("[s]")) {
-      lines.push(line.trim());
-      line = "";
-    }
-    line += (line ? " " : "") + word.replace("[s]", "");
-  });
-
-  if (line) lines.push(line.trim());
+  // If no [s] tags were found, treat the entire description as one line
+  if (lines.length === 0) {
+    lines.push(formatted.trim());
+  }
 
   return `{\n${lines
     .map((line, i) => `            [${i + 1}] = '${line.replace(/'/g, "\\'")}'`)
