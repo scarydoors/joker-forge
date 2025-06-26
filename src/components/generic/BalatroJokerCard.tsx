@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { PhotoIcon } from "@heroicons/react/24/outline";
 import { BalatroText } from "./balatroTextFormatter";
 
@@ -30,6 +30,12 @@ const BalatroJokerCard: React.FC<BalatroJokerCardProps> = ({
   size = "md",
 }) => {
   const [imageError, setImageError] = useState(false);
+  const [placeholderError, setPlaceholderError] = useState(false);
+
+  // Reset error states when joker image changes
+  useEffect(() => {
+    setImageError(false);
+  }, [joker.imagePreview]);
 
   const getRarityText = (rarity: number): string => {
     const rarityMap: Record<number, string> = {
@@ -43,21 +49,22 @@ const BalatroJokerCard: React.FC<BalatroJokerCardProps> = ({
 
   const getRarityStyles = (rarity: number) => {
     const styleMap: Record<number, { bg: string; shadow: string }> = {
+      // these are reversed because im silly and i cant be bothered to rewrite
       1: {
-        bg: "bg-balatro-blue",
-        shadow: "bg-balatro-blueshadow",
+        bg: "bg-balatro-blueshadow",
+        shadow: "bg-balatro-blue",
       },
       2: {
-        bg: "bg-balatro-green",
-        shadow: "bg-balatro-greenshadow",
+        bg: "bg-balatro-greenshadow",
+        shadow: "bg-balatro-green",
       },
       3: {
-        bg: "bg-balatro-red",
-        shadow: "bg-balatro-redshadow",
+        bg: "bg-balatro-redshadow",
+        shadow: "bg-balatro-red",
       },
       4: {
-        bg: "bg-balatro-purple",
-        shadow: "bg-balatro-purpleshadow",
+        bg: "bg-balatro-purpleshadow",
+        shadow: "bg-balatro-purple",
       },
     };
     return styleMap[rarity] || styleMap[1];
@@ -65,16 +72,16 @@ const BalatroJokerCard: React.FC<BalatroJokerCardProps> = ({
 
   const sizeClasses = {
     sm: {
-      image: "w-32 h-40",
-      infoWidth: "w-44",
+      image: "w-28 h-36",
+      infoWidth: "min-w-40",
     },
     md: {
-      image: "w-48 h-60",
-      infoWidth: "w-56",
+      image: "w-40 h-52",
+      infoWidth: "min-w-48",
     },
     lg: {
-      image: "w-56 h-72",
-      infoWidth: "w-64",
+      image: "w-48 h-64",
+      infoWidth: "min-w-56",
     },
   };
 
@@ -94,8 +101,22 @@ const BalatroJokerCard: React.FC<BalatroJokerCardProps> = ({
       onClick={onClick}
     >
       <div className="flex flex-col items-center">
+        {/* Cost Display - positioned above image */}
+        {joker.cost !== undefined && (
+          <div className="bg-cost-bg border-4 border-cost-border rounded-t-2xl px-4 py-1 -mb-1 -z-10 relative">
+            <span className="text-cost-text font-bold text-shadow-cost text-2xl">
+              ${joker.cost}
+            </span>
+          </div>
+        )}
+
+        {/* Image Section */}
         <div
-          className={`${currentSize.image} mb-2 flex items-center justify-center overflow-hidden`}
+          className={`${
+            currentSize.image
+          } mb-2 flex items-center justify-center overflow-hidden ${
+            joker.cost !== undefined ? "rounded-t-none" : ""
+          } `}
         >
           {!imageError && joker.imagePreview ? (
             <div className="relative w-full h-full">
@@ -115,14 +136,23 @@ const BalatroJokerCard: React.FC<BalatroJokerCardProps> = ({
                 />
               )}
             </div>
+          ) : !placeholderError ? (
+            <img
+              src="/images/placeholder-joker.png"
+              alt="Placeholder Joker"
+              className="w-full h-full"
+              draggable="false"
+              onError={() => setPlaceholderError(true)}
+            />
           ) : (
             <div className="w-full h-full bg-balatro-black flex items-center justify-center">
-              <PhotoIcon className="h-16 w-16 text-white-darker opacity-50" />
+              <PhotoIcon className="h-16 w-16 text-white-darker" />
             </div>
           )}
         </div>
 
-        <div className={`${currentSize.infoWidth}`}>
+        {/* Info Section - separate from image */}
+        <div className={`${currentSize.infoWidth} flex-shrink-0`}>
           <div className="relative m-2">
             <div className="absolute inset-0 bg-balatro-lightgreyshadow rounded-2xl translate-y-1" />
             <div className="relative">
@@ -132,15 +162,17 @@ const BalatroJokerCard: React.FC<BalatroJokerCardProps> = ({
                     {joker.name || "New Joker"}
                   </h3>
 
-                  <div className="relative">
+                  {/* Description Box - positioned to grow independently */}
+                  <div className="relative mb-3">
                     <div className="absolute inset-0 bg-balatro-whiteshadow rounded-xl translate-y-1" />
-                    <div className="bg-balatro-white text-balatro-black font-thin px-3 py-2 rounded-xl relative mb-3">
-                      <div className="text-base text-center leading-4">
+                    <div className="bg-balatro-white text-balatro-black font-thin px-3 py-2 rounded-xl relative overflow-visible">
+                      <div className="text-base text-center leading-4 relative z-10">
                         <BalatroText
                           text={
                             joker.description ||
                             "A custom joker with unique effects."
                           }
+                          noWrap={true}
                         />
                       </div>
                     </div>
@@ -148,10 +180,10 @@ const BalatroJokerCard: React.FC<BalatroJokerCardProps> = ({
 
                   <div className="relative mx-6 mt-3">
                     <div
-                      className={`absolute inset-0 ${rarityStyles.shadow} rounded-xl translate-y-1`}
+                      className={`absolute inset-0 ${rarityStyles.bg} rounded-xl translate-y-1`}
                     />
                     <div
-                      className={`${rarityStyles.bg} rounded-xl text-center text-lg text-balatro-white py-1`}
+                      className={`${rarityStyles.shadow} rounded-xl text-center text-lg text-balatro-white py-1 relative`}
                     >
                       <span className="relative text-shadow-pixel">
                         {rarityText}

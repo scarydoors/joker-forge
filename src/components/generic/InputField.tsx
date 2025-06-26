@@ -3,13 +3,14 @@ import React, {
   ReactNode,
   useState,
   forwardRef,
+  KeyboardEvent,
 } from "react";
 import { PencilIcon } from "@heroicons/react/24/outline";
 
 interface InputFieldProps
   extends Omit<
     InputHTMLAttributes<HTMLInputElement | HTMLTextAreaElement>,
-    "size"
+    "size" | "onKeyDown"
   > {
   label?: string;
   icon?: ReactNode;
@@ -22,6 +23,9 @@ interface InputFieldProps
   value: string;
   onChange: (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => void;
+  onKeyDown?: (
+    e: KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => void;
   labelPosition?: "left" | "center" | "right";
 }
@@ -43,6 +47,7 @@ const InputField = forwardRef<
       className = "",
       value,
       onChange,
+      onKeyDown,
       labelPosition = "center",
       ...props
     },
@@ -158,6 +163,7 @@ const InputField = forwardRef<
               ref={ref as React.Ref<HTMLTextAreaElement>}
               value={value}
               onChange={onChange}
+              onKeyDown={onKeyDown}
               onFocus={() => setIsFocused(true)}
               onBlur={() => setIsFocused(false)}
               className={inputClasses}
@@ -169,6 +175,7 @@ const InputField = forwardRef<
               ref={ref as React.Ref<HTMLInputElement>}
               value={value}
               onChange={onChange}
+              onKeyDown={onKeyDown}
               onFocus={() => setIsFocused(true)}
               onBlur={() => setIsFocused(false)}
               className={inputClasses}

@@ -169,17 +169,21 @@ interface BalatroTextProps {
   text: string;
   locVars?: { colours?: string[] };
   className?: string;
+  noWrap?: boolean; // When true, prevents text wrapping
 }
 
 export const BalatroText: React.FC<BalatroTextProps> = ({
   text,
   locVars,
   className = "",
+  noWrap = false, // Default to false so text wraps normally
 }) => {
   const segments = parseBalatroText(text, locVars);
 
+  const wrapperClass = noWrap ? "whitespace-nowrap" : "";
+
   return (
-    <span className={className}>
+    <span className={`${className} ${wrapperClass}`}>
       {segments.map((segment, index) => {
         let classes = segment.textColor || "";
 

@@ -75,6 +75,12 @@ html {
   --color-condition-dark: #155bb8;
   --color-trigger-dark: #268a52;
 
+  /* Cost display colors */
+  --color-cost-border: #1e292c;
+  --color-cost-bg: #2e393d;
+  --color-cost-text: #e3af3e;
+  --color-cost-shadow: #1c2225;
+
   /* Font family */
   --font-game: "m6x11plus", sans-serif;
   --font-lexend: "Lexend", sans-serif;
@@ -113,6 +119,10 @@ html {
 
   .text-shadow-pixel {
     text-shadow: 0 2px 0 rgba(0, 0, 0, 0.5);
+  }
+
+  .text-shadow-cost {
+    text-shadow: 0 1px 2px var(--color-cost-shadow);
   }
 
   .pixelated {
