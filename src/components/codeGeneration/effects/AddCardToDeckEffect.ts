@@ -88,7 +88,7 @@ export const generateAddCardToDeckReturn = (
                     end
                 }))
                 __PRE_RETURN_CODE_END__`,
-      message: `"Added Card!"`,
+      message: customMessage ? `"${customMessage}"` : '"Added Card!"',
       colour: "G.C.GREEN",
     };
   } else {
@@ -107,7 +107,8 @@ export const generateAddCardToDeckReturn = (
                     return true
                 end
             }))
-            __PRE_RETURN_CODE_END__func = function()
+            __PRE_RETURN_CODE_END__
+            func = function()
                 G.E_MANAGER:add_event(Event({
                     func = function()
                         G.deck.config.card_limit = G.deck.config.card_limit + 1
@@ -117,7 +118,7 @@ export const generateAddCardToDeckReturn = (
                 draw_card(G.play, G.deck, 90, 'up')
                 SMODS.calculate_context({ playing_card_added = true, cards = { new_card } })
             end`,
-      message: customMessage ? `"${customMessage}"` : "Added Card!",
+      message: customMessage ? `"${customMessage}"` : '"Added Card!"',
       colour: "G.C.GREEN",
     };
   }
