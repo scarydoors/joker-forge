@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import {
   PhotoIcon,
   ArrowPathIcon,
@@ -41,7 +41,15 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
   const overlayFileInputRef = useRef<HTMLInputElement>(null);
   const modalRef = useRef<HTMLDivElement>(null);
 
+  const [lastDescription, setLastDescription] = useState<string>("");
+  const [autoFormatEnabled, setAutoFormatEnabled] = useState(false);
   const [fallbackAttempted, setFallbackAttempted] = useState(false);
+  const [lastFormattedText, setLastFormattedText] = useState<string>("");
+
+  const handleSave = useCallback(() => {
+    onSave(formData);
+    onClose();
+  }, [formData, onSave, onClose]);
 
   useEffect(() => {
     if (isOpen) {
@@ -53,6 +61,8 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
         discovered: joker.discovered !== false,
       });
       setPlaceholderError(false);
+      setLastDescription(joker.description || "");
+      setLastFormattedText("");
     }
   }, [isOpen, joker]);
 
@@ -72,10 +82,143 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
         document.removeEventListener("mousedown", handleClickOutside);
       };
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen]);
+  }, [isOpen, handleSave]);
 
   if (!isOpen) return null;
+
+  const toggleUndo = () => {
+    const currentDesc = formData.description;
+    handleInputChange("description", lastDescription, false);
+    setLastDescription(currentDesc);
+  };
+
+  const parseTag = (tag: string): Record<string, string> => {
+    const content = tag.slice(1, -1);
+    if (!content) return {};
+
+    const modifiers: Record<string, string> = {};
+    const parts = content.split(",");
+
+    for (const part of parts) {
+      const [key, value] = part.split(":");
+      if (key && value) {
+        modifiers[key.trim()] = value.trim();
+      }
+    }
+
+    return modifiers;
+  };
+
+  const buildTag = (modifiers: Record<string, string>): string => {
+    if (Object.keys(modifiers).length === 0) return "{}";
+
+    const parts = Object.entries(modifiers).map(
+      ([key, value]) => `${key}:${value}`
+    );
+    return `{${parts.join(",")}}`;
+  };
+
+  const applyAutoFormatting = (text: string): string => {
+    if (!autoFormatEnabled || text === lastFormattedText) return text;
+
+    let formatted = text;
+    const words = text.split(/(\s+)/);
+    let hasChanges = false;
+
+    for (let i = 0; i < words.length; i++) {
+      const word = words[i];
+      if (!word || word.match(/^\s+$/)) continue;
+
+      const lowerWord = word.toLowerCase();
+
+      if (lowerWord.match(/^tarot$/)) {
+        words[i] = `{C:tarot}${word}{}`;
+        hasChanges = true;
+      } else if (word.match(/^-\d+(\.\d+)?$/)) {
+        words[i] = `{C:red}${word}{}`;
+        hasChanges = true;
+      }
+
+      if (i >= 2) {
+        const prevSuit = words[i - 2];
+        const prevSpace = words[i - 1];
+
+        if (prevSuit && prevSpace && prevSpace.match(/^\s+$/)) {
+          const lowerSuit = prevSuit.toLowerCase();
+          if (lowerSuit.match(/^(hearts?|spades?|clubs?|diamonds?)$/)) {
+            const suitName =
+              lowerSuit.charAt(0).toUpperCase() + lowerSuit.slice(1);
+            words[i - 2] = `{C:${suitName}}${prevSuit}{}`;
+            hasChanges = true;
+          }
+        }
+      }
+
+      if (i >= 4) {
+        const prevNumber = words[i - 4];
+        const prevSpace = words[i - 3];
+        const contextWord = words[i - 2];
+        const currentSpace = words[i - 1];
+
+        if (
+          prevNumber &&
+          prevNumber.match(/^\+\d+(\.\d+)?$/) &&
+          prevSpace &&
+          prevSpace.match(/^\s+$/) &&
+          contextWord &&
+          currentSpace &&
+          currentSpace.match(/^\s+$/)
+        ) {
+          const contextLower = contextWord.toLowerCase();
+
+          if (contextLower.includes("chip")) {
+            words[i - 4] = `{C:blue}${prevNumber}{}`;
+            hasChanges = true;
+          } else if (contextLower.includes("mult")) {
+            words[i - 4] = `{C:red}${prevNumber}{}`;
+            hasChanges = true;
+          } else if (contextLower.includes("dollar")) {
+            words[i - 4] = `{C:money}${prevNumber}{}`;
+            hasChanges = true;
+          } else {
+            words[i - 4] = `{C:orange}${prevNumber}{}`;
+            hasChanges = true;
+          }
+        }
+      }
+
+      if (i >= 4) {
+        const prevXNumber = words[i - 4];
+        const prevSpace = words[i - 3];
+        const contextWord = words[i - 2];
+        const currentSpace = words[i - 1];
+
+        if (
+          prevXNumber &&
+          prevXNumber.match(/^x(\d*\.?\d*)$/i) &&
+          prevSpace &&
+          prevSpace.match(/^\s+$/) &&
+          contextWord &&
+          contextWord.toLowerCase().includes("mult") &&
+          currentSpace &&
+          currentSpace.match(/^\s+$/)
+        ) {
+          const match = prevXNumber.match(/^x(\d*\.?\d*)$/i);
+          if (match) {
+            words[i - 4] = `{X:red,C:white}X${match[1]}{}`;
+            hasChanges = true;
+          }
+        }
+      }
+    }
+
+    if (hasChanges) {
+      formatted = words.join("");
+      setLastFormattedText(formatted);
+    }
+
+    return formatted;
+  };
 
   const handleOverlayImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] || null;
@@ -112,11 +255,23 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
     }
   };
 
-  const handleInputChange = (field: string, value: string) => {
-    setFormData({
-      ...formData,
-      [field]: value,
-    });
+  const handleInputChange = (
+    field: string,
+    value: string,
+    shouldAutoFormat: boolean = true
+  ) => {
+    if (field === "description" && shouldAutoFormat) {
+      const formattedValue = applyAutoFormatting(value);
+      setFormData({
+        ...formData,
+        [field]: formattedValue,
+      });
+    } else {
+      setFormData({
+        ...formData,
+        [field]: value,
+      });
+    }
   };
 
   const handleNumberChange = (field: string, value: number) => {
@@ -211,11 +366,6 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
     }
   };
 
-  const handleSave = () => {
-    onSave(formData);
-    onClose();
-  };
-
   const handleDelete = () => {
     if (window.confirm("Are you sure you want to delete this joker?")) {
       onDelete(joker.id);
@@ -227,10 +377,10 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
 
   const insertVariable = (variableIndex: number) => {
     const placeholder = `#${variableIndex}#`;
-    insertTag(placeholder, false);
+    insertTagSmart(placeholder, false);
   };
 
-  const insertTag = (tag: string, autoClose: boolean = true) => {
+  const insertTagSmart = (tag: string, autoClose: boolean = true) => {
     const textArea = document.getElementById(
       "joker-description-edit"
     ) as HTMLTextAreaElement;
@@ -241,38 +391,77 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
     const currentValue = textArea.value;
     const selectedText = currentValue.substring(startPos, endPos);
 
+    setLastDescription(currentValue);
+    setLastFormattedText(currentValue);
+
     let newText: string;
     let newCursorPos: number;
 
-    if (autoClose && selectedText) {
+    const tagMatch = selectedText.match(/^(\{[^}]*\})(.*?)(\{\})$/);
+
+    if (tagMatch) {
+      const [, openTag, content, closeTag] = tagMatch;
+      const modifiers = parseTag(openTag);
+
+      const newTagContent = tag.slice(1, -1);
+      const [newKey, newValue] = newTagContent.split(":");
+
+      if (newKey && newValue) {
+        modifiers[newKey] = newValue;
+      }
+
+      const newOpenTag = buildTag(modifiers);
+      const newSelectedText = `${newOpenTag}${content}${closeTag}`;
+
       newText =
         currentValue.substring(0, startPos) +
-        tag +
-        selectedText +
-        "{}" +
+        newSelectedText +
         currentValue.substring(endPos);
-      newCursorPos = startPos + tag.length + selectedText.length + 2;
-    } else if (autoClose) {
-      newText =
-        currentValue.substring(0, startPos) +
-        tag +
-        "{}" +
-        currentValue.substring(endPos);
-      newCursorPos = startPos + tag.length;
+      newCursorPos = startPos + newOpenTag.length + content.length + 2;
+    } else if (selectedText) {
+      if (autoClose) {
+        newText =
+          currentValue.substring(0, startPos) +
+          tag +
+          selectedText +
+          "{}" +
+          currentValue.substring(endPos);
+        newCursorPos = startPos + tag.length + selectedText.length + 2;
+      } else {
+        newText =
+          currentValue.substring(0, startPos) +
+          tag +
+          selectedText +
+          currentValue.substring(endPos);
+        newCursorPos = startPos + tag.length + selectedText.length;
+      }
     } else {
-      newText =
-        currentValue.substring(0, startPos) +
-        tag +
-        currentValue.substring(endPos);
-      newCursorPos = startPos + tag.length;
+      if (autoClose) {
+        newText =
+          currentValue.substring(0, startPos) +
+          tag +
+          "{}" +
+          currentValue.substring(endPos);
+        newCursorPos = startPos + tag.length;
+      } else {
+        newText =
+          currentValue.substring(0, startPos) +
+          tag +
+          currentValue.substring(endPos);
+        newCursorPos = startPos + tag.length;
+      }
     }
 
-    handleInputChange("description", newText);
+    handleInputChange("description", newText, false);
 
     setTimeout(() => {
       textArea.focus();
       textArea.setSelectionRange(newCursorPos, newCursorPos);
     }, 0);
+  };
+
+  const insertTag = (tag: string, autoClose: boolean = true) => {
+    insertTagSmart(tag, autoClose);
   };
 
   const colorButtons = [
@@ -282,11 +471,12 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
     { tag: "{C:purple}", color: "bg-balatro-purple", name: "Purple" },
     { tag: "{C:orange}", color: "bg-balatro-orange", name: "Orange" },
     { tag: "{C:money}", color: "bg-balatro-money", name: "Money" },
-    { tag: "{C:attention}", color: "bg-balatro-planet", name: "Attention" },
-    { tag: "{C:chips}", color: "bg-balatro-chips", name: "Chips" },
-    { tag: "{C:mult}", color: "bg-balatro-mult", name: "Mult" },
     { tag: "{C:white}", color: "bg-white-light", name: "White" },
     { tag: "{C:inactive}", color: "bg-gray-500", name: "Inactive" },
+    { tag: "{C:Hearts}", color: "bg-balatro-hearts", name: "Hearts" },
+    { tag: "{C:Clubs}", color: "bg-balatro-clubs", name: "Clubs" },
+    { tag: "{C:Diamonds}", color: "bg-balatro-diamonds", name: "Diamonds" },
+    { tag: "{C:Spades}", color: "bg-balatro-spades", name: "Spades" },
   ];
 
   const backgroundButtons = [
@@ -308,6 +498,35 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
     { id: "visual", label: "Visual & Properties", icon: PhotoIcon },
     { id: "description", label: "Description", icon: DocumentTextIcon },
   ];
+
+  const handleKeyDown = (
+    e: React.KeyboardEvent<HTMLTextAreaElement | HTMLInputElement>
+  ) => {
+    if (e.ctrlKey || e.metaKey) {
+      if (e.key === "z") {
+        e.preventDefault();
+        toggleUndo();
+        return;
+      }
+    }
+
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      const textarea = e.target as HTMLTextAreaElement;
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+      const value = textarea.value;
+      const newValue = value.substring(0, start) + "[s]" + value.substring(end);
+
+      setLastDescription(value);
+      setLastFormattedText(value);
+      handleInputChange("description", newValue, false);
+
+      setTimeout(() => {
+        textarea.setSelectionRange(start + 3, start + 3);
+      }, 0);
+    }
+  };
 
   return (
     <div className="fixed inset-0 flex bg-black-darker/80 backdrop-blur-sm items-center justify-center z-50 font-lexend">
@@ -466,7 +685,11 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
                             {formData.overlayImagePreview && (
                               <Button
                                 onClick={() =>
-                                  handleInputChange("overlayImagePreview", "")
+                                  handleInputChange(
+                                    "overlayImagePreview",
+                                    "",
+                                    false
+                                  )
                                 }
                                 variant="danger"
                                 className="w-full"
@@ -485,7 +708,7 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
                           <InputField
                             value={formData.name}
                             onChange={(e) =>
-                              handleInputChange("name", e.target.value)
+                              handleInputChange("name", e.target.value, false)
                             }
                             placeholder="Enter joker name"
                             separator={true}
@@ -575,10 +798,27 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
                   <DocumentTextIcon className="absolute top-12 right-16 h-28 w-28 text-black-lighter/20 -rotate-6" />
 
                   <div className="bg-black-darker border border-black-lighter rounded-xl p-6">
-                    <h4 className="text-white-light font-medium text-sm mb-6 flex items-center gap-2">
-                      <DocumentTextIcon className="h-4 w-4 text-mint" />
-                      Formatting Tools
-                    </h4>
+                    <div className="flex items-center justify-between mb-6">
+                      <h4 className="text-white-light font-medium text-sm flex items-center gap-2">
+                        <DocumentTextIcon className="h-4 w-4 text-mint" />
+                        Formatting Tools
+                      </h4>
+                      <div className="flex items-center gap-4">
+                        <span className="text-xs text-white-darker">
+                          Ctrl+Z to undo
+                        </span>
+                        <Button
+                          size="sm"
+                          variant={autoFormatEnabled ? "primary" : "secondary"}
+                          onClick={() =>
+                            setAutoFormatEnabled(!autoFormatEnabled)
+                          }
+                          icon={<SparklesIcon className="h-3 w-3" />}
+                        >
+                          Auto Format
+                        </Button>
+                      </div>
+                    </div>
 
                     <div className="space-y-6">
                       <div>
@@ -684,24 +924,7 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
                       onChange={(e) =>
                         handleInputChange("description", e.target.value)
                       }
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter" && !e.shiftKey) {
-                          e.preventDefault();
-                          const textarea = e.target as HTMLTextAreaElement;
-                          const start = textarea.selectionStart;
-                          const end = textarea.selectionEnd;
-                          const value = textarea.value;
-                          const newValue =
-                            value.substring(0, start) +
-                            "[s]" +
-                            value.substring(end);
-                          handleInputChange("description", newValue);
-
-                          setTimeout(() => {
-                            textarea.setSelectionRange(start + 3, start + 3);
-                          }, 0);
-                        }
-                      }}
+                      onKeyDown={handleKeyDown}
                       multiline={true}
                       height="180px"
                       separator={true}

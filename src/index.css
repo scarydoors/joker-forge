@@ -49,6 +49,12 @@ html {
   --color-balatro-blackshadow: #0b1415;
   --color-balatro-white: #ffffff;
 
+  /* High contrast suit colors */
+  --color-balatro-hearts: #fa2315;
+  --color-balatro-clubs: #0081e6;
+  --color-balatro-diamonds: #e18400;
+  --color-balatro-spades: #3a17b3;
+
   --color-mint-lighter: #6cb79a;
   --color-mint-light: #59a487;
   --color-mint: #469274;
