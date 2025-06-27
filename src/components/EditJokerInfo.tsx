@@ -15,6 +15,7 @@ import Checkbox from "./generic/Checkbox";
 import Button from "./generic/Button";
 import BalatroJokerCard from "./generic/BalatroJokerCard";
 import { JokerData } from "./JokerCard";
+import { getAllVariables } from "./codeGeneration/variableUtils";
 
 interface EditJokerInfoProps {
   isOpen: boolean;
@@ -220,6 +221,13 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
       onDelete(joker.id);
       onClose();
     }
+  };
+
+  const allVariables = getAllVariables(formData);
+
+  const insertVariable = (variableIndex: number) => {
+    const placeholder = `#${variableIndex}#`;
+    insertTag(placeholder, false);
   };
 
   const insertTag = (tag: string, autoClose: boolean = true) => {
@@ -604,6 +612,29 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
                           ))}
                         </div>
                       </div>
+
+                      {allVariables.length > 0 && (
+                        <div>
+                          <p className="text-white-light text-sm mb-3 font-medium">
+                            Variables
+                          </p>
+                          <div className="flex flex-wrap gap-2">
+                            {allVariables.map((variable, index) => (
+                              <button
+                                key={variable.id}
+                                onClick={() => insertVariable(index + 1)}
+                                className="px-3 py-1 bg-mint/20 border border-mint/40 rounded-md text-mint text-xs font-medium hover:bg-mint/30 transition-colors"
+                                title={
+                                  variable.description ||
+                                  `Insert ${variable.name} variable`
+                                }
+                              >
+                                {variable.name} (#{index + 1}#)
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      )}
 
                       <div>
                         <p className="text-white-light text-sm mb-3 font-medium">

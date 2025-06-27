@@ -214,12 +214,6 @@ export const generateVariableConfig = (variables: VariableInfo[]): string => {
   return configItems.join(",\n            ");
 };
 
-export const generateVariableLocVars = (
-  variables: VariableInfo[]
-): string[] => {
-  return variables.map((variable) => `card.ability.extra.${variable.name}`);
-};
-
 export const getVariableNamesFromJoker = (joker: JokerData): string[] => {
   if (!joker.rules) return [];
 
@@ -327,8 +321,36 @@ export const getVariableUsageDetails = (joker: JokerData): VariableUsage[] => {
 
 export const getAllVariables = (joker: JokerData): UserVariable[] => {
   const userVars = joker.userVariables || [];
-  const autoVars = getVariableNamesFromJoker(joker)
+
+  // Check for random chance effects and add automatic variables
+  const hasRandomChance =
+    joker.rules?.some((rule) =>
+      rule.effects.some((effect) => effect.params.has_random_chance === "true")
+    ) || false;
+
+  const autoVars: UserVariable[] = [];
+
+  if (hasRandomChance) {
+    // Add numerator and denominator as automatic variables for random chance
+    autoVars.push({
+      id: "auto_numerator",
+      name: "numerator",
+      initialValue: 1,
+      description: "Chance numerator (e.g., 1 in '1 in 4')",
+    });
+
+    autoVars.push({
+      id: "auto_denominator",
+      name: "denominator",
+      initialValue: 4,
+      description: "Chance denominator (e.g., 4 in '1 in 4')",
+    });
+  }
+
+  // Add other auto variables
+  const otherAutoVars = getVariableNamesFromJoker(joker)
     .filter((name) => !userVars.some((uv) => uv.name === name))
+    .filter((name) => name !== "numerator" && name !== "denominator")
     .map((name) => ({
       id: `auto_${name}`,
       name,
@@ -336,7 +358,7 @@ export const getAllVariables = (joker: JokerData): UserVariable[] => {
       description: getDefaultVariableDescription(name),
     }));
 
-  return [...userVars, ...autoVars];
+  return [...userVars, ...autoVars, ...otherAutoVars];
 };
 
 const getDefaultVariableValue = (name: string): number => {

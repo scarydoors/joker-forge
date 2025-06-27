@@ -10,7 +10,7 @@ import {
 import {
   extractVariablesFromRules,
   generateVariableConfig,
-  generateVariableLocVars,
+  getAllVariables,
 } from "./variableUtils";
 import type { Rule } from "../ruleBuilder/types";
 import type { PassiveEffectResult } from "./effectUtils";
@@ -271,11 +271,9 @@ const extractEffectsConfig = (
       }
     }
 
-    // Check for random chance effects and add odds to config
     let hasAddedOdds = false;
     nonPassiveRules.forEach((rule) => {
       rule.effects.forEach((effect) => {
-        // Add odds for random chance effects
         if (effect.params.has_random_chance === "true" && !hasAddedOdds) {
           const denominator = effect.params.chance_denominator || 4;
           configItems.push(`odds = ${denominator}`);
@@ -429,87 +427,72 @@ const generateLocVarsFunction = (
   joker: JokerData,
   passiveEffects: PassiveEffectResult[]
 ): string => {
-  const vars: string[] = [];
-  const processedVarNames = new Set<string>();
-
-  // Check if the joker description actually contains variable placeholders
   const descriptionHasVariables = joker.description.includes("#");
-
-  // Only add random chance variables if the description uses them
-  let hasRandomChance = false;
-  if (joker.rules && descriptionHasVariables) {
-    joker.rules.forEach((rule) => {
-      rule.effects.forEach((effect) => {
-        if (effect.params.has_random_chance === "true") {
-          hasRandomChance = true;
-        }
-      });
-    });
+  if (!descriptionHasVariables) {
+    return `loc_vars = function(self, info_queue, card)
+        return {vars = {}}
+    end`;
   }
 
-  // Only add probability variables if description contains #1# and #2# for random chance
-  if (
-    hasRandomChance &&
-    joker.description.includes("#1#") &&
-    joker.description.includes("#2#")
-  ) {
-    vars.push("G.GAME.probabilities.normal");
-    vars.push("card.ability.extra.odds");
-    processedVarNames.add("odds");
+  const variablePlaceholders = joker.description.match(/#(\d+)#/g) || [];
+  const maxVariableIndex = Math.max(
+    ...variablePlaceholders.map((placeholder) =>
+      parseInt(placeholder.replace(/#/g, ""))
+    ),
+    0
+  );
+
+  if (maxVariableIndex === 0) {
+    return `loc_vars = function(self, info_queue, card)
+        return {vars = {}}
+    end`;
+  }
+
+  const allVariables = getAllVariables(joker);
+  const hasRandomChance =
+    joker.rules?.some((rule) =>
+      rule.effects.some((effect) => effect.params.has_random_chance === "true")
+    ) || false;
+
+  const variableMapping: string[] = [];
+
+  if (hasRandomChance) {
+    // Map the first variables to numerator/denominator for random chance
+    variableMapping.push("G.GAME.probabilities.normal"); // #1# - numerator
+    variableMapping.push("card.ability.extra.odds"); // #2# - denominator
+
+    // Add remaining variables starting from position 3
+    const remainingVars = allVariables.filter(
+      (v) => v.name !== "numerator" && v.name !== "denominator"
+    );
+
+    for (let i = 2; i < maxVariableIndex; i++) {
+      if (i - 2 < remainingVars.length) {
+        variableMapping.push(`card.ability.extra.${remainingVars[i - 2].name}`);
+      }
+    }
+  } else {
+    for (let i = 0; i < maxVariableIndex; i++) {
+      if (i < allVariables.length) {
+        variableMapping.push(`card.ability.extra.${allVariables[i].name}`);
+      }
+    }
   }
 
   passiveEffects.forEach((effect) => {
     if (effect.locVars) {
       effect.locVars.forEach((locVar) => {
-        if (locVar.trim()) {
-          vars.push(locVar);
+        if (!variableMapping.includes(locVar)) {
+          variableMapping.push(locVar);
         }
       });
     }
   });
 
-  if (joker.userVariables && joker.userVariables.length > 0) {
-    joker.userVariables.forEach((variable) => {
-      if (!processedVarNames.has(variable.name)) {
-        vars.push(`card.ability.extra.${variable.name}`);
-        processedVarNames.add(variable.name);
-      }
-    });
-  }
-
-  if (joker.rules && joker.rules.length > 0 && descriptionHasVariables) {
-    const nonPassiveRules = joker.rules.filter(
-      (rule) => rule.trigger !== "passive"
-    );
-
-    const variables = extractVariablesFromRules(nonPassiveRules);
-    const variableLocVars = generateVariableLocVars(variables);
-
-    variableLocVars.forEach((locVar) => {
-      const varName = locVar.split(".").pop() || "";
-      if (!processedVarNames.has(varName)) {
-        vars.push(locVar);
-        processedVarNames.add(varName);
-      }
-    });
-
-    nonPassiveRules.forEach((rule) => {
-      rule.effects.forEach((effect) => {
-        const configVarName = globalEffectVariableMapping[effect.id];
-        if (configVarName && !processedVarNames.has(configVarName)) {
-          // Only add if the description actually uses variables
-          const effectValue = effect.params.value;
-          if (typeof effectValue === "number" && descriptionHasVariables) {
-            vars.push(`card.ability.extra.${configVarName}`);
-            processedVarNames.add(configVarName);
-          }
-        }
-      });
-    });
-  }
+  const finalVars = variableMapping.slice(0, maxVariableIndex);
 
   return `loc_vars = function(self, info_queue, card)
-        return {vars = {${vars.join(", ")}}}
+        return {vars = {${finalVars.join(", ")}}}
     end`;
 };
 
