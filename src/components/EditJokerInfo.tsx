@@ -190,8 +190,7 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
         if (prevSuit && prevSpace && prevSpace.match(/^\s+$/)) {
           const lowerSuit = prevSuit.toLowerCase();
           if (lowerSuit.match(/^(hearts?|spades?|clubs?|diamonds?)$/)) {
-            const suitName =
-              lowerSuit.charAt(0).toUpperCase() + lowerSuit.slice(1);
+            const suitName = lowerSuit.charAt(0) + lowerSuit.slice(1);
             words[i - 2] = `{C:${suitName}}${prevSuit}{}`;
             hasChanges = true;
           }
@@ -527,10 +526,10 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
     { tag: "{C:money}", color: "bg-balatro-money", name: "Money" },
     { tag: "{C:white}", color: "bg-white-light", name: "White" },
     { tag: "{C:inactive}", color: "bg-gray-500", name: "Inactive" },
-    { tag: "{C:Hearts}", color: "bg-balatro-hearts", name: "Hearts" },
-    { tag: "{C:Clubs}", color: "bg-balatro-clubs", name: "Clubs" },
-    { tag: "{C:Diamonds}", color: "bg-balatro-diamonds", name: "Diamonds" },
-    { tag: "{C:Spades}", color: "bg-balatro-spades", name: "Spades" },
+    { tag: "{C:hearts}", color: "bg-balatro-hearts", name: "Hearts" },
+    { tag: "{C:clubs}", color: "bg-balatro-clubs", name: "Clubs" },
+    { tag: "{C:diamonds}", color: "bg-balatro-diamonds", name: "Diamonds" },
+    { tag: "{C:spades}", color: "bg-balatro-spades", name: "Spades" },
   ];
 
   const backgroundButtons = [
