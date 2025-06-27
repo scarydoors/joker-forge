@@ -225,7 +225,7 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
             words[i - 4] = `{C:money}${prevNumber}{}`;
             hasChanges = true;
           } else {
-            words[i - 4] = `{C:orange}${prevNumber}{}`;
+            words[i - 4] = `{C:attention}${prevNumber}{}`;
             hasChanges = true;
           }
         }
@@ -523,7 +523,7 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
     { tag: "{C:blue}", color: "bg-balatro-blue", name: "Blue" },
     { tag: "{C:green}", color: "bg-balatro-green", name: "Green" },
     { tag: "{C:purple}", color: "bg-balatro-purple", name: "Purple" },
-    { tag: "{C:orange}", color: "bg-balatro-orange", name: "Orange" },
+    { tag: "{C:attention}", color: "bg-balatro-orange", name: "Orange" },
     { tag: "{C:money}", color: "bg-balatro-money", name: "Money" },
     { tag: "{C:white}", color: "bg-white-light", name: "White" },
     { tag: "{C:inactive}", color: "bg-gray-500", name: "Inactive" },
