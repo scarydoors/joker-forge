@@ -81,10 +81,6 @@ const generateMainLua = (
 -- Version: ${metadata.version}
 -- Description: ${metadata.description}
 
-local mod = SMODS.current_mod
-
-mod.config = {}
-
 -- Atlas
 SMODS.Atlas({
     key = "CustomJokers", 
@@ -100,8 +96,7 @@ SMODS.Atlas({
     output += generateJokerCode(joker, index, "CustomJokers", jokers) + "\n\n";
   });
 
-  output += "return mod";
-  return output;
+  return output.trim();
 };
 
 const generateJokerCode = (
