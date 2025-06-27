@@ -46,6 +46,50 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
   const [fallbackAttempted, setFallbackAttempted] = useState(false);
   const [lastFormattedText, setLastFormattedText] = useState<string>("");
 
+  const [placeholderCredits, setPlaceholderCredits] = useState<
+    Record<number, string>
+  >({});
+
+  useEffect(() => {
+    const loadCredits = async () => {
+      try {
+        const response = await fetch("/images/placeholderjokers/credit.txt");
+        const text = await response.text();
+        console.log("Raw credit file content:", JSON.stringify(text));
+
+        const credits: Record<number, string> = {};
+
+        text.split("\n").forEach((line, lineIndex) => {
+          const trimmed = line.trim();
+          console.log(`Line ${lineIndex}: "${trimmed}"`);
+
+          if (trimmed && trimmed.includes(":")) {
+            const [indexStr, nameStr] = trimmed.split(":");
+            const index = indexStr?.trim();
+            const name = nameStr?.trim();
+
+            console.log(`Parsed - Index: "${index}", Name: "${name}"`);
+
+            if (index && name) {
+              const indexNum = parseInt(index);
+              if (!isNaN(indexNum)) {
+                credits[indexNum] = name;
+                console.log(`Added credit: ${indexNum} -> ${name}`);
+              }
+            }
+          }
+        });
+
+        console.log("Final credits object:", credits);
+        setPlaceholderCredits(credits);
+      } catch (error) {
+        console.error("Failed to load placeholder credits:", error);
+      }
+    };
+
+    loadCredits();
+  }, []);
+
   const handleSave = useCallback(() => {
     onSave(formData);
     onClose();
@@ -349,6 +393,16 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
       };
       reader.readAsDataURL(file);
     }
+  };
+
+  const getImageCredit = (joker: JokerData): string | null => {
+    if (
+      joker.placeholderCreditIndex &&
+      placeholderCredits[joker.placeholderCreditIndex]
+    ) {
+      return placeholderCredits[joker.placeholderCreditIndex];
+    }
+    return null;
   };
 
   const getCostFromRarity = (rarity: number): number => {
@@ -699,9 +753,19 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
                               </Button>
                             )}
                           </div>
-                          <p className="text-xs text-white-darker mt-2 text-center">
-                            Accepted: 71×95px or 142×190px each
-                          </p>
+                          <div className="text-center mt-2">
+                            <p className="text-xs text-white-darker">
+                              Accepted: 71×95px or 142×190px each
+                            </p>
+                            {(() => {
+                              const credit = getImageCredit(formData);
+                              return credit ? (
+                                <p className="text-xs text-white-darker mt-1">
+                                  Credit: {credit}
+                                </p>
+                              ) : null;
+                            })()}
+                          </div>
                         </div>
 
                         <div className="flex-1 space-y-4">

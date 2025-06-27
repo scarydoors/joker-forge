@@ -57,10 +57,16 @@ const upscaleImage = (imageSrc: string): Promise<string> => {
   });
 };
 
-const getRandomPlaceholderJoker = async (): Promise<string> => {
+const getRandomPlaceholderJoker = async (): Promise<{
+  imageData: string;
+  creditIndex?: number;
+}> => {
   if (upscaledPlaceholders && upscaledPlaceholders.length > 0) {
     const randomIndex = Math.floor(Math.random() * upscaledPlaceholders.length);
-    return upscaledPlaceholders[randomIndex];
+    return {
+      imageData: upscaledPlaceholders[randomIndex],
+      creditIndex: randomIndex + 1,
+    };
   }
 
   if (availablePlaceholders && availablePlaceholders.length > 0) {
@@ -69,7 +75,10 @@ const getRandomPlaceholderJoker = async (): Promise<string> => {
     );
     upscaledPlaceholders = upscaled;
     const randomIndex = Math.floor(Math.random() * upscaled.length);
-    return upscaled[randomIndex];
+    return {
+      imageData: upscaled[randomIndex],
+      creditIndex: randomIndex + 1,
+    };
   }
 
   const checkImage = (src: string): Promise<boolean> => {
@@ -84,23 +93,17 @@ const getRandomPlaceholderJoker = async (): Promise<string> => {
   const placeholders: string[] = [];
 
   for (let counter = 1; counter <= 10; counter++) {
-    const imagePath =
-      counter === 1
-        ? `/images/placeholderjokers/placeholder-joker.png`
-        : `/images/placeholderjokers/placeholder-joker-${counter}.png`;
+    const imagePath = `/images/placeholderjokers/placeholder-joker-${counter}.png`;
 
     if (await checkImage(imagePath)) {
       placeholders.push(imagePath);
     }
   }
 
-  console.log(`Found ${placeholders.length} placeholder images.`);
-  console.log("Available placeholders:", placeholders);
-
   availablePlaceholders = placeholders;
 
   if (placeholders.length === 0) {
-    return "/images/placeholder-joker.png";
+    return { imageData: "/images/placeholder-joker.png" };
   }
 
   const upscaled = await Promise.all(
@@ -109,7 +112,10 @@ const getRandomPlaceholderJoker = async (): Promise<string> => {
   upscaledPlaceholders = upscaled;
 
   const randomIndex = Math.floor(Math.random() * upscaled.length);
-  return upscaled[randomIndex];
+  return {
+    imageData: upscaled[randomIndex],
+    creditIndex: randomIndex + 1,
+  };
 };
 
 const getRandomPlaceholderJokerSync = (): string => {
@@ -224,13 +230,13 @@ const JokersPage: React.FC<JokersPageProps> = ({
   );
 
   const handleAddNewJoker = async () => {
-    const placeholderImage = await getRandomPlaceholderJoker();
+    const placeholderResult = await getRandomPlaceholderJoker();
 
     const newJoker: JokerData = {
       id: crypto.randomUUID(),
       name: "New Joker",
       description: "A {C:blue}custom{} joker with {C:red}unique{} effects.",
-      imagePreview: placeholderImage,
+      imagePreview: placeholderResult.imageData,
       overlayImagePreview: "",
       rarity: 1,
       cost: 4,
@@ -239,6 +245,7 @@ const JokersPage: React.FC<JokersPageProps> = ({
       unlocked: true,
       discovered: true,
       rules: [],
+      placeholderCreditIndex: placeholderResult.creditIndex,
     };
     setJokers([...jokers, newJoker]);
     setEditingJoker(newJoker);

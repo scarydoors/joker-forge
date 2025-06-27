@@ -34,6 +34,7 @@ export interface JokerData {
   discovered?: boolean;
   rules?: Rule[];
   userVariables?: UserVariable[];
+  placeholderCreditIndex?: number;
 }
 interface JokerCardProps {
   joker: JokerData;
