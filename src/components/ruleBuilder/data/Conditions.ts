@@ -69,6 +69,7 @@ const ENHANCEMENT_TYPES = [
   { value: "m_wild", label: "Wild" },
   { value: "m_mult", label: "Mult" },
   { value: "m_lucky", label: "Lucky" },
+  { value: "m_stone", label: "Stone" },
 ];
 
 const SEAL_TYPES = [
