@@ -414,7 +414,6 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
         id: "value",
         type: "number",
         label: "Amount ($)",
-        min: 0,
         default: 10,
       },
     ],
