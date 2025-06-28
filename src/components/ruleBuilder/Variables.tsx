@@ -1,10 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { useDraggable } from "@dnd-kit/core";
 import { JokerData, UserVariable } from "../JokerCard";
-import {
-  getVariableUsageDetails,
-  getAllVariables,
-} from "../codeGeneration/variableUtils";
+import { getVariableUsageDetails } from "../codeGeneration/variableUtils";
 import {
   CommandLineIcon,
   XMarkIcon,
@@ -32,7 +29,6 @@ const Variables: React.FC<VariablesProps> = ({
   const [editingVariable, setEditingVariable] = useState<string | null>(null);
   const [newVariableName, setNewVariableName] = useState("");
   const [newVariableValue, setNewVariableValue] = useState("0");
-  const [newVariableDescription, setNewVariableDescription] = useState("");
 
   const { attributes, listeners, setNodeRef, transform } = useDraggable({
     id: "panel-variables",
@@ -50,8 +46,8 @@ const Variables: React.FC<VariablesProps> = ({
         top: position.y,
       };
 
-  const usageDetails = getVariableUsageDetails(joker);
-  const allVariables = getAllVariables(joker);
+  // Memoize usage details to ensure they update when joker changes
+  const usageDetails = useMemo(() => getVariableUsageDetails(joker), [joker]);
   const userVariables = joker.userVariables || [];
 
   const getUsageInfo = (variableName: string) => {
@@ -72,7 +68,6 @@ const Variables: React.FC<VariablesProps> = ({
       id: crypto.randomUUID(),
       name: newVariableName.trim(),
       initialValue: parseFloat(newVariableValue) || 0,
-      description: newVariableDescription.trim() || undefined,
     };
 
     const updatedVariables = [...userVariables, newVariable];
@@ -80,7 +75,6 @@ const Variables: React.FC<VariablesProps> = ({
 
     setNewVariableName("");
     setNewVariableValue("0");
-    setNewVariableDescription("");
     setShowAddForm(false);
   };
 
@@ -106,17 +100,24 @@ const Variables: React.FC<VariablesProps> = ({
       style={style}
       className="w-80 bg-black-dark backdrop-blur-md border-2 border-black-lighter rounded-lg shadow-2xl z-40"
     >
+      {/* Header */}
       <div
-        className="flex items-center justify-between p-3 border-b border-black-lighter cursor-grab active:cursor-grabbing"
+        className="flex items-center justify-between p-4 border-b border-black-lighter cursor-grab active:cursor-grabbing"
         {...attributes}
         {...listeners}
       >
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           <Bars3Icon className="h-4 w-4 text-white-darker" />
           <CommandLineIcon className="h-5 w-5 text-white-light" />
-          <h3 className="text-white-light text-sm font-medium tracking-wider">
-            Variables
-          </h3>
+          <div>
+            <h3 className="text-white-light text-sm font-medium tracking-wider">
+              Variables
+            </h3>
+            <p className="text-white-darker text-xs">
+              {userVariables.length} variable
+              {userVariables.length !== 1 ? "s" : ""}
+            </p>
+          </div>
         </div>
         <button
           onClick={onClose}
@@ -127,106 +128,122 @@ const Variables: React.FC<VariablesProps> = ({
       </div>
 
       <div className="p-4">
-        <div className="w-1/4 h-[1px] bg-black-lighter mx-auto mb-4"></div>
+        {/* Variables List */}
+        <div className="max-h-96 overflow-y-auto custom-scrollbar space-y-2 mb-4">
+          {userVariables.length === 0 && !showAddForm ? (
+            <div className="text-center py-8">
+              <CommandLineIcon className="h-12 w-12 text-white-darker mx-auto mb-3 opacity-50" />
+              <p className="text-white-darker text-sm">
+                No variables created yet
+              </p>
+              <p className="text-white-darker text-xs mt-1">
+                Create variables to store and modify values in your joker
+              </p>
+            </div>
+          ) : (
+            userVariables.map((variable) => {
+              const usageInfo = getUsageInfo(variable.name);
+              const isEditing = editingVariable === variable.id;
 
-        <div className="max-h-80 overflow-y-auto custom-scrollbar space-y-3">
-          {allVariables.map((variable) => {
-            const usageInfo = getUsageInfo(variable.name);
-            const isUserDefined = userVariables.some(
-              (uv) => uv.id === variable.id
-            );
-            const isEditing = editingVariable === variable.id;
+              return (
+                <div
+                  key={variable.id}
+                  className="bg-black-darker border border-black-lighter rounded-lg p-3"
+                >
+                  {isEditing ? (
+                    <div className="space-y-3">
+                      <InputField
+                        value={variable.name}
+                        onChange={(e) => {
+                          handleUpdateVariable(variable.id, {
+                            name: e.target.value,
+                          });
+                        }}
+                        label="Name"
+                        size="sm"
+                      />
+                      <InputField
+                        value={variable.initialValue.toString()}
+                        onChange={(e) => {
+                          const value = parseFloat(e.target.value) || 0;
+                          handleUpdateVariable(variable.id, {
+                            initialValue: value,
+                          });
+                        }}
+                        type="number"
+                        label="Initial Value"
+                        size="sm"
+                      />
+                      <Button
+                        variant="primary"
+                        size="sm"
+                        onClick={() => setEditingVariable(null)}
+                        className="cursor-pointer"
+                        fullWidth
+                      >
+                        Done
+                      </Button>
+                    </div>
+                  ) : (
+                    <div>
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-mint text-sm font-mono font-medium">
+                          ${variable.name}
+                        </span>
 
-            return (
-              <div
-                key={variable.id}
-                className={`rounded-lg p-3 border-2 ${
-                  isUserDefined
-                    ? "bg-mint/10 border-mint/30"
-                    : "bg-black-darker border-black-lighter"
-                }`}
-              >
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-2">
-                    <span className="text-mint text-sm font-medium tracking-wide">
-                      {variable.name}
-                    </span>
-                    {usageInfo.count > 0 && (
-                      <span className="bg-mint/20 text-mint text-xs px-2 py-1 rounded">
-                        {usageInfo.count} uses
-                      </span>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-1">
-                    {isUserDefined && (
-                      <>
-                        <button
-                          onClick={() =>
-                            setEditingVariable(isEditing ? null : variable.id)
-                          }
-                          className="p-1 text-white-darker hover:text-white transition-colors cursor-pointer"
-                        >
-                          <PencilIcon className="h-4 w-4" />
-                        </button>
-                        <button
-                          onClick={() => handleDeleteVariable(variable.id)}
-                          className="p-1 text-balatro-red hover:text-white transition-colors cursor-pointer"
-                        >
-                          <TrashIcon className="h-4 w-4" />
-                        </button>
-                      </>
-                    )}
-                  </div>
+                        <div className="flex items-center gap-1">
+                          <button
+                            onClick={() => setEditingVariable(variable.id)}
+                            className="p-1 text-white-darker hover:text-white transition-colors cursor-pointer"
+                            title="Edit"
+                          >
+                            <PencilIcon className="h-3 w-3" />
+                          </button>
+                          <button
+                            onClick={() => handleDeleteVariable(variable.id)}
+                            className="p-1 text-balatro-red hover:text-white transition-colors cursor-pointer"
+                            title="Delete"
+                          >
+                            <TrashIcon className="h-3 w-3" />
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-white-darker">
+                          Initial: {variable.initialValue}
+                        </span>
+                        {usageInfo.count > 0 && (
+                          <div className="flex items-center gap-1">
+                            <span className="text-white-darker text-xs">
+                              Used in:
+                            </span>
+                            {usageInfo.rules.map((ruleNum) => (
+                              <span
+                                key={ruleNum}
+                                className="bg-mint/20 text-mint text-xs px-1.5 py-0.5 rounded"
+                              >
+                                {ruleNum + 1}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </div>
+              );
+            })
+          )}
 
-                {variable.description && (
-                  <div className="text-white-darker text-xs mb-2">
-                    {variable.description}
-                  </div>
-                )}
-
-                {isEditing ? (
-                  <div className="space-y-2">
-                    <InputField
-                      value={variable.initialValue.toString()}
-                      onChange={(e) => {
-                        const value = parseFloat(e.target.value) || 0;
-                        handleUpdateVariable(variable.id, {
-                          initialValue: value,
-                        });
-                      }}
-                      type="number"
-                      size="sm"
-                    />
-                  </div>
-                ) : (
-                  <div className="flex items-center justify-between">
-                    <span className="text-white-darker text-xs">
-                      Initial Value:
-                    </span>
-                    <span className="text-white text-sm font-mono">
-                      {variable.initialValue}
-                    </span>
-                  </div>
-                )}
-
-                {usageInfo.rules.length > 0 && (
-                  <div className="mt-2 text-white-darker text-xs">
-                    Used in rule{usageInfo.rules.length > 1 ? "s" : ""}:{" "}
-                    {usageInfo.rules.join(", ")}
-                  </div>
-                )}
-              </div>
-            );
-          })}
-
+          {/* Add Form */}
           {showAddForm && (
             <div className="bg-black-darker border-2 border-mint/50 rounded-lg p-3">
               <div className="space-y-3">
                 <InputField
                   value={newVariableName}
                   onChange={(e) => setNewVariableName(e.target.value)}
-                  placeholder="Variable name"
+                  placeholder="myVariable"
                   label="Name"
                   size="sm"
                 />
@@ -238,22 +255,15 @@ const Variables: React.FC<VariablesProps> = ({
                   type="number"
                   size="sm"
                 />
-                <InputField
-                  value={newVariableDescription}
-                  onChange={(e) => setNewVariableDescription(e.target.value)}
-                  placeholder="Description (optional)"
-                  label="Description"
-                  size="sm"
-                />
                 <div className="flex gap-2">
                   <Button
                     variant="primary"
                     size="sm"
                     onClick={handleAddVariable}
                     disabled={!newVariableName.trim()}
-                    className="cursor-pointer"
+                    className="cursor-pointer flex-1"
                   >
-                    Add
+                    Create
                   </Button>
                   <Button
                     variant="secondary"
@@ -262,7 +272,6 @@ const Variables: React.FC<VariablesProps> = ({
                       setShowAddForm(false);
                       setNewVariableName("");
                       setNewVariableValue("0");
-                      setNewVariableDescription("");
                     }}
                     className="cursor-pointer"
                   >
@@ -272,27 +281,21 @@ const Variables: React.FC<VariablesProps> = ({
               </div>
             </div>
           )}
-
-          {allVariables.length === 0 && !showAddForm && (
-            <div className="text-white-darker text-xs text-center py-4">
-              No variables defined yet.
-            </div>
-          )}
         </div>
 
-        <div className="mt-4">
+        {/* Add Button */}
+        {!showAddForm && (
           <Button
             variant="secondary"
             size="sm"
             fullWidth
             onClick={() => setShowAddForm(true)}
             icon={<PlusIcon className="h-4 w-4" />}
-            disabled={showAddForm}
             className="cursor-pointer"
           >
             Add Variable
           </Button>
-        </div>
+        )}
       </div>
     </div>
   );
