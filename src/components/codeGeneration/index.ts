@@ -368,7 +368,19 @@ const generateCalculateFunction = (rules: Rule[]): string => {
   let calculateFunction = `calculate = function(self, card, context)`;
 
   Object.entries(rulesByTrigger).forEach(([triggerType, triggerRules]) => {
-    const hasRetriggerEffects = triggerRules.some((rule) =>
+    // SORT RULES: Rules with conditions first, rules without conditions last
+    const sortedRules = [...triggerRules].sort((a, b) => {
+      const aHasConditions = generateConditionChain(a).length > 0;
+      const bHasConditions = generateConditionChain(b).length > 0;
+
+      // Rules with conditions should come first (return -1)
+      // Rules without conditions should come last (return 1)
+      if (aHasConditions && !bHasConditions) return -1;
+      if (!aHasConditions && bHasConditions) return 1;
+      return 0; // Keep original order for rules with same condition status
+    });
+
+    const hasRetriggerEffects = sortedRules.some((rule) =>
       rule.effects.some((effect) => effect.type === "retrigger_cards")
     );
 
@@ -384,7 +396,7 @@ const generateCalculateFunction = (rules: Rule[]): string => {
 
       let hasAnyConditions = false;
 
-      triggerRules.forEach((rule) => {
+      sortedRules.forEach((rule) => {
         const retriggerEffects = rule.effects.filter(
           (e) => e.type === "retrigger_cards"
         );
@@ -445,7 +457,7 @@ const generateCalculateFunction = (rules: Rule[]): string => {
 
       hasAnyConditions = false;
 
-      triggerRules.forEach((rule) => {
+      sortedRules.forEach((rule) => {
         const nonRetriggerEffects = rule.effects.filter(
           (e) => e.type !== "retrigger_cards"
         );
@@ -490,7 +502,7 @@ const generateCalculateFunction = (rules: Rule[]): string => {
       calculateFunction += `
         end`;
     } else {
-      const triggerContext = generateTriggerContext(triggerType, triggerRules);
+      const triggerContext = generateTriggerContext(triggerType, sortedRules);
 
       calculateFunction += `
         ${triggerContext.comment}
@@ -498,7 +510,7 @@ const generateCalculateFunction = (rules: Rule[]): string => {
 
       let hasAnyConditions = false;
 
-      triggerRules.forEach((rule) => {
+      sortedRules.forEach((rule) => {
         const conditionCode = generateConditionChain(rule);
 
         if (conditionCode) {
