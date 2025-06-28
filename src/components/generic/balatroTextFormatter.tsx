@@ -1,4 +1,3 @@
-/* eslint-disable react-refresh/only-export-components */
 import React from "react";
 
 interface ParsedSegment {
@@ -168,14 +167,14 @@ interface BalatroTextProps {
   text: string;
   locVars?: { colours?: string[] };
   className?: string;
-  noWrap?: boolean; // When true, prevents text wrapping
+  noWrap?: boolean;
 }
 
 export const BalatroText: React.FC<BalatroTextProps> = ({
   text,
   locVars,
   className = "",
-  noWrap = false, // Default to false so text wraps normally
+  noWrap = false,
 }) => {
   const segments = parseBalatroText(text, locVars);
 
@@ -190,22 +189,15 @@ export const BalatroText: React.FC<BalatroTextProps> = ({
           classes += ` ${segment.backgroundColor} px-1 rounded`;
         }
 
-        if (segment.scale) {
-          const scaleClass =
-            segment.scale === 0.8
-              ? "text-xs"
-              : segment.scale === 0.85
-              ? "text-sm"
-              : segment.scale === 1.1
-              ? "text-lg"
-              : "";
-          classes += ` ${scaleClass}`;
-        }
-
         if (segment.motion === 1) {
           classes += " animate-float";
         } else if (segment.motion === 2) {
           classes += " animate-bump";
+        }
+
+        const inlineStyle: React.CSSProperties = {};
+        if (segment.scale && segment.scale !== 1) {
+          inlineStyle.fontSize = `${segment.scale}em`;
         }
 
         let displayText = segment.text;
@@ -219,14 +211,20 @@ export const BalatroText: React.FC<BalatroTextProps> = ({
               {displayText.split("\n").map((line, lineIndex) => (
                 <React.Fragment key={lineIndex}>
                   {lineIndex > 0 && <br />}
-                  <span className={classes.trim()}>{line}</span>
+                  <span className={classes.trim()} style={inlineStyle}>
+                    {line}
+                  </span>
                 </React.Fragment>
               ))}
             </span>
           );
         }
 
-        const content = <span className={classes.trim()}>{displayText}</span>;
+        const content = (
+          <span className={classes.trim()} style={inlineStyle}>
+            {displayText}
+          </span>
+        );
 
         if (segment.tooltip) {
           return (
@@ -265,16 +263,8 @@ export const formatBalatroText = (
         html = `<span class="${bgClass} ${textClass} px-1 rounded">${html}</span>`;
       }
 
-      if (segment.scale) {
-        const scaleClass =
-          segment.scale === 0.8
-            ? "text-xs"
-            : segment.scale === 0.85
-            ? "text-sm"
-            : segment.scale === 1.1
-            ? "text-lg"
-            : "";
-        html = `<span class="${scaleClass}">${html}</span>`;
+      if (segment.scale && segment.scale !== 1) {
+        html = `<span style="font-size: ${segment.scale}em;">${html}</span>`;
       }
 
       if (segment.isMultiplier && html.match(/^[X×]?\d/)) {
