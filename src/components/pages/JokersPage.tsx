@@ -1,4 +1,5 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
+import ReactDOM from "react-dom";
 import {
   PlusIcon,
   DocumentTextIcon,
@@ -178,6 +179,21 @@ const JokersPage: React.FC<JokersPageProps> = ({
   const [showFilters, setShowFilters] = useState(false);
   const [sortBy, setSortBy] = useState("name-asc");
   const [showSortMenu, setShowSortMenu] = useState(false);
+  const [sortMenuPosition, setSortMenuPosition] = useState({
+    top: 0,
+    left: 0,
+    width: 0,
+  });
+  const [filtersMenuPosition, setFiltersMenuPosition] = useState({
+    top: 0,
+    left: 0,
+    width: 0,
+  });
+
+  const sortButtonRef = React.useRef<HTMLButtonElement>(null);
+  const filtersButtonRef = React.useRef<HTMLButtonElement>(null);
+  const sortMenuRef = React.useRef<HTMLDivElement>(null);
+  const filtersMenuRef = React.useRef<HTMLDivElement>(null);
 
   const sortOptions: SortOption[] = useMemo(
     () => [
@@ -224,6 +240,54 @@ const JokersPage: React.FC<JokersPageProps> = ({
     ],
     []
   );
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        sortButtonRef.current &&
+        !sortButtonRef.current.contains(event.target as Node) &&
+        sortMenuRef.current &&
+        !sortMenuRef.current.contains(event.target as Node)
+      ) {
+        setShowSortMenu(false);
+      }
+      if (
+        filtersButtonRef.current &&
+        !filtersButtonRef.current.contains(event.target as Node) &&
+        filtersMenuRef.current &&
+        !filtersMenuRef.current.contains(event.target as Node)
+      ) {
+        setShowFilters(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (showSortMenu && sortButtonRef.current) {
+      const rect = sortButtonRef.current.getBoundingClientRect();
+      setSortMenuPosition({
+        top: rect.bottom + 8,
+        left: rect.right - 224,
+        width: 224,
+      });
+    }
+  }, [showSortMenu]);
+
+  useEffect(() => {
+    if (showFilters && filtersButtonRef.current) {
+      const rect = filtersButtonRef.current.getBoundingClientRect();
+      setFiltersMenuPosition({
+        top: rect.bottom + 8,
+        left: rect.right - 256,
+        width: 256,
+      });
+    }
+  }, [showFilters]);
 
   const handleAddNewJoker = async () => {
     const placeholderResult = await getRandomPlaceholderJoker();
@@ -314,6 +378,18 @@ const JokersPage: React.FC<JokersPageProps> = ({
       setCurrentJokerForRules(updatedJoker);
       handleSaveJoker(updatedJoker);
     }
+  };
+
+  const handleSortMenuToggle = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (showFilters) setShowFilters(false);
+    setShowSortMenu(!showSortMenu);
+  };
+
+  const handleFiltersToggle = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (showSortMenu) setShowSortMenu(false);
+    setShowFilters(!showFilters);
   };
 
   const filteredAndSortedJokers = useMemo(() => {
@@ -437,102 +513,29 @@ const JokersPage: React.FC<JokersPageProps> = ({
 
             <div className="flex gap-3">
               <div className="relative">
-                <Button
-                  variant="secondary"
-                  onClick={() => setShowSortMenu(!showSortMenu)}
-                  icon={<ArrowsUpDownIcon className="h-4 w-4" />}
-                  className="whitespace-nowrap"
+                <button
+                  ref={sortButtonRef}
+                  onClick={handleSortMenuToggle}
+                  className="flex items-center gap-2 bg-black-dark text-white-light px-4 py-4 border-2 border-black-lighter rounded-xl hover:border-mint transition-colors cursor-pointer"
                 >
-                  {currentSortLabel}
-                </Button>
-
-                {showSortMenu && (
-                  <div className="absolute top-full right-0 mt-2 bg-black-darker border-2 border-black-lighter rounded-xl shadow-xl z-20 min-w-56 overflow-hidden">
-                    <div className="p-2">
-                      <h3 className="text-white-light font-medium text-sm mb-2 px-3 py-1">
-                        Sort By
-                      </h3>
-                      <div className="space-y-1">
-                        {sortOptions.map((option) => (
-                          <button
-                            key={option.value}
-                            onClick={() => {
-                              setSortBy(option.value);
-                              setShowSortMenu(false);
-                            }}
-                            className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-all ${
-                              sortBy === option.value
-                                ? "bg-mint/20 border border-mint text-mint"
-                                : "hover:bg-black-lighter text-white-darker hover:text-white-light"
-                            }`}
-                          >
-                            {option.label}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                )}
+                  <ArrowsUpDownIcon className="h-4 w-4" />
+                  <span className="whitespace-nowrap">{currentSortLabel}</span>
+                </button>
               </div>
 
               <div className="relative">
-                <Button
-                  variant={showFilters ? "primary" : "secondary"}
-                  onClick={() => setShowFilters(!showFilters)}
-                  icon={<FunnelIcon className="h-4 w-4" />}
+                <button
+                  ref={filtersButtonRef}
+                  onClick={handleFiltersToggle}
+                  className={`flex items-center gap-2 px-4 py-4 border-2 rounded-xl transition-colors cursor-pointer ${
+                    showFilters
+                      ? "bg-mint-dark text-black-darker border-mint"
+                      : "bg-black-dark text-white-light border-black-lighter hover:border-mint"
+                  }`}
                 >
-                  Filters
-                </Button>
-
-                {showFilters && (
-                  <div className="absolute top-full right-0 mt-2 bg-black-darker border-2 border-black-lighter rounded-xl shadow-xl z-10 min-w-52 overflow-hidden">
-                    <div className="p-3 border-b border-black-lighter">
-                      <h3 className="text-white-light font-medium text-sm mb-3">
-                        Filter by Rarity
-                      </h3>
-                      <div className="space-y-1">
-                        {rarityOptions.map((option) => (
-                          <button
-                            key={option.value || "all"}
-                            onClick={() => {
-                              setRarityFilter(option.value);
-                              setShowFilters(false);
-                            }}
-                            className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-all ${
-                              rarityFilter === option.value
-                                ? "bg-mint/20 border border-mint text-mint"
-                                : "hover:bg-black-lighter"
-                            }`}
-                          >
-                            <span className={getRarityColor(option.value)}>
-                              {option.label}
-                            </span>
-                            <span className="text-white-darker ml-1">
-                              ({option.count})
-                            </span>
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-
-                    {(searchTerm || rarityFilter !== null) && (
-                      <div className="p-3">
-                        <Button
-                          variant="secondary"
-                          size="sm"
-                          onClick={() => {
-                            setSearchTerm("");
-                            setRarityFilter(null);
-                            setShowFilters(false);
-                          }}
-                          fullWidth
-                        >
-                          Clear All Filters
-                        </Button>
-                      </div>
-                    )}
-                  </div>
-                )}
+                  <FunnelIcon className="h-4 w-4" />
+                  <span>Filters</span>
+                </button>
               </div>
             </div>
           </div>
@@ -652,6 +655,109 @@ const JokersPage: React.FC<JokersPageProps> = ({
           />
         )}
       </div>
+
+      {showSortMenu &&
+        ReactDOM.createPortal(
+          <div
+            ref={sortMenuRef}
+            className="fixed bg-black-darker border-2 border-black-lighter rounded-xl shadow-xl overflow-hidden"
+            style={{
+              top: `${sortMenuPosition.top}px`,
+              left: `${sortMenuPosition.left}px`,
+              width: `${sortMenuPosition.width}px`,
+              zIndex: 99999,
+            }}
+          >
+            <div className="p-2">
+              <h3 className="text-white-light font-medium text-sm mb-2 px-3 py-1">
+                Sort By
+              </h3>
+              <div className="space-y-1">
+                {sortOptions.map((option) => (
+                  <button
+                    key={option.value}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSortBy(option.value);
+                      setShowSortMenu(false);
+                    }}
+                    className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-all cursor-pointer ${
+                      sortBy === option.value
+                        ? "bg-mint/20 border border-mint text-mint"
+                        : "hover:bg-black-lighter text-white-darker hover:text-white-light"
+                    }`}
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>,
+          document.body
+        )}
+
+      {showFilters &&
+        ReactDOM.createPortal(
+          <div
+            ref={filtersMenuRef}
+            className="fixed bg-black-darker border-2 border-black-lighter rounded-xl shadow-xl overflow-hidden"
+            style={{
+              top: `${filtersMenuPosition.top}px`,
+              left: `${filtersMenuPosition.left}px`,
+              width: `${filtersMenuPosition.width}px`,
+              zIndex: 99999,
+            }}
+          >
+            <div className="p-3 border-b border-black-lighter">
+              <h3 className="text-white-light font-medium text-sm mb-3">
+                Filter by Rarity
+              </h3>
+              <div className="space-y-1">
+                {rarityOptions.map((option) => (
+                  <button
+                    key={option.value || "all"}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setRarityFilter(option.value);
+                      setShowFilters(false);
+                    }}
+                    className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-all cursor-pointer ${
+                      rarityFilter === option.value
+                        ? "bg-mint/20 border border-mint text-mint"
+                        : "hover:bg-black-lighter"
+                    }`}
+                  >
+                    <span className={getRarityColor(option.value)}>
+                      {option.label}
+                    </span>
+                    <span className="text-white-darker ml-1">
+                      ({option.count})
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {(searchTerm || rarityFilter !== null) && (
+              <div className="p-3">
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSearchTerm("");
+                    setRarityFilter(null);
+                    setShowFilters(false);
+                  }}
+                  fullWidth
+                >
+                  Clear All Filters
+                </Button>
+              </div>
+            )}
+          </div>,
+          document.body
+        )}
     </div>
   );
 };
