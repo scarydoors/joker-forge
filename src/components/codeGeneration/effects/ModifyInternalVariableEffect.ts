@@ -7,7 +7,7 @@ export const generateModifyInternalVariableReturn = (
 ): EffectReturn => {
   const variableName = (effect.params?.variable_name as string) || "var1";
   const operation = (effect.params?.operation as string) || "increment";
-  const value = (effect.params?.value as number | string) || 1;
+  const value = effect.params?.value as number | string;
   const customMessage = effect.customMessage;
 
   const scoringTriggers = ["hand_played", "card_scored"];
@@ -29,32 +29,27 @@ export const generateModifyInternalVariableReturn = (
       messageColor = "G.C.BLUE";
       break;
     case "increment":
-      operationCode = `card.ability.extra.${variableName} = (card.ability.extra.${variableName} or 0) + ${valueRef}`;
+      operationCode = `card.ability.extra.${variableName} = (card.ability.extra.${variableName}) + ${valueRef}`;
       messageText = customMessage ? `"${customMessage}"` : "";
       messageColor = "G.C.GREEN";
       break;
     case "decrement":
-      operationCode = `card.ability.extra.${variableName} = math.max(0, (card.ability.extra.${variableName} or 0) - ${valueRef})`;
+      operationCode = `card.ability.extra.${variableName} = math.max(0, (card.ability.extra.${variableName}) - ${valueRef})`;
       messageText = customMessage ? `"${customMessage}"` : "";
       messageColor = "G.C.RED";
       break;
     case "multiply":
-      operationCode = `card.ability.extra.${variableName} = (card.ability.extra.${variableName} or 0) * ${valueRef}`;
+      operationCode = `card.ability.extra.${variableName} = (card.ability.extra.${variableName}) * ${valueRef}`;
       messageText = customMessage ? `"${customMessage}"` : "";
       messageColor = "G.C.MULT";
       break;
     case "divide":
-      operationCode = `card.ability.extra.${variableName} = (card.ability.extra.${variableName} or 0) / ${valueRef}`;
+      operationCode = `card.ability.extra.${variableName} = (card.ability.extra.${variableName}) / ${valueRef}`;
       messageText = customMessage ? `"${customMessage}"` : "";
       messageColor = "G.C.MULT";
       break;
-    case "reset":
-      operationCode = `card.ability.extra.${variableName} = 0`;
-      messageText = customMessage ? `"${customMessage}"` : "";
-      messageColor = "G.C.WHITE";
-      break;
     default:
-      operationCode = `card.ability.extra.${variableName} = (card.ability.extra.${variableName} or 0) + ${valueRef}`;
+      operationCode = `card.ability.extra.${variableName} = (card.ability.extra.${variableName}) + ${valueRef}`;
       messageText = customMessage ? `"${customMessage}"` : "";
       messageColor = "G.C.GREEN";
   }
