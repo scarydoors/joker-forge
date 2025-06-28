@@ -22,6 +22,7 @@ import {
   VariableIcon,
   XMarkIcon,
   Bars3Icon,
+  PlusIcon,
 } from "@heroicons/react/24/outline";
 import { ChartPieIcon, PercentBadgeIcon } from "@heroicons/react/16/solid";
 
@@ -44,6 +45,7 @@ interface InspectorProps {
   onUpdateJoker: (updates: Partial<JokerData>) => void;
   onClose: () => void;
   onPositionChange: (position: { x: number; y: number }) => void;
+  onToggleVariablesPanel: () => void;
 }
 
 interface ParameterFieldProps {
@@ -53,6 +55,7 @@ interface ParameterFieldProps {
   parentValues?: Record<string, unknown>;
   availableVariables?: Array<{ value: string; label: string }>;
   onCreateVariable?: (name: string, initialValue: number) => void;
+  onOpenVariablesPanel?: () => void;
 }
 
 function hasShowWhen(param: ConditionParameter | EffectParameter): param is (
@@ -71,6 +74,7 @@ const ParameterField: React.FC<ParameterFieldProps> = ({
   parentValues = {},
   availableVariables = [],
   onCreateVariable,
+  onOpenVariablesPanel,
 }) => {
   const [isVariableMode, setIsVariableMode] = React.useState(false);
   const [newVariableName, setNewVariableName] = React.useState("");
@@ -83,18 +87,38 @@ const ParameterField: React.FC<ParameterFieldProps> = ({
     }
   }
 
-  if (param.id === "variable_name" && availableVariables.length > 0) {
-    return (
-      <InputDropdown
-        label={String(param.label)}
-        labelPosition="center"
-        value={(value as string) || ""}
-        onChange={(newValue) => onChange(newValue)}
-        options={availableVariables}
-        className="bg-black-dark"
-        size="sm"
-      />
-    );
+  if (param.id === "variable_name") {
+    if (availableVariables.length > 0) {
+      return (
+        <InputDropdown
+          label={String(param.label)}
+          labelPosition="center"
+          value={(value as string) || ""}
+          onChange={(newValue) => onChange(newValue)}
+          options={availableVariables}
+          className="bg-black-dark"
+          size="sm"
+        />
+      );
+    } else {
+      return (
+        <div>
+          <span className="text-white-light text-sm mb-2 block">
+            {String(param.label)}
+          </span>
+          <Button
+            variant="secondary"
+            size="sm"
+            fullWidth
+            onClick={onOpenVariablesPanel}
+            icon={<PlusIcon className="h-4 w-4" />}
+            className="cursor-pointer"
+          >
+            Create Variable
+          </Button>
+        </div>
+      );
+    }
   }
 
   switch (param.type) {
@@ -155,9 +179,16 @@ const ParameterField: React.FC<ParameterFieldProps> = ({
                   size="sm"
                 />
               ) : (
-                <div className="text-white-darker text-xs">
-                  No variables available
-                </div>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  fullWidth
+                  onClick={onOpenVariablesPanel}
+                  icon={<PlusIcon className="h-4 w-4" />}
+                  className="cursor-pointer"
+                >
+                  Create Variable
+                </Button>
               )}
 
               <div className="border-t border-black-lighter pt-2">
@@ -241,6 +272,7 @@ const Inspector: React.FC<InspectorProps> = ({
   onUpdateEffect,
   onUpdateJoker,
   onClose,
+  onToggleVariablesPanel,
 }) => {
   const { attributes, listeners, setNodeRef, transform } = useDraggable({
     id: "panel-inspector",
@@ -404,6 +436,7 @@ const Inspector: React.FC<InspectorProps> = ({
                   parentValues={selectedCondition.params}
                   availableVariables={availableVariables}
                   onCreateVariable={handleCreateVariable}
+                  onOpenVariablesPanel={onToggleVariablesPanel}
                 />
               </div>
             ))}
@@ -419,7 +452,15 @@ const Inspector: React.FC<InspectorProps> = ({
     onChange: (value: string | number) => void;
     availableVariables: Array<{ value: string; label: string }>;
     onCreateVariable: (name: string, initialValue: number) => void;
-  }> = ({ label, value, onChange, availableVariables, onCreateVariable }) => {
+    onOpenVariablesPanel: () => void;
+  }> = ({
+    label,
+    value,
+    onChange,
+    availableVariables,
+    onCreateVariable,
+    onOpenVariablesPanel,
+  }) => {
     const [isVariableMode, setIsVariableMode] = React.useState(
       typeof value === "string"
     );
@@ -456,9 +497,16 @@ const Inspector: React.FC<InspectorProps> = ({
                 size="sm"
               />
             ) : (
-              <div className="text-white-darker text-xs text-center">
-                No variables available
-              </div>
+              <Button
+                variant="secondary"
+                size="sm"
+                fullWidth
+                onClick={onOpenVariablesPanel}
+                icon={<PlusIcon className="h-4 w-4" />}
+                className="cursor-pointer"
+              >
+                Create Variable
+              </Button>
             )}
 
             <div className="border-t border-black-lighter pt-2">
@@ -595,6 +643,7 @@ const Inspector: React.FC<InspectorProps> = ({
                   }}
                   availableVariables={availableVariables}
                   onCreateVariable={handleCreateVariable}
+                  onOpenVariablesPanel={onToggleVariablesPanel}
                 />
                 <span className="text-white-light text-sm">in</span>
                 <ChanceInput
@@ -616,6 +665,7 @@ const Inspector: React.FC<InspectorProps> = ({
                   }}
                   availableVariables={availableVariables}
                   onCreateVariable={handleCreateVariable}
+                  onOpenVariablesPanel={onToggleVariablesPanel}
                 />
               </div>
             </div>
@@ -668,6 +718,7 @@ const Inspector: React.FC<InspectorProps> = ({
                   parentValues={selectedEffect.params}
                   availableVariables={availableVariables}
                   onCreateVariable={handleCreateVariable}
+                  onOpenVariablesPanel={onToggleVariablesPanel}
                 />
               </div>
             ))}

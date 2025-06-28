@@ -1230,6 +1230,7 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
                 onPositionChange={(position) =>
                   updatePanelPosition("inspector", position)
                 }
+                onToggleVariablesPanel={() => togglePanel("variables")}
               />
             )}
 
