@@ -73,11 +73,15 @@ const ParameterField: React.FC<ParameterFieldProps> = ({
   onChange,
   parentValues = {},
   availableVariables = [],
-  onCreateVariable,
   onOpenVariablesPanel,
 }) => {
-  const [isVariableMode, setIsVariableMode] = React.useState(false);
-  const [newVariableName, setNewVariableName] = React.useState("");
+  const [isVariableMode, setIsVariableMode] = React.useState(
+    typeof value === "string"
+  );
+
+  React.useEffect(() => {
+    setIsVariableMode(typeof value === "string");
+  }, [value]);
 
   if (hasShowWhen(param)) {
     const { parameter, values } = param.showWhen;
@@ -190,33 +194,6 @@ const ParameterField: React.FC<ParameterFieldProps> = ({
                   Create Variable
                 </Button>
               )}
-
-              <div className="border-t border-black-lighter pt-2">
-                <div className="flex gap-2">
-                  <InputField
-                    value={newVariableName}
-                    onChange={(e) => setNewVariableName(e.target.value)}
-                    placeholder="Variable name"
-                    size="sm"
-                    className="flex-1"
-                  />
-                  <Button
-                    size="sm"
-                    variant="primary"
-                    onClick={() => {
-                      if (newVariableName.trim() && onCreateVariable) {
-                        onCreateVariable(newVariableName.trim(), numericValue);
-                        onChange(newVariableName.trim());
-                        setNewVariableName("");
-                      }
-                    }}
-                    disabled={!newVariableName.trim()}
-                    className="cursor-pointer"
-                  >
-                    Create
-                  </Button>
-                </div>
-              </div>
             </div>
           ) : (
             <>
@@ -458,15 +435,17 @@ const Inspector: React.FC<InspectorProps> = ({
     value,
     onChange,
     availableVariables,
-    onCreateVariable,
     onOpenVariablesPanel,
   }) => {
     const [isVariableMode, setIsVariableMode] = React.useState(
       typeof value === "string"
     );
-    const [newVariableName, setNewVariableName] = React.useState("");
     const numericValue = typeof value === "number" ? value : 1;
     const actualValue = value || numericValue;
+
+    React.useEffect(() => {
+      setIsVariableMode(typeof value === "string");
+    }, [value]);
 
     return (
       <div className="flex flex-col gap-2 items-center">
@@ -508,33 +487,6 @@ const Inspector: React.FC<InspectorProps> = ({
                 Create Variable
               </Button>
             )}
-
-            <div className="border-t border-black-lighter pt-2">
-              <div className="flex gap-2">
-                <InputField
-                  value={newVariableName}
-                  onChange={(e) => setNewVariableName(e.target.value)}
-                  placeholder="Variable name"
-                  size="sm"
-                  className="flex-1"
-                />
-                <Button
-                  size="sm"
-                  variant="primary"
-                  onClick={() => {
-                    if (newVariableName.trim() && onCreateVariable) {
-                      onCreateVariable(newVariableName.trim(), numericValue);
-                      onChange(newVariableName.trim());
-                      setNewVariableName("");
-                    }
-                  }}
-                  disabled={!newVariableName.trim()}
-                  className="cursor-pointer"
-                >
-                  Create
-                </Button>
-              </div>
-            </div>
           </div>
         ) : (
           <InputField

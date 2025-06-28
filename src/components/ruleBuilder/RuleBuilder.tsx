@@ -161,6 +161,24 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
         const viewportWidth = window.innerWidth;
         const viewportHeight = window.innerHeight - 100;
 
+        if (targetPanelId === "variables") {
+          const blockPalettePanel = panels["blockPalette"];
+          if (blockPalettePanel && blockPalettePanel.isVisible) {
+            return {
+              x:
+                blockPalettePanel.position.x +
+                blockPalettePanel.size.width +
+                padding,
+              y: blockPalettePanel.position.y,
+            };
+          } else {
+            return {
+              x: 360 + padding,
+              y: 100,
+            };
+          }
+        }
+
         const positions = [
           { x: viewportWidth - panelSize.width - padding, y: padding },
           { x: padding, y: padding },
