@@ -7,7 +7,7 @@ const TAROT_CARD_KEYS: Record<string, string> = {
   the_high_priestess: "c_high_priestess",
   the_empress: "c_empress",
   the_emperor: "c_emperor",
-  the_hierophant: "c_hierophant",
+  the_hierophant: "c_heirophant",
   the_lovers: "c_lovers",
   the_chariot: "c_chariot",
   justice: "c_justice",
@@ -41,10 +41,10 @@ export const generateAddTarotCardReturn = (
   let tarotKey = "";
 
   if (tarotCard === "random") {
-    tarotKey = "nil, nil, nil, nil, nil, nil, 'joker_forge_tarot'";
+    tarotKey = "nil, nil, nil, nil, nil, 'joker_forge_tarot'";
   } else {
     const specificKey = TAROT_CARD_KEYS[tarotCard] || "c_fool";
-    tarotKey = `nil, nil, nil, nil, nil, '${specificKey}'`;
+    tarotKey = `nil, nil, nil, nil, '${specificKey}'`;
   }
 
   if (isNegative) {

@@ -54,10 +54,9 @@ export const generateAddSpectralCardReturn = (
                     G.GAME.consumeable_buffer = G.GAME.consumeable_buffer + 1
                     G.E_MANAGER:add_event(Event({
                         func = function()
-                            SMODS.add_card {
-                                set = 'Spectral',
-                                key_append = 'joker_forge_spectral'
-                            }
+                            local spectral_card = create_card('Spectral', G.consumeables, nil, nil, nil, nil, nil, 'joker_forge_spectral')
+                            spectral_card:add_to_deck()
+                            G.consumeables:emplace(spectral_card)
                             G.GAME.consumeable_buffer = 0
                             return true
                         end

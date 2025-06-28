@@ -48,10 +48,9 @@ export const generateAddPlanetCardReturn = (
                     G.GAME.consumeable_buffer = G.GAME.consumeable_buffer + 1
                     G.E_MANAGER:add_event(Event({
                         func = function()
-                            SMODS.add_card {
-                                set = 'Planet',
-                                key_append = 'joker_forge_planet'
-                            }
+                            local planet_card = create_card('Planet', G.consumeables, nil, nil, nil, nil, nil, 'joker_forge_planet')
+                            planet_card:add_to_deck()
+                            G.consumeables:emplace(planet_card)
                             G.GAME.consumeable_buffer = 0
                             return true
                         end
