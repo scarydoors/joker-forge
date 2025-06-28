@@ -87,7 +87,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
     id: "hand_type",
     label: "Hand Type",
     description: "Check the type of poker hand",
-    applicableTriggers: ["hand_played"],
+    applicableTriggers: ["hand_played", "card_scored"],
     params: [
       {
         id: "card_scope",
@@ -118,7 +118,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
     id: "card_count",
     label: "Card Count",
     description: "Check the number of cards in the played hand",
-    applicableTriggers: ["hand_played"],
+    applicableTriggers: ["hand_played", "card_scored"],
     params: [
       {
         id: "card_scope",
@@ -147,7 +147,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
     id: "suit_count",
     label: "Suit Count",
     description: "Check how many cards of a specific suit are in the hand",
-    applicableTriggers: ["hand_played"],
+    applicableTriggers: ["hand_played", "card_scored"],
     params: [
       {
         id: "card_scope",
@@ -214,7 +214,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
     id: "rank_count",
     label: "Rank Count",
     description: "Check how many cards of a specific rank are in the hand",
-    applicableTriggers: ["hand_played"],
+    applicableTriggers: ["hand_played", "card_scored"],
     params: [
       {
         id: "card_scope",

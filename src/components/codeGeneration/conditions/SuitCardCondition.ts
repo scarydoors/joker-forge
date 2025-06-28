@@ -34,9 +34,9 @@ export const generateSuitCardConditionCode = (rules: Rule[]): string | null => {
     scope === "scoring" ? "context.scoring_hand" : "context.full_hand";
 
   if (
-    triggerType === "card_scored" ||
     triggerType === "card_discarded" ||
-    triggerType === "card_held_in_hand"
+    triggerType === "card_held_in_hand" ||
+    (triggerType === "card_scored" && condition.type === "card_suit")
   ) {
     const checkLogic = getSuitsCheckLogic(suits).replace(
       /c:/g,

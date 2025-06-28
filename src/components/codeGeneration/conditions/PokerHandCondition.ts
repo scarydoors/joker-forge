@@ -4,7 +4,6 @@ export const generatePokerHandConditionCode = (
   rules: Rule[]
 ): string | null => {
   const rule = rules[0];
-  if (rule.trigger !== "hand_played") return null;
 
   type HandTypeConditionDef = {
     handType: string;
