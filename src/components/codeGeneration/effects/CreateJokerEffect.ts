@@ -20,6 +20,7 @@ export const generateCreateJokerReturn = (
   let jokerCreationCode = "";
 
   if (jokerType === "specific" && jokerKey) {
+    // Create specific joker using create_card
     const editionCode = hasEdition
       ? `\n                        joker_card:set_edition("${edition}", true)`
       : "";
@@ -51,60 +52,79 @@ export const generateCreateJokerReturn = (
                 end`;
     }
   } else {
-    // Random joker creation
-    let rarityNumber = "nil";
+    // Create random joker using SMODS.add_card with string rarities
+    let rarityString = "";
+
     if (rarity !== "random") {
-      const rarityNumberMap: Record<string, string> = {
-        common: "1",
-        uncommon: "2",
-        rare: "3",
-        legendary: "4",
+      const rarityStringMap: Record<string, string> = {
+        common: "Common",
+        uncommon: "Uncommon",
+        rare: "Rare",
+        legendary: "Legendary",
       };
-      rarityNumber = rarityNumberMap[rarity] || "nil";
+      rarityString = rarityStringMap[rarity] || "";
     }
 
     if (isNegative) {
-      jokerCreationCode = `local created_joker = true
+      // Negative edition jokers bypass slot limits
+      if (rarityString) {
+        jokerCreationCode = `local created_joker = true
                 G.E_MANAGER:add_event(Event({
                     func = function()
-                        local joker_card = create_card('Joker', G.jokers, nil, ${rarityNumber}, nil, nil, nil, 'joker_forge_random')
+                        local joker_card = SMODS.add_card({
+                            set = 'Joker',
+                            rarity = '${rarityString}',
+                            key_append = 'joker_forge_random'
+                        })
+                        joker_card:set_edition("e_negative", true)
+                        return true
+                    end
+                }))`;
+      } else {
+        jokerCreationCode = `local created_joker = true
+                G.E_MANAGER:add_event(Event({
+                    func = function()
+                        local joker_card = create_card('Joker', G.jokers, nil, nil, nil, nil, nil, 'joker_forge_random')
                         joker_card:set_edition("e_negative", true)
                         joker_card:add_to_deck()
                         G.jokers:emplace(joker_card)
                         return true
                     end
                 }))`;
+      }
     } else {
-      const editionCode = hasEdition
-        ? `\n                            joker_card:set_edition("${edition}", true)`
-        : "";
-
-      if (hasEdition) {
+      // Normal jokers respect slot limits
+      if (rarityString) {
         jokerCreationCode = `local created_joker = false
                 if #G.jokers.cards + G.GAME.joker_buffer < G.jokers.config.card_limit then
                     created_joker = true
                     G.GAME.joker_buffer = G.GAME.joker_buffer + 1
                     G.E_MANAGER:add_event(Event({
                         func = function()
-                            local joker_card = create_card('Joker', G.jokers, nil, ${rarityNumber}, nil, nil, nil, 'joker_forge_random')${editionCode}
-                            joker_card:add_to_deck()
-                            G.jokers:emplace(joker_card)
+                            SMODS.add_card({
+                                set = 'Joker',
+                                rarity = '${rarityString}',
+                                key_append = 'joker_forge_random'
+                            })
                             G.GAME.joker_buffer = 0
                             return true
                         end
                     }))
                 end`;
       } else {
+        const editionCode = hasEdition
+          ? `\n                            joker_card:set_edition("${edition}", true)`
+          : "";
+
         jokerCreationCode = `local created_joker = false
                 if #G.jokers.cards + G.GAME.joker_buffer < G.jokers.config.card_limit then
                     created_joker = true
                     G.GAME.joker_buffer = G.GAME.joker_buffer + 1
                     G.E_MANAGER:add_event(Event({
                         func = function()
-                            SMODS.add_card {
-                                set = 'Joker',
-                                key_append = 'joker_forge_random'
-                            }
+                            local joker_card = create_card('Joker', G.jokers, nil, nil, nil, nil, nil, 'joker_forge_random')${editionCode}
+                            joker_card:add_to_deck()
+                            G.jokers:emplace(joker_card)
                             G.GAME.joker_buffer = 0
                             return true
                         end
