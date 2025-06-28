@@ -58,6 +58,86 @@ interface ParameterFieldProps {
   onOpenVariablesPanel?: () => void;
 }
 
+const ChanceInput: React.FC<{
+  label: string;
+  value: string | number | undefined;
+  onChange: (value: string | number) => void;
+  availableVariables: Array<{ value: string; label: string }>;
+  onCreateVariable: (name: string, initialValue: number) => void;
+  onOpenVariablesPanel: () => void;
+}> = React.memo(
+  ({ label, value, onChange, availableVariables, onOpenVariablesPanel }) => {
+    const [isVariableMode, setIsVariableMode] = React.useState(
+      typeof value === "string"
+    );
+    const numericValue = typeof value === "number" ? value : 1;
+    const actualValue = value || numericValue;
+
+    React.useEffect(() => {
+      setIsVariableMode(typeof value === "string");
+    }, [value]);
+
+    return (
+      <div className="flex flex-col gap-2 items-center">
+        <div className="flex items-center gap-2">
+          <span className="text-white-light text-sm">{label}</span>
+          <button
+            onClick={() => setIsVariableMode(!isVariableMode)}
+            className={`p-1 rounded transition-colors cursor-pointer ${
+              isVariableMode
+                ? "bg-mint/20 text-mint"
+                : "bg-black-lighter text-white-darker hover:text-mint"
+            }`}
+            title="Toggle variable mode"
+          >
+            <VariableIcon className="h-3 w-3" />
+          </button>
+        </div>
+
+        {isVariableMode ? (
+          <div className="space-y-2 w-full">
+            {availableVariables.length > 0 ? (
+              <InputDropdown
+                value={(actualValue as string) || ""}
+                onChange={(newValue) => onChange(newValue)}
+                options={availableVariables}
+                placeholder="Select variable"
+                className="bg-black-dark"
+                size="sm"
+              />
+            ) : (
+              <Button
+                variant="secondary"
+                size="sm"
+                fullWidth
+                onClick={onOpenVariablesPanel}
+                icon={<PlusIcon className="h-4 w-4" />}
+                className="cursor-pointer"
+              >
+                Create Variable
+              </Button>
+            )}
+          </div>
+        ) : (
+          <InputField
+            type="number"
+            value={numericValue.toString()}
+            onChange={(e) => {
+              const val = parseInt(e.target.value);
+              onChange(isNaN(val) ? 1 : val);
+            }}
+            min="1"
+            size="sm"
+            className="w-20"
+          />
+        )}
+      </div>
+    );
+  }
+);
+
+ChanceInput.displayName = "ChanceInput";
+
 function hasShowWhen(param: ConditionParameter | EffectParameter): param is (
   | ConditionParameter
   | EffectParameter
@@ -423,88 +503,6 @@ const Inspector: React.FC<InspectorProps> = ({
     );
   };
 
-  const ChanceInput: React.FC<{
-    label: string;
-    value: string | number | undefined;
-    onChange: (value: string | number) => void;
-    availableVariables: Array<{ value: string; label: string }>;
-    onCreateVariable: (name: string, initialValue: number) => void;
-    onOpenVariablesPanel: () => void;
-  }> = ({
-    label,
-    value,
-    onChange,
-    availableVariables,
-    onOpenVariablesPanel,
-  }) => {
-    const [isVariableMode, setIsVariableMode] = React.useState(
-      typeof value === "string"
-    );
-    const numericValue = typeof value === "number" ? value : 1;
-    const actualValue = value || numericValue;
-
-    React.useEffect(() => {
-      setIsVariableMode(typeof value === "string");
-    }, [value]);
-
-    return (
-      <div className="flex flex-col gap-2 items-center">
-        <div className="flex items-center gap-2">
-          <span className="text-white-light text-sm">{label}</span>
-          <button
-            onClick={() => setIsVariableMode(!isVariableMode)}
-            className={`p-1 rounded transition-colors cursor-pointer ${
-              isVariableMode
-                ? "bg-mint/20 text-mint"
-                : "bg-black-lighter text-white-darker hover:text-mint"
-            }`}
-            title="Toggle variable mode"
-          >
-            <VariableIcon className="h-3 w-3" />
-          </button>
-        </div>
-
-        {isVariableMode ? (
-          <div className="space-y-2 w-full">
-            {availableVariables.length > 0 ? (
-              <InputDropdown
-                value={(actualValue as string) || ""}
-                onChange={(newValue) => onChange(newValue)}
-                options={availableVariables}
-                placeholder="Select variable"
-                className="bg-black-dark"
-                size="sm"
-              />
-            ) : (
-              <Button
-                variant="secondary"
-                size="sm"
-                fullWidth
-                onClick={onOpenVariablesPanel}
-                icon={<PlusIcon className="h-4 w-4" />}
-                className="cursor-pointer"
-              >
-                Create Variable
-              </Button>
-            )}
-          </div>
-        ) : (
-          <InputField
-            type="number"
-            value={numericValue.toString()}
-            onChange={(e) => {
-              const val = parseInt(e.target.value);
-              onChange(isNaN(val) ? 1 : val);
-            }}
-            min="1"
-            size="sm"
-            className="w-20"
-          />
-        )}
-      </div>
-    );
-  };
-
   const renderEffectEditor = () => {
     if (!selectedEffect || !selectedRule) return null;
     const effectType = getEffectTypeById(selectedEffect.type);
@@ -577,6 +575,7 @@ const Inspector: React.FC<InspectorProps> = ({
             <div className="mt-3 bg-mint/10 border border-mint/30 rounded-lg p-3">
               <div className="flex flex-col items-center gap-4">
                 <ChanceInput
+                  key="numerator"
                   label="Numerator"
                   value={
                     selectedEffect.params.chance_numerator as
@@ -599,6 +598,7 @@ const Inspector: React.FC<InspectorProps> = ({
                 />
                 <span className="text-white-light text-sm">in</span>
                 <ChanceInput
+                  key="denominator"
                   label="Denominator"
                   value={
                     selectedEffect.params.chance_denominator as
