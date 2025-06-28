@@ -88,14 +88,24 @@ export const coordinateVariableConflicts = (
   preReturnCode?: string;
   modifiedEffects: Effect[];
 } => {
-  const readVars = new Set<string>();
-  const writeVars = new Set<string>();
+  const variableOperations: Array<{
+    varName: string;
+    type: "read" | "write";
+    effectIndex: number;
+    effect: Effect;
+  }> = [];
 
-  effects.forEach((effect) => {
+  // Collect all variable operations with their order
+  effects.forEach((effect, index) => {
     if (effect.type === "modify_internal_variable") {
       const varName = effect.params.variable_name as string;
       if (varName) {
-        writeVars.add(varName);
+        variableOperations.push({
+          varName,
+          type: "write",
+          effectIndex: index,
+          effect,
+        });
       }
     }
 
@@ -106,20 +116,51 @@ export const coordinateVariableConflicts = (
         key !== "variable_name" &&
         isValidVariableName(value)
       ) {
-        readVars.add(value);
+        variableOperations.push({
+          varName: value,
+          type: "read",
+          effectIndex: index,
+          effect,
+        });
       }
     });
   });
 
-  const conflicts = Array.from(readVars).filter((varName) =>
-    writeVars.has(varName)
-  );
+  const varGroups = variableOperations.reduce((acc, op) => {
+    if (!acc[op.varName]) {
+      acc[op.varName] = [];
+    }
+    acc[op.varName].push(op);
+    return acc;
+  }, {} as Record<string, typeof variableOperations>);
 
-  if (conflicts.length === 0) {
+  const conflictedVars: string[] = [];
+
+  Object.entries(varGroups).forEach(([varName, operations]) => {
+    const reads = operations.filter((op) => op.type === "read");
+    const writes = operations.filter((op) => op.type === "write");
+
+    if (reads.length === 0 || writes.length === 0) {
+      return;
+    }
+
+    // Check if any read happens before a write THAT'S a conflict
+    for (const read of reads) {
+      for (const write of writes) {
+        if (read.effectIndex < write.effectIndex) {
+          conflictedVars.push(varName);
+          return;
+        }
+      }
+    }
+  });
+
+  if (conflictedVars.length === 0) {
     return { modifiedEffects: effects };
   }
 
-  const preReturnCode = conflicts
+  // Apply conflict resolution only to actual conflicts
+  const preReturnCode = conflictedVars
     .map((varName) => `local ${varName}_value = card.ability.extra.${varName}`)
     .join("\n                ");
 
@@ -132,7 +173,7 @@ export const coordinateVariableConflicts = (
     Object.entries(effect.params).forEach(([key, value]) => {
       if (
         typeof value === "string" &&
-        conflicts.includes(value) &&
+        conflictedVars.includes(value) &&
         !INTERNAL_PARAMETERS.has(key)
       ) {
         modifiedParams[key] = `${value}_value`;
