@@ -63,9 +63,13 @@ const getRandomPlaceholderJoker = async (): Promise<{
 }> => {
   if (upscaledPlaceholders && upscaledPlaceholders.length > 0) {
     const randomIndex = Math.floor(Math.random() * upscaledPlaceholders.length);
+    const imagePath = availablePlaceholders?.[randomIndex];
+    const match = imagePath?.match(/placeholder-joker-(\d+)\.png/);
+    const imageNumber = match ? parseInt(match[1], 10) : randomIndex + 1;
+
     return {
       imageData: upscaledPlaceholders[randomIndex],
-      creditIndex: randomIndex + 1,
+      creditIndex: imageNumber,
     };
   }
 
@@ -75,9 +79,14 @@ const getRandomPlaceholderJoker = async (): Promise<{
     );
     upscaledPlaceholders = upscaled;
     const randomIndex = Math.floor(Math.random() * upscaled.length);
+    const match = availablePlaceholders[randomIndex].match(
+      /placeholder-joker-(\d+)\.png/
+    );
+    const imageNumber = match ? parseInt(match[1], 10) : 1;
+
     return {
       imageData: upscaled[randomIndex],
-      creditIndex: randomIndex + 1,
+      creditIndex: imageNumber,
     };
   }
 
@@ -112,26 +121,13 @@ const getRandomPlaceholderJoker = async (): Promise<{
   upscaledPlaceholders = upscaled;
 
   const randomIndex = Math.floor(Math.random() * upscaled.length);
+  const match = placeholders[randomIndex].match(/placeholder-joker-(\d+)\.png/);
+  const imageNumber = match ? parseInt(match[1], 10) : 1;
+
   return {
     imageData: upscaled[randomIndex],
-    creditIndex: randomIndex + 1,
+    creditIndex: imageNumber,
   };
-};
-
-const getRandomPlaceholderJokerSync = (): string => {
-  if (upscaledPlaceholders && upscaledPlaceholders.length > 0) {
-    const randomIndex = Math.floor(Math.random() * upscaledPlaceholders.length);
-    return upscaledPlaceholders[randomIndex];
-  }
-
-  if (availablePlaceholders && availablePlaceholders.length > 0) {
-    const randomIndex = Math.floor(
-      Math.random() * availablePlaceholders.length
-    );
-    return availablePlaceholders[randomIndex];
-  }
-
-  return "/images/placeholderjokers/placeholder-joker.png";
 };
 
 const isPlaceholderJoker = (imagePath: string): boolean => {
@@ -268,16 +264,25 @@ const JokersPage: React.FC<JokersPageProps> = ({
     }
   };
 
-  const handleDuplicateJoker = (joker: JokerData) => {
-    const duplicatedJoker: JokerData = {
-      ...joker,
-      id: crypto.randomUUID(),
-      name: `${joker.name} Copy`,
-      imagePreview: isPlaceholderJoker(joker.imagePreview)
-        ? getRandomPlaceholderJokerSync()
-        : joker.imagePreview,
-    };
-    setJokers([...jokers, duplicatedJoker]);
+  const handleDuplicateJoker = async (joker: JokerData) => {
+    if (isPlaceholderJoker(joker.imagePreview)) {
+      const placeholderResult = await getRandomPlaceholderJoker();
+      const duplicatedJoker: JokerData = {
+        ...joker,
+        id: crypto.randomUUID(),
+        name: `${joker.name} Copy`,
+        imagePreview: placeholderResult.imageData,
+        placeholderCreditIndex: placeholderResult.creditIndex,
+      };
+      setJokers([...jokers, duplicatedJoker]);
+    } else {
+      const duplicatedJoker: JokerData = {
+        ...joker,
+        id: crypto.randomUUID(),
+        name: `${joker.name} Copy`,
+      };
+      setJokers([...jokers, duplicatedJoker]);
+    }
   };
 
   const handleQuickUpdate = (joker: JokerData, updates: Partial<JokerData>) => {
