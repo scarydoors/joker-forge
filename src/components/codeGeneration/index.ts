@@ -368,53 +368,176 @@ const generateCalculateFunction = (rules: Rule[]): string => {
   let calculateFunction = `calculate = function(self, card, context)`;
 
   Object.entries(rulesByTrigger).forEach(([triggerType, triggerRules]) => {
-    const triggerContext = generateTriggerContext(triggerType, triggerRules);
+    const hasRetriggerEffects = triggerRules.some((rule) =>
+      rule.effects.some((effect) => effect.type === "retrigger_cards")
+    );
 
-    calculateFunction += `
+    if (hasRetriggerEffects) {
+      const retriggerContextCheck =
+        triggerType === "card_held_in_hand"
+          ? "context.repetition and context.cardarea == G.hand and (next(context.card_effects[1]) or #context.card_effects > 1)"
+          : "context.repetition and context.cardarea == G.play";
+
+      calculateFunction += `
+        -- Card repetition context for retriggering
+        if ${retriggerContextCheck} then`;
+
+      let hasAnyConditions = false;
+
+      triggerRules.forEach((rule) => {
+        const retriggerEffects = rule.effects.filter(
+          (e) => e.type === "retrigger_cards"
+        );
+        if (retriggerEffects.length === 0) return;
+
+        const conditionCode = generateConditionChain(rule);
+
+        if (conditionCode) {
+          const conditional = hasAnyConditions ? "elseif" : "if";
+          calculateFunction += `
+            ${conditional} ${conditionCode} then`;
+          hasAnyConditions = true;
+        } else {
+          if (hasAnyConditions) {
+            calculateFunction += `
+            else`;
+          }
+        }
+
+        const { statement, preReturnCode } = generateEffectReturnStatement(
+          retriggerEffects,
+          triggerType,
+          rule.id
+        );
+
+        if (preReturnCode) {
+          calculateFunction += `
+                ${preReturnCode}`;
+        }
+
+        if (statement) {
+          calculateFunction += `
+                ${statement}`;
+        }
+      });
+
+      if (hasAnyConditions) {
+        calculateFunction += `
+            end`;
+      }
+
+      calculateFunction += `
+        end`;
+
+      const nonRetriggerContextCheck =
+        triggerType === "card_held_in_hand"
+          ? "context.individual and context.cardarea == G.hand and not context.end_of_round and not context.blueprint"
+          : "context.individual and context.cardarea == G.play and not context.blueprint";
+
+      const nonRetriggerComment =
+        triggerType === "card_held_in_hand"
+          ? "-- Individual card held in hand"
+          : "-- Individual card scoring";
+
+      calculateFunction += `
+        ${nonRetriggerComment}
+        if ${nonRetriggerContextCheck} then`;
+
+      hasAnyConditions = false;
+
+      triggerRules.forEach((rule) => {
+        const nonRetriggerEffects = rule.effects.filter(
+          (e) => e.type !== "retrigger_cards"
+        );
+        if (nonRetriggerEffects.length === 0) return;
+
+        const conditionCode = generateConditionChain(rule);
+
+        if (conditionCode) {
+          const conditional = hasAnyConditions ? "elseif" : "if";
+          calculateFunction += `
+            ${conditional} ${conditionCode} then`;
+          hasAnyConditions = true;
+        } else {
+          if (hasAnyConditions) {
+            calculateFunction += `
+            else`;
+          }
+        }
+
+        const { statement, preReturnCode } = generateEffectReturnStatement(
+          nonRetriggerEffects,
+          triggerType,
+          rule.id
+        );
+
+        if (preReturnCode) {
+          calculateFunction += `
+                ${preReturnCode}`;
+        }
+
+        if (statement) {
+          calculateFunction += `
+                ${statement}`;
+        }
+      });
+
+      if (hasAnyConditions) {
+        calculateFunction += `
+            end`;
+      }
+
+      calculateFunction += `
+        end`;
+    } else {
+      const triggerContext = generateTriggerContext(triggerType, triggerRules);
+
+      calculateFunction += `
         ${triggerContext.comment}
         if ${triggerContext.check} then`;
 
-    let hasAnyConditions = false;
+      let hasAnyConditions = false;
 
-    triggerRules.forEach((rule) => {
-      const conditionCode = generateConditionChain(rule);
+      triggerRules.forEach((rule) => {
+        const conditionCode = generateConditionChain(rule);
 
-      if (conditionCode) {
-        const conditional = hasAnyConditions ? "elseif" : "if";
-        calculateFunction += `
-            ${conditional} ${conditionCode} then`;
-        hasAnyConditions = true;
-      } else {
-        if (hasAnyConditions) {
+        if (conditionCode) {
+          const conditional = hasAnyConditions ? "elseif" : "if";
           calculateFunction += `
+            ${conditional} ${conditionCode} then`;
+          hasAnyConditions = true;
+        } else {
+          if (hasAnyConditions) {
+            calculateFunction += `
             else`;
+          }
         }
-      }
 
-      const { statement, preReturnCode } = generateEffectReturnStatement(
-        rule.effects,
-        triggerType,
-        rule.id
-      );
+        const { statement, preReturnCode } = generateEffectReturnStatement(
+          rule.effects,
+          triggerType,
+          rule.id
+        );
 
-      if (preReturnCode) {
-        calculateFunction += `
+        if (preReturnCode) {
+          calculateFunction += `
                 ${preReturnCode}`;
-      }
+        }
 
-      if (statement) {
-        calculateFunction += `
+        if (statement) {
+          calculateFunction += `
                 ${statement}`;
-      }
-    });
+        }
+      });
 
-    if (hasAnyConditions) {
-      calculateFunction += `
+      if (hasAnyConditions) {
+        calculateFunction += `
             end`;
-    }
+      }
 
-    calculateFunction += `
+      calculateFunction += `
         end`;
+    }
   });
 
   calculateFunction += `
