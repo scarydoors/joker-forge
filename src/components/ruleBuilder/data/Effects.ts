@@ -274,6 +274,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
       "hand_discarded",
       "shop_reroll",
       "card_held_in_hand",
+      "round_end",
     ],
     params: [
       {
