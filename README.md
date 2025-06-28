@@ -120,6 +120,7 @@ The plan here is to implement enough triggers, conditions, and effects, so as th
 - [ ] **Permanent Card Modifications** - Add permanent bonuses to cards (Hiker)
 - [ ] **Required Suit Changes** - For jokers that alternate between their required suit (Ancient Joker)
 - [ ] **Required Rank Changes** - For jokers that alternate between their required rank
+- [ ] **Create Skip Tags** - Create a set or random skip tag
 
 ---
 
