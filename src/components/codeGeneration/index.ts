@@ -349,6 +349,16 @@ const extractEffectsConfig = (
           configItems.push(`${varName} = ${value}`);
           globalEffectVariableMapping[effect.id] = varName;
         }
+
+        if (
+          effect.type === "apply_x_chips" &&
+          typeof effectValue === "number" &&
+          !allVariableNames.has(String(effectValue))
+        ) {
+          const varName = getUniqueVariableName("xchips");
+          configItems.push(`${varName} = ${effectValue}`);
+          globalEffectVariableMapping[effect.id] = varName;
+        }
       });
     });
   }

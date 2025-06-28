@@ -48,6 +48,22 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
     ],
   },
   {
+    id: "apply_x_chips",
+    label: "Apply xChips",
+    description: "Multiply the chips by this value",
+    applicableTriggers: ["hand_played", "card_scored", "card_held_in_hand"],
+    params: [
+      {
+        id: "value",
+        type: "number",
+        label: "Multiplier",
+        default: 1.5,
+        min: 0.1,
+        max: 10,
+      },
+    ],
+  },
+  {
     id: "add_dollars",
     label: "Add Dollars",
     description: "Add money directly to your balance",

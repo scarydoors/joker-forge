@@ -35,6 +35,7 @@ import {
   generatePassiveConsideredAs,
   type ConsideredAsResult,
 } from "./effects/ConsideredAsEffect";
+import { generateApplyXChipsReturn } from "./effects/ApplyXChipsEffect";
 
 export interface ReturnStatementResult {
   statement: string;
@@ -203,6 +204,8 @@ const generateSingleEffect = (
       return generateCopyJokerReturn(effect, triggerType);
     case "destroy_joker":
       return generateDestroyJokerReturn(effect, triggerType);
+    case "apply_x_chips":
+      return generateApplyXChipsReturn(triggerType, effect);
     default:
       return {
         statement: "",
