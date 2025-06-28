@@ -36,9 +36,7 @@ export const generateAddMultReturn = (
   } else {
     return {
       statement: `mult = ${valueReference}`,
-      message: customMessage
-        ? `"${customMessage}"`
-        : `localize{type='variable',key='a_mult',vars={${valueReference}}}`,
+      message: customMessage ? `"${customMessage}"` : undefined,
       colour: "G.C.MULT",
     };
   }

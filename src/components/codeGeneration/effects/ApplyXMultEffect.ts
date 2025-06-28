@@ -8,7 +8,6 @@ export const generateApplyXMultReturn = (
 ): EffectReturn => {
   const customMessage = effect?.customMessage;
 
-  // Check if value is a variable reference (string) or a literal value
   const isVariableReference = typeof effect?.params?.value === "string";
 
   let valueReference = "";
@@ -31,9 +30,7 @@ export const generateApplyXMultReturn = (
   } else {
     return {
       statement: `Xmult = ${valueReference}`,
-      message: customMessage
-        ? `"${customMessage}"`
-        : `localize{type='variable',key='a_xmult',vars={${valueReference}}}`,
+      message: customMessage ? `"${customMessage}"` : undefined,
       colour: "G.C.XMULT",
     };
   }

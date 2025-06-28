@@ -13,7 +13,6 @@ export const generateAddChipsReturn = (
 ): EffectReturn => {
   const customMessage = effect?.customMessage;
 
-  // Check if value is a variable reference (string) or a literal value
   const isVariableReference = typeof effect?.params?.value === "string";
 
   let valueReference = "";
@@ -36,9 +35,7 @@ export const generateAddChipsReturn = (
   } else {
     return {
       statement: `chips = ${valueReference}`,
-      message: customMessage
-        ? `"${customMessage}"`
-        : `localize{type='variable',key='a_chips',vars={${valueReference}}}`,
+      message: customMessage ? `"${customMessage}"` : undefined,
       colour: "G.C.CHIPS",
     };
   }
