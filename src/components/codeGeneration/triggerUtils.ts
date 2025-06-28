@@ -123,6 +123,12 @@ export const generateTriggerContext = (
         comment: "-- When hand is discarded",
       };
 
+    case "after_hand_played":
+      return {
+        check: "context.after and context.cardarea == G.jokers",
+        comment: "-- After hand has finished scoring",
+      };
+
     case "hand_played":
     default:
       return {

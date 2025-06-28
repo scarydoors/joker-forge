@@ -33,6 +33,12 @@ export const TRIGGERS: TriggerDefinition[] = [
       "Triggers for each individual card currently held in your hand. Perfect for effects that scale with specific cards you're holding, like gaining money for each Ace or mult for each face card.",
   },
   {
+    id: "after_hand_played",
+    label: "When Hand Finishes Scoring",
+    description:
+      "Triggers after a hand has completely finished scoring, after all cards have been scored and all joker effects have been calculated. Perfect for cleanup effects, resetting variables, or effects that should happen once per hand after everything else.",
+  },
+  {
     id: "round_end",
     label: "When the Round Ends",
     description:

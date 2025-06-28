@@ -87,7 +87,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
     id: "hand_type",
     label: "Hand Type",
     description: "Check the type of poker hand",
-    applicableTriggers: ["hand_played", "card_scored"],
+    applicableTriggers: ["hand_played", "card_scored", "after_hand_played"],
     params: [
       {
         id: "card_scope",
@@ -118,7 +118,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
     id: "card_count",
     label: "Card Count",
     description: "Check the number of cards in the played hand",
-    applicableTriggers: ["hand_played", "card_scored"],
+    applicableTriggers: ["hand_played", "card_scored", "after_hand_played"],
     params: [
       {
         id: "card_scope",
@@ -147,7 +147,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
     id: "suit_count",
     label: "Suit Count",
     description: "Check how many cards of a specific suit are in the hand",
-    applicableTriggers: ["hand_played", "card_scored"],
+    applicableTriggers: ["hand_played", "card_scored", "after_hand_played"],
     params: [
       {
         id: "card_scope",
@@ -214,7 +214,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
     id: "rank_count",
     label: "Rank Count",
     description: "Check how many cards of a specific rank are in the hand",
-    applicableTriggers: ["hand_played", "card_scored"],
+    applicableTriggers: ["hand_played", "card_scored", "after_hand_played"],
     params: [
       {
         id: "card_scope",
@@ -402,6 +402,8 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
       "hand_discarded",
       "round_end",
       "shop_reroll",
+      "card_held_in_hand",
+      "after_hand_played",
     ],
     params: [
       {
@@ -439,6 +441,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
       "round_end",
       "shop_reroll",
       "card_held_in_hand",
+      "after_hand_played",
     ],
     params: [
       {
@@ -477,6 +480,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
       "round_end",
       "shop_reroll",
       "card_held_in_hand",
+      "after_hand_played",
     ],
     params: [
       {
@@ -515,6 +519,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
       "round_end",
       "shop_reroll",
       "card_held_in_hand",
+      "after_hand_played",
     ],
     params: [
       {
@@ -553,6 +558,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
       "round_end",
       "shop_reroll",
       "card_held_in_hand",
+      "after_hand_played",
     ],
     params: [
       {
@@ -595,6 +601,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
       "hand_discarded",
       "round_end",
       "card_held_in_hand",
+      "after_hand_played",
     ],
     params: [
       {
@@ -630,6 +637,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
       "round_end",
       "shop_reroll",
       "card_held_in_hand",
+      "after_hand_played",
     ],
     params: [
       {
@@ -651,7 +659,12 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
     id: "first_played_hand",
     label: "First Played Hand",
     description: "Check if this is the first hand played in the current round",
-    applicableTriggers: ["hand_played", "card_scored", "card_discarded"],
+    applicableTriggers: [
+      "hand_played",
+      "card_scored",
+      "card_discarded",
+      "after_hand_played",
+    ],
     params: [],
   },
   {
@@ -683,6 +696,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
       "round_end",
       "shop_reroll",
       "card_held_in_hand",
+      "after_hand_played",
     ],
     params: [
       {
@@ -722,6 +736,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
       "round_end",
       "shop_reroll",
       "card_held_in_hand",
+      "after_hand_played",
     ],
     params: [
       {
@@ -771,6 +786,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
       "round_end",
       "shop_reroll",
       "card_held_in_hand",
+      "after_hand_played",
     ],
     params: [
       {
