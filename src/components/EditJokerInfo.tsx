@@ -186,6 +186,12 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
       } else if (lowerWord.match(/^tarot$/)) {
         words[i] = `{C:tarot}${word}{}`;
         hasChanges = true;
+      } else if (lowerWord.match(/^spectral$/)) {
+        words[i] = `{C:spectral}${word}{}`;
+        hasChanges = true;
+      } else if (lowerWord.match(/^planet$/)) {
+        words[i] = `{C:planet}${word}{}`;
+        hasChanges = true;
       } else if (word.match(/^-\d+(\.\d+)?$/)) {
         words[i] = `{C:red}${word}{}`;
         hasChanges = true;
@@ -557,11 +563,14 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
     { tag: "{C:attention}", color: "bg-balatro-orange", name: "Orange" },
     { tag: "{C:money}", color: "bg-balatro-money", name: "Money" },
     { tag: "{C:white}", color: "bg-white-light", name: "White" },
-    { tag: "{C:inactive}", color: "bg-gray-500", name: "Inactive" },
+    { tag: "{C:inactive}", color: "bg-gray-inactive", name: "Inactive" },
     { tag: "{C:hearts}", color: "bg-balatro-hearts", name: "Hearts" },
     { tag: "{C:clubs}", color: "bg-balatro-clubs", name: "Clubs" },
     { tag: "{C:diamonds}", color: "bg-balatro-diamonds", name: "Diamonds" },
     { tag: "{C:spades}", color: "bg-balatro-spades", name: "Spades" },
+    { tag: "{C:tarot}", color: "bg-balatro-purple", name: "Tarot" },
+    { tag: "{C:planet}", color: "bg-balatro-planet", name: "Planet" },
+    { tag: "{C:spectral}", color: "bg-balatro-spectral", name: "Spectral" },
   ];
 
   const backgroundButtons = [
