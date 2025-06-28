@@ -42,7 +42,7 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
   const modalRef = useRef<HTMLDivElement>(null);
 
   const [lastDescription, setLastDescription] = useState<string>("");
-  const [autoFormatEnabled, setAutoFormatEnabled] = useState(false);
+  const [autoFormatEnabled, setAutoFormatEnabled] = useState(true);
   const [fallbackAttempted, setFallbackAttempted] = useState(false);
   const [lastFormattedText, setLastFormattedText] = useState<string>("");
 
@@ -175,12 +175,42 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
 
       const lowerWord = word.toLowerCase();
 
-      if (lowerWord.match(/^tarot$/)) {
+      if (lowerWord.match(/^(wild|steel|glass|gold|lucky|stone|bonus)$/)) {
+        const capitalizedWord = word.charAt(0).toUpperCase() + word.slice(1);
+        words[i] = `{C:attention}${capitalizedWord}{}`;
+        hasChanges = true;
+      } else if (lowerWord.match(/^(chips?|dollars?|mult)$/)) {
+        const capitalizedWord = word.charAt(0).toUpperCase() + word.slice(1);
+        words[i] = capitalizedWord;
+        hasChanges = true;
+      } else if (lowerWord.match(/^tarot$/)) {
         words[i] = `{C:tarot}${word}{}`;
         hasChanges = true;
       } else if (word.match(/^-\d+(\.\d+)?$/)) {
         words[i] = `{C:red}${word}{}`;
         hasChanges = true;
+      }
+
+      if (i < words.length - 2) {
+        const nextSpace = words[i + 1];
+        const nextWord = words[i + 2];
+
+        if (
+          nextSpace &&
+          nextSpace.match(/^\s+$/) &&
+          nextWord &&
+          nextWord.toLowerCase() === "seal"
+        ) {
+          if (lowerWord.match(/^(red|blue|purple|gold)$/)) {
+            const capitalizedWord =
+              word.charAt(0).toUpperCase() + word.slice(1);
+            const capitalizedSeal =
+              nextWord.charAt(0).toUpperCase() + nextWord.slice(1);
+            words[i] = `{C:attention}${capitalizedWord}{}`;
+            words[i + 2] = capitalizedSeal;
+            hasChanges = true;
+          }
+        }
       }
 
       if (i >= 2) {
@@ -191,7 +221,9 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
           const lowerSuit = prevSuit.toLowerCase();
           if (lowerSuit.match(/^(hearts?|spades?|clubs?|diamonds?)$/)) {
             const suitName = lowerSuit.charAt(0) + lowerSuit.slice(1);
-            words[i - 2] = `{C:${suitName}}${prevSuit}{}`;
+            const capitalizedSuit =
+              prevSuit.charAt(0).toUpperCase() + prevSuit.slice(1);
+            words[i - 2] = `{C:${suitName}}${capitalizedSuit}{}`;
             hasChanges = true;
           }
         }
