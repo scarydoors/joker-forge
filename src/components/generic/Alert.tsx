@@ -24,13 +24,18 @@ const Alert: React.FC<AlertProps> = ({
   onClose,
 }) => {
   useEffect(() => {
+    let timer: NodeJS.Timeout;
     if (isVisible) {
-      const timer = setTimeout(() => {
+      timer = setTimeout(() => {
         onClose();
       }, duration);
-
-      return () => clearTimeout(timer);
     }
+
+    return () => {
+      if (timer) {
+        clearTimeout(timer);
+      }
+    };
   }, [isVisible, duration, onClose]);
 
   const getTypeStyles = () => {
@@ -109,21 +114,6 @@ const Alert: React.FC<AlertProps> = ({
                   {content}
                 </p>
               </div>
-            </div>
-
-            <div className="mt-3 w-full bg-black-lighter/30 rounded-full h-1 overflow-hidden">
-              <motion.div
-                initial={{ width: "100%" }}
-                animate={{ width: "0%" }}
-                transition={{ duration: duration / 1000, ease: "linear" }}
-                className={`h-full ${
-                  type === "success"
-                    ? "bg-mint"
-                    : type === "warning"
-                    ? "bg-balatro-orange"
-                    : "bg-balatro-red"
-                }`}
-              />
             </div>
           </div>
         </motion.div>

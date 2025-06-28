@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import {
   BrowserRouter as Router,
   Routes,
@@ -6,6 +6,7 @@ import {
   useLocation,
   useNavigate,
 } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
 import Sidebar from "./components/Sidebar";
 import OverviewPage from "./components/pages/OverviewPage";
 import JokersPage from "./components/pages/JokersPage";
@@ -37,6 +38,14 @@ interface AlertState {
   content: string;
 }
 
+interface AutoSaveData {
+  modMetadata: ModMetadata;
+  jokers: JokerData[];
+  timestamp: number;
+}
+
+const AUTO_SAVE_KEY = "joker-forge-autosave";
+
 function AppContent() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -54,6 +63,213 @@ function AppContent() {
     title: "",
     content: "",
   });
+  const [autoSaveStatus, setAutoSaveStatus] = useState<
+    "idle" | "saving" | "saved"
+  >("idle");
+  const [showRestoreModal, setShowRestoreModal] = useState(false);
+  const [hasLoadedInitialData, setHasLoadedInitialData] = useState(false);
+
+  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const statusTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const clearStatusTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const prevDataRef = useRef<{
+    modMetadata: ModMetadata;
+    jokers: JokerData[];
+  } | null>(null);
+
+  const saveToLocalStorage = useCallback(
+    (metadata: ModMetadata, jokerData: JokerData[]) => {
+      try {
+        const data: AutoSaveData = {
+          modMetadata: metadata,
+          jokers: jokerData,
+          timestamp: Date.now(),
+        };
+        localStorage.setItem(AUTO_SAVE_KEY, JSON.stringify(data));
+        console.log("Auto-saved project state");
+      } catch (error) {
+        console.warn("Failed to auto-save:", error);
+      }
+    },
+    []
+  );
+
+  const loadFromLocalStorage = useCallback((): {
+    modMetadata: ModMetadata;
+    jokers: JokerData[];
+  } | null => {
+    try {
+      const savedData = localStorage.getItem(AUTO_SAVE_KEY);
+      if (!savedData) return null;
+
+      const data: AutoSaveData = JSON.parse(savedData);
+
+      if (!data.modMetadata || !Array.isArray(data.jokers)) {
+        console.warn("Invalid auto-save data structure");
+        localStorage.removeItem(AUTO_SAVE_KEY);
+        return null;
+      }
+
+      console.log("Loaded auto-saved project state");
+      return {
+        modMetadata: data.modMetadata,
+        jokers: data.jokers,
+      };
+    } catch (error) {
+      console.warn("Failed to load auto-save:", error);
+      localStorage.removeItem(AUTO_SAVE_KEY);
+      return null;
+    }
+  }, []);
+
+  const clearAutoSave = useCallback(() => {
+    try {
+      localStorage.removeItem(AUTO_SAVE_KEY);
+      console.log("Cleared auto-save data");
+    } catch (error) {
+      console.warn("Failed to clear auto-save:", error);
+    }
+  }, []);
+
+  const getAutoSaveMetadata = useCallback((): {
+    timestamp: number;
+    daysOld: number;
+  } | null => {
+    try {
+      const savedData = localStorage.getItem(AUTO_SAVE_KEY);
+      if (!savedData) return null;
+
+      const data: AutoSaveData = JSON.parse(savedData);
+      const daysOld = (Date.now() - data.timestamp) / (24 * 60 * 60 * 1000);
+
+      return {
+        timestamp: data.timestamp,
+        daysOld: Math.floor(daysOld * 10) / 10,
+      };
+    } catch {
+      return null;
+    }
+  }, []);
+
+  const hasDataChanged = useCallback(
+    (metadata: ModMetadata, jokerData: JokerData[]) => {
+      if (!prevDataRef.current) return true;
+
+      const prevData = prevDataRef.current;
+      return (
+        JSON.stringify(prevData.modMetadata) !== JSON.stringify(metadata) ||
+        JSON.stringify(prevData.jokers) !== JSON.stringify(jokerData)
+      );
+    },
+    []
+  );
+
+  const debouncedSave = useCallback(
+    (metadata: ModMetadata, jokerData: JokerData[]) => {
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+      }
+
+      saveTimeoutRef.current = setTimeout(() => {
+        saveToLocalStorage(metadata, jokerData);
+      }, 500);
+    },
+    [saveToLocalStorage]
+  );
+
+  useEffect(() => {
+    const loadAutoSave = () => {
+      const savedData = loadFromLocalStorage();
+      if (savedData) {
+        setShowRestoreModal(true);
+      }
+      setHasLoadedInitialData(true);
+    };
+
+    loadAutoSave();
+  }, [loadFromLocalStorage]);
+
+  useEffect(() => {
+    if (!hasLoadedInitialData) return;
+
+    if (!modMetadata.name && jokers.length === 0) return;
+
+    if (!hasDataChanged(modMetadata, jokers)) return;
+
+    prevDataRef.current = { modMetadata, jokers };
+
+    setAutoSaveStatus("saving");
+
+    debouncedSave(modMetadata, jokers);
+
+    if (statusTimeoutRef.current) {
+      clearTimeout(statusTimeoutRef.current);
+    }
+    if (clearStatusTimeoutRef.current) {
+      clearTimeout(clearStatusTimeoutRef.current);
+    }
+
+    statusTimeoutRef.current = setTimeout(() => {
+      setAutoSaveStatus("saved");
+    }, 400);
+
+    clearStatusTimeoutRef.current = setTimeout(() => {
+      setAutoSaveStatus("idle");
+    }, 1000);
+
+    return () => {
+      if (statusTimeoutRef.current) {
+        clearTimeout(statusTimeoutRef.current);
+      }
+      if (clearStatusTimeoutRef.current) {
+        clearTimeout(clearStatusTimeoutRef.current);
+      }
+    };
+  }, [
+    modMetadata,
+    jokers,
+    hasLoadedInitialData,
+    debouncedSave,
+    hasDataChanged,
+  ]);
+
+  useEffect(() => {
+    return () => {
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+      }
+      if (statusTimeoutRef.current) {
+        clearTimeout(statusTimeoutRef.current);
+      }
+      if (clearStatusTimeoutRef.current) {
+        clearTimeout(clearStatusTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  const handleRestoreAutoSave = () => {
+    const savedData = loadFromLocalStorage();
+    if (savedData) {
+      setModMetadata(savedData.modMetadata);
+      setJokers(savedData.jokers);
+      setSelectedJokerId(null);
+      prevDataRef.current = {
+        modMetadata: savedData.modMetadata,
+        jokers: savedData.jokers,
+      };
+      showAlert(
+        "success",
+        "Project Restored",
+        "Your auto-saved project has been restored successfully!"
+      );
+    }
+    setShowRestoreModal(false);
+  };
+
+  const handleDiscardAutoSave = () => {
+    clearAutoSave();
+    setShowRestoreModal(false);
+  };
 
   const showAlert = (
     type: "success" | "warning" | "error",
@@ -144,6 +360,10 @@ function AppContent() {
         setModMetadata(importedData.metadata);
         setJokers(importedData.jokers);
         setSelectedJokerId(null);
+        prevDataRef.current = {
+          modMetadata: importedData.metadata,
+          jokers: importedData.jokers,
+        };
         showAlert(
           "success",
           "Mod Imported",
@@ -255,10 +475,70 @@ function AppContent() {
             }
           />
           <Route path="/acknowledgements" element={<AcknowledgementsPage />} />
-          {/* Catch-all route for 404 */}
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </div>
+
+      <AnimatePresence>
+        {autoSaveStatus !== "idle" && (
+          <motion.div
+            initial={{ x: 100, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            exit={{ x: 100, opacity: 0 }}
+            transition={{
+              type: "spring",
+              stiffness: 300,
+              damping: 30,
+            }}
+            className="fixed bottom-4 right-4 z-50"
+          >
+            <div
+              className={`px-3 py-2 rounded-lg text-sm font-medium transition-all duration-300 ${
+                autoSaveStatus === "saving"
+                  ? "bg-mint-darker text-white-light border border-mint-dark"
+                  : "bg-mint-light text-black-dark border border-mint-lighter"
+              }`}
+            >
+              {autoSaveStatus === "saving" ? "Auto-saving..." : "Auto-saved"}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {showRestoreModal && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-black-dark border-2 border-black-lighter rounded-xl p-6 max-w-md mx-4">
+            <h3 className="text-white-light text-lg font-medium tracking-wide mb-3">
+              Restore Auto-Saved Project?
+            </h3>
+            <p className="text-white-dark tracking-wide text-sm mb-4">
+              We found an auto-saved version of your project from{" "}
+              {(() => {
+                const metadata = getAutoSaveMetadata();
+                if (!metadata) return "recently";
+                if (metadata.daysOld < 1) return "today";
+                if (metadata.daysOld < 2) return "yesterday";
+                return `${Math.floor(metadata.daysOld)} days ago`;
+              })()}{" "}
+              Would you like to restore it?
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={handleRestoreAutoSave}
+                className="flex-1 bg-mint text-black-dark hover:text-black-darker px-4 py-2 rounded-lg cursor-pointer hover:bg-mint-light transition-colors font-medium"
+              >
+                Restore
+              </button>
+              <button
+                onClick={handleDiscardAutoSave}
+                className="flex-1 bg-black-lighter text-white-light px-4 py-2 cursor-pointer rounded-lg hover:bg-black-light transition-colors"
+              >
+                Start Fresh
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <Alert
         isVisible={alert.isVisible}
@@ -271,7 +551,6 @@ function AppContent() {
   );
 }
 
-// Main App component with Router wrapper
 function App() {
   return (
     <Router>
