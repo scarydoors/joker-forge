@@ -9,6 +9,7 @@ export const generatePokerHandConditionCode = (
   type HandTypeConditionDef = {
     handType: string;
     scope: string;
+    operator: string;
     negate: boolean;
   };
 
@@ -17,15 +18,17 @@ export const generatePokerHandConditionCode = (
   rule.conditionGroups.forEach((group) => {
     group.conditions.forEach((condition) => {
       if (condition.type === "hand_type") {
+        const operator = condition.params.operator as string;
         if (
-          condition.params.operator === "equals" ||
-          condition.params.operator === "not_equals"
+          operator === "equals" ||
+          operator === "not_equals" ||
+          operator === "contains"
         ) {
           handConditions.push({
             handType: condition.params.value as string,
             scope: (condition.params.card_scope as string) || "scoring",
-            negate:
-              condition.params.operator === "not_equals" || condition.negate,
+            operator: operator,
+            negate: condition.negate,
           });
         }
       }
@@ -37,29 +40,50 @@ export const generatePokerHandConditionCode = (
   if (handConditions.length === 1) {
     const condition = handConditions[0];
 
-    if (condition.scope === "scoring") {
-      if (condition.negate) {
-        return `context.scoring_name ~= "${condition.handType}"`;
-      } else {
-        return `context.scoring_name == "${condition.handType}"`;
-      }
-    } else if (condition.scope === "all_played") {
+    // Handle "contains" operator - always uses poker_hands regardless of scope
+    if (condition.operator === "contains") {
       if (condition.negate) {
         return `not next(context.poker_hands["${condition.handType}"] or {})`;
       } else {
         return `next(context.poker_hands["${condition.handType}"] or {})`;
       }
     }
+
+    // Handle "equals" and "not_equals" operators
+    if (condition.scope === "scoring") {
+      if (condition.operator === "not_equals" || condition.negate) {
+        return `context.scoring_name ~= "${condition.handType}"`;
+      } else {
+        return `context.scoring_name == "${condition.handType}"`;
+      }
+    } else if (condition.scope === "all_played") {
+      if (condition.operator === "not_equals" || condition.negate) {
+        return `not next(context.poker_hands["${condition.handType}"] or {})`;
+      } else {
+        return `next(context.poker_hands["${condition.handType}"] or {})`;
+      }
+    }
   } else {
+    // Handle multiple conditions
     const conditionChecks = handConditions.map((condition) => {
-      if (condition.scope === "scoring") {
+      // Handle "contains" operator
+      if (condition.operator === "contains") {
         if (condition.negate) {
+          return `not next(context.poker_hands["${condition.handType}"] or {})`;
+        } else {
+          return `next(context.poker_hands["${condition.handType}"] or {})`;
+        }
+      }
+
+      // Handle "equals" and "not_equals" operators
+      if (condition.scope === "scoring") {
+        if (condition.operator === "not_equals" || condition.negate) {
           return `context.scoring_name ~= "${condition.handType}"`;
         } else {
           return `context.scoring_name == "${condition.handType}"`;
         }
       } else if (condition.scope === "all_played") {
-        if (condition.negate) {
+        if (condition.operator === "not_equals" || condition.negate) {
           return `not next(context.poker_hands["${condition.handType}"] or {})`;
         } else {
           return `next(context.poker_hands["${condition.handType}"] or {})`;
