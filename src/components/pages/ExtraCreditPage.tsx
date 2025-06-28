@@ -202,7 +202,7 @@ const ExtraCreditPage: React.FC<ExtraCreditPageProps> = ({
       const duplicatedJoker: JokerData = {
         ...joker,
         id: crypto.randomUUID(),
-        name: `${joker.name}`,
+        name: `${joker.name} Copy`,
       };
       onDuplicateToProject(duplicatedJoker);
 

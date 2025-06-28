@@ -200,7 +200,7 @@ const VanillaRemadePage: React.FC<VanillaRemadePageProps> = ({
       const duplicatedJoker: JokerData = {
         ...joker,
         id: crypto.randomUUID(),
-        name: `${joker.name}`,
+        name: `${joker.name} Copy`,
       };
       onDuplicateToProject(duplicatedJoker);
 
