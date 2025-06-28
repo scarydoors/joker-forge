@@ -63,7 +63,7 @@ export const generateEditHandReturn = (effect: Effect): EffectReturn => {
 
 export const generatePassiveHand = (effect: Effect): PassiveEffectResult => {
   const operation = effect.params?.operation || "add";
-  const value = effect.params?.value || 1;
+  const value = effect.params?.value;
 
   let addToDeck = "";
   let removeFromDeck = "";

@@ -7,7 +7,7 @@ export const generateDeckCountConditionCode = (
   const propertyType =
     (condition.params.property_type as string) || "enhancement";
   const operator = (condition.params.operator as string) || "equals";
-  const value = (condition.params.value as number) || 1;
+  const value = condition.params.value as number;
 
   // Generate the property check logic based on type
   let propertyCheck = "";

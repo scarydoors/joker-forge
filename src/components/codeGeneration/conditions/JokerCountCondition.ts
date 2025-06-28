@@ -5,7 +5,7 @@ export const generateJokerCountConditionCode = (
 ): string | null => {
   const condition = rules[0].conditionGroups[0].conditions[0];
   const operator = (condition.params.operator as string) || "equals";
-  const value = (condition.params.value as number) || 1;
+  const value = condition.params.value as number;
 
   let comparison = "";
   switch (operator) {

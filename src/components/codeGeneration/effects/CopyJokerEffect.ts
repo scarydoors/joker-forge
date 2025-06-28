@@ -9,7 +9,7 @@ export const generateCopyJokerReturn = (
     (effect.params?.selection_method as string) || "random";
   const jokerKey = (effect.params?.joker_key as string) || "";
   const position = (effect.params?.position as string) || "first";
-  const specificIndex = (effect.params?.specific_index as number) || 1;
+  const specificIndex = effect.params?.specific_index as number;
   const edition = (effect.params?.edition as string) || "none";
   const customMessage = effect.customMessage;
 

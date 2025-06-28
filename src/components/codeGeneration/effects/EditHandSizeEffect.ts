@@ -4,7 +4,7 @@ import type { PassiveEffectResult } from "../effectUtils";
 
 export const generateEditHandSizeReturn = (effect: Effect): EffectReturn => {
   const operation = effect.params?.operation || "add";
-  const value = effect.params?.value || 1;
+  const value = effect.params?.value;
   const customMessage = effect.customMessage;
 
   const isVariableReference = typeof value === "string";
@@ -73,7 +73,7 @@ export const generatePassiveHandSize = (
   effect: Effect
 ): PassiveEffectResult => {
   const operation = effect.params?.operation || "add";
-  const value = effect.params?.value || 1;
+  const value = effect.params?.value;
 
   const isVariableReference = typeof value === "string";
   const valueReference = isVariableReference

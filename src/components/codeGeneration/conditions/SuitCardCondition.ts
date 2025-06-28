@@ -8,7 +8,7 @@ export const generateSuitCardConditionCode = (rules: Rule[]): string | null => {
   const specificSuit = (condition.params.specific_suit as string) || null;
   const suitGroup = (condition.params.suit_group as string) || null;
   const quantifier = (condition.params.quantifier as string) || "at_least_one";
-  const count = (condition.params.count as number) || 1;
+  const count = condition.params.count as number;
   const scope = (condition.params.card_scope as string) || "scoring";
 
   const getSuitsCheckLogic = (suits: string[]): string => {

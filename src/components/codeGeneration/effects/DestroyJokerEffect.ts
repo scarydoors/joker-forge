@@ -9,7 +9,7 @@ export const generateDestroyJokerReturn = (
     (effect.params?.selection_method as string) || "random";
   const jokerKey = (effect.params?.joker_key as string) || "";
   const position = (effect.params?.position as string) || "first";
-  const specificIndex = (effect.params?.specific_index as number) || 1;
+  const specificIndex = effect.params?.specific_index as number;
   const customMessage = effect.customMessage;
 
   const scoringTriggers = ["hand_played", "card_scored"];
