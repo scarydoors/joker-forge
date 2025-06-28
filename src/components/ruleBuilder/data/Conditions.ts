@@ -60,6 +60,8 @@ const HAND_TYPES = [
   { value: "Five of a Kind", label: "Five of a Kind" },
   { value: "Straight Flush", label: "Straight Flush" },
   { value: "Royal Flush", label: "Royal Flush" },
+  { value: "Flush House", label: "Flush House" },
+  { value: "Flush Five", label: "Flush Five" },
 ];
 
 const ENHANCEMENT_TYPES = [
@@ -99,6 +101,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
         type: "select",
         label: "Operator",
         options: [
+          { value: "contains", label: "contains" },
           { value: "equals", label: "equals" },
           { value: "not_equals", label: "not equals" },
         ],
