@@ -13,6 +13,7 @@ import EditJokerInfo from "../EditJokerInfo";
 import RuleBuilder from "../ruleBuilder/RuleBuilder";
 import Button from "../generic/Button";
 import { JokerData } from "../JokerCard";
+import { exportSingleJoker } from "../codeGeneration/index";
 import type { Rule } from "../ruleBuilder/types";
 
 interface JokersPageProps {
@@ -349,6 +350,14 @@ const JokersPage: React.FC<JokersPageProps> = ({
     }
   };
 
+  const handleExportJoker = (joker: JokerData) => {
+    try {
+      exportSingleJoker(joker);
+    } catch (error) {
+      console.error("Failed to export joker:", error);
+    }
+  };
+
   const handleQuickUpdate = (joker: JokerData, updates: Partial<JokerData>) => {
     const updatedJoker = { ...joker, ...updates };
     handleSaveJoker(updatedJoker);
@@ -625,6 +634,7 @@ const JokersPage: React.FC<JokersPageProps> = ({
                 onEditRules={() => handleEditRules(joker)}
                 onDelete={() => handleDeleteJoker(joker.id)}
                 onDuplicate={() => handleDuplicateJoker(joker)}
+                onExport={() => handleExportJoker(joker)}
                 onQuickUpdate={(updates) => handleQuickUpdate(joker, updates)}
               />
             ))}

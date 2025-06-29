@@ -7,6 +7,7 @@ import {
   StarIcon,
   TrashIcon,
   ExclamationTriangleIcon,
+  ArrowDownTrayIcon,
 } from "@heroicons/react/24/solid";
 
 import Tooltip from "./generic/Tooltip";
@@ -42,6 +43,7 @@ interface JokerCardProps {
   onEditRules: () => void;
   onDelete: () => void;
   onDuplicate: () => void;
+  onExport: () => void;
   onQuickUpdate: (updates: Partial<JokerData>) => void;
 }
 const getRarityText = (rarity: number) => {
@@ -87,6 +89,7 @@ const JokerCard: React.FC<JokerCardProps> = ({
   onEditRules,
   onDelete,
   onDuplicate,
+  onExport,
   onQuickUpdate,
 }) => {
   const [showRarityMenu, setShowRarityMenu] = useState(false);
@@ -448,6 +451,19 @@ const JokerCard: React.FC<JokerCardProps> = ({
                       </div>
                     )}
                   </div>
+                </div>
+              </div>
+            </Tooltip>
+            <div className="w-px bg-black-lighter py-3"></div>
+            <Tooltip content="Export Joker" show={hoveredButton === "export"}>
+              <div
+                className="flex flex-1 hover:bg-white/10 transition-colors cursor-pointer group"
+                onClick={onExport}
+                onMouseEnter={() => handleButtonHover("export")}
+                onMouseLeave={handleButtonLeave}
+              >
+                <div className="flex-1 flex items-center justify-center py-3 px-3">
+                  <ArrowDownTrayIcon className="h-6 w-6 text-white-darker group-hover:text-white-light transition-colors" />
                 </div>
               </div>
             </Tooltip>
