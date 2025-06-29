@@ -115,9 +115,44 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
   {
     id: "level_up_hand",
     label: "Level Up Hand",
-    description: "Increase the level of the played/discarded hand",
+    description: "Increase the level of a poker hand",
     applicableTriggers: ["hand_played", "hand_discarded"],
     params: [
+      {
+        id: "hand_selection",
+        type: "select",
+        label: "Hand Selection",
+        options: [
+          { value: "current", label: "Current Hand (Played/Discarded)" },
+          { value: "specific", label: "Specific Hand" },
+          { value: "random", label: "Random Hand" },
+        ],
+        default: "current",
+      },
+      {
+        id: "specific_hand",
+        type: "select",
+        label: "Specific Hand",
+        options: [
+          { value: "High Card", label: "High Card" },
+          { value: "Pair", label: "Pair" },
+          { value: "Two Pair", label: "Two Pair" },
+          { value: "Three of a Kind", label: "Three of a Kind" },
+          { value: "Straight", label: "Straight" },
+          { value: "Flush", label: "Flush" },
+          { value: "Full House", label: "Full House" },
+          { value: "Four of a Kind", label: "Four of a Kind" },
+          { value: "Five of a Kind", label: "Five of a Kind" },
+          { value: "Straight Flush", label: "Straight Flush" },
+          { value: "Royal Flush", label: "Royal Flush" },
+          { value: "Flush House", label: "Flush House" },
+          { value: "Flush Five", label: "Flush Five" },
+        ],
+        showWhen: {
+          parameter: "hand_selection",
+          values: ["specific"],
+        },
+      },
       {
         id: "value",
         type: "number",
