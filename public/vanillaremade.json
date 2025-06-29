@@ -1726,9 +1726,9 @@
       ]
     },
     {
-      "id": "f56d0a25-611d-4038-9d1f-2482f0c46aad",
+      "id": "8cf7e4c2-ee91-4b1b-8deb-1d2dda4e40c6",
       "name": "Square Joker",
-      "description": "This Joker gains {C:chips}+4{} Chips if played hand has exactly {C:orange}4{} cards[s](Currently [[chipsvar]] Chips)",
+      "description": "This Joker gains {C:chips}+4{} Chips if played hand has exactly {C:orange}4{} cards[s]{C:inactive}(Currently {C:blue}#1#{} Chips){}",
       "imagePreview": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAI4AAAC+CAMAAADUWceXAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAhUExURb/H1f///09jZ/1fVf2iANzc3MDAwIHO/QCc/QCL4wAAAGDpAqIAAAALdFJOU/////////////8ASk8B8gAAAAlwSFlzAAAOwgAADsIBFShKgAAAAzBJREFUeF7tnNFyEzEMRSFAgf7/B2NZV5bW9qpOaCfyRuchtq8l6wzNTOGFb++hSB2P1PFIHY/U8Ugdj9TxSB2P1PFIHY/U8Ugdj9TxiKrz7alAIqQOBd+fiijF1EH6RKLq3Cdzuws0LUFC++v8WOZqOvgzLiAYSB0CwcAr6zCpU/h0HepjpJbXNa6vIzXHdY3YOiqROoUv1BH4vEZ8HYWzkRWdx4its8ar6uCnBDgbeWWdftdLEpg9AQUOeHTKnjo/OzB7ATQ0UseChkbqWNDQSB0LGhqpY0FDw746zoqvo3CWOqIzJ3X4OCtRHcoYzFoADQV5A49WcFXg8x46tWKiI2fMWkB7jm/oLLvbQYc+tY3O/YpZC4y9vNJOM9nF1yH4JPRPkc6vAp88rqmjTUT/FOnwF1PhGxwaH+konMXXkUJOCD4Tcn5ER+DznB10RqEjqoOgaBxXEVOdEZ4hcLaHjt2NWB2uszqSEB/p9LvYOms88lX22EWHLhTORkjn3l8SczCowOf4Ov2uh256nbe34yqQjidEtwyfd9E553YjFQJB4a2BwLDy4j46DJ9nzHQ8zt7SKbq7kg7+dn4Cyl0dhbP4Orw7p3ZXJcw9QWtr2xK76PjPHHUQAoTQqdGU2az4OgpnMz5Lh+9lja6zyvpXuZafUH1KBX8SsXXqfYOzGZ+jY+fxOb7OcUfrDNKphS4oHsB1AcG2Or8H/hRI52OoEk0GO4P2/EmkjujQBN3RuoMOw+dznXXQZOgldBdf57i73fDqKZhhwMUpMmMkdUSHJiiUpA6hOrTaXWydkdT5P537uZbO3w68ugiaGqljQVMjdSxoaryODoIJKCggaFgdpQ7bUIf/iYuuCuYUMGECCgpoqshbeHxgXx0E9ccnYPYEFBRsp30LhqAWXE4Hr3Ws6tTY7PbTERAMOogN5zqCnGpsdrvpjDyuc0QllNQRrqpzBLEBFw3EHbObK+kgOAFFBQQduCwgKKSOgMsCgkLqeOyv85XE1IkhRDJRdZ4t1P1nSaF0CAqeByTC6sQgdTxSxyN1PFLHI3U8UscjdTxSxyN1PFLHI3U8UscjlM77+z/ULeO0noB0AAAAAABJRU5ErkJggg==",
       "rarity": 1,
       "cost": 4,
@@ -1777,8 +1777,26 @@
             }
           ],
           "position": {
-            "x": 638,
-            "y": 199
+            "x": 516,
+            "y": 134
+          }
+        },
+        {
+          "id": "075f39e2-5454-4728-b7b5-98593e4a9295",
+          "trigger": "hand_played",
+          "conditionGroups": [],
+          "effects": [
+            {
+              "id": "0bd608c9-4cc8-42b1-addf-85a0f44bfab7",
+              "type": "add_chips",
+              "params": {
+                "value": "chipsvar"
+              }
+            }
+          ],
+          "position": {
+            "x": 859,
+            "y": 135
           }
         }
       ],
