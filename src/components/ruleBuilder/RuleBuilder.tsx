@@ -1076,29 +1076,59 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
         return currentRules;
       }
 
-      const reorderedItems = arrayMove(containerWithActive, oldIndex, newIndex);
+      let reorderedItems: Condition[] | Effect[];
+      // Determine if this is a Condition[] or Effect[] container
+      if (
+        activeRule.conditionGroups.some(
+          (group) => group.conditions === containerWithActive
+        )
+      ) {
+        reorderedItems = arrayMove(
+          containerWithActive as Condition[],
+          oldIndex,
+          newIndex
+        );
+      } else {
+        reorderedItems = arrayMove(
+          containerWithActive as Effect[],
+          oldIndex,
+          newIndex
+        );
+      }
 
       return currentRules.map((rule) => {
         if (rule.id !== activeRule?.id) {
           return rule;
         }
-        return {
-          ...rule,
-          effects:
-            rule.effects === containerWithActive
-              ? (reorderedItems as Effect[])
-              : rule.effects,
-          conditionGroups: rule.conditionGroups.map((group) =>
-            group.conditions === containerWithActive
-              ? { ...group, conditions: reorderedItems as Condition[] }
-              : group
-          ),
-          randomGroups: rule.randomGroups.map((group) =>
-            group.effects === containerWithActive
-              ? { ...group, effects: reorderedItems as Effect[] }
-              : group
-          ),
-        };
+        // If it's a condition group, update that group; if it's effects, update effects, etc.
+        if (
+          activeRule.conditionGroups.some(
+            (group) => group.conditions === containerWithActive
+          )
+        ) {
+          return {
+            ...rule,
+            conditionGroups: rule.conditionGroups.map((group) =>
+              group.conditions === containerWithActive
+                ? { ...group, conditions: reorderedItems as Condition[] }
+                : group
+            ),
+          };
+        } else if (rule.effects === containerWithActive) {
+          return {
+            ...rule,
+            effects: reorderedItems as Effect[],
+          };
+        } else {
+          return {
+            ...rule,
+            randomGroups: rule.randomGroups.map((group) =>
+              group.effects === containerWithActive
+                ? { ...group, effects: reorderedItems as Effect[] }
+                : group
+            ),
+          };
+        }
       });
     });
   };
