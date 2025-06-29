@@ -36,6 +36,7 @@ import {
   type ConsideredAsResult,
 } from "./effects/ConsideredAsEffect";
 import { generateApplyXChipsReturn } from "./effects/ApplyXChipsEffect";
+import { generateCreateTagReturn } from "./effects/CreateTagEffect";
 
 export interface RandomGroup {
   id: string;
@@ -314,6 +315,8 @@ const generateSingleEffect = (
       return generateDestroyJokerReturn(effect, triggerType);
     case "apply_x_chips":
       return generateApplyXChipsReturn(triggerType, effect);
+    case "create_tag":
+      return generateCreateTagReturn(effect, triggerType);
     default:
       return {
         statement: "",

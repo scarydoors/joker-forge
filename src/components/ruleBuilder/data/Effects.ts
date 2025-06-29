@@ -1298,6 +1298,144 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
     ],
   },
   {
+    id: "create_tag",
+    label: "Create Tag",
+    description: "Create a specific or random tag",
+    applicableTriggers: [
+      "blind_selected",
+      "card_scored",
+      "hand_played",
+      "blind_skipped",
+      "boss_defeated",
+      "booster_opened",
+      "booster_skipped",
+      "consumable_used",
+      "hand_drawn",
+      "first_hand_drawn",
+      "shop_exited",
+      "card_discarded",
+      "hand_discarded",
+      "round_end",
+      "shop_reroll",
+      "card_held_in_hand",
+      "after_hand_played",
+    ],
+    params: [
+      {
+        id: "tag_type",
+        type: "select",
+        label: "Tag Type",
+        options: [
+          { value: "random", label: "Random Tag" },
+          { value: "specific", label: "Specific Tag" },
+        ],
+        default: "random",
+      },
+      {
+        id: "specific_tag",
+        type: "select",
+        label: "Specific Tag",
+        options: [
+          {
+            value: "uncommon",
+            label: "Uncommon Tag - Next shop has free Uncommon Joker",
+          },
+          { value: "rare", label: "Rare Tag - Next shop has free Rare Joker" },
+          {
+            value: "negative",
+            label:
+              "Negative Tag - Next base Joker becomes Negative (+1 slot) and free",
+          },
+          {
+            value: "foil",
+            label:
+              "Foil Tag - Next base Joker becomes Foil (+50 Chips) and free",
+          },
+          {
+            value: "holo",
+            label:
+              "Holographic Tag - Next base Joker becomes Holo (+10 Mult) and free",
+          },
+          {
+            value: "polychrome",
+            label:
+              "Polychrome Tag - Next base Joker becomes Polychrome (X1.5 Mult) and free",
+          },
+          {
+            value: "investment",
+            label: "Investment Tag - Gain $25 after defeating next Boss Blind",
+          },
+          {
+            value: "voucher",
+            label: "Voucher Tag - Adds a Voucher to next shop",
+          },
+          { value: "boss", label: "Boss Tag - Re-rolls the next Boss Blind" },
+          {
+            value: "standard",
+            label: "Standard Tag - Immediately open free Mega Standard Pack",
+          },
+          {
+            value: "charm",
+            label: "Charm Tag - Immediately open free Mega Arcana Pack",
+          },
+          {
+            value: "meteor",
+            label: "Meteor Tag - Immediately open free Mega Celestial Pack",
+          },
+          {
+            value: "buffoon",
+            label: "Buffoon Tag - Immediately open free Mega Buffoon Pack",
+          },
+          {
+            value: "handy",
+            label: "Handy Tag - Gain $1 for each hand played this run",
+          },
+          {
+            value: "garbage",
+            label: "Garbage Tag - Gain $1 for each unused discard this run",
+          },
+          {
+            value: "ethereal",
+            label: "Ethereal Tag - Immediately open free Spectral Pack",
+          },
+          {
+            value: "coupon",
+            label: "Coupon Tag - Next shop items are free ($0)",
+          },
+          {
+            value: "double",
+            label: "Double Tag - Gives copy of next Tag selected",
+          },
+          {
+            value: "juggle",
+            label: "Juggle Tag - +3 Hand Size for next round only",
+          },
+          { value: "d_six", label: "D6 Tag - Next shop rerolls start at $0" },
+          {
+            value: "top_up",
+            label: "Top-up Tag - Create up to 2 Common Jokers",
+          },
+          {
+            value: "speed",
+            label: "Speed Tag - Gives $5 for each Blind skipped this run",
+          },
+          {
+            value: "orbital",
+            label: "Orbital Tag - Upgrades random Poker Hand by 3 levels",
+          },
+          {
+            value: "economy",
+            label: "Economy Tag - Doubles your money (max +$40)",
+          },
+        ],
+        showWhen: {
+          parameter: "tag_type",
+          values: ["specific"],
+        },
+      },
+    ],
+  },
+  {
     id: "destroy_self",
     label: "Destroy Self",
     description: "Destroy this joker",
