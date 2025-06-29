@@ -32,7 +32,7 @@ The plan here is to implement enough triggers, conditions, and effects, so as th
 - [x] **Passive** - Always active, for specific effects like Pareidolia, and game rules like hand size
 - [x] **Round End** - At the end of a round
 - [x] **Shop Reroll** - When the shop is rerolled (Flash Card)
-- [ ] **Card Held in Hand** - Triggers for each card held in hand
+- [x] **Card Held in Hand** - Triggers for each card held in hand
 
 #### Not Implemented Yet
 
