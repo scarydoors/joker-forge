@@ -352,7 +352,7 @@ const JokerCard: React.FC<JokerCardProps> = ({
               )}
             </div>
 
-            <div className="mb-4 h-16 flex items-start overflow-hidden">
+            <div className=" mb-4 h-12 flex items-start overflow-hidden">
               {editingDescription ? (
                 <textarea
                   value={tempDescription}
@@ -381,51 +381,41 @@ const JokerCard: React.FC<JokerCardProps> = ({
                 />
               )}
             </div>
-
-            {(joker.blueprint_compat === false ||
-              joker.eternal_compat === false) && (
-              <div className="flex items-center gap-3 mb-4">
-                {joker.blueprint_compat === false && (
-                  <Tooltip
-                    content="Cannot be copied by Blueprint"
-                    show={hoveredIcon === "blueprint"}
+            <div className="flex items-center gap-3 mb-2 h-6">
+              {joker.blueprint_compat === false && (
+                <Tooltip
+                  content="Cannot be copied by Blueprint"
+                  show={hoveredIcon === "blueprint"}
+                >
+                  <div
+                    className="relative flex items-center"
+                    onMouseEnter={() => setHoveredIcon("blueprint")}
+                    onMouseLeave={() => setHoveredIcon(null)}
                   >
-                    <div
-                      className="relative flex items-center"
-                      onMouseEnter={() => setHoveredIcon("blueprint")}
-                      onMouseLeave={() => setHoveredIcon(null)}
-                    >
-                      <div className="flex items-center gap-1 px-2 py-1 bg-balatro-red/20 border border-balatro-red/40 rounded-md">
-                        <DocumentIcon className="h-3 w-3 text-balatro-red" />
-                        <span className="text-balatro-red text-xs font-medium">
-                          No Blueprint
-                        </span>
-                      </div>
+                    <div className="flex items-center gap-1 px-2 py-1 bg-gray-600/20 border border-gray-500/40 rounded-md">
+                      <DocumentIcon className="h-3 w-3 text-gray-400" />
                     </div>
-                  </Tooltip>
-                )}
+                  </div>
+                </Tooltip>
+              )}
 
-                {joker.eternal_compat === false && (
-                  <Tooltip
-                    content="Cannot be made Eternal"
-                    show={hoveredIcon === "eternal"}
+              {joker.eternal_compat === false && (
+                <Tooltip
+                  content="Cannot be made Eternal"
+                  show={hoveredIcon === "eternal"}
+                >
+                  <div
+                    className="relative flex items-center"
+                    onMouseEnter={() => setHoveredIcon("eternal")}
+                    onMouseLeave={() => setHoveredIcon(null)}
                   >
-                    <div
-                      className="relative flex items-center"
-                      onMouseEnter={() => setHoveredIcon("eternal")}
-                      onMouseLeave={() => setHoveredIcon(null)}
-                    >
-                      <div className="flex items-center gap-1 px-2 py-1 bg-balatro-red/20 border border-balatro-red/40 rounded-md">
-                        <StarIcon className="h-3 w-3 text-balatro-red" />
-                        <span className="text-balatro-red text-xs font-medium">
-                          No Eternal
-                        </span>
-                      </div>
+                    <div className="flex items-center gap-1 px-2 py-1 bg-gray-600/20 border border-gray-500/40 rounded-md">
+                      <StarIcon className="h-3 w-3 text-gray-400" />
                     </div>
-                  </Tooltip>
-                )}
-              </div>
-            )}
+                  </div>
+                </Tooltip>
+              )}
+            </div>
           </div>
 
           <div className="flex items-center justify-center bg-black rounded-lg overflow-hidden">
