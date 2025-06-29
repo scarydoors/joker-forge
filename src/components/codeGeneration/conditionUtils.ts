@@ -17,6 +17,7 @@ import { generateAnteLevelConditionCode } from "./conditions/AnteLevelCondition"
 import { generateHandSizeConditionCode } from "./conditions/HandSizeCondition";
 import { generateDeckSizeConditionCode } from "./conditions/DeckSizeCondition";
 import { generateDeckCountConditionCode } from "./conditions/DeckCountCondition";
+import { generateCardEditionConditionCode } from "./conditions/CardEditionCondition";
 
 export const generateConditionChain = (rule: Rule): string => {
   if (!rule.conditionGroups || rule.conditionGroups.length === 0) {
@@ -154,6 +155,9 @@ const generateSingleConditionCode = (
 
     case "deck_count":
       return generateDeckCountConditionCode([singleConditionRule]);
+
+    case "card_edition":
+      return generateCardEditionConditionCode([singleConditionRule]);
 
     default:
       return null;

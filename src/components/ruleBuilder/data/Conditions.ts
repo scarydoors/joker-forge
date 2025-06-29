@@ -75,6 +75,13 @@ const ENHANCEMENT_TYPES = [
   { value: "m_bonus", label: "Bonus" },
 ];
 
+const EDITION_TYPES = [
+  { value: "e_foil", label: "Foil (+50 Chips)" },
+  { value: "e_holo", label: "Holographic (+10 Mult)" },
+  { value: "e_polychrome", label: "Polychrome (X1.5 Mult)" },
+  { value: "e_negative", label: "Negative (+1 Joker slot)" },
+];
+
 const SEAL_TYPES = [
   { value: "gold", label: "Gold Seal ($3 when played)" },
   { value: "red", label: "Red Seal (Retrigger card)" },
@@ -364,6 +371,24 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
         options: [
           { value: "any", label: "Any Enhancement" },
           ...ENHANCEMENT_TYPES,
+        ],
+      },
+    ],
+  },
+  {
+    id: "card_edition",
+    label: "Card Edition",
+    description: "Check if the card has a specific edition",
+    applicableTriggers: ["card_scored", "card_discarded", "card_held_in_hand"],
+    params: [
+      {
+        id: "edition",
+        type: "select",
+        label: "Edition Type",
+        options: [
+          { value: "any", label: "Any Edition" },
+          { value: "none", label: "No Edition" },
+          ...EDITION_TYPES,
         ],
       },
     ],
