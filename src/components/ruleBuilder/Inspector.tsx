@@ -712,10 +712,10 @@ const Inspector: React.FC<InspectorProps> = ({
     <div
       ref={setNodeRef}
       style={style}
-      className="w-96 bg-black-dark backdrop-blur-md border-2 border-black-lighter rounded-lg shadow-2xl z-40"
+      className="w-96 bg-black-dark backdrop-blur-md border-2 border-black-lighter rounded-lg shadow-2xl max-h-[calc(100vh-14rem)] z-40 flex flex-col"
     >
       <div
-        className="flex items-center justify-between p-3 border-b border-black-lighter cursor-grab active:cursor-grabbing"
+        className="flex items-center justify-between p-3 border-b border-black-lighter cursor-grab active:cursor-grabbing flex-shrink-0"
         {...attributes}
         {...listeners}
       >
@@ -734,7 +734,7 @@ const Inspector: React.FC<InspectorProps> = ({
         </button>
       </div>
 
-      <div className="p-4 max-h-[calc(100vh-12rem)] overflow-y-auto custom-scrollbar">
+      <div className="p-4 overflow-y-auto custom-scrollbar min-h-0 flex-1">
         <div className="w-1/4 h-[1px] bg-black-lighter mx-auto mb-6"></div>
 
         {!selectedRule && (
