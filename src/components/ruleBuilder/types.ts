@@ -11,8 +11,8 @@ export interface Rule {
 // A group of effects with shared random chance
 export interface RandomGroup {
   id: string;
-  chance_numerator: number | string;
-  chance_denominator: number | string;
+  chance_numerator: number;
+  chance_denominator: number;
   effects: Effect[];
 }
 

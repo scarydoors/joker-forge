@@ -563,7 +563,7 @@ const Inspector: React.FC<InspectorProps> = ({
                 value={selectedRandomGroup.chance_numerator}
                 onChange={(value) => {
                   onUpdateRandomGroup(selectedRule.id, selectedRandomGroup.id, {
-                    chance_numerator: value,
+                    chance_numerator: typeof value === "number" ? value : 1,
                   });
                 }}
                 availableVariables={availableVariables}
@@ -577,7 +577,7 @@ const Inspector: React.FC<InspectorProps> = ({
                 value={selectedRandomGroup.chance_denominator}
                 onChange={(value) => {
                   onUpdateRandomGroup(selectedRule.id, selectedRandomGroup.id, {
-                    chance_denominator: value,
+                    chance_denominator: typeof value === "number" ? value : 4,
                   });
                 }}
                 availableVariables={availableVariables}
