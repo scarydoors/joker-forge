@@ -95,7 +95,6 @@ export const coordinateVariableConflicts = (
     effect: Effect;
   }> = [];
 
-  // Collect all variable operations with their order
   effects.forEach((effect, index) => {
     if (effect.type === "modify_internal_variable") {
       const varName = effect.params.variable_name as string;
@@ -144,7 +143,6 @@ export const coordinateVariableConflicts = (
       return;
     }
 
-    // Check if any read happens before a write THAT'S a conflict
     for (const read of reads) {
       for (const write of writes) {
         if (read.effectIndex < write.effectIndex) {
@@ -159,7 +157,6 @@ export const coordinateVariableConflicts = (
     return { modifiedEffects: effects };
   }
 
-  // Apply conflict resolution only to actual conflicts
   const preReturnCode = conflictedVars
     .map((varName) => `local ${varName}_value = card.ability.extra.${varName}`)
     .join("\n                ");
@@ -209,7 +206,7 @@ export const extractVariablesFromRules = (rules: Rule[]): VariableInfo[] => {
       });
     });
 
-    rule.effects.forEach((effect) => {
+    (rule.effects || []).forEach((effect) => {
       if (effect.type === "modify_internal_variable") {
         const varName = (effect.params.variable_name as string) || "var1";
         if (!variableMap.has(varName)) {
@@ -240,6 +237,40 @@ export const extractVariablesFromRules = (rules: Rule[]): VariableInfo[] => {
         }
       });
     });
+
+    (rule.randomGroups || []).forEach((group) => {
+      group.effects.forEach((effect) => {
+        if (effect.type === "modify_internal_variable") {
+          const varName = (effect.params.variable_name as string) || "var1";
+          if (!variableMap.has(varName)) {
+            variableMap.set(varName, {
+              name: varName,
+              initialValue: 0,
+              usedInEffects: [],
+            });
+          }
+          variableMap.get(varName)!.usedInEffects.push(effect.type);
+        }
+
+        Object.entries(effect.params).forEach(([key, value]) => {
+          if (
+            typeof value === "string" &&
+            !INTERNAL_PARAMETERS.has(key) &&
+            key !== "variable_name" &&
+            isValidVariableName(value)
+          ) {
+            if (!variableMap.has(value)) {
+              variableMap.set(value, {
+                name: value,
+                initialValue: 0,
+                usedInEffects: [],
+              });
+            }
+            variableMap.get(value)!.usedInEffects.push(effect.type);
+          }
+        });
+      });
+    });
   });
 
   return Array.from(variableMap.values());
@@ -261,7 +292,7 @@ export const getVariableNamesFromJoker = (joker: JokerData): string[] => {
   const variableNames = new Set<string>();
 
   joker.rules.forEach((rule) => {
-    rule.effects.forEach((effect) => {
+    (rule.effects || []).forEach((effect) => {
       if (effect.type === "modify_internal_variable") {
         const varName = (effect.params.variable_name as string) || "var1";
         variableNames.add(varName);
@@ -276,6 +307,26 @@ export const getVariableNamesFromJoker = (joker: JokerData): string[] => {
         ) {
           variableNames.add(value);
         }
+      });
+    });
+
+    (rule.randomGroups || []).forEach((group) => {
+      group.effects.forEach((effect) => {
+        if (effect.type === "modify_internal_variable") {
+          const varName = (effect.params.variable_name as string) || "var1";
+          variableNames.add(varName);
+        }
+
+        Object.entries(effect.params).forEach(([key, value]) => {
+          if (
+            typeof value === "string" &&
+            !INTERNAL_PARAMETERS.has(key) &&
+            key !== "variable_name" &&
+            isValidVariableName(value)
+          ) {
+            variableNames.add(value);
+          }
+        });
       });
     });
 
@@ -299,7 +350,7 @@ export const getVariableUsageDetails = (joker: JokerData): VariableUsage[] => {
   const usageCount = new Map<string, number>();
 
   joker.rules.forEach((rule, ruleIndex) => {
-    rule.effects.forEach((effect) => {
+    (rule.effects || []).forEach((effect) => {
       if (effect.type === "modify_internal_variable") {
         const varName = (effect.params.variable_name as string) || "var1";
         const currentCount = usageCount.get(varName) || 0;
@@ -337,6 +388,46 @@ export const getVariableUsageDetails = (joker: JokerData): VariableUsage[] => {
       });
     });
 
+    (rule.randomGroups || []).forEach((group) => {
+      group.effects.forEach((effect) => {
+        if (effect.type === "modify_internal_variable") {
+          const varName = (effect.params.variable_name as string) || "var1";
+          const currentCount = usageCount.get(varName) || 0;
+          usageCount.set(varName, currentCount + 1);
+
+          usageDetails.push({
+            variableName: varName,
+            ruleId: rule.id,
+            ruleIndex: ruleIndex + 1,
+            type: "effect",
+            itemId: effect.id,
+            count: currentCount + 1,
+          });
+        }
+
+        Object.entries(effect.params).forEach(([key, value]) => {
+          if (
+            typeof value === "string" &&
+            !INTERNAL_PARAMETERS.has(key) &&
+            key !== "variable_name" &&
+            isValidVariableName(value)
+          ) {
+            const currentCount = usageCount.get(value) || 0;
+            usageCount.set(value, currentCount + 1);
+
+            usageDetails.push({
+              variableName: value,
+              ruleId: rule.id,
+              ruleIndex: ruleIndex + 1,
+              type: "effect",
+              itemId: effect.id,
+              count: currentCount + 1,
+            });
+          }
+        });
+      });
+    });
+
     rule.conditionGroups.forEach((group) => {
       group.conditions.forEach((condition) => {
         if (condition.type === "internal_variable") {
@@ -363,16 +454,14 @@ export const getVariableUsageDetails = (joker: JokerData): VariableUsage[] => {
 export const getAllVariables = (joker: JokerData): UserVariable[] => {
   const userVars = joker.userVariables || [];
 
-  // Check for random chance effects and add automatic variables
-  const hasRandomChance =
-    joker.rules?.some((rule) =>
-      rule.effects.some((effect) => effect.params.has_random_chance === "true")
+  const hasRandomGroups =
+    joker.rules?.some(
+      (rule) => rule.randomGroups && rule.randomGroups.length > 0
     ) || false;
 
   const autoVars: UserVariable[] = [];
 
-  if (hasRandomChance) {
-    // Add numerator and denominator as automatic variables for random chance
+  if (hasRandomGroups) {
     autoVars.push({
       id: "auto_numerator",
       name: "numerator",
@@ -388,7 +477,6 @@ export const getAllVariables = (joker: JokerData): UserVariable[] => {
     });
   }
 
-  // Add other auto variables
   const otherAutoVars = getVariableNamesFromJoker(joker)
     .filter((name) => !userVars.some((uv) => uv.name === name))
     .filter((name) => name !== "numerator" && name !== "denominator")
