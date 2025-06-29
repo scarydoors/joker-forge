@@ -300,7 +300,7 @@ const JokerCard: React.FC<JokerCardProps> = ({
         </div>
       </div>
 
-      <div className="my-auto relative bg-black-dark border-2 border-black-lighter rounded-xl p-4 pl-10 -ml-12 flex-1 min-h-fit">
+      <div className="my-auto relative bg-black-dark border-2 shadow-lg border-black-light rounded-xl p-4 pl-10 -ml-12 flex-1 min-h-fit">
         <Tooltip content="Delete Joker" show={hoveredTrash}>
           <div
             className="absolute -top-3 -right-3 bg-black-dark border-2 border-balatro-red rounded-lg p-1 hover:bg-balatro-redshadow cursor-pointer transition-colors flex items-center justify-center z-10"
