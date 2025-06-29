@@ -41,6 +41,7 @@ The plan here is to implement enough triggers, conditions, and effects, so as th
 - [ ] **Card Bought** - When a card is purchased
 - [ ] **Card Sold** - When a card is sold
 - [ ] **Joker Added/Removed** - When a Joker is added/removed from your list (Joker Stencil)
+- [ ] **When a Card is Modified** - When any card is modified (enhanced, etc)
 
 ---
 
@@ -76,6 +77,7 @@ The plan here is to implement enough triggers, conditions, and effects, so as th
 - [ ] **Score Threshold** - Check if score meets requirement (Mr. Bones)
 - [ ] **Hand History** - Check previous hands played this round/run
 - [ ] **Consecutive Hand Tracking** - Track consecutive hands without certain conditions
+- [ ] **Culmative Chip/Rank Check** - Check for if cards rank/chips add up to a certain number
 
 ---
 
@@ -107,6 +109,7 @@ The plan here is to implement enough triggers, conditions, and effects, so as th
 - [x] **Create Joker** - Create a different joker (Random, By ID)
 - [x] **Copy Joker** - Make a copy of another joker (Random, By ID, By Index)
 - [x] **Destroy Joker** - Destroy another joker (Random, By ID, By Index)
+- [x] **Create Skip Tags** - Create a set or random skip tag
 
 #### Not Implemented Yet
 
@@ -120,7 +123,8 @@ The plan here is to implement enough triggers, conditions, and effects, so as th
 - [ ] **Permanent Card Modifications** - Add permanent bonuses to cards (Hiker)
 - [ ] **Required Suit Changes** - For jokers that alternate between their required suit (Ancient Joker)
 - [ ] **Required Rank Changes** - For jokers that alternate between their required rank
-- [ ] **Create Skip Tags** - Create a set or random skip tag
+- [ ] **Destroy Card in Hand** - Destroys a random or set (by index, rank, suit) card in hand
+- [ ] **Modify Probability** - Oops All 6s! support
 
 ---
 
