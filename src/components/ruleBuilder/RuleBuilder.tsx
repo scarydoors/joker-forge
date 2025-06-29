@@ -6,20 +6,18 @@ import {
 } from "react-zoom-pan-pinch";
 import {
   DndContext,
-  DragOverlay,
   useSensor,
   useSensors,
   PointerSensor,
   KeyboardSensor,
-  DragStartEvent,
   DragEndEvent,
   closestCenter,
 } from "@dnd-kit/core";
+import { restrictToVerticalAxis } from "@dnd-kit/modifiers";
 import { sortableKeyboardCoordinates, arrayMove } from "@dnd-kit/sortable";
-import type { Rule, Condition, Effect } from "./types";
+import type { Rule, Condition, Effect, RandomGroup } from "./types";
 import { JokerData } from "../JokerCard";
 import RuleCard from "./RuleCard";
-import BlockComponent from "./BlockComponent";
 import FloatingDock from "./FloatingDock";
 import BlockPalette from "./BlockPalette";
 import JokerInfo from "./JokerInfo";
@@ -43,19 +41,12 @@ interface RuleBuilderProps {
 }
 
 type SelectedItem = {
-  type: "trigger" | "condition" | "effect";
+  type: "trigger" | "condition" | "effect" | "randomgroup";
   ruleId: string;
   itemId?: string;
   groupId?: string;
+  randomGroupId?: string;
 } | null;
-
-interface DraggedItem {
-  id: string;
-  type: "condition" | "effect";
-  ruleId: string;
-  groupId?: string;
-  data: Condition | Effect;
-}
 
 interface PanelState {
   id: string;
@@ -74,10 +65,8 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
 }) => {
   const [rules, setRules] = useState<Rule[]>([]);
   const [selectedItem, setSelectedItem] = useState<SelectedItem>(null);
-  const [draggedItem, setDraggedItem] = useState<DraggedItem | null>(null);
   const [panState, setPanState] = useState({ x: 0, y: 0, scale: 1 });
   const [backgroundOffset, setBackgroundOffset] = useState({ x: 0, y: 0 });
-  // this is just estimated sizes for auto positioning, it doesnt have to be supoer accurate haha
   const [panels, setPanels] = useState<Record<string, PanelState>>({
     blockPalette: {
       id: "blockPalette",
@@ -104,6 +93,7 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
       size: { width: 384, height: 600 },
     },
   });
+
   const modalRef = useRef<HTMLDivElement>(null);
   const transformRef = useRef<ReactZoomPanPinchRef>(null);
 
@@ -131,27 +121,22 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
     }
   };
 
-  // Calculate center position in transform space
   const getCenterPosition = () => {
     const screenCenterX =
       (typeof window !== "undefined" ? window.innerWidth : 1200) / 2;
     const screenCenterY =
       (typeof window !== "undefined" ? window.innerHeight : 800) / 2;
-
-    // Convert screen center to transform space coordinates
     const transformCenterX = screenCenterX - panState.x;
     const transformCenterY = screenCenterY - panState.y;
-
     return {
-      x: transformCenterX - 160, // Offset by half rule card width (320px / 2)
-      y: transformCenterY - 200, // Offset by approximate half rule card height
+      x: transformCenterX - 160,
+      y: transformCenterY - 200,
     };
   };
 
   const togglePanel = useCallback((panelId: string) => {
     setPanels((prev) => {
       const panel = prev[panelId];
-
       const findPosition = (
         panels: Record<string, PanelState>,
         targetPanelId: string
@@ -160,7 +145,6 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
         const padding = 20;
         const viewportWidth = window.innerWidth;
         const viewportHeight = window.innerHeight - 100;
-
         if (targetPanelId === "variables") {
           const blockPalettePanel = panels["blockPalette"];
           if (blockPalettePanel && blockPalettePanel.isVisible) {
@@ -204,17 +188,14 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
             right: position.x + size.width,
             bottom: position.y + size.height,
           };
-
           return Object.values(panels).some((panel) => {
             if (panel.id === excludePanelId || !panel.isVisible) return false;
-
             const rect2 = {
               left: panel.position.x,
               top: panel.position.y,
               right: panel.position.x + panel.size.width,
               bottom: panel.position.y + panel.size.height,
             };
-
             return !(
               rect1.right < rect2.left ||
               rect1.left > rect2.right ||
@@ -252,7 +233,12 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
 
   useEffect(() => {
     if (isOpen) {
-      setRules(existingRules);
+      setRules(
+        existingRules.map((rule) => ({
+          ...rule,
+          randomGroups: rule.randomGroups || [],
+        }))
+      );
       setSelectedItem(null);
     }
   }, [isOpen, existingRules]);
@@ -275,7 +261,6 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
         ) {
           return;
         }
-
         switch (event.key.toLowerCase()) {
           case "b":
             togglePanel("blockPalette");
@@ -336,6 +321,7 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
       trigger: triggerId,
       conditionGroups: [],
       effects: [],
+      randomGroups: [],
       position: centerPos,
     };
     setRules((prev) => [...prev, newRule]);
@@ -345,10 +331,8 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
   const addCondition = useCallback(
     (conditionType: string) => {
       if (!selectedItem) return;
-
       const conditionTypeData = getConditionTypeById(conditionType);
       const defaultParams: Record<string, unknown> = {};
-
       if (conditionTypeData) {
         conditionTypeData.params.forEach((param) => {
           if (param.default !== undefined) {
@@ -356,7 +340,6 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
           }
         });
       }
-
       const newCondition: Condition = {
         id: crypto.randomUUID(),
         type: conditionType,
@@ -382,7 +365,6 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
                 ),
               };
             }
-
             if (rule.conditionGroups.length === 0) {
               const newGroupId = crypto.randomUUID();
               targetGroupId = newGroupId;
@@ -415,7 +397,6 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
           return rule;
         });
       });
-
       setSelectedItem({
         type: "condition",
         ruleId: selectedItem.ruleId,
@@ -432,7 +413,6 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
       operator: "and" as const,
       conditions: [],
     };
-
     setRules((prev) =>
       prev.map((rule) => {
         if (rule.id === ruleId) {
@@ -444,7 +424,6 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
         return rule;
       })
     );
-
     setSelectedItem({
       type: "condition",
       ruleId: ruleId,
@@ -466,7 +445,6 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
         return rule;
       })
     );
-
     if (selectedItem && selectedItem.groupId === groupId) {
       setSelectedItem({ type: "trigger", ruleId });
     }
@@ -494,12 +472,128 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
     );
   };
 
+  const addRandomGroup = (ruleId: string) => {
+    const newGroup: RandomGroup = {
+      id: crypto.randomUUID(),
+      chance_numerator: 1,
+      chance_denominator: 4,
+      effects: [],
+    };
+    setRules((prev) =>
+      prev.map((rule) => {
+        if (rule.id === ruleId) {
+          return {
+            ...rule,
+            randomGroups: [...rule.randomGroups, newGroup],
+          };
+        }
+        return rule;
+      })
+    );
+    setSelectedItem({
+      type: "randomgroup",
+      ruleId: ruleId,
+      randomGroupId: newGroup.id,
+    });
+  };
+
+  const deleteRandomGroup = (ruleId: string, randomGroupId: string) => {
+    setRules((prev) =>
+      prev.map((rule) => {
+        if (rule.id === ruleId) {
+          const groupToDelete = rule.randomGroups.find(
+            (g) => g.id === randomGroupId
+          );
+          return {
+            ...rule,
+            randomGroups: rule.randomGroups.filter(
+              (group) => group.id !== randomGroupId
+            ),
+            effects: groupToDelete
+              ? [...rule.effects, ...groupToDelete.effects]
+              : rule.effects,
+          };
+        }
+        return rule;
+      })
+    );
+    if (selectedItem && selectedItem.randomGroupId === randomGroupId) {
+      setSelectedItem({ type: "trigger", ruleId });
+    }
+  };
+
+  const updateRandomGroup = (
+    ruleId: string,
+    randomGroupId: string,
+    updates: Partial<RandomGroup>
+  ) => {
+    setRules((prev) =>
+      prev.map((rule) => {
+        if (rule.id === ruleId) {
+          return {
+            ...rule,
+            randomGroups: rule.randomGroups.map((group) =>
+              group.id === randomGroupId ? { ...group, ...updates } : group
+            ),
+          };
+        }
+        return rule;
+      })
+    );
+  };
+
+  const createRandomGroupFromEffect = (ruleId: string, effectId: string) => {
+    const newGroup: RandomGroup = {
+      id: crypto.randomUUID(),
+      chance_numerator: 1,
+      chance_denominator: 4,
+      effects: [],
+    };
+    setRules((prev) =>
+      prev.map((rule) => {
+        if (rule.id !== ruleId) return rule;
+        let movedEffect: Effect | null = null;
+        const updatedRule = { ...rule };
+
+        updatedRule.effects = rule.effects.filter((effect) => {
+          if (effect.id === effectId) {
+            movedEffect = effect;
+            return false;
+          }
+          return true;
+        });
+
+        updatedRule.randomGroups = rule.randomGroups.map((group) => ({
+          ...group,
+          effects: group.effects.filter((effect) => {
+            if (effect.id === effectId) {
+              movedEffect = effect;
+              return false;
+            }
+            return true;
+          }),
+        }));
+
+        if (movedEffect) {
+          newGroup.effects = [movedEffect];
+          updatedRule.randomGroups = [...updatedRule.randomGroups, newGroup];
+        }
+
+        return updatedRule;
+      })
+    );
+    setSelectedItem({
+      type: "randomgroup",
+      ruleId: ruleId,
+      randomGroupId: newGroup.id,
+    });
+  };
+
   const addEffect = (effectType: string) => {
     if (!selectedItem) return;
 
     const effectTypeData = getEffectTypeById(effectType);
     const defaultParams: Record<string, unknown> = {};
-
     if (effectTypeData) {
       effectTypeData.params.forEach((param) => {
         if (param.default !== undefined) {
@@ -517,19 +611,30 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
     setRules((prev) =>
       prev.map((rule) => {
         if (rule.id === selectedItem.ruleId) {
-          return {
-            ...rule,
-            effects: [...rule.effects, newEffect],
-          };
+          if (selectedItem.randomGroupId) {
+            return {
+              ...rule,
+              randomGroups: rule.randomGroups.map((group) =>
+                group.id === selectedItem.randomGroupId
+                  ? { ...group, effects: [...group.effects, newEffect] }
+                  : group
+              ),
+            };
+          } else {
+            return {
+              ...rule,
+              effects: [...rule.effects, newEffect],
+            };
+          }
         }
         return rule;
       })
     );
-
     setSelectedItem({
       type: "effect",
       ruleId: selectedItem.ruleId,
       itemId: newEffect.id,
+      randomGroupId: selectedItem.randomGroupId,
     });
   };
 
@@ -566,12 +671,17 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
     setRules((prev) =>
       prev.map((rule) => {
         if (rule.id === ruleId) {
-          return {
-            ...rule,
-            effects: rule.effects.map((effect) =>
+          const updatedRule = { ...rule };
+          updatedRule.effects = rule.effects.map((effect) =>
+            effect.id === effectId ? { ...effect, ...updates } : effect
+          );
+          updatedRule.randomGroups = rule.randomGroups.map((group) => ({
+            ...group,
+            effects: group.effects.map((effect) =>
               effect.id === effectId ? { ...effect, ...updates } : effect
             ),
-          };
+          }));
+          return updatedRule;
         }
         return rule;
       })
@@ -616,6 +726,10 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
           return {
             ...rule,
             effects: rule.effects.filter((effect) => effect.id !== effectId),
+            randomGroups: rule.randomGroups.map((group) => ({
+              ...group,
+              effects: group.effects.filter((effect) => effect.id !== effectId),
+            })),
           };
         }
         return rule;
@@ -624,51 +738,6 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
     if (selectedItem && selectedItem.itemId === effectId) {
       setSelectedItem({ type: "trigger", ruleId });
     }
-  };
-
-  const reorderConditions = (
-    ruleId: string,
-    groupId: string,
-    oldIndex: number,
-    newIndex: number
-  ) => {
-    setRules((prev) =>
-      prev.map((rule) => {
-        if (rule.id === ruleId) {
-          return {
-            ...rule,
-            conditionGroups: rule.conditionGroups.map((group) => {
-              if (group.id === groupId) {
-                return {
-                  ...group,
-                  conditions: arrayMove(group.conditions, oldIndex, newIndex),
-                };
-              }
-              return group;
-            }),
-          };
-        }
-        return rule;
-      })
-    );
-  };
-
-  const reorderEffects = (
-    ruleId: string,
-    oldIndex: number,
-    newIndex: number
-  ) => {
-    setRules((prev) =>
-      prev.map((rule) => {
-        if (rule.id === ruleId) {
-          return {
-            ...rule,
-            effects: arrayMove(rule.effects, oldIndex, newIndex),
-          };
-        }
-        return rule;
-      })
-    );
   };
 
   const getSelectedRule = () => {
@@ -699,7 +768,31 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
       return null;
     const rule = getSelectedRule();
     if (!rule) return null;
-    return rule.effects.find((e) => e.id === selectedItem.itemId) || null;
+
+    const effectInMain = rule.effects.find((e) => e.id === selectedItem.itemId);
+    if (effectInMain) return effectInMain;
+
+    for (const group of rule.randomGroups) {
+      const effectInGroup = group.effects.find(
+        (e) => e.id === selectedItem.itemId
+      );
+      if (effectInGroup) return effectInGroup;
+    }
+    return null;
+  };
+
+  const getSelectedRandomGroup = () => {
+    if (
+      !selectedItem ||
+      selectedItem.type !== "randomgroup" ||
+      !selectedItem.randomGroupId
+    )
+      return null;
+    const rule = getSelectedRule();
+    if (!rule) return null;
+    return (
+      rule.randomGroups.find((g) => g.id === selectedItem.randomGroupId) || null
+    );
   };
 
   const generateConditionTitle = (condition: Condition) => {
@@ -711,7 +804,6 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
     }
 
     const params = condition.params;
-
     switch (condition.type) {
       case "hand_type":
         if (params.value) {
@@ -819,7 +911,6 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
     }
 
     const params = effect.params;
-
     switch (effect.type) {
       case "add_chips":
         if (params.value !== undefined) {
@@ -907,49 +998,11 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
     return Object.keys(params).length;
   };
 
-  const handleDragStart = (event: DragStartEvent) => {
-    const { active } = event;
-    const activeId = active.id as string;
-
-    console.log("Drag started:", activeId);
-
-    if (activeId.startsWith("panel-")) {
-      return;
-    }
-
-    for (const rule of rules) {
-      for (const group of rule.conditionGroups) {
-        const condition = group.conditions.find((c) => c.id === activeId);
-        if (condition) {
-          setDraggedItem({
-            id: condition.id,
-            type: "condition",
-            ruleId: rule.id,
-            groupId: group.id,
-            data: condition,
-          });
-          return;
-        }
-      }
-
-      const effect = rule.effects.find((e) => e.id === activeId);
-      if (effect) {
-        setDraggedItem({
-          id: effect.id,
-          type: "effect",
-          ruleId: rule.id,
-          data: effect,
-        });
-        return;
-      }
-    }
-  };
+  const handleDragStart = () => {};
 
   const handleDragEnd = (event: DragEndEvent) => {
-    const { active, delta } = event;
+    const { active, over, delta } = event;
     const activeId = active.id as string;
-
-    console.log("Drag ended:", activeId, delta);
 
     if (activeId.startsWith("panel-")) {
       const panelId = activeId.replace("panel-", "");
@@ -959,13 +1012,95 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
           x: Math.max(0, currentPanel.position.x + delta.x),
           y: Math.max(0, currentPanel.position.y + delta.y),
         };
-        console.log("Updating panel position:", panelId, newPosition);
         updatePanelPosition(panelId, newPosition);
       }
       return;
     }
 
-    setDraggedItem(null);
+    if (!over || active.id === over.id) {
+      return;
+    }
+
+    const overId = over.id as string;
+
+    setRules((currentRules) => {
+      let activeRule: Rule | undefined;
+      let containerWithActive: (Condition[] | Effect[]) | undefined;
+      let containerWithOver: (Condition[] | Effect[]) | undefined;
+
+      for (const rule of currentRules) {
+        for (const group of rule.conditionGroups) {
+          if (group.conditions.some((c) => c.id === activeId)) {
+            activeRule = rule;
+            containerWithActive = group.conditions;
+          }
+          if (group.conditions.some((c) => c.id === overId)) {
+            containerWithOver = group.conditions;
+          }
+        }
+
+        if (rule.effects.some((e) => e.id === activeId)) {
+          activeRule = rule;
+          containerWithActive = rule.effects;
+        }
+        if (rule.effects.some((e) => e.id === overId)) {
+          containerWithOver = rule.effects;
+        }
+
+        for (const group of rule.randomGroups) {
+          if (group.effects.some((e) => e.id === activeId)) {
+            activeRule = rule;
+            containerWithActive = group.effects;
+          }
+          if (group.effects.some((e) => e.id === overId)) {
+            containerWithOver = group.effects;
+          }
+        }
+
+        if (activeRule) break;
+      }
+
+      if (
+        !activeRule ||
+        !containerWithActive ||
+        !containerWithOver ||
+        containerWithActive !== containerWithOver
+      ) {
+        return currentRules;
+      }
+
+      const oldIndex = containerWithActive.findIndex((i) => i.id === activeId);
+      const newIndex = containerWithOver.findIndex((i) => i.id === overId);
+
+      if (oldIndex === -1 || newIndex === -1) {
+        return currentRules;
+      }
+
+      const reorderedItems = arrayMove(containerWithActive, oldIndex, newIndex);
+
+      return currentRules.map((rule) => {
+        if (rule.id !== activeRule?.id) {
+          return rule;
+        }
+        return {
+          ...rule,
+          effects:
+            rule.effects === containerWithActive
+              ? (reorderedItems as Effect[])
+              : rule.effects,
+          conditionGroups: rule.conditionGroups.map((group) =>
+            group.conditions === containerWithActive
+              ? { ...group, conditions: reorderedItems as Condition[] }
+              : group
+          ),
+          randomGroups: rule.randomGroups.map((group) =>
+            group.effects === containerWithActive
+              ? { ...group, effects: reorderedItems as Effect[] }
+              : group
+          ),
+        };
+      });
+    });
   };
 
   const createAlternatingDotPattern = () => {
@@ -977,7 +1112,6 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
   };
 
   if (!isOpen) return null;
-
   return (
     <div className="fixed inset-0 flex bg-black-darker items-center justify-center z-[60] font-lexend">
       <div
@@ -989,9 +1123,7 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
             Rule Builder for {joker.name}
           </h2>
         </div>
-
         <div className="flex-grow relative overflow-hidden">
-          {/* Fixed background with alternating dots that moves with panning */}
           <div
             className="absolute inset-0 w-full h-full pointer-events-none"
             style={{
@@ -1005,7 +1137,6 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
               backgroundColor: "#1E2B30",
             }}
           />
-
           <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-50 bg-black-dark/90 backdrop-blur-md border border-black-lighter rounded-lg px-3 py-1 flex items-center gap-3">
             <div className="text-white-darker text-xs">
               Pan: {Math.round(panState.x)}, {Math.round(panState.y)}
@@ -1028,7 +1159,6 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
               Save & Close
             </Button>
           </div>
-
           {rules.length === 0 && (
             <div className="absolute inset-0 flex items-center justify-center z-40">
               <div className="text-center bg-black-dark/80 backdrop-blur-sm rounded-lg p-8 border-2 border-black-lighter">
@@ -1042,12 +1172,12 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
               </div>
             </div>
           )}
-
           <DndContext
             sensors={sensors}
             collisionDetection={closestCenter}
             onDragStart={handleDragStart}
             onDragEnd={handleDragEnd}
+            modifiers={[restrictToVerticalAxis]}
           >
             <TransformWrapper
               ref={transformRef}
@@ -1098,7 +1228,6 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
                 }}
               >
                 <div className="relative z-10">
-                  {/* Removed the problematic margin calculation */}
                   <div className="p-6 min-h-screen">
                     <div className="relative">
                       {rules.map((rule, index) => (
@@ -1124,9 +1253,9 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
                             onDeleteConditionGroup={deleteConditionGroup}
                             onDeleteEffect={deleteEffect}
                             onAddConditionGroup={addConditionGroup}
+                            onAddRandomGroup={addRandomGroup}
+                            onDeleteRandomGroup={deleteRandomGroup}
                             onToggleGroupOperator={toggleGroupOperator}
-                            onReorderConditions={reorderConditions}
-                            onReorderEffects={reorderEffects}
                             onUpdatePosition={updateRulePosition}
                             isRuleSelected={selectedItem?.ruleId === rule.id}
                             joker={joker}
@@ -1143,58 +1272,6 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
               </TransformComponent>
             </TransformWrapper>
 
-            <DragOverlay>
-              {draggedItem ? (
-                <div>
-                  {draggedItem.type === "condition"
-                    ? (() => {
-                        const condition = draggedItem.data as Condition;
-                        const conditionType = getConditionTypeById(
-                          condition.type
-                        );
-                        return (
-                          <div className="w-72">
-                            <BlockComponent
-                              type="condition"
-                              label={
-                                conditionType?.label || "Unknown Condition"
-                              }
-                              dynamicTitle={generateConditionTitle(condition)}
-                              onClick={() => {}}
-                              isDraggable={false}
-                              parameterCount={getParameterCount(
-                                condition.params
-                              )}
-                              isNegated={condition.negate}
-                              variant="condition"
-                            />
-                          </div>
-                        );
-                      })()
-                    : (() => {
-                        const effect = draggedItem.data as Effect;
-                        const effectType = getEffectTypeById(effect.type);
-                        const hasRandomChance =
-                          effect.params.has_random_chance === "true";
-                        return (
-                          <div>
-                            <BlockComponent
-                              type="effect"
-                              label={effectType?.label || "Unknown Effect"}
-                              dynamicTitle={generateEffectTitle(effect)}
-                              onClick={() => {}}
-                              isDraggable={false}
-                              parameterCount={getParameterCount(effect.params)}
-                              hasRandomChance={hasRandomChance}
-                              variant="default"
-                            />
-                          </div>
-                        );
-                      })()}
-                </div>
-              ) : null}
-            </DragOverlay>
-
             {panels.blockPalette.isVisible && (
               <BlockPalette
                 position={panels.blockPalette.position}
@@ -1209,7 +1286,6 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
                 }
               />
             )}
-
             {panels.jokerInfo.isVisible && (
               <JokerInfo
                 position={panels.jokerInfo.position}
@@ -1221,7 +1297,6 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
                 }
               />
             )}
-
             {panels.variables.isVisible && (
               <Variables
                 position={panels.variables.position}
@@ -1233,7 +1308,6 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
                 }
               />
             )}
-
             {panels.inspector.isVisible && (
               <Inspector
                 position={panels.inspector.position}
@@ -1241,17 +1315,19 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
                 selectedRule={getSelectedRule()}
                 selectedCondition={getSelectedCondition()}
                 selectedEffect={getSelectedEffect()}
+                selectedRandomGroup={getSelectedRandomGroup()}
                 onUpdateCondition={updateCondition}
                 onUpdateEffect={updateEffect}
+                onUpdateRandomGroup={updateRandomGroup}
                 onUpdateJoker={onUpdateJoker}
                 onClose={() => togglePanel("inspector")}
                 onPositionChange={(position) =>
                   updatePanelPosition("inspector", position)
                 }
                 onToggleVariablesPanel={() => togglePanel("variables")}
+                onCreateRandomGroupFromEffect={createRandomGroupFromEffect}
               />
             )}
-
             <FloatingDock panels={panels} onTogglePanel={togglePanel} />
           </DndContext>
         </div>

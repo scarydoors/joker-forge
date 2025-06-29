@@ -1,4 +1,3 @@
-// Export the main RuleBuilder component
 export { default as RuleBuilder } from "./RuleBuilder";
 
 // Export types
@@ -7,6 +6,7 @@ export type {
   ConditionGroup,
   Condition,
   Effect,
+  RandomGroup,
   TriggerDefinition,
   ConditionTypeDefinition,
   EffectTypeDefinition,
