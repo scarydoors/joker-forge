@@ -4,6 +4,7 @@ import type {
   Rule,
   Condition,
   Effect,
+  RandomGroup,
   ConditionParameter,
   EffectParameter,
   ShowWhenCondition,
@@ -32,6 +33,7 @@ interface InspectorProps {
   selectedRule: Rule | null;
   selectedCondition: Condition | null;
   selectedEffect: Effect | null;
+  selectedRandomGroup: RandomGroup | null;
   onUpdateCondition: (
     ruleId: string,
     conditionId: string,
@@ -42,10 +44,16 @@ interface InspectorProps {
     effectId: string,
     updates: Partial<Effect>
   ) => void;
+  onUpdateRandomGroup: (
+    ruleId: string,
+    randomGroupId: string,
+    updates: Partial<RandomGroup>
+  ) => void;
   onUpdateJoker: (updates: Partial<JokerData>) => void;
   onClose: () => void;
   onPositionChange: (position: { x: number; y: number }) => void;
   onToggleVariablesPanel: () => void;
+  onCreateRandomGroupFromEffect: (ruleId: string, effectId: string) => void;
 }
 
 interface ParameterFieldProps {
@@ -325,11 +333,14 @@ const Inspector: React.FC<InspectorProps> = ({
   selectedRule,
   selectedCondition,
   selectedEffect,
+  selectedRandomGroup,
   onUpdateCondition,
   onUpdateEffect,
+  onUpdateRandomGroup,
   onUpdateJoker,
   onClose,
   onToggleVariablesPanel,
+  onCreateRandomGroupFromEffect,
 }) => {
   const { attributes, listeners, setNodeRef, transform } = useDraggable({
     id: "panel-inspector",
@@ -391,7 +402,7 @@ const Inspector: React.FC<InspectorProps> = ({
           </p>
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-3 gap-3">
           <div className="bg-black-darker border border-black-lighter rounded-lg p-3">
             <div className="text-white-light text-sm font-medium mb-1">
               Conditions
@@ -408,7 +419,19 @@ const Inspector: React.FC<InspectorProps> = ({
               Effects
             </div>
             <div className="text-mint text-2xl font-bold">
-              {selectedRule.effects.length}
+              {selectedRule.effects.length +
+                selectedRule.randomGroups.reduce(
+                  (sum, group) => sum + group.effects.length,
+                  0
+                )}
+            </div>
+          </div>
+          <div className="bg-black-darker border border-black-lighter rounded-lg p-3">
+            <div className="text-white-light text-sm font-medium mb-1">
+              Random Groups
+            </div>
+            <div className="text-mint text-2xl font-bold">
+              {selectedRule.randomGroups.length}
             </div>
           </div>
         </div>
@@ -503,12 +526,84 @@ const Inspector: React.FC<InspectorProps> = ({
     );
   };
 
+  const renderRandomGroupEditor = () => {
+    if (!selectedRandomGroup || !selectedRule) return null;
+
+    return (
+      <div className="space-y-4">
+        <div className="bg-gradient-to-r from-mint/20 to-transparent border border-mint/30 rounded-lg p-4">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-10 h-10 bg-mint/20 rounded-lg flex items-center justify-center">
+              <PercentBadgeIcon className="h-5 w-5 text-mint" />
+            </div>
+            <div>
+              <h4 className="text-mint font-medium text-lg">Random Group</h4>
+              <span className="text-white-darker text-xs uppercase tracking-wider">
+                Chance-Based Effects
+              </span>
+            </div>
+          </div>
+          <p className="text-white-light text-sm leading-relaxed">
+            Effects in this group will all be triggered together if the random
+            chance succeeds.
+          </p>
+        </div>
+
+        <div className="space-y-3">
+          <h5 className="text-white-light font-medium text-sm flex items-center gap-2">
+            <div className="w-2 h-2 bg-mint rounded-full"></div>
+            Chance Configuration
+          </h5>
+
+          <div className="bg-mint/10 border border-mint/30 rounded-lg p-4">
+            <div className="flex flex-col items-center gap-4">
+              <ChanceInput
+                key="numerator"
+                label="Numerator"
+                value={selectedRandomGroup.chance_numerator}
+                onChange={(value) => {
+                  onUpdateRandomGroup(selectedRule.id, selectedRandomGroup.id, {
+                    chance_numerator: typeof value === "number" ? value : 1,
+                  });
+                }}
+                availableVariables={availableVariables}
+                onCreateVariable={handleCreateVariable}
+                onOpenVariablesPanel={onToggleVariablesPanel}
+              />
+              <span className="text-white-light text-sm">in</span>
+              <ChanceInput
+                key="denominator"
+                label="Denominator"
+                value={selectedRandomGroup.chance_denominator}
+                onChange={(value) => {
+                  onUpdateRandomGroup(selectedRule.id, selectedRandomGroup.id, {
+                    chance_denominator: typeof value === "number" ? value : 4,
+                  });
+                }}
+                availableVariables={availableVariables}
+                onCreateVariable={handleCreateVariable}
+                onOpenVariablesPanel={onToggleVariablesPanel}
+              />
+            </div>
+          </div>
+
+          <div className="bg-black-darker border border-black-lighter rounded-lg p-3">
+            <div className="text-white-light text-sm font-medium mb-2">
+              Effects in this group
+            </div>
+            <div className="text-mint text-lg font-bold">
+              {selectedRandomGroup.effects.length}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   const renderEffectEditor = () => {
     if (!selectedEffect || !selectedRule) return null;
     const effectType = getEffectTypeById(selectedEffect.type);
     if (!effectType) return null;
-
-    const hasRandomChance = selectedEffect.params.has_random_chance === "true";
 
     const paramsToRender = effectType.params.filter((param) => {
       if (!hasShowWhen(param)) return true;
@@ -517,42 +612,27 @@ const Inspector: React.FC<InspectorProps> = ({
       return values.includes(parentValue as string);
     });
 
+    const isInRandomGroup = selectedRule.randomGroups.some((group) =>
+      group.effects.some((effect) => effect.id === selectedEffect.id)
+    );
+
     return (
       <div className="space-y-4">
         <div className="bg-gradient-to-r from-effect/20 to-transparent border border-effect/30 rounded-lg p-4 relative">
-          <button
-            onClick={() => {
-              if (hasRandomChance) {
-                const newParams = { ...selectedEffect.params };
-                delete newParams.has_random_chance;
-                delete newParams.chance_numerator;
-                delete newParams.chance_denominator;
-                onUpdateEffect(selectedRule.id, selectedEffect.id, {
-                  params: newParams,
-                });
-              } else {
-                const newParams = {
-                  ...selectedEffect.params,
-                  has_random_chance: "true",
-                  chance_numerator: 1,
-                  chance_denominator: 4,
-                };
-                onUpdateEffect(selectedRule.id, selectedEffect.id, {
-                  params: newParams,
-                });
+          {!isInRandomGroup && (
+            <button
+              onClick={() =>
+                onCreateRandomGroupFromEffect(
+                  selectedRule.id,
+                  selectedEffect.id
+                )
               }
-            }}
-            className={`absolute top-4 right-4 p-2 rounded-lg border-2 transition-colors cursor-pointer z-10 ${
-              hasRandomChance
-                ? "bg-mint/20 border-mint text-mint"
-                : "bg-black-darker border-black-lighter text-white-darker hover:border-mint hover:text-mint"
-            }`}
-            title={
-              hasRandomChance ? "Remove random chance" : "Add random chance"
-            }
-          >
-            <PercentBadgeIcon className="h-4 w-4" />
-          </button>
+              className="absolute top-4 right-4 p-2 rounded-lg border-2 transition-colors cursor-pointer z-10 bg-black-darker border-mint text-mint hover:bg-mint/20"
+              title="Create Random Group"
+            >
+              <PercentBadgeIcon className="h-4 w-4" />
+            </button>
+          )}
 
           <div className="flex items-center gap-3 mb-3">
             <div className="w-10 h-10 bg-effect/20 rounded-lg flex items-center justify-center">
@@ -570,58 +650,6 @@ const Inspector: React.FC<InspectorProps> = ({
           <p className="text-white-light text-sm leading-relaxed">
             {effectType.description}
           </p>
-
-          {hasRandomChance && (
-            <div className="mt-3 bg-mint/10 border border-mint/30 rounded-lg p-3">
-              <div className="flex flex-col items-center gap-4">
-                <ChanceInput
-                  key="numerator"
-                  label="Numerator"
-                  value={
-                    selectedEffect.params.chance_numerator as
-                      | string
-                      | number
-                      | undefined
-                  }
-                  onChange={(value) => {
-                    const newParams = {
-                      ...selectedEffect.params,
-                      chance_numerator: value,
-                    };
-                    onUpdateEffect(selectedRule.id, selectedEffect.id, {
-                      params: newParams,
-                    });
-                  }}
-                  availableVariables={availableVariables}
-                  onCreateVariable={handleCreateVariable}
-                  onOpenVariablesPanel={onToggleVariablesPanel}
-                />
-                <span className="text-white-light text-sm">in</span>
-                <ChanceInput
-                  key="denominator"
-                  label="Denominator"
-                  value={
-                    selectedEffect.params.chance_denominator as
-                      | string
-                      | number
-                      | undefined
-                  }
-                  onChange={(value) => {
-                    const newParams = {
-                      ...selectedEffect.params,
-                      chance_denominator: value,
-                    };
-                    onUpdateEffect(selectedRule.id, selectedEffect.id, {
-                      params: newParams,
-                    });
-                  }}
-                  availableVariables={availableVariables}
-                  onCreateVariable={handleCreateVariable}
-                  onOpenVariablesPanel={onToggleVariablesPanel}
-                />
-              </div>
-            </div>
-          )}
         </div>
 
         <div className="space-y-3">
@@ -723,9 +751,11 @@ const Inspector: React.FC<InspectorProps> = ({
         {selectedRule &&
           !selectedCondition &&
           !selectedEffect &&
+          !selectedRandomGroup &&
           renderTriggerInfo()}
         {selectedCondition && renderConditionEditor()}
         {selectedEffect && renderEffectEditor()}
+        {selectedRandomGroup && renderRandomGroupEditor()}
       </div>
     </div>
   );

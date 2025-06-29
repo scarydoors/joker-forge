@@ -271,15 +271,34 @@ const extractEffectsConfig = (
       }
     }
 
-    let hasAddedOdds = false;
-    nonPassiveRules.forEach((rule) => {
-      rule.effects.forEach((effect) => {
-        if (effect.params.has_random_chance === "true" && !hasAddedOdds) {
-          const denominator = effect.params.chance_denominator || 4;
-          configItems.push(`odds = ${denominator}`);
-          hasAddedOdds = true;
-        }
+    const hasRandomGroups = nonPassiveRules.some(
+      (rule) => rule.randomGroups && rule.randomGroups.length > 0
+    );
 
+    if (hasRandomGroups) {
+      const randomGroups = nonPassiveRules.flatMap(
+        (rule) => rule.randomGroups || []
+      );
+      if (randomGroups.length > 0) {
+        const denominators = [
+          ...new Set(randomGroups.map((group) => group.chance_denominator)),
+        ];
+        if (denominators.length === 1) {
+          configItems.push(`odds = ${denominators[0]}`);
+        } else {
+          denominators.forEach((denom, index) => {
+            if (index === 0) {
+              configItems.push(`odds = ${denom}`);
+            } else {
+              configItems.push(`odds${index + 1} = ${denom}`);
+            }
+          });
+        }
+      }
+    }
+
+    nonPassiveRules.forEach((rule) => {
+      (rule.effects || []).forEach((effect) => {
         const effectValue = effect.params.value;
 
         if (
@@ -360,6 +379,90 @@ const extractEffectsConfig = (
           globalEffectVariableMapping[effect.id] = varName;
         }
       });
+
+      (rule.randomGroups || []).forEach((group) => {
+        group.effects.forEach((effect) => {
+          const effectValue = effect.params.value;
+
+          if (
+            effect.type === "add_chips" &&
+            typeof effectValue === "number" &&
+            !allVariableNames.has(String(effectValue))
+          ) {
+            const varName = getUniqueVariableName("chips");
+            configItems.push(`${varName} = ${effectValue}`);
+            globalEffectVariableMapping[effect.id] = varName;
+          }
+
+          if (
+            effect.type === "add_mult" &&
+            typeof effectValue === "number" &&
+            !allVariableNames.has(String(effectValue))
+          ) {
+            const varName = getUniqueVariableName("mult");
+            configItems.push(`${varName} = ${effectValue}`);
+            globalEffectVariableMapping[effect.id] = varName;
+          }
+
+          if (
+            effect.type === "apply_x_mult" &&
+            typeof effectValue === "number" &&
+            !allVariableNames.has(String(effectValue))
+          ) {
+            const varName = getUniqueVariableName("Xmult");
+            configItems.push(`${varName} = ${effectValue}`);
+            globalEffectVariableMapping[effect.id] = varName;
+          }
+
+          if (
+            effect.type === "add_dollars" &&
+            typeof effectValue === "number" &&
+            !allVariableNames.has(String(effectValue))
+          ) {
+            const varName = getUniqueVariableName("dollars");
+            configItems.push(`${varName} = ${effectValue}`);
+            globalEffectVariableMapping[effect.id] = varName;
+          }
+
+          if (effect.type === "retrigger_cards") {
+            const repetitions = effect.params.repetitions || 1;
+            const varName = getUniqueVariableName("repetitions");
+            configItems.push(`${varName} = ${repetitions}`);
+            globalEffectVariableMapping[effect.id] = varName;
+          }
+
+          if (effect.type === "edit_hand") {
+            const value = effect.params.value || 1;
+            const varName = getUniqueVariableName("hands");
+            configItems.push(`${varName} = ${value}`);
+            globalEffectVariableMapping[effect.id] = varName;
+          }
+
+          if (effect.type === "edit_discard") {
+            const value = effect.params.value || 1;
+            const varName = getUniqueVariableName("discards");
+            configItems.push(`${varName} = ${value}`);
+            globalEffectVariableMapping[effect.id] = varName;
+          }
+
+          if (effect.type === "level_up_hand") {
+            const value = effect.params.value || 1;
+            const varName = getUniqueVariableName("levels");
+            configItems.push(`${varName} = ${value}`);
+            globalEffectVariableMapping[effect.id] = varName;
+          }
+
+          if (
+            effect.type === "apply_x_chips" &&
+            typeof effectValue === "number" &&
+            !allVariableNames.has(String(effectValue))
+          ) {
+            const varName = getUniqueVariableName("xchips");
+            configItems.push(`${varName} = ${effectValue}`);
+            globalEffectVariableMapping[effect.id] = varName;
+          }
+        });
+      });
     });
   }
 
@@ -378,20 +481,20 @@ const generateCalculateFunction = (rules: Rule[]): string => {
   let calculateFunction = `calculate = function(self, card, context)`;
 
   Object.entries(rulesByTrigger).forEach(([triggerType, triggerRules]) => {
-    // SORT RULES: Rules with conditions first, rules without conditions last
     const sortedRules = [...triggerRules].sort((a, b) => {
       const aHasConditions = generateConditionChain(a).length > 0;
       const bHasConditions = generateConditionChain(b).length > 0;
 
-      // Rules with conditions should come first (return -1)
-      // Rules without conditions should come last (return 1)
       if (aHasConditions && !bHasConditions) return -1;
       if (!aHasConditions && bHasConditions) return 1;
-      return 0; // Keep original order for rules with same condition status
+      return 0;
     });
 
     const hasRetriggerEffects = sortedRules.some((rule) =>
-      rule.effects.some((effect) => effect.type === "retrigger_cards")
+      [
+        ...(rule.effects || []),
+        ...(rule.randomGroups?.flatMap((g) => g.effects) || []),
+      ].some((effect) => effect.type === "retrigger_cards")
     );
 
     if (hasRetriggerEffects) {
@@ -407,10 +510,18 @@ const generateCalculateFunction = (rules: Rule[]): string => {
       let hasAnyConditions = false;
 
       sortedRules.forEach((rule) => {
-        const retriggerEffects = rule.effects.filter(
+        const regularRetriggerEffects = (rule.effects || []).filter(
           (e) => e.type === "retrigger_cards"
         );
-        if (retriggerEffects.length === 0) return;
+        const randomRetriggerEffects = (rule.randomGroups || []).filter(
+          (group) => group.effects.some((e) => e.type === "retrigger_cards")
+        );
+
+        if (
+          regularRetriggerEffects.length === 0 &&
+          randomRetriggerEffects.length === 0
+        )
+          return;
 
         const conditionCode = generateConditionChain(rule);
 
@@ -427,7 +538,8 @@ const generateCalculateFunction = (rules: Rule[]): string => {
         }
 
         const { statement, preReturnCode } = generateEffectReturnStatement(
-          retriggerEffects,
+          regularRetriggerEffects,
+          randomRetriggerEffects,
           triggerType,
           rule.id
         );
@@ -468,10 +580,21 @@ const generateCalculateFunction = (rules: Rule[]): string => {
       hasAnyConditions = false;
 
       sortedRules.forEach((rule) => {
-        const nonRetriggerEffects = rule.effects.filter(
+        const regularNonRetriggerEffects = (rule.effects || []).filter(
           (e) => e.type !== "retrigger_cards"
         );
-        if (nonRetriggerEffects.length === 0) return;
+        const randomNonRetriggerGroups = (rule.randomGroups || [])
+          .map((group) => ({
+            ...group,
+            effects: group.effects.filter((e) => e.type !== "retrigger_cards"),
+          }))
+          .filter((group) => group.effects.length > 0);
+
+        if (
+          regularNonRetriggerEffects.length === 0 &&
+          randomNonRetriggerGroups.length === 0
+        )
+          return;
 
         const conditionCode = generateConditionChain(rule);
 
@@ -488,7 +611,8 @@ const generateCalculateFunction = (rules: Rule[]): string => {
         }
 
         const { statement, preReturnCode } = generateEffectReturnStatement(
-          nonRetriggerEffects,
+          regularNonRetriggerEffects,
+          randomNonRetriggerGroups,
           triggerType,
           rule.id
         );
@@ -536,7 +660,8 @@ const generateCalculateFunction = (rules: Rule[]): string => {
         }
 
         const { statement, preReturnCode } = generateEffectReturnStatement(
-          rule.effects,
+          rule.effects || [],
+          rule.randomGroups || [],
           triggerType,
           rule.id
         );

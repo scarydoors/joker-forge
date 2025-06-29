@@ -37,6 +37,13 @@ import {
 } from "./effects/ConsideredAsEffect";
 import { generateApplyXChipsReturn } from "./effects/ApplyXChipsEffect";
 
+export interface RandomGroup {
+  id: string;
+  chance_numerator: number;
+  chance_denominator: number;
+  effects: Effect[];
+}
+
 export interface ReturnStatementResult {
   statement: string;
   colour: string;
@@ -53,56 +60,51 @@ export interface PassiveEffectResult {
 }
 
 export function generateEffectReturnStatement(
-  effects: Effect[] = [],
+  regularEffects: Effect[] = [],
+  randomGroups: RandomGroup[] = [],
   triggerType: string = "hand_played",
   ruleId?: string
 ): ReturnStatementResult {
-  if (effects.length === 0) {
+  if (regularEffects.length === 0 && randomGroups.length === 0) {
     return {
       statement: "",
       colour: "G.C.WHITE",
     };
   }
 
-  const { preReturnCode: variablePreCode, modifiedEffects } =
-    coordinateVariableConflicts(effects);
+  let combinedPreReturnCode = "";
+  let mainReturnStatement = "";
+  let primaryColour = "G.C.WHITE";
 
-  const hasRandomChance = effects.some(
-    (effect) => effect.params.has_random_chance === "true"
-  );
+  if (regularEffects.length > 0) {
+    const { preReturnCode: regularPreCode, modifiedEffects } =
+      coordinateVariableConflicts(regularEffects);
 
-  const effectReturns: EffectReturn[] = modifiedEffects
-    .map((effect, index) => {
-      const effectWithContext = {
-        ...effect,
-        _ruleContext: ruleId,
-        _effectIndex: index,
-      };
+    const effectReturns: EffectReturn[] = modifiedEffects
+      .map((effect, index) => {
+        const effectWithContext = {
+          ...effect,
+          _ruleContext: ruleId,
+          _effectIndex: index,
+        };
 
-      return generateSingleEffect(effectWithContext, triggerType);
-    })
-    .filter((ret) => ret.statement || ret.message);
+        return generateSingleEffect(effectWithContext, triggerType);
+      })
+      .filter((ret) => ret.statement || ret.message);
 
-  if (effectReturns.length === 0) {
-    return {
-      statement: "",
-      colour: "G.C.WHITE",
-    };
-  }
+    if (regularPreCode) {
+      combinedPreReturnCode += regularPreCode;
+    }
 
-  if (hasRandomChance) {
     const processedEffects: EffectReturn[] = [];
-    let randomChancePreReturnCode = variablePreCode || "";
-
     effectReturns.forEach((effect) => {
       const { cleanedStatement, preReturnCode } = extractPreReturnCode(
         effect.statement
       );
 
       if (preReturnCode) {
-        randomChancePreReturnCode +=
-          (randomChancePreReturnCode ? "\n                " : "") +
-          preReturnCode;
+        combinedPreReturnCode +=
+          (combinedPreReturnCode ? "\n                " : "") + preReturnCode;
       }
 
       processedEffects.push({
@@ -111,43 +113,149 @@ export function generateEffectReturnStatement(
       });
     });
 
-    const randomChanceResults = processRandomChanceEffects(
-      processedEffects,
-      effects,
-      randomChancePreReturnCode
-    );
-    return {
-      statement: randomChanceResults,
-      colour: processedEffects[0]?.colour ?? "G.C.WHITE",
-      isRandomChance: true,
-    };
+    if (processedEffects.length > 0) {
+      mainReturnStatement = buildReturnStatement(processedEffects);
+      primaryColour = processedEffects[0]?.colour ?? "G.C.WHITE";
+    }
   }
 
-  let combinedPreReturnCode = variablePreCode || "";
-  const processedEffects: EffectReturn[] = [];
+  if (randomGroups.length > 0) {
+    const randomGroupStatements: string[] = [];
 
-  effectReturns.forEach((effect) => {
-    const { cleanedStatement, preReturnCode } = extractPreReturnCode(
-      effect.statement
-    );
+    // Create mapping of denominators to odds variable names
+    const denominators = [
+      ...new Set(randomGroups.map((group) => group.chance_denominator)),
+    ];
+    const denominatorToOddsVar: Record<number, string> = {};
 
-    if (preReturnCode) {
-      combinedPreReturnCode +=
-        (combinedPreReturnCode ? "\n                " : "") + preReturnCode;
+    if (denominators.length === 1) {
+      denominatorToOddsVar[denominators[0]] = "card.ability.extra.odds";
+    } else {
+      denominators.forEach((denom, index) => {
+        if (index === 0) {
+          denominatorToOddsVar[denom] = "card.ability.extra.odds";
+        } else {
+          denominatorToOddsVar[denom] = `card.ability.extra.odds${index + 1}`;
+        }
+      });
     }
 
-    processedEffects.push({
-      ...effect,
-      statement: cleanedStatement,
-    });
-  });
+    randomGroups.forEach((group, groupIndex) => {
+      const { preReturnCode: groupPreCode, modifiedEffects } =
+        coordinateVariableConflicts(group.effects);
 
-  const returnStatement = buildReturnStatement(processedEffects);
+      const effectReturns: EffectReturn[] = modifiedEffects
+        .map((effect, index) => {
+          const effectWithContext = {
+            ...effect,
+            _ruleContext: ruleId,
+            _effectIndex: index,
+          };
+
+          return generateSingleEffect(effectWithContext, triggerType);
+        })
+        .filter((ret) => ret.statement || ret.message);
+
+      if (effectReturns.length === 0) return;
+
+      let groupPreReturnCode = groupPreCode || "";
+      const processedEffects: EffectReturn[] = [];
+
+      effectReturns.forEach((effect) => {
+        const { cleanedStatement, preReturnCode } = extractPreReturnCode(
+          effect.statement
+        );
+
+        if (preReturnCode) {
+          groupPreReturnCode +=
+            (groupPreReturnCode ? "\n                        " : "") +
+            preReturnCode;
+        }
+
+        processedEffects.push({
+          ...effect,
+          statement: cleanedStatement,
+        });
+      });
+
+      // Use the mapped odds variable instead of hardcoded denominator
+      const oddsVar = denominatorToOddsVar[group.chance_denominator];
+      const probabilityCheck =
+        group.chance_numerator === 1
+          ? `G.GAME.probabilities.normal / ${oddsVar}`
+          : `G.GAME.probabilities.normal * ${group.chance_numerator} / ${oddsVar}`;
+
+      let groupContent = "";
+      if (groupPreReturnCode && groupPreReturnCode.trim()) {
+        groupContent += `${groupPreReturnCode}
+                        `;
+      }
+
+      // Convert effects to SMODS.calculate_effect calls for random groups
+      const effectCalls: string[] = [];
+      processedEffects.forEach((effect) => {
+        if (effect.statement && effect.statement.trim()) {
+          const effectObj = `{${effect.statement}}`;
+          effectCalls.push(`SMODS.calculate_effect(${effectObj}, card)`);
+        }
+        if (effect.message) {
+          effectCalls.push(
+            `card_eval_status_text(context.blueprint_card or card, 'extra', nil, nil, nil, {message = ${
+              effect.message
+            }, colour = ${effect.colour || "G.C.WHITE"}})`
+          );
+        }
+      });
+
+      groupContent += effectCalls.join("\n                        ");
+
+      const groupStatement = `if pseudorandom('group_${groupIndex}_${group.id.substring(
+        0,
+        8
+      )}') < ${probabilityCheck} then
+                        ${groupContent}
+                    end`;
+
+      randomGroupStatements.push(groupStatement);
+    });
+
+    if (mainReturnStatement && randomGroupStatements.length > 0) {
+      const randomGroupCode = randomGroupStatements.join(
+        "\n                    "
+      );
+      const funcStatement = `func = function()
+                        ${randomGroupCode}
+                        return true
+                    end`;
+
+      if (
+        mainReturnStatement.includes("return {") &&
+        mainReturnStatement.includes("}")
+      ) {
+        const insertIndex = mainReturnStatement.lastIndexOf("}");
+        mainReturnStatement =
+          mainReturnStatement.slice(0, insertIndex) +
+          `,
+                    ${funcStatement}
+                ${mainReturnStatement.slice(insertIndex)}`;
+      }
+    } else if (!mainReturnStatement && randomGroupStatements.length > 0) {
+      mainReturnStatement = randomGroupStatements.join("\n                ");
+      if (randomGroups.length > 0 && randomGroups[0].effects.length > 0) {
+        const firstEffect = generateSingleEffect(
+          randomGroups[0].effects[0],
+          triggerType
+        );
+        primaryColour = firstEffect.colour || "G.C.WHITE";
+      }
+    }
+  }
 
   return {
-    statement: returnStatement,
-    colour: processedEffects[0]?.colour ?? "G.C.WHITE",
+    statement: mainReturnStatement,
+    colour: primaryColour,
     preReturnCode: combinedPreReturnCode || undefined,
+    isRandomChance: randomGroups.length > 0,
   };
 }
 
@@ -214,64 +322,9 @@ const generateSingleEffect = (
   }
 };
 
-const processRandomChanceEffects = (
-  processedEffects: EffectReturn[],
-  originalEffects: Effect[],
-  preReturnCode?: string
-): string => {
-  const effect = processedEffects[0];
-  const originalEffect = originalEffects[0];
-
-  const numerator = originalEffect.params.chance_numerator || 1;
-  const effectKey = `effect_0_${originalEffect.type}`;
-
-  // Use the Balatro standard probability formula
-  const probabilityCheck =
-    numerator === 1
-      ? `G.GAME.probabilities.normal / card.ability.extra.odds`
-      : `G.GAME.probabilities.normal * ${numerator} / card.ability.extra.odds`;
-
-  let content = "";
-
-  // Add pre-return code first
-  if (preReturnCode && preReturnCode.trim()) {
-    content += `${preReturnCode}
-                `;
-  }
-
-  // Generate return statement with both statement and message
-  const hasStatement = effect.statement && effect.statement.trim().length > 0;
-  const hasMessage = effect.message;
-
-  if (hasStatement || hasMessage) {
-    content += `return {`;
-
-    if (hasStatement) {
-      content += `
-                    ${effect.statement}`;
-    }
-
-    if (hasMessage) {
-      if (hasStatement) {
-        content += `,`;
-      }
-      content += `
-                    message = ${effect.message}`;
-    }
-
-    content += `
-                }`;
-  }
-
-  return `if pseudorandom('${effectKey}') < ${probabilityCheck} then
-                ${content}
-            end`;
-};
-
 const buildReturnStatement = (effects: EffectReturn[]): string => {
   if (effects.length === 0) return "";
 
-  // Find the first effect that actually has content to return
   let firstContentEffectIndex = -1;
   for (let i = 0; i < effects.length; i++) {
     const effect = effects[i];
@@ -281,7 +334,6 @@ const buildReturnStatement = (effects: EffectReturn[]): string => {
     }
   }
 
-  // If no effects have content, return empty
   if (firstContentEffectIndex === -1) {
     return `return {
                     colour = ${effects[0]?.colour || "G.C.WHITE"}
@@ -293,7 +345,6 @@ const buildReturnStatement = (effects: EffectReturn[]): string => {
 
   let returnStatement = "";
 
-  // Build the main return statement from the first content-bearing effect
   if (hasFirstStatement) {
     returnStatement = `return {
                     ${firstContentEffect.statement}`;
@@ -307,7 +358,6 @@ const buildReturnStatement = (effects: EffectReturn[]): string => {
                     message = ${firstContentEffect.message}`;
   }
 
-  // Handle additional effects after the first content-bearing effect
   const remainingEffects = effects.slice(firstContentEffectIndex + 1);
   if (remainingEffects.length > 0) {
     let extraChain = "";
@@ -344,7 +394,6 @@ const buildReturnStatement = (effects: EffectReturn[]): string => {
       extraCount++;
     }
 
-    // Close all the extra blocks
     for (let i = 0; i < extraCount; i++) {
       extraChain += `
                         }`;

@@ -5,6 +5,15 @@ export interface Rule {
   trigger: string;
   conditionGroups: ConditionGroup[];
   effects: Effect[];
+  randomGroups: RandomGroup[];
+}
+
+// A group of effects with shared random chance
+export interface RandomGroup {
+  id: string;
+  chance_numerator: number;
+  chance_denominator: number;
+  effects: Effect[];
 }
 
 // A group of conditions with a logical operator (AND/OR)
@@ -110,10 +119,11 @@ export interface LogicalOperator {
 
 // Interface for selected items in the rule builder
 export interface SelectedItem {
-  type: "trigger" | "condition" | "effect";
+  type: "trigger" | "condition" | "effect" | "randomgroup";
   ruleId: string;
   itemId?: string;
   groupId?: string;
+  randomGroupId?: string;
 }
 
 // Export logical operators
