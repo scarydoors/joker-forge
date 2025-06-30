@@ -183,6 +183,22 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
         const capitalizedWord = word.charAt(0).toUpperCase() + word.slice(1);
         words[i] = capitalizedWord;
         hasChanges = true;
+      } else if (lowerWord.match(/^(common)$/)) {
+        const capitalizedWord = word.charAt(0).toUpperCase() + word.slice(1);
+        words[i] = `{C:common}${capitalizedWord}{}`;
+        hasChanges = true;
+      } else if (lowerWord.match(/^(uncommon)$/)) {
+        const capitalizedWord = word.charAt(0).toUpperCase() + word.slice(1);
+        words[i] = `{C:uncommon}${capitalizedWord}{}`;
+        hasChanges = true;
+      } else if (lowerWord.match(/^(rare)$/)) {
+        const capitalizedWord = word.charAt(0).toUpperCase() + word.slice(1);
+        words[i] = `{C:rare}${capitalizedWord}{}`;
+        hasChanges = true;
+      } else if (lowerWord.match(/^(legendary)$/)) {
+        const capitalizedWord = word.charAt(0).toUpperCase() + word.slice(1);
+        words[i] = `{C:legendary}${capitalizedWord}{}`;
+        hasChanges = true;
       } else if (lowerWord.match(/^tarot$/)) {
         words[i] = `{C:tarot}${word}{}`;
         hasChanges = true;
@@ -191,6 +207,14 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
         hasChanges = true;
       } else if (lowerWord.match(/^planet$/)) {
         words[i] = `{C:planet}${word}{}`;
+        hasChanges = true;
+      } else if (lowerWord.match(/^(enhanced?|enhancement)$/)) {
+        const capitalizedWord = word.charAt(0).toUpperCase() + word.slice(1);
+        words[i] = `{C:enhanced}${capitalizedWord}{}`;
+        hasChanges = true;
+      } else if (lowerWord.match(/^(edition)$/)) {
+        const capitalizedWord = word.charAt(0).toUpperCase() + word.slice(1);
+        words[i] = `{C:edition}${capitalizedWord}{}`;
         hasChanges = true;
       } else if (word.match(/^-\d+(\.\d+)?$/)) {
         words[i] = `{C:red}${word}{}`;
@@ -300,6 +324,64 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
 
     return formatted;
   };
+
+  const colorButtons = [
+    { tag: "{C:red}", color: "bg-balatro-red", name: "Red" },
+    { tag: "{C:blue}", color: "bg-balatro-blue", name: "Blue" },
+    { tag: "{C:green}", color: "bg-balatro-green", name: "Green" },
+    { tag: "{C:purple}", color: "bg-balatro-purple", name: "Purple" },
+    { tag: "{C:attention}", color: "bg-balatro-orange", name: "Orange" },
+    { tag: "{C:money}", color: "bg-balatro-money", name: "Money" },
+    { tag: "{C:gold}", color: "bg-balatro-gold-new", name: "Gold" },
+    { tag: "{C:white}", color: "bg-balatro-white", name: "White" },
+    { tag: "{C:inactive}", color: "bg-balatro-grey", name: "Inactive" },
+    { tag: "{C:default}", color: "bg-balatro-default", name: "Default" },
+    { tag: "{C:hearts}", color: "bg-balatro-hearts", name: "Hearts" },
+    { tag: "{C:clubs}", color: "bg-balatro-clubs", name: "Clubs" },
+    { tag: "{C:diamonds}", color: "bg-balatro-diamonds", name: "Diamonds" },
+    { tag: "{C:spades}", color: "bg-balatro-spades", name: "Spades" },
+    { tag: "{C:tarot}", color: "bg-balatro-purple", name: "Tarot" },
+    { tag: "{C:planet}", color: "bg-balatro-planet", name: "Planet" },
+    { tag: "{C:spectral}", color: "bg-balatro-spectral", name: "Spectral" },
+    { tag: "{C:enhanced}", color: "bg-balatro-enhanced-new", name: "Enhanced" },
+    { tag: "{C:common}", color: "bg-balatro-common", name: "Common" },
+    { tag: "{C:uncommon}", color: "bg-balatro-uncommon", name: "Uncommon" },
+    { tag: "{C:rare}", color: "bg-balatro-rare", name: "Rare" },
+    { tag: "{C:legendary}", color: "bg-balatro-legendary", name: "Legendary" },
+    {
+      tag: "{C:edition}",
+      color: "bg-gradient-to-r from-purple-400 to-pink-400",
+      name: "Edition",
+    },
+    {
+      tag: "{C:dark_edition}",
+      color: "bg-gray-900 border-2 border-purple-400",
+      name: "Dark Edition",
+    },
+  ];
+
+  const backgroundButtons = [
+    { tag: "{X:red,C:white}", color: "bg-balatro-red", name: "Red BG" },
+    { tag: "{X:blue,C:white}", color: "bg-balatro-blue", name: "Blue BG" },
+    { tag: "{X:mult,C:white}", color: "bg-balatro-mult", name: "Mult BG" },
+    { tag: "{X:chips,C:white}", color: "bg-balatro-chips", name: "Chips BG" },
+    { tag: "{X:money,C:white}", color: "bg-balatro-money", name: "Money BG" },
+    {
+      tag: "{X:attention,C:white}",
+      color: "bg-balatro-orange",
+      name: "Attention BG",
+    },
+    {
+      tag: "{X:legendary,C:white}",
+      color: "bg-balatro-legendary",
+      name: "Legendary BG",
+    },
+    {
+      tag: "{X:edition,C:white}",
+      color: "bg-gradient-to-r from-purple-400 to-pink-400",
+      name: "Edition BG",
+    },
+  ];
 
   const handleOverlayImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] || null;
@@ -555,32 +637,6 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
     insertTagSmart(tag, autoClose);
   };
 
-  const colorButtons = [
-    { tag: "{C:red}", color: "bg-balatro-red", name: "Red" },
-    { tag: "{C:blue}", color: "bg-balatro-blue", name: "Blue" },
-    { tag: "{C:green}", color: "bg-balatro-green", name: "Green" },
-    { tag: "{C:purple}", color: "bg-balatro-purple", name: "Purple" },
-    { tag: "{C:attention}", color: "bg-balatro-orange", name: "Orange" },
-    { tag: "{C:money}", color: "bg-balatro-money", name: "Money" },
-    { tag: "{C:white}", color: "bg-white-light", name: "White" },
-    { tag: "{C:inactive}", color: "bg-gray-inactive", name: "Inactive" },
-    { tag: "{C:hearts}", color: "bg-balatro-hearts", name: "Hearts" },
-    { tag: "{C:clubs}", color: "bg-balatro-clubs", name: "Clubs" },
-    { tag: "{C:diamonds}", color: "bg-balatro-diamonds", name: "Diamonds" },
-    { tag: "{C:spades}", color: "bg-balatro-spades", name: "Spades" },
-    { tag: "{C:tarot}", color: "bg-balatro-purple", name: "Tarot" },
-    { tag: "{C:planet}", color: "bg-balatro-planet", name: "Planet" },
-    { tag: "{C:spectral}", color: "bg-balatro-spectral", name: "Spectral" },
-  ];
-
-  const backgroundButtons = [
-    { tag: "{X:red,C:white}", color: "bg-balatro-red", name: "Red BG" },
-    { tag: "{X:blue,C:white}", color: "bg-balatro-blue", name: "Blue BG" },
-    { tag: "{X:mult,C:white}", color: "bg-balatro-mult", name: "Mult BG" },
-    { tag: "{X:chips,C:white}", color: "bg-balatro-chips", name: "Chips BG" },
-    { tag: "{X:money,C:white}", color: "bg-balatro-money", name: "Money BG" },
-  ];
-
   const rarityOptions = [
     { value: "1", label: "Common" },
     { value: "2", label: "Uncommon" },
@@ -686,7 +742,7 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
               {activeTab === "visual" && (
                 <div className="p-6 space-y-6">
                   {/* Background Icons */}
-                  <PuzzlePieceIcon className="absolute top-4 right-8 h-32 w-32 text-black-lighter/20 -rotate-12" />
+                  <PuzzlePieceIcon className="absolute top-4 right-8 h-32 w-32 text-black-lighter/20 -rotate-12 pointer-events-none" />
 
                   <div className="space-y-6">
                     <div>
@@ -899,10 +955,10 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
               {activeTab === "description" && (
                 <div className="p-6 space-y-6">
                   {/* Background Icons */}
-                  <DocumentTextIcon className="absolute top-12 right-16 h-28 w-28 text-black-lighter/20 -rotate-6" />
+                  <DocumentTextIcon className="absolute top-12 right-16 h-28 w-28 text-black-lighter/20 -rotate-6 pointer-events-none" />
 
                   <div className="bg-black-darker border border-black-lighter rounded-xl p-6">
-                    <div className="flex items-center justify-between mb-6">
+                    <div className="flex items-center justify-between mb-2">
                       <h4 className="text-white-light font-medium text-sm flex items-center gap-2">
                         <DocumentTextIcon className="h-4 w-4 text-mint" />
                         Formatting Tools
@@ -924,7 +980,7 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
                       </div>
                     </div>
 
-                    <div className="space-y-6">
+                    <div className="space-y-4">
                       <div>
                         <p className="text-white-light text-sm mb-3 font-medium">
                           Text Colors
@@ -935,7 +991,7 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
                               key={index}
                               onClick={() => insertTag(item.tag)}
                               title={item.name}
-                              className={`w-8 h-8 ${item.color} rounded border border-black-lighter hover:scale-110 transition-transform`}
+                              className={`w-8 h-8 ${item.color} rounded border border-black-lighter hover:scale-110 transition-transform z-10`}
                             />
                           ))}
                         </div>
@@ -1021,7 +1077,7 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
                     </div>
                   </div>
 
-                  <div className="w-full">
+                  <div className="w-full -mt-2">
                     <InputField
                       id="joker-description-edit"
                       value={formData.description}
@@ -1030,7 +1086,7 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
                       }
                       onKeyDown={handleKeyDown}
                       multiline={true}
-                      height="180px"
+                      height="140px"
                       separator={true}
                       useGameFont={true}
                       label="Description Text"

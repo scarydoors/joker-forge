@@ -55,6 +55,16 @@ html {
   --color-balatro-diamonds: #e18400;
   --color-balatro-spades: #3a17b3;
 
+  --color-balatro-common: #0093ff;
+  --color-balatro-uncommon: #35bd86;
+  --color-balatro-rare: #ff4c40;
+  --color-balatro-legendary: #aa5bb5;
+  --color-balatro-enhanced-new: #757cdc;
+  --color-balatro-edition-new: #fff5ce;
+  --color-balatro-dark-edition: #6a6aed;
+  --color-balatro-gold-new: #eaba44;
+  --color-balatro-default: #3a5055;
+
   --color-mint-lighter: #6cb79a;
   --color-mint-light: #59a487;
   --color-mint: #469274;
