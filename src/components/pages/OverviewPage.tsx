@@ -1,16 +1,23 @@
 import React from "react";
 import {
-  HomeIcon,
   PlusIcon,
   ArrowUpTrayIcon,
   DocumentTextIcon,
-  ChartBarIcon,
-  CheckCircleIcon,
-  ClockIcon,
-  CodeBracketIcon,
   WrenchScrewdriverIcon,
-  EyeIcon,
   BeakerIcon,
+  ExclamationTriangleIcon,
+  SparklesIcon,
+  BugAntIcon,
+  BookOpenIcon,
+  CogIcon,
+  SwatchIcon,
+  ArrowPathIcon,
+  BoltIcon,
+  CodeBracketSquareIcon,
+  StarIcon,
+  FireIcon,
+  CubeIcon,
+  InformationCircleIcon,
 } from "@heroicons/react/24/outline";
 import { JokerData } from "../JokerCard";
 
@@ -30,6 +37,99 @@ interface ImplementationStats {
   ui: { implemented: number; total: number; percentage: number };
 }
 
+interface GitHubCommit {
+  sha: string;
+  commit: {
+    message: string;
+    author: {
+      name: string;
+      date: string;
+    };
+  };
+  html_url: string;
+  author: {
+    login: string;
+    avatar_url: string;
+  } | null;
+}
+
+interface ParsedCommit {
+  sha: string;
+  message: string;
+  type: CommitType | null;
+  author: string;
+  date: string;
+  url: string;
+  avatarUrl?: string;
+}
+
+interface CommitType {
+  prefix: string;
+  label: string;
+  color: string;
+  bgColor: string;
+  icon: React.ComponentType<{ className?: string }>;
+}
+
+const COMMIT_TYPES: Record<string, CommitType> = {
+  feat: {
+    prefix: "feat",
+    label: "Feature",
+    color: "text-green-400",
+    bgColor: "bg-green-400/10",
+    icon: SparklesIcon,
+  },
+  fix: {
+    prefix: "fix",
+    label: "Fix",
+    color: "text-red-400",
+    bgColor: "bg-red-400/10",
+    icon: BugAntIcon,
+  },
+  docs: {
+    prefix: "docs",
+    label: "Docs",
+    color: "text-blue-400",
+    bgColor: "bg-blue-400/10",
+    icon: BookOpenIcon,
+  },
+  chore: {
+    prefix: "chore",
+    label: "Chore",
+    color: "text-gray-400",
+    bgColor: "bg-gray-400/10",
+    icon: CogIcon,
+  },
+  style: {
+    prefix: "style",
+    label: "Style",
+    color: "text-purple-400",
+    bgColor: "bg-purple-400/10",
+    icon: SwatchIcon,
+  },
+  refactor: {
+    prefix: "refactor",
+    label: "Refactor",
+    color: "text-yellow-400",
+    bgColor: "bg-yellow-400/10",
+    icon: ArrowPathIcon,
+  },
+  test: {
+    prefix: "test",
+    label: "Test",
+    color: "text-mint",
+    bgColor: "bg-mint/10",
+    icon: BeakerIcon,
+  },
+  perf: {
+    prefix: "perf",
+    label: "Performance",
+    color: "text-orange-400",
+    bgColor: "bg-orange-400/10",
+    icon: BoltIcon,
+  },
+};
+
 const parseImplementationStats = async (): Promise<ImplementationStats> => {
   try {
     const response = await fetch(
@@ -37,44 +137,24 @@ const parseImplementationStats = async (): Promise<ImplementationStats> => {
     );
     const readmeContent = await response.text();
 
-    console.log("README fetched successfully, length:", readmeContent.length);
-
     const parseSection = (
       sectionName: string
     ): { implemented: number; total: number } => {
-      // Split the content by ### headers to isolate sections
       const sections = readmeContent.split(/^### /m);
       const targetSection = sections.find((section) =>
         section.toLowerCase().startsWith(sectionName.toLowerCase())
       );
 
       if (!targetSection) {
-        console.warn(`Section "${sectionName}" not found in README`);
-        console.log(
-          "Available sections:",
-          sections.map((s) => s.split("\n")[0]).slice(1)
-        );
         return { implemented: 0, total: 0 };
       }
 
-      console.log(
-        `Found section "${sectionName}", length: ${targetSection.length}`
-      );
-
-      // Count checkboxes in this section
       const implementedMatches = targetSection.match(/- \[x\]/gi) || [];
       const notImplementedMatches = targetSection.match(/- \[ \]/g) || [];
 
       const implementedCount = implementedMatches.length;
       const notImplementedCount = notImplementedMatches.length;
       const totalCount = implementedCount + notImplementedCount;
-
-      console.log(
-        `${sectionName}: Found ${implementedCount} [x] and ${notImplementedCount} [ ]`
-      );
-      console.log(
-        `${sectionName}: ${implementedCount}/${totalCount} implemented`
-      );
 
       return { implemented: implementedCount, total: totalCount };
     };
@@ -105,14 +185,86 @@ const parseImplementationStats = async (): Promise<ImplementationStats> => {
         percentage: Math.round((ui.implemented / ui.total) * 100) || 0,
       },
     };
-  } catch (error) {
-    console.warn("Could not parse README stats, using fallback:", error);
+  } catch {
     return {
       triggers: { implemented: 13, total: 21, percentage: 62 },
       conditions: { implemented: 14, total: 19, percentage: 74 },
       effects: { implemented: 15, total: 19, percentage: 79 },
       ui: { implemented: 8, total: 14, percentage: 57 },
     };
+  }
+};
+
+const fetchGitHubCommits = async (): Promise<ParsedCommit[]> => {
+  try {
+    const response = await fetch(
+      "https://api.github.com/repos/Jayd-H/joker-forge/commits?per_page=8&page=1",
+      {
+        headers: {
+          Accept: "application/vnd.github.v3+json",
+        },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`GitHub API error: ${response.status}`);
+    }
+
+    const commits: GitHubCommit[] = await response.json();
+    return commits.map(parseCommit);
+  } catch {
+    return [];
+  }
+};
+
+const parseCommit = (commit: GitHubCommit): ParsedCommit => {
+  const message = commit.commit.message;
+  const firstLine = message.split("\n")[0];
+
+  const commitTypeMatch = firstLine.match(/^([a-z]+)(\(.+\))?:\s*(.+)$/i);
+
+  let parsedMessage = firstLine;
+  let commitType: CommitType | null = null;
+
+  if (commitTypeMatch) {
+    const [, type, , actualMessage] = commitTypeMatch;
+    const normalizedType = type.toLowerCase();
+
+    if (COMMIT_TYPES[normalizedType]) {
+      commitType = COMMIT_TYPES[normalizedType];
+      parsedMessage = actualMessage;
+    }
+  }
+
+  return {
+    sha: commit.sha.substring(0, 7),
+    message: parsedMessage,
+    type: commitType,
+    author: commit.author?.login || commit.commit.author.name,
+    date: commit.commit.author.date,
+    url: commit.html_url,
+    avatarUrl: commit.author?.avatar_url,
+  };
+};
+
+const formatTimeAgo = (dateString: string): string => {
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+
+  if (diffInSeconds < 60) {
+    return "just now";
+  } else if (diffInSeconds < 3600) {
+    const minutes = Math.floor(diffInSeconds / 60);
+    return `${minutes}m ago`;
+  } else if (diffInSeconds < 86400) {
+    const hours = Math.floor(diffInSeconds / 3600);
+    return `${hours}h ago`;
+  } else if (diffInSeconds < 2592000) {
+    const days = Math.floor(diffInSeconds / 86400);
+    return `${days}d ago`;
+  } else {
+    return date.toLocaleDateString();
   }
 };
 
@@ -131,8 +283,16 @@ const OverviewPage: React.FC<OverviewPageProps> = ({
     ui: { implemented: 8, total: 14, percentage: 57 },
   });
 
+  const [commits, setCommits] = React.useState<ParsedCommit[]>([]);
+  const [commitsLoading, setCommitsLoading] = React.useState(true);
+
   React.useEffect(() => {
     parseImplementationStats().then(setStats);
+
+    fetchGitHubCommits().then((fetchedCommits) => {
+      setCommits(fetchedCommits);
+      setCommitsLoading(false);
+    });
   }, []);
 
   const validateJoker = (joker: JokerData) => {
@@ -152,375 +312,382 @@ const OverviewPage: React.FC<OverviewPageProps> = ({
     (joker) => validateJoker(joker).length === 0
   );
 
-  const overallProgress = Math.round(
-    ((stats.triggers.implemented +
-      stats.conditions.implemented +
-      stats.effects.implemented +
-      stats.ui.implemented) /
-      (stats.triggers.total +
-        stats.conditions.total +
-        stats.effects.total +
-        stats.ui.total)) *
-      100
-  );
-
   return (
-    <div className="p-8 max-w-7xl mx-auto">
-      <div className="flex items-center gap-3 mb-8">
-        <HomeIcon className="h-8 w-8 text-mint" />
-        <h1 className="text-3xl text-white-light font-light tracking-wide">
-          Project Overview
-        </h1>
-      </div>
-
-      <div className="grid grid-cols-12 gap-6 mb-8">
-        <div className="col-span-12 lg:col-span-8">
-          <div className="bg-black-dark border-2 border-black-lighter rounded-lg p-6 h-full">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl text-white-light font-light tracking-wide">
-                Your Project
-              </h2>
-              <ChartBarIcon className="h-6 w-6 text-mint" />
+    <div className="p-8 max-w-7xl mx-auto font-lexend">
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h1 className="text-4xl text-white-light font-light tracking-wide mb-3">
+            Project Overview
+          </h1>
+          <div className="flex items-center gap-6 text-white-darker text-sm">
+            <div className="flex items-center">
+              <DocumentTextIcon className="h-4 w-4 mr-2 text-mint" />
+              {modName || "Unnamed Mod"} • {jokerCount} joker
+              {jokerCount !== 1 ? "s" : ""}
             </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-              <div className="bg-black-darker border border-black-lighter rounded-lg p-4">
-                <div className="flex items-center justify-between mb-3">
-                  <span className="text-white-light font-medium text-sm">
-                    {modName || "Unnamed Mod"}
-                  </span>
-                  <span className="text-xs text-white-darker bg-black border border-black-lighter rounded px-2 py-1">
-                    v1.0.0
-                  </span>
-                </div>
-                <p className="text-white-darker text-xs">
-                  by {authorName || "Anonymous"}
-                </p>
-              </div>
-
-              <div className="bg-black-darker border border-black-lighter rounded-lg p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-white-darker text-xs">
-                    Total Jokers
-                  </span>
-                  <span className="text-xl font-bold text-mint">
-                    {jokerCount}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between text-xs">
-                  <span className="text-green-400">
-                    {completeJokers.length} Complete
-                  </span>
-                  <span className="text-orange-400">
-                    {incompleteJokers.length} Incomplete
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-4 gap-4 mb-6">
-              <div className="text-center">
-                <div className="text-lg font-bold text-white-light">
-                  {jokerCount}
-                </div>
-                <div className="text-xs text-white-darker">Jokers</div>
-              </div>
-              <div className="text-center">
-                <div className="text-lg font-bold text-white-darker">0</div>
-                <div className="text-xs text-white-darker">Consumables</div>
-              </div>
-              <div className="text-center">
-                <div className="text-lg font-bold text-white-darker">0</div>
-                <div className="text-xs text-white-darker">Decks</div>
-              </div>
-              <div className="text-center">
-                <div className="text-lg font-bold text-white-darker">0</div>
-                <div className="text-xs text-white-darker">Editions</div>
-              </div>
-            </div>
-
-            <div>
-              <h3 className="text-sm text-white-light font-medium mb-3 flex items-center gap-2">
-                <WrenchScrewdriverIcon className="h-4 w-4 text-mint" />
-                Quick Actions
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                <button
-                  onClick={() => onNavigate("jokers")}
-                  className="flex items-center gap-2 p-3 bg-black-darker border border-black-lighter rounded-lg text-white-light hover:border-mint hover:text-mint transition-colors cursor-pointer text-sm"
-                >
-                  <PlusIcon className="h-4 w-4" />
-                  <span>Add New Joker</span>
-                </button>
-                <button
-                  onClick={() => onNavigate("metadata")}
-                  className="flex items-center gap-2 p-3 bg-black-darker border border-black-lighter rounded-lg text-white-light hover:border-mint hover:text-mint transition-colors cursor-pointer text-sm"
-                >
-                  <DocumentTextIcon className="h-4 w-4" />
-                  <span>Edit Mod Info</span>
-                </button>
-                <button
-                  onClick={onExport}
-                  disabled={jokerCount === 0}
-                  className="flex items-center gap-2 p-3 bg-black-darker border border-mint-dark rounded-lg text-mint-light hover:bg-mint hover:text-black-dark transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed text-sm"
-                >
-                  <ArrowUpTrayIcon className="h-4 w-4" />
-                  <span>Export Mod</span>
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="col-span-12 lg:col-span-4 flex flex-col gap-6">
-          <div className="bg-black-dark border-2 border-black-lighter rounded-lg p-6 flex-1">
-            <div className="flex items-center gap-2 mb-4">
-              <ClockIcon className="h-5 w-5 text-mint" />
-              <h3 className="text-lg text-white-light font-medium">
-                Recent Activity
-              </h3>
-            </div>
-            {jokerCount === 0 ? (
-              <div className="text-center py-4">
-                <div className="text-white-darker text-sm">No activity yet</div>
-                <div className="text-white-darker text-xs mt-1">
-                  Start by creating your first joker
-                </div>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                <div className="flex items-center gap-3 text-sm">
-                  <div className="w-2 h-2 bg-mint rounded-full"></div>
-                  <span className="text-white-light">
-                    Created {jokerCount} joker{jokerCount !== 1 ? "s" : ""}
-                  </span>
-                </div>
-                {incompleteJokers.length > 0 && (
-                  <div className="flex items-center gap-3 text-sm">
-                    <div className="w-2 h-2 bg-orange-400 rounded-full"></div>
-                    <span className="text-white-darker">
-                      {incompleteJokers.length} joker
-                      {incompleteJokers.length !== 1 ? "s" : ""} need attention
-                    </span>
-                  </div>
-                )}
+            {incompleteJokers.length > 0 && (
+              <div className="flex items-center text-balatro-orange">
+                <ExclamationTriangleIcon className="h-4 w-4 mr-1" />
+                {incompleteJokers.length} incomplete
               </div>
             )}
           </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-8 mb-8">
-        <div className="bg-black-dark border-2 border-mint-dark rounded-lg p-6">
-          <div className="flex items-center gap-3 mb-6">
-            <CodeBracketIcon className="h-6 w-6 text-mint" />
-            <h2 className="text-xl text-white-light font-light tracking-wide">
-              About Joker Forge
-            </h2>
-          </div>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div>
-              <p className="text-white-light text-sm leading-relaxed mb-4">
-                Joker Forge is a visual tool for creating custom Balatro jokers
-                using the SMODS framework. Design unique joker behaviors without
-                writing Lua code directly. This is just a solo-developer
-                project, in its current state expect bad UI, annoyances, and
-                bugs. The premise is not to make the most polished generated
-                code, but rather to provide a functional and flexible tool for
-                modders.
-              </p>
-              <p className="text-white-light text-sm leading-relaxed mb-4">
-                Please note that I am not a wizard with the SMODS API, so if you
-                find any bugs with the generated code or with the UI, feel free
-                to open an issue on the Github repository.
-              </p>
+      <div className="bg-black-dark border-2 border-black-lighter rounded-xl p-8 mb-8">
+        <div className="flex items-center gap-3 mb-8">
+          <CubeIcon className="h-6 w-6 text-mint" />
+          <h2 className="text-2xl text-white-light font-light">Your Project</h2>
+        </div>
+
+        <div className="mb-8">
+          <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between mb-8">
+            <div className="mb-6 lg:mb-0">
+              <div className="text-4xl font-bold text-white-light mb-3">
+                {modName || "Unnamed Mod"}
+              </div>
+              <div className="text-white-darker text-lg mb-4">
+                by {authorName || "Anonymous"}
+              </div>
+              <div className="inline-flex items-center gap-2 text-sm text-mint bg-mint/15 border border-mint/30 px-4 py-2 rounded-xl">
+                <StarIcon className="h-4 w-4" />
+                v1.0.0
+              </div>
             </div>
-            <div className="bg-black-darker border border-black-lighter rounded-lg p-4">
-              <h4 className="text-white-light font-medium text-sm mb-3">
-                How It Works
-              </h4>
-              <div className="space-y-2 text-xs text-white-darker">
-                <div className="flex items-center gap-2">
-                  <span className="bg-trigger text-black px-2 py-1 rounded text-xs font-medium">
-                    1
-                  </span>
-                  <span>Choose triggers (when effects activate)</span>
+
+            <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="text-center p-4 bg-black-darker border border-mint/20 rounded-xl">
+                <div className="text-2xl font-bold text-mint mb-1">
+                  {jokerCount}
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className="bg-condition text-black px-2 py-1 rounded text-xs font-medium">
-                    2
-                  </span>
-                  <span>Set conditions (requirements to check)</span>
+                <div className="text-white-darker text-sm">Jokers</div>
+              </div>
+
+              <div className="text-center p-4 bg-black-darker border border-green-400/30 rounded-xl">
+                <div className="text-2xl font-bold text-green-400 mb-1">
+                  {completeJokers.length}
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className="bg-effect text-black px-2 py-1 rounded text-xs font-medium">
-                    3
-                  </span>
-                  <span>Define effects (what happens)</span>
+                <div className="text-white-darker text-sm">Complete</div>
+              </div>
+              <div className="text-center p-4 bg-black-darker border border-orange-400/30 rounded-xl">
+                <div className="text-2xl font-bold text-orange-400 mb-1">
+                  {incompleteJokers.length}
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className="bg-mint text-black px-2 py-1 rounded text-xs font-medium">
-                    4
-                  </span>
-                  <span>Export as working SMODS mod</span>
-                </div>
+                <div className="text-white-darker text-sm">Incomplete</div>
               </div>
             </div>
           </div>
         </div>
+
+        <div className="border-t border-black-lighter pt-8">
+          <div className="flex items-center gap-3 mb-6">
+            <WrenchScrewdriverIcon className="h-5 w-5 text-mint" />
+            <h3 className="text-xl text-white-light font-medium">
+              Quick Actions
+            </h3>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <button
+              onClick={() => onNavigate("jokers")}
+              className="group flex items-center gap-4 p-6 bg-black-darker border border-black-lighter hover:border-mint/50 rounded-xl transition-all cursor-pointer hover:bg-gradient-to-r hover:from-black-darker hover:to-mint/5"
+            >
+              <div className="p-3 bg-mint/20 rounded-xl group-hover:bg-mint/30 transition-all group-hover:scale-110">
+                <PlusIcon className="h-6 w-6 text-mint" />
+              </div>
+              <div className="text-left">
+                <div className="text-white-light font-semibold text-lg mb-1">
+                  Create Joker
+                </div>
+                <div className="text-white-darker text-sm">
+                  Design new joker cards
+                </div>
+              </div>
+            </button>
+
+            <button
+              onClick={() => onNavigate("metadata")}
+              className="group flex items-center gap-4 p-6 bg-black-darker border border-black-lighter hover:border-mint/50 rounded-xl transition-all cursor-pointer hover:bg-gradient-to-r hover:from-black-darker hover:to-mint/5"
+            >
+              <div className="p-3 bg-mint/20 rounded-xl group-hover:bg-mint/30 transition-all group-hover:scale-110">
+                <DocumentTextIcon className="h-6 w-6 text-mint" />
+              </div>
+              <div className="text-left">
+                <div className="text-white-light font-semibold text-lg mb-1">
+                  Edit Metadata
+                </div>
+                <div className="text-white-darker text-sm">
+                  Configure mod settings
+                </div>
+              </div>
+            </button>
+
+            <button
+              onClick={onExport}
+              disabled={jokerCount === 0}
+              className="group flex items-center gap-4 p-6 bg-gradient-to-r from-mint/10 to-mint/5 border border-mint/30 hover:border-mint rounded-xl transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:border-mint/30 hover:from-mint/15 hover:to-mint/10"
+            >
+              <div className="p-3 bg-mint/30 rounded-xl group-hover:bg-mint/40 transition-all group-hover:scale-110">
+                <ArrowUpTrayIcon className="h-6 w-6 text-mint" />
+              </div>
+              <div className="text-left">
+                <div className="text-mint font-semibold text-lg mb-1">
+                  Export Mod
+                </div>
+                <div className="text-mint-light text-sm">
+                  Generate mod files
+                </div>
+              </div>
+            </button>
+          </div>
+        </div>
       </div>
 
-      <div className="grid grid-cols-12 gap-6 mb-8">
-        <div className="col-span-12 lg:col-span-8">
-          <div className="bg-black-dark border-2 border-black-lighter rounded-lg p-6 h-full">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl text-white-light font-light tracking-wide flex items-center gap-2">
-                <BeakerIcon className="h-6 w-6 text-mint" />
-                Implementation Status
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 mb-8">
+        <div className="lg:col-span-3 bg-black-dark border-2 border-black-lighter rounded-xl p-6">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-3">
+              <CodeBracketSquareIcon className="h-6 w-6 text-mint" />
+              <h2 className="text-2xl text-white-light font-light">
+                Recent Development
               </h2>
-              <span className="text-xs text-mint bg-mint/20 px-3 py-1 rounded">
-                ACTIVE DEVELOPMENT
+            </div>
+            <a
+              href="https://github.com/Jayd-H/joker-forge"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm text-mint hover:text-mint-light transition-colors px-3 py-2 bg-mint/10 rounded-lg border border-mint/30 hover:bg-mint/20"
+            >
+              View on GitHub
+            </a>
+          </div>
+
+          <div className="space-y-3 max-h-96 overflow-y-auto custom-scrollbar">
+            {commitsLoading ? (
+              <div className="space-y-3">
+                {[...Array(4)].map((_, i) => (
+                  <div key={i} className="animate-pulse">
+                    <div className="flex items-center gap-3 p-4 bg-black-darker rounded-xl">
+                      <div className="w-8 h-8 bg-black-lighter rounded-lg"></div>
+                      <div className="flex-1">
+                        <div className="h-4 bg-black-lighter rounded mb-2"></div>
+                        <div className="h-3 bg-black-lighter rounded w-3/4"></div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : commits.length === 0 ? (
+              <div className="text-center py-8">
+                <ExclamationTriangleIcon className="h-12 w-12 text-white-darker mx-auto mb-3 opacity-50" />
+                <div className="text-white-darker text-sm">
+                  Unable to load commits
+                </div>
+              </div>
+            ) : (
+              commits.map((commit) => (
+                <a
+                  key={commit.sha}
+                  href={commit.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block p-4 bg-black-darker border border-black-lighter rounded-xl hover:border-mint/30 transition-all group"
+                >
+                  <div className="flex items-start gap-3">
+                    <div className="flex-shrink-0 mt-0.5">
+                      {commit.type ? (
+                        <div
+                          className={`p-2 ${commit.type.bgColor} border border-white/10 rounded-lg`}
+                        >
+                          <commit.type.icon
+                            className={`h-4 w-4 ${commit.type.color}`}
+                          />
+                        </div>
+                      ) : (
+                        <div className="w-3 h-3 bg-white-darker rounded-full mt-2"></div>
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-2">
+                        {commit.type && (
+                          <span
+                            className={`text-xs px-2 py-1 ${commit.type.bgColor} ${commit.type.color} rounded font-medium border border-white/10`}
+                          >
+                            {commit.type.label}
+                          </span>
+                        )}
+                        <span className="text-xs text-white-darker font-mono bg-black px-2 py-1 rounded">
+                          {commit.sha}
+                        </span>
+                      </div>
+                      <div className="text-sm text-white-light group-hover:text-mint transition-colors mb-2 leading-relaxed">
+                        {commit.message}
+                      </div>
+                      <div className="flex items-center gap-2 text-xs text-white-darker">
+                        <span className="font-medium">{commit.author}</span>
+                        <span>•</span>
+                        <span>{formatTimeAgo(commit.date)}</span>
+                      </div>
+                    </div>
+                  </div>
+                </a>
+              ))
+            )}
+          </div>
+        </div>
+
+        <div className="lg:col-span-1 bg-black-dark border-2 border-black-lighter rounded-xl p-6">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-3">
+              <BeakerIcon className="h-6 w-6 text-mint" />
+              <h2 className="text-xl text-white-light font-light">Checklist</h2>
+            </div>
+          </div>
+
+          <div className="space-y-3 mb-6">
+            {[
+              { name: "Triggers", data: stats.triggers, color: "bg-trigger" },
+              {
+                name: "Conditions",
+                data: stats.conditions,
+                color: "bg-condition",
+              },
+              { name: "Effects", data: stats.effects, color: "bg-effect" },
+              { name: "UI Features", data: stats.ui, color: "bg-mint" },
+            ].map((item) => (
+              <div key={item.name} className="p-3 bg-black-darker rounded-lg">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-white-light font-medium text-sm">
+                    {item.name}
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-white-darker">
+                      {item.data.implemented}/{item.data.total}
+                    </span>
+                    <span className="text-white-light font-bold text-sm">
+                      {item.data.percentage}%
+                    </span>
+                  </div>
+                </div>
+                <div className="w-full bg-black-light rounded-full h-2">
+                  <div
+                    className={`${item.color} h-2 rounded-full transition-all duration-1000 ease-out`}
+                    style={{ width: `${item.data.percentage}%` }}
+                  ></div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="pt-4 border-t border-black-lighter">
+            <div className="flex items-center justify-center gap-2 mb-2">
+              <FireIcon className="h-4 w-4 text-orange-400" />
+              <span className="text-sm text-orange-400 font-medium">
+                PRE-ALPHA
               </span>
             </div>
-            <div className="space-y-4">
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm text-white-light">Triggers</span>
-                  <span className="text-xs text-white-darker">
-                    {stats.triggers.implemented}/{stats.triggers.total}
-                  </span>
-                </div>
-                <div className="w-full bg-black-lighter rounded-full h-2">
-                  <div
-                    className="bg-trigger h-2 rounded-full transition-all duration-500"
-                    style={{ width: `${stats.triggers.percentage}%` }}
-                  ></div>
-                </div>
-              </div>
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm text-white-light">Conditions</span>
-                  <span className="text-xs text-white-darker">
-                    {stats.conditions.implemented}/{stats.conditions.total}
-                  </span>
-                </div>
-                <div className="w-full bg-black-lighter rounded-full h-2">
-                  <div
-                    className="bg-condition h-2 rounded-full transition-all duration-500"
-                    style={{ width: `${stats.conditions.percentage}%` }}
-                  ></div>
-                </div>
-              </div>
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm text-white-light">Effects</span>
-                  <span className="text-xs text-white-darker">
-                    {stats.effects.implemented}/{stats.effects.total}
-                  </span>
-                </div>
-                <div className="w-full bg-black-lighter rounded-full h-2">
-                  <div
-                    className="bg-effect h-2 rounded-full transition-all duration-500"
-                    style={{ width: `${stats.effects.percentage}%` }}
-                  ></div>
-                </div>
-              </div>
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm text-white-light">UI Features</span>
-                  <span className="text-xs text-white-darker">
-                    {stats.ui.implemented}/{stats.ui.total}
-                  </span>
-                </div>
-                <div className="w-full bg-black-lighter rounded-full h-2">
-                  <div
-                    className="bg-mint h-2 rounded-full transition-all duration-500"
-                    style={{ width: `${stats.ui.percentage}%` }}
-                  ></div>
-                </div>
-              </div>
-            </div>
+            <h1 className="text-sm mb-2 text-white-darker text-center">
+              See full checkist in the README
+            </h1>
           </div>
-        </div>
-
-        <div className="col-span-12 lg:col-span-4 flex flex-col gap-6">
-          <div className="bg-black-dark border-2 border-black-lighter rounded-lg p-6 flex-1">
-            <h3 className="text-lg text-white-light font-medium mb-4">
-              Recently Added
-            </h3>
-            <div className="space-y-3">
-              <div className="flex items-center gap-3">
-                <CheckCircleIcon className="h-4 w-4 text-mint" />
-                <span className="text-sm text-white-light">
-                  Passive trigger support
-                </span>
-              </div>
-              <div className="flex items-center gap-3">
-                <CheckCircleIcon className="h-4 w-4 text-mint" />
-                <span className="text-sm text-white-light">
-                  Card destruction effects
-                </span>
-              </div>
-              <div className="flex items-center gap-3">
-                <CheckCircleIcon className="h-4 w-4 text-mint" />
-                <span className="text-sm text-white-light">
-                  Random chance effects
-                </span>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-black-dark border-2 border-black-lighter rounded-lg p-6 flex-1">
-            <h3 className="text-lg text-white-light font-medium mb-4">
-              Coming Soon
-            </h3>
-            <div className="space-y-3">
-              <div className="flex items-center gap-3">
-                <ClockIcon className="h-4 w-4 text-orange-400" />
-                <span className="text-sm text-white-darker">
-                  Consumable card editor
-                </span>
-              </div>
-              <div className="flex items-center gap-3">
-                <ClockIcon className="h-4 w-4 text-orange-400" />
-                <span className="text-sm text-white-darker">
-                  Custom deck support
-                </span>
-              </div>
-              <div className="flex items-center gap-3">
-                <ClockIcon className="h-4 w-4 text-orange-400" />
-                <span className="text-sm text-white-darker">
-                  Blueprint compatibility
-                </span>
-              </div>
-            </div>
-          </div>
+          <a href="https://github.com/Jayd-H/joker-forge/blob/main/README.md">
+            <h1 className=" text-mint hover:underline text-center">
+              View README
+            </h1>
+          </a>
         </div>
       </div>
 
-      <div className="bg-black-darker border border-black-lighter rounded-lg p-6">
-        <div className="flex items-center gap-2 mb-6">
-          <EyeIcon className="h-5 w-5 text-mint" />
-          <h3 className="text-lg text-white-light font-medium">
-            Current Status
-          </h3>
+      <div className="bg-black-dark border-2 border-black-lighter rounded-xl p-8">
+        <div className="flex items-center gap-3 mb-6">
+          <InformationCircleIcon className="h-6 w-6 text-mint" />
+          <h2 className="text-2xl text-white-light font-light">
+            About Joker Forge
+          </h2>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="text-center">
-            <div className="text-2xl font-bold text-mint mb-1">PRE-ALPHA</div>
-            <div className="text-sm text-white-darker">Development Stage</div>
-          </div>
-          <div className="text-center">
-            <div className="text-2xl font-bold text-white-light mb-1">
-              {overallProgress}%
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-2 space-y-6">
+            <div>
+              <h3 className="text-xl text-white-light font-medium mb-4">
+                Visual Joker Design Tool
+              </h3>
+              <p className="text-white-light leading-relaxed mb-4">
+                Joker Forge is a visual tool for creating custom Balatro jokers
+                using the SMODS framework. Design unique joker behaviors without
+                writing Lua code directly.
+              </p>
+              <p className="text-white-darker leading-relaxed mb-4">
+                This is a solo-developer project, in its current state expect
+                rough edges and bugs. The goal isn't the most polished generated
+                code, but rather a functional and flexible tool for modders.
+              </p>
+              <p className="text-white-darker leading-relaxed mb-4">
+                If you have found any issues, rather with the generated code or
+                the user interface, or just have any suggestions, please feel
+                free to open an issue on the GitHub Repository.
+              </p>
+              <p className="text-white-darker leading-relaxed">
+                <a
+                  href="https://github.com/jayd-h/joker-forge/issues"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-mint hover:underline text-lg"
+                >
+                  Open an issue
+                </a>
+              </p>
             </div>
-            <div className="text-sm text-white-darker">Feature Complete</div>
           </div>
-          <div className="text-center">
-            <div className="text-2xl font-bold text-white-light mb-1">
-              {jokerCount > 0 ? "READY" : "PENDING"}
+
+          <div className="bg-black-darker border border-black-lighter rounded-xl p-6">
+            <h4 className="text-white-light font-medium mb-6 flex items-center gap-2">
+              <SparklesIcon className="h-5 w-5 text-mint" />
+              How It Works
+            </h4>
+            <div className="space-y-4">
+              {[
+                {
+                  num: "1",
+                  label: "Choose triggers",
+                  desc: "when effects activate",
+                  color: "bg-trigger",
+                },
+                {
+                  num: "2",
+                  label: "Set conditions",
+                  desc: "requirements to check",
+                  color: "bg-condition",
+                },
+                {
+                  num: "3",
+                  label: "Define effects",
+                  desc: "what happens",
+                  color: "bg-effect",
+                },
+                {
+                  num: "4",
+                  label: "Export mod",
+                  desc: "working SMODS files",
+                  color: "bg-mint",
+                },
+              ].map((step) => (
+                <div key={step.num} className="flex items-center gap-3">
+                  <div
+                    className={`w-8 h-8 ${step.color} text-black text-sm font-bold rounded-lg flex items-center justify-center`}
+                  >
+                    {step.num}
+                  </div>
+                  <div>
+                    <div className="text-white-light font-medium">
+                      {step.label}
+                    </div>
+                    <div className="text-white-darker text-sm">{step.desc}</div>
+                  </div>
+                </div>
+              ))}
             </div>
-            <div className="text-sm text-white-darker">Export Status</div>
           </div>
         </div>
       </div>
