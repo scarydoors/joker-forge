@@ -16,72 +16,6 @@ export interface VariableUsage {
   count: number;
 }
 
-const INTERNAL_PARAMETERS = new Set([
-  "has_random_chance",
-  "chance_numerator",
-  "chance_denominator",
-  "operation",
-  "operator",
-  "card_scope",
-  "quantifier",
-  "negate",
-  "rank_type",
-  "rank_group",
-  "specific_rank",
-  "suit_type",
-  "suit_group",
-  "specific_suit",
-  "count",
-  "value_source",
-  "enhancement",
-  "seal",
-  "edition",
-  "blind_type",
-  "variable_name",
-  "joker_type",
-  "rarity",
-  "joker_key",
-  "random",
-  "common",
-  "j_joker",
-  "tarot_card",
-  "planet_card",
-  "spectral_card",
-  "is_negative",
-  "consumable_type",
-  "specific_card",
-  "selection_method",
-  "position",
-  "specific_index",
-  "suit",
-  "rank",
-  "new_rank",
-  "new_suit",
-  "new_enhancement",
-  "new_seal",
-  "new_edition",
-  "card_index",
-  "card_rank",
-  "card_suit",
-  "source_type",
-  "target_type",
-  "source_enhancement",
-  "target_enhancement",
-  "source_seal",
-  "target_seal",
-  "source_edition",
-  "target_edition",
-  "source_rank",
-  "target_rank",
-  "source_suit",
-  "target_suit",
-  "source_rank_type",
-  "source_ranks",
-  "target_rank",
-  "size_type",
-  "property_type",
-]);
-
 export const coordinateVariableConflicts = (
   effects: Effect[]
 ): {
@@ -108,20 +42,14 @@ export const coordinateVariableConflicts = (
       }
     }
 
-    Object.entries(effect.params).forEach(([key, value]) => {
-      if (
-        typeof value === "string" &&
-        !INTERNAL_PARAMETERS.has(key) &&
-        key !== "variable_name" &&
-        isValidVariableName(value)
-      ) {
-        variableOperations.push({
-          varName: value,
-          type: "read",
-          effectIndex: index,
-          effect,
-        });
-      }
+    const explicitVariables = extractExplicitVariablesFromEffect(effect);
+    explicitVariables.forEach((varName) => {
+      variableOperations.push({
+        varName,
+        type: "read",
+        effectIndex: index,
+        effect,
+      });
     });
   });
 
@@ -167,13 +95,15 @@ export const coordinateVariableConflicts = (
     }
 
     const modifiedParams = { ...effect.params };
-    Object.entries(effect.params).forEach(([key, value]) => {
-      if (
-        typeof value === "string" &&
-        conflictedVars.includes(value) &&
-        !INTERNAL_PARAMETERS.has(key)
-      ) {
-        modifiedParams[key] = `${value}_value`;
+    const explicitVariables = extractExplicitVariablesFromEffect(effect);
+
+    explicitVariables.forEach((varName) => {
+      if (conflictedVars.includes(varName)) {
+        Object.entries(effect.params).forEach(([key, value]) => {
+          if (value === varName) {
+            modifiedParams[key] = `${varName}_value`;
+          }
+        });
       }
     });
 
@@ -183,8 +113,151 @@ export const coordinateVariableConflicts = (
   return { preReturnCode, modifiedEffects };
 };
 
-const isValidVariableName = (str: string): boolean => {
-  return /^[a-zA-Z_][a-zA-Z0-9_]*$/.test(str);
+const extractExplicitVariablesFromEffect = (effect: Effect): string[] => {
+  const variables: string[] = [];
+
+  Object.entries(effect.params).forEach(([, value]) => {
+    if (typeof value === "string" && isUserDefinedVariable(value)) {
+      variables.push(value);
+    }
+  });
+
+  return variables;
+};
+
+const isUserDefinedVariable = (str: string): boolean => {
+  return (
+    /^[a-zA-Z_][a-zA-Z0-9_]*$/.test(str) &&
+    !isReservedKeyword(str) &&
+    !isBuiltInValue(str)
+  );
+};
+
+const isReservedKeyword = (str: string): boolean => {
+  const reserved = new Set([
+    "true",
+    "false",
+    "nil",
+    "and",
+    "or",
+    "not",
+    "if",
+    "then",
+    "else",
+    "end",
+    "function",
+    "return",
+    "local",
+    "for",
+    "while",
+    "repeat",
+    "until",
+    "break",
+    "do",
+    "in",
+    "self",
+    "card",
+    "context",
+    "G",
+    "SMODS",
+  ]);
+  return reserved.has(str);
+};
+
+const isBuiltInValue = (str: string): boolean => {
+  const builtIns = new Set([
+    "random",
+    "none",
+    "any",
+    "all",
+    "specific",
+    "group",
+    "equals",
+    "not_equals",
+    "greater_than",
+    "less_than",
+    "greater_equals",
+    "less_equals",
+    "contains",
+    "scoring",
+    "all_played",
+    "face",
+    "even",
+    "odd",
+    "red",
+    "black",
+    "current",
+    "add",
+    "subtract",
+    "set",
+    "increment",
+    "decrement",
+    "multiply",
+    "divide",
+    "small",
+    "big",
+    "boss",
+    "remaining",
+    "total",
+    "rank",
+    "suit",
+    "enhancement",
+    "seal",
+    "edition",
+    "first",
+    "last",
+    "left",
+    "right",
+    "position",
+    "tarot",
+    "planet",
+    "spectral",
+    "negative",
+    "common",
+    "uncommon",
+    "rare",
+    "legendary",
+    "m_gold",
+    "m_steel",
+    "m_glass",
+    "m_wild",
+    "m_mult",
+    "m_lucky",
+    "m_stone",
+    "m_bonus",
+    "e_foil",
+    "e_holo",
+    "e_polychrome",
+    "e_negative",
+    "Gold",
+    "Red",
+    "Blue",
+    "Purple",
+    "Spades",
+    "Hearts",
+    "Diamonds",
+    "Clubs",
+    "remove",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6",
+    "7",
+    "8",
+    "9",
+    "10",
+    "J",
+    "Q",
+    "K",
+    "A",
+    "T",
+    "Jack",
+    "Queen",
+    "King",
+    "Ace",
+  ]);
+  return builtIns.has(str);
 };
 
 export const extractVariablesFromRules = (rules: Rule[]): VariableInfo[] => {
@@ -219,22 +292,16 @@ export const extractVariablesFromRules = (rules: Rule[]): VariableInfo[] => {
         variableMap.get(varName)!.usedInEffects.push(effect.type);
       }
 
-      Object.entries(effect.params).forEach(([key, value]) => {
-        if (
-          typeof value === "string" &&
-          !INTERNAL_PARAMETERS.has(key) &&
-          key !== "variable_name" &&
-          isValidVariableName(value)
-        ) {
-          if (!variableMap.has(value)) {
-            variableMap.set(value, {
-              name: value,
-              initialValue: 0,
-              usedInEffects: [],
-            });
-          }
-          variableMap.get(value)!.usedInEffects.push(effect.type);
+      const explicitVariables = extractExplicitVariablesFromEffect(effect);
+      explicitVariables.forEach((varName) => {
+        if (!variableMap.has(varName)) {
+          variableMap.set(varName, {
+            name: varName,
+            initialValue: 0,
+            usedInEffects: [],
+          });
         }
+        variableMap.get(varName)!.usedInEffects.push(effect.type);
       });
     });
 
@@ -252,22 +319,16 @@ export const extractVariablesFromRules = (rules: Rule[]): VariableInfo[] => {
           variableMap.get(varName)!.usedInEffects.push(effect.type);
         }
 
-        Object.entries(effect.params).forEach(([key, value]) => {
-          if (
-            typeof value === "string" &&
-            !INTERNAL_PARAMETERS.has(key) &&
-            key !== "variable_name" &&
-            isValidVariableName(value)
-          ) {
-            if (!variableMap.has(value)) {
-              variableMap.set(value, {
-                name: value,
-                initialValue: 0,
-                usedInEffects: [],
-              });
-            }
-            variableMap.get(value)!.usedInEffects.push(effect.type);
+        const explicitVariables = extractExplicitVariablesFromEffect(effect);
+        explicitVariables.forEach((varName) => {
+          if (!variableMap.has(varName)) {
+            variableMap.set(varName, {
+              name: varName,
+              initialValue: 0,
+              usedInEffects: [],
+            });
           }
+          variableMap.get(varName)!.usedInEffects.push(effect.type);
         });
       });
     });
@@ -298,15 +359,9 @@ export const getVariableNamesFromJoker = (joker: JokerData): string[] => {
         variableNames.add(varName);
       }
 
-      Object.entries(effect.params).forEach(([key, value]) => {
-        if (
-          typeof value === "string" &&
-          !INTERNAL_PARAMETERS.has(key) &&
-          key !== "variable_name" &&
-          isValidVariableName(value)
-        ) {
-          variableNames.add(value);
-        }
+      const explicitVariables = extractExplicitVariablesFromEffect(effect);
+      explicitVariables.forEach((varName) => {
+        variableNames.add(varName);
       });
     });
 
@@ -317,15 +372,9 @@ export const getVariableNamesFromJoker = (joker: JokerData): string[] => {
           variableNames.add(varName);
         }
 
-        Object.entries(effect.params).forEach(([key, value]) => {
-          if (
-            typeof value === "string" &&
-            !INTERNAL_PARAMETERS.has(key) &&
-            key !== "variable_name" &&
-            isValidVariableName(value)
-          ) {
-            variableNames.add(value);
-          }
+        const explicitVariables = extractExplicitVariablesFromEffect(effect);
+        explicitVariables.forEach((varName) => {
+          variableNames.add(varName);
         });
       });
     });
@@ -366,25 +415,19 @@ export const getVariableUsageDetails = (joker: JokerData): VariableUsage[] => {
         });
       }
 
-      Object.entries(effect.params).forEach(([key, value]) => {
-        if (
-          typeof value === "string" &&
-          !INTERNAL_PARAMETERS.has(key) &&
-          key !== "variable_name" &&
-          isValidVariableName(value)
-        ) {
-          const currentCount = usageCount.get(value) || 0;
-          usageCount.set(value, currentCount + 1);
+      const explicitVariables = extractExplicitVariablesFromEffect(effect);
+      explicitVariables.forEach((varName) => {
+        const currentCount = usageCount.get(varName) || 0;
+        usageCount.set(varName, currentCount + 1);
 
-          usageDetails.push({
-            variableName: value,
-            ruleId: rule.id,
-            ruleIndex: ruleIndex + 1,
-            type: "effect",
-            itemId: effect.id,
-            count: currentCount + 1,
-          });
-        }
+        usageDetails.push({
+          variableName: varName,
+          ruleId: rule.id,
+          ruleIndex: ruleIndex + 1,
+          type: "effect",
+          itemId: effect.id,
+          count: currentCount + 1,
+        });
       });
     });
 
@@ -405,25 +448,19 @@ export const getVariableUsageDetails = (joker: JokerData): VariableUsage[] => {
           });
         }
 
-        Object.entries(effect.params).forEach(([key, value]) => {
-          if (
-            typeof value === "string" &&
-            !INTERNAL_PARAMETERS.has(key) &&
-            key !== "variable_name" &&
-            isValidVariableName(value)
-          ) {
-            const currentCount = usageCount.get(value) || 0;
-            usageCount.set(value, currentCount + 1);
+        const explicitVariables = extractExplicitVariablesFromEffect(effect);
+        explicitVariables.forEach((varName) => {
+          const currentCount = usageCount.get(varName) || 0;
+          usageCount.set(varName, currentCount + 1);
 
-            usageDetails.push({
-              variableName: value,
-              ruleId: rule.id,
-              ruleIndex: ruleIndex + 1,
-              type: "effect",
-              itemId: effect.id,
-              count: currentCount + 1,
-            });
-          }
+          usageDetails.push({
+            variableName: varName,
+            ruleId: rule.id,
+            ruleIndex: ruleIndex + 1,
+            type: "effect",
+            itemId: effect.id,
+            count: currentCount + 1,
+          });
         });
       });
     });
@@ -453,41 +490,105 @@ export const getVariableUsageDetails = (joker: JokerData): VariableUsage[] => {
 
 export const getAllVariables = (joker: JokerData): UserVariable[] => {
   const userVars = joker.userVariables || [];
-
-  const hasRandomGroups =
-    joker.rules?.some(
-      (rule) => rule.randomGroups && rule.randomGroups.length > 0
-    ) || false;
-
   const autoVars: UserVariable[] = [];
 
-  if (hasRandomGroups) {
-    autoVars.push({
-      id: "auto_numerator",
-      name: "numerator",
-      initialValue: 1,
-      description: "Chance numerator (e.g., 1 in '1 in 4')",
-    });
+  const nonPassiveRules =
+    joker.rules?.filter((rule) => rule.trigger !== "passive") || [];
 
-    autoVars.push({
-      id: "auto_denominator",
-      name: "denominator",
-      initialValue: 4,
-      description: "Chance denominator (e.g., 4 in '1 in 4')",
-    });
+  const hasRandomGroups = nonPassiveRules.some(
+    (rule) => rule.randomGroups && rule.randomGroups.length > 0
+  );
+
+  if (hasRandomGroups) {
+    const randomGroups = nonPassiveRules.flatMap(
+      (rule) => rule.randomGroups || []
+    );
+    const numerators = [
+      ...new Set(randomGroups.map((group) => group.chance_numerator)),
+    ];
+    const denominators = [
+      ...new Set(randomGroups.map((group) => group.chance_denominator)),
+    ];
+
+    if (numerators.length === 1) {
+      autoVars.push({
+        id: "auto_numerator",
+        name: "numerator",
+        initialValue: numerators[0],
+        description: `Chance numerator (e.g., ${numerators[0]} in '${numerators[0]} in X')`,
+      });
+    } else {
+      numerators.forEach((num, index) => {
+        if (index === 0) {
+          autoVars.push({
+            id: "auto_numerator",
+            name: "numerator",
+            initialValue: num,
+            description: `First chance numerator (e.g., ${num} in '${num} in X')`,
+          });
+        } else {
+          autoVars.push({
+            id: `auto_numerator_${index + 1}`,
+            name: `numerator${index + 1}`,
+            initialValue: num,
+            description: `${index + 1}${getOrdinalSuffix(
+              index + 1
+            )} chance numerator (e.g., ${num} in '${num} in X')`,
+          });
+        }
+      });
+    }
+
+    if (denominators.length === 1) {
+      autoVars.push({
+        id: "auto_denominator",
+        name: "denominator",
+        initialValue: denominators[0],
+        description: `Chance denominator (e.g., ${denominators[0]} in 'X in ${denominators[0]}')`,
+      });
+    } else {
+      denominators.forEach((denom, index) => {
+        if (index === 0) {
+          autoVars.push({
+            id: "auto_denominator",
+            name: "denominator",
+            initialValue: denom,
+            description: `First chance denominator (e.g., ${denom} in 'X in ${denom}')`,
+          });
+        } else {
+          autoVars.push({
+            id: `auto_denominator_${index + 1}`,
+            name: `denominator${index + 1}`,
+            initialValue: denom,
+            description: `${index + 1}${getOrdinalSuffix(
+              index + 1
+            )} chance denominator (e.g., ${denom} in 'X in ${denom}')`,
+          });
+        }
+      });
+    }
   }
 
-  const otherAutoVars = getVariableNamesFromJoker(joker)
+  const explicitVariableNames = getVariableNamesFromJoker(joker)
     .filter((name) => !userVars.some((uv) => uv.name === name))
-    .filter((name) => name !== "numerator" && name !== "denominator")
-    .map((name) => ({
-      id: `auto_${name}`,
-      name,
-      initialValue: getDefaultVariableValue(name),
-      description: getDefaultVariableDescription(name),
-    }));
+    .filter(
+      (name) => !name.startsWith("denominator") && !name.startsWith("numerator")
+    );
+
+  const otherAutoVars = explicitVariableNames.map((name) => ({
+    id: `auto_${name}`,
+    name,
+    initialValue: getDefaultVariableValue(name),
+    description: getDefaultVariableDescription(name),
+  }));
 
   return [...userVars, ...autoVars, ...otherAutoVars];
+};
+
+const getOrdinalSuffix = (num: number): string => {
+  if (num === 2) return "nd";
+  if (num === 3) return "rd";
+  return "th";
 };
 
 const getDefaultVariableValue = (name: string): number => {
@@ -495,6 +596,7 @@ const getDefaultVariableValue = (name: string): number => {
     chips: 10,
     mult: 5,
     Xmult: 1.5,
+    xchips: 1.5,
     dollars: 5,
     repetitions: 1,
     hands: 1,
@@ -509,6 +611,7 @@ const getDefaultVariableDescription = (name: string): string => {
     chips: "Chips to add",
     mult: "Mult to add",
     Xmult: "X Mult multiplier",
+    xchips: "X Chips multiplier",
     dollars: "Money to add",
     repetitions: "Card repetitions",
     hands: "Hands to modify",
