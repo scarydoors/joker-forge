@@ -288,7 +288,7 @@ const BlockPalette: React.FC<BlockPaletteProps> = ({
           </div>
         </div>
 
-        <div className="h-[45rem] overflow-y-auto custom-scrollbar">
+        <div className="h-[calc(100vh-18rem)] overflow-y-auto custom-scrollbar">
           {renderSection(
             "Triggers",
             filteredItems.triggers,

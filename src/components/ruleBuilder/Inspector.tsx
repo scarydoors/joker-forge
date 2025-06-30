@@ -712,7 +712,7 @@ const Inspector: React.FC<InspectorProps> = ({
     <div
       ref={setNodeRef}
       style={style}
-      className="w-96 bg-black-dark backdrop-blur-md border-2 border-black-lighter rounded-lg shadow-2xl max-h-[calc(100vh-14rem)] z-40 flex flex-col"
+      className="w-96 bg-black-dark backdrop-blur-md border-2 border-black-lighter rounded-lg shadow-2xl max-h-[calc(100vh-6rem)] z-40 flex flex-col"
     >
       <div
         className="flex items-center justify-between p-3 border-b border-black-lighter cursor-grab active:cursor-grabbing flex-shrink-0"
