@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   PlusIcon,
   ArrowUpTrayIcon,
@@ -18,14 +18,20 @@ import {
   FireIcon,
   CubeIcon,
   InformationCircleIcon,
+  PencilIcon,
+  CheckIcon,
+  XMarkIcon,
 } from "@heroicons/react/24/outline";
 import { JokerData } from "../JokerCard";
+import { ModMetadata } from "./ModMetadataPage";
 
 interface OverviewPageProps {
   jokerCount: number;
   jokers: JokerData[];
   modName: string;
   authorName: string;
+  metadata: ModMetadata;
+  setMetadata: (metadata: ModMetadata) => void;
   onExport: () => void;
   onNavigate: (section: string) => void;
 }
@@ -268,11 +274,36 @@ const formatTimeAgo = (dateString: string): string => {
   }
 };
 
+const generateModIdFromName = (name: string): string => {
+  return (
+    name
+      .toLowerCase()
+      .replace(/[^a-zA-Z0-9\s]/g, "")
+      .replace(/\s+/g, "")
+      .replace(/^[0-9]+/, "") || "custommod"
+  );
+};
+
+const generatePrefixFromId = (id: string): string => {
+  return id.toLowerCase().substring(0, 8);
+};
+
+const parseAuthorsString = (authorsString: string): string[] => {
+  return authorsString
+    .split(",")
+    .map((author) => author.trim())
+    .filter((author) => author.length > 0);
+};
+
+const formatAuthorsString = (authors: string[]): string => {
+  return authors.join(", ");
+};
+
 const OverviewPage: React.FC<OverviewPageProps> = ({
   jokerCount,
   jokers,
-  modName,
-  authorName,
+  metadata,
+  setMetadata,
   onExport,
   onNavigate,
 }) => {
@@ -286,6 +317,24 @@ const OverviewPage: React.FC<OverviewPageProps> = ({
   const [commits, setCommits] = React.useState<ParsedCommit[]>([]);
   const [commitsLoading, setCommitsLoading] = React.useState(true);
 
+  const [editingName, setEditingName] = useState(false);
+  const [editingAuthor, setEditingAuthor] = useState(false);
+  const [editingVersion, setEditingVersion] = useState(false);
+  const [editingDescription, setEditingDescription] = useState(false);
+
+  const displayName = metadata?.name || "My Custom Mod";
+  const displayAuthor =
+    metadata?.author && metadata.author.length > 0
+      ? formatAuthorsString(metadata.author)
+      : "Anonymous";
+  const displayVersion = metadata?.version || "1.0.0";
+  const displayDescription = metadata?.description || "";
+
+  const [tempName, setTempName] = useState(displayName);
+  const [tempAuthor, setTempAuthor] = useState(displayAuthor);
+  const [tempVersion, setTempVersion] = useState(displayVersion);
+  const [tempDescription, setTempDescription] = useState(displayDescription);
+
   React.useEffect(() => {
     parseImplementationStats().then(setStats);
 
@@ -294,6 +343,81 @@ const OverviewPage: React.FC<OverviewPageProps> = ({
       setCommitsLoading(false);
     });
   }, []);
+
+  React.useEffect(() => {
+    setTempName(displayName);
+    setTempAuthor(displayAuthor);
+    setTempVersion(displayVersion);
+    setTempDescription(displayDescription);
+  }, [displayName, displayAuthor, displayVersion, displayDescription]);
+
+  const handleNameSave = () => {
+    if (!metadata || !setMetadata) return;
+
+    const newMetadata = { ...metadata, name: tempName };
+
+    if (tempName) {
+      const generatedId = generateModIdFromName(tempName);
+      const generatedPrefix = generatePrefixFromId(generatedId);
+      newMetadata.id = generatedId;
+      newMetadata.prefix = generatedPrefix;
+      newMetadata.display_name = tempName;
+    }
+
+    setMetadata(newMetadata);
+    setEditingName(false);
+  };
+
+  const handleAuthorSave = () => {
+    if (!metadata || !setMetadata) return;
+
+    setMetadata({
+      ...metadata,
+      author: parseAuthorsString(tempAuthor),
+    });
+    setEditingAuthor(false);
+  };
+
+  const handleVersionSave = () => {
+    if (!metadata || !setMetadata) return;
+
+    setMetadata({
+      ...metadata,
+      version: tempVersion,
+    });
+    setEditingVersion(false);
+  };
+
+  const handleDescriptionSave = () => {
+    if (!metadata || !setMetadata) return;
+
+    setMetadata({
+      ...metadata,
+      description: tempDescription,
+    });
+    setEditingDescription(false);
+  };
+
+  const handleCancel = (field: string) => {
+    switch (field) {
+      case "name":
+        setTempName(displayName);
+        setEditingName(false);
+        break;
+      case "author":
+        setTempAuthor(displayAuthor);
+        setEditingAuthor(false);
+        break;
+      case "version":
+        setTempVersion(displayVersion);
+        setEditingVersion(false);
+        break;
+      case "description":
+        setTempDescription(displayDescription);
+        setEditingDescription(false);
+        break;
+    }
+  };
 
   const validateJoker = (joker: JokerData) => {
     const issues = [];
@@ -322,7 +446,7 @@ const OverviewPage: React.FC<OverviewPageProps> = ({
           <div className="flex items-center gap-6 text-white-darker text-sm">
             <div className="flex items-center">
               <DocumentTextIcon className="h-4 w-4 mr-2 text-mint" />
-              {modName || "Unnamed Mod"} • {jokerCount} joker
+              {displayName} • {jokerCount} joker
               {jokerCount !== 1 ? "s" : ""}
             </div>
             {incompleteJokers.length > 0 && (
@@ -342,21 +466,179 @@ const OverviewPage: React.FC<OverviewPageProps> = ({
         </div>
 
         <div className="mb-8">
-          <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between mb-8">
-            <div className="mb-6 lg:mb-0">
-              <div className="text-4xl font-bold text-white-light mb-3">
-                {modName || "Unnamed Mod"}
+          <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between mb-8 gap-8">
+            <div className="space-y-6 flex-1">
+              <div className="group">
+                {editingName ? (
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      value={tempName}
+                      onChange={(e) => setTempName(e.target.value)}
+                      className="text-4xl font-bold bg-transparent border-b-2 border-mint text-white-light focus:outline-none"
+                      autoFocus
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") handleNameSave();
+                        if (e.key === "Escape") handleCancel("name");
+                      }}
+                    />
+                    <button
+                      onClick={handleNameSave}
+                      className="p-1 text-mint hover:text-mint-light"
+                    >
+                      <CheckIcon className="h-4 w-4" />
+                    </button>
+                    <button
+                      onClick={() => handleCancel("name")}
+                      className="p-1 text-white-darker hover:text-white-light"
+                    >
+                      <XMarkIcon className="h-4 w-4" />
+                    </button>
+                  </div>
+                ) : (
+                  <div
+                    className="flex items-center gap-3 cursor-pointer group/edit"
+                    onClick={() => setEditingName(true)}
+                  >
+                    <div className="text-4xl font-bold text-white-light group-hover/edit:text-mint transition-colors">
+                      {displayName}
+                    </div>
+                    <PencilIcon className="h-5 w-5 text-white-darker group-hover/edit:text-mint transition-colors opacity-0 group-hover:opacity-100" />
+                  </div>
+                )}
               </div>
-              <div className="text-white-darker text-lg mb-4">
-                by {authorName || "Anonymous"}
+
+              <div className="group">
+                {editingAuthor ? (
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      value={tempAuthor}
+                      onChange={(e) => setTempAuthor(e.target.value)}
+                      className="text-lg bg-transparent border-b-2 border-mint text-white-darker focus:outline-none"
+                      autoFocus
+                      placeholder="Author One, Author Two"
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") handleAuthorSave();
+                        if (e.key === "Escape") handleCancel("author");
+                      }}
+                    />
+                    <button
+                      onClick={handleAuthorSave}
+                      className="p-1 text-mint hover:text-mint-light"
+                    >
+                      <CheckIcon className="h-4 w-4" />
+                    </button>
+                    <button
+                      onClick={() => handleCancel("author")}
+                      className="p-1 text-white-darker hover:text-white-light"
+                    >
+                      <XMarkIcon className="h-4 w-4" />
+                    </button>
+                  </div>
+                ) : (
+                  <div
+                    className="flex items-center gap-3 cursor-pointer group/edit"
+                    onClick={() => setEditingAuthor(true)}
+                  >
+                    <div className="text-white-darker text-lg group-hover/edit:text-mint transition-colors">
+                      by {displayAuthor}
+                    </div>
+                    <PencilIcon className="h-4 w-4 text-white-darker group-hover/edit:text-mint transition-colors opacity-0 group-hover:opacity-100" />
+                  </div>
+                )}
               </div>
-              <div className="inline-flex items-center gap-2 text-sm text-mint bg-mint/15 border border-mint/30 px-4 py-2 rounded-xl">
-                <StarIcon className="h-4 w-4" />
-                v1.0.0
+
+              <div className="group">
+                {editingVersion ? (
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      value={tempVersion}
+                      onChange={(e) => setTempVersion(e.target.value)}
+                      className="bg-transparent border-b-2 border-mint px-3 py-2 text-mint focus:outline-none"
+                      autoFocus
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") handleVersionSave();
+                        if (e.key === "Escape") handleCancel("version");
+                      }}
+                    />
+                    <button
+                      onClick={handleVersionSave}
+                      className="p-1 text-mint hover:text-mint-light"
+                    >
+                      <CheckIcon className="h-4 w-4" />
+                    </button>
+                    <button
+                      onClick={() => handleCancel("version")}
+                      className="p-1 text-white-darker hover:text-white-light"
+                    >
+                      <XMarkIcon className="h-4 w-4" />
+                    </button>
+                  </div>
+                ) : (
+                  <div
+                    className="inline-flex items-center gap-2 text-sm text-mint bg-mint/15 border border-mint/30 px-4 py-2 rounded-xl cursor-pointer group/edit"
+                    onClick={() => setEditingVersion(true)}
+                  >
+                    <StarIcon className="h-4 w-4" />
+                    <span className="group-hover/edit:text-mint-light transition-colors">
+                      v{displayVersion}
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              <div className="group">
+                {editingDescription ? (
+                  <div className="space-y-2">
+                    <textarea
+                      value={tempDescription}
+                      onChange={(e) => setTempDescription(e.target.value)}
+                      className="w-full h-16 bg-transparent border-b-2 border-mint text-white-light focus:outline-none resize-none"
+                      autoFocus
+                      placeholder="Describe your mod..."
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" && e.ctrlKey)
+                          handleDescriptionSave();
+                        if (e.key === "Escape") handleCancel("description");
+                      }}
+                    />
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={handleDescriptionSave}
+                        className="px-3 py-1 text-mint hover:text-mint-light text-sm"
+                      >
+                        Save
+                      </button>
+                      <button
+                        onClick={() => handleCancel("description")}
+                        className="px-3 py-1 text-white-darker hover:text-white-light text-sm"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div
+                    className="cursor-pointer group/edit py-2 transition-all"
+                    onClick={() => setEditingDescription(true)}
+                  >
+                    <div className="flex items-start gap-3">
+                      <div className="flex-1">
+                        <div className="text-white-light leading-relaxed group-hover/edit:text-mint transition-colors">
+                          {displayDescription ||
+                            "Click to add a description for your mod..."}
+                        </div>
+                      </div>
+                      <PencilIcon className="h-4 w-4 text-white-darker group-hover/edit:text-mint transition-colors opacity-0 group-hover:opacity-100 flex-shrink-0 mt-1" />
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 
-            <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 lg:w-auto w-full">
               <div className="text-center p-4 bg-black-darker border border-mint/20 rounded-xl">
                 <div className="text-2xl font-bold text-mint mb-1">
                   {jokerCount}

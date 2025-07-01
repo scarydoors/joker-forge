@@ -407,6 +407,8 @@ function AppContent() {
                 jokers={jokers}
                 modName={modMetadata.name}
                 authorName={modMetadata.author.join(", ")}
+                metadata={modMetadata}
+                setMetadata={setModMetadata}
                 onExport={handleExport}
                 onNavigate={handleNavigate}
               />
@@ -420,6 +422,8 @@ function AppContent() {
                 jokers={jokers}
                 modName={modMetadata.name}
                 authorName={modMetadata.author.join(", ")}
+                metadata={modMetadata}
+                setMetadata={setModMetadata}
                 onExport={handleExport}
                 onNavigate={handleNavigate}
               />
