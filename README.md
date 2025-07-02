@@ -33,15 +33,15 @@ The plan here is to implement enough triggers, conditions, and effects, so as th
 - [x] **Round End** - At the end of a round
 - [x] **Shop Reroll** - When the shop is rerolled (Flash Card)
 - [x] **Card Held in Hand** - Triggers for each card held in hand
+- [x] **Card Bought** - When a card is purchased
+- [x] **Card Sold** - When a card is sold
 
 #### Not Implemented Yet
 
 - [ ] **Card Destroyed** - When a card is destroyed
 - [ ] **Ante Start** - At the start of an ante
-- [ ] **Card Bought** - When a card is purchased
-- [ ] **Card Sold** - When a card is sold
 - [ ] **Joker Added/Removed** - When a Joker is added/removed from your list (Joker Stencil)
-- [ ] **When a Card is Modified** - When any card is modified (enhanced, etc)
+- [ ] **When a Card is Modified** - When any card is modified (enhanced, etc) (difficult)
 
 ---
 
@@ -78,6 +78,7 @@ The plan here is to implement enough triggers, conditions, and effects, so as th
 - [ ] **Hand History** - Check previous hands played this round/run
 - [ ] **Consecutive Hand Tracking** - Track consecutive hands without certain conditions
 - [ ] **Culmative Chip/Rank Check** - Check for if cards rank/chips add up to a certain number
+- [ ] **Specific Joker Check** - Check if you have a specific joker
 
 ---
 
@@ -86,8 +87,11 @@ The plan here is to implement enough triggers, conditions, and effects, so as th
 #### Fully Implemented
 
 - [x] **Add Chips** - Add flat chips to score
+- [x] **Apply X Chips** - Multiply chips by value
+- [x] **Apply ^Chips** - Exponentially multiply chips by value
 - [x] **Add Mult** - Add flat mult to score
-- [x] **Apply X Mult** - Multiply score by value
+- [x] **Apply X Mult** - Multiply mult by value
+- [x] **Apply ^Mult** - Exponentially multiply mult by value
 - [x] **Add Dollars** - Give money to player
 - [x] **Retrigger Cards** - Retrigger scored cards (card_scored trigger only)
 - [x] **Level Up Hand** - Increase poker hand level
