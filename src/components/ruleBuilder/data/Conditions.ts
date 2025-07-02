@@ -397,7 +397,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
     id: "card_seal",
     label: "Card Seal",
     description: "Check if the card has a specific seal",
-    applicableTriggers: ["card_scored"],
+    applicableTriggers: ["card_scored", "card_discarded", "card_held_in_hand"],
     params: [
       {
         id: "seal",
