@@ -35,6 +35,7 @@ The plan here is to implement enough triggers, conditions, and effects, so as th
 - [x] **Card Held in Hand** - Triggers for each card held in hand
 - [x] **Card Bought** - When a card is purchased
 - [x] **Card Sold** - When a card is sold
+- [ ] **When this Card is Sold** - When this specific card is sold
 
 #### Not Implemented Yet
 
@@ -42,6 +43,7 @@ The plan here is to implement enough triggers, conditions, and effects, so as th
 - [ ] **Ante Start** - At the start of an ante
 - [ ] **Joker Added/Removed** - When a Joker is added/removed from your list (Joker Stencil)
 - [ ] **When a Card is Modified** - When any card is modified (enhanced, etc) (difficult)
+- [ ] **When shop is Entered** - WHne the shop is entered
 
 ---
 
@@ -70,6 +72,7 @@ The plan here is to implement enough triggers, conditions, and effects, so as th
 - [x] **Hand Size** - Check current hand size
 - [x] **Deck Size** - Check remaining deck size
 - [x] **Deck Count By Rank, Suit, Enhancement, Seal, Edition** - Check the specifics of the cards in your full deck
+- [x] **Specific Joker** - Check if you have a specific joker in your list
 
 #### Not Implemented Yet
 
@@ -78,7 +81,6 @@ The plan here is to implement enough triggers, conditions, and effects, so as th
 - [ ] **Hand History** - Check previous hands played this round/run
 - [ ] **Consecutive Hand Tracking** - Track consecutive hands without certain conditions
 - [ ] **Culmative Chip/Rank Check** - Check for if cards rank/chips add up to a certain number
-- [ ] **Specific Joker Check** - Check if you have a specific joker
 
 ---
 
