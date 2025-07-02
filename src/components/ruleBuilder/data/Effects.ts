@@ -85,6 +85,8 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
       "shop_reroll",
       "card_held_in_hand",
       "after_hand_played",
+      "card_sold",
+      "card_bought",
     ],
     params: [
       {
@@ -184,6 +186,8 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
       "shop_reroll",
       "card_held_in_hand",
       "after_hand_played",
+      "card_sold",
+      "card_bought",
     ],
     params: [
       {
@@ -227,6 +231,8 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
       "shop_reroll",
       "card_held_in_hand",
       "after_hand_played",
+      "card_sold",
+      "card_bought",
     ],
     params: [
       {
@@ -270,6 +276,8 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
       "shop_reroll",
       "card_held_in_hand",
       "after_hand_played",
+      "card_sold",
+      "card_bought",
     ],
     params: [
       {
@@ -315,6 +323,8 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
       "card_held_in_hand",
       "round_end",
       "after_hand_played",
+      "card_sold",
+      "card_bought",
     ],
     params: [
       {
@@ -365,6 +375,8 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
       "shop_reroll",
       "card_held_in_hand",
       "after_hand_played",
+      "card_sold",
+      "card_bought",
     ],
     params: [
       {
@@ -630,6 +642,8 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
       "shop_reroll",
       "card_held_in_hand",
       "after_hand_played",
+      "card_sold",
+      "card_bought",
     ],
     params: [
       {
@@ -706,6 +720,8 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
       "shop_reroll",
       "card_held_in_hand",
       "after_hand_played",
+      "card_sold",
+      "card_bought",
     ],
     params: [
       {
@@ -795,6 +811,8 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
       "shop_reroll",
       "card_held_in_hand",
       "after_hand_played",
+      "card_sold",
+      "card_bought",
     ],
     params: [
       {
@@ -871,6 +889,8 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
       "shop_reroll",
       "card_held_in_hand",
       "after_hand_played",
+      "card_sold",
+      "card_bought",
     ],
     params: [
       {
@@ -977,6 +997,8 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
       "shop_reroll",
       "card_held_in_hand",
       "after_hand_played",
+      "card_sold",
+      "card_bought",
     ],
     params: [
       {
@@ -1046,6 +1068,8 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
       "shop_reroll",
       "card_held_in_hand",
       "after_hand_played",
+      "card_sold",
+      "card_bought",
     ],
     params: [
       {
@@ -1140,6 +1164,8 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
       "shop_reroll",
       "card_held_in_hand",
       "after_hand_played",
+      "card_sold",
+      "card_bought",
     ],
     params: [
       {
@@ -1242,6 +1268,8 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
       "shop_reroll",
       "card_held_in_hand",
       "after_hand_played",
+      "card_sold",
+      "card_bought",
     ],
     params: [
       {
@@ -1354,6 +1382,8 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
       "shop_reroll",
       "card_held_in_hand",
       "after_hand_played",
+      "card_bought",
+      "card_sold",
     ],
     params: [
       {
@@ -1492,6 +1522,8 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
       "shop_reroll",
       "card_held_in_hand",
       "after_hand_played",
+      "card_sold",
+      "card_bought",
     ],
     params: [],
   },

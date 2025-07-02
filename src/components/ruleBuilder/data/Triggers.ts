@@ -61,6 +61,17 @@ export const TRIGGERS: TriggerDefinition[] = [
     description: "Triggers after defeating a boss blind.",
   },
   {
+    id: "card_sold",
+    label: "When a Card is Sold",
+    description:
+      "Triggers when any card is sold from your collection or the shop.",
+  },
+  {
+    id: "card_bought",
+    label: "When a Card is Bought",
+    description: "Triggers when any card is bought from the shop.",
+  },
+  {
     id: "booster_opened",
     label: "When a Booster is Opened",
     description: "Triggers when the player opens a booster pack.",

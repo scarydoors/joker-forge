@@ -429,6 +429,8 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
       "shop_reroll",
       "card_held_in_hand",
       "after_hand_played",
+      "card_sold",
+      "card_bought",
     ],
     params: [
       {
@@ -467,6 +469,8 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
       "shop_reroll",
       "card_held_in_hand",
       "after_hand_played",
+      "card_sold",
+      "card_bought",
     ],
     params: [
       {
@@ -506,6 +510,8 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
       "shop_reroll",
       "card_held_in_hand",
       "after_hand_played",
+      "card_sold",
+      "card_bought",
     ],
     params: [
       {
@@ -545,6 +551,8 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
       "shop_reroll",
       "card_held_in_hand",
       "after_hand_played",
+      "card_sold",
+      "card_bought",
     ],
     params: [
       {
@@ -584,6 +592,8 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
       "shop_reroll",
       "card_held_in_hand",
       "after_hand_played",
+      "card_sold",
+      "card_bought",
     ],
     params: [
       {
@@ -627,6 +637,8 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
       "round_end",
       "card_held_in_hand",
       "after_hand_played",
+      "shop_reroll",
+      "card_sold",
     ],
     params: [
       {
@@ -663,6 +675,8 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
       "shop_reroll",
       "card_held_in_hand",
       "after_hand_played",
+      "card_sold",
+      "card_bought",
     ],
     params: [
       {
@@ -722,6 +736,8 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
       "shop_reroll",
       "card_held_in_hand",
       "after_hand_played",
+      "card_sold",
+      "card_bought",
     ],
     params: [
       {
@@ -762,6 +778,8 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
       "shop_reroll",
       "card_held_in_hand",
       "after_hand_played",
+      "card_sold",
+      "card_bought",
     ],
     params: [
       {
@@ -812,6 +830,8 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
       "shop_reroll",
       "card_held_in_hand",
       "after_hand_played",
+      "card_sold",
+      "card_bought",
     ],
     params: [
       {

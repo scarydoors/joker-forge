@@ -129,6 +129,18 @@ export const generateTriggerContext = (
         comment: "-- After hand has finished scoring",
       };
 
+    case "card_sold":
+      return {
+        check: "context.selling_card and not context.blueprint",
+        comment: "-- When any card is sold",
+      };
+
+    case "card_bought":
+      return {
+        check: "context.buying_card and not context.blueprint",
+        comment: "-- When any card is bought",
+      };
+
     case "hand_played":
     default:
       return {
