@@ -18,6 +18,7 @@ import { generateHandSizeConditionCode } from "./conditions/HandSizeCondition";
 import { generateDeckSizeConditionCode } from "./conditions/DeckSizeCondition";
 import { generateDeckCountConditionCode } from "./conditions/DeckCountCondition";
 import { generateCardEditionConditionCode } from "./conditions/CardEditionCondition";
+import { generateSpecificJokerConditionCode } from "./conditions/SpecificJokerCondition";
 
 export const generateConditionChain = (rule: Rule): string => {
   if (!rule.conditionGroups || rule.conditionGroups.length === 0) {
@@ -158,6 +159,9 @@ const generateSingleConditionCode = (
 
     case "card_edition":
       return generateCardEditionConditionCode([singleConditionRule]);
+
+    case "specific_joker":
+      return generateSpecificJokerConditionCode([singleConditionRule]);
 
     default:
       return null;
