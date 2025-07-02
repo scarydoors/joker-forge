@@ -141,6 +141,12 @@ export const generateTriggerContext = (
         comment: "-- When any card is bought",
       };
 
+    case "selling_self":
+      return {
+        check: "context.selling_self and not context.blueprint",
+        comment: "-- When this specific joker is sold",
+      };
+
     case "hand_played":
     default:
       return {

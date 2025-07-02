@@ -61,6 +61,11 @@ export const TRIGGERS: TriggerDefinition[] = [
     description: "Triggers after defeating a boss blind.",
   },
   {
+    id: "selling_self",
+    label: "When This Card is Sold",
+    description: "Triggers when this specific joker is sold.",
+  },
+  {
     id: "card_sold",
     label: "When a Card is Sold",
     description:

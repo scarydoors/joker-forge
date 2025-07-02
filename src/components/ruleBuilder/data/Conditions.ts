@@ -431,6 +431,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
       "after_hand_played",
       "card_sold",
       "card_bought",
+      "selling_self",
     ],
     params: [
       {
@@ -471,6 +472,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
       "after_hand_played",
       "card_sold",
       "card_bought",
+      "selling_self",
     ],
     params: [
       {
@@ -512,6 +514,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
       "after_hand_played",
       "card_sold",
       "card_bought",
+      "selling_self",
     ],
     params: [
       {
@@ -553,6 +556,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
       "after_hand_played",
       "card_sold",
       "card_bought",
+      "selling_self",
     ],
     params: [
       {
@@ -594,6 +598,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
       "after_hand_played",
       "card_sold",
       "card_bought",
+      "selling_self",
     ],
     params: [
       {
@@ -638,6 +643,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
       "after_hand_played",
       "card_sold",
       "card_bought",
+      "selling_self",
     ],
     params: [
       {
@@ -683,6 +689,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
       "after_hand_played",
       "shop_reroll",
       "card_sold",
+      "selling_self",
     ],
     params: [
       {
@@ -721,6 +728,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
       "after_hand_played",
       "card_sold",
       "card_bought",
+      "selling_self",
     ],
     params: [
       {
@@ -782,6 +790,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
       "after_hand_played",
       "card_sold",
       "card_bought",
+      "selling_self",
     ],
     params: [
       {
@@ -824,6 +833,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
       "after_hand_played",
       "card_sold",
       "card_bought",
+      "selling_self",
     ],
     params: [
       {
@@ -876,6 +886,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
       "after_hand_played",
       "card_sold",
       "card_bought",
+      "selling_self",
     ],
     params: [
       {

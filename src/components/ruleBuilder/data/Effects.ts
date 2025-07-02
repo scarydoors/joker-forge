@@ -119,6 +119,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
       "after_hand_played",
       "card_sold",
       "card_bought",
+      "selling_self",
     ],
     params: [
       {
@@ -220,6 +221,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
       "after_hand_played",
       "card_sold",
       "card_bought",
+      "selling_self",
     ],
     params: [
       {
@@ -265,6 +267,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
       "after_hand_played",
       "card_sold",
       "card_bought",
+      "selling_self",
     ],
     params: [
       {
@@ -310,6 +313,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
       "after_hand_played",
       "card_sold",
       "card_bought",
+      "selling_self",
     ],
     params: [
       {
@@ -357,6 +361,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
       "after_hand_played",
       "card_sold",
       "card_bought",
+      "selling_self",
     ],
     params: [
       {
@@ -409,6 +414,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
       "after_hand_played",
       "card_sold",
       "card_bought",
+      "selling_self",
     ],
     params: [
       {
@@ -676,6 +682,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
       "after_hand_played",
       "card_sold",
       "card_bought",
+      "selling_self",
     ],
     params: [
       {
@@ -754,6 +761,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
       "after_hand_played",
       "card_sold",
       "card_bought",
+      "selling_self",
     ],
     params: [
       {
@@ -845,6 +853,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
       "after_hand_played",
       "card_sold",
       "card_bought",
+      "selling_self",
     ],
     params: [
       {
@@ -923,6 +932,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
       "after_hand_played",
       "card_sold",
       "card_bought",
+      "selling_self",
     ],
     params: [
       {
@@ -1031,6 +1041,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
       "after_hand_played",
       "card_sold",
       "card_bought",
+      "selling_self",
     ],
     params: [
       {
@@ -1102,6 +1113,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
       "after_hand_played",
       "card_sold",
       "card_bought",
+      "selling_self",
     ],
     params: [
       {
@@ -1198,6 +1210,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
       "after_hand_played",
       "card_sold",
       "card_bought",
+      "selling_self",
     ],
     params: [
       {
@@ -1302,6 +1315,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
       "after_hand_played",
       "card_sold",
       "card_bought",
+      "selling_self",
     ],
     params: [
       {
@@ -1416,6 +1430,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
       "after_hand_played",
       "card_bought",
       "card_sold",
+      "selling_self",
     ],
     params: [
       {
