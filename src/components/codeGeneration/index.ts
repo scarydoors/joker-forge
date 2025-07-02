@@ -491,6 +491,26 @@ const extractEffectsConfig = (
           configItems.push(`${varName} = ${effectValue}`);
           globalEffectVariableMapping[effect.id] = varName;
         }
+
+        if (
+          effect.type === "apply_exp_mult" &&
+          typeof effectValue === "number" &&
+          !allVariableNames.has(String(effectValue))
+        ) {
+          const varName = getUniqueVariableName("emult");
+          configItems.push(`${varName} = ${effectValue}`);
+          globalEffectVariableMapping[effect.id] = varName;
+        }
+
+        if (
+          effect.type === "apply_exp_chips" &&
+          typeof effectValue === "number" &&
+          !allVariableNames.has(String(effectValue))
+        ) {
+          const varName = getUniqueVariableName("echips");
+          configItems.push(`${varName} = ${effectValue}`);
+          globalEffectVariableMapping[effect.id] = varName;
+        }
       });
 
       (rule.randomGroups || []).forEach((group) => {
@@ -571,6 +591,26 @@ const extractEffectsConfig = (
             !allVariableNames.has(String(effectValue))
           ) {
             const varName = getUniqueVariableName("xchips");
+            configItems.push(`${varName} = ${effectValue}`);
+            globalEffectVariableMapping[effect.id] = varName;
+          }
+
+          if (
+            effect.type === "apply_exp_mult" &&
+            typeof effectValue === "number" &&
+            !allVariableNames.has(String(effectValue))
+          ) {
+            const varName = getUniqueVariableName("emult");
+            configItems.push(`${varName} = ${effectValue}`);
+            globalEffectVariableMapping[effect.id] = varName;
+          }
+
+          if (
+            effect.type === "apply_exp_chips" &&
+            typeof effectValue === "number" &&
+            !allVariableNames.has(String(effectValue))
+          ) {
+            const varName = getUniqueVariableName("echips");
             configItems.push(`${varName} = ${effectValue}`);
             globalEffectVariableMapping[effect.id] = varName;
           }
