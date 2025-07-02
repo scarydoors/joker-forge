@@ -8,6 +8,7 @@ import {
   PencilIcon,
   DocumentTextIcon,
   PuzzlePieceIcon,
+  ExclamationTriangleIcon,
 } from "@heroicons/react/24/outline";
 import InputField from "./generic/InputField";
 import InputDropdown from "./generic/InputDropdown";
@@ -16,6 +17,10 @@ import Button from "./generic/Button";
 import BalatroJokerCard from "./generic/BalatroJokerCard";
 import { JokerData } from "./JokerCard";
 import { getAllVariables } from "./codeGeneration/variableUtils";
+import {
+  validateJokerName,
+  validateDescription,
+} from "./generic/validationUtils";
 
 interface EditJokerInfoProps {
   isOpen: boolean;
@@ -49,6 +54,30 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
   const [placeholderCredits, setPlaceholderCredits] = useState<
     Record<number, string>
   >({});
+
+  const [validationErrors, setValidationErrors] = useState<{
+    name?: string;
+    description?: string;
+  }>({});
+
+  const validateField = (field: string, value: string) => {
+    let result;
+    switch (field) {
+      case "name":
+        result = validateJokerName(value);
+        break;
+      case "description":
+        result = validateDescription(value);
+        break;
+      default:
+        return;
+    }
+
+    setValidationErrors((prev) => ({
+      ...prev,
+      [field]: result.isValid ? undefined : result.error,
+    }));
+  };
 
   useEffect(() => {
     const loadCredits = async () => {
@@ -91,6 +120,17 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
   }, []);
 
   const handleSave = useCallback(() => {
+    const nameValidation = validateJokerName(formData.name);
+    const descValidation = validateDescription(formData.description);
+
+    if (!nameValidation.isValid || !descValidation.isValid) {
+      setValidationErrors({
+        name: nameValidation.isValid ? undefined : nameValidation.error,
+        description: descValidation.isValid ? undefined : descValidation.error,
+      });
+      return;
+    }
+
     onSave(formData);
     onClose();
   }, [formData, onSave, onClose]);
@@ -107,6 +147,7 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
       setPlaceholderError(false);
       setLastDescription(joker.description || "");
       setLastFormattedText("");
+      setValidationErrors({});
     }
   }, [isOpen, joker]);
 
@@ -435,6 +476,8 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
         [field]: value,
       });
     }
+
+    validateField(field, value);
   };
 
   const handleNumberChange = (field: string, value: number) => {
@@ -875,7 +918,14 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
                             useGameFont={true}
                             label="Joker Name"
                             size="lg"
+                            error={validationErrors.name}
                           />
+                          {validationErrors.name && (
+                            <div className="flex items-center gap-2 mt-1 text-balatro-red text-sm">
+                              <ExclamationTriangleIcon className="h-4 w-4" />
+                              <span>{validationErrors.name}</span>
+                            </div>
+                          )}
 
                           <div className="grid grid-cols-2 gap-4">
                             <InputDropdown
@@ -1091,7 +1141,14 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
                       useGameFont={true}
                       label="Description Text"
                       placeholder="Describe your joker's effects using Balatro formatting..."
+                      error={validationErrors.description}
                     />
+                    {validationErrors.description && (
+                      <div className="flex items-center gap-2 mt-1 text-balatro-orange text-sm">
+                        <ExclamationTriangleIcon className="h-4 w-4" />
+                        <span>{validationErrors.description}</span>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}

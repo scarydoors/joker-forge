@@ -24,8 +24,10 @@ import {
   XMarkIcon,
   Bars3Icon,
   PlusIcon,
+  ExclamationTriangleIcon,
 } from "@heroicons/react/24/outline";
 import { ChartPieIcon, PercentBadgeIcon } from "@heroicons/react/16/solid";
+import { validateVariableName } from "../generic/validationUtils";
 
 interface InspectorProps {
   position: { x: number; y: number };
@@ -166,6 +168,8 @@ const ParameterField: React.FC<ParameterFieldProps> = ({
   const [isVariableMode, setIsVariableMode] = React.useState(
     typeof value === "string"
   );
+
+  const [inputError, setInputError] = React.useState<string>("");
 
   React.useEffect(() => {
     setIsVariableMode(typeof value === "string");
@@ -311,16 +315,38 @@ const ParameterField: React.FC<ParameterFieldProps> = ({
       );
     }
 
-    case "text":
+    case "text": {
+      const isVariableName = param.id === "variable_name";
+
       return (
-        <InputField
-          label={String(param.label)}
-          value={(value as string) || ""}
-          onChange={(e) => onChange(e.target.value)}
-          className="text-sm"
-          size="sm"
-        />
+        <div>
+          <InputField
+            label={String(param.label)}
+            value={(value as string) || ""}
+            onChange={(e) => {
+              const newValue = e.target.value;
+              onChange(newValue);
+
+              if (isVariableName) {
+                const validation = validateVariableName(newValue);
+                setInputError(
+                  validation.isValid ? "" : validation.error || "Invalid name"
+                );
+              }
+            }}
+            className="text-sm"
+            size="sm"
+            error={isVariableName ? inputError : undefined}
+          />
+          {isVariableName && inputError && (
+            <div className="flex items-center gap-2 mt-1 text-balatro-red text-sm">
+              <ExclamationTriangleIcon className="h-4 w-4" />
+              <span>{inputError}</span>
+            </div>
+          )}
+        </div>
       );
+    }
 
     default:
       return null;
@@ -366,6 +392,21 @@ const Inspector: React.FC<InspectorProps> = ({
   );
 
   const handleCreateVariable = (name: string, initialValue: number) => {
+    const validation = validateVariableName(name);
+
+    if (!validation.isValid) {
+      alert(validation.error);
+      return;
+    }
+
+    const existingNames = getAllVariables(joker).map((v) =>
+      v.name.toLowerCase()
+    );
+    if (existingNames.includes(name.toLowerCase())) {
+      alert("Variable name already exists");
+      return;
+    }
+
     const newVariable = {
       id: crypto.randomUUID(),
       name,

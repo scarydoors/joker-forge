@@ -6,10 +6,12 @@ import {
   CommandLineIcon,
   XMarkIcon,
   Bars3Icon,
+  ExclamationTriangleIcon,
 } from "@heroicons/react/24/outline";
 import { PlusIcon, TrashIcon, PencilIcon } from "@heroicons/react/24/solid";
 import InputField from "../generic/InputField";
 import Button from "../generic/Button";
+import { validateVariableName } from "../generic/validationUtils";
 
 interface VariablesProps {
   position: { x: number; y: number };
@@ -29,6 +31,10 @@ const Variables: React.FC<VariablesProps> = ({
   const [editingVariable, setEditingVariable] = useState<string | null>(null);
   const [newVariableName, setNewVariableName] = useState("");
   const [newVariableValue, setNewVariableValue] = useState("0");
+  const [nameValidationError, setNameValidationError] = useState<string>("");
+  const [editValidationError, setEditValidationError] = useState<string>("");
+  const [editingName, setEditingName] = useState("");
+  const [editingValue, setEditingValue] = useState(0);
 
   const { attributes, listeners, setNodeRef, transform } = useDraggable({
     id: "panel-variables",
@@ -46,7 +52,6 @@ const Variables: React.FC<VariablesProps> = ({
         top: position.y,
       };
 
-  // Memoize usage details to ensure they update when joker changes
   const usageDetails = useMemo(() => getVariableUsageDetails(joker), [joker]);
   const userVariables = joker.userVariables || [];
 
@@ -61,8 +66,50 @@ const Variables: React.FC<VariablesProps> = ({
     };
   };
 
+  const validateNewVariableName = (name: string) => {
+    const validation = validateVariableName(name.trim());
+    if (!validation.isValid) {
+      setNameValidationError(validation.error || "Invalid variable name");
+      return false;
+    }
+
+    const existingNames = userVariables.map((v) => v.name.toLowerCase());
+    if (existingNames.includes(name.trim().toLowerCase())) {
+      setNameValidationError("Variable name already exists");
+      return false;
+    }
+
+    setNameValidationError("");
+    return true;
+  };
+
+  const validateEditVariableName = (
+    name: string,
+    currentVariableId: string
+  ) => {
+    const validation = validateVariableName(name);
+    if (!validation.isValid) {
+      setEditValidationError(validation.error || "Invalid variable name");
+      return false;
+    }
+
+    const existingNames = userVariables
+      .filter((v) => v.id !== currentVariableId)
+      .map((v) => v.name.toLowerCase());
+
+    if (existingNames.includes(name.toLowerCase())) {
+      setEditValidationError("Variable name already exists");
+      return false;
+    }
+
+    setEditValidationError("");
+    return true;
+  };
+
   const handleAddVariable = () => {
-    if (!newVariableName.trim()) return;
+    if (!validateNewVariableName(newVariableName)) {
+      return;
+    }
 
     const newVariable: UserVariable = {
       id: crypto.randomUUID(),
@@ -75,6 +122,7 @@ const Variables: React.FC<VariablesProps> = ({
 
     setNewVariableName("");
     setNewVariableValue("0");
+    setNameValidationError("");
     setShowAddForm(false);
   };
 
@@ -83,15 +131,31 @@ const Variables: React.FC<VariablesProps> = ({
     onUpdateJoker({ userVariables: updatedVariables });
   };
 
-  const handleUpdateVariable = (
-    variableId: string,
-    updates: Partial<UserVariable>
-  ) => {
+  const handleStartEdit = (variable: UserVariable) => {
+    setEditingVariable(variable.id);
+    setEditingName(variable.name);
+    setEditingValue(variable.initialValue);
+    setEditValidationError("");
+  };
+
+  const handleSaveEdit = (variableId: string) => {
+    if (!validateEditVariableName(editingName, variableId)) {
+      return;
+    }
+
     const updatedVariables = userVariables.map((v) =>
-      v.id === variableId ? { ...v, ...updates } : v
+      v.id === variableId
+        ? { ...v, name: editingName, initialValue: editingValue }
+        : v
     );
     onUpdateJoker({ userVariables: updatedVariables });
     setEditingVariable(null);
+    setEditValidationError("");
+  };
+
+  const handleCancelEdit = () => {
+    setEditingVariable(null);
+    setEditValidationError("");
   };
 
   return (
@@ -100,7 +164,6 @@ const Variables: React.FC<VariablesProps> = ({
       style={style}
       className="w-80 bg-black-dark backdrop-blur-md border-2 border-black-lighter rounded-lg shadow-2xl z-40"
     >
-      {/* Header */}
       <div
         className="flex items-center justify-between p-4 border-b border-black-lighter cursor-grab active:cursor-grabbing"
         {...attributes}
@@ -128,7 +191,6 @@ const Variables: React.FC<VariablesProps> = ({
       </div>
 
       <div className="p-4">
-        {/* Variables List */}
         <div className="max-h-96 overflow-y-auto custom-scrollbar space-y-2 mb-4">
           {userVariables.length === 0 && !showAddForm ? (
             <div className="text-center py-8">
@@ -152,37 +214,57 @@ const Variables: React.FC<VariablesProps> = ({
                 >
                   {isEditing ? (
                     <div className="space-y-3">
+                      <div>
+                        <InputField
+                          value={editingName}
+                          onChange={(e) => {
+                            setEditingName(e.target.value);
+                            if (editValidationError) {
+                              validateEditVariableName(
+                                e.target.value,
+                                variable.id
+                              );
+                            }
+                          }}
+                          label="Name"
+                          size="sm"
+                        />
+                        {editValidationError && (
+                          <div className="flex items-center gap-2 mt-1 text-balatro-red text-sm">
+                            <ExclamationTriangleIcon className="h-4 w-4" />
+                            <span>{editValidationError}</span>
+                          </div>
+                        )}
+                      </div>
                       <InputField
-                        value={variable.name}
-                        onChange={(e) => {
-                          handleUpdateVariable(variable.id, {
-                            name: e.target.value,
-                          });
-                        }}
-                        label="Name"
-                        size="sm"
-                      />
-                      <InputField
-                        value={variable.initialValue.toString()}
+                        value={editingValue.toString()}
                         onChange={(e) => {
                           const value = parseFloat(e.target.value) || 0;
-                          handleUpdateVariable(variable.id, {
-                            initialValue: value,
-                          });
+                          setEditingValue(value);
                         }}
                         type="number"
                         label="Initial Value"
                         size="sm"
                       />
-                      <Button
-                        variant="primary"
-                        size="sm"
-                        onClick={() => setEditingVariable(null)}
-                        className="cursor-pointer"
-                        fullWidth
-                      >
-                        Done
-                      </Button>
+                      <div className="flex gap-2">
+                        <Button
+                          variant="primary"
+                          size="sm"
+                          onClick={() => handleSaveEdit(variable.id)}
+                          disabled={!!editValidationError}
+                          className="cursor-pointer flex-1"
+                        >
+                          Save
+                        </Button>
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          onClick={handleCancelEdit}
+                          className="cursor-pointer"
+                        >
+                          Cancel
+                        </Button>
+                      </div>
                     </div>
                   ) : (
                     <div>
@@ -193,7 +275,7 @@ const Variables: React.FC<VariablesProps> = ({
 
                         <div className="flex items-center gap-1">
                           <button
-                            onClick={() => setEditingVariable(variable.id)}
+                            onClick={() => handleStartEdit(variable)}
                             className="p-1 text-white-darker hover:text-white transition-colors cursor-pointer"
                             title="Edit"
                           >
@@ -236,17 +318,27 @@ const Variables: React.FC<VariablesProps> = ({
             })
           )}
 
-          {/* Add Form */}
           {showAddForm && (
             <div className="bg-black-darker border-2 border-mint/50 rounded-lg p-3">
               <div className="space-y-3">
-                <InputField
-                  value={newVariableName}
-                  onChange={(e) => setNewVariableName(e.target.value)}
-                  placeholder="myVariable"
-                  label="Name"
-                  size="sm"
-                />
+                <div>
+                  <InputField
+                    value={newVariableName}
+                    onChange={(e) => {
+                      setNewVariableName(e.target.value);
+                      validateNewVariableName(e.target.value);
+                    }}
+                    placeholder="myVariable"
+                    label="Name"
+                    size="sm"
+                  />
+                  {nameValidationError && (
+                    <div className="flex items-center gap-2 mt-1 text-balatro-red text-sm">
+                      <ExclamationTriangleIcon className="h-4 w-4" />
+                      <span>{nameValidationError}</span>
+                    </div>
+                  )}
+                </div>
                 <InputField
                   value={newVariableValue}
                   onChange={(e) => setNewVariableValue(e.target.value)}
@@ -260,7 +352,7 @@ const Variables: React.FC<VariablesProps> = ({
                     variant="primary"
                     size="sm"
                     onClick={handleAddVariable}
-                    disabled={!newVariableName.trim()}
+                    disabled={!newVariableName.trim() || !!nameValidationError}
                     className="cursor-pointer flex-1"
                   >
                     Create
@@ -272,6 +364,7 @@ const Variables: React.FC<VariablesProps> = ({
                       setShowAddForm(false);
                       setNewVariableName("");
                       setNewVariableValue("0");
+                      setNameValidationError("");
                     }}
                     className="cursor-pointer"
                   >
@@ -283,7 +376,6 @@ const Variables: React.FC<VariablesProps> = ({
           )}
         </div>
 
-        {/* Add Button */}
         {!showAddForm && (
           <Button
             variant="secondary"

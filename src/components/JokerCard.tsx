@@ -13,6 +13,7 @@ import {
 import Tooltip from "./generic/Tooltip";
 import { formatBalatroText } from "./generic/balatroTextFormatter";
 import type { Rule } from "./ruleBuilder/types";
+import { validateJokerName } from "./generic/validationUtils";
 
 export interface UserVariable {
   id: string;
@@ -116,6 +117,8 @@ const JokerCard: React.FC<JokerCardProps> = ({
   const rarityStyles = getRarityStyles(safeRarity);
   const rulesCount = joker.rules?.length || 0;
 
+  const [nameValidationError, setNameValidationError] = useState<string>("");
+
   const rarities = [
     { value: 1, label: "Common", styles: getRarityStyles(1) },
     { value: 2, label: "Uncommon", styles: getRarityStyles(2) },
@@ -124,8 +127,16 @@ const JokerCard: React.FC<JokerCardProps> = ({
   ];
 
   const handleNameSave = () => {
+    const validation = validateJokerName(tempName);
+
+    if (!validation.isValid) {
+      setNameValidationError(validation.error || "Invalid name");
+      return;
+    }
+
     onQuickUpdate({ name: tempName });
     setEditingName(false);
+    setNameValidationError("");
   };
 
   const handleCostSave = () => {
@@ -326,27 +337,53 @@ const JokerCard: React.FC<JokerCardProps> = ({
           <div className="flex-1">
             <div className="mb-3 h-7 flex items-start overflow-hidden">
               {editingName ? (
-                <input
-                  type="text"
-                  value={tempName}
-                  onChange={(e) => setTempName(e.target.value)}
-                  onBlur={handleNameSave}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") handleNameSave();
-                    if (e.key === "Escape") {
-                      setTempName(joker.name);
-                      setEditingName(false);
-                    }
-                  }}
-                  className="text-white-lighter text-xl tracking-wide font-game leading-tight bg-transparent border-none outline-none w-full cursor-text"
-                  autoFocus
-                />
+                <div className="w-full">
+                  <input
+                    type="text"
+                    value={tempName}
+                    onChange={(e) => {
+                      setTempName(e.target.value);
+                      if (nameValidationError) {
+                        const validation = validateJokerName(e.target.value);
+                        if (validation.isValid) {
+                          setNameValidationError("");
+                        }
+                      }
+                    }}
+                    onBlur={() => {
+                      if (!nameValidationError) {
+                        handleNameSave();
+                      }
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        handleNameSave();
+                      }
+                      if (e.key === "Escape") {
+                        setTempName(joker.name);
+                        setEditingName(false);
+                        setNameValidationError("");
+                      }
+                    }}
+                    className={`text-white-lighter text-xl tracking-wide font-game leading-tight bg-transparent border-none outline-none w-full cursor-text ${
+                      nameValidationError ? "border-b-2 border-balatro-red" : ""
+                    }`}
+                    autoFocus
+                  />
+                  {nameValidationError && (
+                    <div className="text-balatro-red text-xs mt-1 flex items-center gap-1">
+                      <ExclamationTriangleIcon className="h-3 w-3" />
+                      <span>{nameValidationError}</span>
+                    </div>
+                  )}
+                </div>
               ) : (
                 <h3
                   className="text-white-lighter text-xl tracking-wide font-game leading-tight cursor-pointer line-clamp-1"
                   onClick={() => {
                     setTempName(joker.name);
                     setEditingName(true);
+                    setNameValidationError("");
                   }}
                   style={{ lineHeight: "1.75rem" }}
                 >
