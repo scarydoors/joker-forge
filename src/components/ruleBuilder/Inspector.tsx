@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useDraggable } from "@dnd-kit/core";
 import type {
   Rule,
@@ -27,7 +27,10 @@ import {
   ExclamationTriangleIcon,
 } from "@heroicons/react/24/outline";
 import { ChartPieIcon, PercentBadgeIcon } from "@heroicons/react/16/solid";
-import { validateVariableName } from "../generic/validationUtils";
+import {
+  validateVariableName,
+  validateCustomMessage,
+} from "../generic/validationUtils";
 
 interface InspectorProps {
   position: { x: number; y: number };
@@ -368,6 +371,9 @@ const Inspector: React.FC<InspectorProps> = ({
   onToggleVariablesPanel,
   onCreateRandomGroupFromEffect,
 }) => {
+  const [customMessageValidationError, setCustomMessageValidationError] =
+    useState<string>("");
+
   const { attributes, listeners, setNodeRef, transform } = useDraggable({
     id: "panel-inspector",
   });
@@ -416,6 +422,10 @@ const Inspector: React.FC<InspectorProps> = ({
     const updatedVariables = [...(joker.userVariables || []), newVariable];
     onUpdateJoker({ userVariables: updatedVariables });
   };
+
+  React.useEffect(() => {
+    setCustomMessageValidationError("");
+  }, [selectedEffect?.id]);
 
   const renderTriggerInfo = () => {
     if (!selectedRule) return null;
@@ -703,13 +713,30 @@ const Inspector: React.FC<InspectorProps> = ({
               label="Message"
               value={selectedEffect.customMessage || ""}
               onChange={(e) => {
+                const value = e.target.value;
+                const validation = validateCustomMessage(value);
+
+                if (validation.isValid) {
+                  setCustomMessageValidationError("");
+                } else {
+                  setCustomMessageValidationError(
+                    validation.error || "Invalid message"
+                  );
+                }
+
                 onUpdateEffect(selectedRule.id, selectedEffect.id, {
-                  customMessage: e.target.value || undefined,
+                  customMessage: value || undefined,
                 });
               }}
               placeholder="Leave blank for default message"
               size="sm"
             />
+            {customMessageValidationError && (
+              <div className="flex items-center gap-2 mt-1 text-balatro-red text-sm">
+                <ExclamationTriangleIcon className="h-4 w-4" />
+                <span>{customMessageValidationError}</span>
+              </div>
+            )}
           </div>
         </div>
 

@@ -130,3 +130,27 @@ export const validateDescription = (description: string): ValidationResult => {
 
   return { isValid: true };
 };
+
+export const validateCustomMessage = (message: string): ValidationResult => {
+  if (message.includes('"') || message.includes("'")) {
+    return { isValid: false, error: "Message cannot contain quotation marks" };
+  }
+
+  if (message.includes("\\") && !message.includes("\\\\")) {
+    return { isValid: false, error: "Unescaped backslashes may cause issues" };
+  }
+
+  if (message.includes("`")) {
+    return { isValid: false, error: "Message cannot contain backticks" };
+  }
+
+  if (message.includes("\n") || message.includes("\r")) {
+    return { isValid: false, error: "Message cannot contain line breaks" };
+  }
+
+  if (message.length > 100) {
+    return { isValid: false, error: "Message must be 100 characters or less" };
+  }
+
+  return { isValid: true };
+};
