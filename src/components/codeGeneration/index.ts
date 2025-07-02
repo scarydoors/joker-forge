@@ -812,32 +812,18 @@ const generateCalculateFunction = (rules: Rule[]): string => {
         if (regularDeleteEffects.length > 0 || randomDeleteGroups.length > 0) {
           calculateFunction += `
                 context.other_card.should_destroy = true`;
-
-          const { statement, preReturnCode } = generateEffectReturnStatement(
-            regularDeleteEffects,
-            randomDeleteGroups,
-            triggerType,
-            rule.id
-          );
-
-          if (preReturnCode) {
-            calculateFunction += `
-                ${preReturnCode}`;
-          }
-
-          if (statement) {
-            calculateFunction += `
-                ${statement}`;
-          }
         }
 
-        if (
-          regularNonDeleteEffects.length > 0 ||
-          randomNonDeleteGroups.length > 0
-        ) {
+        const allEffects = [
+          ...regularNonDeleteEffects,
+          ...regularDeleteEffects,
+        ];
+        const allGroups = [...randomNonDeleteGroups, ...randomDeleteGroups];
+
+        if (allEffects.length > 0 || allGroups.length > 0) {
           const { statement, preReturnCode } = generateEffectReturnStatement(
-            regularNonDeleteEffects,
-            randomNonDeleteGroups,
+            allEffects,
+            allGroups,
             triggerType,
             rule.id
           );
