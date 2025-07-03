@@ -18,7 +18,6 @@ import ConsumablesPage from "./components/pages/ConsumablesPage";
 import DecksPage from "./components/pages/DecksPage";
 import EditionsPage from "./components/pages/EditionsPage";
 import EnhancementsPage from "./components/pages/EnhancementsPage";
-import DocsPage from "./components/pages/DocsPage";
 import VanillaRemadePage from "./components/pages/VanillaRemadePage";
 import ExtraCreditPage from "./components/pages/ExtraCreditPage";
 import AcknowledgementsPage from "./components/pages/AcknowledgementsPage";
@@ -454,7 +453,6 @@ function AppContent() {
           <Route path="/decks" element={<DecksPage />} />
           <Route path="/editions" element={<EditionsPage />} />
           <Route path="/enhancements" element={<EnhancementsPage />} />
-          <Route path="/docs" element={<DocsPage />} />
           <Route
             path="/vanilla"
             element={

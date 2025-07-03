@@ -46,6 +46,11 @@ const Sidebar: React.FC<SidebarProps> = ({
       return;
     }
 
+    if (section === "docs") {
+      window.open("https://github.com/Jayd-H/joker-forge/wiki", "_blank");
+      return;
+    }
+
     onSectionChange?.(section);
   };
 
