@@ -1,37 +1,49 @@
 import type { EffectReturn } from "./AddChipsEffect";
 import type { Effect } from "../../ruleBuilder/types";
 import { getEffectVariableName } from "../index";
+import {
+  generateGameVariableCode,
+  parseGameVariable,
+} from "../gameVariableUtils";
 
 export const generateApplyExpChipsReturn = (
   triggerType: string,
-  effect?: Effect
+  effect: Effect
 ): EffectReturn => {
-  const customMessage = effect?.customMessage;
+  const effectValue = effect.params.value;
+  const parsed = parseGameVariable(effectValue);
 
-  const isVariableReference = typeof effect?.params?.value === "string";
+  let valueCode: string;
 
-  let valueReference = "";
-  if (isVariableReference) {
-    const variableName = effect?.params?.value as string;
-    valueReference = `card.ability.extra.${variableName}`;
+  if (parsed.isGameVariable) {
+    valueCode = generateGameVariableCode(effectValue);
+  } else if (typeof effectValue === "string") {
+    valueCode = `card.ability.extra.${effectValue}`;
   } else {
-    const configVarName = effect
-      ? getEffectVariableName(effect.id, "echips")
-      : "echips";
-    valueReference = `card.ability.extra.${configVarName}`;
+    const variableName = getEffectVariableName(effect.id, "echips");
+    valueCode = `card.ability.extra.${variableName}`;
   }
 
-  if (triggerType === "card_scored" || triggerType === "card_discarded") {
-    return {
-      statement: `echips = ${valueReference}`,
-      message: customMessage ? `"${customMessage}"` : undefined,
-      colour: "G.C.DARK_EDITION",
-    };
-  } else {
-    return {
-      statement: `echips = ${valueReference}`,
-      message: customMessage ? `"${customMessage}"` : undefined,
-      colour: "G.C.DARK_EDITION",
-    };
+  const customMessage = effect.customMessage;
+  const messageCode = customMessage
+    ? `"${customMessage}"`
+    : `"^" .. ${valueCode} .. " Chips!"`;
+
+  switch (triggerType) {
+    case "card_scored":
+    case "card_held_in_hand":
+      return {
+        statement: `e_chips = ${valueCode}`,
+        message: messageCode,
+        colour: "G.C.DARK_EDITION",
+      };
+
+    case "hand_played":
+    default:
+      return {
+        statement: `e_chips = ${valueCode}`,
+        message: messageCode,
+        colour: "G.C.DARK_EDITION",
+      };
   }
 };

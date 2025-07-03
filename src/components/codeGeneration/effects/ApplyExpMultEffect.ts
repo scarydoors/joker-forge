@@ -1,37 +1,54 @@
-import type { EffectReturn } from "./AddChipsEffect";
 import type { Effect } from "../../ruleBuilder/types";
 import { getEffectVariableName } from "../index";
+import {
+  generateGameVariableCode,
+  parseGameVariable,
+} from "../gameVariableUtils";
+
+export interface EffectReturn {
+  statement: string;
+  message?: string;
+  colour: string;
+}
 
 export const generateApplyExpMultReturn = (
   triggerType: string,
-  effect?: Effect
+  effect: Effect
 ): EffectReturn => {
-  const customMessage = effect?.customMessage;
+  const effectValue = effect.params.value;
+  const parsed = parseGameVariable(effectValue);
 
-  const isVariableReference = typeof effect?.params?.value === "string";
+  let valueCode: string;
 
-  let valueReference = "";
-  if (isVariableReference) {
-    const variableName = effect?.params?.value as string;
-    valueReference = `card.ability.extra.${variableName}`;
+  if (parsed.isGameVariable) {
+    valueCode = generateGameVariableCode(effectValue);
+  } else if (typeof effectValue === "string") {
+    valueCode = `card.ability.extra.${effectValue}`;
   } else {
-    const configVarName = effect
-      ? getEffectVariableName(effect.id, "emult")
-      : "emult";
-    valueReference = `card.ability.extra.${configVarName}`;
+    const variableName = getEffectVariableName(effect.id, "emult");
+    valueCode = `card.ability.extra.${variableName}`;
   }
 
-  if (triggerType === "card_scored" || triggerType === "card_discarded") {
-    return {
-      statement: `emult = ${valueReference}`,
-      message: customMessage ? `"${customMessage}"` : undefined,
-      colour: "G.C.DARK_EDITION",
-    };
-  } else {
-    return {
-      statement: `emult = ${valueReference}`,
-      message: customMessage ? `"${customMessage}"` : undefined,
-      colour: "G.C.DARK_EDITION",
-    };
+  const customMessage = effect.customMessage;
+  const messageCode = customMessage
+    ? `"${customMessage}"`
+    : `"^" .. ${valueCode} .. " Mult!"`;
+
+  switch (triggerType) {
+    case "card_scored":
+    case "card_held_in_hand":
+      return {
+        statement: `e_mult = ${valueCode}`,
+        message: messageCode,
+        colour: "G.C.DARK_EDITION",
+      };
+
+    case "hand_played":
+    default:
+      return {
+        statement: `e_mult = ${valueCode}`,
+        message: messageCode,
+        colour: "G.C.DARK_EDITION",
+      };
   }
 };

@@ -1,10 +1,11 @@
 import type { Rule } from "../../ruleBuilder/types";
+import { generateGameVariableCode } from "../gameVariableUtils";
 
 export const generateDeckSizeConditionCode = (rules: Rule[]): string | null => {
   const condition = rules[0].conditionGroups[0].conditions[0];
   const sizeType = (condition.params.size_type as string) || "remaining";
   const operator = (condition.params.operator as string) || "equals";
-  const value = (condition.params.value as number) || 52;
+  const value = generateGameVariableCode(condition.params.value) || "52";
 
   let comparison = "";
   switch (operator) {
@@ -30,7 +31,6 @@ export const generateDeckSizeConditionCode = (rules: Rule[]): string | null => {
       comparison = `== ${value}`;
   }
 
-  // Choose the appropriate deck size reference based on the size_type parameter
   const deckSizeRef =
     sizeType === "remaining" ? "#G.deck.cards" : "#G.playing_cards";
 

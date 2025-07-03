@@ -1,9 +1,10 @@
 import type { Rule } from "../../ruleBuilder/types";
+import { generateGameVariableCode } from "../gameVariableUtils";
 
 export const generateHandSizeConditionCode = (rules: Rule[]): string | null => {
   const condition = rules[0].conditionGroups[0].conditions[0];
   const operator = (condition.params.operator as string) || "equals";
-  const value = (condition.params.value as number) || 8;
+  const value = generateGameVariableCode(condition.params.value) || "8";
 
   let comparison = "";
   switch (operator) {

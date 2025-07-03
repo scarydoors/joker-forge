@@ -1,16 +1,39 @@
-import type { EffectReturn } from "./AddChipsEffect";
 import type { Effect } from "../../ruleBuilder/types";
 import { getEffectVariableName } from "../index";
+import {
+  generateGameVariableCode,
+  parseGameVariable,
+} from "../gameVariableUtils";
 
-export const generateRetriggerReturn = (effect?: Effect): EffectReturn => {
-  const customMessage = effect?.customMessage;
-  const configVarName = effect
-    ? getEffectVariableName(effect.id, "repetitions")
-    : "repetitions";
+export interface EffectReturn {
+  statement: string;
+  message?: string;
+  colour: string;
+}
+
+export const generateRetriggerReturn = (effect: Effect): EffectReturn => {
+  const repetitionsValue = effect.params.repetitions;
+  const parsed = parseGameVariable(repetitionsValue);
+
+  let valueCode: string;
+
+  if (parsed.isGameVariable) {
+    valueCode = generateGameVariableCode(repetitionsValue);
+  } else if (typeof repetitionsValue === "string") {
+    valueCode = `card.ability.extra.${repetitionsValue}`;
+  } else {
+    const variableName = getEffectVariableName(effect.id, "repetitions");
+    valueCode = `card.ability.extra.${variableName}`;
+  }
+
+  const customMessage = effect.customMessage;
+  const messageCode = customMessage
+    ? `"${customMessage}"`
+    : "localize('k_again_ex')";
 
   return {
-    statement: `repetitions = card.ability.extra.${configVarName}`,
-    message: customMessage ? `"${customMessage}"` : `localize('k_again_ex')`,
-    colour: "G.C.ORANGE",
+    statement: `repetitions = ${valueCode}`,
+    message: messageCode,
+    colour: "G.C.RED",
   };
 };

@@ -1,4 +1,5 @@
 import type { Rule } from "../../ruleBuilder/types";
+import { generateGameVariableCode } from "../gameVariableUtils";
 
 export const generateInternalVariableConditionCode = (
   rules: Rule[]
@@ -6,7 +7,7 @@ export const generateInternalVariableConditionCode = (
   const condition = rules[0].conditionGroups[0].conditions[0];
   const variableName = (condition.params.variable_name as string) || "var1";
   const operator = (condition.params.operator as string) || "equals";
-  const value = (condition.params.value as number) || 0;
+  const value = generateGameVariableCode(condition.params.value) || "0";
 
   let comparison = "";
   switch (operator) {

@@ -1,4 +1,5 @@
 import type { Rule } from "../../ruleBuilder/types";
+import { generateGameVariableCode } from "../gameVariableUtils";
 
 export const generateDeckCountConditionCode = (
   rules: Rule[]
@@ -7,16 +8,15 @@ export const generateDeckCountConditionCode = (
   const propertyType =
     (condition.params.property_type as string) || "enhancement";
   const operator = (condition.params.operator as string) || "equals";
-  const value = condition.params.value as number;
+  const value = generateGameVariableCode(condition.params.value);
 
-  // Generate the property check logic based on type
   let propertyCheck = "";
 
   switch (propertyType) {
     case "rank": {
       const rank = condition.params.rank as string;
       if (rank === "any") {
-        propertyCheck = "true"; // Any rank counts
+        propertyCheck = "true";
       } else {
         const rankId = getRankId(rank);
         propertyCheck = `playing_card:get_id() == ${rankId}`;
@@ -27,7 +27,7 @@ export const generateDeckCountConditionCode = (
     case "suit": {
       const suit = condition.params.suit as string;
       if (suit === "any") {
-        propertyCheck = "true"; // Any suit counts
+        propertyCheck = "true";
       } else if (suit === "red") {
         propertyCheck = `(playing_card:is_suit("Hearts") or playing_card:is_suit("Diamonds"))`;
       } else if (suit === "black") {
@@ -78,7 +78,6 @@ export const generateDeckCountConditionCode = (
       propertyCheck = "true";
   }
 
-  // Generate comparison logic
   let comparison = "";
   switch (operator) {
     case "equals":
@@ -103,7 +102,6 @@ export const generateDeckCountConditionCode = (
       comparison = `== ${value}`;
   }
 
-  // Return the complete Lua function
   return `(function()
     local count = 0
     for _, playing_card in pairs(G.playing_cards or {}) do
@@ -115,7 +113,6 @@ export const generateDeckCountConditionCode = (
 end)()`;
 };
 
-// Helper function to convert rank string to numeric ID
 const getRankId = (rank: string): number => {
   switch (rank) {
     case "2":

@@ -1,11 +1,12 @@
 import type { Rule } from "../../ruleBuilder/types";
+import { generateGameVariableCode } from "../gameVariableUtils";
 
 export const generateRemainingDiscardsConditionCode = (
   rules: Rule[]
 ): string | null => {
   const condition = rules[0].conditionGroups[0].conditions[0];
   const operator = (condition.params.operator as string) || "equals";
-  const value = condition.params.value as number;
+  const value = generateGameVariableCode(condition.params.value);
 
   let comparison = "";
   switch (operator) {

@@ -1,5 +1,7 @@
 import type { Rule, Effect } from "../ruleBuilder/types";
 import type { JokerData, UserVariable } from "../JokerCard";
+import { parseGameVariable } from "./gameVariableUtils";
+import { getGameVariableById } from "../ruleBuilder/data/GameVars";
 
 export interface VariableInfo {
   name: string;
@@ -14,6 +16,14 @@ export interface VariableUsage {
   type: "condition" | "effect";
   itemId: string;
   count: number;
+}
+
+export interface GameVariableInfo {
+  id: string;
+  name: string;
+  description: string;
+  multiplier: number;
+  code: string;
 }
 
 export const coordinateVariableConflicts = (
@@ -123,6 +133,54 @@ const extractExplicitVariablesFromEffect = (effect: Effect): string[] => {
   });
 
   return variables;
+};
+
+// New function to extract game variables from rules
+export const extractGameVariablesFromRules = (
+  rules: Rule[]
+): GameVariableInfo[] => {
+  const gameVariableMap = new Map<string, GameVariableInfo>();
+
+  const processParams = (params: Record<string, unknown>) => {
+    Object.values(params).forEach((value) => {
+      const parsed = parseGameVariable(value);
+      if (parsed.isGameVariable && parsed.gameVariableId && parsed.code) {
+        const gameVar = getGameVariableById(parsed.gameVariableId);
+        if (gameVar && !gameVariableMap.has(parsed.gameVariableId)) {
+          gameVariableMap.set(parsed.gameVariableId, {
+            id: parsed.gameVariableId,
+            name: gameVar.label,
+            description: gameVar.description,
+            multiplier: parsed.multiplier || 1,
+            code: parsed.code,
+          });
+        }
+      }
+    });
+  };
+
+  rules.forEach((rule) => {
+    // Process conditions
+    rule.conditionGroups.forEach((group) => {
+      group.conditions.forEach((condition) => {
+        processParams(condition.params);
+      });
+    });
+
+    // Process effects
+    (rule.effects || []).forEach((effect) => {
+      processParams(effect.params);
+    });
+
+    // Process random group effects
+    (rule.randomGroups || []).forEach((group) => {
+      group.effects.forEach((effect) => {
+        processParams(effect.params);
+      });
+    });
+  });
+
+  return Array.from(gameVariableMap.values());
 };
 
 const isUserDefinedVariable = (str: string): boolean => {
@@ -514,7 +572,7 @@ export const getAllVariables = (joker: JokerData): UserVariable[] => {
       autoVars.push({
         id: "auto_numerator",
         name: "numerator",
-        initialValue: numerators[0],
+        initialValue: Number(numerators[0]),
         description: `Chance numerator (e.g., ${numerators[0]} in '${numerators[0]} in X')`,
       });
     } else {
@@ -523,14 +581,14 @@ export const getAllVariables = (joker: JokerData): UserVariable[] => {
           autoVars.push({
             id: "auto_numerator",
             name: "numerator",
-            initialValue: num,
+            initialValue: Number(num),
             description: `First chance numerator (e.g., ${num} in '${num} in X')`,
           });
         } else {
           autoVars.push({
             id: `auto_numerator_${index + 1}`,
             name: `numerator${index + 1}`,
-            initialValue: num,
+            initialValue: Number(num),
             description: `${index + 1}${getOrdinalSuffix(
               index + 1
             )} chance numerator (e.g., ${num} in '${num} in X')`,
@@ -543,7 +601,7 @@ export const getAllVariables = (joker: JokerData): UserVariable[] => {
       autoVars.push({
         id: "auto_denominator",
         name: "denominator",
-        initialValue: denominators[0],
+        initialValue: Number(denominators[0]),
         description: `Chance denominator (e.g., ${denominators[0]} in 'X in ${denominators[0]}')`,
       });
     } else {
@@ -552,14 +610,14 @@ export const getAllVariables = (joker: JokerData): UserVariable[] => {
           autoVars.push({
             id: "auto_denominator",
             name: "denominator",
-            initialValue: denom,
+            initialValue: Number(denom),
             description: `First chance denominator (e.g., ${denom} in 'X in ${denom}')`,
           });
         } else {
           autoVars.push({
             id: `auto_denominator_${index + 1}`,
             name: `denominator${index + 1}`,
-            initialValue: denom,
+            initialValue: Number(denom),
             description: `${index + 1}${getOrdinalSuffix(
               index + 1
             )} chance denominator (e.g., ${denom} in 'X in ${denom}')`,
@@ -582,7 +640,18 @@ export const getAllVariables = (joker: JokerData): UserVariable[] => {
     description: getDefaultVariableDescription(name),
   }));
 
-  return [...userVars, ...autoVars, ...otherAutoVars];
+  // Add game variables as auto-variables
+  const gameVariables = extractGameVariablesFromRules(joker.rules || []);
+  const gameVarAutoVars = gameVariables.map((gameVar) => ({
+    id: `auto_gamevar_${gameVar.id}`,
+    name: gameVar.name.replace(/\s+/g, "").toLowerCase(), // Create a safe variable name
+    initialValue: 0, // Game variables don't have initial values in the traditional sense
+    description: `${gameVar.description}${
+      gameVar.multiplier !== 1 ? ` (×${gameVar.multiplier})` : ""
+    }`,
+  }));
+
+  return [...userVars, ...autoVars, ...otherAutoVars, ...gameVarAutoVars];
 };
 
 const getOrdinalSuffix = (num: number): string => {

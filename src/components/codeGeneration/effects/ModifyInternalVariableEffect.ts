@@ -1,5 +1,9 @@
 import type { EffectReturn } from "./AddChipsEffect";
 import type { Effect } from "../../ruleBuilder/types";
+import {
+  generateGameVariableCode,
+  parseGameVariable,
+} from "../gameVariableUtils";
 
 export const generateModifyInternalVariableReturn = (
   effect: Effect,
@@ -7,7 +11,19 @@ export const generateModifyInternalVariableReturn = (
 ): EffectReturn => {
   const variableName = (effect.params?.variable_name as string) || "var1";
   const operation = (effect.params?.operation as string) || "increment";
-  const value = effect.params?.value as number | string;
+  const effectValue = effect.params?.value;
+  const parsed = parseGameVariable(effectValue);
+
+  let valueCode: string;
+
+  if (parsed.isGameVariable) {
+    valueCode = generateGameVariableCode(effectValue);
+  } else if (typeof effectValue === "string") {
+    valueCode = `card.ability.extra.${effectValue}`;
+  } else {
+    valueCode = effectValue?.toString() || "1";
+  }
+
   const customMessage = effect.customMessage;
 
   const scoringTriggers = ["hand_played", "card_scored"];
@@ -17,39 +33,34 @@ export const generateModifyInternalVariableReturn = (
   let messageText = "";
   let messageColor = "G.C.WHITE";
 
-  const valueRef =
-    typeof value === "string"
-      ? `card.ability.extra.${value}`
-      : value.toString();
-
   switch (operation) {
     case "set":
-      operationCode = `card.ability.extra.${variableName} = ${valueRef}`;
+      operationCode = `card.ability.extra.${variableName} = ${valueCode}`;
       messageText = customMessage ? `"${customMessage}"` : "";
       messageColor = "G.C.BLUE";
       break;
     case "increment":
-      operationCode = `card.ability.extra.${variableName} = (card.ability.extra.${variableName}) + ${valueRef}`;
+      operationCode = `card.ability.extra.${variableName} = (card.ability.extra.${variableName}) + ${valueCode}`;
       messageText = customMessage ? `"${customMessage}"` : "";
       messageColor = "G.C.GREEN";
       break;
     case "decrement":
-      operationCode = `card.ability.extra.${variableName} = math.max(0, (card.ability.extra.${variableName}) - ${valueRef})`;
+      operationCode = `card.ability.extra.${variableName} = math.max(0, (card.ability.extra.${variableName}) - ${valueCode})`;
       messageText = customMessage ? `"${customMessage}"` : "";
       messageColor = "G.C.RED";
       break;
     case "multiply":
-      operationCode = `card.ability.extra.${variableName} = (card.ability.extra.${variableName}) * ${valueRef}`;
+      operationCode = `card.ability.extra.${variableName} = (card.ability.extra.${variableName}) * ${valueCode}`;
       messageText = customMessage ? `"${customMessage}"` : "";
       messageColor = "G.C.MULT";
       break;
     case "divide":
-      operationCode = `card.ability.extra.${variableName} = (card.ability.extra.${variableName}) / ${valueRef}`;
+      operationCode = `card.ability.extra.${variableName} = (card.ability.extra.${variableName}) / ${valueCode}`;
       messageText = customMessage ? `"${customMessage}"` : "";
       messageColor = "G.C.MULT";
       break;
     default:
-      operationCode = `card.ability.extra.${variableName} = (card.ability.extra.${variableName}) + ${valueRef}`;
+      operationCode = `card.ability.extra.${variableName} = (card.ability.extra.${variableName}) + ${valueCode}`;
       messageText = customMessage ? `"${customMessage}"` : "";
       messageColor = "G.C.GREEN";
   }

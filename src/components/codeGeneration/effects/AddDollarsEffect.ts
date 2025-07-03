@@ -1,57 +1,62 @@
-import type { EffectReturn } from "./AddChipsEffect";
 import type { Effect } from "../../ruleBuilder/types";
 import { getEffectVariableName } from "../index";
+import {
+  generateGameVariableCode,
+  parseGameVariable,
+} from "../gameVariableUtils";
 
-const EVAL_STATUS_TEXT_TRIGGERS = [
-  "blind_selected",
-  "blind_skipped",
-  "boss_defeated",
-  "booster_opened",
-  "booster_skipped",
-  "consumable_used",
-  "hand_drawn",
-  "first_hand_drawn",
-  "shop_entered",
-  "shop_exited",
-  "card_discarded",
-];
+export interface EffectReturn {
+  statement: string;
+  message?: string;
+  colour: string;
+}
 
 export const generateAddDollarsReturn = (
   triggerType: string,
-  effect?: Effect
+  effect: Effect
 ): EffectReturn => {
-  const customMessage = effect?.customMessage;
+  const effectValue = effect.params.value;
+  const parsed = parseGameVariable(effectValue);
 
-  // Check if value is a variable reference (string) or a literal value
-  const isVariableReference = typeof effect?.params?.value === "string";
+  let valueCode: string;
 
-  let valueReference = "";
-  if (isVariableReference) {
-    const variableName = effect?.params?.value as string;
-    valueReference = `card.ability.extra.${variableName}`;
+  if (parsed.isGameVariable) {
+    valueCode = generateGameVariableCode(effectValue);
+  } else if (typeof effectValue === "string") {
+    valueCode = `card.ability.extra.${effectValue}`;
   } else {
-    const configVarName = effect
-      ? getEffectVariableName(effect.id, "dollars")
-      : "dollars";
-    valueReference = `card.ability.extra.${configVarName}`;
+    const variableName = getEffectVariableName(effect.id, "dollars");
+    valueCode = `card.ability.extra.${variableName}`;
   }
 
-  if (EVAL_STATUS_TEXT_TRIGGERS.includes(triggerType)) {
-    const messageText = customMessage
-      ? `"${customMessage}"`
-      : `"$"..tostring(${valueReference})`;
-    return {
-      statement: `func = function()
-                    card_eval_status_text(context.blueprint_card or card, 'extra', nil, nil, nil, {message = ${messageText}, colour = G.C.MONEY})
-                    ease_dollars(${valueReference})
-                    return true
-                end`,
-      colour: "G.C.MONEY",
-    };
-  } else {
-    return {
-      statement: `dollars = ${valueReference}`,
-      message: customMessage ? `"${customMessage}"` : undefined,
-    };
+  const customMessage = effect.customMessage;
+  const messageCode = customMessage
+    ? `"${customMessage}"`
+    : `localize{type='variable',key='a_dollars',vars={${valueCode}}}`;
+
+  switch (triggerType) {
+    case "card_scored":
+    case "card_held_in_hand":
+      return {
+        statement: `dollars = ${valueCode}`,
+        message: messageCode,
+        colour: "G.C.MONEY",
+      };
+
+    case "round_end":
+      return {
+        statement: `dollars = ${valueCode}`,
+        message: messageCode,
+        colour: "G.C.MONEY",
+      };
+
+    case "hand_played":
+    default:
+      return {
+        statement: `
+                ease_dollars(${valueCode})
+                card_eval_status_text(context.blueprint_card or card, 'extra', nil, nil, nil, {message = ${messageCode}, colour = G.C.MONEY})`,
+        colour: "G.C.MONEY",
+      };
   }
 };

@@ -1,4 +1,5 @@
 import type { Rule } from "../../ruleBuilder/types";
+import { generateGameVariableCode } from "../gameVariableUtils";
 
 export const generateRankCardConditionCode = (rules: Rule[]): string | null => {
   const condition = rules[0].conditionGroups[0].conditions[0];
@@ -8,7 +9,7 @@ export const generateRankCardConditionCode = (rules: Rule[]): string | null => {
   const specificRank = (condition.params.specific_rank as string) || null;
   const rankGroup = (condition.params.rank_group as string) || null;
   const quantifier = (condition.params.quantifier as string) || "at_least_one";
-  const count = condition.params.count as number;
+  const count = generateGameVariableCode(condition.params.count);
   const scope = (condition.params.card_scope as string) || "scoring";
 
   const getRanksCheckLogic = (

@@ -1,11 +1,12 @@
 import type { Rule } from "../../ruleBuilder/types";
+import { generateGameVariableCode } from "../gameVariableUtils";
 
 export const generateCountCardConditionCode = (
   rules: Rule[]
 ): string | null => {
   const condition = rules[0].conditionGroups[0].conditions[0];
   const operator = (condition.params.operator as string) || "equals";
-  const value = (condition.params.value as number) || 5;
+  const value = generateGameVariableCode(condition.params.value) || "5";
   const scope = (condition.params.card_scope as string) || "scoring";
 
   const cardsToCheck =
