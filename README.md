@@ -74,6 +74,7 @@ The plan here is to implement enough triggers, conditions, and effects, so as th
 - [x] **Deck Size** - Check remaining deck size
 - [x] **Deck Count By Rank, Suit, Enhancement, Seal, Edition** - Check the specifics of the cards in your full deck
 - [x] **Specific Joker** - Check if you have a specific joker in your list
+- [x] **Generic Compare** - Check GameVars and Vars against a value/eachother
 
 #### Not Implemented Yet
 
@@ -84,6 +85,7 @@ The plan here is to implement enough triggers, conditions, and effects, so as th
 - [ ] **Glass Card Destroyed** - Check to see if a glass card got destroyed (Glass Joker)
 - [ ] **Most/Least Played Poker Hand** - Check if the hand played is your most/least played (Obelisk)
 - [ ] **Triggered Boss Blind Ability** - Check if the boss blind's ability was triggered (Matador)
+- [ ] **Consumable Type** - Check for card sold and consumable used
 
 ---
 
@@ -119,6 +121,8 @@ The plan here is to implement enough triggers, conditions, and effects, so as th
 - [x] **Copy Joker** - Make a copy of another joker (Random, By ID, By Index)
 - [x] **Destroy Joker** - Destroy another joker (Random, By ID, By Index)
 - [x] **Create Skip Tags** - Create a set or random skip tag
+- [x] **Set Dollars** - Set dollars to a value
+- [x] **Show Message** - Just show a simple little message
 
 #### Not Implemented Yet
 
