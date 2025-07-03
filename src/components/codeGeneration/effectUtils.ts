@@ -269,13 +269,13 @@ const generateSingleEffect = (
 ): EffectReturn => {
   switch (effect.type) {
     case "add_chips":
-      return generateAddChipsReturn(triggerType, effect);
+      return generateAddChipsReturn(effect);
     case "add_mult":
-      return generateAddMultReturn(triggerType, effect);
+      return generateAddMultReturn(effect);
     case "apply_x_mult":
-      return generateApplyXMultReturn(triggerType, effect);
+      return generateApplyXMultReturn(effect);
     case "add_dollars":
-      return generateAddDollarsReturn(triggerType, effect);
+      return generateAddDollarsReturn(effect);
     case "retrigger_cards":
       return generateRetriggerReturn(effect);
     case "destroy_self":
@@ -317,7 +317,7 @@ const generateSingleEffect = (
     case "destroy_joker":
       return generateDestroyJokerReturn(effect, triggerType);
     case "apply_x_chips":
-      return generateApplyXChipsReturn(triggerType, effect);
+      return generateApplyXChipsReturn(effect);
     case "create_tag":
       return generateCreateTagReturn(effect, triggerType);
     case "apply_exp_mult":
@@ -348,9 +348,7 @@ const buildReturnStatement = (effects: EffectReturn[]): string => {
   }
 
   if (firstContentEffectIndex === -1) {
-    return `return {
-                    colour = ${effects[0]?.colour || "G.C.WHITE"}
-                }`;
+    return "";
   }
 
   const firstContentEffect = effects[firstContentEffectIndex];
@@ -396,13 +394,21 @@ const buildReturnStatement = (effects: EffectReturn[]): string => {
       if (extraCount === 0) {
         extraChain = `,
                     extra = {
-                        ${extraContent},
+                        ${extraContent}`;
+
+        if (effect.colour && effect.colour.trim()) {
+          extraChain += `,
                         colour = ${effect.colour}`;
+        }
       } else {
         extraChain += `,
                         extra = {
-                            ${extraContent},
+                            ${extraContent}`;
+
+        if (effect.colour && effect.colour.trim()) {
+          extraChain += `,
                             colour = ${effect.colour}`;
+        }
       }
       extraCount++;
     }

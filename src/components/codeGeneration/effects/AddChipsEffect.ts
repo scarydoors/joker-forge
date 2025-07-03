@@ -11,10 +11,7 @@ export interface EffectReturn {
   colour: string;
 }
 
-export const generateAddChipsReturn = (
-  triggerType: string,
-  effect: Effect
-): EffectReturn => {
+export const generateAddChipsReturn = (effect: Effect): EffectReturn => {
   const effectValue = effect.params.value;
   const parsed = parseGameVariable(effectValue);
 
@@ -30,25 +27,15 @@ export const generateAddChipsReturn = (
   }
 
   const customMessage = effect.customMessage;
-  const messageCode = customMessage
-    ? `"${customMessage}"`
-    : `localize{type='variable',key='a_chips',vars={${valueCode}}}`;
 
-  switch (triggerType) {
-    case "card_scored":
-    case "card_held_in_hand":
-      return {
-        statement: `chips = ${valueCode}`,
-        message: messageCode,
-        colour: "G.C.CHIPS",
-      };
+  const result: EffectReturn = {
+    statement: `chips = ${valueCode}`,
+    colour: "",
+  };
 
-    case "hand_played":
-    default:
-      return {
-        statement: `chip_mod = ${valueCode}`,
-        message: messageCode,
-        colour: "G.C.CHIPS",
-      };
+  if (customMessage) {
+    result.message = `"${customMessage}"`;
   }
+
+  return result;
 };

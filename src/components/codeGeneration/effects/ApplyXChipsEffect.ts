@@ -11,10 +11,7 @@ export interface EffectReturn {
   colour: string;
 }
 
-export const generateApplyXChipsReturn = (
-  triggerType: string,
-  effect: Effect
-): EffectReturn => {
+export const generateApplyXChipsReturn = (effect: Effect): EffectReturn => {
   const effectValue = effect.params.value;
   const parsed = parseGameVariable(effectValue);
 
@@ -30,25 +27,15 @@ export const generateApplyXChipsReturn = (
   }
 
   const customMessage = effect.customMessage;
-  const messageCode = customMessage
-    ? `"${customMessage}"`
-    : `localize{type='variable',key='a_xchips',vars={${valueCode}}}`;
 
-  switch (triggerType) {
-    case "card_scored":
-    case "card_held_in_hand":
-      return {
-        statement: `x_chips = ${valueCode}`,
-        message: messageCode,
-        colour: "G.C.CHIPS",
-      };
+  const result: EffectReturn = {
+    statement: `Xchips = ${valueCode}`,
+    colour: "",
+  };
 
-    case "hand_played":
-    default:
-      return {
-        statement: `Xchips_mod = ${valueCode}`,
-        message: messageCode,
-        colour: "G.C.CHIPS",
-      };
+  if (customMessage) {
+    result.message = `"${customMessage}"`;
   }
+
+  return result;
 };

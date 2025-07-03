@@ -11,10 +11,7 @@ export interface EffectReturn {
   colour: string;
 }
 
-export const generateAddDollarsReturn = (
-  triggerType: string,
-  effect: Effect
-): EffectReturn => {
+export const generateAddDollarsReturn = (effect: Effect): EffectReturn => {
   const effectValue = effect.params.value;
   const parsed = parseGameVariable(effectValue);
 
@@ -30,33 +27,15 @@ export const generateAddDollarsReturn = (
   }
 
   const customMessage = effect.customMessage;
-  const messageCode = customMessage
-    ? `"${customMessage}"`
-    : `localize{type='variable',key='a_dollars',vars={${valueCode}}}`;
 
-  switch (triggerType) {
-    case "card_scored":
-    case "card_held_in_hand":
-      return {
-        statement: `dollars = ${valueCode}`,
-        message: messageCode,
-        colour: "G.C.MONEY",
-      };
+  const result: EffectReturn = {
+    statement: `dollars = ${valueCode}`,
+    colour: "",
+  };
 
-    case "round_end":
-      return {
-        statement: `dollars = ${valueCode}`,
-        message: messageCode,
-        colour: "G.C.MONEY",
-      };
-
-    case "hand_played":
-    default:
-      return {
-        statement: `
-                ease_dollars(${valueCode})
-                card_eval_status_text(context.blueprint_card or card, 'extra', nil, nil, nil, {message = ${messageCode}, colour = G.C.MONEY})`,
-        colour: "G.C.MONEY",
-      };
+  if (customMessage) {
+    result.message = `"${customMessage}"`;
   }
+
+  return result;
 };

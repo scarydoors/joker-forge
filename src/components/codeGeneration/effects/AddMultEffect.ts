@@ -11,10 +11,7 @@ export interface EffectReturn {
   colour: string;
 }
 
-export const generateAddMultReturn = (
-  triggerType: string,
-  effect: Effect
-): EffectReturn => {
+export const generateAddMultReturn = (effect: Effect): EffectReturn => {
   const effectValue = effect.params.value;
   const parsed = parseGameVariable(effectValue);
 
@@ -30,25 +27,15 @@ export const generateAddMultReturn = (
   }
 
   const customMessage = effect.customMessage;
-  const messageCode = customMessage
-    ? `"${customMessage}"`
-    : `localize{type='variable',key='a_mult',vars={${valueCode}}}`;
 
-  switch (triggerType) {
-    case "card_scored":
-    case "card_held_in_hand":
-      return {
-        statement: `mult = ${valueCode}`,
-        message: messageCode,
-        colour: "G.C.MULT",
-      };
+  const result: EffectReturn = {
+    statement: `mult = ${valueCode}`,
+    colour: "",
+  };
 
-    case "hand_played":
-    default:
-      return {
-        statement: `mult_mod = ${valueCode}`,
-        message: messageCode,
-        colour: "G.C.MULT",
-      };
+  if (customMessage) {
+    result.message = `"${customMessage}"`;
   }
+
+  return result;
 };

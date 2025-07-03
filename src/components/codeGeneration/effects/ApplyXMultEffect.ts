@@ -11,10 +11,7 @@ export interface EffectReturn {
   colour: string;
 }
 
-export const generateApplyXMultReturn = (
-  triggerType: string,
-  effect: Effect
-): EffectReturn => {
+export const generateApplyXMultReturn = (effect: Effect): EffectReturn => {
   const effectValue = effect.params.value;
   const parsed = parseGameVariable(effectValue);
 
@@ -30,25 +27,15 @@ export const generateApplyXMultReturn = (
   }
 
   const customMessage = effect.customMessage;
-  const messageCode = customMessage
-    ? `"${customMessage}"`
-    : `localize{type='variable',key='a_xmult',vars={${valueCode}}}`;
 
-  switch (triggerType) {
-    case "card_scored":
-    case "card_held_in_hand":
-      return {
-        statement: `x_mult = ${valueCode}`,
-        message: messageCode,
-        colour: "G.C.RED",
-      };
+  const result: EffectReturn = {
+    statement: `Xmult = ${valueCode}`,
+    colour: "",
+  };
 
-    case "hand_played":
-    default:
-      return {
-        statement: `Xmult_mod = ${valueCode}`,
-        message: messageCode,
-        colour: "G.C.RED",
-      };
+  if (customMessage) {
+    result.message = `"${customMessage}"`;
   }
+
+  return result;
 };
