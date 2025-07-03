@@ -152,21 +152,21 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
   }, [isOpen, joker]);
 
   useEffect(() => {
-    if (isOpen) {
-      const handleClickOutside = (event: MouseEvent) => {
-        if (
-          modalRef.current &&
-          !modalRef.current.contains(event.target as Node)
-        ) {
-          handleSave();
-        }
-      };
+    if (!isOpen) return;
 
-      document.addEventListener("mousedown", handleClickOutside);
-      return () => {
-        document.removeEventListener("mousedown", handleClickOutside);
-      };
-    }
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        modalRef.current &&
+        !modalRef.current.contains(event.target as Node)
+      ) {
+        handleSave();
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
   }, [isOpen, handleSave]);
 
   if (!isOpen) return null;
@@ -951,48 +951,120 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
                             />
                           </div>
 
-                          <div className="grid grid-cols-2 gap-4 pt-2">
-                            <div className="space-y-2">
-                              <Checkbox
-                                id="blueprint_compat_edit"
-                                label="Blueprint Compatible"
-                                checked={formData.blueprint_compat !== false}
-                                onChange={(checked) =>
-                                  handleCheckboxChange(
-                                    "blueprint_compat",
-                                    checked
-                                  )
-                                }
-                              />
-                              <Checkbox
-                                id="eternal_compat_edit"
-                                label="Eternal Compatible"
-                                checked={formData.eternal_compat !== false}
-                                onChange={(checked) =>
-                                  handleCheckboxChange(
-                                    "eternal_compat",
-                                    checked
-                                  )
-                                }
-                              />
-                            </div>
-                            <div className="space-y-2">
-                              <Checkbox
-                                id="unlocked_edit"
-                                label="Unlocked by Default"
-                                checked={formData.unlocked !== false}
-                                onChange={(checked) =>
-                                  handleCheckboxChange("unlocked", checked)
-                                }
-                              />
-                              <Checkbox
-                                id="discovered_edit"
-                                label="Already Discovered"
-                                checked={formData.discovered !== false}
-                                onChange={(checked) =>
-                                  handleCheckboxChange("discovered", checked)
-                                }
-                              />
+                          <div>
+                            <h4 className="text-white-light font-medium text-base mb-3 flex items-center gap-2">
+                              <BoltIcon className="h-5 w-5 text-mint" />
+                              Joker Properties
+                            </h4>
+                            <div className="space-y-4 rounded-lg border border-black-lighter p-4 bg-black-darker/30">
+                              {/* --- Compatibility --- */}
+                              <div>
+                                <p className="text-sm font-medium text-white-darker mb-2">
+                                  Compatibility
+                                </p>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2">
+                                  <Checkbox
+                                    id="blueprint_compat_edit"
+                                    label="Blueprint Compatible"
+                                    checked={
+                                      formData.blueprint_compat !== false
+                                    }
+                                    onChange={(checked) =>
+                                      handleCheckboxChange(
+                                        "blueprint_compat",
+                                        checked
+                                      )
+                                    }
+                                  />
+                                  <Checkbox
+                                    id="eternal_compat_edit"
+                                    label="Eternal Compatible"
+                                    checked={formData.eternal_compat !== false}
+                                    onChange={(checked) =>
+                                      handleCheckboxChange(
+                                        "eternal_compat",
+                                        checked
+                                      )
+                                    }
+                                  />
+                                </div>
+                              </div>
+
+                              {/* --- Separator --- */}
+                              <div className="border-t border-black-lighter/50"></div>
+
+                              {/* --- Default State --- */}
+                              <div>
+                                <p className="text-sm font-medium text-white-darker mb-2">
+                                  Default State
+                                </p>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2">
+                                  <Checkbox
+                                    id="unlocked_edit"
+                                    label="Unlocked by Default"
+                                    checked={formData.unlocked !== false}
+                                    onChange={(checked) =>
+                                      handleCheckboxChange("unlocked", checked)
+                                    }
+                                  />
+                                  <Checkbox
+                                    id="discovered_edit"
+                                    label="Already Discovered"
+                                    checked={formData.discovered !== false}
+                                    onChange={(checked) =>
+                                      handleCheckboxChange(
+                                        "discovered",
+                                        checked
+                                      )
+                                    }
+                                  />
+                                </div>
+                              </div>
+
+                              {/* --- Separator --- */}
+                              <div className="border-t border-black-lighter/50"></div>
+
+                              {/* --- Forced Spawning --- */}
+                              <div>
+                                <p className="text-sm font-medium text-white-darker mb-2">
+                                  Forced Spawning
+                                </p>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2">
+                                  <Checkbox
+                                    id="force_eternal_edit"
+                                    label="Always Spawn Eternal"
+                                    checked={formData.force_eternal === true}
+                                    onChange={(checked) =>
+                                      handleCheckboxChange(
+                                        "force_eternal",
+                                        checked
+                                      )
+                                    }
+                                  />
+                                  <Checkbox
+                                    id="force_perishable_edit"
+                                    label="Always Spawn Perishable"
+                                    checked={formData.force_perishable === true}
+                                    onChange={(checked) =>
+                                      handleCheckboxChange(
+                                        "force_perishable",
+                                        checked
+                                      )
+                                    }
+                                  />
+                                  <Checkbox
+                                    id="force_rental_edit"
+                                    label="Always Spawn Rental"
+                                    checked={formData.force_rental === true}
+                                    onChange={(checked) =>
+                                      handleCheckboxChange(
+                                        "force_rental",
+                                        checked
+                                      )
+                                    }
+                                  />
+                                </div>
+                              </div>
                             </div>
                           </div>
                         </div>

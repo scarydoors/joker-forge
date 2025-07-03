@@ -34,6 +34,9 @@ export interface JokerData {
   eternal_compat?: boolean;
   unlocked?: boolean;
   discovered?: boolean;
+  force_eternal?: boolean;
+  force_perishable?: boolean;
+  force_rental?: boolean;
   rules?: Rule[];
   userVariables?: UserVariable[];
   placeholderCreditIndex?: number;

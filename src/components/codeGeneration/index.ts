@@ -142,6 +142,11 @@ const generateSingleJokerLua = (joker: JokerData): string => {
   const locVarsCode = generateLocVarsFunction(joker, passiveEffects);
   jokerCode += `,\n\n    ${locVarsCode}`;
 
+  const setStickerCode = generateSetAbilityFunction(joker);
+  if (setStickerCode) {
+    jokerCode += `,\n\n    ${setStickerCode}`;
+  }
+
   const nonPassiveRules =
     joker.rules?.filter((rule) => rule.trigger !== "passive") || [];
 
@@ -172,6 +177,30 @@ const generateSingleJokerLua = (joker: JokerData): string => {
 
   output += jokerCode;
   return output;
+};
+
+const generateSetAbilityFunction = (joker: JokerData): string | null => {
+  const forcedStickers: string[] = [];
+
+  if (joker.force_eternal) {
+    forcedStickers.push("card:set_eternal(true)");
+  }
+
+  if (joker.force_perishable) {
+    forcedStickers.push("card:add_sticker('perishable', true)");
+  }
+
+  if (joker.force_rental) {
+    forcedStickers.push("card:add_sticker('rental', true)");
+  }
+
+  if (forcedStickers.length === 0) {
+    return null;
+  }
+
+  return `set_ability = function(self, card, initial)
+        ${forcedStickers.join("\n        ")}
+    end`;
 };
 
 const generateSingleJokerBase = (
@@ -246,6 +275,11 @@ const generateJokerCode = (
 
   const locVarsCode = generateLocVarsFunction(joker, passiveEffects);
   jokerCode += `,\n\n    ${locVarsCode}`;
+
+  const setStickerCode = generateSetAbilityFunction(joker);
+  if (setStickerCode) {
+    jokerCode += `,\n\n    ${setStickerCode}`;
+  }
 
   const nonPassiveRules =
     joker.rules?.filter((rule) => rule.trigger !== "passive") || [];
