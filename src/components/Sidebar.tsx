@@ -192,7 +192,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 
           <div className="text-center mt-4">
             <span className="text-xs text-mint font-medium tracking-widest">
-              PRE-ALPHA
+              v0.1.0
             </span>
           </div>
         </div>

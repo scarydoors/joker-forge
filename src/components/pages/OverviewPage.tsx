@@ -866,7 +866,7 @@ const OverviewPage: React.FC<OverviewPageProps> = ({
             <div className="flex items-center justify-center gap-2 mb-2">
               <FireIcon className="h-4 w-4 text-orange-400" />
               <span className="text-sm text-orange-400 font-medium">
-                PRE-ALPHA
+                v0.1.0
               </span>
             </div>
             <h1 className="text-sm mb-2 text-white-darker text-center">
