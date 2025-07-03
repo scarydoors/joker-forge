@@ -745,7 +745,7 @@ const OverviewPage: React.FC<OverviewPageProps> = ({
             </a>
           </div>
 
-          <div className="space-y-3 max-h-96 overflow-y-auto custom-scrollbar">
+          <div className="space-y-3 max-h-96 overflow-y-auto custom-scrollbar pr-2">
             {commitsLoading ? (
               <div className="space-y-3">
                 {[...Array(4)].map((_, i) => (
