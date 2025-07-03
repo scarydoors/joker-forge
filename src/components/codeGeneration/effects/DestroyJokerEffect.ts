@@ -33,7 +33,7 @@ export const generateDestroyJokerReturn = (
       jokerSelectionCode = `
                 local target_joker = nil
                 for i, joker in ipairs(G.jokers.cards) do
-                    if not joker.ability.eternal and not joker.getting_sliced then
+                    if joker ~= card and not joker.ability.eternal and not joker.getting_sliced then
                         target_joker = joker
                         break
                     end
@@ -43,7 +43,7 @@ export const generateDestroyJokerReturn = (
                 local target_joker = nil
                 for i = #G.jokers.cards, 1, -1 do
                     local joker = G.jokers.cards[i]
-                    if not joker.ability.eternal and not joker.getting_sliced then
+                    if joker ~= card and not joker.ability.eternal and not joker.getting_sliced then
                         target_joker = joker
                         break
                     end
@@ -85,16 +85,17 @@ export const generateDestroyJokerReturn = (
                 local target_joker = nil
                 if G.jokers.cards[${specificIndex}] then
                     local joker = G.jokers.cards[${specificIndex}]
-                    if not joker.ability.eternal and not joker.getting_sliced then
+                    if joker ~= card and not joker.ability.eternal and not joker.getting_sliced then
                         target_joker = joker
                     end
                 end`;
     }
   } else {
+    // FIXED: Added joker ~= card check to exclude self from random destruction
     jokerSelectionCode = `
                 local destructable_jokers = {}
                 for i, joker in ipairs(G.jokers.cards) do
-                    if not joker.ability.eternal and not joker.getting_sliced then
+                    if joker ~= card and not joker.ability.eternal and not joker.getting_sliced then
                         table.insert(destructable_jokers, joker)
                     end
                 end
