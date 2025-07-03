@@ -322,9 +322,9 @@ const generateSingleEffect = (
     case "create_tag":
       return generateCreateTagReturn(effect, triggerType);
     case "apply_exp_mult":
-      return generateApplyExpMultReturn(triggerType, effect);
+      return generateApplyExpMultReturn(effect);
     case "apply_exp_chips":
-      return generateApplyExpChipsReturn(triggerType, effect);
+      return generateApplyExpChipsReturn(effect);
     case "show_message":
       return generateShowMessageReturn(effect);
     case "set_dollars":

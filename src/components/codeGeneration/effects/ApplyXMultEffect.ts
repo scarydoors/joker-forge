@@ -20,7 +20,11 @@ export const generateApplyXMultReturn = (effect: Effect): EffectReturn => {
   if (parsed.isGameVariable) {
     valueCode = generateGameVariableCode(effectValue);
   } else if (typeof effectValue === "string") {
-    valueCode = `card.ability.extra.${effectValue}`;
+    if (effectValue.endsWith("_value")) {
+      valueCode = effectValue;
+    } else {
+      valueCode = `card.ability.extra.${effectValue}`;
+    }
   } else {
     const variableName = getEffectVariableName(effect.id, "Xmult");
     valueCode = `card.ability.extra.${variableName}`;

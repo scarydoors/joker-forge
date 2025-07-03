@@ -20,7 +20,11 @@ export const generateRetriggerReturn = (effect: Effect): EffectReturn => {
   if (parsed.isGameVariable) {
     valueCode = generateGameVariableCode(repetitionsValue);
   } else if (typeof repetitionsValue === "string") {
-    valueCode = `card.ability.extra.${repetitionsValue}`;
+    if (repetitionsValue.endsWith("_value")) {
+      valueCode = repetitionsValue;
+    } else {
+      valueCode = `card.ability.extra.${repetitionsValue}`;
+    }
   } else {
     const variableName = getEffectVariableName(effect.id, "repetitions");
     valueCode = `card.ability.extra.${variableName}`;
