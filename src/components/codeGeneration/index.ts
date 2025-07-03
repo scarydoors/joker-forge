@@ -556,6 +556,16 @@ const extractEffectsConfig = (
           configItems.push(`${varName} = ${effectValue}`);
           globalEffectVariableMapping[effect.id] = varName;
         }
+
+        if (
+          effect.type === "set_dollars" &&
+          typeof effectValue === "number" &&
+          !allVariableNames.has(String(effectValue))
+        ) {
+          const varName = getUniqueVariableName("set_dollars");
+          configItems.push(`${varName} = ${effectValue}`);
+          globalEffectVariableMapping[effect.id] = varName;
+        }
       });
 
       (rule.randomGroups || []).forEach((group) => {
@@ -684,6 +694,16 @@ const extractEffectsConfig = (
             !allVariableNames.has(String(effectValue))
           ) {
             const varName = getUniqueVariableName("echips");
+            configItems.push(`${varName} = ${effectValue}`);
+            globalEffectVariableMapping[effect.id] = varName;
+          }
+
+          if (
+            effect.type === "set_dollars" &&
+            typeof effectValue === "number" &&
+            !allVariableNames.has(String(effectValue))
+          ) {
+            const varName = getUniqueVariableName("set_dollars");
             configItems.push(`${varName} = ${effectValue}`);
             globalEffectVariableMapping[effect.id] = varName;
           }
