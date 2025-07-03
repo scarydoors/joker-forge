@@ -20,6 +20,7 @@ import { generateDeckCountConditionCode } from "./conditions/DeckCountCondition"
 import { generateCardEditionConditionCode } from "./conditions/CardEditionCondition";
 import { generateSpecificJokerConditionCode } from "./conditions/SpecificJokerCondition";
 import { generateGenericCompareConditionCode } from "./conditions/GenericCompareCondition";
+import { generateConsumableHeldConditionCode } from "./conditions/ConsumableHeldCondition";
 
 export const generateConditionChain = (rule: Rule): string => {
   if (!rule.conditionGroups || rule.conditionGroups.length === 0) {
@@ -163,8 +164,12 @@ const generateSingleConditionCode = (
 
     case "specific_joker":
       return generateSpecificJokerConditionCode([singleConditionRule]);
+
     case "generic_compare":
       return generateGenericCompareConditionCode([singleConditionRule]);
+
+    case "consumable_held":
+      return generateConsumableHeldConditionCode([singleConditionRule]);
 
     default:
       return null;
