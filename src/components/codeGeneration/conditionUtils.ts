@@ -19,6 +19,7 @@ import { generateDeckSizeConditionCode } from "./conditions/DeckSizeCondition";
 import { generateDeckCountConditionCode } from "./conditions/DeckCountCondition";
 import { generateCardEditionConditionCode } from "./conditions/CardEditionCondition";
 import { generateSpecificJokerConditionCode } from "./conditions/SpecificJokerCondition";
+import { generateGenericCompareConditionCode } from "./conditions/GenericCompareCondition";
 
 export const generateConditionChain = (rule: Rule): string => {
   if (!rule.conditionGroups || rule.conditionGroups.length === 0) {
@@ -162,6 +163,8 @@ const generateSingleConditionCode = (
 
     case "specific_joker":
       return generateSpecificJokerConditionCode([singleConditionRule]);
+    case "generic_compare":
+      return generateGenericCompareConditionCode([singleConditionRule]);
 
     default:
       return null;

@@ -39,6 +39,7 @@ import { generateApplyXChipsReturn } from "./effects/ApplyXChipsEffect";
 import { generateCreateTagReturn } from "./effects/CreateTagEffect";
 import { generateApplyExpMultReturn } from "./effects/ApplyExpMultEffect";
 import { generateApplyExpChipsReturn } from "./effects/ApplyExpChipsEffect";
+import { generateShowMessageReturn } from "./effects/ShowMessageEffect";
 
 export interface RandomGroup {
   id: string;
@@ -323,6 +324,8 @@ const generateSingleEffect = (
       return generateApplyExpMultReturn(triggerType, effect);
     case "apply_exp_chips":
       return generateApplyExpChipsReturn(triggerType, effect);
+    case "show_message":
+      return generateShowMessageReturn(effect);
 
     default:
       return {
