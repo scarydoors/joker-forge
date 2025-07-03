@@ -33,7 +33,7 @@ export const generateApplyXChipsReturn = (effect: Effect): EffectReturn => {
   const customMessage = effect.customMessage;
 
   const result: EffectReturn = {
-    statement: `Xchips = ${valueCode}`,
+    statement: `xchips = ${valueCode}`,
     colour: "",
   };
 
