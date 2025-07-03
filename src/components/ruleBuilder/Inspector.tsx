@@ -31,6 +31,9 @@ import {
   validateVariableName,
   validateCustomMessage,
 } from "../generic/validationUtils";
+import { GameVariable, getGameVariableById } from "./data/GameVars";
+import { CubeIcon } from "@heroicons/react/24/outline";
+import { SelectedItem } from "./types";
 
 interface InspectorProps {
   position: { x: number; y: number };
@@ -58,7 +61,11 @@ interface InspectorProps {
   onClose: () => void;
   onPositionChange: (position: { x: number; y: number }) => void;
   onToggleVariablesPanel: () => void;
+  onToggleGameVariablesPanel: () => void;
   onCreateRandomGroupFromEffect: (ruleId: string, effectId: string) => void;
+  selectedGameVariable: GameVariable | null;
+  onGameVariableApplied: () => void;
+  selectedItem: SelectedItem;
 }
 
 interface ParameterFieldProps {
@@ -69,17 +76,34 @@ interface ParameterFieldProps {
   availableVariables?: Array<{ value: string; label: string }>;
   onCreateVariable?: (name: string, initialValue: number) => void;
   onOpenVariablesPanel?: () => void;
+  onOpenGameVariablesPanel?: () => void;
+  selectedGameVariable?: GameVariable | null;
+  onGameVariableApplied?: () => void;
 }
 
-const ChanceInput: React.FC<{
+interface ChanceInputProps {
   label: string;
   value: string | number | undefined;
   onChange: (value: string | number) => void;
   availableVariables: Array<{ value: string; label: string }>;
   onCreateVariable: (name: string, initialValue: number) => void;
   onOpenVariablesPanel: () => void;
-}> = React.memo(
-  ({ label, value, onChange, availableVariables, onOpenVariablesPanel }) => {
+  onOpenGameVariablesPanel: () => void;
+  selectedGameVariable?: GameVariable | null;
+  onGameVariableApplied?: () => void;
+}
+
+const ChanceInput: React.FC<ChanceInputProps> = React.memo(
+  ({
+    label,
+    value,
+    onChange,
+    availableVariables,
+    onOpenVariablesPanel,
+    onOpenGameVariablesPanel,
+    selectedGameVariable,
+    onGameVariableApplied,
+  }) => {
     const [isVariableMode, setIsVariableMode] = React.useState(
       typeof value === "string"
     );
@@ -89,6 +113,21 @@ const ChanceInput: React.FC<{
     React.useEffect(() => {
       setIsVariableMode(typeof value === "string");
     }, [value]);
+
+    React.useEffect(() => {
+      if (selectedGameVariable) {
+        const currentValue = value;
+        const isAlreadyGameVar =
+          typeof currentValue === "string" &&
+          currentValue.startsWith("GAMEVAR:");
+        const multiplier = isAlreadyGameVar
+          ? parseFloat(currentValue.split("|")[1] || "1")
+          : 1;
+
+        onChange(`GAMEVAR:${selectedGameVariable.id}|${multiplier}`);
+        onGameVariableApplied?.();
+      }
+    }, [selectedGameVariable, value, onChange, onGameVariableApplied]);
 
     return (
       <div className="flex flex-col gap-2 items-center">
@@ -104,6 +143,17 @@ const ChanceInput: React.FC<{
             title="Toggle variable mode"
           >
             <VariableIcon className="h-3 w-3" />
+          </button>
+          <button
+            onClick={onOpenGameVariablesPanel}
+            className={`p-1 rounded transition-colors cursor-pointer ${
+              typeof value === "string" && value.startsWith("GAMEVAR:")
+                ? "bg-mint/20 text-mint"
+                : "bg-black-lighter text-white-darker hover:text-mint"
+            }`}
+            title="Use game variable"
+          >
+            <CubeIcon className="h-3 w-3" />
           </button>
         </div>
 
@@ -167,6 +217,9 @@ const ParameterField: React.FC<ParameterFieldProps> = ({
   parentValues = {},
   availableVariables = [],
   onOpenVariablesPanel,
+  onOpenGameVariablesPanel,
+  selectedGameVariable,
+  onGameVariableApplied,
 }) => {
   const [isVariableMode, setIsVariableMode] = React.useState(
     typeof value === "string"
@@ -177,6 +230,26 @@ const ParameterField: React.FC<ParameterFieldProps> = ({
   React.useEffect(() => {
     setIsVariableMode(typeof value === "string");
   }, [value]);
+
+  React.useEffect(() => {
+    if (selectedGameVariable && param.type === "number") {
+      const currentValue = value;
+      const isAlreadyGameVar =
+        typeof currentValue === "string" && currentValue.startsWith("GAMEVAR:");
+      const multiplier = isAlreadyGameVar
+        ? parseFloat(currentValue.split("|")[1] || "1")
+        : 1;
+
+      onChange(`GAMEVAR:${selectedGameVariable.id}|${multiplier}`);
+      onGameVariableApplied?.();
+    }
+  }, [
+    selectedGameVariable,
+    param.type,
+    onChange,
+    onGameVariableApplied,
+    value,
+  ]);
 
   if (hasShowWhen(param)) {
     const { parameter, values } = param.showWhen;
@@ -240,8 +313,20 @@ const ParameterField: React.FC<ParameterFieldProps> = ({
       );
 
     case "number": {
+      const isGameVariable =
+        typeof value === "string" && value.startsWith("GAMEVAR:");
+      const gameVariableId = isGameVariable
+        ? value.replace("GAMEVAR:", "").split("|")[0]
+        : null;
+      const gameVariableMultiplier = isGameVariable
+        ? parseFloat(value.replace("GAMEVAR:", "").split("|")[1] || "1")
+        : 1;
+      const gameVariable = gameVariableId
+        ? getGameVariableById(gameVariableId)
+        : null;
+
       const numericValue =
-        typeof value === "number"
+        !isGameVariable && typeof value === "number"
           ? value
           : typeof param.default === "number"
           ? param.default
@@ -264,11 +349,56 @@ const ParameterField: React.FC<ParameterFieldProps> = ({
             >
               <VariableIcon className="h-4 w-4" />
             </button>
+            <button
+              onClick={onOpenGameVariablesPanel}
+              className={`p-1 rounded transition-colors cursor-pointer ${
+                isGameVariable
+                  ? "bg-mint/20 text-mint"
+                  : "bg-black-lighter text-white-darker hover:text-mint"
+              }`}
+              title="Use game variable"
+            >
+              <CubeIcon className="h-4 w-4" />
+            </button>
           </div>
 
-          {isVariableMode ? (
+          {isGameVariable ? (
             <div className="space-y-2">
-              {availableVariables.length > 0 ? (
+              <div className="flex items-center justify-between p-2 bg-mint/10 border border-mint/30 rounded-lg">
+                <div className="flex items-center gap-2">
+                  <CubeIcon className="h-4 w-4 text-mint" />
+                  <span className="text-mint text-sm font-medium">
+                    {gameVariable?.label || "Unknown Game Variable"}
+                  </span>
+                </div>
+                <button
+                  onClick={() => onChange(numericValue)}
+                  className="p-1 text-mint hover:text-white transition-colors cursor-pointer"
+                  title="Remove game variable"
+                >
+                  <XMarkIcon className="h-4 w-4" />
+                </button>
+              </div>
+              <div>
+                <span className="text-white-light text-sm mb-2 block">
+                  Multiplier
+                </span>
+                <InputField
+                  type="number"
+                  value={gameVariableMultiplier.toString()}
+                  onChange={(e) => {
+                    const newMultiplier = parseFloat(e.target.value) || 1;
+                    onChange(`GAMEVAR:${gameVariableId}|${newMultiplier}`);
+                  }}
+                  min="0"
+                  step="0.1"
+                  size="sm"
+                />
+              </div>
+            </div>
+          ) : isVariableMode ? (
+            <div className="space-y-2">
+              {availableVariables && availableVariables.length > 0 ? (
                 <InputDropdown
                   value={(value as string) || ""}
                   onChange={(newValue) => onChange(newValue)}
@@ -282,7 +412,7 @@ const ParameterField: React.FC<ParameterFieldProps> = ({
                   variant="secondary"
                   size="sm"
                   fullWidth
-                  onClick={onOpenVariablesPanel}
+                  onClick={() => onOpenVariablesPanel?.()}
                   icon={<PlusIcon className="h-4 w-4" />}
                   className="cursor-pointer"
                 >
@@ -291,28 +421,26 @@ const ParameterField: React.FC<ParameterFieldProps> = ({
               )}
             </div>
           ) : (
-            <>
-              <InputField
-                type="number"
-                value={numericValue.toString()}
-                onChange={(e) => {
-                  const val = parseFloat(e.target.value);
-                  onChange(isNaN(val) ? 0 : val);
-                }}
-                min={param.min?.toString()}
-                max={param.max?.toString()}
-                step={
-                  param.id === "value" &&
-                  typeof value === "number" &&
-                  value > 0 &&
-                  value < 1
-                    ? "0.1"
-                    : "1"
-                }
-                size="sm"
-                labelPosition="center"
-              />
-            </>
+            <InputField
+              type="number"
+              value={numericValue.toString()}
+              onChange={(e) => {
+                const val = parseFloat(e.target.value);
+                onChange(isNaN(val) ? 0 : val);
+              }}
+              min={param.min?.toString()}
+              max={param.max?.toString()}
+              step={
+                param.id === "value" &&
+                typeof value === "number" &&
+                value > 0 &&
+                value < 1
+                  ? "0.1"
+                  : "1"
+              }
+              size="sm"
+              labelPosition="center"
+            />
           )}
         </>
       );
@@ -369,7 +497,11 @@ const Inspector: React.FC<InspectorProps> = ({
   onUpdateJoker,
   onClose,
   onToggleVariablesPanel,
+  onToggleGameVariablesPanel,
   onCreateRandomGroupFromEffect,
+  selectedGameVariable,
+  onGameVariableApplied,
+  selectedItem,
 }) => {
   const [customMessageValidationError, setCustomMessageValidationError] =
     useState<string>("");
@@ -426,6 +558,69 @@ const Inspector: React.FC<InspectorProps> = ({
   React.useEffect(() => {
     setCustomMessageValidationError("");
   }, [selectedEffect?.id]);
+
+  React.useEffect(() => {
+    if (selectedGameVariable && selectedItem) {
+      if (selectedItem.type === "condition" && selectedCondition) {
+        const valueParam = selectedCondition.params.value;
+        if (valueParam !== undefined) {
+          const currentValue = valueParam;
+          const isAlreadyGameVar =
+            typeof currentValue === "string" &&
+            currentValue.startsWith("GAMEVAR:");
+          const multiplier = isAlreadyGameVar
+            ? parseFloat(currentValue.split("|")[1] || "1")
+            : 1;
+
+          onUpdateCondition(selectedRule?.id || "", selectedCondition.id, {
+            params: {
+              ...selectedCondition.params,
+              value: `GAMEVAR:${selectedGameVariable.id}|${multiplier}`,
+            },
+          });
+          onGameVariableApplied();
+        }
+      } else if (selectedItem.type === "effect" && selectedEffect) {
+        const valueParam =
+          selectedEffect.params.value || selectedEffect.params.repetitions;
+        if (valueParam !== undefined) {
+          const currentValue = valueParam;
+          const isAlreadyGameVar =
+            typeof currentValue === "string" &&
+            currentValue.startsWith("GAMEVAR:");
+          const multiplier = isAlreadyGameVar
+            ? parseFloat(currentValue.split("|")[1] || "1")
+            : 1;
+
+          const paramKey =
+            selectedEffect.params.value !== undefined ? "value" : "repetitions";
+          onUpdateEffect(selectedRule?.id || "", selectedEffect.id, {
+            params: {
+              ...selectedEffect.params,
+              [paramKey]: `GAMEVAR:${selectedGameVariable.id}|${multiplier}`,
+            },
+          });
+          onGameVariableApplied();
+        }
+      } else if (selectedItem.type === "randomgroup" && selectedRandomGroup) {
+        onUpdateRandomGroup(selectedRule?.id || "", selectedRandomGroup.id, {
+          chance_numerator: `GAMEVAR:${selectedGameVariable.id}|1`,
+        });
+        onGameVariableApplied();
+      }
+    }
+  }, [
+    selectedGameVariable,
+    selectedItem,
+    selectedCondition,
+    selectedEffect,
+    selectedRandomGroup,
+    selectedRule?.id,
+    onUpdateCondition,
+    onUpdateEffect,
+    onUpdateRandomGroup,
+    onGameVariableApplied,
+  ]);
 
   const renderTriggerInfo = () => {
     if (!selectedRule) return null;
@@ -568,6 +763,9 @@ const Inspector: React.FC<InspectorProps> = ({
                   availableVariables={availableVariables}
                   onCreateVariable={handleCreateVariable}
                   onOpenVariablesPanel={onToggleVariablesPanel}
+                  onOpenGameVariablesPanel={onToggleGameVariablesPanel}
+                  selectedGameVariable={selectedGameVariable}
+                  onGameVariableApplied={onGameVariableApplied}
                 />
               </div>
             ))}
@@ -614,12 +812,15 @@ const Inspector: React.FC<InspectorProps> = ({
                 value={selectedRandomGroup.chance_numerator}
                 onChange={(value) => {
                   onUpdateRandomGroup(selectedRule.id, selectedRandomGroup.id, {
-                    chance_numerator: typeof value === "number" ? value : 1,
+                    chance_numerator: value,
                   });
                 }}
                 availableVariables={availableVariables}
                 onCreateVariable={handleCreateVariable}
                 onOpenVariablesPanel={onToggleVariablesPanel}
+                onOpenGameVariablesPanel={onToggleGameVariablesPanel}
+                selectedGameVariable={selectedGameVariable}
+                onGameVariableApplied={onGameVariableApplied}
               />
               <span className="text-white-light text-sm">in</span>
               <ChanceInput
@@ -628,12 +829,15 @@ const Inspector: React.FC<InspectorProps> = ({
                 value={selectedRandomGroup.chance_denominator}
                 onChange={(value) => {
                   onUpdateRandomGroup(selectedRule.id, selectedRandomGroup.id, {
-                    chance_denominator: typeof value === "number" ? value : 4,
+                    chance_denominator: value,
                   });
                 }}
                 availableVariables={availableVariables}
                 onCreateVariable={handleCreateVariable}
                 onOpenVariablesPanel={onToggleVariablesPanel}
+                onOpenGameVariablesPanel={onToggleGameVariablesPanel}
+                selectedGameVariable={selectedGameVariable}
+                onGameVariableApplied={onGameVariableApplied}
               />
             </div>
           </div>
@@ -767,6 +971,9 @@ const Inspector: React.FC<InspectorProps> = ({
                   availableVariables={availableVariables}
                   onCreateVariable={handleCreateVariable}
                   onOpenVariablesPanel={onToggleVariablesPanel}
+                  onOpenGameVariablesPanel={onToggleGameVariablesPanel}
+                  selectedGameVariable={selectedGameVariable}
+                  onGameVariableApplied={onGameVariableApplied}
                 />
               </div>
             ))}

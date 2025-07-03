@@ -15,7 +15,14 @@ import {
 } from "@dnd-kit/core";
 import { restrictToVerticalAxis } from "@dnd-kit/modifiers";
 import { sortableKeyboardCoordinates, arrayMove } from "@dnd-kit/sortable";
-import type { Rule, Condition, Effect, RandomGroup } from "./types";
+import type {
+  EffectTypeDefinition,
+  Rule,
+  Condition,
+  Effect,
+  RandomGroup,
+  ConditionTypeDefinition,
+} from "./types";
 import { JokerData } from "../JokerCard";
 import RuleCard from "./RuleCard";
 import FloatingDock from "./FloatingDock";
@@ -30,6 +37,8 @@ import {
 } from "@heroicons/react/24/outline";
 import { getConditionTypeById } from "./data/Conditions";
 import { getEffectTypeById } from "./data/Effects";
+import GameVariables from "./GameVariables";
+import { GameVariable } from "./data/GameVars";
 
 interface RuleBuilderProps {
   isOpen: boolean;
@@ -86,6 +95,12 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
       position: { x: 0, y: 0 },
       size: { width: 320, height: 300 },
     },
+    gameVariables: {
+      id: "gameVariables",
+      isVisible: false,
+      position: { x: 20, y: 20 },
+      size: { width: 320, height: 500 },
+    },
     inspector: {
       id: "inspector",
       isVisible: false,
@@ -96,6 +111,9 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
 
   const modalRef = useRef<HTMLDivElement>(null);
   const transformRef = useRef<ReactZoomPanPinchRef>(null);
+
+  const [selectedGameVariable, setSelectedGameVariable] =
+    useState<GameVariable | null>(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -137,6 +155,7 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
   const togglePanel = useCallback((panelId: string) => {
     setPanels((prev) => {
       const panel = prev[panelId];
+
       const findPosition = (
         panels: Record<string, PanelState>,
         targetPanelId: string
@@ -145,22 +164,54 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
         const padding = 20;
         const viewportWidth = window.innerWidth;
         const viewportHeight = window.innerHeight - 100;
+
+        const blockPalettePanel = panels["blockPalette"];
+        const variablesPanel = panels["variables"];
+        const gameVariablesPanel = panels["gameVariables"];
+
+        const blockPaletteX = 20;
+        const blockPaletteWidth = 320;
+        const variablesHeight = 300;
+
         if (targetPanelId === "variables") {
-          const blockPalettePanel = panels["blockPalette"];
-          if (blockPalettePanel && blockPalettePanel.isVisible) {
+          const baseX = blockPalettePanel?.isVisible
+            ? blockPaletteX + blockPaletteWidth + padding
+            : blockPaletteX;
+          return {
+            x: baseX,
+            y: blockPaletteX,
+          };
+        }
+
+        if (targetPanelId === "gameVariables") {
+          const baseX = blockPalettePanel?.isVisible
+            ? blockPaletteX + blockPaletteWidth + padding
+            : blockPaletteX;
+          return {
+            x: baseX,
+            y: blockPaletteX + variablesHeight + padding,
+          };
+        }
+
+        if (targetPanelId === "blockPalette") {
+          const variablesAtBlockPaletteX =
+            variablesPanel?.isVisible &&
+            variablesPanel.position.x === blockPaletteX;
+          const gameVariablesAtBlockPaletteX =
+            gameVariablesPanel?.isVisible &&
+            gameVariablesPanel.position.x === blockPaletteX;
+
+          if (variablesAtBlockPaletteX || gameVariablesAtBlockPaletteX) {
             return {
-              x:
-                blockPalettePanel.position.x +
-                blockPalettePanel.size.width +
-                padding,
-              y: blockPalettePanel.position.y,
-            };
-          } else {
-            return {
-              x: 360 + padding,
-              y: 100,
+              x: blockPaletteX + blockPaletteWidth + padding,
+              y: blockPaletteX,
             };
           }
+
+          return {
+            x: blockPaletteX,
+            y: blockPaletteX,
+          };
         }
 
         const positions = [
@@ -240,8 +291,13 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
         }))
       );
       setSelectedItem(null);
+      setSelectedGameVariable(null);
     }
   }, [isOpen, existingRules]);
+
+  useEffect(() => {
+    setSelectedGameVariable(null);
+  }, [selectedItem]);
 
   useEffect(() => {
     if (isOpen) {
@@ -270,6 +326,9 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
             break;
           case "v":
             togglePanel("variables");
+            break;
+          case "g":
+            togglePanel("gameVariables");
             break;
           case "p":
             togglePanel("inspector");
@@ -303,6 +362,213 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
         position,
       },
     }));
+  };
+
+  const generateAutoTitle = (
+    item: Condition | Effect,
+    typeDefinition: ConditionTypeDefinition | EffectTypeDefinition,
+    isCondition: boolean
+  ): string => {
+    const baseLabel = typeDefinition.label;
+    const params = item.params;
+
+    if (!params || Object.keys(params).length === 0) {
+      return baseLabel;
+    }
+
+    const prefix = isCondition ? "If " : "";
+    const skipValues = [
+      "none",
+      "dont_change",
+      "no_edition",
+      "remove",
+      "any",
+      "specific",
+    ];
+    const processedParams = new Set<string>();
+
+    let title = "";
+
+    if (params.operator && params.value !== undefined) {
+      const operatorMap: Record<string, string> = {
+        equals: "=",
+        not_equals: "≠",
+        greater_than: ">",
+        less_than: "<",
+        greater_equals: "≥",
+        less_equals: "≤",
+      };
+      const op =
+        params.operator &&
+        Object.prototype.hasOwnProperty.call(
+          operatorMap,
+          params.operator as string
+        )
+          ? operatorMap[params.operator as string]
+          : params.operator;
+
+      let valueDisplay = params.value;
+      if (
+        typeDefinition.id === "player_money" ||
+        typeDefinition.id === "add_dollars"
+      ) {
+        valueDisplay = `$${params.value}`;
+      }
+
+      title = `${prefix}${baseLabel
+        .replace("Player ", "")
+        .replace("Remaining ", "")} ${op} ${valueDisplay}`;
+      processedParams.add("operator");
+      processedParams.add("value");
+    } else if (params.value !== undefined && !params.operator) {
+      title = `${prefix}${baseLabel} = ${params.value}`;
+      processedParams.add("value");
+    } else if (params.specific_rank || params.rank_group) {
+      const rank = params.specific_rank || params.rank_group;
+      title = `${prefix}Card Rank = ${rank}`;
+      processedParams.add("specific_rank");
+      processedParams.add("rank_group");
+    } else if (params.specific_suit || params.suit_group) {
+      const suit = params.specific_suit || params.suit_group;
+      title = `${prefix}Card Suit = ${suit}`;
+      processedParams.add("specific_suit");
+      processedParams.add("suit_group");
+    } else if (!isCondition && params.operation && params.value !== undefined) {
+      const operationMap: { [key: string]: string } = {
+        add: "+",
+        subtract: "-",
+        set: "Set to",
+      };
+      const op = operationMap[params.operation as string] || params.operation;
+      const target = baseLabel
+        .replace("Edit ", "")
+        .replace("Add ", "")
+        .replace("Apply ", "");
+      title = `${op} ${params.value} ${target}`;
+      processedParams.add("operation");
+      processedParams.add("value");
+    } else if (!isCondition) {
+      if (params.value !== undefined && baseLabel.startsWith("Add")) {
+        let valueDisplay = params.value;
+        if (typeDefinition.id === "add_dollars") {
+          valueDisplay = `$${params.value}`;
+        }
+        title = `Add ${valueDisplay} ${baseLabel.replace("Add ", "")}`;
+        processedParams.add("value");
+      } else if (params.value !== undefined && baseLabel.startsWith("Apply")) {
+        title = `Apply ${params.value}x ${baseLabel
+          .replace("Apply x", "")
+          .replace("Apply ", "")}`;
+        processedParams.add("value");
+      } else if (params.repetitions !== undefined) {
+        title = `Retrigger ${params.repetitions}x`;
+        processedParams.add("repetitions");
+      } else if (
+        typeDefinition.id === "level_up_hand" &&
+        params.value !== undefined
+      ) {
+        title = `Level Up Hand ${params.value}x`;
+        processedParams.add("value");
+      } else {
+        title = baseLabel;
+      }
+    } else {
+      title = baseLabel;
+    }
+
+    const additionalParams: string[] = [];
+
+    Object.entries(params).forEach(([key, value]) => {
+      if (
+        processedParams.has(key) ||
+        !value ||
+        skipValues.includes(value as string)
+      ) {
+        return;
+      }
+
+      const stringValue = value as string;
+
+      if (
+        key === "suit" ||
+        key === "rank" ||
+        key === "enhancement" ||
+        key === "seal" ||
+        key === "edition"
+      ) {
+        if (stringValue === "random") {
+          additionalParams.push("random " + key);
+        } else {
+          additionalParams.push(stringValue);
+        }
+      } else if (key === "joker_type" && stringValue === "random") {
+        additionalParams.push("random joker");
+      } else if (key === "joker_key" && stringValue !== "j_joker") {
+        additionalParams.push(stringValue);
+      } else if (key === "rarity" && stringValue !== "random") {
+        additionalParams.push(stringValue);
+      } else if (key === "is_negative" && stringValue === "negative") {
+        additionalParams.push("negative");
+      } else if (key === "tarot_card" && stringValue !== "random") {
+        additionalParams.push(stringValue.replace("_", " "));
+      } else if (key === "planet_card" && stringValue !== "random") {
+        additionalParams.push(stringValue.replace("_", " "));
+      } else if (key === "spectral_card" && stringValue !== "random") {
+        additionalParams.push(stringValue.replace("_", " "));
+      } else if (key === "consumable_type" && stringValue !== "random") {
+        additionalParams.push(stringValue);
+      } else if (key === "specific_card" && stringValue !== "random") {
+        additionalParams.push(stringValue.replace("_", " "));
+      } else if (key === "specific_tag") {
+        additionalParams.push(stringValue.replace("_", " "));
+      } else if (key === "selection_method" && stringValue !== "random") {
+        additionalParams.push(stringValue + " selection");
+      } else if (key === "position" && stringValue !== "first") {
+        additionalParams.push(stringValue + " position");
+      } else if (key === "hand_selection" && stringValue !== "current") {
+        additionalParams.push(stringValue + " hand");
+      } else if (key === "specific_hand") {
+        additionalParams.push(stringValue.toLowerCase());
+      } else if (key === "card_scope" && stringValue !== "scoring") {
+        additionalParams.push(stringValue + " cards");
+      } else if (key === "quantifier" && stringValue !== "all") {
+        additionalParams.push(stringValue.replace("_", " "));
+      } else if (key === "count" && !title.includes(stringValue)) {
+        additionalParams.push(stringValue + " cards");
+      } else if (key === "property_type") {
+        additionalParams.push("by " + stringValue);
+      } else if (key === "size_type" && stringValue !== "remaining") {
+        additionalParams.push(stringValue);
+      } else if (key === "blind_type") {
+        additionalParams.push(stringValue + " blind");
+      } else if (key === "card_index" && stringValue !== "any") {
+        if (stringValue === "1") additionalParams.push("1st card");
+        else if (stringValue === "2") additionalParams.push("2nd card");
+        else if (stringValue === "3") additionalParams.push("3rd card");
+        else if (stringValue === "4") additionalParams.push("4th card");
+        else if (stringValue === "5") additionalParams.push("5th card");
+        else additionalParams.push(stringValue + " card");
+      } else if (key === "card_rank" && stringValue !== "any") {
+        additionalParams.push("rank " + stringValue);
+      } else if (key === "card_suit" && stringValue !== "any") {
+        additionalParams.push("suit " + stringValue);
+      } else if (
+        key === "new_rank" ||
+        key === "new_suit" ||
+        key === "new_enhancement" ||
+        key === "new_seal" ||
+        key === "new_edition"
+      ) {
+        const cleanKey = key.replace("new_", "");
+        additionalParams.push("→ " + cleanKey + " " + stringValue);
+      }
+    });
+
+    if (additionalParams.length > 0) {
+      title += ", " + additionalParams.join(", ");
+    }
+
+    return title;
   };
 
   const updateRulePosition = (
@@ -795,180 +1061,6 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
     );
   };
 
-  const generateConditionTitle = (condition: Condition) => {
-    const conditionType = getConditionTypeById(condition.type);
-    const baseLabel = conditionType?.label || "Unknown Condition";
-
-    if (!condition.params || Object.keys(condition.params).length === 0) {
-      return baseLabel;
-    }
-
-    const params = condition.params;
-    switch (condition.type) {
-      case "hand_type":
-        if (params.value) {
-          return `If Hand Type = ${params.value}`;
-        }
-        break;
-      case "player_money":
-        if (params.operator && params.value !== undefined) {
-          const op =
-            params.operator === "greater_than"
-              ? ">"
-              : params.operator === "less_than"
-              ? "<"
-              : params.operator === "equals"
-              ? "="
-              : params.operator === "greater_equals"
-              ? ">="
-              : params.operator === "less_equals"
-              ? "<="
-              : "≠";
-          return `If Player Money ${op} $${params.value}`;
-        }
-        break;
-      case "card_count":
-        if (params.operator && params.value !== undefined) {
-          const op =
-            params.operator === "greater_than"
-              ? ">"
-              : params.operator === "less_than"
-              ? "<"
-              : params.operator === "equals"
-              ? "="
-              : params.operator === "greater_equals"
-              ? ">="
-              : params.operator === "less_equals"
-              ? "<="
-              : "≠";
-          return `If Card Count ${op} ${params.value}`;
-        }
-        break;
-      case "card_rank":
-        if (params.specific_rank) {
-          return `If Card Rank = ${params.specific_rank}`;
-        } else if (params.rank_group) {
-          return `If Card Rank = ${params.rank_group}`;
-        }
-        break;
-      case "card_suit":
-        if (params.specific_suit) {
-          return `If Card Suit = ${params.specific_suit}`;
-        } else if (params.suit_group) {
-          return `If Card Suit = ${params.suit_group}`;
-        }
-        break;
-      case "remaining_hands":
-        if (params.operator && params.value !== undefined) {
-          const op =
-            params.operator === "greater_than"
-              ? ">"
-              : params.operator === "less_than"
-              ? "<"
-              : params.operator === "equals"
-              ? "="
-              : params.operator === "greater_equals"
-              ? ">="
-              : params.operator === "less_equals"
-              ? "<="
-              : "≠";
-          return `If Remaining Hands ${op} ${params.value}`;
-        }
-        break;
-      case "remaining_discards":
-        if (params.operator && params.value !== undefined) {
-          const op =
-            params.operator === "greater_than"
-              ? ">"
-              : params.operator === "less_than"
-              ? "<"
-              : params.operator === "equals"
-              ? "="
-              : params.operator === "greater_equals"
-              ? ">="
-              : params.operator === "less_equals"
-              ? "<="
-              : "≠";
-          return `If Remaining Discards ${op} ${params.value}`;
-        }
-        break;
-      case "random_chance":
-        if (params.numerator && params.denominator) {
-          return `If Random ${params.numerator} in ${params.denominator}`;
-        }
-        break;
-    }
-
-    return baseLabel;
-  };
-
-  const generateEffectTitle = (effect: Effect) => {
-    const effectType = getEffectTypeById(effect.type);
-    const baseLabel = effectType?.label || "Unknown Effect";
-
-    if (!effect.params || Object.keys(effect.params).length === 0) {
-      return baseLabel;
-    }
-
-    const params = effect.params;
-    switch (effect.type) {
-      case "add_chips":
-        if (params.value !== undefined) {
-          return `Add ${params.value} Chips`;
-        }
-        break;
-      case "add_mult":
-        if (params.value !== undefined) {
-          return `Add ${params.value} Mult`;
-        }
-        break;
-      case "apply_x_mult":
-        if (params.value !== undefined) {
-          return `Apply ${params.value}x Mult`;
-        }
-        break;
-      case "add_dollars":
-        if (params.value !== undefined) {
-          return `Add $${params.value}`;
-        }
-        break;
-      case "retrigger_cards":
-        if (params.repetitions !== undefined) {
-          return `Retrigger ${params.repetitions}x`;
-        }
-        break;
-      case "edit_hand":
-        if (params.operation && params.value !== undefined) {
-          const op =
-            params.operation === "add"
-              ? "+"
-              : params.operation === "subtract"
-              ? "-"
-              : "Set to";
-          return `${op} ${params.value} Hands`;
-        }
-        break;
-      case "edit_discard":
-        if (params.operation && params.value !== undefined) {
-          const op =
-            params.operation === "add"
-              ? "+"
-              : params.operation === "subtract"
-              ? "-"
-              : "Set to";
-          return `${op} ${params.value} Discards`;
-        }
-        break;
-      case "level_up_hand":
-        if (params.value !== undefined) {
-          return `Level Up Hand ${params.value}x`;
-        }
-        break;
-    }
-
-    return baseLabel;
-  };
-
   const updateConditionOperator = (
     ruleId: string,
     conditionId: string,
@@ -1077,7 +1169,6 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
       }
 
       let reorderedItems: Condition[] | Effect[];
-      // Determine if this is a Condition[] or Effect[] container
       if (
         activeRule.conditionGroups.some(
           (group) => group.conditions === containerWithActive
@@ -1100,7 +1191,6 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
         if (rule.id !== activeRule?.id) {
           return rule;
         }
-        // If it's a condition group, update that group; if it's effects, update effects, etc.
         if (
           activeRule.conditionGroups.some(
             (group) => group.conditions === containerWithActive
@@ -1140,6 +1230,10 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
       radial-gradient(circle at 0px 0px, #26353B ${dotSize}px, transparent ${dotSize}px)
     `;
   };
+
+  const handleGameVariableApplied = useCallback(() => {
+    setSelectedGameVariable(null);
+  }, []);
 
   if (!isOpen) return null;
   return (
@@ -1289,8 +1383,20 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
                             onUpdatePosition={updateRulePosition}
                             isRuleSelected={selectedItem?.ruleId === rule.id}
                             joker={joker}
-                            generateConditionTitle={generateConditionTitle}
-                            generateEffectTitle={generateEffectTitle}
+                            generateConditionTitle={(condition) =>
+                              generateAutoTitle(
+                                condition,
+                                getConditionTypeById(condition.type)!,
+                                true
+                              )
+                            }
+                            generateEffectTitle={(effect) =>
+                              generateAutoTitle(
+                                effect,
+                                getEffectTypeById(effect.type)!,
+                                false
+                              )
+                            }
                             getParameterCount={getParameterCount}
                             onUpdateConditionOperator={updateConditionOperator}
                           />
@@ -1355,7 +1461,23 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
                   updatePanelPosition("inspector", position)
                 }
                 onToggleVariablesPanel={() => togglePanel("variables")}
+                onToggleGameVariablesPanel={() => togglePanel("gameVariables")}
                 onCreateRandomGroupFromEffect={createRandomGroupFromEffect}
+                selectedGameVariable={selectedGameVariable}
+                onGameVariableApplied={handleGameVariableApplied}
+                selectedItem={selectedItem}
+              />
+            )}
+
+            {panels.gameVariables.isVisible && (
+              <GameVariables
+                position={panels.gameVariables.position}
+                selectedGameVariable={selectedGameVariable}
+                onSelectGameVariable={setSelectedGameVariable}
+                onClose={() => togglePanel("gameVariables")}
+                onPositionChange={(position) =>
+                  updatePanelPosition("gameVariables", position)
+                }
               />
             )}
             <FloatingDock panels={panels} onTogglePanel={togglePanel} />

@@ -11,11 +11,10 @@ export interface Rule {
 // A group of effects with shared random chance
 export interface RandomGroup {
   id: string;
-  chance_numerator: number;
-  chance_denominator: number;
+  chance_numerator: number | string;
+  chance_denominator: number | string;
   effects: Effect[];
 }
-
 // A group of conditions with a logical operator (AND/OR)
 export interface ConditionGroup {
   id: string;
@@ -118,13 +117,13 @@ export interface LogicalOperator {
 }
 
 // Interface for selected items in the rule builder
-export interface SelectedItem {
+export type SelectedItem = {
   type: "trigger" | "condition" | "effect" | "randomgroup";
   ruleId: string;
   itemId?: string;
   groupId?: string;
   randomGroupId?: string;
-}
+} | null;
 
 // Export logical operators
 export const LOGICAL_OPERATORS: LogicalOperator[] = [

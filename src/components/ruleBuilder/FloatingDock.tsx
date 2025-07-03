@@ -4,6 +4,7 @@ import {
   IdentificationIcon,
   CommandLineIcon,
   ChartPieIcon,
+  CubeIcon,
 } from "@heroicons/react/24/outline";
 
 interface PanelState {
@@ -40,6 +41,12 @@ const FloatingDock: React.FC<FloatingDockProps> = ({
       icon: CommandLineIcon,
       label: "Variables",
       shortcut: "V",
+    },
+    {
+      id: "gameVariables",
+      icon: CubeIcon,
+      label: "Game Variables",
+      shortcut: "G",
     },
     {
       id: "inspector",
