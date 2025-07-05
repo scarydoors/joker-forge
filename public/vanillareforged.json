@@ -4824,6 +4824,60 @@
       ]
     },
     {
+      "id": "3b3ce2c7-b923-4b27-bbf3-4f5b331465d7",
+      "name": "Mr. Bones",
+      "description": "Prevents Death if Chips scored[s] are at least {C:attention}25%{} of required Chips[s]{C:red}self destructs{}",
+      "imagePreview": "data:image/png;base64,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",
+      "overlayImagePreview": "",
+      "rarity": 2,
+      "cost": 5,
+      "blueprint_compat": true,
+      "eternal_compat": true,
+      "unlocked": true,
+      "discovered": true,
+      "rules": [
+        {
+          "id": "c44bd342-05af-4e6d-8f14-b1c883032e49",
+          "trigger": "game_over",
+          "conditionGroups": [
+            {
+              "id": "d8e0c4f4-e49e-4ee6-a32e-d1cc88f097a3",
+              "operator": "and",
+              "conditions": [
+                {
+                  "id": "16a405f0-1110-4fb3-a44f-b5add4d8c6d8",
+                  "type": "check_blind_requirements",
+                  "negate": false,
+                  "params": {
+                    "operator": "greater_equals",
+                    "percentage": 25
+                  }
+                }
+              ]
+            }
+          ],
+          "effects": [
+            {
+              "id": "622657f6-35a8-449d-a8a1-94b755b3d3fc",
+              "type": "prevent_game_over",
+              "params": {}
+            },
+            {
+              "id": "06b1f473-d47d-48e3-b319-fc3b7c20810f",
+              "type": "destroy_self",
+              "params": {}
+            }
+          ],
+          "randomGroups": [],
+          "position": {
+            "x": 1027,
+            "y": 474
+          }
+        }
+      ],
+      "placeholderCreditIndex": 9
+    },
+    {
       "id": "cef48c82-5344-486f-9a42-9fdceab28876",
       "name": "Mime",
       "description": "Retrigger all card {C:orange}held in hand{} abilities",
