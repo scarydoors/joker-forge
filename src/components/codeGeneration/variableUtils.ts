@@ -23,6 +23,7 @@ export interface GameVariableInfo {
   name: string;
   description: string;
   multiplier: number;
+  startsFrom: number;
   code: string;
 }
 
@@ -135,7 +136,6 @@ const extractExplicitVariablesFromEffect = (effect: Effect): string[] => {
   return variables;
 };
 
-// New function to extract game variables from rules
 export const extractGameVariablesFromRules = (
   rules: Rule[]
 ): GameVariableInfo[] => {
@@ -152,6 +152,7 @@ export const extractGameVariablesFromRules = (
             name: gameVar.label,
             description: gameVar.description,
             multiplier: parsed.multiplier || 1,
+            startsFrom: parsed.startsFrom || 0,
             code: parsed.code,
           });
         }
@@ -160,19 +161,16 @@ export const extractGameVariablesFromRules = (
   };
 
   rules.forEach((rule) => {
-    // Process conditions
     rule.conditionGroups.forEach((group) => {
       group.conditions.forEach((condition) => {
         processParams(condition.params);
       });
     });
 
-    // Process effects
     (rule.effects || []).forEach((effect) => {
       processParams(effect.params);
     });
 
-    // Process random group effects
     (rule.randomGroups || []).forEach((group) => {
       group.effects.forEach((effect) => {
         processParams(effect.params);
@@ -640,15 +638,14 @@ export const getAllVariables = (joker: JokerData): UserVariable[] => {
     description: getDefaultVariableDescription(name),
   }));
 
-  // Add game variables as auto-variables
   const gameVariables = extractGameVariablesFromRules(joker.rules || []);
   const gameVarAutoVars = gameVariables.map((gameVar) => ({
     id: `auto_gamevar_${gameVar.id}`,
-    name: gameVar.name.replace(/\s+/g, "").toLowerCase(), // Create a safe variable name
-    initialValue: 0, // Game variables don't have initial values in the traditional sense
+    name: gameVar.name.replace(/\s+/g, "").toLowerCase(),
+    initialValue: gameVar.startsFrom,
     description: `${gameVar.description}${
       gameVar.multiplier !== 1 ? ` (×${gameVar.multiplier})` : ""
-    }`,
+    }${gameVar.startsFrom !== 0 ? ` (starts from ${gameVar.startsFrom})` : ""}`,
   }));
 
   return [...userVars, ...autoVars, ...otherAutoVars, ...gameVarAutoVars];

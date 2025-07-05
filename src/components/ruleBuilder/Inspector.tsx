@@ -123,8 +123,13 @@ const ChanceInput: React.FC<ChanceInputProps> = React.memo(
         const multiplier = isAlreadyGameVar
           ? parseFloat(currentValue.split("|")[1] || "1")
           : 1;
+        const startsFrom = isAlreadyGameVar
+          ? parseFloat(currentValue.split("|")[2] || "0")
+          : 0;
 
-        onChange(`GAMEVAR:${selectedGameVariable.id}|${multiplier}`);
+        onChange(
+          `GAMEVAR:${selectedGameVariable.id}|${multiplier}|${startsFrom}`
+        );
         onGameVariableApplied?.();
       }
     }, [selectedGameVariable, value, onChange, onGameVariableApplied]);
@@ -187,7 +192,7 @@ const ChanceInput: React.FC<ChanceInputProps> = React.memo(
             value={numericValue.toString()}
             onChange={(e) => {
               const val = parseInt(e.target.value);
-              onChange(isNaN(val) ? 1 : val);
+              onChange(isNaN(val) ? 0 : val);
             }}
             min="1"
             size="sm"
@@ -239,8 +244,13 @@ const ParameterField: React.FC<ParameterFieldProps> = ({
       const multiplier = isAlreadyGameVar
         ? parseFloat(currentValue.split("|")[1] || "1")
         : 1;
+      const startsFrom = isAlreadyGameVar
+        ? parseFloat(currentValue.split("|")[2] || "0")
+        : 0;
 
-      onChange(`GAMEVAR:${selectedGameVariable.id}|${multiplier}`);
+      onChange(
+        `GAMEVAR:${selectedGameVariable.id}|${multiplier}|${startsFrom}`
+      );
       onGameVariableApplied?.();
     }
   }, [
@@ -321,6 +331,9 @@ const ParameterField: React.FC<ParameterFieldProps> = ({
       const gameVariableMultiplier = isGameVariable
         ? parseFloat(value.replace("GAMEVAR:", "").split("|")[1] || "1")
         : 1;
+      const gameVariableStartsFrom = isGameVariable
+        ? parseFloat(value.replace("GAMEVAR:", "").split("|")[2] || "0")
+        : 0;
       const gameVariable = gameVariableId
         ? getGameVariableById(gameVariableId)
         : null;
@@ -381,17 +394,33 @@ const ParameterField: React.FC<ParameterFieldProps> = ({
               </div>
               <div>
                 <span className="text-white-light text-sm mb-2 block">
+                  Starts From
+                </span>
+                <InputField
+                  type="number"
+                  value={gameVariableStartsFrom.toString()}
+                  onChange={(e) => {
+                    const newStartsFrom = parseFloat(e.target.value) || 0;
+                    onChange(
+                      `GAMEVAR:${gameVariableId}|${gameVariableMultiplier}|${newStartsFrom}`
+                    );
+                  }}
+                  size="sm"
+                />
+              </div>
+              <div>
+                <span className="text-white-light text-sm mb-2 block">
                   Multiplier
                 </span>
                 <InputField
                   type="number"
                   value={gameVariableMultiplier.toString()}
                   onChange={(e) => {
-                    const newMultiplier = parseFloat(e.target.value) || 1;
-                    onChange(`GAMEVAR:${gameVariableId}|${newMultiplier}`);
+                    const newMultiplier = parseFloat(e.target.value);
+                    onChange(
+                      `GAMEVAR:${gameVariableId}|${newMultiplier}|${gameVariableStartsFrom}`
+                    );
                   }}
-                  min="0"
-                  step="0.1"
                   size="sm"
                 />
               </div>
@@ -571,11 +600,14 @@ const Inspector: React.FC<InspectorProps> = ({
           const multiplier = isAlreadyGameVar
             ? parseFloat(currentValue.split("|")[1] || "1")
             : 1;
+          const startsFrom = isAlreadyGameVar
+            ? parseFloat(currentValue.split("|")[2] || "0")
+            : 0;
 
           onUpdateCondition(selectedRule?.id || "", selectedCondition.id, {
             params: {
               ...selectedCondition.params,
-              value: `GAMEVAR:${selectedGameVariable.id}|${multiplier}`,
+              value: `GAMEVAR:${selectedGameVariable.id}|${multiplier}|${startsFrom}`,
             },
           });
           onGameVariableApplied();
@@ -591,20 +623,23 @@ const Inspector: React.FC<InspectorProps> = ({
           const multiplier = isAlreadyGameVar
             ? parseFloat(currentValue.split("|")[1] || "1")
             : 1;
+          const startsFrom = isAlreadyGameVar
+            ? parseFloat(currentValue.split("|")[2] || "0")
+            : 0;
 
           const paramKey =
             selectedEffect.params.value !== undefined ? "value" : "repetitions";
           onUpdateEffect(selectedRule?.id || "", selectedEffect.id, {
             params: {
               ...selectedEffect.params,
-              [paramKey]: `GAMEVAR:${selectedGameVariable.id}|${multiplier}`,
+              [paramKey]: `GAMEVAR:${selectedGameVariable.id}|${multiplier}|${startsFrom}`,
             },
           });
           onGameVariableApplied();
         }
       } else if (selectedItem.type === "randomgroup" && selectedRandomGroup) {
         onUpdateRandomGroup(selectedRule?.id || "", selectedRandomGroup.id, {
-          chance_numerator: `GAMEVAR:${selectedGameVariable.id}|1`,
+          chance_numerator: `GAMEVAR:${selectedGameVariable.id}|1|0`,
         });
         onGameVariableApplied();
       }

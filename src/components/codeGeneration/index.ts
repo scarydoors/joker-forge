@@ -414,6 +414,12 @@ const extractEffectsConfig = (
     });
   }
 
+  const gameVariables = extractGameVariablesFromRules(joker.rules || []);
+  gameVariables.forEach((gameVar) => {
+    const varName = gameVar.name.replace(/\s+/g, "").toLowerCase();
+    configItems.push(`${varName} = ${gameVar.startsFrom}`);
+  });
+
   if (joker.rules && joker.rules.length > 0) {
     const nonPassiveRules = joker.rules.filter(
       (rule) => rule.trigger !== "passive"
@@ -1129,11 +1135,9 @@ const generateLocVarsFunction = (
   const variableMapping: string[] = [];
 
   if (hasRandomChance) {
-    // Map the first variables to numerator/denominator for random chance
-    variableMapping.push("G.GAME.probabilities.normal"); // #1# - numerator
-    variableMapping.push("card.ability.extra.odds"); // #2# - denominator
+    variableMapping.push("G.GAME.probabilities.normal");
+    variableMapping.push("card.ability.extra.odds");
 
-    // Add remaining variables starting from position 3
     const remainingVars = allVariables.filter(
       (v) => v.name !== "numerator" && v.name !== "denominator"
     );
@@ -1145,44 +1149,57 @@ const generateLocVarsFunction = (
 
     let currentIndex = 2;
 
-    // Add regular variables first
     for (const variable of remainingVars) {
       if (currentIndex >= maxVariableIndex) break;
       variableMapping.push(`card.ability.extra.${variable.name}`);
       currentIndex++;
     }
 
-    // Add game variables
     for (const gameVar of remainingGameVars) {
       if (currentIndex >= maxVariableIndex) break;
-      if (gameVar.multiplier === 1) {
+      const varName = gameVar.name.replace(/\s+/g, "").toLowerCase();
+      if (gameVar.multiplier === 1 && gameVar.startsFrom === 0) {
         variableMapping.push(gameVar.code);
-      } else {
+      } else if (gameVar.startsFrom === 0) {
         variableMapping.push(`(${gameVar.code}) * ${gameVar.multiplier}`);
+      } else if (gameVar.multiplier === 1) {
+        variableMapping.push(
+          `card.ability.extra.${varName} + (${gameVar.code})`
+        );
+      } else {
+        variableMapping.push(
+          `card.ability.extra.${varName} + (${gameVar.code}) * ${gameVar.multiplier}`
+        );
       }
       currentIndex++;
     }
   } else {
     let currentIndex = 0;
 
-    // Add regular user and auto variables first
     for (const variable of allVariables) {
       if (currentIndex >= maxVariableIndex) break;
 
-      // Skip game variables in this loop
       if (!variable.id.startsWith("auto_gamevar_")) {
         variableMapping.push(`card.ability.extra.${variable.name}`);
         currentIndex++;
       }
     }
 
-    // Add game variables
     for (const gameVar of gameVariables) {
       if (currentIndex >= maxVariableIndex) break;
-      if (gameVar.multiplier === 1) {
+      const varName = gameVar.name.replace(/\s+/g, "").toLowerCase();
+      if (gameVar.multiplier === 1 && gameVar.startsFrom === 0) {
         variableMapping.push(gameVar.code);
-      } else {
+      } else if (gameVar.startsFrom === 0) {
         variableMapping.push(`(${gameVar.code}) * ${gameVar.multiplier}`);
+      } else if (gameVar.multiplier === 1) {
+        variableMapping.push(
+          `card.ability.extra.${varName} + (${gameVar.code})`
+        );
+      } else {
+        variableMapping.push(
+          `card.ability.extra.${varName} + (${gameVar.code}) * ${gameVar.multiplier}`
+        );
       }
       currentIndex++;
     }
