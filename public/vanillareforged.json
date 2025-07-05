@@ -2177,41 +2177,6 @@
       "placeholderCreditIndex": 2
     },
     {
-      "id": "049aab47-a10a-46d6-9d42-add8cded80dc",
-      "name": "Abstract Joker",
-      "description": "{C:red}+3{} Mult for each {C:attention}Joker{} card[s]{C:inactive}(Currently {C:red}+#1#{} Mult){}",
-      "imagePreview": "data:image/png;base64,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",
-      "overlayImagePreview": "",
-      "rarity": 1,
-      "cost": 4,
-      "blueprint_compat": true,
-      "eternal_compat": true,
-      "unlocked": true,
-      "discovered": true,
-      "rules": [
-        {
-          "id": "64b00df6-d483-4e64-a3c3-7f871d8ced95",
-          "trigger": "hand_played",
-          "conditionGroups": [],
-          "effects": [
-            {
-              "id": "9c1418c6-49e4-44a1-ae1c-d3fbde91cae8",
-              "type": "add_mult",
-              "params": {
-                "value": "GAMEVAR:joker_count|3"
-              }
-            }
-          ],
-          "randomGroups": [],
-          "position": {
-            "x": 1027,
-            "y": 474
-          }
-        }
-      ],
-      "placeholderCreditIndex": 5
-    },
-    {
       "id": "629a1325-d62e-4e8d-a1a9-3856aa64336d",
       "name": "Delayed Gratification",
       "description": "Earn {C:money}$2{} per {C:attention}discard{}[s] if no discards are used by end of the round",
