@@ -44,6 +44,7 @@ export interface TriggerDefinition {
   id: string;
   label: string;
   description: string;
+  category: string;
 }
 
 // When a parameter should be shown based on other parameter values
@@ -79,6 +80,7 @@ export interface ConditionTypeDefinition {
   description: string;
   params: ConditionParameter[];
   applicableTriggers?: string[];
+  category: string;
 }
 
 // Interface for effect parameters
@@ -108,6 +110,7 @@ export interface EffectTypeDefinition {
   description: string;
   params: EffectParameter[];
   applicableTriggers?: string[];
+  category: string;
 }
 
 // Interface for logical operators

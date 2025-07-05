@@ -1,4 +1,35 @@
 import { ConditionTypeDefinition } from "../types";
+import {
+  RectangleStackIcon,
+  UserIcon,
+  ArchiveBoxIcon,
+  InformationCircleIcon,
+  SparklesIcon,
+} from "@heroicons/react/24/outline";
+import { CategoryDefinition } from "./Triggers";
+
+export const CONDITION_CATEGORIES: CategoryDefinition[] = [
+  {
+    label: "Hand & Cards",
+    icon: RectangleStackIcon,
+  },
+  {
+    label: "Player Resources",
+    icon: UserIcon,
+  },
+  {
+    label: "Deck & Jokers",
+    icon: ArchiveBoxIcon,
+  },
+  {
+    label: "Game State",
+    icon: InformationCircleIcon,
+  },
+  {
+    label: "Special",
+    icon: SparklesIcon,
+  },
+];
 
 const COMPARISON_OPERATORS = [
   { value: "equals", label: "equals" },
@@ -124,6 +155,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
         ],
       },
     ],
+    category: "Hand & Cards",
   },
   {
     id: "card_count",
@@ -153,6 +185,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
         default: 5,
       },
     ],
+    category: "Hand & Cards",
   },
   {
     id: "suit_count",
@@ -220,6 +253,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
         },
       },
     ],
+    category: "Hand & Cards",
   },
   {
     id: "rank_count",
@@ -287,6 +321,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
         },
       },
     ],
+    category: "Hand & Cards",
   },
   {
     id: "card_rank",
@@ -324,6 +359,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
         },
       },
     ],
+    category: "Hand & Cards",
   },
   {
     id: "card_suit",
@@ -361,6 +397,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
         },
       },
     ],
+    category: "Hand & Cards",
   },
   {
     id: "card_enhancement",
@@ -378,6 +415,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
         ],
       },
     ],
+    category: "Hand & Cards",
   },
   {
     id: "card_edition",
@@ -396,6 +434,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
         ],
       },
     ],
+    category: "Hand & Cards",
   },
   {
     id: "card_seal",
@@ -410,6 +449,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
         options: [{ value: "any", label: "Any Seal" }, ...SEAL_TYPES],
       },
     ],
+    category: "Hand & Cards",
   },
   {
     id: "player_money",
@@ -452,6 +492,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
         default: 10,
       },
     ],
+    category: "Player Resources",
   },
   {
     id: "generic_compare",
@@ -500,6 +541,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
         default: 0,
       },
     ],
+    category: "Special",
   },
   {
     id: "remaining_hands",
@@ -543,6 +585,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
         default: 1,
       },
     ],
+    category: "Player Resources",
   },
   {
     id: "remaining_discards",
@@ -586,6 +629,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
         default: 1,
       },
     ],
+    category: "Player Resources",
   },
   {
     id: "joker_count",
@@ -629,6 +673,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
         default: 1,
       },
     ],
+    category: "Deck & Jokers",
   },
   {
     id: "specific_joker",
@@ -675,6 +720,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
         default: "j_joker",
       },
     ],
+    category: "Deck & Jokers",
   },
   {
     id: "internal_variable",
@@ -723,6 +769,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
         default: 0,
       },
     ],
+    category: "Special",
   },
   {
     id: "consumable_held",
@@ -842,6 +889,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
         },
       },
     ],
+    category: "Player Resources",
   },
   {
     id: "blind_type",
@@ -881,6 +929,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
         ],
       },
     ],
+    category: "Game State",
   },
   {
     id: "check_blind_requirements",
@@ -917,6 +966,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
         default: 25,
       },
     ],
+    category: "Game State",
   },
   {
     id: "ante_level",
@@ -960,6 +1010,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
         default: 1,
       },
     ],
+    category: "Game State",
   },
   {
     id: "first_played_hand",
@@ -972,6 +1023,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
       "after_hand_played",
     ],
     params: [],
+    category: "Game State",
   },
   {
     id: "first_discarded_hand",
@@ -980,6 +1032,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
       "Check if this is the first hand discarded in the current round",
     applicableTriggers: ["card_discarded", "hand_discarded"],
     params: [],
+    category: "Game State",
   },
   {
     id: "hand_size",
@@ -1024,6 +1077,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
         default: 8,
       },
     ],
+    category: "Player Resources",
   },
   {
     id: "deck_size",
@@ -1078,6 +1132,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
         default: 52,
       },
     ],
+    category: "Deck & Jokers",
   },
   {
     id: "deck_count",
@@ -1232,6 +1287,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
         default: 1,
       },
     ],
+    category: "Deck & Jokers",
   },
 ];
 

@@ -1,4 +1,45 @@
 import { EffectTypeDefinition } from "../types";
+import {
+  ChartBarIcon,
+  BanknotesIcon,
+  Cog6ToothIcon,
+  PencilSquareIcon,
+  SparklesIcon,
+  CakeIcon,
+  UserGroupIcon,
+} from "@heroicons/react/24/outline";
+import { CategoryDefinition } from "./Triggers";
+
+export const EFFECT_CATEGORIES: CategoryDefinition[] = [
+  {
+    label: "Scoring",
+    icon: ChartBarIcon,
+  },
+  {
+    label: "Economy",
+    icon: BanknotesIcon,
+  },
+  {
+    label: "Card Effects",
+    icon: PencilSquareIcon,
+  },
+  {
+    label: "Consumables",
+    icon: CakeIcon,
+  },
+  {
+    label: "Jokers",
+    icon: UserGroupIcon,
+  },
+  {
+    label: "Game Rules",
+    icon: Cog6ToothIcon,
+  },
+  {
+    label: "Special",
+    icon: SparklesIcon,
+  },
+];
 
 export const EFFECT_TYPES: EffectTypeDefinition[] = [
   {
@@ -15,6 +56,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
         min: 0,
       },
     ],
+    category: "Scoring",
   },
   {
     id: "apply_x_chips",
@@ -31,6 +73,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
         max: 10,
       },
     ],
+    category: "Scoring",
   },
   {
     id: "apply_exp_chips",
@@ -47,6 +90,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
         max: 3,
       },
     ],
+    category: "Scoring",
   },
   {
     id: "add_mult",
@@ -62,6 +106,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
         min: 0,
       },
     ],
+    category: "Scoring",
   },
   {
     id: "apply_x_mult",
@@ -78,6 +123,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
         max: 10,
       },
     ],
+    category: "Scoring",
   },
   {
     id: "apply_exp_mult",
@@ -94,6 +140,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
         max: 3,
       },
     ],
+    category: "Scoring",
   },
   {
     id: "add_dollars",
@@ -130,6 +177,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
         min: -100,
       },
     ],
+    category: "Economy",
   },
   {
     id: "set_dollars",
@@ -166,6 +214,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
         min: -100,
       },
     ],
+    category: "Economy",
   },
   {
     id: "retrigger_cards",
@@ -182,6 +231,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
         max: 10,
       },
     ],
+    category: "Card Effects",
   },
   {
     id: "level_up_hand",
@@ -232,6 +282,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
         min: 1,
       },
     ],
+    category: "Game Rules",
   },
   {
     id: "edit_hand",
@@ -279,6 +330,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
         min: 0,
       },
     ],
+    category: "Game Rules",
   },
   {
     id: "edit_discard",
@@ -325,6 +377,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
         min: 0,
       },
     ],
+    category: "Game Rules",
   },
   {
     id: "edit_hand_size",
@@ -372,6 +425,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
         max: 10,
       },
     ],
+    category: "Game Rules",
   },
   {
     id: "modify_internal_variable",
@@ -426,6 +480,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
         default: 1,
       },
     ],
+    category: "Special",
   },
   {
     id: "add_card_to_deck",
@@ -535,6 +590,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
         default: "none",
       },
     ],
+    category: "Card Effects",
   },
   {
     id: "copy_triggered_card",
@@ -542,6 +598,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
     description: "Copy the card that triggered this effect to your deck",
     applicableTriggers: ["card_scored", "card_discarded", "card_held_in_hand"],
     params: [],
+    category: "Card Effects",
   },
   {
     id: "copy_played_card",
@@ -599,6 +656,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
         default: "any",
       },
     ],
+    category: "Card Effects",
   },
   {
     id: "delete_triggered_card",
@@ -606,6 +664,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
     description: "Destroy the card that triggered this effect",
     applicableTriggers: ["card_scored", "card_discarded", "card_held_in_hand"],
     params: [],
+    category: "Card Effects",
   },
   {
     id: "edit_triggered_card",
@@ -694,6 +753,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
         default: "none",
       },
     ],
+    category: "Card Effects",
   },
   {
     id: "add_sell_value",
@@ -741,6 +801,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
         min: 0,
       },
     ],
+    category: "Economy",
   },
   {
     id: "create_joker",
@@ -820,6 +881,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
         default: "none",
       },
     ],
+    category: "Jokers",
   },
   {
     id: "copy_joker",
@@ -912,6 +974,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
         default: "none",
       },
     ],
+    category: "Jokers",
   },
   {
     id: "destroy_joker",
@@ -991,6 +1054,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
         },
       },
     ],
+    category: "Jokers",
   },
   {
     id: "create_tarot_card",
@@ -1100,6 +1164,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
         default: "none",
       },
     ],
+    category: "Consumables",
   },
   {
     id: "create_planet_card",
@@ -1172,6 +1237,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
         default: "none",
       },
     ],
+    category: "Consumables",
   },
   {
     id: "create_spectral_card",
@@ -1269,6 +1335,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
         default: "none",
       },
     ],
+    category: "Consumables",
   },
   {
     id: "destroy_consumable",
@@ -1374,6 +1441,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
         },
       },
     ],
+    category: "Consumables",
   },
   {
     id: "copy_consumable",
@@ -1489,6 +1557,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
         default: "none",
       },
     ],
+    category: "Consumables",
   },
   {
     id: "create_tag",
@@ -1630,6 +1699,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
         },
       },
     ],
+    category: "Consumables",
   },
   {
     id: "destroy_self",
@@ -1658,6 +1728,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
       "game_over",
     ],
     params: [],
+    category: "Jokers",
   },
   {
     id: "disable_boss_blind",
@@ -1687,6 +1758,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
       "selling_self",
     ],
     params: [],
+    category: "Game Rules",
   },
   {
     id: "combine_ranks",
@@ -1738,6 +1810,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
         default: "J",
       },
     ],
+    category: "Card Effects",
   },
   {
     id: "prevent_game_over",
@@ -1746,6 +1819,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
       "Prevent the run from ending when game over conditions are met (like Mr. Bones)",
     applicableTriggers: ["game_over"],
     params: [],
+    category: "Special",
   },
   {
     id: "show_message",
@@ -1795,6 +1869,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
         default: "G.C.WHITE",
       },
     ],
+    category: "Special",
   },
   {
     id: "considered_as",
@@ -1969,6 +2044,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
         },
       },
     ],
+    category: "Card Effects",
   },
 ];
 

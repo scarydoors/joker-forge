@@ -1,14 +1,22 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { useDraggable } from "@dnd-kit/core";
+import { motion, AnimatePresence } from "framer-motion";
 import type {
   Rule,
   TriggerDefinition,
   ConditionTypeDefinition,
   EffectTypeDefinition,
 } from "./types";
-import { TRIGGERS } from "./data/Triggers";
-import { getConditionsForTrigger } from "./data/Conditions";
-import { getEffectsForTrigger } from "./data/Effects";
+import {
+  TRIGGERS,
+  TRIGGER_CATEGORIES,
+  type CategoryDefinition,
+} from "./data/Triggers";
+import {
+  getConditionsForTrigger,
+  CONDITION_CATEGORIES,
+} from "./data/Conditions";
+import { getEffectsForTrigger, EFFECT_CATEGORIES } from "./data/Effects";
 import BlockComponent from "./BlockComponent";
 import {
   SwatchIcon,
@@ -17,6 +25,7 @@ import {
   MagnifyingGlassIcon,
   XMarkIcon,
   Bars3Icon,
+  SparklesIcon,
 } from "@heroicons/react/24/outline";
 import {
   BoltIcon,
@@ -27,7 +36,6 @@ import {
 interface BlockPaletteProps {
   position: { x: number; y: number };
   selectedRule: Rule | null;
-  rulesCount: number;
   onAddTrigger: (triggerId: string) => void;
   onAddCondition: (conditionType: string) => void;
   onAddEffect: (effectType: string) => void;
@@ -40,19 +48,21 @@ type FilterType = "triggers" | "conditions" | "effects";
 const BlockPalette: React.FC<BlockPaletteProps> = ({
   position,
   selectedRule,
-  rulesCount,
   onAddTrigger,
   onAddCondition,
   onAddEffect,
   onClose,
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [expandedSections, setExpandedSections] = useState({
-    triggers: true,
-    conditions: true,
-    effects: true,
-  });
-  const [activeFilters, setActiveFilters] = useState<FilterType[]>([]);
+  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(
+    new Set()
+  );
+  const [activeFilter, setActiveFilter] = useState<FilterType>(
+    selectedRule ? "conditions" : "triggers"
+  );
+  const [previousSelectedRule, setPreviousSelectedRule] = useState<Rule | null>(
+    selectedRule
+  );
 
   const { attributes, listeners, setNodeRef, transform } = useDraggable({
     id: "panel-blockPalette",
@@ -70,21 +80,20 @@ const BlockPalette: React.FC<BlockPaletteProps> = ({
         top: position.y,
       };
 
-  const showOnlyTriggers = !selectedRule;
+  useEffect(() => {
+    const ruleChanged = selectedRule !== previousSelectedRule;
+    const hasRuleNow = !!selectedRule;
+
+    if (ruleChanged && hasRuleNow && activeFilter === "triggers") {
+      setActiveFilter("conditions");
+    }
+
+    setPreviousSelectedRule(selectedRule);
+  }, [selectedRule, previousSelectedRule, activeFilter]);
 
   useEffect(() => {
-    if (rulesCount > 0) {
-      setExpandedSections((prev) => ({
-        ...prev,
-        triggers: false,
-      }));
-    } else {
-      setExpandedSections((prev) => ({
-        ...prev,
-        triggers: true,
-      }));
-    }
-  }, [rulesCount]);
+    setExpandedCategories(new Set());
+  }, [activeFilter]);
 
   const availableConditions = useMemo(() => {
     return selectedRule ? getConditionsForTrigger(selectedRule.trigger) : [];
@@ -94,117 +103,270 @@ const BlockPalette: React.FC<BlockPaletteProps> = ({
     return selectedRule ? getEffectsForTrigger(selectedRule.trigger) : [];
   }, [selectedRule]);
 
-  const filteredItems = useMemo(() => {
+  const categorizedItems = useMemo(() => {
     const normalizedSearch = searchTerm.toLowerCase();
 
-    const triggers = TRIGGERS.filter(
+    const filteredTriggers = TRIGGERS.filter(
       (trigger) =>
         trigger.label.toLowerCase().includes(normalizedSearch) ||
         trigger.description.toLowerCase().includes(normalizedSearch)
     );
 
-    const conditions = availableConditions.filter(
+    const triggersByCategory: Record<
+      string,
+      { category: CategoryDefinition; items: TriggerDefinition[] }
+    > = {};
+
+    TRIGGER_CATEGORIES.forEach((category) => {
+      triggersByCategory[category.label] = {
+        category,
+        items: [],
+      };
+    });
+
+    const uncategorizedCategory: CategoryDefinition = {
+      label: "Other",
+      icon: SparklesIcon,
+    };
+    triggersByCategory["Other"] = {
+      category: uncategorizedCategory,
+      items: [],
+    };
+
+    filteredTriggers.forEach((trigger) => {
+      const categoryLabel = trigger.category || "Other";
+      if (triggersByCategory[categoryLabel]) {
+        triggersByCategory[categoryLabel].items.push(trigger);
+      } else {
+        triggersByCategory["Other"].items.push(trigger);
+      }
+    });
+
+    Object.keys(triggersByCategory).forEach((categoryLabel) => {
+      if (triggersByCategory[categoryLabel].items.length === 0) {
+        delete triggersByCategory[categoryLabel];
+      }
+    });
+
+    const filteredConditions = availableConditions.filter(
       (condition) =>
         condition.label.toLowerCase().includes(normalizedSearch) ||
         condition.description.toLowerCase().includes(normalizedSearch)
     );
 
-    const effects = availableEffects.filter(
+    const conditionsByCategory: Record<
+      string,
+      { category: CategoryDefinition; items: ConditionTypeDefinition[] }
+    > = {};
+
+    CONDITION_CATEGORIES.forEach((category) => {
+      conditionsByCategory[category.label] = {
+        category,
+        items: [],
+      };
+    });
+
+    conditionsByCategory["Other"] = {
+      category: uncategorizedCategory,
+      items: [],
+    };
+
+    filteredConditions.forEach((condition) => {
+      const categoryLabel = condition.category || "Other";
+      if (conditionsByCategory[categoryLabel]) {
+        conditionsByCategory[categoryLabel].items.push(condition);
+      } else {
+        conditionsByCategory["Other"].items.push(condition);
+      }
+    });
+
+    Object.keys(conditionsByCategory).forEach((categoryLabel) => {
+      if (conditionsByCategory[categoryLabel].items.length === 0) {
+        delete conditionsByCategory[categoryLabel];
+      }
+    });
+
+    const filteredEffects = availableEffects.filter(
       (effect) =>
         effect.label.toLowerCase().includes(normalizedSearch) ||
         effect.description.toLowerCase().includes(normalizedSearch)
     );
 
-    return { triggers, conditions, effects };
+    const effectsByCategory: Record<
+      string,
+      { category: CategoryDefinition; items: EffectTypeDefinition[] }
+    > = {};
+
+    EFFECT_CATEGORIES.forEach((category) => {
+      effectsByCategory[category.label] = {
+        category,
+        items: [],
+      };
+    });
+
+    effectsByCategory["Other"] = {
+      category: uncategorizedCategory,
+      items: [],
+    };
+
+    filteredEffects.forEach((effect) => {
+      const categoryLabel = effect.category || "Other";
+      if (effectsByCategory[categoryLabel]) {
+        effectsByCategory[categoryLabel].items.push(effect);
+      } else {
+        effectsByCategory["Other"].items.push(effect);
+      }
+    });
+
+    Object.keys(effectsByCategory).forEach((categoryLabel) => {
+      if (effectsByCategory[categoryLabel].items.length === 0) {
+        delete effectsByCategory[categoryLabel];
+      }
+    });
+
+    return {
+      triggers: triggersByCategory,
+      conditions: conditionsByCategory,
+      effects: effectsByCategory,
+    };
   }, [searchTerm, availableConditions, availableEffects]);
 
   const shouldShowSection = (sectionType: FilterType) => {
-    if (activeFilters.length === 0) return true;
-    return activeFilters.includes(sectionType);
+    if (!selectedRule && sectionType !== "triggers") {
+      return false;
+    }
+
+    return activeFilter === sectionType;
   };
 
-  const toggleSection = (section: keyof typeof expandedSections) => {
-    setExpandedSections((prev) => ({
-      ...prev,
-      [section]: !prev[section],
-    }));
-  };
-
-  const handleFilterToggle = (filterType: FilterType) => {
-    setActiveFilters((prev) => {
-      const newFilters = prev.includes(filterType)
-        ? prev.filter((f) => f !== filterType)
-        : [...prev, filterType];
-
-      if (newFilters.includes(filterType) && !expandedSections[filterType]) {
-        setExpandedSections((prevExpanded) => ({
-          ...prevExpanded,
-          [filterType]: true,
-        }));
+  const toggleCategory = (categoryLabel: string) => {
+    setExpandedCategories((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(categoryLabel)) {
+        newSet.delete(categoryLabel);
+      } else {
+        newSet.add(categoryLabel);
       }
-
-      return newFilters;
+      return newSet;
     });
   };
 
-  const renderSection = (
-    title: string,
-    items:
-      | TriggerDefinition[]
-      | ConditionTypeDefinition[]
-      | EffectTypeDefinition[],
+  const handleFilterToggle = (filterType: FilterType) => {
+    setActiveFilter(filterType);
+  };
+
+  const renderCategory = (
+    categoryData: {
+      category: CategoryDefinition;
+      items:
+        | TriggerDefinition[]
+        | ConditionTypeDefinition[]
+        | EffectTypeDefinition[];
+    },
     type: "trigger" | "condition" | "effect",
-    onAdd: (id: string) => void,
-    sectionKey: keyof typeof expandedSections
+    onAdd: (id: string) => void
   ) => {
-    const filterKey = `${sectionKey}` as FilterType;
-
-    if (showOnlyTriggers && type !== "trigger") return null;
-    if (!shouldShowSection(filterKey)) return null;
-    if (items.length === 0 && searchTerm) return null;
-
-    const isExpanded = expandedSections[sectionKey];
+    const { category, items } = categoryData;
+    const isExpanded = expandedCategories.has(category.label);
+    const IconComponent = category.icon;
 
     return (
-      <div className="mb-4">
+      <div key={category.label} className="mb-3">
         <button
-          onClick={() => toggleSection(sectionKey)}
+          onClick={() => toggleCategory(category.label)}
           className="w-full flex items-center justify-between p-2 hover:bg-black-light rounded-md transition-colors"
         >
           <div className="flex items-center gap-2">
-            <span className="text-white-light text-sm font-medium tracking-wider uppercase">
-              {title}
+            <IconComponent className="h-4 w-4 text-mint-light" />
+            <span className="text-white-light text-xs font-medium tracking-wider uppercase">
+              {category.label}
             </span>
             <span className="text-white-darker text-xs">({items.length})</span>
           </div>
           {isExpanded ? (
-            <ChevronDownIcon className="h-4 w-4 text-white-darker" />
+            <ChevronDownIcon className="h-3 w-3 text-white-darker" />
           ) : (
-            <ChevronRightIcon className="h-4 w-4 text-white-darker" />
+            <ChevronRightIcon className="h-3 w-3 text-white-darker" />
           )}
         </button>
 
-        {isExpanded && (
-          <div className="mt-2 space-y-2">
-            {items.length === 0 ? (
-              <div className="text-white-darker text-xs text-center py-4">
-                No {title.toLowerCase()} available
+        <AnimatePresence>
+          {isExpanded && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="overflow-hidden"
+            >
+              <div className="mt-2 space-y-2 ml-1 mr-1">
+                {items.map((item, index) => (
+                  <motion.div
+                    key={`${activeFilter}-${item.id}`}
+                    initial={{ x: -20, opacity: 0 }}
+                    animate={{ x: 0, opacity: 1 }}
+                    transition={{
+                      delay: index * 0.03,
+                      duration: 0.15,
+                      ease: "easeOut",
+                    }}
+                    className="px-2"
+                  >
+                    <BlockComponent
+                      label={item.label}
+                      type={type}
+                      onClick={() => onAdd(item.id)}
+                      variant="palette"
+                    />
+                  </motion.div>
+                ))}
               </div>
-            ) : (
-              items.map((item) => (
-                <div key={item.id} className="px-2">
-                  <BlockComponent
-                    label={item.label}
-                    type={type}
-                    onClick={() => onAdd(item.id)}
-                    variant="palette"
-                  />
-                </div>
-              ))
-            )}
-          </div>
-        )}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
+    );
+  };
+
+  const renderSection = (
+    categorizedData: Record<
+      string,
+      {
+        category: CategoryDefinition;
+        items:
+          | TriggerDefinition[]
+          | ConditionTypeDefinition[]
+          | EffectTypeDefinition[];
+      }
+    >,
+    type: "trigger" | "condition" | "effect",
+    onAdd: (id: string) => void,
+    sectionKey: FilterType
+  ) => {
+    if (!shouldShowSection(sectionKey)) return null;
+
+    const totalItems = Object.values(categorizedData).reduce(
+      (sum, { items }) => sum + items.length,
+      0
+    );
+
+    if (totalItems === 0 && searchTerm) return null;
+
+    return (
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={activeFilter}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -10 }}
+          transition={{ duration: 0.2 }}
+          className="space-y-3"
+        >
+          {Object.values(categorizedData).map((categoryData) =>
+            renderCategory(categoryData, type, onAdd)
+          )}
+        </motion.div>
+      </AnimatePresence>
     );
   };
 
@@ -237,43 +399,47 @@ const BlockPalette: React.FC<BlockPaletteProps> = ({
       <div className="p-3">
         <div className="w-1/4 h-[1px] bg-black-lighter mx-auto mb-4"></div>
 
-        {!showOnlyTriggers && (
-          <div className="flex justify-center gap-2 mb-4">
-            <button
-              onClick={() => handleFilterToggle("triggers")}
-              className={`p-2 rounded-md transition-colors cursor-pointer border ${
-                activeFilters.includes("triggers")
-                  ? "bg-trigger text-black border-trigger"
-                  : "bg-black-darker text-trigger border-trigger hover:bg-trigger hover:text-black"
-              }`}
-              title="Filter Triggers"
-            >
-              <BoltIcon className="h-4 w-4" />
-            </button>
-            <button
-              onClick={() => handleFilterToggle("conditions")}
-              className={`p-2 rounded-md transition-colors cursor-pointer border ${
-                activeFilters.includes("conditions")
-                  ? "bg-condition text-white border-condition"
-                  : "bg-black-darker text-condition border-condition hover:bg-condition hover:text-white"
-              }`}
-              title="Filter Conditions"
-            >
-              <BeakerIcon className="h-4 w-4" />
-            </button>
-            <button
-              onClick={() => handleFilterToggle("effects")}
-              className={`p-2 rounded-md transition-colors cursor-pointer border ${
-                activeFilters.includes("effects")
-                  ? "bg-effect text-black border-effect"
-                  : "bg-black-darker text-effect border-effect hover:bg-effect hover:text-black"
-              }`}
-              title="Filter Effects"
-            >
-              <PuzzlePieceIcon className="h-4 w-4" />
-            </button>
-          </div>
-        )}
+        <div className="flex justify-center gap-2 mb-4">
+          <button
+            onClick={() => handleFilterToggle("triggers")}
+            className={`p-2 rounded-md transition-colors cursor-pointer border ${
+              activeFilter === "triggers"
+                ? "bg-trigger text-black border-trigger"
+                : "bg-black-darker text-trigger border-trigger hover:bg-trigger hover:text-black"
+            }`}
+            title="Filter Triggers"
+          >
+            <BoltIcon className="h-4 w-4" />
+          </button>
+          <button
+            onClick={() => handleFilterToggle("conditions")}
+            disabled={!selectedRule}
+            className={`p-2 rounded-md transition-colors cursor-pointer border ${
+              !selectedRule
+                ? "bg-black-darker text-white-darker border-black-lighter cursor-not-allowed opacity-50"
+                : activeFilter === "conditions"
+                ? "bg-condition text-white border-condition"
+                : "bg-black-darker text-condition border-condition hover:bg-condition hover:text-white"
+            }`}
+            title="Filter Conditions"
+          >
+            <BeakerIcon className="h-4 w-4" />
+          </button>
+          <button
+            onClick={() => handleFilterToggle("effects")}
+            disabled={!selectedRule}
+            className={`p-2 rounded-md transition-colors cursor-pointer border ${
+              !selectedRule
+                ? "bg-black-darker text-white-darker border-black-lighter cursor-not-allowed opacity-50"
+                : activeFilter === "effects"
+                ? "bg-effect text-black border-effect"
+                : "bg-black-darker text-effect border-effect hover:bg-effect hover:text-black"
+            }`}
+            title="Filter Effects"
+          >
+            <PuzzlePieceIcon className="h-4 w-4" />
+          </button>
+        </div>
 
         <div className="relative mb-4">
           <div className="relative">
@@ -290,24 +456,21 @@ const BlockPalette: React.FC<BlockPaletteProps> = ({
 
         <div className="h-[calc(100vh-18rem)] overflow-y-auto custom-scrollbar">
           {renderSection(
-            "Triggers",
-            filteredItems.triggers,
+            categorizedItems.triggers,
             "trigger",
             onAddTrigger,
             "triggers"
           )}
 
           {renderSection(
-            "Conditions",
-            filteredItems.conditions,
+            categorizedItems.conditions,
             "condition",
             onAddCondition,
             "conditions"
           )}
 
           {renderSection(
-            "Effects",
-            filteredItems.effects,
+            categorizedItems.effects,
             "effect",
             onAddEffect,
             "effects"

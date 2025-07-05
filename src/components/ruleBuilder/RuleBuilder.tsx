@@ -1412,7 +1412,6 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
               <BlockPalette
                 position={panels.blockPalette.position}
                 selectedRule={getSelectedRule()}
-                rulesCount={rules.length}
                 onAddTrigger={addTrigger}
                 onAddCondition={addCondition}
                 onAddEffect={addEffect}
