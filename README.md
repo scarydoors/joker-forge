@@ -140,6 +140,9 @@ The plan here is to implement enough triggers, conditions, and effects, so as th
 - [ ] **Modify Probability** - Oops All 6s! support
 - [ ] **Cards May Appear Multiple Times** - Showman logic
 - [ ] **All [Cards] in the Shop are Free** - Changes the buy price of certain packs/cards (planet, joker, tarot, spectral) to be free
+- [ ] **Allowing Debt** - Credit Card logic
+- [ ] **All Cards are Scored** - Splash logic
+- [ ] **Alter Blind Requirement** - I.E. 2X blind requirement, 0.5x blind requirement
 
 ---
 
