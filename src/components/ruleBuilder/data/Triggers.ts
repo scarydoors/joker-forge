@@ -114,6 +114,12 @@ export const TRIGGERS: TriggerDefinition[] = [
     description: "Triggers when the player exits the shop.",
   },
   {
+    id: "game_over",
+    label: "When Game Over",
+    description:
+      "Triggers when the player would lose the run (game over condition). Perfect for implementing 'save on death' mechanics like Mr. Bones, or effects that should happen when a run ends unsuccessfully.",
+  },
+  {
     id: "passive",
     label: "Passive (Always Active)",
     description:

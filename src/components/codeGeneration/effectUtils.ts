@@ -45,6 +45,7 @@ import {
   generateDisableBossBlindReturn,
   generatePassiveDisableBossBlind,
 } from "./effects/DisableBossBlindEffect";
+import { generateSavedReturn } from "./effects/SavedEffect";
 
 export interface RandomGroup {
   id: string;
@@ -335,6 +336,8 @@ const generateSingleEffect = (
       return generateSetDollarsReturn(effect);
     case "disable_boss_blind":
       return generateDisableBossBlindReturn(effect, triggerType);
+    case "prevent_game_over":
+      return generateSavedReturn(effect);
 
     default:
       return {

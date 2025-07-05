@@ -147,6 +147,13 @@ export const generateTriggerContext = (
         comment: "-- When this specific joker is sold",
       };
 
+    case "game_over":
+      return {
+        check:
+          "context.end_of_round and context.game_over and context.main_eval and not context.blueprint",
+        comment: "-- When the game would end (game over)",
+      };
+
     case "hand_played":
     default:
       return {

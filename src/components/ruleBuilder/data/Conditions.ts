@@ -432,6 +432,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
       "card_sold",
       "card_bought",
       "selling_self",
+      "game_over",
     ],
     params: [
       {
@@ -473,6 +474,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
       "card_sold",
       "card_bought",
       "selling_self",
+      "game_over",
     ],
     params: [
       {
@@ -520,6 +522,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
       "card_sold",
       "card_bought",
       "selling_self",
+      "game_over",
     ],
     params: [
       {
@@ -562,6 +565,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
       "card_sold",
       "card_bought",
       "selling_self",
+      "game_over",
     ],
     params: [
       {
@@ -604,6 +608,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
       "card_sold",
       "card_bought",
       "selling_self",
+      "game_over",
     ],
     params: [
       {
@@ -646,6 +651,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
       "card_sold",
       "card_bought",
       "selling_self",
+      "game_over",
     ],
     params: [
       {
@@ -691,6 +697,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
       "card_sold",
       "card_bought",
       "selling_self",
+      "game_over",
     ],
     params: [
       {
@@ -738,6 +745,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
       "card_sold",
       "card_bought",
       "selling_self",
+      "game_over",
     ],
     params: [
       {
@@ -855,6 +863,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
       "shop_reroll",
       "card_sold",
       "selling_self",
+      "game_over",
     ],
     params: [
       {
@@ -885,6 +894,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
       "card_sold",
       "hand_drawn",
       "first_hand_drawn",
+      "game_over",
     ],
     params: [
       {
@@ -929,6 +939,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
       "card_sold",
       "card_bought",
       "selling_self",
+      "game_over",
     ],
     params: [
       {
@@ -991,6 +1002,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
       "card_sold",
       "card_bought",
       "selling_self",
+      "game_over",
     ],
     params: [
       {
@@ -1034,6 +1046,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
       "card_sold",
       "card_bought",
       "selling_self",
+      "game_over",
     ],
     params: [
       {
@@ -1087,6 +1100,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
       "card_sold",
       "card_bought",
       "selling_self",
+      "game_over",
     ],
     params: [
       {

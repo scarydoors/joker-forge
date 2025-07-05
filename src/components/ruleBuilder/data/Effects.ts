@@ -398,6 +398,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
       "card_sold",
       "card_bought",
       "selling_self",
+      "game_over",
     ],
     params: [
       {
@@ -1607,6 +1608,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
       "after_hand_played",
       "card_sold",
       "card_bought",
+      "selling_self",
     ],
     params: [],
   },
@@ -1691,6 +1693,14 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
     ],
   },
   {
+    id: "prevent_game_over",
+    label: "Prevent Game Over",
+    description:
+      "Prevent the run from ending when game over conditions are met (like Mr. Bones)",
+    applicableTriggers: ["game_over"],
+    params: [],
+  },
+  {
     id: "show_message",
     label: "Show Message",
     description: "Display a custom message with specified color",
@@ -1715,6 +1725,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
       "card_sold",
       "card_bought",
       "selling_self",
+      "game_over",
     ],
     params: [
       {
