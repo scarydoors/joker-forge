@@ -635,6 +635,24 @@ const extractEffectsConfig = (
           configItems.push(`${varName} = ${effectValue}`);
           globalEffectVariableMapping[effect.id] = varName;
         }
+
+        if (effect.type === "add_sell_value") {
+          const effectValue = effect.params.value;
+          const parsed = parseGameVariable(effectValue);
+
+          if (parsed.isGameVariable) {
+            return;
+          }
+
+          if (
+            typeof effectValue === "number" &&
+            !allVariableNames.has(String(effectValue))
+          ) {
+            const varName = getUniqueVariableName("sell_value");
+            configItems.push(`${varName} = ${effectValue}`);
+            globalEffectVariableMapping[effect.id] = varName;
+          }
+        }
       });
 
       (rule.randomGroups || []).forEach((group) => {
@@ -775,6 +793,24 @@ const extractEffectsConfig = (
             const varName = getUniqueVariableName("set_dollars");
             configItems.push(`${varName} = ${effectValue}`);
             globalEffectVariableMapping[effect.id] = varName;
+          }
+
+          if (effect.type === "add_sell_value") {
+            const effectValue = effect.params.value;
+            const parsed = parseGameVariable(effectValue);
+
+            if (parsed.isGameVariable) {
+              return;
+            }
+
+            if (
+              typeof effectValue === "number" &&
+              !allVariableNames.has(String(effectValue))
+            ) {
+              const varName = getUniqueVariableName("sell_value");
+              configItems.push(`${varName} = ${effectValue}`);
+              globalEffectVariableMapping[effect.id] = varName;
+            }
           }
         });
       });
