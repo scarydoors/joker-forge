@@ -18,7 +18,7 @@ import ConsumablesPage from "./components/pages/ConsumablesPage";
 import DecksPage from "./components/pages/DecksPage";
 import EditionsPage from "./components/pages/EditionsPage";
 import EnhancementsPage from "./components/pages/EnhancementsPage";
-import VanillaRemadePage from "./components/pages/VanillaRemadePage";
+import VanillaRemadePage from "./components/pages/VanillaReforgedPage";
 import ExtraCreditPage from "./components/pages/ExtraCreditPage";
 import AcknowledgementsPage from "./components/pages/AcknowledgementsPage";
 import NotFoundPage from "./components/pages/NotFoundPage";

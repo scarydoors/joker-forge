@@ -12,7 +12,7 @@ import { JokerData } from "../JokerCard";
 import { formatBalatroText } from "../generic/balatroTextFormatter";
 import RuleBuilder from "../ruleBuilder/RuleBuilder";
 
-interface VanillaRemadePageProps {
+interface VanillaReforgedPageProps {
   onDuplicateToProject?: (joker: JokerData) => void;
   onNavigateToJokers?: () => void;
 }
@@ -23,7 +23,7 @@ type SortOption = {
   sortFn: (a: JokerData, b: JokerData) => number;
 };
 
-const VanillaRemadePage: React.FC<VanillaRemadePageProps> = ({
+const VanillaReforgedPage: React.FC<VanillaReforgedPageProps> = ({
   onDuplicateToProject,
   onNavigateToJokers,
 }) => {
@@ -49,7 +49,6 @@ const VanillaRemadePage: React.FC<VanillaRemadePageProps> = ({
 
   const sortButtonRef = React.useRef<HTMLButtonElement>(null);
   const filtersButtonRef = React.useRef<HTMLButtonElement>(null);
-  // Add refs for the dropdown menus
   const sortMenuRef = React.useRef<HTMLDivElement>(null);
   const filtersMenuRef = React.useRef<HTMLDivElement>(null);
 
@@ -141,7 +140,7 @@ const VanillaRemadePage: React.FC<VanillaRemadePageProps> = ({
 
   useEffect(() => {
     const fetchVanillaJokers = async () => {
-      const response = await fetch("/vanillaremade.json");
+      const response = await fetch("/vanillareforged.json");
       if (!response.ok) {
         throw new Error("Failed to fetch vanilla jokers data");
       }
@@ -261,7 +260,7 @@ const VanillaRemadePage: React.FC<VanillaRemadePageProps> = ({
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-4xl text-white-light font-light tracking-wide mb-3">
-              Vanilla Remade
+              Vanilla Reforged
             </h1>
             <div className="flex items-center gap-6 text-white-darker text-sm">
               <div className="flex items-center">
@@ -689,4 +688,4 @@ const VanillaJokerCard: React.FC<VanillaJokerCardProps> = ({
   );
 };
 
-export default VanillaRemadePage;
+export default VanillaReforgedPage;
