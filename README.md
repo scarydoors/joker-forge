@@ -86,6 +86,9 @@ The plan here is to implement enough triggers, conditions, and effects, so as th
 - [ ] **Most/Least Played Poker Hand** - Check if the hand played is your most/least played (Obelisk)
 - [ ] **Triggered Boss Blind Ability** - Check if the boss blind's ability was triggered (Matador)
 - [ ] **Consumable Type** - Check for card sold and consumable used
+- [ ] **Edition Count** - Check how many cards with editions are in hand played
+- [ ] **Enhancement Count** - Check how many cards with enhancements are in hand played
+- [ ] **Seal Count** - Check how many cards with seals are in hand played
 
 ---
 
