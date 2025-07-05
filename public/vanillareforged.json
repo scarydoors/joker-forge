@@ -5037,6 +5037,41 @@
       "placeholderCreditIndex": 8
     },
     {
+      "id": "36ab8325-b4eb-456e-b066-511fef862ce7",
+      "name": "Satellite",
+      "description": "Earn {C:money}$1{} at end of round per[s] unique {C:planet}Planet{} card used this run",
+      "imagePreview": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAI4AAAC+CAYAAADjhzelAAAAAXNSR0IArs4c6QAAEIJJREFUeJztnWusHVUVx/+n97SEktsCDQgYiPURwMpDm9RcIgjBhhgeBkpEAyQQoqEFY4iAvBpjKA8BwwelVQgpSSEKoRiRakghaCHc2AQppYU2CpgSXq0F7r3QhtuXH+asezvrzJq195o955zbrt+Xe/fMnj1zZmb/ztqPmdOAwHOD66VVzn7EGQOzCpdP6vBxOPsIDfqHG2Z6/1QAwNDItj2dPSSnF5jeP7UBAEMj23LLyUBuHMdEs2DZHmD8TjttznGdPB6nR1i1egP/pmnsnXDjOCYaFNvwmMZN4wDAqtUbALTHPG4cx0Rjr9ZUkGnmLbghl+4/9OigHY18+DYAYPniO3PlaNvTdhp7dg7n0k/cOAAAuOCOwdLtGs1puTQ/Hto/L59vx5HKic0fen450v745+A8cf/iwuVkHrRiHTeOY0I1DjcMsfy6rD1/2YPld3AsoYYhtBokQcbQzCCVLxlHK89qEF6e1dRtZm4Z5oIfLyhcTrhxnCQU9eMEUZdprAaRag6Hm0bbL4+VYk0jLQ+N9SRzPLToKgDAZbfcl6WvyI5r3t3FY4zS59POl4QbxzFhjnF4DaEaICHVLF6jLvppVs4ff31HaXlWuDFCDRfbiuKEtqpCY7zQVltVgxMe4zhJiI5xYk0jbRfaeknF/mIa/rl+8LMbAaQ3uBvHMRHccxwa/VNrQduOt2aoZnz/2CzfYxuz9daaYjWMtD1vBRGxrSG+XV2mqYrHOE4tqDGOtZ+BCI3+x8xS8TuZTFG1R5mjmSa2x7tXTaPFdIQbxzGhGsdqmk5T1TShxJqGx3DcpNYxr26ZhnDjOCai+3F4v43Us0zE9mhaY5uqNZBq3OLf3AUAWPCT63PrQ1tBoZ9LM03qnmCJWNMQbhzHhHl0nBjrt3lrWVD+umOQqry6+eNcuqppOKEzDon5C28qLW/xL8qNH3ocsbhxHBPBxqGaQDEN7yHGzEtzSR77pDJN1dbTkiW/AwDMn39lrjzihaefiiqv6pjXJVddWric+O0jzxUuv/riMwqXa/OSqo69EW4cx4Q5xiGjpDJJ6Chu6P6kmkemWfDLzJhLbr09t/7V1WsBACfMOTGXth4H7UeCDLfmfweV5ttz9DFB+7PO6IudC+3GcUyYjUM1TnoOR7vz+Vze1PNFtP2TabhZtJonmUYyixSjEFdffA4A4OVVbwAAGm9vyvbTMgylew03jmNCNY40RsJNQzWclmvRvfaEZV3wVoUc0xySy6eZRjILN0e3TFK134bjxnFMRMc4kml4OtQ8EqlHu7WxIW4eYvph/ZQTAPDxe+8UliOZpS5OOPzgJOXQUyV/XfZk1HZuHMdEsHE6NSpL+6m6P63/5OH7srG1SX3Z2BSZZdNbbwEAjpk5M/eXoPTaF1+odHwa9184u/Xf7ML11B9VFW4aeiJUw43jmKg8Oh5K1acOOJpRtDEeai3ymIbzrbOyfpZ7Z/wDAHDN1m8DGDeTld9fc34uzQ2Tyiix0DsBHlpUns+N45hIZhytnyDWMHWP8UgxDRmGs+LKRwAAz9yWGYdaV1rrRopVqhol9glNOv+p+nPcOI4J1TjcFFI/jTRPR+u/qTrGs4blC+2ZHdoyAmB8hp00D4eM8sEDj2ULWjMEqebSjMG6zELw/rC63uYRihvHMVF5Pg4ZxmoazSw8Rkk9xkOj5GQeHrMsWfYwgPZ+GzIO9QfV/ZyZdZ4NERrbhH4ON45jIto4/M6tOhPQOnpsHavh29Fxhz4tIL1DkJcXinUsLxTrk6IabhzHRLRx2p5uYPBWl7S+LrQxHnpC0/q+nNC3lYaS6nyExjCx7+WRcOM4JoKNQ3e0tb8mVc3iYzw8TUZJFYPwmjy8uTd+q9T6fJT0nuVY3DiOCdU4sWMb2gxBQmsVcZMQUk9s6tbOtMNn5cqhGlp3jKahPXtOaDGM1TSEG8cxEd2qEn/zINA0RKoxHl4Dq7Z2qDxeTq+aJlWPdez5cuM4JmqbAaj1iMa+1yX1fB+p/F57f0+saTp1/G4cx0SypxykHuOqYzF1m8BafuwMvNDfCI2lW4Z04zgmksc42lhVLHWbwFpjY2fgVTVN6jGyqrhxHBPRc44lk2ixTN3zTohuz8W1osVAvWIawo3jmIiOcUKN0e2e1olO1eef6ja8G8cxUfn9OKGkmqVf9a2jvQbFNvSe6CeyRmHb74fHxjZ1f243jmPCHONoo+Gp+nGIXqtxqaBWFDdN6me9U+PGcUzUNjre6ZhmX6VXP78bxzGRzDipnqPqlmnqGr0OjVF4bNPruHEcE8mMo5lFG7XudkxT15veJ4pBYnHjOCY69tZRq2l27sp+U6HZ91FUuleIPW5K9zpuHMdE7U85EPTk4I7P+gAAkw/YlUs3sz+iMfhyLd0rxB639DlSm6rqWJ4bxzGRbHRcG5sis0jpXjVGr5DaVOddcXMrbTseN45jItg41LM6fqf2Vitm1+7sOPomfVSarhtt/5TuFHXFhm4cx4RqHLojz1u0AQDw5IO3Re2ADKWh1dDz554CAHj86deDypHSF551fFA5VrT9a+brNWNJuHEcE42X1qwDAAxvb+wBgNPmHJfLIBmDm+fsy+/KpVcsvZ6tv6fakUYyumMGAGDK5K0svaWVPizJftrLL05LpDbgiqXX5tJ0XfomDQGQvzH4deb5Vq3eQP82ADeOY6R54JTsn+HtxRl27Z5uKpjudG6eULQaTOnQcsbTaUwjl1+e5jz+9PrcccUaKxTpOo5/U8RdZzeOY6I5JfFo1ehoFv2vfORH+eWBhmgrT6vBu1q/LtO3qTwdyMDJUwEAg2u2RW3XhnY8rTQ3YKyxOHMvWQoAWPnw5QDGjc9j0Kq4cRwTqm/IIBpSLEM1oI3EpmjLH7t9i8qmkfZvPb5Ac2lI14eu78CJ2byowbVhMxbdOI6J+Ahn58zCxXMvfgBAe2yj1qxEpuBMOeJQAMDo+x+WpquilU9pM5HmWvmHM3PpuRc9k/3TzH7tuO36tK7n4Nq431F34zgmdOO07siBb2S/7z34r09L89EdvvLR72R/WzVg7g+fBdA5ExC8vE6X3y2zjZmGEL4pgtcz3DiOiebozrCMZBoyicSUo4r7HYJr5udaTz5+MFye3tdQPu8Ull07n3Sdzr7mZQDA6LvFPdB0vWg9fbNouHEcE+roON2xIj1iiMO/lrUuNq/bVJquG23/lK6bFTd8KSo/v84r7v16Lu2j404SmsPbG+U5Qo3B87F0p4zAy+mUaUL3X/V4Qo129p1vxBUc+c3gxnFMBPccpzJEbA2cNfsAAMC1R+7OLb/nvfw9z9eHQuXQ9jwduj0ntDxp+/UvfVa4XDt/sbENcflTOwCEx2BuHMdE47nBsffpFraq6E7kkAlSIdXIL24ovrffPG536fqq+bVyYtH2q5VrNZtmZun6Lj1nci7trSonCWqMw80yfsemrXmLh8rv4SO2vJNLn7KltVzI/+KpR2b5nn+vMD+t5/zl7xsBAHf05VsZN+4abpVT3vqgfOeefmxuuWQUfnwS7x/2+cLy+PnUzuO17GPL3xzl19eN45hQYxwO3eHcAFINphqlIW1PnLT834XLX5n3ldL1vcqiGVmN5maSkEwYChmLm0+LIQmPcZwkqDEON8abLTOctP6T3HJrjSdjcKiGUY2U8h3/4BrTfrvFXV86EABw/RvZg2y3bM3OG30++ty3bOV1OksvmpGfE9yeD7nyximOWfrXbxTyl+PGcUyoMQ6ZRLsjNeOMfpyfOfj6FScDGK9hVAOt9L9rG3VevfA8AMCcW58szbfw1Mx8tz6/0bQfYuSorKeXzMOpeh6mHFw+n4ZfRy12JDzGcZKgxjgU/VtjCTILh5vGaoyqaKYhNNOQuarut1/ZjowlwU2hXTf+TaAZi3DjOCZU48R+55I5KCbQarRWw3oN+lwEtfp4K1Aj1lAS7ec3b3jJ+Hw9mYkbSMKN45hQW1VUk6q2Juqi75OKT0p2iZu+O1C4PNRYnNBYTYNiKG4qb1U5SVBjnE6ZZqKaw8rtf8v/PhYZiAwfCl0fKWYiE2kxFeUbb92Wx0ZuHMdEsvdx0R1NNYbXqG5BNblXjkdCOz7pc9BPMQz8/CEAwOCvLivcXjIPLeetRQ03jmMi2jhSLEJ3fK/RadPUZThreVrsyNdTzKS17tw4jgnVOPtba6cqZAbeT2PtnyFCjc5jHSnm4dBxLxT6lzhuHMdEx34FuCq8Bt/96HJTOauW3JRLUyvQWp5Ee3nzCtdfd1F+OTcWmSq0p5mMo7WyJGj/HuM4taCOVdXVWpo8/G7S8rhJiNieWI1UZuKmse53x7SjALS35rhpJANJ15fn87EqJwnJYpzUBpEgs3CT8LRmBqrxoQah/NwUVgOFHh9P8+3INLR8kJn3tPm3AwDyT4LLSLEUx43jmFBjHLpjuw2vcbHGiN0PJ3Y/dR8fL1eK8ej6Set5Pqk8j3GcJJiNo7UKUrc+UtfcqoQeV6qYyLp/K24cpxaiW1WdNkCvmSYWfvxVDcRblZSWvhm02IeOhz+toeHGcUxMmFaVlVSGrGoKvj0fC+JjZtaecGl7qXXFzSMdn8c4ThL2eeNUpWrrkRtP6vkmJBNpaKbhaPm8VeXUQrKxKimW4FF7qMHO/2b2e0t/+uczSs56SBUbjRskK08ziLT+P/8dAjB+PmJH11PjxnFMNA+asgsA8Olon5K1GP6dLbU+7n60vBwyDNEt0xCp+o80w5BJNHrFNIQbxzHRPKC5BwDw6Wh5RqmdL83Zja0ZVQ2Tuke7Uz3kX/7C9KD99IppCDeOY6Kxfl32JqbNI5NL349T9zwYK2Otr2f/nKa8M79XuLxq+WK5imnpfGuxEDdXbM8x35/3HDu10Hj9tVcAAO8PNbvTc/xJ2DvnOFSDU5mGlyvB9xd7HLx8aTvtOMa2Z8aSeqo5kmkIN45TC81Jk5RfAY7FaJBYYk0TagZaL9X40OWpTMiPRzIeQbEQxX7aNwbl4z3T555ePkfZjeOYaPZNCrx3mEnqijFSU/dxWmOUUPNJaf65JOOtWnZb6X7ISLznXsON45hovPbaOgDAB0ON4lbVpTcn3aHVANp3fF39LBLdMm3o5+WmoesoGYhfZ57PW1VOEprblTEqIjSqj/3urkpVc9XVU1wXVY9LM08obhzHRHN4e+J+nMSkjmGk1spEaSWmomrs6sZxTCSbc9zpfhIrnTJLrxosVUznxnFMVDbORG2dEHWZQSuv6n6t26eK6dw4jgmzcfgda+1P4fSaoVKZgbCeL45kDql/RupJtuLGcUwEG0eKZUJrZOhYUF3zWrT9pCpP6yfSzles4WLPT6qxRzeOY0J/W4Vwh4bGKKlqdl1PMYS2Mqxzi0PPR9UxwFCso+s+Ou4kwdyq0mKeiULoTDqeX1rPl1tbn71ubjeOY0KNcQge66Tqh7HWpG7N+LPOJe62iUPPl9gP5DGOk4Ix40zvnwoAGBrZVmoeZ/+CTDO9f2oDAIZGtgFw4zhGxqb/8ViHcPPsn+wV0xANADhjYBYAN45jpKgfpwGMxzyrVm/YU5BnjJdeGwYAzP7qtMSH5nQTHtNw3DiOCfERh71inkI+Gt5RuPyQaaG//uhMBCim4bhxHBP/BywmeLmasQbUAAAAAElFTkSuQmCC",
+      "overlayImagePreview": "",
+      "rarity": 2,
+      "cost": 6,
+      "blueprint_compat": true,
+      "eternal_compat": true,
+      "unlocked": true,
+      "discovered": true,
+      "rules": [
+        {
+          "id": "d8ac4884-e85e-4f37-9441-db1577d71ac8",
+          "trigger": "round_end",
+          "conditionGroups": [],
+          "effects": [
+            {
+              "id": "50606b0f-a348-48b2-8e06-665303fab84f",
+              "type": "add_dollars",
+              "params": {
+                "value": "GAMEVAR:unique_planets_used|1|0"
+              }
+            }
+          ],
+          "randomGroups": [],
+          "position": {
+            "x": 1027,
+            "y": 474
+          }
+        }
+      ],
+      "placeholderCreditIndex": 1
+    },
+    {
       "id": "cef48c82-5344-486f-9a42-9fdceab28876",
       "name": "Mime",
       "description": "Retrigger all card {C:orange}held in hand{} abilities",
