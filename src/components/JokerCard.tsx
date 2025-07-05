@@ -37,10 +37,12 @@ export interface JokerData {
   force_eternal?: boolean;
   force_perishable?: boolean;
   force_rental?: boolean;
+  appears_in_shop?: boolean;
   rules?: Rule[];
   userVariables?: UserVariable[];
   placeholderCreditIndex?: number;
 }
+
 interface JokerCardProps {
   joker: JokerData;
   onEditInfo: () => void;

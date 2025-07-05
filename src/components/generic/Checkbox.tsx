@@ -7,6 +7,7 @@ interface CheckboxProps {
   onChange: (checked: boolean) => void;
   className?: string;
   labelClassName?: string;
+  disabled?: boolean;
 }
 
 const Checkbox: React.FC<CheckboxProps> = ({
@@ -16,6 +17,7 @@ const Checkbox: React.FC<CheckboxProps> = ({
   onChange,
   className = "",
   labelClassName = "",
+  disabled = false,
 }) => {
   return (
     <div className={`flex items-center select-none ${className}`}>
@@ -23,12 +25,17 @@ const Checkbox: React.FC<CheckboxProps> = ({
         type="checkbox"
         id={id}
         checked={checked}
+        disabled={disabled}
         onChange={(e) => onChange(e.target.checked)}
-        className="mr-2 h-5 w-5 rounded border-black-lighter accent-mint cursor-pointer"
+        className={`mr-2 h-5 w-5 rounded border-black-lighter accent-mint ${
+          disabled ? "cursor-not-allowed opacity-50" : "cursor-pointer"
+        }`}
       />
       <label
         htmlFor={id}
-        className={`text-white cursor-pointer ${labelClassName}`}
+        className={`text-white ${
+          disabled ? "cursor-not-allowed opacity-50" : "cursor-pointer"
+        } ${labelClassName}`}
       >
         {label}
       </label>

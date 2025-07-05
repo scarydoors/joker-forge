@@ -254,9 +254,23 @@ SMODS.Joker{ --${joker.name}
     }`;
   }
 
+  if (
+    (joker.rarity !== 4 && joker.appears_in_shop === false) ||
+    (joker.rarity === 4 && joker.appears_in_shop === true)
+  ) {
+    jokerCode += `,
+
+    in_pool = function(self, args)
+        return ${
+          joker.rarity === 4 && joker.appears_in_shop === true
+            ? "true"
+            : "false"
+        }
+    end`;
+  }
+
   return jokerCode;
 };
-
 const generateJokerCode = (
   joker: JokerData,
   index: number,
@@ -371,6 +385,21 @@ const generateJokerBase = (
         x = ${soulX},
         y = ${soulY}
     }`;
+  }
+
+  if (
+    (joker.rarity !== 4 && joker.appears_in_shop === false) ||
+    (joker.rarity === 4 && joker.appears_in_shop === true)
+  ) {
+    jokerCode += `,
+
+    in_pool = function(self, args)
+        return ${
+          joker.rarity === 4 && joker.appears_in_shop === true
+            ? "true"
+            : "false"
+        }
+    end`;
   }
 
   return jokerCode;

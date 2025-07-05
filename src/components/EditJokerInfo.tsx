@@ -496,16 +496,30 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
 
   const handleRarityChange = (value: string) => {
     const rarity = parseInt(value, 10);
-    setFormData({
+    const previousRarity = formData.rarity;
+
+    const newFormData = {
       ...formData,
       rarity,
       cost:
         formData.cost === getCostFromRarity(formData.rarity)
           ? getCostFromRarity(rarity)
           : formData.cost,
-    });
-  };
+    };
 
+    // Only auto-adjust appears_in_shop when rarity actually changes
+    if (previousRarity !== rarity) {
+      if (rarity === 4 && previousRarity !== 4) {
+        // Switching TO legendary, set to false
+        newFormData.appears_in_shop = false;
+      } else if (previousRarity === 4 && rarity !== 4) {
+        // Switching FROM legendary to non-legendary, set to true
+        newFormData.appears_in_shop = true;
+      }
+    }
+
+    setFormData(newFormData);
+  };
   const upscaleImage = (img: HTMLImageElement): string => {
     const canvas = document.createElement("canvas");
     const ctx = canvas.getContext("2d");
@@ -1063,6 +1077,47 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
                                       )
                                     }
                                   />
+                                </div>
+                              </div>
+                              {/* --- Separator --- */}
+                              <div className="border-t border-black-lighter/50"></div>
+
+                              {/* --- Shop Availability --- */}
+                              <div>
+                                <p className="text-sm font-medium text-white-darker mb-2">
+                                  Shop Availability
+                                </p>
+                                <div className="grid grid-cols-1 gap-y-2">
+                                  <Checkbox
+                                    id="appears_in_shop_edit"
+                                    label={
+                                      formData.rarity === 4
+                                        ? "Force Appear in Shop (Legendary)"
+                                        : "Appears in Shop"
+                                    }
+                                    checked={formData.appears_in_shop !== false}
+                                    onChange={(checked) =>
+                                      handleCheckboxChange(
+                                        "appears_in_shop",
+                                        checked
+                                      )
+                                    }
+                                    disabled={false}
+                                  />
+                                  {formData.rarity === 4 && (
+                                    <p className="text-xs text-white-darker mt-1">
+                                      Legendary jokers don't normally appear in
+                                      shops. Enable this to force shop
+                                      appearance.
+                                    </p>
+                                  )}
+                                  {formData.rarity !== 4 &&
+                                    formData.appears_in_shop === false && (
+                                      <p className="text-xs text-white-darker mt-1">
+                                        This joker will not appear in shops or
+                                        from soul packs.
+                                      </p>
+                                    )}
                                 </div>
                               </div>
                             </div>
