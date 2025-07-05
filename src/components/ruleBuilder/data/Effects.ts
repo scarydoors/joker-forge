@@ -1608,7 +1608,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
       "after_hand_played",
       "card_sold",
       "card_bought",
-      "selling_self",
+      "game_over",
     ],
     params: [],
   },
