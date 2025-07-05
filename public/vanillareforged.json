@@ -5072,6 +5072,78 @@
       "placeholderCreditIndex": 1
     },
     {
+      "id": "63d4fcc1-42c7-4c76-90a0-b7d33a616977",
+      "name": "Egg",
+      "description": "Gains {C:money}$3{} of {C:attention}sell value{} at end of round",
+      "imagePreview": "data:image/png;base64,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",
+      "overlayImagePreview": "",
+      "rarity": 1,
+      "cost": 4,
+      "blueprint_compat": true,
+      "eternal_compat": true,
+      "unlocked": true,
+      "discovered": true,
+      "rules": [
+        {
+          "id": "ed3194c5-8b12-4523-9cf9-e9352d832818",
+          "trigger": "round_end",
+          "conditionGroups": [],
+          "effects": [
+            {
+              "id": "0db1afbf-a613-4242-8018-669d2db9a366",
+              "type": "add_sell_value",
+              "params": {
+                "target": "self",
+                "value": 3
+              }
+            }
+          ],
+          "randomGroups": [],
+          "position": {
+            "x": 1027,
+            "y": 474
+          }
+        }
+      ],
+      "placeholderCreditIndex": 3
+    },
+    {
+      "id": "75bb52d8-bdaa-4352-80fb-62c91179c051",
+      "name": "Gift Card",
+      "description": "Add {C:money}$1{} of {C:attention}sell value{} to every[s] {C:attention}Joker{} and {C:attention}Consumable{} card at end of round",
+      "imagePreview": "data:image/png;base64,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",
+      "overlayImagePreview": "",
+      "rarity": 2,
+      "cost": 6,
+      "blueprint_compat": true,
+      "eternal_compat": true,
+      "unlocked": true,
+      "discovered": true,
+      "rules": [
+        {
+          "id": "28fb12ad-d63b-4d53-8be6-e6b82cbbb720",
+          "trigger": "round_end",
+          "conditionGroups": [],
+          "effects": [
+            {
+              "id": "4ee97d31-945c-4644-a0b2-90bfdfae34fa",
+              "type": "add_sell_value",
+              "params": {
+                "target": "all",
+                "value": 1
+              }
+            }
+          ],
+          "randomGroups": [],
+          "position": {
+            "x": 1027,
+            "y": 474
+          }
+        }
+      ],
+      "placeholderCreditIndex": 6
+    },
+    {
       "id": "cef48c82-5344-486f-9a42-9fdceab28876",
       "name": "Mime",
       "description": "Retrigger all card {C:orange}held in hand{} abilities",
