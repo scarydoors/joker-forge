@@ -880,7 +880,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
   },
   {
     id: "check_blind_requirements",
-    label: "Check Blind Requirements",
+    label: "Blind Requirements",
     description:
       "Check what percentage of the blind requirement the current base hand score represents (e.g., 110% means you've exceeded the blind by 10%, values over 100% check if you've exceeded the blind)",
     applicableTriggers: [
