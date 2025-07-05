@@ -21,6 +21,7 @@ import { generateCardEditionConditionCode } from "./conditions/CardEditionCondit
 import { generateSpecificJokerConditionCode } from "./conditions/SpecificJokerCondition";
 import { generateGenericCompareConditionCode } from "./conditions/GenericCompareCondition";
 import { generateConsumableHeldConditionCode } from "./conditions/ConsumableHeldCondition";
+import { generateCheckBlindRequirementsConditionCode } from "./conditions/BlindRequirementsCondition";
 
 export const generateConditionChain = (rule: Rule): string => {
   if (!rule.conditionGroups || rule.conditionGroups.length === 0) {
@@ -170,6 +171,9 @@ const generateSingleConditionCode = (
 
     case "consumable_held":
       return generateConsumableHeldConditionCode([singleConditionRule]);
+
+    case "check_blind_requirements":
+      return generateCheckBlindRequirementsConditionCode([singleConditionRule]);
 
     default:
       return null;

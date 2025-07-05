@@ -870,6 +870,41 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
     ],
   },
   {
+    id: "check_blind_requirements",
+    label: "Check Blind Requirements",
+    description:
+      "Check what percentage of the blind requirement the current base hand score represents (e.g., 110% means you've exceeded the blind by 10%, values over 100% check if you've exceeded the blind)",
+    applicableTriggers: [
+      "after_hand_played",
+      "hand_played",
+      "card_scored",
+      "round_end",
+      "hand_discarded",
+      "card_discarded",
+      "selling_self",
+      "card_sold",
+      "hand_drawn",
+      "first_hand_drawn",
+    ],
+    params: [
+      {
+        id: "operator",
+        type: "select",
+        label: "Operator",
+        options: COMPARISON_OPERATORS,
+        default: "greater_equals",
+      },
+      {
+        id: "percentage",
+        type: "number",
+        label: "Percentage (%)",
+        min: 1,
+        max: 500,
+        default: 25,
+      },
+    ],
+  },
+  {
     id: "ante_level",
     label: "Ante Level",
     description: "Check the current ante level",
