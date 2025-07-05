@@ -35,7 +35,7 @@ The plan here is to implement enough triggers, conditions, and effects, so as th
 - [x] **Card Held in Hand** - Triggers for each card held in hand
 - [x] **Card Bought** - When a card is purchased
 - [x] **Card Sold** - When a card is sold
-- [ ] **When this Card is Sold** - When this specific card is sold
+- [x] **When this Card is Sold** - When this specific card is sold
 
 #### Not Implemented Yet
 
@@ -44,6 +44,7 @@ The plan here is to implement enough triggers, conditions, and effects, so as th
 - [ ] **Joker Added/Removed** - When a Joker is added/removed from your list (Joker Stencil)
 - [ ] **When a Card is Modified** - When any card is modified (enhanced, etc) (difficult)
 - [ ] **When shop is Entered** - WHne the shop is entered
+- [ ] **When a Playing Card is Added** - When a playing card is added to your deck (Hologram)
 
 ---
 
@@ -73,14 +74,18 @@ The plan here is to implement enough triggers, conditions, and effects, so as th
 - [x] **Deck Size** - Check remaining deck size
 - [x] **Deck Count By Rank, Suit, Enhancement, Seal, Edition** - Check the specifics of the cards in your full deck
 - [x] **Specific Joker** - Check if you have a specific joker in your list
+- [x] **Generic Compare** - Check GameVars and Vars against a value/eachother
 
 #### Not Implemented Yet
 
 - [ ] **Consumable Count** - Check number of consumables owned
 - [ ] **Score Threshold** - Check if score meets requirement (Mr. Bones)
-- [ ] **Hand History** - Check previous hands played this round/run
-- [ ] **Consecutive Hand Tracking** - Track consecutive hands without certain conditions
 - [ ] **Culmative Chip/Rank Check** - Check for if cards rank/chips add up to a certain number
+- [ ] **Lucky Card Triggered** - Check if a lucky card succesfully triggered (Lucky Cat)
+- [ ] **Glass Card Destroyed** - Check to see if a glass card got destroyed (Glass Joker)
+- [ ] **Most/Least Played Poker Hand** - Check if the hand played is your most/least played (Obelisk)
+- [ ] **Triggered Boss Blind Ability** - Check if the boss blind's ability was triggered (Matador)
+- [ ] **Consumable Type** - Check for card sold and consumable used
 
 ---
 
@@ -116,6 +121,8 @@ The plan here is to implement enough triggers, conditions, and effects, so as th
 - [x] **Copy Joker** - Make a copy of another joker (Random, By ID, By Index)
 - [x] **Destroy Joker** - Destroy another joker (Random, By ID, By Index)
 - [x] **Create Skip Tags** - Create a set or random skip tag
+- [x] **Set Dollars** - Set dollars to a value
+- [x] **Show Message** - Just show a simple little message
 
 #### Not Implemented Yet
 
@@ -128,9 +135,11 @@ The plan here is to implement enough triggers, conditions, and effects, so as th
 - [ ] **Copy Ability of Adjacent Joker** - Blueprint/Brainstorm logic (difficult)
 - [ ] **Permanent Card Modifications** - Add permanent bonuses to cards (Hiker)
 - [ ] **Required Suit Changes** - For jokers that alternate between their required suit (Ancient Joker)
-- [ ] **Required Rank Changes** - For jokers that alternate between their required rank
+- [ ] **Required Rank Changes** - For jokers that alternate between their required rank (Mail-In Rebate, Castle)
 - [ ] **Destroy Card in Hand** - Destroys a random or set (by index, rank, suit) card in hand
 - [ ] **Modify Probability** - Oops All 6s! support
+- [ ] **Cards May Appear Multiple Times** - Showman logic
+- [ ] **All [Cards] in the Shop are Free** - Changes the buy price of certain packs/cards (planet, joker, tarot, spectral) to be free
 
 ---
 
