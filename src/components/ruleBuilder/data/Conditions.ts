@@ -117,7 +117,11 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
         id: "value",
         type: "select",
         label: "Hand Type",
-        options: HAND_TYPES,
+        options: [
+          ...HAND_TYPES,
+          { value: "most_played_hand", label: "Most Played Hand" },
+          { value: "least_played_hand", label: "Least Played Hand" },
+        ],
       },
     ],
   },
