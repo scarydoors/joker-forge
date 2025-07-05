@@ -41,6 +41,10 @@ import { generateApplyExpMultReturn } from "./effects/ApplyExpMultEffect";
 import { generateApplyExpChipsReturn } from "./effects/ApplyExpChipsEffect";
 import { generateShowMessageReturn } from "./effects/ShowMessageEffect";
 import { generateSetDollarsReturn } from "./effects/SetDollarsEffect";
+import {
+  generateDisableBossBlindReturn,
+  generatePassiveDisableBossBlind,
+} from "./effects/DisableBossBlindEffect";
 
 export interface RandomGroup {
   id: string;
@@ -329,6 +333,8 @@ const generateSingleEffect = (
       return generateShowMessageReturn(effect);
     case "set_dollars":
       return generateSetDollarsReturn(effect);
+    case "disable_boss_blind":
+      return generateDisableBossBlindReturn(effect, triggerType);
 
     default:
       return {
@@ -456,6 +462,10 @@ export const processPassiveEffects = (
         case "combine_ranks":
           passiveResult = generatePassiveCombineRanks(effect);
           break;
+        case "disable_boss_blind": {
+          passiveResult = generatePassiveDisableBossBlind(effect);
+          break;
+        }
         case "considered_as": {
           const consideredAsResult: ConsideredAsResult =
             generatePassiveConsideredAs(effect);
