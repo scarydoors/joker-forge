@@ -4,17 +4,22 @@ import type { PassiveEffectResult } from "../effectUtils";
 import {
   generateGameVariableCode,
   parseGameVariable,
+  parseRangeVariable,
 } from "../gameVariableUtils";
 
 export const generateEditHandSizeReturn = (effect: Effect): EffectReturn => {
   const operation = effect.params?.operation || "add";
   const effectValue = effect.params.value;
   const parsed = parseGameVariable(effectValue);
+  const rangeParsed = parseRangeVariable(effectValue);
 
   let valueCode: string;
 
   if (parsed.isGameVariable) {
     valueCode = generateGameVariableCode(effectValue as string);
+  } else if (rangeParsed.isRangeVariable) {
+    const seedName = `handsize_${effect.id.substring(0, 8)}`;
+    valueCode = `pseudorandom('${seedName}', ${rangeParsed.min}, ${rangeParsed.max})`;
   } else if (typeof effectValue === "string") {
     valueCode = `card.ability.extra.${effectValue}`;
   } else if (
@@ -90,11 +95,15 @@ export const generatePassiveHandSize = (
   const operation = effect.params?.operation || "add";
   const effectValue = effect.params.value;
   const parsed = parseGameVariable(effectValue);
+  const rangeParsed = parseRangeVariable(effectValue);
 
   let valueCode: string;
 
   if (parsed.isGameVariable) {
     valueCode = generateGameVariableCode(effectValue as string);
+  } else if (rangeParsed.isRangeVariable) {
+    const seedName = `handsize_passive`;
+    valueCode = `pseudorandom('${seedName}', ${rangeParsed.min}, ${rangeParsed.max})`;
   } else if (typeof effectValue === "string") {
     valueCode = `card.ability.extra.${effectValue}`;
   } else {

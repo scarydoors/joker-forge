@@ -25,6 +25,7 @@ import {
   Bars3Icon,
   PlusIcon,
   ExclamationTriangleIcon,
+  ArrowsRightLeftIcon,
 } from "@heroicons/react/24/outline";
 import { ChartPieIcon, PercentBadgeIcon } from "@heroicons/react/16/solid";
 import {
@@ -79,6 +80,7 @@ interface ParameterFieldProps {
   onOpenGameVariablesPanel?: () => void;
   selectedGameVariable?: GameVariable | null;
   onGameVariableApplied?: () => void;
+  isEffect?: boolean;
 }
 
 interface ChanceInputProps {
@@ -105,13 +107,40 @@ const ChanceInput: React.FC<ChanceInputProps> = React.memo(
     onGameVariableApplied,
   }) => {
     const [isVariableMode, setIsVariableMode] = React.useState(
-      typeof value === "string"
+      typeof value === "string" &&
+        !value.startsWith("GAMEVAR:") &&
+        !value.startsWith("RANGE:")
     );
+    const [isRangeMode, setIsRangeMode] = React.useState(
+      typeof value === "string" && value.startsWith("RANGE:")
+    );
+
     const numericValue = typeof value === "number" ? value : 1;
     const actualValue = value || numericValue;
 
+    const parseRangeValue = (rangeStr: string) => {
+      if (rangeStr.startsWith("RANGE:")) {
+        const parts = rangeStr.replace("RANGE:", "").split("|");
+        return {
+          min: parseFloat(parts[0] || "1"),
+          max: parseFloat(parts[1] || "5"),
+        };
+      }
+      return { min: 1, max: 5 };
+    };
+
+    const rangeValues = isRangeMode
+      ? parseRangeValue(actualValue as string)
+      : { min: 1, max: 5 };
+
     React.useEffect(() => {
-      setIsVariableMode(typeof value === "string");
+      const isVar =
+        typeof value === "string" &&
+        !value.startsWith("GAMEVAR:") &&
+        !value.startsWith("RANGE:");
+      const isRange = typeof value === "string" && value.startsWith("RANGE:");
+      setIsVariableMode(isVar);
+      setIsRangeMode(isRange);
     }, [value]);
 
     React.useEffect(() => {
@@ -134,12 +163,30 @@ const ChanceInput: React.FC<ChanceInputProps> = React.memo(
       }
     }, [selectedGameVariable, value, onChange, onGameVariableApplied]);
 
+    const handleModeChange = (mode: "number" | "variable" | "range") => {
+      if (mode === "number") {
+        setIsVariableMode(false);
+        setIsRangeMode(false);
+        onChange(numericValue);
+      } else if (mode === "variable") {
+        setIsVariableMode(true);
+        setIsRangeMode(false);
+        onChange("");
+      } else if (mode === "range") {
+        setIsVariableMode(false);
+        setIsRangeMode(true);
+        onChange("RANGE:1|5");
+      }
+    };
+
     return (
       <div className="flex flex-col gap-2 items-center">
         <div className="flex items-center gap-2">
           <span className="text-white-light text-sm">{label}</span>
           <button
-            onClick={() => setIsVariableMode(!isVariableMode)}
+            onClick={() =>
+              handleModeChange(isVariableMode ? "number" : "variable")
+            }
             className={`p-1 rounded transition-colors cursor-pointer ${
               isVariableMode
                 ? "bg-mint/20 text-mint"
@@ -160,9 +207,48 @@ const ChanceInput: React.FC<ChanceInputProps> = React.memo(
           >
             <CubeIcon className="h-3 w-3" />
           </button>
+          <button
+            onClick={() => handleModeChange(isRangeMode ? "number" : "range")}
+            className={`p-1 rounded transition-colors cursor-pointer ${
+              isRangeMode
+                ? "bg-mint/20 text-mint"
+                : "bg-black-lighter text-white-darker hover:text-mint"
+            }`}
+            title="Toggle range mode"
+          >
+            <ArrowsRightLeftIcon className="h-3 w-3" />
+          </button>
         </div>
 
-        {isVariableMode ? (
+        {isRangeMode ? (
+          <div className="flex items-center gap-2 w-full">
+            <InputField
+              type="number"
+              value={rangeValues.min.toString()}
+              onChange={(e) => {
+                const newMin = parseInt(e.target.value);
+                onChange(`RANGE:${newMin}|${rangeValues.max}`);
+              }}
+              min="1"
+              size="sm"
+              className="w-16"
+              placeholder="Min"
+            />
+            <span className="text-white-light text-xs">to</span>
+            <InputField
+              type="number"
+              value={rangeValues.max.toString()}
+              onChange={(e) => {
+                const newMax = parseInt(e.target.value);
+                onChange(`RANGE:${rangeValues.min}|${newMax}`);
+              }}
+              min="1"
+              size="sm"
+              className="w-16"
+              placeholder="Max"
+            />
+          </div>
+        ) : isVariableMode ? (
           <div className="space-y-2 w-full">
             {availableVariables.length > 0 ? (
               <InputDropdown
@@ -225,15 +311,27 @@ const ParameterField: React.FC<ParameterFieldProps> = ({
   onOpenGameVariablesPanel,
   selectedGameVariable,
   onGameVariableApplied,
+  isEffect = false,
 }) => {
   const [isVariableMode, setIsVariableMode] = React.useState(
-    typeof value === "string"
+    typeof value === "string" &&
+      !value.startsWith("GAMEVAR:") &&
+      !value.startsWith("RANGE:")
+  );
+  const [isRangeMode, setIsRangeMode] = React.useState(
+    typeof value === "string" && value.startsWith("RANGE:")
   );
 
   const [inputError, setInputError] = React.useState<string>("");
 
   React.useEffect(() => {
-    setIsVariableMode(typeof value === "string");
+    const isVar =
+      typeof value === "string" &&
+      !value.startsWith("GAMEVAR:") &&
+      !value.startsWith("RANGE:");
+    const isRange = typeof value === "string" && value.startsWith("RANGE:");
+    setIsVariableMode(isVar);
+    setIsRangeMode(isRange);
   }, [value]);
 
   React.useEffect(() => {
@@ -338,12 +436,43 @@ const ParameterField: React.FC<ParameterFieldProps> = ({
         ? getGameVariableById(gameVariableId)
         : null;
 
+      const parseRangeValue = (rangeStr: string) => {
+        if (rangeStr.startsWith("RANGE:")) {
+          const parts = rangeStr.replace("RANGE:", "").split("|");
+          return {
+            min: parseFloat(parts[0] || "1"),
+            max: parseFloat(parts[1] || "5"),
+          };
+        }
+        return { min: 1, max: 5 };
+      };
+
+      const rangeValues = isRangeMode
+        ? parseRangeValue(value as string)
+        : { min: 1, max: 5 };
+
       const numericValue =
-        !isGameVariable && typeof value === "number"
+        !isGameVariable && !isRangeMode && typeof value === "number"
           ? value
           : typeof param.default === "number"
           ? param.default
           : 0;
+
+      const handleModeChange = (mode: "number" | "variable" | "range") => {
+        if (mode === "number") {
+          setIsVariableMode(false);
+          setIsRangeMode(false);
+          onChange(numericValue);
+        } else if (mode === "variable") {
+          setIsVariableMode(true);
+          setIsRangeMode(false);
+          onChange("");
+        } else if (mode === "range") {
+          setIsVariableMode(false);
+          setIsRangeMode(true);
+          onChange("RANGE:1|5");
+        }
+      };
 
       return (
         <>
@@ -352,7 +481,9 @@ const ParameterField: React.FC<ParameterFieldProps> = ({
               {String(param.label)}
             </span>
             <button
-              onClick={() => setIsVariableMode(!isVariableMode)}
+              onClick={() =>
+                handleModeChange(isVariableMode ? "number" : "variable")
+              }
               className={`p-1 rounded transition-colors cursor-pointer ${
                 isVariableMode
                   ? "bg-mint/20 text-mint"
@@ -373,6 +504,21 @@ const ParameterField: React.FC<ParameterFieldProps> = ({
             >
               <CubeIcon className="h-4 w-4" />
             </button>
+            {isEffect && (
+              <button
+                onClick={() =>
+                  handleModeChange(isRangeMode ? "number" : "range")
+                }
+                className={`p-1 rounded transition-colors cursor-pointer ${
+                  isRangeMode
+                    ? "bg-mint/20 text-mint"
+                    : "bg-black-lighter text-white-darker hover:text-mint"
+                }`}
+                title="Toggle range mode"
+              >
+                <ArrowsRightLeftIcon className="h-4 w-4" />
+              </button>
+            )}
           </div>
 
           {isGameVariable ? (
@@ -420,6 +566,52 @@ const ParameterField: React.FC<ParameterFieldProps> = ({
                     onChange(
                       `GAMEVAR:${gameVariableId}|${newMultiplier}|${gameVariableStartsFrom}`
                     );
+                  }}
+                  size="sm"
+                />
+              </div>
+            </div>
+          ) : isRangeMode && isEffect ? (
+            <div className="space-y-2">
+              <div className="flex items-center justify-between p-2 bg-mint/10 border border-mint/30 rounded-lg">
+                <div className="flex items-center gap-2">
+                  <ArrowsRightLeftIcon className="h-4 w-4 text-mint" />
+                  <span className="text-mint text-sm font-medium">
+                    Range Mode: {rangeValues.min} to {rangeValues.max}
+                  </span>
+                </div>
+                <button
+                  onClick={() => handleModeChange("number")}
+                  className="p-1 text-mint hover:text-white transition-colors cursor-pointer"
+                  title="Remove range mode"
+                >
+                  <XMarkIcon className="h-4 w-4" />
+                </button>
+              </div>
+              <div>
+                <span className="text-white-light text-sm mb-2 block">
+                  Minimum Value
+                </span>
+                <InputField
+                  type="number"
+                  value={rangeValues.min.toString()}
+                  onChange={(e) => {
+                    const newMin = parseFloat(e.target.value);
+                    onChange(`RANGE:${newMin}|${rangeValues.max}`);
+                  }}
+                  size="sm"
+                />
+              </div>
+              <div>
+                <span className="text-white-light text-sm mb-2 block">
+                  Maximum Value
+                </span>
+                <InputField
+                  type="number"
+                  value={rangeValues.max.toString()}
+                  onChange={(e) => {
+                    const newMax = parseFloat(e.target.value);
+                    onChange(`RANGE:${rangeValues.min}|${newMax}`);
                   }}
                   size="sm"
                 />
@@ -801,6 +993,7 @@ const Inspector: React.FC<InspectorProps> = ({
                   onOpenGameVariablesPanel={onToggleGameVariablesPanel}
                   selectedGameVariable={selectedGameVariable}
                   onGameVariableApplied={onGameVariableApplied}
+                  isEffect={false}
                 />
               </div>
             ))}
@@ -1009,6 +1202,7 @@ const Inspector: React.FC<InspectorProps> = ({
                   onOpenGameVariablesPanel={onToggleGameVariablesPanel}
                   selectedGameVariable={selectedGameVariable}
                   onGameVariableApplied={onGameVariableApplied}
+                  isEffect={true}
                 />
               </div>
             ))}

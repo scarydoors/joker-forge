@@ -3,6 +3,7 @@ import type { Effect } from "../../ruleBuilder/types";
 import {
   generateGameVariableCode,
   parseGameVariable,
+  parseRangeVariable,
 } from "../gameVariableUtils";
 
 export const generateModifyInternalVariableReturn = (
@@ -13,11 +14,15 @@ export const generateModifyInternalVariableReturn = (
   const operation = (effect.params?.operation as string) || "increment";
   const effectValue = effect.params?.value;
   const parsed = parseGameVariable(effectValue);
+  const rangeParsed = parseRangeVariable(effectValue);
 
   let valueCode: string;
 
   if (parsed.isGameVariable) {
     valueCode = generateGameVariableCode(effectValue);
+  } else if (rangeParsed.isRangeVariable) {
+    const seedName = `${variableName}_${effect.id.substring(0, 8)}`;
+    valueCode = `pseudorandom('${seedName}', ${rangeParsed.min}, ${rangeParsed.max})`;
   } else if (typeof effectValue === "string") {
     valueCode = `card.ability.extra.${effectValue}`;
   } else {

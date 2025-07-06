@@ -4,16 +4,22 @@ import { getEffectVariableName } from "../index";
 import {
   generateGameVariableCode,
   parseGameVariable,
+  parseRangeVariable,
 } from "../gameVariableUtils";
 
 export const generateApplyExpMultReturn = (effect: Effect): EffectReturn => {
   const effectValue = effect.params.value;
   const parsed = parseGameVariable(effectValue);
+  const rangeParsed = parseRangeVariable(effectValue);
 
   let valueCode: string;
 
   if (parsed.isGameVariable) {
     valueCode = generateGameVariableCode(effectValue);
+  } else if (rangeParsed.isRangeVariable) {
+    const variableName = getEffectVariableName(effect.id, "emult");
+    const seedName = `${variableName}_${effect.id.substring(0, 8)}`;
+    valueCode = `pseudorandom('${seedName}', card.ability.extra.${variableName}_min, card.ability.extra.${variableName}_max)`;
   } else if (typeof effectValue === "string") {
     if (effectValue.endsWith("_value")) {
       valueCode = effectValue;

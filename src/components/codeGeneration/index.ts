@@ -15,7 +15,7 @@ import {
 } from "./variableUtils";
 import type { Rule } from "../ruleBuilder/types";
 import type { PassiveEffectResult } from "./effectUtils";
-import { parseGameVariable } from "./gameVariableUtils";
+import { parseGameVariable, parseRangeVariable } from "./gameVariableUtils";
 
 export interface ModMetadata {
   id: string;
@@ -499,8 +499,35 @@ const extractEffectsConfig = (
       (rule.effects || []).forEach((effect) => {
         const effectValue = effect.params.value;
         const parsed = parseGameVariable(effectValue);
+        const rangeParsed = parseRangeVariable(effectValue);
 
-        if (parsed.isGameVariable) {
+        if (parsed.isGameVariable || rangeParsed.isRangeVariable) {
+          if (rangeParsed.isRangeVariable) {
+            const varName = getUniqueVariableName(
+              effect.type === "add_chips"
+                ? "chips"
+                : effect.type === "add_mult"
+                ? "mult"
+                : effect.type === "apply_x_mult"
+                ? "Xmult"
+                : effect.type === "add_dollars"
+                ? "dollars"
+                : effect.type === "apply_x_chips"
+                ? "xchips"
+                : effect.type === "apply_exp_mult"
+                ? "emult"
+                : effect.type === "apply_exp_chips"
+                ? "echips"
+                : effect.type === "set_dollars"
+                ? "set_dollars"
+                : effect.type === "add_sell_value"
+                ? "sell_value"
+                : "value"
+            );
+            configItems.push(`${varName}_min = ${rangeParsed.min}`);
+            configItems.push(`${varName}_max = ${rangeParsed.max}`);
+            globalEffectVariableMapping[effect.id] = varName;
+          }
           return;
         }
 
@@ -547,8 +574,22 @@ const extractEffectsConfig = (
         if (effect.type === "retrigger_cards") {
           const repetitions = effect.params.repetitions || 1;
           const parsedRepetitions = parseGameVariable(repetitions);
+          const rangeParsedRepetitions = parseRangeVariable(repetitions);
 
-          if (parsedRepetitions.isGameVariable) {
+          if (
+            parsedRepetitions.isGameVariable ||
+            rangeParsedRepetitions.isRangeVariable
+          ) {
+            if (rangeParsedRepetitions.isRangeVariable) {
+              const varName = getUniqueVariableName("repetitions");
+              configItems.push(
+                `${varName}_min = ${rangeParsedRepetitions.min}`
+              );
+              configItems.push(
+                `${varName}_max = ${rangeParsedRepetitions.max}`
+              );
+              globalEffectVariableMapping[effect.id] = varName;
+            }
             return;
           }
 
@@ -560,8 +601,15 @@ const extractEffectsConfig = (
         if (effect.type === "edit_hand") {
           const value = effect.params.value || 1;
           const parsedValue = parseGameVariable(value);
+          const rangeParsedValue = parseRangeVariable(value);
 
-          if (parsedValue.isGameVariable) {
+          if (parsedValue.isGameVariable || rangeParsedValue.isRangeVariable) {
+            if (rangeParsedValue.isRangeVariable) {
+              const varName = getUniqueVariableName("hands");
+              configItems.push(`${varName}_min = ${rangeParsedValue.min}`);
+              configItems.push(`${varName}_max = ${rangeParsedValue.max}`);
+              globalEffectVariableMapping[effect.id] = varName;
+            }
             return;
           }
 
@@ -573,8 +621,15 @@ const extractEffectsConfig = (
         if (effect.type === "edit_discard") {
           const value = effect.params.value || 1;
           const parsedValue = parseGameVariable(value);
+          const rangeParsedValue = parseRangeVariable(value);
 
-          if (parsedValue.isGameVariable) {
+          if (parsedValue.isGameVariable || rangeParsedValue.isRangeVariable) {
+            if (rangeParsedValue.isRangeVariable) {
+              const varName = getUniqueVariableName("discards");
+              configItems.push(`${varName}_min = ${rangeParsedValue.min}`);
+              configItems.push(`${varName}_max = ${rangeParsedValue.max}`);
+              globalEffectVariableMapping[effect.id] = varName;
+            }
             return;
           }
 
@@ -586,8 +641,15 @@ const extractEffectsConfig = (
         if (effect.type === "level_up_hand") {
           const value = effect.params.value || 1;
           const parsedValue = parseGameVariable(value);
+          const rangeParsedValue = parseRangeVariable(value);
 
-          if (parsedValue.isGameVariable) {
+          if (parsedValue.isGameVariable || rangeParsedValue.isRangeVariable) {
+            if (rangeParsedValue.isRangeVariable) {
+              const varName = getUniqueVariableName("levels");
+              configItems.push(`${varName}_min = ${rangeParsedValue.min}`);
+              configItems.push(`${varName}_max = ${rangeParsedValue.max}`);
+              globalEffectVariableMapping[effect.id] = varName;
+            }
             return;
           }
 
@@ -639,8 +701,15 @@ const extractEffectsConfig = (
         if (effect.type === "add_sell_value") {
           const effectValue = effect.params.value;
           const parsed = parseGameVariable(effectValue);
+          const rangeParsed = parseRangeVariable(effectValue);
 
-          if (parsed.isGameVariable) {
+          if (parsed.isGameVariable || rangeParsed.isRangeVariable) {
+            if (rangeParsed.isRangeVariable) {
+              const varName = getUniqueVariableName("sell_value");
+              configItems.push(`${varName}_min = ${rangeParsed.min}`);
+              configItems.push(`${varName}_max = ${rangeParsed.max}`);
+              globalEffectVariableMapping[effect.id] = varName;
+            }
             return;
           }
 
@@ -659,10 +728,38 @@ const extractEffectsConfig = (
         group.effects.forEach((effect) => {
           const effectValue = effect.params.value;
           const parsed = parseGameVariable(effectValue);
+          const rangeParsed = parseRangeVariable(effectValue);
 
-          if (parsed.isGameVariable) {
+          if (parsed.isGameVariable || rangeParsed.isRangeVariable) {
+            if (rangeParsed.isRangeVariable) {
+              const varName = getUniqueVariableName(
+                effect.type === "add_chips"
+                  ? "chips"
+                  : effect.type === "add_mult"
+                  ? "mult"
+                  : effect.type === "apply_x_mult"
+                  ? "Xmult"
+                  : effect.type === "add_dollars"
+                  ? "dollars"
+                  : effect.type === "apply_x_chips"
+                  ? "xchips"
+                  : effect.type === "apply_exp_mult"
+                  ? "emult"
+                  : effect.type === "apply_exp_chips"
+                  ? "echips"
+                  : effect.type === "set_dollars"
+                  ? "set_dollars"
+                  : effect.type === "add_sell_value"
+                  ? "sell_value"
+                  : "value"
+              );
+              configItems.push(`${varName}_min = ${rangeParsed.min}`);
+              configItems.push(`${varName}_max = ${rangeParsed.max}`);
+              globalEffectVariableMapping[effect.id] = varName;
+            }
             return;
           }
+
           if (
             effect.type === "add_chips" &&
             typeof effectValue === "number" &&
@@ -706,8 +803,22 @@ const extractEffectsConfig = (
           if (effect.type === "retrigger_cards") {
             const repetitions = effect.params.repetitions || 1;
             const parsedRepetitions = parseGameVariable(repetitions);
+            const rangeParsedRepetitions = parseRangeVariable(repetitions);
 
-            if (parsedRepetitions.isGameVariable) {
+            if (
+              parsedRepetitions.isGameVariable ||
+              rangeParsedRepetitions.isRangeVariable
+            ) {
+              if (rangeParsedRepetitions.isRangeVariable) {
+                const varName = getUniqueVariableName("repetitions");
+                configItems.push(
+                  `${varName}_min = ${rangeParsedRepetitions.min}`
+                );
+                configItems.push(
+                  `${varName}_max = ${rangeParsedRepetitions.max}`
+                );
+                globalEffectVariableMapping[effect.id] = varName;
+              }
               return;
             }
 
@@ -719,8 +830,18 @@ const extractEffectsConfig = (
           if (effect.type === "edit_hand") {
             const value = effect.params.value || 1;
             const parsedValue = parseGameVariable(value);
+            const rangeParsedValue = parseRangeVariable(value);
 
-            if (parsedValue.isGameVariable) {
+            if (
+              parsedValue.isGameVariable ||
+              rangeParsedValue.isRangeVariable
+            ) {
+              if (rangeParsedValue.isRangeVariable) {
+                const varName = getUniqueVariableName("hands");
+                configItems.push(`${varName}_min = ${rangeParsedValue.min}`);
+                configItems.push(`${varName}_max = ${rangeParsedValue.max}`);
+                globalEffectVariableMapping[effect.id] = varName;
+              }
               return;
             }
 
@@ -732,8 +853,18 @@ const extractEffectsConfig = (
           if (effect.type === "edit_discard") {
             const value = effect.params.value || 1;
             const parsedValue = parseGameVariable(value);
+            const rangeParsedValue = parseRangeVariable(value);
 
-            if (parsedValue.isGameVariable) {
+            if (
+              parsedValue.isGameVariable ||
+              rangeParsedValue.isRangeVariable
+            ) {
+              if (rangeParsedValue.isRangeVariable) {
+                const varName = getUniqueVariableName("discards");
+                configItems.push(`${varName}_min = ${rangeParsedValue.min}`);
+                configItems.push(`${varName}_max = ${rangeParsedValue.max}`);
+                globalEffectVariableMapping[effect.id] = varName;
+              }
               return;
             }
 
@@ -745,8 +876,18 @@ const extractEffectsConfig = (
           if (effect.type === "level_up_hand") {
             const value = effect.params.value || 1;
             const parsedValue = parseGameVariable(value);
+            const rangeParsedValue = parseRangeVariable(value);
 
-            if (parsedValue.isGameVariable) {
+            if (
+              parsedValue.isGameVariable ||
+              rangeParsedValue.isRangeVariable
+            ) {
+              if (rangeParsedValue.isRangeVariable) {
+                const varName = getUniqueVariableName("levels");
+                configItems.push(`${varName}_min = ${rangeParsedValue.min}`);
+                configItems.push(`${varName}_max = ${rangeParsedValue.max}`);
+                globalEffectVariableMapping[effect.id] = varName;
+              }
               return;
             }
 
@@ -798,8 +939,15 @@ const extractEffectsConfig = (
           if (effect.type === "add_sell_value") {
             const effectValue = effect.params.value;
             const parsed = parseGameVariable(effectValue);
+            const rangeParsed = parseRangeVariable(effectValue);
 
-            if (parsed.isGameVariable) {
+            if (parsed.isGameVariable || rangeParsed.isRangeVariable) {
+              if (rangeParsed.isRangeVariable) {
+                const varName = getUniqueVariableName("sell_value");
+                configItems.push(`${varName}_min = ${rangeParsed.min}`);
+                configItems.push(`${varName}_max = ${rangeParsed.max}`);
+                globalEffectVariableMapping[effect.id] = varName;
+              }
               return;
             }
 

@@ -8,6 +8,12 @@ export interface ParsedGameVariable {
   code?: string;
 }
 
+export interface ParsedRangeVariable {
+  isRangeVariable: boolean;
+  min?: number;
+  max?: number;
+}
+
 export const parseGameVariable = (value: unknown): ParsedGameVariable => {
   if (typeof value === "string" && value.startsWith("GAMEVAR:")) {
     const parts = value.replace("GAMEVAR:", "").split("|");
@@ -27,6 +33,24 @@ export const parseGameVariable = (value: unknown): ParsedGameVariable => {
 
   return {
     isGameVariable: false,
+  };
+};
+
+export const parseRangeVariable = (value: unknown): ParsedRangeVariable => {
+  if (typeof value === "string" && value.startsWith("RANGE:")) {
+    const parts = value.replace("RANGE:", "").split("|");
+    const min = parseFloat(parts[0] || "1");
+    const max = parseFloat(parts[1] || "5");
+
+    return {
+      isRangeVariable: true,
+      min,
+      max,
+    };
+  }
+
+  return {
+    isRangeVariable: false,
   };
 };
 

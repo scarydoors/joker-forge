@@ -5,17 +5,23 @@ import { getEffectVariableName } from "../index";
 import {
   generateGameVariableCode,
   parseGameVariable,
+  parseRangeVariable,
 } from "../gameVariableUtils";
 
 export const generateEditDiscardReturn = (effect: Effect): EffectReturn => {
   const operation = effect.params?.operation || "add";
   const effectValue = effect.params.value;
   const parsed = parseGameVariable(effectValue);
+  const rangeParsed = parseRangeVariable(effectValue);
 
   let valueCode: string;
 
   if (parsed.isGameVariable) {
     valueCode = generateGameVariableCode(effectValue);
+  } else if (rangeParsed.isRangeVariable) {
+    const variableName = getEffectVariableName(effect.id, "discards");
+    const seedName = `${variableName}_${effect.id.substring(0, 8)}`;
+    valueCode = `pseudorandom('${seedName}', card.ability.extra.${variableName}_min, card.ability.extra.${variableName}_max)`;
   } else if (typeof effectValue === "string") {
     valueCode = `card.ability.extra.${effectValue}`;
   } else {
@@ -82,12 +88,20 @@ export const generatePassiveDiscard = (effect: Effect): PassiveEffectResult => {
   const operation = effect.params?.operation || "add";
   const effectValue = effect.params.value;
   const parsed = parseGameVariable(effectValue);
+  const rangeParsed = parseRangeVariable(effectValue);
 
   let valueCode: string;
   let configVariables: string[] = [];
 
   if (parsed.isGameVariable) {
     valueCode = generateGameVariableCode(effectValue);
+  } else if (rangeParsed.isRangeVariable) {
+    const variableName = "discard_change";
+    valueCode = `pseudorandom('discard_change', card.ability.extra.${variableName}_min, card.ability.extra.${variableName}_max)`;
+    configVariables = [
+      `${variableName}_min = ${rangeParsed.min}`,
+      `${variableName}_max = ${rangeParsed.max}`,
+    ];
   } else if (typeof effectValue === "string") {
     valueCode = `card.ability.extra.${effectValue}`;
   } else {
@@ -124,6 +138,7 @@ export const generatePassiveDiscard = (effect: Effect): PassiveEffectResult => {
     addToDeck,
     removeFromDeck,
     configVariables,
-    locVars: parsed.isGameVariable ? [] : [valueCode],
+    locVars:
+      parsed.isGameVariable || rangeParsed.isRangeVariable ? [] : [valueCode],
   };
 };
