@@ -5615,6 +5615,79 @@
       "placeholderCreditIndex": 3
     },
     {
+      "id": "46b024ec-63f7-4049-810f-26c58380ca8a",
+      "name": "Sixth Sense",
+      "description": "If {C:attention}first hand{} of round is a single {C:attention}6{},[s] destroy it and create a {C:spectral}Spectral{} card[s]{C:inactive}(Must have room){}",
+      "imagePreview": "data:image/png;base64,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",
+      "overlayImagePreview": "",
+      "rarity": 1,
+      "cost": 6,
+      "blueprint_compat": true,
+      "eternal_compat": true,
+      "unlocked": true,
+      "discovered": true,
+      "rules": [
+        {
+          "id": "86321ba3-a571-47e8-9979-24a442825e7f",
+          "trigger": "card_scored",
+          "conditionGroups": [
+            {
+              "id": "e9335bfb-4208-4a5b-86de-e4ced253fee1",
+              "operator": "and",
+              "conditions": [
+                {
+                  "id": "186cd395-5c81-49ff-a8f8-db09853f5389",
+                  "type": "first_played_hand",
+                  "negate": false,
+                  "params": {}
+                },
+                {
+                  "id": "43668554-b395-46c0-a459-2679eaa8f7b2",
+                  "type": "card_count",
+                  "negate": false,
+                  "params": {
+                    "card_scope": "all_played",
+                    "value": 1,
+                    "operator": "equals"
+                  }
+                },
+                {
+                  "id": "76c4d32d-c07c-48ce-9d8e-394e5462ccbc",
+                  "type": "card_rank",
+                  "negate": false,
+                  "params": {
+                    "rank_type": "specific",
+                    "specific_rank": "6"
+                  }
+                }
+              ]
+            }
+          ],
+          "effects": [
+            {
+              "id": "2bf140e1-1c24-4714-adec-26edf131bdec",
+              "type": "delete_triggered_card",
+              "params": {}
+            },
+            {
+              "id": "3abdfd14-9dc8-4f3e-a7f6-c2a0abb5750c",
+              "type": "create_spectral_card",
+              "params": {
+                "spectral_card": "random",
+                "is_negative": "none"
+              }
+            }
+          ],
+          "randomGroups": [],
+          "position": {
+            "x": 766.5,
+            "y": 121
+          }
+        }
+      ],
+      "placeholderCreditIndex": 2
+    },
+    {
       "id": "cef48c82-5344-486f-9a42-9fdceab28876",
       "name": "Mime",
       "description": "Retrigger all card {C:orange}held in hand{} abilities",
