@@ -1,4 +1,5 @@
 import type { Rule, Condition, ConditionGroup } from "../ruleBuilder/types";
+import type { JokerData } from "../JokerCard";
 import { generatePokerHandConditionCode } from "./conditions/PokerHandCondition";
 import { generateSuitCardConditionCode } from "./conditions/SuitCardCondition";
 import { generateRankCardConditionCode } from "./conditions/RankCardCondition";
@@ -23,7 +24,10 @@ import { generateGenericCompareConditionCode } from "./conditions/GenericCompare
 import { generateConsumableHeldConditionCode } from "./conditions/ConsumableHeldCondition";
 import { generateCheckBlindRequirementsConditionCode } from "./conditions/BlindRequirementsCondition";
 
-export const generateConditionChain = (rule: Rule): string => {
+export const generateConditionChain = (
+  rule: Rule,
+  joker?: JokerData
+): string => {
   if (!rule.conditionGroups || rule.conditionGroups.length === 0) {
     return "";
   }
@@ -31,7 +35,7 @@ export const generateConditionChain = (rule: Rule): string => {
   const groupConditions: string[] = [];
 
   rule.conditionGroups.forEach((group) => {
-    const conditions = generateConditionGroupCode(group, rule);
+    const conditions = generateConditionGroupCode(group, rule, joker);
     if (conditions) {
       groupConditions.push(conditions);
     }
@@ -50,7 +54,8 @@ export const generateConditionChain = (rule: Rule): string => {
 
 const generateConditionGroupCode = (
   group: ConditionGroup,
-  rule: Rule
+  rule: Rule,
+  joker?: JokerData
 ): string => {
   if (!group.conditions || group.conditions.length === 0) {
     return "";
@@ -59,7 +64,7 @@ const generateConditionGroupCode = (
   const conditionCodes: string[] = [];
 
   group.conditions.forEach((condition) => {
-    const code = generateSingleConditionCode(condition, rule);
+    const code = generateSingleConditionCode(condition, rule, joker);
     if (code) {
       let finalCode = code;
 
@@ -91,7 +96,8 @@ const generateConditionGroupCode = (
 
 const generateSingleConditionCode = (
   condition: Condition,
-  rule: Rule
+  rule: Rule,
+  joker?: JokerData
 ): string | null => {
   const singleConditionRule = {
     ...rule,
@@ -109,11 +115,11 @@ const generateSingleConditionCode = (
 
     case "suit_count":
     case "card_suit":
-      return generateSuitCardConditionCode([singleConditionRule]);
+      return generateSuitCardConditionCode([singleConditionRule], joker);
 
     case "rank_count":
     case "card_rank":
-      return generateRankCardConditionCode([singleConditionRule]);
+      return generateRankCardConditionCode([singleConditionRule], joker);
 
     case "card_count":
       return generateCountCardConditionCode([singleConditionRule]);

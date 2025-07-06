@@ -1,63 +1,60 @@
 import type { Rule } from "../../ruleBuilder/types";
+import type { JokerData } from "../../JokerCard";
 import { generateGameVariableCode } from "../gameVariableUtils";
+import { parseRankVariable } from "../variableUtils";
 
-export const generateRankCardConditionCode = (rules: Rule[]): string | null => {
+export const generateRankCardConditionCode = (
+  rules: Rule[],
+  joker?: JokerData
+): string | null => {
   const condition = rules[0].conditionGroups[0].conditions[0];
   const triggerType = rules[0].trigger || "hand_played";
 
   const rankType = (condition.params.rank_type as string) || "specific";
-  const specificRank = (condition.params.specific_rank as string) || null;
+  const specificRank = condition.params.specific_rank;
   const rankGroup = (condition.params.rank_group as string) || null;
   const quantifier = (condition.params.quantifier as string) || "at_least_one";
   const count = generateGameVariableCode(condition.params.count);
   const scope = (condition.params.card_scope as string) || "scoring";
 
+  const rankVarInfo = parseRankVariable(specificRank, joker);
+
   const getRanksCheckLogic = (
     ranks: string[],
-    rankGroupType: string | null
+    rankGroupType: string | null,
+    useVariable = false,
+    varCode?: string
   ): string => {
-    if (rankGroupType === "face") {
+    if (useVariable && varCode) {
+      return `c:get_id() == ${varCode}`;
+    } else if (rankGroupType === "face") {
       return "c:is_face()";
     } else if (rankGroupType === "even") {
-      return "(c:get_id() % 2 == 0)";
+      return "(c:get_id() == 2 or c:get_id() == 4 or c:get_id() == 6 or c:get_id() == 8 or c:get_id() == 10)";
     } else if (rankGroupType === "odd") {
-      return "(c:get_id() % 2 == 1)";
+      return "(c:get_id() == 14 or c:get_id() == 3 or c:get_id() == 5 or c:get_id() == 7 or c:get_id() == 9)";
     } else if (ranks.length === 1) {
-      if (ranks[0] === "J") {
-        return "c:get_id() == 11";
-      } else if (ranks[0] === "Q") {
-        return "c:get_id() == 12";
-      } else if (ranks[0] === "K") {
-        return "c:get_id() == 13";
-      } else if (ranks[0] === "A") {
-        return "c:get_id() == 14";
-      } else {
-        return `c:get_id() == ${ranks[0]}`;
-      }
+      const rankId = getRankId(ranks[0]);
+      return `c:get_id() == ${rankId}`;
     } else {
       return ranks
-        .map((rank) => {
-          if (rank === "J") {
-            return "c:get_id() == 11";
-          } else if (rank === "Q") {
-            return "c:get_id() == 12";
-          } else if (rank === "K") {
-            return "c:get_id() == 13";
-          } else if (rank === "A") {
-            return "c:get_id() == 14";
-          } else {
-            return `c:get_id() == ${rank}`;
-          }
-        })
+        .map((rank) => `c:get_id() == ${getRankId(rank)}`)
         .join(" or ");
     }
   };
 
   let ranks: string[] = [];
   let rankGroupType: string | null = null;
+  let useVariable = false;
+  let variableCode = "";
 
-  if (rankType === "specific" && specificRank) {
-    ranks = [specificRank];
+  if (rankType === "specific") {
+    if (rankVarInfo.isRankVariable) {
+      useVariable = true;
+      variableCode = `G.GAME.current_round.${rankVarInfo.variableName}_card.id`;
+    } else if (typeof specificRank === "string") {
+      ranks = [specificRank];
+    }
   } else if (rankType === "group" && rankGroup) {
     rankGroupType = rankGroup;
   }
@@ -70,10 +67,12 @@ export const generateRankCardConditionCode = (rules: Rule[]): string | null => {
     triggerType === "card_discarded" ||
     triggerType === "card_held_in_hand"
   ) {
-    const checkLogic = getRanksCheckLogic(ranks, rankGroupType).replace(
-      /c:/g,
-      "context.other_card:"
-    );
+    const checkLogic = getRanksCheckLogic(
+      ranks,
+      rankGroupType,
+      useVariable,
+      variableCode
+    ).replace(/c:/g, "context.other_card:");
     return checkLogic;
   } else {
     switch (quantifier) {
@@ -81,7 +80,12 @@ export const generateRankCardConditionCode = (rules: Rule[]): string | null => {
         return `(function()
     local rankFound = false
     for i, c in ipairs(${cardsToCheck}) do
-        if ${getRanksCheckLogic(ranks, rankGroupType)} then
+        if ${getRanksCheckLogic(
+          ranks,
+          rankGroupType,
+          useVariable,
+          variableCode
+        )} then
             rankFound = true
             break
         end
@@ -94,7 +98,12 @@ end)()`;
         return `(function()
     local allMatchRank = true
     for i, c in ipairs(${cardsToCheck}) do
-        if not (${getRanksCheckLogic(ranks, rankGroupType)}) then
+        if not (${getRanksCheckLogic(
+          ranks,
+          rankGroupType,
+          useVariable,
+          variableCode
+        )}) then
             allMatchRank = false
             break
         end
@@ -107,7 +116,12 @@ end)()`;
         return `(function()
     local rankCount = 0
     for i, c in ipairs(${cardsToCheck}) do
-        if ${getRanksCheckLogic(ranks, rankGroupType)} then
+        if ${getRanksCheckLogic(
+          ranks,
+          rankGroupType,
+          useVariable,
+          variableCode
+        )} then
             rankCount = rankCount + 1
         end
     end
@@ -119,7 +133,12 @@ end)()`;
         return `(function()
     local rankCount = 0
     for i, c in ipairs(${cardsToCheck}) do
-        if ${getRanksCheckLogic(ranks, rankGroupType)} then
+        if ${getRanksCheckLogic(
+          ranks,
+          rankGroupType,
+          useVariable,
+          variableCode
+        )} then
             rankCount = rankCount + 1
         end
     end
@@ -131,7 +150,12 @@ end)()`;
         return `(function()
     local rankCount = 0
     for i, c in ipairs(${cardsToCheck}) do
-        if ${getRanksCheckLogic(ranks, rankGroupType)} then
+        if ${getRanksCheckLogic(
+          ranks,
+          rankGroupType,
+          useVariable,
+          variableCode
+        )} then
             rankCount = rankCount + 1
         end
     end
@@ -143,7 +167,12 @@ end)()`;
         return `(function()
     local rankFound = false
     for i, c in ipairs(${cardsToCheck}) do
-        if ${getRanksCheckLogic(ranks, rankGroupType)} then
+        if ${getRanksCheckLogic(
+          ranks,
+          rankGroupType,
+          useVariable,
+          variableCode
+        )} then
             rankFound = true
             break
         end
@@ -152,5 +181,20 @@ end)()`;
     return rankFound
 end)()`;
     }
+  }
+};
+
+const getRankId = (rank: string): number => {
+  switch (rank) {
+    case "A":
+      return 14;
+    case "K":
+      return 13;
+    case "Q":
+      return 12;
+    case "J":
+      return 11;
+    default:
+      return parseInt(rank) || 14;
   }
 };

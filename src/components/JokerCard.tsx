@@ -18,8 +18,24 @@ import { validateJokerName } from "./generic/validationUtils";
 export interface UserVariable {
   id: string;
   name: string;
-  initialValue: number;
+  type?: "number" | "suit" | "rank";
   description?: string;
+  initialValue?: number;
+  initialSuit?: "Spades" | "Hearts" | "Diamonds" | "Clubs";
+  initialRank?:
+    | "2"
+    | "3"
+    | "4"
+    | "5"
+    | "6"
+    | "7"
+    | "8"
+    | "9"
+    | "10"
+    | "Jack"
+    | "Queen"
+    | "King"
+    | "Ace";
 }
 
 export interface JokerData {

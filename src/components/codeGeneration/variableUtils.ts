@@ -27,6 +27,18 @@ export interface GameVariableInfo {
   code: string;
 }
 
+export interface SuitVariableInfo {
+  isSuitVariable: boolean;
+  variableName?: string;
+  code?: string;
+}
+
+export interface RankVariableInfo {
+  isRankVariable: boolean;
+  variableName?: string;
+  code?: string;
+}
+
 export const coordinateVariableConflicts = (
   effects: Effect[]
 ): {
@@ -179,6 +191,86 @@ export const extractGameVariablesFromRules = (
   });
 
   return Array.from(gameVariableMap.values());
+};
+
+export const getSuitVariables = (joker: JokerData): UserVariable[] => {
+  return (joker.userVariables || []).filter((v) => v.type === "suit");
+};
+
+export const getRankVariables = (joker: JokerData): UserVariable[] => {
+  return (joker.userVariables || []).filter((v) => v.type === "rank");
+};
+
+export const parseSuitVariable = (
+  value: unknown,
+  joker?: JokerData
+): SuitVariableInfo => {
+  if (typeof value === "string" && joker?.userVariables) {
+    const suitVariable = joker.userVariables.find(
+      (v) => v.name === value && v.type === "suit"
+    );
+
+    if (suitVariable) {
+      return {
+        isSuitVariable: true,
+        variableName: value,
+        code: `G.GAME.current_round.${value}_card.suit`,
+      };
+    }
+  }
+
+  return {
+    isSuitVariable: false,
+  };
+};
+
+export const parseRankVariable = (
+  value: unknown,
+  joker?: JokerData
+): RankVariableInfo => {
+  if (typeof value === "string" && joker?.userVariables) {
+    const rankVariable = joker.userVariables.find(
+      (v) => v.name === value && v.type === "rank"
+    );
+
+    if (rankVariable) {
+      return {
+        isRankVariable: true,
+        variableName: value,
+        code: `G.GAME.current_round.${value}_card.id`,
+      };
+    }
+  }
+
+  return {
+    isRankVariable: false,
+  };
+};
+
+export const addSuitVariablesToOptions = (
+  baseOptions: Array<{ value: string; label: string }>,
+  joker: JokerData
+): Array<{ value: string; label: string }> => {
+  const suitVariables = getSuitVariables(joker);
+  const variableOptions = suitVariables.map((variable) => ({
+    value: variable.name,
+    label: `${variable.name} (suit variable)`,
+  }));
+
+  return [...baseOptions, ...variableOptions];
+};
+
+export const addRankVariablesToOptions = (
+  baseOptions: Array<{ value: string; label: string }>,
+  joker: JokerData
+): Array<{ value: string; label: string }> => {
+  const rankVariables = getRankVariables(joker);
+  const variableOptions = rankVariables.map((variable) => ({
+    value: variable.name,
+    label: `${variable.name} (rank variable)`,
+  }));
+
+  return [...baseOptions, ...variableOptions];
 };
 
 const isUserDefinedVariable = (str: string): boolean => {

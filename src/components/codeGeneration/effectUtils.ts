@@ -48,6 +48,8 @@ import {
 import { generateSavedReturn } from "./effects/SavedEffect";
 import { generateAddSellValueReturn } from "./effects/AddSellValueEffect";
 import { generateBalanceReturn } from "./effects/BalanceEffect";
+import { generateChangeSuitVariableReturn } from "./effects/ChangeSuitVariableEffect";
+import { generateChangeRankVariableReturn } from "./effects/ChangeRankVariableEffect";
 
 export interface RandomGroup {
   id: string;
@@ -344,6 +346,10 @@ const generateSingleEffect = (
       return generateAddSellValueReturn(effect, triggerType);
     case "balance":
       return generateBalanceReturn(effect);
+    case "change_suit_variable":
+      return generateChangeSuitVariableReturn(effect);
+    case "change_rank_variable":
+      return generateChangeRankVariableReturn(effect);
 
     default:
       return {

@@ -10,7 +10,11 @@ import type {
   ShowWhenCondition,
 } from "./types";
 import { JokerData } from "../JokerCard";
-import { getAllVariables } from "../codeGeneration/variableUtils";
+import {
+  addSuitVariablesToOptions,
+  addRankVariablesToOptions,
+  getAllVariables,
+} from "../codeGeneration/variableUtils";
 import { getTriggerById } from "./data/Triggers";
 import { getConditionTypeById } from "./data/Conditions";
 import { getEffectTypeById } from "./data/Effects";
@@ -81,6 +85,7 @@ interface ParameterFieldProps {
   selectedGameVariable?: GameVariable | null;
   onGameVariableApplied?: () => void;
   isEffect?: boolean;
+  joker?: JokerData;
 }
 
 interface ChanceInputProps {
@@ -312,6 +317,7 @@ const ParameterField: React.FC<ParameterFieldProps> = ({
   selectedGameVariable,
   onGameVariableApplied,
   isEffect = false,
+  joker = null,
 }) => {
   const [isVariableMode, setIsVariableMode] = React.useState(
     typeof value === "string" &&
@@ -402,23 +408,51 @@ const ParameterField: React.FC<ParameterFieldProps> = ({
   }
 
   switch (param.type) {
-    case "select":
+    case "select": {
+      let options =
+        param.options?.map((option) => ({
+          value: option.value,
+          label: option.label,
+        })) || [];
+
+      if (param.id === "specific_suit" && joker) {
+        options = addSuitVariablesToOptions(options, joker);
+      }
+
+      if (param.id === "specific_rank" && joker) {
+        options = addRankVariablesToOptions(options, joker);
+      }
+
+      if (param.id === "variable_name" && joker && param.label) {
+        if (param.label.includes("Suit")) {
+          const suitVariables =
+            joker.userVariables?.filter((v) => v.type === "suit") || [];
+          options = suitVariables.map((variable) => ({
+            value: variable.name,
+            label: variable.name,
+          }));
+        } else if (param.label.includes("Rank")) {
+          const rankVariables =
+            joker.userVariables?.filter((v) => v.type === "rank") || [];
+          options = rankVariables.map((variable) => ({
+            value: variable.name,
+            label: variable.name,
+          }));
+        }
+      }
+
       return (
         <InputDropdown
           label={String(param.label)}
           labelPosition="center"
           value={(value as string) || ""}
           onChange={(newValue) => onChange(newValue)}
-          options={
-            param.options?.map((option) => ({
-              value: option.value,
-              label: option.label,
-            })) || []
-          }
+          options={options}
           className="bg-black-dark"
           size="sm"
         />
       );
+    }
 
     case "number": {
       const isGameVariable =
@@ -994,6 +1028,7 @@ const Inspector: React.FC<InspectorProps> = ({
                   selectedGameVariable={selectedGameVariable}
                   onGameVariableApplied={onGameVariableApplied}
                   isEffect={false}
+                  joker={joker}
                 />
               </div>
             ))}
@@ -1203,6 +1238,7 @@ const Inspector: React.FC<InspectorProps> = ({
                   selectedGameVariable={selectedGameVariable}
                   onGameVariableApplied={onGameVariableApplied}
                   isEffect={true}
+                  joker={joker}
                 />
               </div>
             ))}

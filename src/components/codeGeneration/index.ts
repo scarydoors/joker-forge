@@ -151,7 +151,7 @@ const generateSingleJokerLua = (joker: JokerData): string => {
     joker.rules?.filter((rule) => rule.trigger !== "passive") || [];
 
   if (nonPassiveRules.length > 0) {
-    const calculateCode = generateCalculateFunction(nonPassiveRules);
+    const calculateCode = generateCalculateFunction(nonPassiveRules, joker);
     jokerCode += `,\n\n    ${calculateCode}`;
   }
 
@@ -179,8 +179,68 @@ const generateSingleJokerLua = (joker: JokerData): string => {
   return output;
 };
 
+const generateJokerCode = (
+  joker: JokerData,
+  index: number,
+  atlasKey: string,
+  allJokers: JokerData[]
+): string => {
+  const passiveEffects = processPassiveEffects(joker);
+
+  let jokerCode = generateJokerBase(
+    joker,
+    index,
+    atlasKey,
+    passiveEffects,
+    allJokers
+  );
+
+  const locVarsCode = generateLocVarsFunction(joker, passiveEffects);
+  jokerCode += `,\n\n    ${locVarsCode}`;
+
+  const setStickerCode = generateSetAbilityFunction(joker);
+  if (setStickerCode) {
+    jokerCode += `,\n\n    ${setStickerCode}`;
+  }
+
+  const nonPassiveRules =
+    joker.rules?.filter((rule) => rule.trigger !== "passive") || [];
+
+  if (nonPassiveRules.length > 0) {
+    const calculateCode = generateCalculateFunction(nonPassiveRules, joker); // Pass joker here
+    jokerCode += `,\n\n    ${calculateCode}`;
+  }
+
+  passiveEffects.forEach((effect) => {
+    if (effect.addToDeck) {
+      jokerCode += `,\n\n    add_to_deck = function(self, card, from_debuff)
+        ${effect.addToDeck}
+    end`;
+    }
+
+    if (effect.removeFromDeck) {
+      jokerCode += `,\n\n    remove_from_deck = function(self, card, from_debuff)
+        ${effect.removeFromDeck}
+    end`;
+    }
+
+    if (effect.calculateFunction) {
+      jokerCode += `,\n\n    ${effect.calculateFunction}`;
+    }
+  });
+
+  jokerCode += `\n}`;
+  return jokerCode;
+};
+
 const generateSetAbilityFunction = (joker: JokerData): string | null => {
   const forcedStickers: string[] = [];
+  const suitVariables = (joker.userVariables || []).filter(
+    (v) => v.type === "suit"
+  );
+  const rankVariables = (joker.userVariables || []).filter(
+    (v) => v.type === "rank"
+  );
 
   if (joker.force_eternal) {
     forcedStickers.push("card:set_eternal(true)");
@@ -194,13 +254,47 @@ const generateSetAbilityFunction = (joker: JokerData): string | null => {
     forcedStickers.push("card:add_sticker('rental', true)");
   }
 
-  if (forcedStickers.length === 0) {
+  const variableInits: string[] = [];
+
+  suitVariables.forEach((variable) => {
+    const defaultSuit = variable.initialSuit || "Spades";
+    variableInits.push(
+      `G.GAME.current_round.${variable.name}_card = { suit = '${defaultSuit}' }`
+    );
+  });
+
+  rankVariables.forEach((variable) => {
+    const defaultRank = variable.initialRank || "Ace";
+    const defaultId = getRankId(defaultRank);
+    variableInits.push(
+      `G.GAME.current_round.${variable.name}_card = { rank = '${defaultRank}', id = ${defaultId} }`
+    );
+  });
+
+  if (forcedStickers.length === 0 && variableInits.length === 0) {
     return null;
   }
 
+  const allCode = [...forcedStickers, ...variableInits];
+
   return `set_ability = function(self, card, initial)
-        ${forcedStickers.join("\n        ")}
+        ${allCode.join("\n        ")}
     end`;
+};
+
+const getRankId = (rank: string): number => {
+  switch (rank) {
+    case "Ace":
+      return 14;
+    case "King":
+      return 13;
+    case "Queen":
+      return 12;
+    case "Jack":
+      return 11;
+    default:
+      return parseInt(rank) || 14;
+  }
 };
 
 const generateSingleJokerBase = (
@@ -269,59 +363,6 @@ SMODS.Joker{ --${joker.name}
     end`;
   }
 
-  return jokerCode;
-};
-const generateJokerCode = (
-  joker: JokerData,
-  index: number,
-  atlasKey: string,
-  allJokers: JokerData[]
-): string => {
-  const passiveEffects = processPassiveEffects(joker);
-
-  let jokerCode = generateJokerBase(
-    joker,
-    index,
-    atlasKey,
-    passiveEffects,
-    allJokers
-  );
-
-  const locVarsCode = generateLocVarsFunction(joker, passiveEffects);
-  jokerCode += `,\n\n    ${locVarsCode}`;
-
-  const setStickerCode = generateSetAbilityFunction(joker);
-  if (setStickerCode) {
-    jokerCode += `,\n\n    ${setStickerCode}`;
-  }
-
-  const nonPassiveRules =
-    joker.rules?.filter((rule) => rule.trigger !== "passive") || [];
-
-  if (nonPassiveRules.length > 0) {
-    const calculateCode = generateCalculateFunction(nonPassiveRules);
-    jokerCode += `,\n\n    ${calculateCode}`;
-  }
-
-  passiveEffects.forEach((effect) => {
-    if (effect.addToDeck) {
-      jokerCode += `,\n\n    add_to_deck = function(self, card, from_debuff)
-        ${effect.addToDeck}
-    end`;
-    }
-
-    if (effect.removeFromDeck) {
-      jokerCode += `,\n\n    remove_from_deck = function(self, card, from_debuff)
-        ${effect.removeFromDeck}
-    end`;
-    }
-
-    if (effect.calculateFunction) {
-      jokerCode += `,\n\n    ${effect.calculateFunction}`;
-    }
-  });
-
-  jokerCode += `\n}`;
   return jokerCode;
 };
 
@@ -439,7 +480,9 @@ const extractEffectsConfig = (
 
   if (joker.userVariables && joker.userVariables.length > 0) {
     joker.userVariables.forEach((variable) => {
-      configItems.push(`${variable.name} = ${variable.initialValue}`);
+      if (variable.type === "number" || !variable.type) {
+        configItems.push(`${variable.name} = ${variable.initialValue || 0}`);
+      }
     });
   }
 
@@ -968,7 +1011,7 @@ const extractEffectsConfig = (
   return configItems.join(",\n            ");
 };
 
-const generateCalculateFunction = (rules: Rule[]): string => {
+const generateCalculateFunction = (rules: Rule[], joker: JokerData): string => {
   const rulesByTrigger: Record<string, Rule[]> = {};
   rules.forEach((rule) => {
     if (!rulesByTrigger[rule.trigger]) {
@@ -981,8 +1024,8 @@ const generateCalculateFunction = (rules: Rule[]): string => {
 
   Object.entries(rulesByTrigger).forEach(([triggerType, triggerRules]) => {
     const sortedRules = [...triggerRules].sort((a, b) => {
-      const aHasConditions = generateConditionChain(a).length > 0;
-      const bHasConditions = generateConditionChain(b).length > 0;
+      const aHasConditions = generateConditionChain(a, joker).length > 0;
+      const bHasConditions = generateConditionChain(b, joker).length > 0;
 
       if (aHasConditions && !bHasConditions) return -1;
       if (!aHasConditions && bHasConditions) return 1;
@@ -1035,7 +1078,7 @@ const generateCalculateFunction = (rules: Rule[]): string => {
         )
           return;
 
-        const conditionCode = generateConditionChain(rule);
+        const conditionCode = generateConditionChain(rule, joker);
 
         if (conditionCode) {
           const conditional = hasAnyConditions ? "elseif" : "if";
@@ -1075,7 +1118,6 @@ const generateCalculateFunction = (rules: Rule[]): string => {
       calculateFunction += `
         end`;
 
-      // Check if there are any non-retrigger effects
       const hasNonRetriggerEffects = sortedRules.some((rule) => {
         const regularNonRetriggerEffects = (rule.effects || []).filter(
           (e) => e.type !== "retrigger_cards"
@@ -1093,7 +1135,6 @@ const generateCalculateFunction = (rules: Rule[]): string => {
         );
       });
 
-      // Only create the individual context if there are non-retrigger effects
       if (hasNonRetriggerEffects) {
         const nonRetriggerContextCheck =
           triggerType === "card_held_in_hand"
@@ -1124,7 +1165,7 @@ const generateCalculateFunction = (rules: Rule[]): string => {
           )
             return;
 
-          const conditionCode = generateConditionChain(rule);
+          const conditionCode = generateConditionChain(rule, joker);
 
           if (conditionCode) {
             const conditional = hasAnyConditions ? "elseif" : "if";
@@ -1204,7 +1245,7 @@ const generateCalculateFunction = (rules: Rule[]): string => {
         )
           return;
 
-        const conditionCode = generateConditionChain(rule);
+        const conditionCode = generateConditionChain(rule, joker);
 
         if (conditionCode) {
           const conditional = hasAnyConditions ? "elseif" : "if";
@@ -1265,7 +1306,7 @@ const generateCalculateFunction = (rules: Rule[]): string => {
       let hasAnyConditions = false;
 
       sortedRules.forEach((rule) => {
-        const conditionCode = generateConditionChain(rule);
+        const conditionCode = generateConditionChain(rule, joker);
 
         if (conditionCode) {
           const conditional = hasAnyConditions ? "elseif" : "if";
@@ -1340,19 +1381,31 @@ const generateLocVarsFunction = (
 
   const allVariables = getAllVariables(joker);
   const gameVariables = extractGameVariablesFromRules(joker.rules || []);
+  const suitVariables = (joker.userVariables || []).filter(
+    (v) => v.type === "suit"
+  );
+  const rankVariables = (joker.userVariables || []).filter(
+    (v) => v.type === "rank"
+  );
+
   const hasRandomChance =
     joker.rules?.some((rule) =>
       rule.effects.some((effect) => effect.params.has_random_chance === "true")
     ) || false;
 
   const variableMapping: string[] = [];
+  const colorVariables: string[] = [];
 
   if (hasRandomChance) {
     variableMapping.push("G.GAME.probabilities.normal");
     variableMapping.push("card.ability.extra.odds");
 
     const remainingVars = allVariables.filter(
-      (v) => v.name !== "numerator" && v.name !== "denominator"
+      (v) =>
+        v.name !== "numerator" &&
+        v.name !== "denominator" &&
+        v.type !== "suit" &&
+        v.type !== "rank"
     );
     const remainingGameVars = gameVariables.filter(
       (gv) =>
@@ -1386,16 +1439,58 @@ const generateLocVarsFunction = (
       }
       currentIndex++;
     }
+
+    for (const suitVar of suitVariables) {
+      if (currentIndex >= maxVariableIndex) break;
+      variableMapping.push(
+        `localize((G.GAME.current_round.${suitVar.name}_card or {}).suit or 'Spades', 'suits_singular')`
+      );
+      colorVariables.push(
+        `G.C.SUITS[(G.GAME.current_round.${suitVar.name}_card or {}).suit or 'Spades']`
+      );
+      currentIndex++;
+    }
+
+    for (const rankVar of rankVariables) {
+      if (currentIndex >= maxVariableIndex) break;
+      variableMapping.push(
+        `localize((G.GAME.current_round.${rankVar.name}_card or {}).rank or 'A', 'ranks')`
+      );
+      currentIndex++;
+    }
   } else {
     let currentIndex = 0;
 
     for (const variable of allVariables) {
       if (currentIndex >= maxVariableIndex) break;
 
-      if (!variable.id.startsWith("auto_gamevar_")) {
+      if (
+        !variable.id.startsWith("auto_gamevar_") &&
+        variable.type !== "suit" &&
+        variable.type !== "rank"
+      ) {
         variableMapping.push(`card.ability.extra.${variable.name}`);
         currentIndex++;
       }
+    }
+
+    for (const suitVar of suitVariables) {
+      if (currentIndex >= maxVariableIndex) break;
+      variableMapping.push(
+        `localize((G.GAME.current_round.${suitVar.name}_card or {}).suit or 'Spades', 'suits_singular')`
+      );
+      colorVariables.push(
+        `G.C.SUITS[(G.GAME.current_round.${suitVar.name}_card or {}).suit or 'Spades']`
+      );
+      currentIndex++;
+    }
+
+    for (const rankVar of rankVariables) {
+      if (currentIndex >= maxVariableIndex) break;
+      variableMapping.push(
+        `localize((G.GAME.current_round.${rankVar.name}_card or {}).rank or 'Ace', 'ranks')`
+      );
+      currentIndex++;
     }
 
     for (const gameVar of gameVariables) {
@@ -1433,8 +1528,16 @@ const generateLocVarsFunction = (
 
   const finalVars = variableMapping.slice(0, maxVariableIndex);
 
+  let locVarsReturn = `{vars = {${finalVars.join(", ")}}}`;
+
+  if (colorVariables.length > 0) {
+    locVarsReturn = `{vars = {${finalVars.join(
+      ", "
+    )}}, colours = {${colorVariables.join(", ")}}}`;
+  }
+
   return `loc_vars = function(self, info_queue, card)
-        return {vars = {${finalVars.join(", ")}}}
+        return ${locVarsReturn}
     end`;
 };
 

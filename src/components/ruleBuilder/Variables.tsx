@@ -7,9 +7,13 @@ import {
   XMarkIcon,
   Bars3Icon,
   ExclamationTriangleIcon,
+  HashtagIcon,
+  SparklesIcon,
+  CubeIcon,
 } from "@heroicons/react/24/outline";
 import { PlusIcon, TrashIcon, PencilIcon } from "@heroicons/react/24/solid";
 import InputField from "../generic/InputField";
+import InputDropdown from "../generic/InputDropdown";
 import Button from "../generic/Button";
 import { validateVariableName } from "../generic/validationUtils";
 
@@ -21,6 +25,35 @@ interface VariablesProps {
   onPositionChange: (position: { x: number; y: number }) => void;
 }
 
+const SUIT_OPTIONS = [
+  { value: "Spades", label: "♠ Spades" },
+  { value: "Hearts", label: "♥ Hearts" },
+  { value: "Diamonds", label: "♦ Diamonds" },
+  { value: "Clubs", label: "♣ Clubs" },
+];
+
+const RANK_OPTIONS = [
+  { value: "2", label: "2" },
+  { value: "3", label: "3" },
+  { value: "4", label: "4" },
+  { value: "5", label: "5" },
+  { value: "6", label: "6" },
+  { value: "7", label: "7" },
+  { value: "8", label: "8" },
+  { value: "9", label: "9" },
+  { value: "10", label: "10" },
+  { value: "Jack", label: "Jack" },
+  { value: "Queen", label: "Queen" },
+  { value: "King", label: "King" },
+  { value: "Ace", label: "Ace" },
+];
+
+const VARIABLE_TYPE_OPTIONS = [
+  { value: "number", label: "Number Variable", icon: HashtagIcon },
+  { value: "suit", label: "Suit Variable", icon: SparklesIcon },
+  { value: "rank", label: "Rank Variable", icon: CubeIcon },
+];
+
 const Variables: React.FC<VariablesProps> = ({
   position,
   joker,
@@ -29,12 +62,56 @@ const Variables: React.FC<VariablesProps> = ({
 }) => {
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingVariable, setEditingVariable] = useState<string | null>(null);
+  const [newVariableType, setNewVariableType] = useState<
+    "number" | "suit" | "rank"
+  >("number");
   const [newVariableName, setNewVariableName] = useState("");
   const [newVariableValue, setNewVariableValue] = useState("0");
+  const [newVariableSuit, setNewVariableSuit] = useState<
+    "Spades" | "Hearts" | "Diamonds" | "Clubs"
+  >("Spades");
+  const [newVariableRank, setNewVariableRank] = useState<
+    | "2"
+    | "3"
+    | "4"
+    | "5"
+    | "6"
+    | "7"
+    | "8"
+    | "9"
+    | "10"
+    | "Jack"
+    | "Queen"
+    | "King"
+    | "Ace"
+  >("Ace");
+
   const [nameValidationError, setNameValidationError] = useState<string>("");
   const [editValidationError, setEditValidationError] = useState<string>("");
+
+  const [editingType, setEditingType] = useState<"number" | "suit" | "rank">(
+    "number"
+  );
   const [editingName, setEditingName] = useState("");
   const [editingValue, setEditingValue] = useState(0);
+  const [editingSuit, setEditingSuit] = useState<
+    "Spades" | "Hearts" | "Diamonds" | "Clubs"
+  >("Spades");
+  const [editingRank, setEditingRank] = useState<
+    | "2"
+    | "3"
+    | "4"
+    | "5"
+    | "6"
+    | "7"
+    | "8"
+    | "9"
+    | "10"
+    | "Jack"
+    | "Queen"
+    | "King"
+    | "Ace"
+  >("Ace");
 
   const { attributes, listeners, setNodeRef, transform } = useDraggable({
     id: "panel-variables",
@@ -114,14 +191,25 @@ const Variables: React.FC<VariablesProps> = ({
     const newVariable: UserVariable = {
       id: crypto.randomUUID(),
       name: newVariableName.trim(),
-      initialValue: parseFloat(newVariableValue) || 0,
+      type: newVariableType,
     };
+
+    if (newVariableType === "number") {
+      newVariable.initialValue = parseFloat(newVariableValue) || 0;
+    } else if (newVariableType === "suit") {
+      newVariable.initialSuit = newVariableSuit;
+    } else if (newVariableType === "rank") {
+      newVariable.initialRank = newVariableRank;
+    }
 
     const updatedVariables = [...userVariables, newVariable];
     onUpdateJoker({ userVariables: updatedVariables });
 
     setNewVariableName("");
     setNewVariableValue("0");
+    setNewVariableSuit("Spades");
+    setNewVariableRank("Ace");
+    setNewVariableType("number");
     setNameValidationError("");
     setShowAddForm(false);
   };
@@ -134,7 +222,10 @@ const Variables: React.FC<VariablesProps> = ({
   const handleStartEdit = (variable: UserVariable) => {
     setEditingVariable(variable.id);
     setEditingName(variable.name);
-    setEditingValue(variable.initialValue);
+    setEditingType(variable.type || "number");
+    setEditingValue(variable.initialValue || 0);
+    setEditingSuit(variable.initialSuit || "Spades");
+    setEditingRank(variable.initialRank || "Ace");
     setEditValidationError("");
   };
 
@@ -143,10 +234,22 @@ const Variables: React.FC<VariablesProps> = ({
       return;
     }
 
+    const updatedVariable: UserVariable = {
+      id: variableId,
+      name: editingName,
+      type: editingType,
+    };
+
+    if (editingType === "number") {
+      updatedVariable.initialValue = editingValue;
+    } else if (editingType === "suit") {
+      updatedVariable.initialSuit = editingSuit;
+    } else if (editingType === "rank") {
+      updatedVariable.initialRank = editingRank;
+    }
+
     const updatedVariables = userVariables.map((v) =>
-      v.id === variableId
-        ? { ...v, name: editingName, initialValue: editingValue }
-        : v
+      v.id === variableId ? updatedVariable : v
     );
     onUpdateJoker({ userVariables: updatedVariables });
     setEditingVariable(null);
@@ -156,6 +259,55 @@ const Variables: React.FC<VariablesProps> = ({
   const handleCancelEdit = () => {
     setEditingVariable(null);
     setEditValidationError("");
+  };
+
+  const getVariableDisplayValue = (variable: UserVariable) => {
+    if (variable.type === "suit") {
+      const suit = variable.initialSuit || "Spades";
+      return `${getSuitSymbol(suit)} ${suit}`;
+    } else if (variable.type === "rank") {
+      const rank = variable.initialRank || "Ace";
+      return rank;
+    } else {
+      return variable.initialValue?.toString() || "0";
+    }
+  };
+
+  const getSuitSymbol = (suit: string) => {
+    switch (suit) {
+      case "Spades":
+        return "♠";
+      case "Hearts":
+        return "♥";
+      case "Diamonds":
+        return "♦";
+      case "Clubs":
+        return "♣";
+      default:
+        return "";
+    }
+  };
+
+  const getVariableIcon = (type: "number" | "suit" | "rank" | undefined) => {
+    switch (type) {
+      case "suit":
+        return SparklesIcon;
+      case "rank":
+        return CubeIcon;
+      default:
+        return HashtagIcon;
+    }
+  };
+
+  const getVariableColor = (type: "number" | "suit" | "rank" | undefined) => {
+    switch (type) {
+      case "suit":
+        return "text-purple-400";
+      case "rank":
+        return "text-blue-400";
+      default:
+        return "text-mint";
+    }
   };
 
   return (
@@ -206,6 +358,8 @@ const Variables: React.FC<VariablesProps> = ({
             userVariables.map((variable) => {
               const usageInfo = getUsageInfo(variable.name);
               const isEditing = editingVariable === variable.id;
+              const VariableIcon = getVariableIcon(variable.type);
+              const colorClass = getVariableColor(variable.type);
 
               return (
                 <div
@@ -236,16 +390,75 @@ const Variables: React.FC<VariablesProps> = ({
                           </div>
                         )}
                       </div>
-                      <InputField
-                        value={editingValue.toString()}
-                        onChange={(e) => {
-                          const value = parseFloat(e.target.value) || 0;
-                          setEditingValue(value);
-                        }}
-                        type="number"
-                        label="Initial Value"
+
+                      <InputDropdown
+                        label="Type"
+                        value={editingType}
+                        onChange={(value) =>
+                          setEditingType(value as "number" | "suit" | "rank")
+                        }
+                        options={VARIABLE_TYPE_OPTIONS}
                         size="sm"
                       />
+
+                      {editingType === "number" && (
+                        <InputField
+                          value={editingValue.toString()}
+                          onChange={(e) => {
+                            const value = parseFloat(e.target.value) || 0;
+                            setEditingValue(value);
+                          }}
+                          type="number"
+                          label="Initial Value"
+                          size="sm"
+                        />
+                      )}
+
+                      {editingType === "suit" && (
+                        <InputDropdown
+                          label="Initial Suit"
+                          value={editingSuit}
+                          onChange={(value) =>
+                            setEditingSuit(
+                              value as
+                                | "Spades"
+                                | "Hearts"
+                                | "Diamonds"
+                                | "Clubs"
+                            )
+                          }
+                          options={SUIT_OPTIONS}
+                          size="sm"
+                        />
+                      )}
+
+                      {editingType === "rank" && (
+                        <InputDropdown
+                          label="Initial Rank"
+                          value={editingRank}
+                          onChange={(value) =>
+                            setEditingRank(
+                              value as
+                                | "2"
+                                | "3"
+                                | "4"
+                                | "5"
+                                | "6"
+                                | "7"
+                                | "8"
+                                | "9"
+                                | "10"
+                                | "Jack"
+                                | "Queen"
+                                | "King"
+                                | "Ace"
+                            )
+                          }
+                          options={RANK_OPTIONS}
+                          size="sm"
+                        />
+                      )}
+
                       <div className="flex gap-2">
                         <Button
                           variant="primary"
@@ -269,9 +482,14 @@ const Variables: React.FC<VariablesProps> = ({
                   ) : (
                     <div>
                       <div className="flex items-center justify-between mb-2">
-                        <span className="text-mint text-sm font-mono font-medium">
-                          ${variable.name}
-                        </span>
+                        <div className="flex items-center gap-2">
+                          <VariableIcon className={`h-4 w-4 ${colorClass}`} />
+                          <span
+                            className={`text-sm font-mono font-medium ${colorClass}`}
+                          >
+                            ${variable.name}
+                          </span>
+                        </div>
 
                         <div className="flex items-center gap-1">
                           <button
@@ -293,7 +511,8 @@ const Variables: React.FC<VariablesProps> = ({
 
                       <div className="flex items-center justify-between text-sm">
                         <span className="text-white-darker">
-                          Initial: {variable.initialValue}
+                          {variable.type === "number" ? "Initial:" : "Value:"}{" "}
+                          {getVariableDisplayValue(variable)}
                         </span>
                         {usageInfo.count > 0 && (
                           <div className="flex items-center gap-1">
@@ -303,7 +522,9 @@ const Variables: React.FC<VariablesProps> = ({
                             {usageInfo.rules.map((ruleNum) => (
                               <span
                                 key={ruleNum}
-                                className="bg-mint/20 text-mint text-xs px-1.5 py-0.5 rounded"
+                                className={
+                                  "bg-opacity-20 text-xs px-1.5 py-0.5 rounded text-white"
+                                }
                               >
                                 {ruleNum + 1}
                               </span>
@@ -339,14 +560,69 @@ const Variables: React.FC<VariablesProps> = ({
                     </div>
                   )}
                 </div>
-                <InputField
-                  value={newVariableValue}
-                  onChange={(e) => setNewVariableValue(e.target.value)}
-                  placeholder="0"
-                  label="Initial Value"
-                  type="number"
+
+                <InputDropdown
+                  label="Type"
+                  value={newVariableType}
+                  onChange={(value) =>
+                    setNewVariableType(value as "number" | "suit" | "rank")
+                  }
+                  options={VARIABLE_TYPE_OPTIONS}
                   size="sm"
                 />
+
+                {newVariableType === "number" && (
+                  <InputField
+                    value={newVariableValue}
+                    onChange={(e) => setNewVariableValue(e.target.value)}
+                    placeholder="0"
+                    label="Initial Value"
+                    type="number"
+                    size="sm"
+                  />
+                )}
+
+                {newVariableType === "suit" && (
+                  <InputDropdown
+                    label="Initial Suit"
+                    value={newVariableSuit}
+                    onChange={(value) =>
+                      setNewVariableSuit(
+                        value as "Spades" | "Hearts" | "Diamonds" | "Clubs"
+                      )
+                    }
+                    options={SUIT_OPTIONS}
+                    size="sm"
+                  />
+                )}
+
+                {newVariableType === "rank" && (
+                  <InputDropdown
+                    label="Initial Rank"
+                    value={newVariableRank}
+                    onChange={(value) =>
+                      setNewVariableRank(
+                        value as
+                          | "2"
+                          | "3"
+                          | "4"
+                          | "5"
+                          | "6"
+                          | "7"
+                          | "8"
+                          | "9"
+                          | "10"
+                          | "Jack"
+                          | "Queen"
+                          | "King"
+                          | "Ace"
+                      )
+                    }
+                    options={RANK_OPTIONS}
+                    size="sm"
+                  />
+                )}
+
                 <div className="flex gap-2">
                   <Button
                     variant="primary"
@@ -364,6 +640,9 @@ const Variables: React.FC<VariablesProps> = ({
                       setShowAddForm(false);
                       setNewVariableName("");
                       setNewVariableValue("0");
+                      setNewVariableSuit("Spades");
+                      setNewVariableRank("Ace");
+                      setNewVariableType("number");
                       setNameValidationError("");
                     }}
                     className="cursor-pointer"
