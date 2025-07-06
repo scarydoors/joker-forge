@@ -1761,6 +1761,14 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
     category: "Game Rules",
   },
   {
+    id: "balance",
+    label: "Balance Chips and Mult",
+    description: "Plasma Deck effect",
+    applicableTriggers: ["hand_played", "card_scored", "card_held_in_hand"],
+    params: [],
+    category: "Special",
+  },
+  {
     id: "combine_ranks",
     label: "Combine Ranks (BROKEN)",
     description: "Treat specified ranks as a different rank",

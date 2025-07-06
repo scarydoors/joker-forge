@@ -47,6 +47,7 @@ import {
 } from "./effects/DisableBossBlindEffect";
 import { generateSavedReturn } from "./effects/SavedEffect";
 import { generateAddSellValueReturn } from "./effects/AddSellValueEffect";
+import { generateBalanceReturn } from "./effects/BalanceEffect";
 
 export interface RandomGroup {
   id: string;
@@ -341,6 +342,8 @@ const generateSingleEffect = (
       return generateSavedReturn(effect);
     case "add_sell_value":
       return generateAddSellValueReturn(effect, triggerType);
+    case "balance":
+      return generateBalanceReturn(effect);
 
     default:
       return {
