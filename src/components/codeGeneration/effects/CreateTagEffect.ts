@@ -42,16 +42,13 @@ export const generateCreateTagReturn = (
   let tagCreationCode = "";
 
   if (tagType === "random") {
-    const allTags = Object.values(TAG_TYPES);
     tagCreationCode = `
             G.E_MANAGER:add_event(Event({
                 func = function()
-                    local random_tags = {${allTags
-                      .map((tag) => `"${tag}"`)
-                      .join(", ")}}
-                    local selected_tag = pseudorandom_element(random_tags, pseudoseed('create_tag'))
-                    add_tag(Tag(selected_tag))
-                    play_sound('generic1', 0.9 + math.random() * 0.1, 0.8)
+                    local selected_tag = pseudorandom_element(G.P_TAGS, pseudoseed("create_tag")).key
+                    local tag = Tag(selected_tag)
+                    tag:set_ability()
+                    add_tag(tag)
                     play_sound('holo1', 1.2 + math.random() * 0.1, 0.4)
                     return true
                 end
@@ -61,8 +58,9 @@ export const generateCreateTagReturn = (
     tagCreationCode = `
             G.E_MANAGER:add_event(Event({
                 func = function()
-                    add_tag(Tag("${tagKey}"))
-                    play_sound('generic1', 0.9 + math.random() * 0.1, 0.8)
+                    local tag = Tag("${tagKey}")
+                    tag:set_ability()
+                    add_tag(tag)
                     play_sound('holo1', 1.2 + math.random() * 0.1, 0.4)
                     return true
                 end
