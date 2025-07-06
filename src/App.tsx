@@ -35,7 +35,6 @@ import {
   FolderIcon,
   ExclamationCircleIcon,
 } from "@heroicons/react/24/outline";
-import { track } from "@vercel/analytics";
 
 interface AlertState {
   isVisible: boolean;
@@ -325,21 +324,9 @@ function AppContent() {
     setExportLoading(true);
     try {
       await exportJokersAsMod(jokers, modMetadata);
-
-      track("mod_exported", {
-        joker_count: jokers.length,
-        mod_name: modMetadata.name,
-        author: modMetadata.author[0],
-        has_complete_jokers: jokers.some((j) => j.rules && j.rules.length > 0),
-      });
-
       setShowExportSuccessModal(true);
     } catch (error) {
       console.error("Export failed:", error);
-      track("mod_export_failed", {
-        joker_count: jokers.length,
-        error: error instanceof Error ? error.message : "Unknown error",
-      });
       showAlert(
         "error",
         "Export Failed",
