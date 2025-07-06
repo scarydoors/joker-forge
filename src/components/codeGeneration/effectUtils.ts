@@ -50,6 +50,12 @@ import { generateAddSellValueReturn } from "./effects/AddSellValueEffect";
 import { generateBalanceReturn } from "./effects/BalanceEffect";
 import { generateChangeSuitVariableReturn } from "./effects/ChangeSuitVariableEffect";
 import { generateChangeRankVariableReturn } from "./effects/ChangeRankVariableEffect";
+import {
+  generateFreeRerollsReturn,
+  generateDiscountItemsReturn,
+} from "./effects/DiscountItemsEffect";
+
+import { slugify } from "./index";
 
 export interface RandomGroup {
   id: string;
@@ -71,6 +77,11 @@ export interface PassiveEffectResult {
   configVariables?: string[];
   locVars?: string[];
   calculateFunction?: string;
+  needsHook?: {
+    hookType: string;
+    jokerKey: string;
+    effectParams: unknown;
+  };
 }
 
 export function generateEffectReturnStatement(
@@ -464,6 +475,8 @@ export const processPassiveEffects = (
       const effect = rule.effects[0];
       let passiveResult: PassiveEffectResult | null = null;
 
+      const jokerKey = slugify(joker.name);
+
       switch (effect.type) {
         case "edit_hand_size":
           passiveResult = generatePassiveHandSize(effect);
@@ -479,6 +492,14 @@ export const processPassiveEffects = (
           break;
         case "disable_boss_blind": {
           passiveResult = generatePassiveDisableBossBlind(effect);
+          break;
+        }
+        case "free_rerolls": {
+          passiveResult = generateFreeRerollsReturn(effect);
+          break;
+        }
+        case "discount_items": {
+          passiveResult = generateDiscountItemsReturn(effect, jokerKey);
           break;
         }
         case "considered_as": {
