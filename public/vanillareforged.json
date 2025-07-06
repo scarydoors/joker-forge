@@ -5144,6 +5144,41 @@
       "placeholderCreditIndex": 6
     },
     {
+      "id": "ea25b930-8aca-4b0a-903c-cfdae32fbb34",
+      "name": "Misprint",
+      "description": "{C:red}+0-23{} Mult",
+      "imagePreview": "data:image/png;base64,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",
+      "overlayImagePreview": "",
+      "rarity": 1,
+      "cost": 4,
+      "blueprint_compat": true,
+      "eternal_compat": true,
+      "unlocked": true,
+      "discovered": true,
+      "rules": [
+        {
+          "id": "1217ba49-35ed-4aa3-8a20-31dd9d831dd0",
+          "trigger": "hand_played",
+          "conditionGroups": [],
+          "effects": [
+            {
+              "id": "2f0b4a03-0239-4ef9-ba83-d9445249857a",
+              "type": "add_mult",
+              "params": {
+                "value": "RANGE:0|23"
+              }
+            }
+          ],
+          "randomGroups": [],
+          "position": {
+            "x": 1027,
+            "y": 474
+          }
+        }
+      ],
+      "placeholderCreditIndex": 9
+    },
+    {
       "id": "cef48c82-5344-486f-9a42-9fdceab28876",
       "name": "Mime",
       "description": "Retrigger all card {C:orange}held in hand{} abilities",
