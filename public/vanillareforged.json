@@ -5543,6 +5543,78 @@
       ]
     },
     {
+      "id": "c27017e2-06aa-4ee1-b06c-d4840772c74f",
+      "name": "Chaos the Clown",
+      "description": "{C:attention}1{} free {C:green}Reroll{} per shop",
+      "imagePreview": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAI4AAAC+CAYAAADjhzelAAAAAXNSR0IArs4c6QAACmlJREFUeJztnV2IXVcVx/83U0RCpmMppRjMw0A1YlNailRTiLX1wTI2GvIgsaUPthixrfgQ/KgIQQnGrxSlUjFU4osy+BCiIwEfJGkCbQlSLI6SoBKhJT6UoulIHsRpfNhnnZmz7t1377PuPufse+7/93Lv+bjn7En2/t219se5A3g489KffYfIDHH/7ttH7t/ScjlITxjIG22YhfmtAICra9eut1skkgML81sHAHB17VplvxiIxiEmbhix7zqwUdM+cs/72ywPyYRzFy7qb5rB5g0ah5gYSGyjYxqahgDAuQsXAQzHPDQOMTHYlE3RNMSLmAdFrEPjEBOsOMQEKw4xwYpDTLDiEBOjeo5N7D/4xNjjJ48/l+pWJANoHGJiYuOETEP6CY1DTExsHB27aAMxtuknNA4xwYpDTLDiEBOsOMQEKw4xUTurYtZEABqHGJm44uw/+AR7j2cQGoeYMM855mj4bME5xyQJ5rEqGmW2oXGIicbm49BI/YbGISbMxvH1IMt+eaV5+gmNQ0zU7seJHavimFa/YD8OSUKydVV9gVliHDQOMUHjFIhp3vHR94w9TvM4aBxiYuaNEzKNIMdpHgeNQ0wkm4+je471/lyJNY7mv2dfB5D/35cK9uOQJEw8H0ePTenjuWI1DXHQOMRE8qdVzAqznmXROMTExCs5Nb7sSh8n0w2NQ0zUNo61v4am6Rc0DjGRfKwq9/6cuv03b//z3wCALe9+V2NlmkZoHGKisSer52aappjV/hwah5hobD5Obi3QOjalYxsd88j2rEHjEBPJjON7wnpT5kn9fJ662VOsaWKfVpaLmWOhcYiJ7OYcx7bQUKwSyvIO/PLbIz/nM4/PML869L2x942NqabtCWc0DjEx8dpxjXV0vOkZecsPf33k/k8f+4rpeto0Gp/RrHQ9x5lzjkkSzKscUtH23N9JzVPXNKnHuroyD41DkpA8xvHh6+dJZZpQy/aZxoc2UMg0mtgYJ1RuXzb3v0v/AdCeeWgckoTGZgDGmkm3qFAs4Dtfjx3J9tHdn4kqh6auYTRiOF/MI9Q1TS7QOMREYz3HsXOQxUw37NwGIPydH9ujK6ZZXFyMLHE7TKthNDQOMdHYDEDBGvVPWwv0EYpp6v6dbWdTPmgcYqKx+Th1P6djHSvf3f8FAJtim1/MjT7xkfWJ7lMSuL5kZ9IvZDVpLqYRaBxiIpv5OL7+IbOBfCbwHY81UOi6+jyj2cQwQi6mEWgcYqLxVQ5CbIsJ9UBPGgMNGUDMEDJEyFCxJvKQu2E0NA4xkez5OE399rjVQJfv/RsAYPHF29yOwhDDJizMEWuM2OtExja5ZUux0DjEROczAK34+n2kH0cI9ucIqbIqz3X0/J5pMw3n45AkJH8GoKapFlW7xzlVT/GE15k20/igcYiJxmcAtvXUCh3b1OX8+fMAgD179piOh5Axq6ayT8E6M7Pu/w+NQ0w0PgOwqRYm1z329JdHHq87809MImbxHZ8U/e/SdaxjvT+NQ0y0NlbVNaF1TrIqIWSW2Ot0he9XfVKbjcYhJrKdc5yK2BWVqZ4uIdfp2jya1N8ANA4xkXzOcVuxjb6fL7vKjaazqVQrbEPQOMRE8qyqrajedz8xz+XLlwH413AL1lik7vXa7rdp+j40DjHR+Oh4W1hjnrpZUN3sq6se4qbvS+MQE1M7A9CHzzgydpX6aaBCLrGNvm8sofJxBiBJQu+MI7RlntxM0xQ0DknC1BvH910eyqr0fJ1YA4WyL+k/Eg4d/f7Y89v+VR1rOWgckoRsnlYRwteSTj25MPoDbx0HAPz9xoMjD4sZxDyTjmZr08gK0pP3Vc/bsqu6vmpfw79lGhqr4gxA0irZGke3DK9ZPLy96lYVLMK9ylpyjTaFxjd32fe5cq16oFzCqSfTGqitLI7GISayM46YJmSYb+Ho+Avtqh4/fNa9fvNu9/rIjeNNI4SMdNtZZ6T1z7rtI2/VW+l59/I8AGBp1zUAfgPl1h9E4xAT2RinrmkOv1Ldv37+QGV7bs+y21+YQM6X122PV5+AdehndwDYMJJGPnfs8T9VD5wt7ndibLHLcuCxajmPfGnNvSnMg9UfAxg2UF3zND2LgcYhJjo3TqxpNNKCQy3dd1wMow3yjTvd65FX3evh319xb27aHlcuj/mkHDoCkuuvF4Y5vbq18rpUZIV1zRP67dNJoXGIic6NE4v0f2x79GEAwA/LI84c0rIFbaRPvVRtab/e7VqkmAf/ci1/7pnqfV8rBLJj+Ur1fCNlOYv7yfVxxr0sBcwDfH7s9VP1DIegcYiJzowTG9uIaWSM531fvRcA8PPHflKcUTWAxCzaSF5Uy99RFVe5rc0jMY82m87mcKJaLuHQD24GAGw/s2NksXzmkX+v2FgnFNNY5w3ROMREtjGONo1sL+1yx/euPODe3BR3PYlpxDBDMUbB9Y89697Mv7ey/3U8WDlfzDN3YnS25cvmXrxUpGt4IKrc2jwbY12jYx2OVZGsydY4IVbe2AkAWFr9RGX/HJZHnT5kmD8+u7M4cKl6njKNRj63UmzfdcB9fsfvnHnC2dvNlfKffqPImgqz+NDm8eHLqkKxDmMc0grZGccX22ikBf7lNy8DAD7woQ9XjpfZzjNXKvs3TFPdvuuLhXnW/goA+O2yGzN66MBTbv87H6ycJ58rr3eL2y+G0eZ57eOuHDprE8r+mkjzPP/C2NOGiH1abCw0DjGRnXHq8o9PvgkAuOOWosvX0wMsMYWmNI3ioc/9qFY55Pp7UTWPlEdMs35r0W9zq3vRMUusebqGxiEmOjOOfLfuM46OC9IyV1arsYq08DL7isxKfFnV9u0uazr99HxUOfaqbK00jedzsebZ/4Lrv/HFJr7nE6WGxiEmso1xfNmUj7JlFmM/K6p/xGcayYqWjhYz8V71ZFVyn+I8bR5tCDFPV7FK089kpHGIic6No2MdWfkY6sdJRWkaRd2sauJyBMwYim2Gzjf2IMdC4xATnRtH2GgRxTZsptGxRjCL0gTGqnxZVej+1lgnlWlSQ+MQE9kYR9DmKfff99NG7icGKWMd31hVgS+rSsXzbz5a2U61jir0e/EcHSetkJ1xhOHnunjOm9BEXWVVErtorDGJdZ2VFRqHmOjtMwCtnPraB0fu3/edPyS9T1tzg1P9jhifAUiSMPXGSU2uv/RXl9ie49i/i8YhSaBxekasUeqah8YhSWDFISZYcYgJVhxighWHmGDFISZYcYgJ9uP0FPYckyyhcXoOR8dJVmQ7A5CkgascSFbQOD0n9bP/BBqHmKBxekpsPw7XVZFWYcWZMU4efy5JpsWKQ0wwxplRJrUOjUNMsOIQE6w4xAQrDjHBikNMMKvqGaEnbwnMqkgn0DgzRqr5OTQOMUHj9Az+CjDJGlYcYoIVh5hgxSEmWHGIiTKrWpjfOgCAcxcuckUnKZEVnFI/rq65X8GhcYiJgbzRa8gFmmc22bRWXBgAwP27bwdA4xAjo3qOBwCwMO9+2U1iHjJb6JhGQ+MQEwPfgU0xD5lhJKbR0DjExP8BmDnHZX5UQAYAAAAASUVORK5CYII=",
+      "overlayImagePreview": "",
+      "rarity": 1,
+      "cost": 4,
+      "blueprint_compat": true,
+      "eternal_compat": true,
+      "unlocked": true,
+      "discovered": true,
+      "rules": [
+        {
+          "id": "154a4e97-61b9-44cc-912f-9ea3a8de261b",
+          "trigger": "passive",
+          "conditionGroups": [],
+          "effects": [
+            {
+              "id": "bd3387a0-1e54-4297-9486-7229bb408140",
+              "type": "free_rerolls",
+              "params": {
+                "reroll_amount": 1
+              }
+            }
+          ],
+          "randomGroups": [],
+          "position": {
+            "x": 1546.5,
+            "y": 203
+          }
+        }
+      ],
+      "placeholderCreditIndex": 8
+    },
+    {
+      "id": "b11a419c-0350-4f48-bd0f-9b77259e5c7f",
+      "name": "Astronomer",
+      "description": "All {C:planet}Planet{} cards and {C:planet}Celestial Packs{}[s] in the shop are {C:attention}free{}",
+      "imagePreview": "data:image/png;base64,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",
+      "overlayImagePreview": "",
+      "rarity": 2,
+      "cost": 8,
+      "blueprint_compat": true,
+      "eternal_compat": true,
+      "unlocked": true,
+      "discovered": true,
+      "rules": [
+        {
+          "id": "c96ecc41-f57c-452d-bf85-767bad41391a",
+          "trigger": "passive",
+          "conditionGroups": [],
+          "effects": [
+            {
+              "id": "0f960ade-b679-4121-9e76-9d74fb12bfc8",
+              "type": "discount_items",
+              "params": {
+                "discount_type": "planet",
+                "discount_method": "make_free",
+                "discount_amount": 1
+              }
+            }
+          ],
+          "randomGroups": [],
+          "position": {
+            "x": 1575.5,
+            "y": 233
+          }
+        }
+      ],
+      "placeholderCreditIndex": 3
+    },
+    {
       "id": "cef48c82-5344-486f-9a42-9fdceab28876",
       "name": "Mime",
       "description": "Retrigger all card {C:orange}held in hand{} abilities",
