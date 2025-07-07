@@ -167,6 +167,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
       "card_sold",
       "card_bought",
       "selling_self",
+      "card_held_in_hand_end_of_round",
     ],
     params: [
       {
