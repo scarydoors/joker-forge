@@ -2145,6 +2145,39 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
     category: "Card Effects",
   },
   {
+    id: "copy_joker_ability",
+    label: "Copy Joker Ability",
+    description:
+      "Copy the calculate function of another joker (like Blueprint/Brainstorm)",
+    applicableTriggers: ["passive"],
+    params: [
+      {
+        id: "selection_method",
+        type: "select",
+        label: "Target Joker",
+        options: [
+          { value: "right", label: "Joker to the Right" },
+          { value: "left", label: "Joker to the Left" },
+          { value: "specific", label: "Specific Position" },
+        ],
+        default: "right",
+      },
+      {
+        id: "specific_index",
+        type: "number",
+        label: "Joker Position (1-5)",
+        default: 1,
+        min: 1,
+        max: 5,
+        showWhen: {
+          parameter: "selection_method",
+          values: ["specific"],
+        },
+      },
+    ],
+    category: "Jokers",
+  },
+  {
     id: "prevent_game_over",
     label: "Prevent Game Over",
     description:

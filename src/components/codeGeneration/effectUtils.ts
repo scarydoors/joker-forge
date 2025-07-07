@@ -55,7 +55,7 @@ import {
   generateDiscountItemsReturn,
 } from "./effects/DiscountItemsEffect";
 import { generateChangePokerHandVariableReturn } from "./effects/ChangePokerHandVariableEffect";
-
+import { generatePassiveCopyJokerAbility } from "./effects/CopyJokerAbilityEffect";
 import { slugify } from "./index";
 
 export interface RandomGroup {
@@ -503,6 +503,10 @@ export const processPassiveEffects = (
         }
         case "discount_items": {
           passiveResult = generateDiscountItemsReturn(effect, jokerKey);
+          break;
+        }
+        case "copy_joker_ability": {
+          passiveResult = generatePassiveCopyJokerAbility(effect);
           break;
         }
         case "considered_as": {
