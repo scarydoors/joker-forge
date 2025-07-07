@@ -154,6 +154,21 @@ export const generateTriggerContext = (
         comment: "-- When the game would end (game over)",
       };
 
+    case "card_held_in_hand_end_of_round":
+      if (hasRetriggerEffects) {
+        return {
+          check:
+            "context.repetition and context.cardarea == G.hand and context.end_of_round and (next(context.card_effects[1]) or #context.card_effects > 1)",
+          comment: "-- Card repetition context for held cards at end of round",
+        };
+      } else {
+        return {
+          check:
+            "context.cardarea == G.hand and context.end_of_round and not context.blueprint",
+          comment: "-- When a card hand is held at the end of the round",
+        };
+      }
+
     case "hand_played":
     default:
       return {

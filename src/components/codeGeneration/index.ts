@@ -1082,7 +1082,8 @@ const generateCalculateFunction = (rules: Rule[], joker: JokerData): string => {
 
     if (hasRetriggerEffects) {
       const retriggerContextCheck =
-        triggerType === "card_held_in_hand"
+        triggerType === "card_held_in_hand" ||
+        triggerType === "card_held_in_hand_end_of_round"
           ? "context.repetition and context.cardarea == G.hand and (next(context.card_effects[1]) or #context.card_effects > 1)"
           : "context.repetition and context.cardarea == G.play";
 
@@ -1164,7 +1165,8 @@ const generateCalculateFunction = (rules: Rule[], joker: JokerData): string => {
 
       if (hasNonRetriggerEffects) {
         const nonRetriggerContextCheck =
-          triggerType === "card_held_in_hand"
+          triggerType === "card_held_in_hand" ||
+          triggerType === "card_held_in_hand_end_of_round"
             ? "context.individual and context.cardarea == G.hand and not context.end_of_round and not context.blueprint"
             : "context.individual and context.cardarea == G.play and not context.blueprint";
 
@@ -1234,7 +1236,8 @@ const generateCalculateFunction = (rules: Rule[], joker: JokerData): string => {
       }
     } else if (hasDeleteEffects) {
       const individualContextCheck =
-        triggerType === "card_held_in_hand"
+        triggerType === "card_held_in_hand" ||
+        triggerType === "card_held_in_hand_end_of_round"
           ? "context.individual and context.cardarea == G.hand and not context.end_of_round and not context.blueprint"
           : "context.individual and context.cardarea == G.play and not context.blueprint";
 
