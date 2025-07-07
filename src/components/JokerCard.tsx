@@ -18,7 +18,7 @@ import { validateJokerName } from "./generic/validationUtils";
 export interface UserVariable {
   id: string;
   name: string;
-  type?: "number" | "suit" | "rank";
+  type?: "number" | "suit" | "rank" | "pokerhand";
   description?: string;
   initialValue?: number;
   initialSuit?: "Spades" | "Hearts" | "Diamonds" | "Clubs";
@@ -36,6 +36,21 @@ export interface UserVariable {
     | "Queen"
     | "King"
     | "Ace";
+  initialPokerHand?:
+    | "High Card"
+    | "Pair"
+    | "Two Pair"
+    | "Three of a Kind"
+    | "Straight"
+    | "Flush"
+    | "Full House"
+    | "Flush House"
+    | "Four of a Kind"
+    | "Five of a Kind"
+    | "Straight Flush"
+    | "Royal Flush"
+    | "Flush House"
+    | "Flush Five";
 }
 
 export interface JokerData {

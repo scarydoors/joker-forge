@@ -39,6 +39,12 @@ export interface RankVariableInfo {
   code?: string;
 }
 
+export interface PokerHandVariableInfo {
+  isPokerHandVariable: boolean;
+  variableName?: string;
+  code?: string;
+}
+
 export const coordinateVariableConflicts = (
   effects: Effect[]
 ): {
@@ -279,6 +285,46 @@ const isUserDefinedVariable = (str: string): boolean => {
     !isReservedKeyword(str) &&
     !isBuiltInValue(str)
   );
+};
+
+export const getPokerHandVariables = (joker: JokerData): UserVariable[] => {
+  return (joker.userVariables || []).filter((v) => v.type === "pokerhand");
+};
+
+export const parsePokerHandVariable = (
+  value: unknown,
+  joker?: JokerData
+): PokerHandVariableInfo => {
+  if (typeof value === "string" && joker?.userVariables) {
+    const pokerHandVariable = joker.userVariables.find(
+      (v) => v.name === value && v.type === "pokerhand"
+    );
+
+    if (pokerHandVariable) {
+      return {
+        isPokerHandVariable: true,
+        variableName: value,
+        code: `G.GAME.current_round.${value}_hand`,
+      };
+    }
+  }
+
+  return {
+    isPokerHandVariable: false,
+  };
+};
+
+export const addPokerHandVariablesToOptions = (
+  baseOptions: Array<{ value: string; label: string }>,
+  joker: JokerData
+): Array<{ value: string; label: string }> => {
+  const pokerHandVariables = getPokerHandVariables(joker);
+  const variableOptions = pokerHandVariables.map((variable) => ({
+    value: variable.name,
+    label: `${variable.name} (poker hand variable)`,
+  }));
+
+  return [...baseOptions, ...variableOptions];
 };
 
 const isReservedKeyword = (str: string): boolean => {

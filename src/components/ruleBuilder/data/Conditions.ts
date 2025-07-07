@@ -327,7 +327,12 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
     id: "card_rank",
     label: "Card Rank",
     description: "Check the rank of the card",
-    applicableTriggers: ["card_scored", "card_discarded", "card_held_in_hand", "card_held_in_hand_end_of_round"],
+    applicableTriggers: [
+      "card_scored",
+      "card_discarded",
+      "card_held_in_hand",
+      "card_held_in_hand_end_of_round",
+    ],
     params: [
       {
         id: "rank_type",
@@ -365,7 +370,12 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
     id: "card_suit",
     label: "Card Suit",
     description: "Check the suit of the card",
-    applicableTriggers: ["card_scored", "card_discarded", "card_held_in_hand", "card_held_in_hand_end_of_round"],
+    applicableTriggers: [
+      "card_scored",
+      "card_discarded",
+      "card_held_in_hand",
+      "card_held_in_hand_end_of_round",
+    ],
     params: [
       {
         id: "suit_type",
@@ -403,7 +413,12 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
     id: "card_enhancement",
     label: "Card Enhancement",
     description: "Check if the card has a specific enhancement",
-    applicableTriggers: ["card_scored", "card_discarded", "card_held_in_hand", "card_held_in_hand_end_of_round"],
+    applicableTriggers: [
+      "card_scored",
+      "card_discarded",
+      "card_held_in_hand",
+      "card_held_in_hand_end_of_round",
+    ],
     params: [
       {
         id: "enhancement",
@@ -421,7 +436,12 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
     id: "card_edition",
     label: "Card Edition",
     description: "Check if the card has a specific edition",
-    applicableTriggers: ["card_scored", "card_discarded", "card_held_in_hand", "card_held_in_hand_end_of_round"],
+    applicableTriggers: [
+      "card_scored",
+      "card_discarded",
+      "card_held_in_hand",
+      "card_held_in_hand_end_of_round",
+    ],
     params: [
       {
         id: "edition",
@@ -440,7 +460,12 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
     id: "card_seal",
     label: "Card Seal",
     description: "Check if the card has a specific seal",
-    applicableTriggers: ["card_scored", "card_discarded", "card_held_in_hand", "card_held_in_hand_end_of_round"],
+    applicableTriggers: [
+      "card_scored",
+      "card_discarded",
+      "card_held_in_hand",
+      "card_held_in_hand_end_of_round",
+    ],
     params: [
       {
         id: "seal",

@@ -268,6 +268,9 @@ const generateSetAbilityFunction = (joker: JokerData): string | null => {
   const rankVariables = (joker.userVariables || []).filter(
     (v) => v.type === "rank"
   );
+  const pokerHandVariables = (joker.userVariables || []).filter(
+    (v) => v.type === "pokerhand"
+  );
 
   if (joker.force_eternal) {
     forcedStickers.push("card:set_eternal(true)");
@@ -295,6 +298,13 @@ const generateSetAbilityFunction = (joker: JokerData): string | null => {
     const defaultId = getRankId(defaultRank);
     variableInits.push(
       `G.GAME.current_round.${variable.name}_card = { rank = '${defaultRank}', id = ${defaultId} }`
+    );
+  });
+
+  pokerHandVariables.forEach((variable) => {
+    const defaultPokerHand = variable.initialPokerHand || "High Card";
+    variableInits.push(
+      `G.GAME.current_round.${variable.name}_hand = '${defaultPokerHand}'`
     );
   });
 
@@ -1417,6 +1427,9 @@ const generateLocVarsFunction = (
   const rankVariables = (joker.userVariables || []).filter(
     (v) => v.type === "rank"
   );
+  const pokerHandVariables = (joker.userVariables || []).filter(
+    (v) => v.type === "pokerhand"
+  );
 
   const hasRandomChance =
     joker.rules?.some((rule) =>
@@ -1435,7 +1448,8 @@ const generateLocVarsFunction = (
         v.name !== "numerator" &&
         v.name !== "denominator" &&
         v.type !== "suit" &&
-        v.type !== "rank"
+        v.type !== "rank" &&
+        v.type !== "pokerhand"
     );
     const remainingGameVars = gameVariables.filter(
       (gv) =>
@@ -1488,6 +1502,14 @@ const generateLocVarsFunction = (
       );
       currentIndex++;
     }
+
+    for (const pokerHandVar of pokerHandVariables) {
+      if (currentIndex >= maxVariableIndex) break;
+      variableMapping.push(
+        `localize((G.GAME.current_round.${pokerHandVar.name}_hand or 'High Card'), 'poker_hands')`
+      );
+      currentIndex++;
+    }
   } else {
     let currentIndex = 0;
 
@@ -1497,7 +1519,8 @@ const generateLocVarsFunction = (
       if (
         !variable.id.startsWith("auto_gamevar_") &&
         variable.type !== "suit" &&
-        variable.type !== "rank"
+        variable.type !== "rank" &&
+        variable.type !== "pokerhand"
       ) {
         variableMapping.push(`card.ability.extra.${variable.name}`);
         currentIndex++;
@@ -1519,6 +1542,14 @@ const generateLocVarsFunction = (
       if (currentIndex >= maxVariableIndex) break;
       variableMapping.push(
         `localize((G.GAME.current_round.${rankVar.name}_card or {}).rank or 'Ace', 'ranks')`
+      );
+      currentIndex++;
+    }
+
+    for (const pokerHandVar of pokerHandVariables) {
+      if (currentIndex >= maxVariableIndex) break;
+      variableMapping.push(
+        `localize((G.GAME.current_round.${pokerHandVar.name}_hand or 'High Card'), 'poker_hands')`
       );
       currentIndex++;
     }

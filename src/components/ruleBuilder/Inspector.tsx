@@ -14,6 +14,7 @@ import {
   addSuitVariablesToOptions,
   addRankVariablesToOptions,
   getAllVariables,
+  addPokerHandVariablesToOptions,
 } from "../codeGeneration/variableUtils";
 import { getTriggerById } from "./data/Triggers";
 import { getConditionTypeById } from "./data/Conditions";
@@ -423,6 +424,10 @@ const ParameterField: React.FC<ParameterFieldProps> = ({
         options = addRankVariablesToOptions(options, joker);
       }
 
+      if (param.id === "value" && param.label === "Hand Type" && joker) {
+        options = addPokerHandVariablesToOptions(options, joker);
+      }
+
       if (param.id === "variable_name" && joker && param.label) {
         if (param.label.includes("Suit")) {
           const suitVariables =
@@ -435,6 +440,13 @@ const ParameterField: React.FC<ParameterFieldProps> = ({
           const rankVariables =
             joker.userVariables?.filter((v) => v.type === "rank") || [];
           options = rankVariables.map((variable) => ({
+            value: variable.name,
+            label: variable.name,
+          }));
+        } else if (param.label.includes("Poker Hand")) {
+          const pokerHandVariables =
+            joker.userVariables?.filter((v) => v.type === "pokerhand") || [];
+          options = pokerHandVariables.map((variable) => ({
             value: variable.name,
             label: variable.name,
           }));

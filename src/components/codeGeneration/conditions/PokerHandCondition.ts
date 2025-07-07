@@ -1,7 +1,10 @@
 import type { Rule } from "../../ruleBuilder/types";
+import type { JokerData } from "../../JokerCard";
+import { parsePokerHandVariable } from "../variableUtils";
 
 export const generatePokerHandConditionCode = (
-  rules: Rule[]
+  rules: Rule[],
+  joker?: JokerData
 ): string | null => {
   const rule = rules[0];
 
@@ -39,9 +42,7 @@ export const generatePokerHandConditionCode = (
   if (handConditions.length === 1) {
     const condition = handConditions[0];
 
-    // Handle special cases for most/least played hands
     if (condition.handType === "most_played_hand") {
-      // Check if current hand is the most played (no other hand has been played more)
       const isMostPlayedCode = `(function()
     local current_played = G.GAME.hands[context.scoring_name].played or 0
     for handname, values in pairs(G.GAME.hands) do
@@ -60,7 +61,6 @@ end)()`;
     }
 
     if (condition.handType === "least_played_hand") {
-      // Check if current hand is the least played (no other hand has been played fewer times)
       const isLeastPlayedCode = `(function()
     local current_played = G.GAME.hands[context.scoring_name].played or 0
     for handname, values in pairs(G.GAME.hands) do
@@ -78,31 +78,58 @@ end)()`;
       }
     }
 
-    // Handle regular hand types
+    const pokerHandVarInfo = parsePokerHandVariable(condition.handType, joker);
+
     if (condition.operator === "contains") {
-      if (condition.negate) {
-        return `not next(context.poker_hands["${condition.handType}"])`;
+      if (pokerHandVarInfo.isPokerHandVariable) {
+        const handReference = `G.GAME.current_round.${pokerHandVarInfo.variableName}_hand`;
+        if (condition.negate) {
+          return `not next(context.poker_hands[${handReference}])`;
+        } else {
+          return `next(context.poker_hands[${handReference}])`;
+        }
       } else {
-        return `next(context.poker_hands["${condition.handType}"])`;
+        if (condition.negate) {
+          return `not next(context.poker_hands["${condition.handType}"])`;
+        } else {
+          return `next(context.poker_hands["${condition.handType}"])`;
+        }
       }
     }
 
     if (condition.scope === "scoring") {
-      if (condition.operator === "not_equals" || condition.negate) {
-        return `context.scoring_name ~= "${condition.handType}"`;
+      if (pokerHandVarInfo.isPokerHandVariable) {
+        const handReference = `G.GAME.current_round.${pokerHandVarInfo.variableName}_hand`;
+        if (condition.operator === "not_equals" || condition.negate) {
+          return `context.scoring_name ~= ${handReference}`;
+        } else {
+          return `context.scoring_name == ${handReference}`;
+        }
       } else {
-        return `context.scoring_name == "${condition.handType}"`;
+        if (condition.operator === "not_equals" || condition.negate) {
+          return `context.scoring_name ~= "${condition.handType}"`;
+        } else {
+          return `context.scoring_name == "${condition.handType}"`;
+        }
       }
     } else if (condition.scope === "all_played") {
-      if (condition.operator === "not_equals" || condition.negate) {
-        return `not next(context.poker_hands["${condition.handType}"])`;
+      if (pokerHandVarInfo.isPokerHandVariable) {
+        const handReference = `G.GAME.current_round.${pokerHandVarInfo.variableName}_hand`;
+        if (condition.operator === "not_equals" || condition.negate) {
+          return `not next(context.poker_hands[${handReference}])`;
+        } else {
+          return `next(context.poker_hands[${handReference}])`;
+        }
       } else {
-        return `next(context.poker_hands["${condition.handType}"])`;
+        if (condition.operator === "not_equals" || condition.negate) {
+          return `not next(context.poker_hands["${condition.handType}"])`;
+        } else {
+          return `next(context.poker_hands["${condition.handType}"])`;
+        }
       }
     }
   } else {
     const conditionChecks = handConditions.map((condition) => {
-      // Handle special cases in multiple conditions
       if (condition.handType === "most_played_hand") {
         const isMostPlayedCode = `(function()
     local current_played = G.GAME.hands[context.scoring_name].played or 0
@@ -139,26 +166,57 @@ end)()`;
         }
       }
 
-      // Handle regular hand types
+      const pokerHandVarInfo = parsePokerHandVariable(
+        condition.handType,
+        joker
+      );
+
       if (condition.operator === "contains") {
-        if (condition.negate) {
-          return `not next(context.poker_hands["${condition.handType}"])`;
+        if (pokerHandVarInfo.isPokerHandVariable) {
+          const handReference = `G.GAME.current_round.${pokerHandVarInfo.variableName}_hand`;
+          if (condition.negate) {
+            return `not next(context.poker_hands[${handReference}])`;
+          } else {
+            return `next(context.poker_hands[${handReference}])`;
+          }
         } else {
-          return `next(context.poker_hands["${condition.handType}"])`;
+          if (condition.negate) {
+            return `not next(context.poker_hands["${condition.handType}"])`;
+          } else {
+            return `next(context.poker_hands["${condition.handType}"])`;
+          }
         }
       }
 
       if (condition.scope === "scoring") {
-        if (condition.operator === "not_equals" || condition.negate) {
-          return `context.scoring_name ~= "${condition.handType}"`;
+        if (pokerHandVarInfo.isPokerHandVariable) {
+          const handReference = `G.GAME.current_round.${pokerHandVarInfo.variableName}_hand`;
+          if (condition.operator === "not_equals" || condition.negate) {
+            return `context.scoring_name ~= ${handReference}`;
+          } else {
+            return `context.scoring_name == ${handReference}`;
+          }
         } else {
-          return `context.scoring_name == "${condition.handType}"`;
+          if (condition.operator === "not_equals" || condition.negate) {
+            return `context.scoring_name ~= "${condition.handType}"`;
+          } else {
+            return `context.scoring_name == "${condition.handType}"`;
+          }
         }
       } else if (condition.scope === "all_played") {
-        if (condition.operator === "not_equals" || condition.negate) {
-          return `not next(context.poker_hands["${condition.handType}"])`;
+        if (pokerHandVarInfo.isPokerHandVariable) {
+          const handReference = `G.GAME.current_round.${pokerHandVarInfo.variableName}_hand`;
+          if (condition.operator === "not_equals" || condition.negate) {
+            return `not next(context.poker_hands[${handReference}])`;
+          } else {
+            return `next(context.poker_hands[${handReference}])`;
+          }
         } else {
-          return `next(context.poker_hands["${condition.handType}"])`;
+          if (condition.operator === "not_equals" || condition.negate) {
+            return `not next(context.poker_hands["${condition.handType}"])`;
+          } else {
+            return `next(context.poker_hands["${condition.handType}"])`;
+          }
         }
       }
       return "true";

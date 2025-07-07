@@ -111,7 +111,7 @@ const generateSingleConditionCode = (
 
   switch (condition.type) {
     case "hand_type":
-      return generatePokerHandConditionCode([singleConditionRule]);
+      return generatePokerHandConditionCode([singleConditionRule], joker);
 
     case "suit_count":
     case "card_suit":

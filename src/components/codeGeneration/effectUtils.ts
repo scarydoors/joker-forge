@@ -54,6 +54,7 @@ import {
   generateFreeRerollsReturn,
   generateDiscountItemsReturn,
 } from "./effects/DiscountItemsEffect";
+import { generateChangePokerHandVariableReturn } from "./effects/ChangePokerHandVariableEffect";
 
 import { slugify } from "./index";
 
@@ -361,6 +362,8 @@ const generateSingleEffect = (
       return generateChangeSuitVariableReturn(effect);
     case "change_rank_variable":
       return generateChangeRankVariableReturn(effect);
+    case "change_pokerhand_variable":
+      return generateChangePokerHandVariableReturn(effect);
 
     default:
       return {

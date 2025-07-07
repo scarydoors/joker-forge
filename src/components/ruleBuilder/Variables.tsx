@@ -10,6 +10,7 @@ import {
   HashtagIcon,
   SparklesIcon,
   CubeIcon,
+  RectangleStackIcon,
 } from "@heroicons/react/24/outline";
 import { PlusIcon, TrashIcon, PencilIcon } from "@heroicons/react/24/solid";
 import InputField from "../generic/InputField";
@@ -48,10 +49,31 @@ const RANK_OPTIONS = [
   { value: "Ace", label: "Ace" },
 ];
 
+const POKER_HAND_OPTIONS = [
+  { value: "High Card", label: "High Card" },
+  { value: "Pair", label: "Pair" },
+  { value: "Two Pair", label: "Two Pair" },
+  { value: "Three of a Kind", label: "Three of a Kind" },
+  { value: "Straight", label: "Straight" },
+  { value: "Flush", label: "Flush" },
+  { value: "Full House", label: "Full House" },
+  { value: "Four of a Kind", label: "Four of a Kind" },
+  { value: "Five of a Kind", label: "Five of a Kind" },
+  { value: "Straight Flush", label: "Straight Flush" },
+  { value: "Royal Flush", label: "Royal Flush" },
+  { value: "Flush House", label: "Flush House" },
+  { value: "Flush Five", label: "Flush Five" },
+];
+
 const VARIABLE_TYPE_OPTIONS = [
   { value: "number", label: "Number Variable", icon: HashtagIcon },
   { value: "suit", label: "Suit Variable", icon: SparklesIcon },
   { value: "rank", label: "Rank Variable", icon: CubeIcon },
+  {
+    value: "pokerhand",
+    label: "Poker Hand Variable",
+    icon: RectangleStackIcon,
+  },
 ];
 
 const Variables: React.FC<VariablesProps> = ({
@@ -63,7 +85,7 @@ const Variables: React.FC<VariablesProps> = ({
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingVariable, setEditingVariable] = useState<string | null>(null);
   const [newVariableType, setNewVariableType] = useState<
-    "number" | "suit" | "rank"
+    "number" | "suit" | "rank" | "pokerhand"
   >("number");
   const [newVariableName, setNewVariableName] = useState("");
   const [newVariableValue, setNewVariableValue] = useState("0");
@@ -85,13 +107,28 @@ const Variables: React.FC<VariablesProps> = ({
     | "King"
     | "Ace"
   >("Ace");
+  const [newVariablePokerHand, setNewVariablePokerHand] = useState<
+    | "High Card"
+    | "Pair"
+    | "Two Pair"
+    | "Three of a Kind"
+    | "Straight"
+    | "Flush"
+    | "Full House"
+    | "Four of a Kind"
+    | "Five of a Kind"
+    | "Straight Flush"
+    | "Royal Flush"
+    | "Flush House"
+    | "Flush Five"
+  >("High Card");
 
   const [nameValidationError, setNameValidationError] = useState<string>("");
   const [editValidationError, setEditValidationError] = useState<string>("");
 
-  const [editingType, setEditingType] = useState<"number" | "suit" | "rank">(
-    "number"
-  );
+  const [editingType, setEditingType] = useState<
+    "number" | "suit" | "rank" | "pokerhand"
+  >("number");
   const [editingName, setEditingName] = useState("");
   const [editingValue, setEditingValue] = useState(0);
   const [editingSuit, setEditingSuit] = useState<
@@ -112,6 +149,22 @@ const Variables: React.FC<VariablesProps> = ({
     | "King"
     | "Ace"
   >("Ace");
+  const [editingPokerHand, setEditingPokerHand] = useState<
+    | "High Card"
+    | "Pair"
+    | "Two Pair"
+    | "Three of a Kind"
+    | "Straight"
+    | "Flush"
+    | "Full House"
+    | "Four of a Kind"
+    | "Five of a Kind"
+    | "Straight Flush"
+    | "Royal Flush"
+    | "Flush House"
+    | "Flush Five"
+    | "Flush House"
+  >("High Card");
 
   const { attributes, listeners, setNodeRef, transform } = useDraggable({
     id: "panel-variables",
@@ -200,6 +253,8 @@ const Variables: React.FC<VariablesProps> = ({
       newVariable.initialSuit = newVariableSuit;
     } else if (newVariableType === "rank") {
       newVariable.initialRank = newVariableRank;
+    } else if (newVariableType === "pokerhand") {
+      newVariable.initialPokerHand = newVariablePokerHand;
     }
 
     const updatedVariables = [...userVariables, newVariable];
@@ -209,6 +264,7 @@ const Variables: React.FC<VariablesProps> = ({
     setNewVariableValue("0");
     setNewVariableSuit("Spades");
     setNewVariableRank("Ace");
+    setNewVariablePokerHand("High Card");
     setNewVariableType("number");
     setNameValidationError("");
     setShowAddForm(false);
@@ -226,6 +282,7 @@ const Variables: React.FC<VariablesProps> = ({
     setEditingValue(variable.initialValue || 0);
     setEditingSuit(variable.initialSuit || "Spades");
     setEditingRank(variable.initialRank || "Ace");
+    setEditingPokerHand(variable.initialPokerHand || "High Card");
     setEditValidationError("");
   };
 
@@ -246,6 +303,8 @@ const Variables: React.FC<VariablesProps> = ({
       updatedVariable.initialSuit = editingSuit;
     } else if (editingType === "rank") {
       updatedVariable.initialRank = editingRank;
+    } else if (editingType === "pokerhand") {
+      updatedVariable.initialPokerHand = editingPokerHand;
     }
 
     const updatedVariables = userVariables.map((v) =>
@@ -268,6 +327,9 @@ const Variables: React.FC<VariablesProps> = ({
     } else if (variable.type === "rank") {
       const rank = variable.initialRank || "Ace";
       return rank;
+    } else if (variable.type === "pokerhand") {
+      const pokerHand = variable.initialPokerHand || "High Card";
+      return pokerHand;
     } else {
       return variable.initialValue?.toString() || "0";
     }
@@ -288,23 +350,31 @@ const Variables: React.FC<VariablesProps> = ({
     }
   };
 
-  const getVariableIcon = (type: "number" | "suit" | "rank" | undefined) => {
+  const getVariableIcon = (
+    type: "number" | "suit" | "rank" | "pokerhand" | undefined
+  ) => {
     switch (type) {
       case "suit":
         return SparklesIcon;
       case "rank":
         return CubeIcon;
+      case "pokerhand":
+        return RectangleStackIcon;
       default:
         return HashtagIcon;
     }
   };
 
-  const getVariableColor = (type: "number" | "suit" | "rank" | undefined) => {
+  const getVariableColor = (
+    type: "number" | "suit" | "rank" | "pokerhand" | undefined
+  ) => {
     switch (type) {
       case "suit":
         return "text-purple-400";
       case "rank":
         return "text-blue-400";
+      case "pokerhand":
+        return "text-green-400";
       default:
         return "text-mint";
     }
@@ -395,7 +465,9 @@ const Variables: React.FC<VariablesProps> = ({
                         label="Type"
                         value={editingType}
                         onChange={(value) =>
-                          setEditingType(value as "number" | "suit" | "rank")
+                          setEditingType(
+                            value as "number" | "suit" | "rank" | "pokerhand"
+                          )
                         }
                         options={VARIABLE_TYPE_OPTIONS}
                         size="sm"
@@ -455,6 +527,33 @@ const Variables: React.FC<VariablesProps> = ({
                             )
                           }
                           options={RANK_OPTIONS}
+                          size="sm"
+                        />
+                      )}
+
+                      {editingType === "pokerhand" && (
+                        <InputDropdown
+                          label="Initial Poker Hand"
+                          value={editingPokerHand}
+                          onChange={(value) =>
+                            setEditingPokerHand(
+                              value as
+                                | "High Card"
+                                | "Pair"
+                                | "Two Pair"
+                                | "Three of a Kind"
+                                | "Straight"
+                                | "Flush"
+                                | "Full House"
+                                | "Four of a Kind"
+                                | "Five of a Kind"
+                                | "Straight Flush"
+                                | "Royal Flush"
+                                | "Flush House"
+                                | "Flush Five"
+                            )
+                          }
+                          options={POKER_HAND_OPTIONS}
                           size="sm"
                         />
                       )}
@@ -565,7 +664,9 @@ const Variables: React.FC<VariablesProps> = ({
                   label="Type"
                   value={newVariableType}
                   onChange={(value) =>
-                    setNewVariableType(value as "number" | "suit" | "rank")
+                    setNewVariableType(
+                      value as "number" | "suit" | "rank" | "pokerhand"
+                    )
                   }
                   options={VARIABLE_TYPE_OPTIONS}
                   size="sm"
@@ -623,6 +724,33 @@ const Variables: React.FC<VariablesProps> = ({
                   />
                 )}
 
+                {newVariableType === "pokerhand" && (
+                  <InputDropdown
+                    label="Initial Poker Hand"
+                    value={newVariablePokerHand}
+                    onChange={(value) =>
+                      setNewVariablePokerHand(
+                        value as
+                          | "High Card"
+                          | "Pair"
+                          | "Two Pair"
+                          | "Three of a Kind"
+                          | "Straight"
+                          | "Flush"
+                          | "Full House"
+                          | "Four of a Kind"
+                          | "Five of a Kind"
+                          | "Straight Flush"
+                          | "Royal Flush"
+                          | "Flush House"
+                          | "Flush Five"
+                      )
+                    }
+                    options={POKER_HAND_OPTIONS}
+                    size="sm"
+                  />
+                )}
+
                 <div className="flex gap-2">
                   <Button
                     variant="primary"
@@ -642,6 +770,7 @@ const Variables: React.FC<VariablesProps> = ({
                       setNewVariableValue("0");
                       setNewVariableSuit("Spades");
                       setNewVariableRank("Ace");
+                      setNewVariablePokerHand("High Card");
                       setNewVariableType("number");
                       setNameValidationError("");
                     }}
