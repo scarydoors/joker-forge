@@ -89,6 +89,7 @@ The plan here is to implement enough triggers, conditions, and effects, so as th
 - [ ] **Edition Count** - Check how many cards with editions are in hand played
 - [ ] **Enhancement Count** - Check how many cards with enhancements are in hand played
 - [ ] **Seal Count** - Check how many cards with seals are in hand played
+- [ ] **Check Specific Poker Hand Level** - Check a specific poker hands level
 
 ---
 
@@ -126,16 +127,16 @@ The plan here is to implement enough triggers, conditions, and effects, so as th
 - [x] **Create Skip Tags** - Create a set or random skip tag
 - [x] **Set Dollars** - Set dollars to a value
 - [x] **Show Message** - Just show a simple little message
+- [x] **Disable Boss Blind** - Disables the boss blinds unique effect (Luchador, Chicot)
+- [x] **Copy Ability of Adjacent Joker** - Blueprint/Brainstorm logic
 
 #### Not Implemented Yet
 
-- [ ] **Disable Boss Blind** - Disables the boss blinds unique effect (Luchador, Chicot)
 - [ ] **Combine Suits** - Treat two or more suits as the same suit (Smeared Joker)
 - [ ] **Combine Ranks** - Treat two or more ranks as the same rank
 - [ ] **All Cards Are Face Cards** - Literally just for Pareidolia (this could probably just be the combine ranks effect)
 - [ ] **Beat Current Blind** - Completes the current blind (Mr. Bones)
 - [ ] **Modify Sell Value** - Change sell value of this or other jokers (Egg, Gift Card)
-- [ ] **Copy Ability of Adjacent Joker** - Blueprint/Brainstorm logic (difficult)
 - [ ] **Permanent Card Modifications** - Add permanent bonuses to cards (Hiker)
 - [ ] **Required Suit Changes** - For jokers that alternate between their required suit (Ancient Joker)
 - [ ] **Required Rank Changes** - For jokers that alternate between their required rank (Mail-In Rebate, Castle)
@@ -146,6 +147,7 @@ The plan here is to implement enough triggers, conditions, and effects, so as th
 - [ ] **Allowing Debt** - Credit Card logic
 - [ ] **All Cards are Scored** - Splash logic
 - [ ] **Alter Blind Requirement** - I.E. 2X blind requirement, 0.5x blind requirement
+
 
 ---
 
