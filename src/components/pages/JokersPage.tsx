@@ -124,7 +124,7 @@ const getRandomPlaceholderJoker = async (): Promise<{
 
   const randomIndex = Math.floor(Math.random() * upscaled.length);
   const match = placeholders[randomIndex].match(/placeholder-joker-(\d+)\.png/);
-  const imageNumber = match ? parseInt(match[1], 10) : 1;
+  const imageNumber = match ? parseInt(match[1], 15) : 1;
 
   return {
     imageData: upscaled[randomIndex],
