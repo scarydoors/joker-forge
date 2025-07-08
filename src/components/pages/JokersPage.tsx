@@ -103,7 +103,7 @@ const getRandomPlaceholderJoker = async (): Promise<{
 
   const placeholders: string[] = [];
 
-  for (let counter = 1; counter <= 10; counter++) {
+  for (let counter = 1; counter <= 15; counter++) {
     const imagePath = `/images/placeholderjokers/placeholder-joker-${counter}.png`;
 
     if (await checkImage(imagePath)) {
