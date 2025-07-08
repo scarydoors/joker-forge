@@ -57,6 +57,7 @@ import {
 import { generateChangePokerHandVariableReturn } from "./effects/ChangePokerHandVariableEffect";
 import { generatePassiveCopyJokerAbility } from "./effects/CopyJokerAbilityEffect";
 import { slugify } from "./index";
+import { generatePermaBonusReturn } from "./effects/PermaBonusEffect";
 
 export interface RandomGroup {
   id: string;
@@ -364,6 +365,8 @@ const generateSingleEffect = (
       return generateChangeRankVariableReturn(effect);
     case "change_pokerhand_variable":
       return generateChangePokerHandVariableReturn(effect);
+    case "permanent_bonus":
+      return generatePermaBonusReturn(effect);
 
     default:
       return {

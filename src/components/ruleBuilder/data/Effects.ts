@@ -1595,6 +1595,44 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
     category: "Consumables",
   },
   {
+    id: "permanent_bonus",
+    label: "Add Permanent Bonus",
+    description:
+      "Add permanent bonuses to the triggered card (like Hiker joker)",
+    applicableTriggers: ["card_scored"],
+    params: [
+      {
+        id: "bonus_type",
+        type: "select",
+        label: "Bonus Type",
+        options: [
+          { value: "perma_bonus", label: "Permanent Chips" },
+          { value: "perma_mult", label: "Permanent Mult" },
+          { value: "perma_x_chips", label: "Permanent X Chips" },
+          { value: "perma_x_mult", label: "Permanent X Mult" },
+          { value: "perma_h_chips", label: "Permanent Held Chips" },
+          { value: "perma_h_mult", label: "Permanent Held Mult" },
+          { value: "perma_h_x_chips", label: "Permanent Held X Chips" },
+          { value: "perma_h_x_mult", label: "Permanent Held X Mult" },
+          { value: "perma_p_dollars", label: "Permanent Dollars (on scoring)" },
+          {
+            value: "perma_h_dollars",
+            label: "Permanent Held Dollars (end of round)",
+          },
+        ],
+        default: "perma_bonus",
+      },
+      {
+        id: "value",
+        type: "number",
+        label: "Amount",
+        default: 1,
+        min: 0,
+      },
+    ],
+    category: "Card Effects",
+  },
+  {
     id: "create_tag",
     label: "Create Tag",
     description: "Create a specific or random tag",
