@@ -3006,63 +3006,6 @@
       ]
     },
     {
-      "id": "6013fece-1975-49af-a2f3-836f30692d37",
-      "name": "DNA",
-      "description": "If {C:orange}first hand{} of round has only {C:orange}1{} card, add a permanent copy to deck and draw it to {C:orange}hand{}",
-      "imagePreview": "data:image/png;base64,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",
-      "rarity": 3,
-      "cost": 8,
-      "blueprint_compat": true,
-      "eternal_compat": true,
-      "unlocked": true,
-      "discovered": true,
-      "rules": [
-        {
-          "id": "0c05272a-c17f-4c51-ba3f-938aab937fc1",
-          "trigger": "hand_played",
-          "conditionGroups": [
-            {
-              "id": "44ba0894-dac5-4d91-9ce0-06037b86e974",
-              "operator": "and",
-              "conditions": [
-                {
-                  "id": "54e29c5f-3357-4e01-8988-f72af45dd939",
-                  "type": "card_count",
-                  "negate": false,
-                  "params": {
-                    "card_scope": "all_played",
-                    "value": 1,
-                    "operator": "equals"
-                  }
-                },
-                {
-                  "id": "e4b3808a-fb3b-43c9-9acf-75a42db6cad7",
-                  "type": "first_played_hand",
-                  "negate": false,
-                  "params": {}
-                }
-              ]
-            }
-          ],
-          "effects": [
-            {
-              "id": "820511b0-eec8-465f-8f3f-d11f17f2f9e6",
-              "type": "copy_played_card",
-              "params": {
-                "card_index": "1",
-                "card_rank": "any",
-                "card_suit": "any"
-              }
-            }
-          ],
-          "position": {
-            "x": 751,
-            "y": 148
-          }
-        }
-      ]
-    },
-    {
       "id": "5aaf4ab5-93b9-44e6-8c14-b0ab2e106fd7",
       "name": "Merry Andy",
       "description": "{C:red}+3{} discards each round, {C:red}-1{} hand size",
