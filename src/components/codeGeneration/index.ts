@@ -1483,22 +1483,44 @@ const generateLocVarsFunction = (
     (v) => v.type === "pokerhand"
   );
 
-  const hasRandomChance =
-    joker.rules?.some((rule) =>
-      rule.effects.some((effect) => effect.params.has_random_chance === "true")
+  const hasRandomGroups =
+    joker.rules?.some(
+      (rule) => rule.randomGroups && rule.randomGroups.length > 0
     ) || false;
 
   const variableMapping: string[] = [];
   const colorVariables: string[] = [];
 
-  if (hasRandomChance) {
+  if (hasRandomGroups) {
+    const nonPassiveRules =
+      joker.rules?.filter((rule) => rule.trigger !== "passive") || [];
+    const randomGroups = nonPassiveRules.flatMap(
+      (rule) => rule.randomGroups || []
+    );
+    const denominators = [
+      ...new Set(randomGroups.map((group) => group.chance_denominator)),
+    ];
+
     variableMapping.push("G.GAME.probabilities.normal");
-    variableMapping.push("card.ability.extra.odds");
+
+    if (denominators.length === 1) {
+      variableMapping.push("card.ability.extra.odds");
+    } else {
+      denominators.forEach((_, index) => {
+        if (index === 0) {
+          variableMapping.push("card.ability.extra.odds");
+        } else {
+          variableMapping.push(`card.ability.extra.odds${index + 1}`);
+        }
+      });
+    }
 
     const remainingVars = allVariables.filter(
       (v) =>
         v.name !== "numerator" &&
         v.name !== "denominator" &&
+        !v.name.startsWith("numerator") &&
+        !v.name.startsWith("denominator") &&
         v.type !== "suit" &&
         v.type !== "rank" &&
         v.type !== "pokerhand"
@@ -1509,7 +1531,7 @@ const generateLocVarsFunction = (
         !gv.name.toLowerCase().includes("denominator")
     );
 
-    let currentIndex = 2;
+    let currentIndex = denominators.length + 1;
 
     for (const variable of remainingVars) {
       if (currentIndex >= maxVariableIndex) break;
