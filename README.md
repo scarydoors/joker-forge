@@ -36,10 +36,10 @@ The plan here is to implement enough triggers, conditions, and effects, so as th
 - [x] **Card Bought** - When a card is purchased
 - [x] **Card Sold** - When a card is sold
 - [x] **When this Card is Sold** - When this specific card is sold
+- [x] **Card Destroyed** - When a card is destroyed
 
 #### Not Implemented Yet
 
-- [ ] **Card Destroyed** - When a card is destroyed
 - [ ] **Ante Start** - At the start of an ante
 - [ ] **Joker Added/Removed** - When a Joker is added/removed from your list (Joker Stencil)
 - [ ] **When a Card is Modified** - When any card is modified (enhanced, etc) (difficult)
@@ -138,8 +138,6 @@ The plan here is to implement enough triggers, conditions, and effects, so as th
 - [ ] **Beat Current Blind** - Completes the current blind (Mr. Bones)
 - [ ] **Modify Sell Value** - Change sell value of this or other jokers (Egg, Gift Card)
 - [ ] **Permanent Card Modifications** - Add permanent bonuses to cards (Hiker)
-- [ ] **Required Suit Changes** - For jokers that alternate between their required suit (Ancient Joker)
-- [ ] **Required Rank Changes** - For jokers that alternate between their required rank (Mail-In Rebate, Castle)
 - [ ] **Destroy Card in Hand** - Destroys a random or set (by index, rank, suit) card in hand
 - [ ] **Modify Probability** - Oops All 6s! support
 - [ ] **Cards May Appear Multiple Times** - Showman logic
@@ -147,6 +145,7 @@ The plan here is to implement enough triggers, conditions, and effects, so as th
 - [ ] **Allowing Debt** - Credit Card logic
 - [ ] **All Cards are Scored** - Splash logic
 - [ ] **Alter Blind Requirement** - I.E. 2X blind requirement, 0.5x blind requirement
+- [ ] **Add/Subtract/Set Joker Slots** - Would be cool i guess lol
 
 
 ---
