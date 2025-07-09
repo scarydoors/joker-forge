@@ -62,6 +62,7 @@ import { generateSetAnteReturn } from "./effects/SetAnteEffect";
 import { generateAddCardToHandReturn } from "./effects/AddCardToHandEffect";
 import { generateCopyCardToHandReturn } from "./effects/CopyCardToHandEffect";
 import { generateDoubleProbabilityEffect } from "./effects/DoubleProbabilityEffect";
+import { generatePassiveSplashEffect } from "./effects/SplashEffect";
 
 export interface RandomGroup {
   id: string;
@@ -526,6 +527,10 @@ export const processPassiveEffects = (
         }
         case "copy_joker_ability": {
           passiveResult = generatePassiveCopyJokerAbility(effect);
+          break;
+        }
+        case "splash_effect": {
+          passiveResult = generatePassiveSplashEffect();
           break;
         }
         case "considered_as": {

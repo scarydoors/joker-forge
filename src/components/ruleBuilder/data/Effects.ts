@@ -2460,6 +2460,14 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
     category: "Special",
   },
   {
+    id: "splash_effect",
+    label: "Every Played Card is Scored (Splash)",
+    description: "When a hand is played, every card in it is scored",
+    applicableTriggers: ["passive"],
+    params: [],
+    category: "Special",
+  },
+  {
     id: "copy_joker_ability",
     label: "Copy Joker Ability",
     description:
