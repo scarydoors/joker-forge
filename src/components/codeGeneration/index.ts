@@ -802,6 +802,31 @@ const extractEffectsConfig = (
             globalEffectVariableMapping[effect.id] = varName;
           }
         }
+
+        if (effect.type === "set_ante") {
+          const value = effect.params.value;
+          const parsedValue = parseGameVariable(value);
+          const rangeParsedValue = parseRangeVariable(value);
+
+          if (parsedValue.isGameVariable || rangeParsedValue.isRangeVariable) {
+            if (rangeParsedValue.isRangeVariable) {
+              const varName = getUniqueVariableName("ante_value");
+              configItems.push(`${varName}_min = ${rangeParsedValue.min}`);
+              configItems.push(`${varName}_max = ${rangeParsedValue.max}`);
+              globalEffectVariableMapping[effect.id] = varName;
+            }
+            return;
+          }
+
+          if (
+            typeof value === "number" &&
+            !allVariableNames.has(String(value))
+          ) {
+            const varName = getUniqueVariableName("ante_value");
+            configItems.push(`${varName} = ${value}`);
+            globalEffectVariableMapping[effect.id] = varName;
+          }
+        }
       });
 
       (rule.randomGroups || []).forEach((group) => {
@@ -1037,6 +1062,33 @@ const extractEffectsConfig = (
             ) {
               const varName = getUniqueVariableName("sell_value");
               configItems.push(`${varName} = ${effectValue}`);
+              globalEffectVariableMapping[effect.id] = varName;
+            }
+          }
+          if (effect.type === "set_ante") {
+            const value = effect.params.value;
+            const parsedValue = parseGameVariable(value);
+            const rangeParsedValue = parseRangeVariable(value);
+
+            if (
+              parsedValue.isGameVariable ||
+              rangeParsedValue.isRangeVariable
+            ) {
+              if (rangeParsedValue.isRangeVariable) {
+                const varName = getUniqueVariableName("ante_value");
+                configItems.push(`${varName}_min = ${rangeParsedValue.min}`);
+                configItems.push(`${varName}_max = ${rangeParsedValue.max}`);
+                globalEffectVariableMapping[effect.id] = varName;
+              }
+              return;
+            }
+
+            if (
+              typeof value === "number" &&
+              !allVariableNames.has(String(value))
+            ) {
+              const varName = getUniqueVariableName("ante_value");
+              configItems.push(`${varName} = ${value}`);
               globalEffectVariableMapping[effect.id] = varName;
             }
           }

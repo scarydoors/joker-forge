@@ -806,6 +806,7 @@ const getDefaultVariableValue = (name: string): number => {
     hands: 1,
     discards: 1,
     levels: 1,
+    ante_value: 1,
   };
   return defaults[name] || 0;
 };
@@ -821,6 +822,7 @@ const getDefaultVariableDescription = (name: string): string => {
     hands: "Hands to modify",
     discards: "Discards to modify",
     levels: "Hand levels to add",
+    ante_value: "Ante level value",
   };
   return descriptions[name] || "Custom variable";
 };
