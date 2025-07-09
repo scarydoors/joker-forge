@@ -59,6 +59,8 @@ import { generatePassiveCopyJokerAbility } from "./effects/CopyJokerAbilityEffec
 import { slugify } from "./index";
 import { generatePermaBonusReturn } from "./effects/PermaBonusEffect";
 import { generateSetAnteReturn } from "./effects/SetAnteEffect";
+import { generateAddCardToHandReturn } from "./effects/AddCardToHandEffect";
+import { generateCopyCardToHandReturn } from "./effects/CopyCardToHandEffect";
 
 export interface RandomGroup {
   id: string;
@@ -370,6 +372,12 @@ const generateSingleEffect = (
       return generatePermaBonusReturn(effect);
     case "set_ante":
       return generateSetAnteReturn(effect, triggerType);
+    case "add_card_to_hand":
+      return generateAddCardToHandReturn(effect, triggerType);
+    case "copy_triggered_card_to_hand":
+      return generateCopyCardToHandReturn(effect, triggerType);
+    case "copy_played_card_to_hand":
+      return generateCopyCardToHandReturn(effect, triggerType);
 
     default:
       return {
