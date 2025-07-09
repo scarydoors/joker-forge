@@ -45,6 +45,7 @@ The plan here is to implement enough triggers, conditions, and effects, so as th
 - [ ] **When a Card is Modified** - When any card is modified (enhanced, etc) (difficult)
 - [ ] **When shop is Entered** - WHne the shop is entered
 - [ ] **When a Playing Card is Added** - When a playing card is added to your deck (Hologram)
+- [ ] **When this Joker is Bought** - When specifically this joker is bought (different from add to deck)
 
 ---
 
@@ -75,17 +76,18 @@ The plan here is to implement enough triggers, conditions, and effects, so as th
 - [x] **Deck Count By Rank, Suit, Enhancement, Seal, Edition** - Check the specifics of the cards in your full deck
 - [x] **Specific Joker** - Check if you have a specific joker in your list
 - [x] **Generic Compare** - Check GameVars and Vars against a value/eachother
+- [x] **Consumable Type** - Check for card sold and consumable used
+- [x] **Glass Card Destroyed** - Check to see if a glass card got destroyed (Glass Joker)
+- [x] **Triggered Boss Blind Ability** - Check if the boss blind's ability was triggered (Matador)
+- [x] **Most/Least Played Poker Hand** - Check if the hand played is your most/least played (Obelisk)
+- [x] **Consumable Held** - Check for specific consumable/s held
+- [x] **Score Threshold** - Check if score meets requirement (Mr. Bones)
 
 #### Not Implemented Yet
 
 - [ ] **Consumable Count** - Check number of consumables owned
-- [ ] **Score Threshold** - Check if score meets requirement (Mr. Bones)
 - [ ] **Culmative Chip/Rank Check** - Check for if cards rank/chips add up to a certain number
 - [ ] **Lucky Card Triggered** - Check if a lucky card succesfully triggered (Lucky Cat)
-- [ ] **Glass Card Destroyed** - Check to see if a glass card got destroyed (Glass Joker)
-- [ ] **Most/Least Played Poker Hand** - Check if the hand played is your most/least played (Obelisk)
-- [ ] **Triggered Boss Blind Ability** - Check if the boss blind's ability was triggered (Matador)
-- [ ] **Consumable Type** - Check for card sold and consumable used
 - [ ] **Edition Count** - Check how many cards with editions are in hand played
 - [ ] **Enhancement Count** - Check how many cards with enhancements are in hand played
 - [ ] **Seal Count** - Check how many cards with seals are in hand played
@@ -129,21 +131,21 @@ The plan here is to implement enough triggers, conditions, and effects, so as th
 - [x] **Show Message** - Just show a simple little message
 - [x] **Disable Boss Blind** - Disables the boss blinds unique effect (Luchador, Chicot)
 - [x] **Copy Ability of Adjacent Joker** - Blueprint/Brainstorm logic
+- [x] **Modify Sell Value** - Change sell value of this or other jokers (Egg, Gift Card)
+- [x] **Permanent Card Modifications** - Add permanent bonuses to cards (Hiker)
+- [x] **Modify Probability** - Oops All 6s! support
+- [x] **All [Cards] in the Shop are Free** - Changes the buy price of certain packs/cards (planet, joker, tarot, spectral) to be free
+- [x] **All Cards are Scored** - Splash logic
 
 #### Not Implemented Yet
 
 - [ ] **Combine Suits** - Treat two or more suits as the same suit (Smeared Joker)
 - [ ] **Combine Ranks** - Treat two or more ranks as the same rank
 - [ ] **All Cards Are Face Cards** - Literally just for Pareidolia (this could probably just be the combine ranks effect)
-- [ ] **Beat Current Blind** - Completes the current blind (Mr. Bones)
-- [ ] **Modify Sell Value** - Change sell value of this or other jokers (Egg, Gift Card)
-- [ ] **Permanent Card Modifications** - Add permanent bonuses to cards (Hiker)
+- [ ] **Beat Current Blind** - Completes the current blind
 - [ ] **Destroy Card in Hand** - Destroys a random or set (by index, rank, suit) card in hand
-- [ ] **Modify Probability** - Oops All 6s! support
 - [ ] **Cards May Appear Multiple Times** - Showman logic
-- [ ] **All [Cards] in the Shop are Free** - Changes the buy price of certain packs/cards (planet, joker, tarot, spectral) to be free
 - [ ] **Allowing Debt** - Credit Card logic
-- [ ] **All Cards are Scored** - Splash logic
 - [ ] **Alter Blind Requirement** - I.E. 2X blind requirement, 0.5x blind requirement
 - [ ] **Add/Subtract/Set Joker Slots** - Would be cool i guess lol
 
@@ -162,12 +164,12 @@ The plan here is to implement enough triggers, conditions, and effects, so as th
 - [x] **Atlas Generation** - Creates sprite atlases from uploaded images
 - [x] **Mod Packaging** - Complete mod folder structure with JSON metadata
 - [x] **Mod Metadata Editing** - Edit parameters like description, version, etc.
+- [x] **Sticker Compatibility** - Perishable, Rental, etc.
 
 #### Not Implemented Yet
 
 - [ ] **Blueprint Compatibility Logic** - Actual blueprint behavior code
 - [ ] **Unlock Condition Generation** - Custom unlock requirements
-- [ ] **Sticker Compatibility** - Perishable, Rental, etc.
 - [ ] **Localization Support** - Multiple language support
 
 ---
@@ -191,7 +193,6 @@ The plan here is to implement enough triggers, conditions, and effects, so as th
 - [ ] **Dynamic Code Display** - Live preview of generated Lua code in rule builder
 - [ ] **Undo/Redo System** - History management for rule editing
 - [ ] **Help System** - Integrated tooltips and documentation
-- [ ] **Much Better Variable Management** - This will be annoying and will come with an overhaul
 
 ---
 
