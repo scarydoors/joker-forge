@@ -26,6 +26,7 @@ import { generateCheckBlindRequirementsConditionCode } from "./conditions/BlindR
 import { generateGlassCardDestroyedConditionCode } from "./conditions/GlassCardDestroyedCondition";
 import { generateConsumableTypeConditionCode } from "./conditions/ConsumableTypeCondition";
 import { generatePokerHandBeenPlayedConditionCode } from "./conditions/PokerHandBeenPlayedCondition";
+import { generateTriggeredBossBlindConditionCode } from "./conditions/TriggeredBossBlindCondition";
 
 export const generateConditionChain = (
   rule: Rule,
@@ -192,6 +193,9 @@ const generateSingleConditionCode = (
 
     case "poker_hand_been_played":
       return generatePokerHandBeenPlayedConditionCode();
+
+    case "triggered_boss_blind":
+      return generateTriggeredBossBlindConditionCode();
 
     default:
       return null;
