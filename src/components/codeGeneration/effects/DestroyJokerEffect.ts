@@ -11,6 +11,9 @@ export const generateDestroyJokerReturn = (
   const position = (effect.params?.position as string) || "first";
   const specificIndex = effect.params?.specific_index as number;
   const customMessage = effect.customMessage;
+  const sellValueMultiplier =
+    (effect.params?.sell_value_multiplier as number) || 0;
+  const variableName = (effect.params?.variable_name as string) || "";
 
   const scoringTriggers = ["hand_played", "card_scored"];
   const isScoring = scoringTriggers.includes(triggerType);
@@ -18,7 +21,6 @@ export const generateDestroyJokerReturn = (
   let jokerSelectionCode = "";
   let destroyCode = "";
 
-  // Generate joker selection logic
   if (selectionMethod === "specific" && jokerKey) {
     jokerSelectionCode = `
                 local target_joker = nil
@@ -91,7 +93,6 @@ export const generateDestroyJokerReturn = (
                 end`;
     }
   } else {
-    // FIXED: Added joker ~= card check to exclude self from random destruction
     jokerSelectionCode = `
                 local destructable_jokers = {}
                 for i, joker in ipairs(G.jokers.cards) do
@@ -102,9 +103,17 @@ export const generateDestroyJokerReturn = (
                 local target_joker = #destructable_jokers > 0 and pseudorandom_element(destructable_jokers, pseudoseed('destroy_joker')) or nil`;
   }
 
+  let sellValueCode = "";
+  if (sellValueMultiplier > 0 && variableName) {
+    sellValueCode = `
+                    local joker_sell_value = target_joker.sell_cost or 0
+                    local sell_value_gain = joker_sell_value * ${sellValueMultiplier}
+                    card.ability.extra.${variableName} = card.ability.extra.${variableName} + sell_value_gain`;
+  }
+
   destroyCode = `${jokerSelectionCode}
                 
-                if target_joker then
+                if target_joker then${sellValueCode}
                     target_joker.getting_sliced = true
                     G.E_MANAGER:add_event(Event({
                         func = function()
