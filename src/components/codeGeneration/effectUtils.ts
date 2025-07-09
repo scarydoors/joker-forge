@@ -61,6 +61,7 @@ import { generatePermaBonusReturn } from "./effects/PermaBonusEffect";
 import { generateSetAnteReturn } from "./effects/SetAnteEffect";
 import { generateAddCardToHandReturn } from "./effects/AddCardToHandEffect";
 import { generateCopyCardToHandReturn } from "./effects/CopyCardToHandEffect";
+import { generateDoubleProbabilityEffect } from "./effects/DoubleProbabilityEffect";
 
 export interface RandomGroup {
   id: string;
@@ -517,6 +518,10 @@ export const processPassiveEffects = (
         }
         case "discount_items": {
           passiveResult = generateDiscountItemsReturn(effect, jokerKey);
+          break;
+        }
+        case "double_probability": {
+          passiveResult = generateDoubleProbabilityEffect();
           break;
         }
         case "copy_joker_ability": {

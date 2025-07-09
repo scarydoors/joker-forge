@@ -2451,6 +2451,15 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
     category: "Card Effects",
   },
   {
+    id: "double_probability",
+    label: "Double Probability",
+    description:
+      "Double all probability chances (like lucky cards, card destruction, etc.)",
+    applicableTriggers: ["passive"],
+    params: [],
+    category: "Special",
+  },
+  {
     id: "copy_joker_ability",
     label: "Copy Joker Ability",
     description:
