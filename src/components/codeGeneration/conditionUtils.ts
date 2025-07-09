@@ -23,6 +23,7 @@ import { generateSpecificJokerConditionCode } from "./conditions/SpecificJokerCo
 import { generateGenericCompareConditionCode } from "./conditions/GenericCompareCondition";
 import { generateConsumableHeldConditionCode } from "./conditions/ConsumableHeldCondition";
 import { generateCheckBlindRequirementsConditionCode } from "./conditions/BlindRequirementsCondition";
+import { generateGlassCardDestroyedConditionCode } from "./conditions/GlassCardDestroyedCondition";
 
 export const generateConditionChain = (
   rule: Rule,
@@ -180,6 +181,9 @@ const generateSingleConditionCode = (
 
     case "check_blind_requirements":
       return generateCheckBlindRequirementsConditionCode([singleConditionRule]);
+
+    case "glass_card_destroyed":
+      return generateGlassCardDestroyedConditionCode();
 
     default:
       return null;

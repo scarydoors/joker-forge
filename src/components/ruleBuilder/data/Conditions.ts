@@ -670,6 +670,14 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
     category: "Player Resources",
   },
   {
+    id: "glass_card_destroyed",
+    label: "Glass Card Destroyed",
+    description: "Check if any glass cards were destroyed/shattered",
+    applicableTriggers: ["card_destroyed"],
+    params: [],
+    category: "Hand & Cards",
+  },
+  {
     id: "joker_count",
     label: "Joker Count",
     description: "Check how many jokers the player has",
