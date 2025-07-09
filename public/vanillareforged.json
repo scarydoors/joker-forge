@@ -6347,6 +6347,39 @@
       "placeholderCreditIndex": 10
     },
     {
+      "id": "9f2e7ae3-3775-4bf0-9ad4-13391f475a24",
+      "name": "Oops! All 6s",
+      "description": "Doubles all {C:attention}listed{} {C:green}probabilities{}[s](ex: {C:green}1 in 3{} -> {C:green}2 in 3{})",
+      "imagePreview": "data:image/png;base64,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",
+      "overlayImagePreview": "",
+      "rarity": 2,
+      "cost": 4,
+      "blueprint_compat": true,
+      "eternal_compat": true,
+      "unlocked": true,
+      "discovered": true,
+      "rules": [
+        {
+          "id": "417fdd0d-2aea-4ae2-aaad-7cd231aea041",
+          "trigger": "passive",
+          "conditionGroups": [],
+          "effects": [
+            {
+              "id": "c3ac5a88-f73f-4a8b-9baf-febafc4dbd05",
+              "type": "double_probability",
+              "params": {}
+            }
+          ],
+          "randomGroups": [],
+          "position": {
+            "x": 1027.5,
+            "y": 474
+          }
+        }
+      ],
+      "placeholderCreditIndex": 7
+    },
+    {
       "id": "fb6d74bb-e974-4183-9f61-f738b6dabf78",
       "name": "Blackboard",
       "description": "{X:red,C:white}X3{} Mult if all cards {C:orange}held in hand{} are Spades or Clubs",
