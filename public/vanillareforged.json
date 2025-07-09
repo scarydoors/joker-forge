@@ -6251,6 +6251,54 @@
       ]
     },
     {
+      "id": "944a6394-8adb-482c-b4c7-726095bbb4be",
+      "name": "Card Sharp",
+      "description": "{X:red,C:white}X3{} Mult if played {C:attention}poker hand{}[s] has already been played this round",
+      "imagePreview": "data:image/png;base64,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",
+      "overlayImagePreview": "",
+      "rarity": 2,
+      "cost": 6,
+      "blueprint_compat": true,
+      "eternal_compat": true,
+      "unlocked": true,
+      "discovered": true,
+      "rules": [
+        {
+          "id": "ece9f094-0a72-4dea-bd67-72481a2ef47d",
+          "trigger": "hand_played",
+          "conditionGroups": [
+            {
+              "id": "4441a5a7-206e-4c35-9dd3-ed7a76813489",
+              "operator": "and",
+              "conditions": [
+                {
+                  "id": "cb7bf5f5-ed84-45d6-a224-e08e3b35b602",
+                  "type": "poker_hand_been_played",
+                  "negate": false,
+                  "params": {}
+                }
+              ]
+            }
+          ],
+          "effects": [
+            {
+              "id": "6ba77cbf-54c8-46a9-823b-5a6b6f17a321",
+              "type": "apply_x_mult",
+              "params": {
+                "value": 3
+              }
+            }
+          ],
+          "randomGroups": [],
+          "position": {
+            "x": 707.5,
+            "y": 318
+          }
+        }
+      ],
+      "placeholderCreditIndex": 5
+    },
+    {
       "id": "fb6d74bb-e974-4183-9f61-f738b6dabf78",
       "name": "Blackboard",
       "description": "{X:red,C:white}X3{} Mult if all cards {C:orange}held in hand{} are Spades or Clubs",
