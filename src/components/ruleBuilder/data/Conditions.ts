@@ -527,6 +527,15 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
     category: "Player Resources",
   },
   {
+    id: "poker_hand_been_played",
+    label: "Poker Hand Been Played",
+    description:
+      "Check if the current poker hand has already been played this round",
+    applicableTriggers: ["hand_played", "card_scored", "after_hand_played"],
+    params: [],
+    category: "Hand & Cards",
+  },
+  {
     id: "generic_compare",
     label: "Generic Compare",
     description: "Compare two custom values with an operator",

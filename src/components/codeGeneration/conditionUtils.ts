@@ -25,6 +25,7 @@ import { generateConsumableHeldConditionCode } from "./conditions/ConsumableHeld
 import { generateCheckBlindRequirementsConditionCode } from "./conditions/BlindRequirementsCondition";
 import { generateGlassCardDestroyedConditionCode } from "./conditions/GlassCardDestroyedCondition";
 import { generateConsumableTypeConditionCode } from "./conditions/ConsumableTypeCondition";
+import { generatePokerHandBeenPlayedConditionCode } from "./conditions/PokerHandBeenPlayedCondition";
 
 export const generateConditionChain = (
   rule: Rule,
@@ -188,6 +189,9 @@ const generateSingleConditionCode = (
 
     case "consumable_type":
       return generateConsumableTypeConditionCode([singleConditionRule]);
+
+    case "poker_hand_been_played":
+      return generatePokerHandBeenPlayedConditionCode();
 
     default:
       return null;
