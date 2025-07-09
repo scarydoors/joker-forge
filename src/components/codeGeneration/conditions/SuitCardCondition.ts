@@ -22,14 +22,15 @@ export const generateSuitCardConditionCode = (
   const getSuitsCheckLogic = (
     suits: string[],
     useVariable = false,
-    varCode?: string
+    varCode?: string,
+    cardRef = "c"
   ): string => {
     if (useVariable && varCode) {
-      return `c:is_suit(${varCode})`;
+      return `${cardRef}:is_suit(${varCode})`;
     } else if (suits.length === 1) {
-      return `c:is_suit("${suits[0]}")`;
+      return `${cardRef}:is_suit("${suits[0]}")`;
     } else {
-      return suits.map((suit) => `c:is_suit("${suit}")`).join(" or ");
+      return suits.map((suit) => `${cardRef}:is_suit("${suit}")`).join(" or ");
     }
   };
 
@@ -55,6 +56,23 @@ export const generateSuitCardConditionCode = (
   const cardsToCheck =
     scope === "scoring" ? "context.scoring_hand" : "context.full_hand";
 
+  if (triggerType === "card_destroyed") {
+    const checkLogic = getSuitsCheckLogic(
+      suits,
+      useVariable,
+      variableCode,
+      "removed_card"
+    );
+    return `(function()
+    for k, removed_card in ipairs(context.removed) do
+        if ${checkLogic} then
+            return true
+        end
+    end
+    return false
+end)()`;
+  }
+
   if (
     triggerType === "card_discarded" ||
     triggerType === "card_held_in_hand" ||
@@ -63,8 +81,9 @@ export const generateSuitCardConditionCode = (
     const checkLogic = getSuitsCheckLogic(
       suits,
       useVariable,
-      variableCode
-    ).replace(/c:/g, "context.other_card:");
+      variableCode,
+      "context.other_card"
+    );
     return checkLogic;
   } else {
     switch (quantifier) {

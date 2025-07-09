@@ -168,6 +168,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
       "card_bought",
       "selling_self",
       "card_held_in_hand_end_of_round",
+      "card_destroyed",
     ],
     params: [
       {
@@ -205,6 +206,8 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
       "card_sold",
       "card_bought",
       "selling_self",
+      "card_held_in_hand_end_of_round",
+      "card_destroyed",
     ],
     params: [
       {
@@ -316,6 +319,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
       "card_sold",
       "card_bought",
       "selling_self",
+      "card_destroyed",
     ],
     params: [
       {
@@ -364,6 +368,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
       "card_sold",
       "card_bought",
       "selling_self",
+      "card_destroyed",
     ],
     params: [
       {
@@ -412,6 +417,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
       "card_sold",
       "card_bought",
       "selling_self",
+      "card_destroyed",
     ],
     params: [
       {
@@ -463,6 +469,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
       "card_bought",
       "selling_self",
       "game_over",
+      "card_destroyed",
     ],
     params: [
       {
@@ -518,6 +525,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
       "card_sold",
       "card_bought",
       "selling_self",
+      "card_destroyed",
     ],
     params: [
       {
@@ -805,6 +813,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
       "card_sold",
       "card_bought",
       "selling_self",
+      "card_destroyed",
     ],
     params: [
       {
@@ -987,6 +996,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
       "card_sold",
       "card_bought",
       "selling_self",
+      "card_destroyed",
     ],
     params: [
       {
@@ -1036,6 +1046,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
       "card_sold",
       "card_bought",
       "selling_self",
+      "card_destroyed",
     ],
     params: [
       {
@@ -1117,6 +1128,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
       "card_sold",
       "card_bought",
       "selling_self",
+      "card_destroyed",
     ],
     params: [
       {
@@ -1211,6 +1223,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
       "card_sold",
       "card_bought",
       "selling_self",
+      "card_destroyed",
     ],
     params: [
       {
@@ -1306,6 +1319,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
       "card_sold",
       "card_bought",
       "selling_self",
+      "card_destroyed",
     ],
     params: [
       {
@@ -1417,6 +1431,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
       "card_sold",
       "card_bought",
       "selling_self",
+      "card_destroyed",
     ],
     params: [
       {
@@ -1491,6 +1506,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
       "card_sold",
       "card_bought",
       "selling_self",
+      "card_destroyed",
     ],
     params: [
       {
@@ -1590,6 +1606,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
       "card_sold",
       "card_bought",
       "selling_self",
+      "card_destroyed",
     ],
     params: [
       {
@@ -1697,6 +1714,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
       "card_bought",
       "selling_self",
       "card_held_in_hand_end_of_round",
+      "card_destroyed",
     ],
     params: [
       {
@@ -1852,6 +1870,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
       "card_sold",
       "card_bought",
       "selling_self",
+      "card_destroyed",
     ],
     params: [
       {
@@ -1901,6 +1920,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
       "card_sold",
       "selling_self",
       "card_held_in_hand_end_of_round",
+      "card_destroyed",
     ],
     params: [
       {
@@ -2044,6 +2064,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
       "card_sold",
       "card_bought",
       "game_over",
+      "card_destroyed",
     ],
     params: [],
     category: "Jokers",
@@ -2075,6 +2096,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
       "card_sold",
       "card_bought",
       "selling_self",
+      "card_destroyed",
     ],
     params: [],
     category: "Game Rules",
@@ -2189,6 +2211,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
       "game_over",
       "card_held_in_hand",
       "card_held_in_hand_end_of_round",
+      "card_destroyed",
     ],
     params: [
       {
@@ -2253,6 +2276,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
       "game_over",
       "card_held_in_hand",
       "card_held_in_hand_end_of_round",
+      "card_destroyed",
     ],
     params: [
       {
@@ -2326,6 +2350,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
       "game_over",
       "card_held_in_hand",
       "card_held_in_hand_end_of_round",
+      "card_destroyed",
     ],
     params: [
       {

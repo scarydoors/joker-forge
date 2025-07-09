@@ -56,6 +56,13 @@ export const TRIGGERS: TriggerDefinition[] = [
     category: "Gameplay",
   },
   {
+    id: "card_destroyed",
+    label: "When a Card is Destroyed",
+    description:
+      "Triggers when cards are destroyed (e.g. by Glass Cards breaking, being eaten by jokers, sacrificed by consumables).",
+    category: "Special",
+  },
+  {
     id: "hand_discarded",
     label: "When a Hand is Discarded",
     description:

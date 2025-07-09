@@ -23,22 +23,23 @@ export const generateRankCardConditionCode = (
     ranks: string[],
     rankGroupType: string | null,
     useVariable = false,
-    varCode?: string
+    varCode?: string,
+    cardRef = "c"
   ): string => {
     if (useVariable && varCode) {
-      return `c:get_id() == ${varCode}`;
+      return `${cardRef}:get_id() == ${varCode}`;
     } else if (rankGroupType === "face") {
-      return "c:is_face()";
+      return `${cardRef}:is_face()`;
     } else if (rankGroupType === "even") {
-      return "(c:get_id() == 2 or c:get_id() == 4 or c:get_id() == 6 or c:get_id() == 8 or c:get_id() == 10)";
+      return `(${cardRef}:get_id() == 2 or ${cardRef}:get_id() == 4 or ${cardRef}:get_id() == 6 or ${cardRef}:get_id() == 8 or ${cardRef}:get_id() == 10)`;
     } else if (rankGroupType === "odd") {
-      return "(c:get_id() == 14 or c:get_id() == 3 or c:get_id() == 5 or c:get_id() == 7 or c:get_id() == 9)";
+      return `(${cardRef}:get_id() == 14 or ${cardRef}:get_id() == 3 or ${cardRef}:get_id() == 5 or ${cardRef}:get_id() == 7 or ${cardRef}:get_id() == 9)`;
     } else if (ranks.length === 1) {
       const rankId = getRankId(ranks[0]);
-      return `c:get_id() == ${rankId}`;
+      return `${cardRef}:get_id() == ${rankId}`;
     } else {
       return ranks
-        .map((rank) => `c:get_id() == ${getRankId(rank)}`)
+        .map((rank) => `${cardRef}:get_id() == ${getRankId(rank)}`)
         .join(" or ");
     }
   };
@@ -62,6 +63,24 @@ export const generateRankCardConditionCode = (
   const cardsToCheck =
     scope === "scoring" ? "context.scoring_hand" : "context.full_hand";
 
+  if (triggerType === "card_destroyed") {
+    const checkLogic = getRanksCheckLogic(
+      ranks,
+      rankGroupType,
+      useVariable,
+      variableCode,
+      "removed_card"
+    );
+    return `(function()
+    for k, removed_card in ipairs(context.removed) do
+        if ${checkLogic} then
+            return true
+        end
+    end
+    return false
+end)()`;
+  }
+
   if (
     triggerType === "card_scored" ||
     triggerType === "card_discarded" ||
@@ -71,8 +90,9 @@ export const generateRankCardConditionCode = (
       ranks,
       rankGroupType,
       useVariable,
-      variableCode
-    ).replace(/c:/g, "context.other_card:");
+      variableCode,
+      "context.other_card"
+    );
     return checkLogic;
   } else {
     switch (quantifier) {

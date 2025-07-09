@@ -169,6 +169,12 @@ export const generateTriggerContext = (
         };
       }
 
+    case "card_destroyed":
+      return {
+        check: "context.remove_playing_cards and not context.blueprint",
+        comment: "-- When cards are destroyed",
+      };
+
     case "hand_played":
     default:
       return {
