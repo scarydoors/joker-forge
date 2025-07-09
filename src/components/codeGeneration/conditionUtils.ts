@@ -24,6 +24,7 @@ import { generateGenericCompareConditionCode } from "./conditions/GenericCompare
 import { generateConsumableHeldConditionCode } from "./conditions/ConsumableHeldCondition";
 import { generateCheckBlindRequirementsConditionCode } from "./conditions/BlindRequirementsCondition";
 import { generateGlassCardDestroyedConditionCode } from "./conditions/GlassCardDestroyedCondition";
+import { generateConsumableTypeConditionCode } from "./conditions/ConsumableTypeCondition";
 
 export const generateConditionChain = (
   rule: Rule,
@@ -184,6 +185,9 @@ const generateSingleConditionCode = (
 
     case "glass_card_destroyed":
       return generateGlassCardDestroyedConditionCode();
+
+    case "consumable_type":
+      return generateConsumableTypeConditionCode([singleConditionRule]);
 
     default:
       return null;
