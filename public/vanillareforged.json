@@ -5595,6 +5595,56 @@
       "placeholderCreditIndex": 18
     },
     {
+      "id": "5ac1c790-53e1-4a24-9f83-448289baee35",
+      "name": "Smeared Joker",
+      "description": " {C:hearts}Hearts{} and  {C:diamonds}Diamonds{} count as the same suit,[s]  {C:spades}Spades{} and  {C:clubs}Clubs{} count as the same suit",
+      "imagePreview": "data:image/png;base64,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",
+      "overlayImagePreview": "",
+      "rarity": 2,
+      "cost": 7,
+      "blueprint_compat": true,
+      "eternal_compat": true,
+      "unlocked": true,
+      "discovered": true,
+      "rules": [
+        {
+          "id": "fc4b6567-f84c-4041-b661-c161f493315e",
+          "trigger": "passive",
+          "conditionGroups": [],
+          "effects": [
+            {
+              "id": "3d60753b-0b81-41d0-8c79-067f68e1f830",
+              "type": "combine_suits",
+              "params": {
+                "source_suit_type": "specific",
+                "source_suits": "Spades,Hearts",
+                "target_suit": "Clubs",
+                "suit_1": "Hearts",
+                "suit_2": "Diamonds"
+              }
+            },
+            {
+              "id": "fbfdd515-67f2-438f-8e34-3d20d2a42a86",
+              "type": "combine_suits",
+              "params": {
+                "source_suit_type": "specific",
+                "source_suits": "Spades,Hearts",
+                "target_suit": "Clubs",
+                "suit_1": "Spades",
+                "suit_2": "Clubs"
+              }
+            }
+          ],
+          "randomGroups": [],
+          "position": {
+            "x": 707.5,
+            "y": 318
+          }
+        }
+      ],
+      "placeholderCreditIndex": 3
+    },
+    {
       "id": "46b024ec-63f7-4049-810f-26c58380ca8a",
       "name": "Sixth Sense",
       "description": "If {C:attention}first hand{} of round is a single {C:attention}6{},[s] destroy it and create a {C:spectral}Spectral{} card[s]{C:inactive}(Must have room){}",
