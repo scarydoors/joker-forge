@@ -27,6 +27,7 @@ import { generateGlassCardDestroyedConditionCode } from "./conditions/GlassCardD
 import { generateConsumableTypeConditionCode } from "./conditions/ConsumableTypeCondition";
 import { generatePokerHandBeenPlayedConditionCode } from "./conditions/PokerHandBeenPlayedCondition";
 import { generateTriggeredBossBlindConditionCode } from "./conditions/TriggeredBossBlindCondition";
+import { generateLuckyCardTriggeredConditionCode } from "./conditions/LuckyCardTriggeredCondition";
 
 export const generateConditionChain = (
   rule: Rule,
@@ -196,6 +197,9 @@ const generateSingleConditionCode = (
 
     case "triggered_boss_blind":
       return generateTriggeredBossBlindConditionCode();
+
+    case "lucky_card_triggered":
+      return generateLuckyCardTriggeredConditionCode();
 
     default:
       return null;

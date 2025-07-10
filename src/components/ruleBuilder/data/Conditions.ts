@@ -1144,6 +1144,15 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
     category: "Game State",
   },
   {
+    id: "lucky_card_triggered",
+    label: "Lucky Card Triggered",
+    description:
+      "Check if a lucky card's special effect was triggered when scored",
+    applicableTriggers: ["card_scored"],
+    params: [],
+    category: "Hand & Cards",
+  },
+  {
     id: "triggered_boss_blind",
     label: "Boss Blind Triggered",
     description: "Check if the current boss blind's effect has been triggered",
