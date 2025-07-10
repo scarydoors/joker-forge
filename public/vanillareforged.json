@@ -5558,6 +5558,43 @@
       "placeholderCreditIndex": 3
     },
     {
+      "id": "2f8e455c-4562-4705-8c04-21b46f4701fd",
+      "name": "Pareidolia",
+      "description": "All cards are considered {C:attention}face{} cards",
+      "imagePreview": "data:image/png;base64,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",
+      "overlayImagePreview": "",
+      "rarity": 2,
+      "cost": 5,
+      "blueprint_compat": true,
+      "eternal_compat": true,
+      "unlocked": true,
+      "discovered": true,
+      "rules": [
+        {
+          "id": "0bf6e942-71e6-4818-ad85-3fb0bb9ca08e",
+          "trigger": "passive",
+          "conditionGroups": [],
+          "effects": [
+            {
+              "id": "c42dc73c-99c9-4abd-9054-a7ac9e1a72ec",
+              "type": "combine_ranks",
+              "params": {
+                "source_rank_type": "all",
+                "source_ranks": "J,Q,K",
+                "target_rank": "face_cards"
+              }
+            }
+          ],
+          "randomGroups": [],
+          "position": {
+            "x": 1555.5,
+            "y": 182
+          }
+        }
+      ],
+      "placeholderCreditIndex": 18
+    },
+    {
       "id": "46b024ec-63f7-4049-810f-26c58380ca8a",
       "name": "Sixth Sense",
       "description": "If {C:attention}first hand{} of round is a single {C:attention}6{},[s] destroy it and create a {C:spectral}Spectral{} card[s]{C:inactive}(Must have room){}",
