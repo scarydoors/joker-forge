@@ -6490,6 +6490,58 @@
       ]
     },
     {
+      "id": "57d3beaa-ead0-4bb5-b5f7-76b64dea1533",
+      "name": "Drivers License",
+      "description": "{X:red,C:white}X3{} Mult if you have at least[s] {C:attention}16{} {C:enhanced}Enhanced{} cards in your full deck[s]{C:inactive}(Currently #1#){}",
+      "imagePreview": "data:image/png;base64,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",
+      "overlayImagePreview": "",
+      "rarity": 3,
+      "cost": 7,
+      "blueprint_compat": true,
+      "eternal_compat": true,
+      "unlocked": true,
+      "discovered": true,
+      "rules": [
+        {
+          "id": "0826634d-a53f-4770-ae17-f2d42c66cc1f",
+          "trigger": "hand_played",
+          "conditionGroups": [
+            {
+              "id": "ae204d07-27e5-42dc-ad2e-457cbe39e7e1",
+              "operator": "and",
+              "conditions": [
+                {
+                  "id": "627b725b-b24d-4d81-9d64-b099a05d7e8e",
+                  "type": "generic_compare",
+                  "negate": false,
+                  "params": {
+                    "value1": 15,
+                    "value2": "GAMEVAR:enhanced_cards_in_deck|1|0",
+                    "operator": "less_than"
+                  }
+                }
+              ]
+            }
+          ],
+          "effects": [
+            {
+              "id": "93ef1656-b907-4b03-ad50-433ae2b4fe0c",
+              "type": "apply_x_mult",
+              "params": {
+                "value": 3
+              }
+            }
+          ],
+          "randomGroups": [],
+          "position": {
+            "x": 740.5,
+            "y": 130
+          }
+        }
+      ],
+      "placeholderCreditIndex": 5
+    },
+    {
       "id": "fb6d74bb-e974-4183-9f61-f738b6dabf78",
       "name": "Blackboard",
       "description": "{X:red,C:white}X3{} Mult if all cards {C:orange}held in hand{} are Spades or Clubs",
