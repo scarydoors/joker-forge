@@ -64,6 +64,7 @@ import { generateCopyCardToHandReturn } from "./effects/CopyCardToHandEffect";
 import { generateDoubleProbabilityEffect } from "./effects/DoubleProbabilityEffect";
 import { generatePassiveSplashEffect } from "./effects/SplashEffect";
 import { generatePassiveAllowDebt } from "./effects/AllowDebtEffect";
+import { generateReduceFlushStraightRequirementsReturn } from "./effects/ReduceFlushStraightRequirementsEffect";
 
 export interface RandomGroup {
   id: string;
@@ -536,6 +537,13 @@ export const processPassiveEffects = (
         }
         case "allow_debt": {
           passiveResult = generatePassiveAllowDebt(effect);
+          break;
+        }
+        case "reduce_flush_straight_requirements": {
+          passiveResult = generateReduceFlushStraightRequirementsReturn(
+            effect,
+            jokerKey
+          );
           break;
         }
         case "considered_as": {

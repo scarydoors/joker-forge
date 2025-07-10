@@ -1762,6 +1762,24 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
     category: "Special",
   },
   {
+    id: "reduce_flush_straight_requirements",
+    label: "Reduce Flush/Straight Requirements",
+    description:
+      "Reduce the number of cards required to make Flushes and Straights",
+    applicableTriggers: ["passive"],
+    params: [
+      {
+        id: "reduction_value",
+        type: "number",
+        label: "Reduction Amount",
+        default: 1,
+        min: 1,
+        max: 5,
+      },
+    ],
+    category: "Game Rules",
+  },
+  {
     id: "change_rank_variable",
     label: "Change Rank Variable",
     description:

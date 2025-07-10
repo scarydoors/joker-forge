@@ -17,6 +17,7 @@ import type { Rule } from "../ruleBuilder/types";
 import type { PassiveEffectResult } from "./effectUtils";
 import { parseGameVariable, parseRangeVariable } from "./gameVariableUtils";
 import { generateDiscountItemsHook } from "./effects/DiscountItemsEffect";
+import { generateReduceFlushStraightRequirementsHook } from "./effects/ReduceFlushStraightRequirementsEffect";
 
 export interface ModMetadata {
   id: string;
@@ -1772,6 +1773,18 @@ const generateHooks = (jokers: JokerData[], modPrefix: string): string => {
           discountType: string;
           discountMethod: string;
           discountAmount: number;
+        };
+      }>,
+      modPrefix
+    );
+  }
+
+  if (hooksByType.reduce_flush_straight_requirements) {
+    allHooks += generateReduceFlushStraightRequirementsHook(
+      hooksByType.reduce_flush_straight_requirements as Array<{
+        jokerKey: string;
+        params: {
+          reductionValue: number;
         };
       }>,
       modPrefix
