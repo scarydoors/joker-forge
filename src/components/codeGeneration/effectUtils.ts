@@ -323,7 +323,7 @@ const generateSingleEffect = (
     case "copy_played_card":
       return generateCopyCardToDeckReturn(effect, triggerType);
     case "delete_triggered_card":
-      return generateDeleteCardReturn(effect);
+      return generateDeleteCardReturn(effect, triggerType);
     case "edit_triggered_card":
       return generateEditCardReturn(effect, triggerType);
     case "modify_internal_variable":

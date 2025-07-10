@@ -1128,12 +1128,14 @@ const generateCalculateFunction = (rules: Rule[], joker: JokerData): string => {
       ].some((effect) => effect.type === "retrigger_cards")
     );
 
-    const hasDeleteEffects = sortedRules.some((rule) =>
-      [
-        ...(rule.effects || []),
-        ...(rule.randomGroups?.flatMap((g) => g.effects) || []),
-      ].some((effect) => effect.type === "delete_triggered_card")
-    );
+    const hasDeleteEffects =
+      triggerType !== "card_discarded" &&
+      sortedRules.some((rule) =>
+        [
+          ...(rule.effects || []),
+          ...(rule.randomGroups?.flatMap((g) => g.effects) || []),
+        ].some((effect) => effect.type === "delete_triggered_card")
+      );
 
     if (hasDeleteEffects) {
       calculateFunction += `
@@ -1230,10 +1232,17 @@ const generateCalculateFunction = (rules: Rule[], joker: JokerData): string => {
           triggerType === "card_held_in_hand" ||
           triggerType === "card_held_in_hand_end_of_round"
             ? "context.individual and context.cardarea == G.hand and not context.end_of_round and not context.blueprint"
+            : triggerType === "card_discarded"
+            ? "context.discard and not context.blueprint"
             : "context.individual and context.cardarea == G.play and not context.blueprint";
 
         calculateFunction += `
         if ${nonRetriggerContextCheck} then`;
+
+        if (hasDeleteEffects) {
+          calculateFunction += `
+            context.other_card.should_destroy = false`;
+        }
 
         hasAnyConditions = false;
 
@@ -1270,6 +1279,16 @@ const generateCalculateFunction = (rules: Rule[], joker: JokerData): string => {
             }
           }
 
+          const hasDeleteInThisRule = [
+            ...(rule.effects || []),
+            ...(rule.randomGroups?.flatMap((g) => g.effects) || []),
+          ].some((effect) => effect.type === "delete_triggered_card");
+
+          if (hasDeleteInThisRule) {
+            calculateFunction += `
+                context.other_card.should_destroy = true`;
+          }
+
           const { statement, preReturnCode } = generateEffectReturnStatement(
             regularNonRetriggerEffects,
             convertRandomGroupsForCodegen(randomNonRetriggerGroups),
@@ -1301,6 +1320,8 @@ const generateCalculateFunction = (rules: Rule[], joker: JokerData): string => {
         triggerType === "card_held_in_hand" ||
         triggerType === "card_held_in_hand_end_of_round"
           ? "context.individual and context.cardarea == G.hand and not context.end_of_round and not context.blueprint"
+          : triggerType === "card_discarded"
+          ? "context.discard and not context.blueprint"
           : "context.individual and context.cardarea == G.play and not context.blueprint";
 
       calculateFunction += `
