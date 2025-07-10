@@ -6413,6 +6413,83 @@
       "placeholderCreditIndex": 9
     },
     {
+      "id": "1dab108c-b760-4081-825a-29095be2269c",
+      "name": "Lucky Cat",
+      "description": "This Joker gains {X:red,C:white}X0.25{} Mult every[s] time a {C:attention}Lucky{} card {C:green}successfully{} triggers[s]{C:inactive}(Currently {X:red,C:white}X#1#{} Mult){}",
+      "imagePreview": "data:image/png;base64,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",
+      "overlayImagePreview": "",
+      "rarity": 2,
+      "cost": 6,
+      "blueprint_compat": true,
+      "eternal_compat": true,
+      "unlocked": true,
+      "discovered": true,
+      "rules": [
+        {
+          "id": "53f168c1-c869-4116-9a87-f7c50f096a1c",
+          "trigger": "card_scored",
+          "conditionGroups": [
+            {
+              "id": "e1d697f5-bfcf-44f6-814d-48d0c6b7345f",
+              "operator": "and",
+              "conditions": [
+                {
+                  "id": "762ad7c7-d1c8-41a0-84f6-534845e4e9c2",
+                  "type": "lucky_card_triggered",
+                  "negate": false,
+                  "params": {}
+                }
+              ]
+            }
+          ],
+          "effects": [
+            {
+              "id": "ec866966-761a-41fb-962d-85ef2c026939",
+              "type": "modify_internal_variable",
+              "params": {
+                "variable_name": "xmultvar",
+                "value": 0.25,
+                "operation": "increment"
+              }
+            }
+          ],
+          "randomGroups": [],
+          "position": {
+            "x": 684.5,
+            "y": 295
+          }
+        },
+        {
+          "id": "e173490b-53d2-4bc9-b8e0-a9f3b36e89b0",
+          "trigger": "hand_played",
+          "conditionGroups": [],
+          "effects": [
+            {
+              "id": "79b4218a-8fa3-4d4b-8987-90435f26b764",
+              "type": "apply_x_mult",
+              "params": {
+                "value": "xmultvar"
+              }
+            }
+          ],
+          "randomGroups": [],
+          "position": {
+            "x": 335.5,
+            "y": 312
+          }
+        }
+      ],
+      "placeholderCreditIndex": 4,
+      "userVariables": [
+        {
+          "id": "dfe2f46d-2f74-41a3-9720-14f321dfb64c",
+          "name": "xmultvar",
+          "type": "number",
+          "initialValue": 1
+        }
+      ]
+    },
+    {
       "id": "fb6d74bb-e974-4183-9f61-f738b6dabf78",
       "name": "Blackboard",
       "description": "{X:red,C:white}X3{} Mult if all cards {C:orange}held in hand{} are Spades or Clubs",
