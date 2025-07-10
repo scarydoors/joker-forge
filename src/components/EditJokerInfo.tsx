@@ -1114,8 +1114,7 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
                                   {formData.rarity !== 4 &&
                                     formData.appears_in_shop === false && (
                                       <p className="text-xs text-white-darker mt-1">
-                                        This joker will not appear in shops or
-                                        from soul packs.
+                                        This joker will not appear in shops.
                                       </p>
                                     )}
                                 </div>
