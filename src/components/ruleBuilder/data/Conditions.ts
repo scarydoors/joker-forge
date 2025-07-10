@@ -324,6 +324,153 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
     category: "Hand & Cards",
   },
   {
+    id: "discarded_card_count",
+    label: "Discarded Card Count",
+    description: "Check the number of cards in the discarded hand",
+    applicableTriggers: ["card_discarded", "hand_discarded"],
+    params: [
+      {
+        id: "operator",
+        type: "select",
+        label: "Operator",
+        options: COMPARISON_OPERATORS,
+      },
+      {
+        id: "value",
+        type: "number",
+        label: "Number of Cards",
+        min: 1,
+        max: 52,
+        default: 5,
+      },
+    ],
+    category: "Hand & Cards",
+  },
+  {
+    id: "discarded_suit_count",
+    label: "Discarded Suit Count",
+    description:
+      "Check how many cards of a specific suit are in the discarded hand",
+    applicableTriggers: ["card_discarded", "hand_discarded"],
+    params: [
+      {
+        id: "suit_type",
+        type: "select",
+        label: "Suit Type",
+        options: [
+          { value: "specific", label: "Specific Suit" },
+          { value: "group", label: "Suit Group" },
+        ],
+      },
+      {
+        id: "specific_suit",
+        type: "select",
+        label: "Suit",
+        options: CARD_SUITS,
+        showWhen: {
+          parameter: "suit_type",
+          values: ["specific"],
+        },
+      },
+      {
+        id: "suit_group",
+        type: "select",
+        label: "Suit Group",
+        options: CARD_SUIT_GROUPS,
+        showWhen: {
+          parameter: "suit_type",
+          values: ["group"],
+        },
+      },
+      {
+        id: "quantifier",
+        type: "select",
+        label: "Condition",
+        options: [
+          { value: "all", label: "All cards must be this suit" },
+          { value: "none", label: "No cards can be this suit" },
+          { value: "exactly", label: "Exactly N cards of this suit" },
+          { value: "at_least", label: "At least N cards of this suit" },
+          { value: "at_most", label: "At most N cards of this suit" },
+        ],
+      },
+      {
+        id: "count",
+        type: "number",
+        label: "Count",
+        default: 1,
+        min: 1,
+        showWhen: {
+          parameter: "quantifier",
+          values: ["exactly", "at_least", "at_most"],
+        },
+      },
+    ],
+    category: "Hand & Cards",
+  },
+  {
+    id: "discarded_rank_count",
+    label: "Discarded Rank Count",
+    description:
+      "Check how many cards of a specific rank are in the discarded hand",
+    applicableTriggers: ["card_discarded", "hand_discarded"],
+    params: [
+      {
+        id: "rank_type",
+        type: "select",
+        label: "Rank Type",
+        options: [
+          { value: "specific", label: "Specific Rank" },
+          { value: "group", label: "Rank Group" },
+        ],
+      },
+      {
+        id: "specific_rank",
+        type: "select",
+        label: "Rank",
+        options: CARD_RANKS,
+        showWhen: {
+          parameter: "rank_type",
+          values: ["specific"],
+        },
+      },
+      {
+        id: "rank_group",
+        type: "select",
+        label: "Rank Group",
+        options: CARD_RANK_GROUPS,
+        showWhen: {
+          parameter: "rank_type",
+          values: ["group"],
+        },
+      },
+      {
+        id: "quantifier",
+        type: "select",
+        label: "Condition",
+        options: [
+          { value: "all", label: "All cards must be this rank" },
+          { value: "none", label: "No cards can be this rank" },
+          { value: "exactly", label: "Exactly N cards of this rank" },
+          { value: "at_least", label: "At least N cards of this rank" },
+          { value: "at_most", label: "At most N cards of this rank" },
+        ],
+      },
+      {
+        id: "count",
+        type: "number",
+        label: "Count",
+        default: 1,
+        min: 1,
+        showWhen: {
+          parameter: "quantifier",
+          values: ["exactly", "at_least", "at_most"],
+        },
+      },
+    ],
+    category: "Hand & Cards",
+  },
+  {
     id: "card_rank",
     label: "Card Rank",
     description: "Check the rank of the card",
@@ -333,6 +480,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
       "card_held_in_hand",
       "card_held_in_hand_end_of_round",
       "card_destroyed",
+      "card_discarded",
     ],
     params: [
       {
@@ -377,6 +525,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
       "card_held_in_hand",
       "card_held_in_hand_end_of_round",
       "card_destroyed",
+      "card_discarded",
     ],
     params: [
       {

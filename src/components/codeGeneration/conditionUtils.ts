@@ -1,9 +1,18 @@
 import type { Rule, Condition, ConditionGroup } from "../ruleBuilder/types";
 import type { JokerData } from "../JokerCard";
 import { generatePokerHandConditionCode } from "./conditions/PokerHandCondition";
-import { generateSuitCardConditionCode } from "./conditions/SuitCardCondition";
-import { generateRankCardConditionCode } from "./conditions/RankCardCondition";
-import { generateCountCardConditionCode } from "./conditions/CountHandCondition";
+import {
+  generateSuitCardConditionCode,
+  generateDiscardedSuitConditionCode,
+} from "./conditions/SuitCardCondition";
+import {
+  generateRankCardConditionCode,
+  generateDiscardedRankConditionCode,
+} from "./conditions/RankCardCondition";
+import {
+  generateCountCardConditionCode,
+  generateDiscardedCardCountConditionCode,
+} from "./conditions/CountHandCondition";
 import { generatePlayerMoneyConditionCode } from "./conditions/PlayerMoneyCondition";
 import { generateRemainingHandsConditionCode } from "./conditions/RemainingHandsCondition";
 import { generateRemainingDiscardsConditionCode } from "./conditions/RemainingDiscardsCondition";
@@ -122,12 +131,21 @@ const generateSingleConditionCode = (
     case "card_suit":
       return generateSuitCardConditionCode([singleConditionRule], joker);
 
+    case "discarded_suit_count":
+      return generateDiscardedSuitConditionCode([singleConditionRule], joker);
+
     case "rank_count":
     case "card_rank":
       return generateRankCardConditionCode([singleConditionRule], joker);
 
+    case "discarded_rank_count":
+      return generateDiscardedRankConditionCode([singleConditionRule], joker);
+
     case "card_count":
       return generateCountCardConditionCode([singleConditionRule]);
+
+    case "discarded_card_count":
+      return generateDiscardedCardCountConditionCode([singleConditionRule]);
 
     case "card_enhancement":
       return generateCardEnhancementConditionCode([singleConditionRule]);
