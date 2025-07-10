@@ -1952,6 +1952,39 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
     category: "Card Effects",
   },
   {
+    id: "combine_suits",
+    label: "Combine Suits",
+    description: "Two suits are considered as each other (bidirectional)",
+    applicableTriggers: ["passive"],
+    params: [
+      {
+        id: "suit_1",
+        type: "select",
+        label: "First Suit",
+        options: [
+          { value: "Spades", label: "♠ Spades" },
+          { value: "Hearts", label: "♥ Hearts" },
+          { value: "Diamonds", label: "♦ Diamonds" },
+          { value: "Clubs", label: "♣ Clubs" },
+        ],
+        default: "Spades",
+      },
+      {
+        id: "suit_2",
+        type: "select",
+        label: "Second Suit",
+        options: [
+          { value: "Spades", label: "♠ Spades" },
+          { value: "Hearts", label: "♥ Hearts" },
+          { value: "Diamonds", label: "♦ Diamonds" },
+          { value: "Clubs", label: "♣ Clubs" },
+        ],
+        default: "Hearts",
+      },
+    ],
+    category: "Card Effects",
+  },
+  {
     id: "double_probability",
     label: "Double Probability",
     description:

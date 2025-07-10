@@ -63,6 +63,7 @@ import { generatePassiveAllowDebt } from "./effects/AllowDebtEffect";
 import { generateReduceFlushStraightRequirementsReturn } from "./effects/ReduceFlushStraightRequirementsEffect";
 import { generateShortcutReturn } from "./effects/ShortcutEffect";
 import { generateShowmanReturn } from "./effects/ShowmanEffect";
+import { generatePassiveCombineSuits } from "./effects/CombineSuitsEffect";
 
 export interface RandomGroup {
   id: string;
@@ -489,75 +490,79 @@ export const processPassiveEffects = (
   if (!joker.rules) return passiveEffects;
 
   joker.rules
-    .filter((rule) => rule.trigger === "passive" && rule.effects?.length === 1)
+    .filter((rule) => rule.trigger === "passive")
     .forEach((rule) => {
-      const effect = rule.effects[0];
-      let passiveResult: PassiveEffectResult | null = null;
+      rule.effects?.forEach((effect) => {
+        let passiveResult: PassiveEffectResult | null = null;
+        const jokerKey = slugify(joker.name);
 
-      const jokerKey = slugify(joker.name);
+        switch (effect.type) {
+          case "edit_hand_size":
+            passiveResult = generatePassiveHandSize(effect);
+            break;
+          case "edit_hand":
+            passiveResult = generatePassiveHand(effect);
+            break;
+          case "edit_discard":
+            passiveResult = generatePassiveDiscard(effect);
+            break;
+          case "combine_ranks": {
+            passiveResult = generatePassiveCombineRanks(effect, jokerKey);
+            break;
+          }
+          case "combine_suits": {
+            passiveResult = generatePassiveCombineSuits(effect, jokerKey);
+            break;
+          }
+          case "disable_boss_blind": {
+            passiveResult = generatePassiveDisableBossBlind(effect);
+            break;
+          }
+          case "free_rerolls": {
+            passiveResult = generateFreeRerollsReturn(effect);
+            break;
+          }
+          case "discount_items": {
+            passiveResult = generateDiscountItemsReturn(effect, jokerKey);
+            break;
+          }
+          case "double_probability": {
+            passiveResult = generateDoubleProbabilityEffect();
+            break;
+          }
+          case "copy_joker_ability": {
+            passiveResult = generatePassiveCopyJokerAbility(effect);
+            break;
+          }
+          case "splash_effect": {
+            passiveResult = generatePassiveSplashEffect();
+            break;
+          }
+          case "allow_debt": {
+            passiveResult = generatePassiveAllowDebt(effect);
+            break;
+          }
+          case "reduce_flush_straight_requirements": {
+            passiveResult = generateReduceFlushStraightRequirementsReturn(
+              effect,
+              jokerKey
+            );
+            break;
+          }
+          case "shortcut": {
+            passiveResult = generateShortcutReturn(jokerKey);
+            break;
+          }
+          case "showman": {
+            passiveResult = generateShowmanReturn(jokerKey);
+            break;
+          }
+        }
 
-      switch (effect.type) {
-        case "edit_hand_size":
-          passiveResult = generatePassiveHandSize(effect);
-          break;
-        case "edit_hand":
-          passiveResult = generatePassiveHand(effect);
-          break;
-        case "edit_discard":
-          passiveResult = generatePassiveDiscard(effect);
-          break;
-        case "combine_ranks": {
-          passiveResult = generatePassiveCombineRanks(effect, jokerKey);
-          break;
+        if (passiveResult) {
+          passiveEffects.push(passiveResult);
         }
-        case "disable_boss_blind": {
-          passiveResult = generatePassiveDisableBossBlind(effect);
-          break;
-        }
-        case "free_rerolls": {
-          passiveResult = generateFreeRerollsReturn(effect);
-          break;
-        }
-        case "discount_items": {
-          passiveResult = generateDiscountItemsReturn(effect, jokerKey);
-          break;
-        }
-        case "double_probability": {
-          passiveResult = generateDoubleProbabilityEffect();
-          break;
-        }
-        case "copy_joker_ability": {
-          passiveResult = generatePassiveCopyJokerAbility(effect);
-          break;
-        }
-        case "splash_effect": {
-          passiveResult = generatePassiveSplashEffect();
-          break;
-        }
-        case "allow_debt": {
-          passiveResult = generatePassiveAllowDebt(effect);
-          break;
-        }
-        case "reduce_flush_straight_requirements": {
-          passiveResult = generateReduceFlushStraightRequirementsReturn(
-            effect,
-            jokerKey
-          );
-          break;
-        }
-        case "shortcut": {
-          passiveResult = generateShortcutReturn(jokerKey);
-          break;
-        }
-        case "showman": {
-          passiveResult = generateShowmanReturn(jokerKey);
-          break;
-        }
-      }
-
-      if (passiveResult) {
-        passiveEffects.push(passiveResult);
-      }
+      });
     });
 
   return passiveEffects;

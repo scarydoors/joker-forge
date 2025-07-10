@@ -21,6 +21,7 @@ import { generateReduceFlushStraightRequirementsHook } from "./effects/ReduceFlu
 import { generateShortcutHook } from "./effects/ShortcutEffect";
 import { generateShowmanHook } from "./effects/ShowmanEffect";
 import { generateCombineRanksHook } from "./effects/CombineRanksEffect";
+import { generateCombineSuitsHook } from "./effects/CombineSuitsEffect";
 
 export interface ModMetadata {
   id: string;
@@ -242,22 +243,34 @@ const generateJokerCode = (
     jokerCode += `,\n\n    ${calculateCode}`;
   }
 
-  passiveEffects.forEach((effect) => {
-    if (effect.addToDeck) {
-      jokerCode += `,\n\n    add_to_deck = function(self, card, from_debuff)
-        ${effect.addToDeck}
-    end`;
-    }
+  const addToDeckCode = passiveEffects
+    .filter((effect) => effect.addToDeck)
+    .map((effect) => effect.addToDeck)
+    .join("\n        ");
 
-    if (effect.removeFromDeck) {
-      jokerCode += `,\n\n    remove_from_deck = function(self, card, from_debuff)
-        ${effect.removeFromDeck}
-    end`;
-    }
+  const removeFromDeckCode = passiveEffects
+    .filter((effect) => effect.removeFromDeck)
+    .map((effect) => effect.removeFromDeck)
+    .join("\n        ");
 
-    if (effect.calculateFunction) {
-      jokerCode += `,\n\n    ${effect.calculateFunction}`;
-    }
+  const calculateFunctions = passiveEffects
+    .filter((effect) => effect.calculateFunction)
+    .map((effect) => effect.calculateFunction);
+
+  if (addToDeckCode) {
+    jokerCode += `,\n\n    add_to_deck = function(self, card, from_debuff)
+        ${addToDeckCode}
+    end`;
+  }
+
+  if (removeFromDeckCode) {
+    jokerCode += `,\n\n    remove_from_deck = function(self, card, from_debuff)
+        ${removeFromDeckCode}
+    end`;
+  }
+
+  calculateFunctions.forEach((calculateFunction) => {
+    jokerCode += `,\n\n    ${calculateFunction}`;
   });
 
   jokerCode += `\n}`;
@@ -1822,6 +1835,19 @@ const generateHooks = (jokers: JokerData[], modPrefix: string): string => {
           sourceRankType: string;
           sourceRanks: string[];
           targetRank: string;
+        };
+      }>,
+      modPrefix
+    );
+  }
+
+  if (hooksByType.combine_suits) {
+    allHooks += generateCombineSuitsHook(
+      hooksByType.combine_suits as Array<{
+        jokerKey: string;
+        params: {
+          suit1: string;
+          suit2: string;
         };
       }>,
       modPrefix
