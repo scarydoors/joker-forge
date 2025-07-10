@@ -20,6 +20,7 @@ import { generateDiscountItemsHook } from "./effects/DiscountItemsEffect";
 import { generateReduceFlushStraightRequirementsHook } from "./effects/ReduceFlushStraightRequirementsEffect";
 import { generateShortcutHook } from "./effects/ShortcutEffect";
 import { generateShowmanHook } from "./effects/ShowmanEffect";
+import { generateCombineRanksHook } from "./effects/CombineRanksEffect";
 
 export interface ModMetadata {
   id: string;
@@ -1808,6 +1809,20 @@ const generateHooks = (jokers: JokerData[], modPrefix: string): string => {
       hooksByType.showman as Array<{
         jokerKey: string;
         params: Record<string, unknown>;
+      }>,
+      modPrefix
+    );
+  }
+
+  if (hooksByType.combine_ranks) {
+    allHooks += generateCombineRanksHook(
+      hooksByType.combine_ranks as Array<{
+        jokerKey: string;
+        params: {
+          sourceRankType: string;
+          sourceRanks: string[];
+          targetRank: string;
+        };
       }>,
       modPrefix
     );

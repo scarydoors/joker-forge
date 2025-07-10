@@ -506,9 +506,10 @@ export const processPassiveEffects = (
         case "edit_discard":
           passiveResult = generatePassiveDiscard(effect);
           break;
-        case "combine_ranks":
-          passiveResult = generatePassiveCombineRanks(effect);
+        case "combine_ranks": {
+          passiveResult = generatePassiveCombineRanks(effect, jokerKey);
           break;
+        }
         case "disable_boss_blind": {
           passiveResult = generatePassiveDisableBossBlind(effect);
           break;
