@@ -266,7 +266,7 @@ const VanillaReforgedPage: React.FC<VanillaReforgedPageProps> = ({
               <div className="flex items-center">
                 <FolderIcon className="h-4 w-4 mr-2 text-mint" />
                 {filteredAndSortedJokers.length} of {vanillaJokers.length}{" "}
-                vanilla jokers (many are missing, I need to add them later)
+                vanilla jokers
               </div>
             </div>
           </div>
