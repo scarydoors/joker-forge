@@ -82,12 +82,12 @@ The plan here is to implement enough triggers, conditions, and effects, so as th
 - [x] **Most/Least Played Poker Hand** - Check if the hand played is your most/least played (Obelisk)
 - [x] **Consumable Held** - Check for specific consumable/s held
 - [x] **Score Threshold** - Check if score meets requirement (Mr. Bones)
+- [x] **Lucky Card Triggered** - Check if a lucky card succesfully triggered (Lucky Cat)
 
 #### Not Implemented Yet
 
 - [ ] **Consumable Count** - Check number of consumables owned
 - [ ] **Culmative Chip/Rank Check** - Check for if cards rank/chips add up to a certain number
-- [ ] **Lucky Card Triggered** - Check if a lucky card succesfully triggered (Lucky Cat)
 - [ ] **Edition Count** - Check how many cards with editions are in hand played
 - [ ] **Enhancement Count** - Check how many cards with enhancements are in hand played
 - [ ] **Seal Count** - Check how many cards with seals are in hand played
@@ -136,18 +136,18 @@ The plan here is to implement enough triggers, conditions, and effects, so as th
 - [x] **Modify Probability** - Oops All 6s! support
 - [x] **All [Cards] in the Shop are Free** - Changes the buy price of certain packs/cards (planet, joker, tarot, spectral) to be free
 - [x] **All Cards are Scored** - Splash logic
+- [x] **Combine Suits** - Treat two or more suits as the same suit (Smeared Joker)
+- [x] **Combine Ranks** - Treat two or more ranks as the same rank
+- [x] **Cards May Appear Multiple Times** - Showman logic
+- [x] **Allowing Debt** - Credit Card logic
 
 #### Not Implemented Yet
 
-- [ ] **Combine Suits** - Treat two or more suits as the same suit (Smeared Joker)
-- [ ] **Combine Ranks** - Treat two or more ranks as the same rank
-- [ ] **All Cards Are Face Cards** - Literally just for Pareidolia (this could probably just be the combine ranks effect)
 - [ ] **Beat Current Blind** - Completes the current blind
 - [ ] **Destroy Card in Hand** - Destroys a random or set (by index, rank, suit) card in hand
-- [ ] **Cards May Appear Multiple Times** - Showman logic
-- [ ] **Allowing Debt** - Credit Card logic
 - [ ] **Alter Blind Requirement** - I.E. 2X blind requirement, 0.5x blind requirement
 - [ ] **Add/Subtract/Set Joker Slots** - Would be cool i guess lol
+- [ ] **Add/Subtract/Set Consumable Slots** - also self-explanatory
 
 
 ---
