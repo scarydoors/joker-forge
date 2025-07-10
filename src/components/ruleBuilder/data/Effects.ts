@@ -837,7 +837,8 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
   {
     id: "create_joker",
     label: "Create Joker",
-    description: "Create a random or specific joker card",
+    description:
+      "Create a random or specific joker card. For creating jokers from your own mod, it is j_[modprefix]_[joker_name]. You can find your mod prefix in the mod metadata page.",
     applicableTriggers: [...GENERIC_TRIGGERS],
     params: [
       {
@@ -896,7 +897,8 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
   {
     id: "copy_joker",
     label: "Copy Joker",
-    description: "Copy an existing joker from your collection",
+    description:
+      "Copy an existing joker from your collection. For copying jokers from your own mod, it is j_[modprefix]_[joker_name]. You can find your mod prefix in the mod metadata page.",
     applicableTriggers: [...GENERIC_TRIGGERS],
     params: [
       {
@@ -968,7 +970,8 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
   {
     id: "destroy_joker",
     label: "Destroy Joker",
-    description: "Destroy an existing joker from your collection",
+    description:
+      "Destroy an existing joker from your collection. For destroying jokers from your own mod, it is j_[modprefix]_[joker_name]. You can find your mod prefix in the mod metadata page.",
     applicableTriggers: [...GENERIC_TRIGGERS],
     params: [
       {
