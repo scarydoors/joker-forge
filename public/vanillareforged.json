@@ -6764,6 +6764,39 @@
       "placeholderCreditIndex": 8
     },
     {
+      "id": "a8f555ab-7200-49f6-9e44-e815ebbb72f0",
+      "name": "Showman",
+      "description": "{C:attention}Joker{}, {C:tarot}Tarot{}, {C:planet}Planet{}, and {C:spectral}Spectral{} cards[s] may appear multiple times",
+      "imagePreview": "data:image/png;base64,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",
+      "overlayImagePreview": "",
+      "rarity": 2,
+      "cost": 5,
+      "blueprint_compat": true,
+      "eternal_compat": true,
+      "unlocked": true,
+      "discovered": true,
+      "rules": [
+        {
+          "id": "38a80aa6-f828-4125-bd5f-34721085402c",
+          "trigger": "passive",
+          "conditionGroups": [],
+          "effects": [
+            {
+              "id": "4b16d254-10b3-4150-adaa-43db642c1edf",
+              "type": "showman",
+              "params": {}
+            }
+          ],
+          "randomGroups": [],
+          "position": {
+            "x": 707.5,
+            "y": 318
+          }
+        }
+      ],
+      "placeholderCreditIndex": 3
+    },
+    {
       "id": "fb6d74bb-e974-4183-9f61-f738b6dabf78",
       "name": "Blackboard",
       "description": "{X:red,C:white}X3{} Mult if all cards {C:orange}held in hand{} are Spades or Clubs",
