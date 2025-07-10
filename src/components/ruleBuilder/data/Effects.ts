@@ -1780,6 +1780,15 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
     category: "Game Rules",
   },
   {
+    id: "shortcut",
+    label: "Shortcut Straights",
+    description:
+      "Allow gaps in straights (e.g., 2, 4, 6, 8, 10 counts as a straight)",
+    applicableTriggers: ["passive"],
+    params: [],
+    category: "Game Rules",
+  },
+  {
     id: "change_rank_variable",
     label: "Change Rank Variable",
     description:

@@ -18,6 +18,7 @@ import type { PassiveEffectResult } from "./effectUtils";
 import { parseGameVariable, parseRangeVariable } from "./gameVariableUtils";
 import { generateDiscountItemsHook } from "./effects/DiscountItemsEffect";
 import { generateReduceFlushStraightRequirementsHook } from "./effects/ReduceFlushStraightRequirementsEffect";
+import { generateShortcutHook } from "./effects/ShortcutEffect";
 
 export interface ModMetadata {
   id: string;
@@ -1786,6 +1787,16 @@ const generateHooks = (jokers: JokerData[], modPrefix: string): string => {
         params: {
           reductionValue: number;
         };
+      }>,
+      modPrefix
+    );
+  }
+
+  if (hooksByType.shortcut) {
+    allHooks += generateShortcutHook(
+      hooksByType.shortcut as Array<{
+        jokerKey: string;
+        params: Record<string, unknown>;
       }>,
       modPrefix
     );

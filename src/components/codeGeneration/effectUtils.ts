@@ -65,6 +65,7 @@ import { generateDoubleProbabilityEffect } from "./effects/DoubleProbabilityEffe
 import { generatePassiveSplashEffect } from "./effects/SplashEffect";
 import { generatePassiveAllowDebt } from "./effects/AllowDebtEffect";
 import { generateReduceFlushStraightRequirementsReturn } from "./effects/ReduceFlushStraightRequirementsEffect";
+import { generateShortcutReturn } from "./effects/ShortcutEffect";
 
 export interface RandomGroup {
   id: string;
@@ -544,6 +545,10 @@ export const processPassiveEffects = (
             effect,
             jokerKey
           );
+          break;
+        }
+        case "shortcut": {
+          passiveResult = generateShortcutReturn(jokerKey);
           break;
         }
         case "considered_as": {
