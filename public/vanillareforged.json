@@ -6661,6 +6661,41 @@
       ]
     },
     {
+      "id": "517f0abf-05d7-4762-9bc5-b3f380a9fca1",
+      "name": "Credit Card",
+      "description": "Go up to {C:red}-$20{} in debt",
+      "imagePreview": "data:image/png;base64,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",
+      "overlayImagePreview": "",
+      "rarity": 1,
+      "cost": 1,
+      "blueprint_compat": true,
+      "eternal_compat": true,
+      "unlocked": true,
+      "discovered": true,
+      "rules": [
+        {
+          "id": "3d532ced-5076-463c-8c48-7f26765dc088",
+          "trigger": "passive",
+          "conditionGroups": [],
+          "effects": [
+            {
+              "id": "09a72af2-5788-4579-85d4-9b1abd996675",
+              "type": "allow_debt",
+              "params": {
+                "debt_amount": 20
+              }
+            }
+          ],
+          "randomGroups": [],
+          "position": {
+            "x": 707.5,
+            "y": 318
+          }
+        }
+      ],
+      "placeholderCreditIndex": 1
+    },
+    {
       "id": "fb6d74bb-e974-4183-9f61-f738b6dabf78",
       "name": "Blackboard",
       "description": "{X:red,C:white}X3{} Mult if all cards {C:orange}held in hand{} are Spades or Clubs",
