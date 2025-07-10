@@ -175,6 +175,12 @@ export const generateTriggerContext = (
         comment: "-- When cards are destroyed",
       };
 
+    case "playing_card_added":
+      return {
+        check: "context.playing_card_added and not context.blueprint",
+        comment: "-- When playing cards are added to deck",
+      };
+
     case "hand_played":
     default:
       return {

@@ -84,6 +84,13 @@ export const TRIGGERS: TriggerDefinition[] = [
     category: "Gameplay",
   },
   {
+    id: "playing_card_added",
+    label: "When Playing Card is Added",
+    description:
+      "Triggers when playing cards are added to your deck. Perfect for effects that scale with deck size or trigger when specific cards are acquired, like Hologram gaining X Mult when cards are added.",
+    category: "Packs & Consumables",
+  },
+  {
     id: "card_held_in_hand_end_of_round",
     label: "When a Card is Held in Hand at End of Round",
     description:
