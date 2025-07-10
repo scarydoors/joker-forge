@@ -19,6 +19,7 @@ import { parseGameVariable, parseRangeVariable } from "./gameVariableUtils";
 import { generateDiscountItemsHook } from "./effects/DiscountItemsEffect";
 import { generateReduceFlushStraightRequirementsHook } from "./effects/ReduceFlushStraightRequirementsEffect";
 import { generateShortcutHook } from "./effects/ShortcutEffect";
+import { generateShowmanHook } from "./effects/ShowmanEffect";
 
 export interface ModMetadata {
   id: string;
@@ -1795,6 +1796,16 @@ const generateHooks = (jokers: JokerData[], modPrefix: string): string => {
   if (hooksByType.shortcut) {
     allHooks += generateShortcutHook(
       hooksByType.shortcut as Array<{
+        jokerKey: string;
+        params: Record<string, unknown>;
+      }>,
+      modPrefix
+    );
+  }
+
+  if (hooksByType.showman) {
+    allHooks += generateShowmanHook(
+      hooksByType.showman as Array<{
         jokerKey: string;
         params: Record<string, unknown>;
       }>,

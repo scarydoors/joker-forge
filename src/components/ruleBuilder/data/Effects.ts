@@ -1789,6 +1789,15 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
     category: "Game Rules",
   },
   {
+    id: "showman",
+    label: "Allow Duplicate Cards (Showman)",
+    description:
+      "Joker, Tarot, Planet, and Spectral cards may appear multiple times",
+    applicableTriggers: ["passive"],
+    params: [],
+    category: "Game Rules",
+  },
+  {
     id: "change_rank_variable",
     label: "Change Rank Variable",
     description:
