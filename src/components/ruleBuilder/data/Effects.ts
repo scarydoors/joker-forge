@@ -1461,7 +1461,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
     id: "set_ante",
     label: "Set Ante Level",
     description: "Modify the current ante level",
-    applicableTriggers: [...GENERIC_TRIGGERS],
+    applicableTriggers: [...GENERIC_TRIGGERS, "game_over"],
     params: [
       {
         id: "operation",
