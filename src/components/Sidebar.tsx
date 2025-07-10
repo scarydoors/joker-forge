@@ -85,7 +85,6 @@ const Sidebar: React.FC<SidebarProps> = ({
   const resourceItems = [
     { id: "docs", label: "Docs", icon: DocumentTextIcon },
     { id: "vanilla", label: "Vanilla Reforged", icon: FolderIcon },
-    { id: "credit", label: "Extra Credit", icon: FolderIcon },
     { id: "github", label: "GitHub Repository", icon: LinkIcon },
     { id: "acknowledgements", label: "Acknowledgements", icon: HeartIcon },
   ];
