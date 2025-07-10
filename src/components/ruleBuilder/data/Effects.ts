@@ -176,6 +176,23 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
     category: "Economy",
   },
   {
+    id: "allow_debt",
+    label: "Allow Debt",
+    description: "Allow the player to go into debt by a specified amount",
+    applicableTriggers: ["passive"],
+    params: [
+      {
+        id: "debt_amount",
+        type: "number",
+        label: "Debt Amount",
+        default: 20,
+        min: 1,
+        max: 100,
+      },
+    ],
+    category: "Economy",
+  },
+  {
     id: "retrigger_cards",
     label: "Retrigger",
     description: "Retrigger the scored/activated card",

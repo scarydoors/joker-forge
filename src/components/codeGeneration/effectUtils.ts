@@ -63,6 +63,7 @@ import { generateAddCardToHandReturn } from "./effects/AddCardToHandEffect";
 import { generateCopyCardToHandReturn } from "./effects/CopyCardToHandEffect";
 import { generateDoubleProbabilityEffect } from "./effects/DoubleProbabilityEffect";
 import { generatePassiveSplashEffect } from "./effects/SplashEffect";
+import { generatePassiveAllowDebt } from "./effects/AllowDebtEffect";
 
 export interface RandomGroup {
   id: string;
@@ -531,6 +532,10 @@ export const processPassiveEffects = (
         }
         case "splash_effect": {
           passiveResult = generatePassiveSplashEffect();
+          break;
+        }
+        case "allow_debt": {
+          passiveResult = generatePassiveAllowDebt(effect);
           break;
         }
         case "considered_as": {
