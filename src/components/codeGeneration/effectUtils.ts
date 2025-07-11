@@ -68,6 +68,10 @@ import {
   generateEditConsumableSlotsReturn,
   generatePassiveConsumableSlots,
 } from "./effects/EditConsumableSlotsEffect";
+import {
+  generateEditJokerSlotsReturn,
+  generatePassiveJokerSlots,
+} from "./effects/EditJokerSlotsEffect";
 
 export interface RandomGroup {
   id: string;
@@ -387,6 +391,8 @@ const generateSingleEffect = (
       return generateCopyCardToHandReturn(effect, triggerType);
     case "edit_consumable_slots":
       return generateEditConsumableSlotsReturn(effect);
+    case "edit_joker_slots":
+      return generateEditJokerSlotsReturn(effect);
 
     default:
       return {
@@ -565,6 +571,10 @@ export const processPassiveEffects = (
           }
           case "edit_consumable_slots": {
             passiveResult = generatePassiveConsumableSlots(effect);
+            break;
+          }
+          case "edit_joker_slots": {
+            passiveResult = generatePassiveJokerSlots(effect);
             break;
           }
         }

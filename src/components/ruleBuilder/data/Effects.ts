@@ -1738,6 +1738,34 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
     category: "Economy",
   },
   {
+    id: "edit_joker_slots",
+    label: "Edit Joker Slots",
+    description: "Modify the number of joker slots available",
+    applicableTriggers: [...GENERIC_TRIGGERS, "passive"],
+    params: [
+      {
+        id: "operation",
+        type: "select",
+        label: "Operation",
+        options: [
+          { value: "add", label: "Add" },
+          { value: "subtract", label: "Subtract" },
+          { value: "set", label: "Set to" },
+        ],
+        default: "add",
+      },
+      {
+        id: "value",
+        type: "number",
+        label: "Amount",
+        default: 1,
+        min: 1,
+        max: 10,
+      },
+    ],
+    category: "Game Rules",
+  },
+  {
     id: "balance",
     label: "Balance Chips and Mult",
     description: "Plasma Deck effect",
