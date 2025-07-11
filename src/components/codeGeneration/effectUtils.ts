@@ -64,6 +64,10 @@ import { generateReduceFlushStraightRequirementsReturn } from "./effects/ReduceF
 import { generateShortcutReturn } from "./effects/ShortcutEffect";
 import { generateShowmanReturn } from "./effects/ShowmanEffect";
 import { generatePassiveCombineSuits } from "./effects/CombineSuitsEffect";
+import {
+  generateEditConsumableSlotsReturn,
+  generatePassiveConsumableSlots,
+} from "./effects/EditConsumableSlotsEffect";
 
 export interface RandomGroup {
   id: string;
@@ -381,6 +385,8 @@ const generateSingleEffect = (
       return generateCopyCardToHandReturn(effect, triggerType);
     case "copy_played_card_to_hand":
       return generateCopyCardToHandReturn(effect, triggerType);
+    case "edit_consumable_slots":
+      return generateEditConsumableSlotsReturn(effect);
 
     default:
       return {
@@ -557,8 +563,11 @@ export const processPassiveEffects = (
             passiveResult = generateShowmanReturn(jokerKey);
             break;
           }
+          case "edit_consumable_slots": {
+            passiveResult = generatePassiveConsumableSlots(effect);
+            break;
+          }
         }
-
         if (passiveResult) {
           passiveEffects.push(passiveResult);
         }

@@ -1659,6 +1659,33 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
     category: "Economy",
   },
   {
+    id: "edit_consumable_slots",
+    label: "Edit Consumable Slots",
+    description: "Modify the number of consumable slots available",
+    applicableTriggers: [...GENERIC_TRIGGERS, "passive"],
+    params: [
+      {
+        id: "operation",
+        type: "select",
+        label: "Operation",
+        options: [
+          { value: "add", label: "Add" },
+          { value: "subtract", label: "Subtract" },
+          { value: "set", label: "Set to" },
+        ],
+        default: "add",
+      },
+      {
+        id: "value",
+        type: "number",
+        label: "Amount",
+        default: 1,
+        min: 0,
+      },
+    ],
+    category: "Game Rules",
+  },
+  {
     id: "discount_items",
     label: "Discount Items",
     description: "Reduce the cost of specific shop items",
