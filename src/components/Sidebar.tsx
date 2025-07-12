@@ -1,19 +1,15 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   HomeIcon,
   DocumentTextIcon,
   PuzzlePieceIcon,
-  RectangleStackIcon,
-  SparklesIcon,
   FolderIcon,
   HeartIcon,
   ArrowUpTrayIcon,
   ArrowDownTrayIcon,
   BookmarkIcon,
   CodeBracketIcon,
-  CakeIcon,
   LinkIcon,
 } from "@heroicons/react/24/solid";
 import { JokerData } from "./JokerCard";
