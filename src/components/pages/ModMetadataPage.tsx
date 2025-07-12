@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import {
   DocumentTextIcon,
   TagIcon,
@@ -8,9 +8,6 @@ import {
   ShieldCheckIcon,
   CubeIcon,
   PaintBrushIcon,
-  ExclamationTriangleIcon,
-  CheckCircleIcon,
-  InformationCircleIcon,
 } from "@heroicons/react/24/outline";
 import InputField from "../generic/InputField";
 
@@ -38,20 +35,19 @@ interface ModMetadataValidation {
   warnings: Record<string, string>;
 }
 
-//! wadawedawdawdawdaw
 // eslint-disable-next-line react-refresh/only-export-components
 export const DEFAULT_MOD_METADATA: ModMetadata = {
-  id: "",
-  name: "",
-  author: [],
-  description: "",
-  prefix: "",
+  id: "mycustommod",
+  name: "My Custom Mod",
+  author: ["Anonymous"],
+  description: "Custom jokers created with Joker Forge",
+  prefix: "mycustom",
   main_file: "main.lua",
   version: "1.0.0",
   priority: 0,
   badge_colour: "666665",
   badge_text_colour: "FFFFFF",
-  display_name: "",
+  display_name: "My Custom Mod",
   dependencies: ["Steamodded (>=1.0.0~BETA-0404a)"],
   conflicts: [],
   provides: [],
@@ -132,7 +128,7 @@ const generateModIdFromName = (name: string): string => {
       .toLowerCase()
       .replace(/[^a-zA-Z0-9\s]/g, "")
       .replace(/\s+/g, "")
-      .replace(/^[0-9]+/, "") || "custommod"
+      .replace(/^[0-9]+/, "") || "mycustommod"
   );
 };
 
@@ -184,27 +180,51 @@ const ModMetadataPage: React.FC<ModMetadataPageProps> = ({
     formatDependenciesString(metadata.provides)
   );
 
+  const previousNameRef = useRef(metadata.name);
+  const metadataRef = useRef(metadata);
+
   useEffect(() => {
-    if (metadata.name) {
-      const generatedId = generateModIdFromName(metadata.name);
+    metadataRef.current = metadata;
+  });
+
+  const updateMetadata = useCallback(
+    (updates: Partial<ModMetadata>) => {
+      setMetadata({ ...metadataRef.current, ...updates });
+    },
+    [setMetadata]
+  );
+
+  // Auto-generate ID and prefix from name, but only when name changes from user input
+  useEffect(() => {
+    const currentMetadata = metadataRef.current;
+
+    if (
+      currentMetadata.name &&
+      currentMetadata.name !== DEFAULT_MOD_METADATA.name &&
+      currentMetadata.name !== previousNameRef.current
+    ) {
+      previousNameRef.current = currentMetadata.name;
+
+      const generatedId = generateModIdFromName(currentMetadata.name);
       const generatedPrefix = generatePrefixFromId(generatedId);
 
-      setMetadata({
-        ...metadata,
-        id: generatedId,
-        prefix: generatedPrefix,
-        display_name: metadata.name,
-      });
+      // Only update if the generated values are different from current values
+      if (
+        currentMetadata.id !== generatedId ||
+        currentMetadata.prefix !== generatedPrefix ||
+        currentMetadata.display_name !== currentMetadata.name
+      ) {
+        setMetadata({
+          ...currentMetadata,
+          id: generatedId,
+          prefix: generatedPrefix,
+          display_name: currentMetadata.name,
+        });
+      }
     }
-    //! needs work
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [metadata.name]);
+  }, [metadata.name, setMetadata]);
 
   const validation = validateModMetadata(metadata);
-
-  const updateMetadata = (updates: Partial<ModMetadata>) => {
-    setMetadata({ ...metadata, ...updates });
-  };
 
   const handleAuthorsChange = (value: string) => {
     setAuthorsString(value);
@@ -229,89 +249,22 @@ const ModMetadataPage: React.FC<ModMetadataPageProps> = ({
   const isValidHexColor = (color: string) =>
     /^[0-9A-Fa-f]{6}([0-9A-Fa-f]{2})?$/.test(color);
 
-  const hasErrors = Object.keys(validation.errors).length > 0;
-
   return (
-    <div className="p-8">
-      <div className="flex items-center gap-3 mb-8">
-        <DocumentTextIcon className="h-8 w-8 text-mint" />
-        <h1 className="text-2xl text-white-light font-light tracking-wide">
+    <div className="min-h-screen">
+      <div className="p-8 font-lexend max-w-7xl mx-auto">
+        <h1 className="text-3xl text-white-light tracking-widest text-center">
           Mod Metadata
+        </h1>
+        <h1 className="text-xl text-white-dark font-light tracking-widest mb-8 text-center">
+          {metadata.name}
         </h1>
       </div>
 
       <div className="max-w-6xl mx-auto space-y-8">
-        <div
-          className={`bg-black-darker border-2 rounded-lg p-6 ${
-            validation.isValid
-              ? "border-mint/30"
-              : hasErrors
-              ? "border-red-900/50"
-              : "border-yellow-600/50"
-          }`}
-        >
-          <div className="flex items-center gap-3 mb-3">
-            <div
-              className={`w-3 h-3 rounded-full ${
-                validation.isValid
-                  ? "bg-mint animate-pulse"
-                  : hasErrors
-                  ? "bg-red-400"
-                  : "bg-yellow-400"
-              }`}
-            ></div>
-            <span className="text-white-light font-medium text-sm">
-              SMODS Status
-            </span>
-          </div>
-
-          <div className="flex items-center gap-2">
-            {validation.isValid ? (
-              <CheckCircleIcon className="h-4 w-4 text-mint" />
-            ) : hasErrors ? (
-              <ExclamationTriangleIcon className="h-4 w-4 text-red-400" />
-            ) : (
-              <InformationCircleIcon className="h-4 w-4 text-yellow-400" />
-            )}
-            <span
-              className={`text-xs ${
-                validation.isValid
-                  ? "text-mint"
-                  : hasErrors
-                  ? "text-red-400"
-                  : "text-yellow-400"
-              }`}
-            >
-              {validation.isValid
-                ? "Export Ready"
-                : hasErrors
-                ? "Has Errors"
-                : "Has Warnings"}
-            </span>
-          </div>
-
-          {hasErrors && (
-            <div className="mt-3 space-y-1">
-              {Object.entries(validation.errors)
-                .slice(0, 3)
-                .map(([field, error]) => (
-                  <p key={field} className="text-red-400 text-xs">
-                    <strong>{field}:</strong> {error}
-                  </p>
-                ))}
-              {Object.keys(validation.errors).length > 3 && (
-                <p className="text-red-400 text-xs">
-                  +{Object.keys(validation.errors).length - 3} more errors
-                </p>
-              )}
-            </div>
-          )}
-        </div>
-
-        <div className="bg-black-dark border-2 border-mint-dark rounded-lg p-6">
+        <div>
           <h2 className="text-lg text-white-light font-medium mb-6 flex items-center gap-2">
-            <ExclamationTriangleIcon className="h-5 w-5 text-red-400" />
-            Required Fields
+            <DocumentTextIcon className="h-5 w-5 text-mint" />
+            Basic Information
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
@@ -319,7 +272,7 @@ const ModMetadataPage: React.FC<ModMetadataPageProps> = ({
                 value={metadata.name}
                 onChange={(e) => updateMetadata({ name: e.target.value })}
                 placeholder="My Custom Mod"
-                separator={true}
+                darkmode={true}
                 icon={
                   <DocumentTextIcon className="h-5 w-5 text-mint stroke-2" />
                 }
@@ -337,7 +290,7 @@ const ModMetadataPage: React.FC<ModMetadataPageProps> = ({
                 value={metadata.id}
                 onChange={(e) => updateMetadata({ id: e.target.value })}
                 placeholder="mycustommod"
-                separator={true}
+                darkmode={true}
                 icon={<HashtagIcon className="h-5 w-5 text-mint stroke-2" />}
                 label="Mod ID"
               />
@@ -353,15 +306,12 @@ const ModMetadataPage: React.FC<ModMetadataPageProps> = ({
             </div>
 
             <div>
-              <label className="block text-white-light text-sm font-medium mb-2">
-                Authors *
-              </label>
-              <input
-                type="text"
+              <InputField
                 value={authorsString}
                 onChange={(e) => handleAuthorsChange(e.target.value)}
-                placeholder="Author One, Author Two"
-                className="w-full px-4 py-3 bg-black-darker border-2 border-black-light rounded-lg text-white-light placeholder-white-darker focus:border-mint focus:outline-none"
+                placeholder="Anonymous"
+                darkmode={true}
+                label="Authors"
               />
               {validation.errors.author && (
                 <p className="text-red-400 text-xs mt-1">
@@ -377,8 +327,8 @@ const ModMetadataPage: React.FC<ModMetadataPageProps> = ({
               <InputField
                 value={metadata.prefix}
                 onChange={(e) => updateMetadata({ prefix: e.target.value })}
-                placeholder="mycustommod"
-                separator={true}
+                placeholder="mycustom"
+                darkmode={true}
                 icon={<TagIcon className="h-5 w-5 text-mint stroke-2" />}
                 label="Prefix"
               />
@@ -394,7 +344,7 @@ const ModMetadataPage: React.FC<ModMetadataPageProps> = ({
 
             <div className="md:col-span-2">
               <label className="block text-white-light text-sm font-medium mb-2">
-                Description *
+                Description
               </label>
               <textarea
                 value={metadata.description}
@@ -416,7 +366,7 @@ const ModMetadataPage: React.FC<ModMetadataPageProps> = ({
                 value={metadata.main_file}
                 onChange={(e) => updateMetadata({ main_file: e.target.value })}
                 placeholder="main.lua"
-                separator={true}
+                darkmode={true}
                 icon={
                   <CodeBracketIcon className="h-5 w-5 text-mint stroke-2" />
                 }
@@ -431,7 +381,7 @@ const ModMetadataPage: React.FC<ModMetadataPageProps> = ({
           </div>
         </div>
 
-        <div className="bg-black-dark border-2 border-black-lighter rounded-lg p-6">
+        <div className="border-t border-black-light pt-8">
           <h2 className="text-lg text-white-light font-medium mb-6 flex items-center gap-2">
             <PaintBrushIcon className="h-5 w-5 text-mint" />
             Appearance & Display
@@ -444,7 +394,7 @@ const ModMetadataPage: React.FC<ModMetadataPageProps> = ({
                   updateMetadata({ display_name: e.target.value })
                 }
                 placeholder={metadata.name || "Short name for badge"}
-                separator={true}
+                darkmode={true}
                 icon={<TagIcon className="h-5 w-5 text-mint stroke-2" />}
                 label="Display Name"
               />
@@ -460,7 +410,7 @@ const ModMetadataPage: React.FC<ModMetadataPageProps> = ({
                   updateMetadata({ badge_colour: e.target.value })
                 }
                 placeholder="666665"
-                separator={true}
+                darkmode={true}
                 icon={<span className="text-mint">#</span>}
                 label="Badge Color"
               />
@@ -481,7 +431,7 @@ const ModMetadataPage: React.FC<ModMetadataPageProps> = ({
                   updateMetadata({ badge_text_colour: e.target.value })
                 }
                 placeholder="FFFFFF"
-                separator={true}
+                darkmode={true}
                 icon={<span className="text-mint">#</span>}
                 label="Badge Text Color"
               />
@@ -496,7 +446,7 @@ const ModMetadataPage: React.FC<ModMetadataPageProps> = ({
             </div>
           </div>
 
-          <div className="bg-black-darker border border-black-lighter rounded-lg p-4">
+          <div className="border border-black-lighter rounded-lg p-4">
             <h4 className="text-white-light font-medium text-sm mb-3 tracking-wider">
               BADGE PREVIEW
             </h4>
@@ -523,84 +473,86 @@ const ModMetadataPage: React.FC<ModMetadataPageProps> = ({
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <div className="bg-black-dark border-2 border-black-lighter rounded-lg p-6">
-            <h2 className="text-lg text-white-light font-medium mb-6 flex items-center gap-2">
-              <ClockIcon className="h-5 w-5 text-mint" />
-              Version & Loading
-            </h2>
-            <div className="space-y-6">
-              <div>
-                <InputField
-                  value={metadata.version}
-                  onChange={(e) => updateMetadata({ version: e.target.value })}
-                  placeholder="1.0.0"
-                  separator={true}
-                  icon={<HashtagIcon className="h-5 w-5 text-mint stroke-2" />}
-                  label="Version"
-                />
-                {validation.warnings.version && (
-                  <p className="text-yellow-400 text-xs mt-1">
-                    {validation.warnings.version}
+        <div className="border-t border-black-light pt-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div>
+              <h2 className="text-lg text-white-light font-medium mb-6 flex items-center gap-2">
+                <ClockIcon className="h-5 w-5 text-mint" />
+                Version & Loading
+              </h2>
+              <div className="space-y-6">
+                <div>
+                  <InputField
+                    value={metadata.version}
+                    onChange={(e) =>
+                      updateMetadata({ version: e.target.value })
+                    }
+                    placeholder="1.0.0"
+                    darkmode={true}
+                    icon={
+                      <HashtagIcon className="h-5 w-5 text-mint stroke-2" />
+                    }
+                    label="Version"
+                  />
+                  {validation.warnings.version && (
+                    <p className="text-yellow-400 text-xs mt-1">
+                      {validation.warnings.version}
+                    </p>
+                  )}
+                  <p className="text-white-darker text-xs mt-1">
+                    Format: (major).(minor).(patch), use ~ for beta
                   </p>
-                )}
-                <p className="text-white-darker text-xs mt-1">
-                  Format: (major).(minor).(patch), use ~ for beta
-                </p>
-              </div>
+                </div>
 
-              <div>
-                <InputField
-                  value={metadata.priority.toString()}
-                  onChange={(e) =>
-                    updateMetadata({
-                      priority: parseInt(e.target.value) || 0,
-                    })
-                  }
-                  placeholder="0"
-                  separator={true}
-                  icon={<CubeIcon className="h-5 w-5 text-mint stroke-2" />}
-                  label="Priority"
-                />
-                <p className="text-white-darker text-xs mt-1">
-                  Negative values load first, positive load last
-                </p>
+                <div>
+                  <InputField
+                    value={metadata.priority.toString()}
+                    onChange={(e) =>
+                      updateMetadata({
+                        priority: parseInt(e.target.value) || 0,
+                      })
+                    }
+                    placeholder="0"
+                    darkmode={true}
+                    icon={<CubeIcon className="h-5 w-5 text-mint stroke-2" />}
+                    label="Priority"
+                  />
+                  <p className="text-white-darker text-xs mt-1">
+                    Negative values load first, positive load last
+                  </p>
+                </div>
               </div>
             </div>
-          </div>
 
-          <div className="bg-black-darker border border-black-lighter rounded-lg p-4">
-            <h4 className="text-white-light font-medium text-sm mb-3 tracking-wider">
-              MOD SUMMARY
-            </h4>
-            <div className="space-y-2 text-xs">
-              <div className="flex justify-between">
-                <span className="text-white-darker">Name:</span>
-                <span className="text-white-light">
-                  {metadata.name || "Unnamed"}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-white-darker">ID:</span>
-                <span className="text-white-light">
-                  {metadata.id || "None"}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-white-darker">Version:</span>
-                <span className="text-white-light">{metadata.version}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-white-darker">Author:</span>
-                <span className="text-white-light">
-                  {metadata.author.join(", ") || "Anonymous"}
-                </span>
+            <div className="border border-black-lighter rounded-lg p-4">
+              <h4 className="text-white-light font-medium text-sm mb-3 tracking-wider">
+                MOD SUMMARY
+              </h4>
+              <div className="space-y-2 text-xs">
+                <div className="flex justify-between">
+                  <span className="text-white-darker">Name:</span>
+                  <span className="text-white-light">{metadata.name}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-white-darker">ID:</span>
+                  <span className="text-white-light">{metadata.id}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-white-darker">Version:</span>
+                  <span className="text-white-light">{metadata.version}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-white-darker">Author:</span>
+                  <span className="text-white-light">
+                    {metadata.author.join(", ")}
+                  </span>
+                </div>
               </div>
             </div>
           </div>
         </div>
 
-        <div className="bg-black-dark border-2 border-black-lighter rounded-lg p-6">
+        <div className="border-t border-black-light pt-8">
           <h2 className="text-lg text-white-light font-medium mb-6 flex items-center gap-2">
             <ShieldCheckIcon className="h-5 w-5 text-mint" />
             Dependencies & Conflicts
@@ -613,7 +565,7 @@ const ModMetadataPage: React.FC<ModMetadataPageProps> = ({
               <textarea
                 value={dependenciesString}
                 onChange={(e) => handleDependenciesChange(e.target.value)}
-                placeholder="Steamodded (>=1.0.0~BETA-0404a)&#10;Lovely (>=0.6)&#10;SomeMod (==1.0.*)"
+                placeholder="Steamodded (>=1.0.0~BETA-0404a)"
                 className="w-full h-20 px-4 py-3 bg-black-darker border-2 border-black-light rounded-lg text-white-light placeholder-white-darker focus:border-mint focus:outline-none resize-none"
               />
               <p className="text-white-darker text-xs mt-1">
@@ -654,14 +606,16 @@ const ModMetadataPage: React.FC<ModMetadataPageProps> = ({
           </div>
         </div>
 
-        <div className="bg-black-darker border border-black-lighter rounded-lg p-4">
-          <h4 className="text-white-light font-medium text-sm mb-3 tracking-wider">
-            JSON PREVIEW
-          </h4>
-          <div className="bg-black border border-black-light rounded p-3 max-h-60 overflow-y-auto custom-scrollbar">
-            <pre className="text-white-darker text-xs font-mono whitespace-pre-wrap">
-              {JSON.stringify(metadata, null, 2)}
-            </pre>
+        <div className="border-t border-black-light pt-8">
+          <div className="border border-black-lighter rounded-lg p-4">
+            <h4 className="text-white-light font-medium text-sm mb-3 tracking-wider">
+              JSON PREVIEW
+            </h4>
+            <div className="bg-black border border-black-light rounded p-3 max-h-60 overflow-y-auto custom-scrollbar">
+              <pre className="text-white-darker text-xs font-mono whitespace-pre-wrap">
+                {JSON.stringify(metadata, null, 2)}
+              </pre>
+            </div>
           </div>
         </div>
       </div>

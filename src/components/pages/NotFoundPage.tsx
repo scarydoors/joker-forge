@@ -21,7 +21,7 @@ const NotFoundPage: React.FC = () => {
   return (
     <div className="min-h-screen flex items-center justify-center p-8">
       <div className="max-w-md w-full">
-        <div className="bg-gradient-to-br from-black-dark to-black border-2 border-black-lighter rounded-2xl p-8 shadow-lg text-center">
+        <div className="p-8 text-center">
           {/* Error Icon */}
           <div className="mb-6">
             <ExclamationTriangleIcon className="h-16 w-16 text-mint opacity-80 mx-auto" />

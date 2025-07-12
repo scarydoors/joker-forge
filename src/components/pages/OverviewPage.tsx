@@ -15,9 +15,6 @@ import {
   BoltIcon,
   CodeBracketSquareIcon,
   StarIcon,
-  FireIcon,
-  CubeIcon,
-  InformationCircleIcon,
   PencilIcon,
   CheckIcon,
   XMarkIcon,
@@ -34,13 +31,6 @@ interface OverviewPageProps {
   setMetadata: (metadata: ModMetadata) => void;
   onExport: () => void;
   onNavigate: (section: string) => void;
-}
-
-interface ImplementationStats {
-  triggers: { implemented: number; total: number; percentage: number };
-  conditions: { implemented: number; total: number; percentage: number };
-  effects: { implemented: number; total: number; percentage: number };
-  ui: { implemented: number; total: number; percentage: number };
 }
 
 interface GitHubCommit {
@@ -134,71 +124,6 @@ const COMMIT_TYPES: Record<string, CommitType> = {
     bgColor: "bg-orange-400/10",
     icon: BoltIcon,
   },
-};
-
-const parseImplementationStats = async (): Promise<ImplementationStats> => {
-  try {
-    const response = await fetch(
-      "https://raw.githubusercontent.com/Jayd-H/joker-forge/main/README.md"
-    );
-    const readmeContent = await response.text();
-
-    const parseSection = (
-      sectionName: string
-    ): { implemented: number; total: number } => {
-      const sections = readmeContent.split(/^### /m);
-      const targetSection = sections.find((section) =>
-        section.toLowerCase().startsWith(sectionName.toLowerCase())
-      );
-
-      if (!targetSection) {
-        return { implemented: 0, total: 0 };
-      }
-
-      const implementedMatches = targetSection.match(/- \[x\]/gi) || [];
-      const notImplementedMatches = targetSection.match(/- \[ \]/g) || [];
-
-      const implementedCount = implementedMatches.length;
-      const notImplementedCount = notImplementedMatches.length;
-      const totalCount = implementedCount + notImplementedCount;
-
-      return { implemented: implementedCount, total: totalCount };
-    };
-
-    const triggers = parseSection("Triggers");
-    const conditions = parseSection("Conditions");
-    const effects = parseSection("Effects");
-    const ui = parseSection("UI Features");
-
-    return {
-      triggers: {
-        ...triggers,
-        percentage:
-          Math.round((triggers.implemented / triggers.total) * 100) || 0,
-      },
-      conditions: {
-        ...conditions,
-        percentage:
-          Math.round((conditions.implemented / conditions.total) * 100) || 0,
-      },
-      effects: {
-        ...effects,
-        percentage:
-          Math.round((effects.implemented / effects.total) * 100) || 0,
-      },
-      ui: {
-        ...ui,
-        percentage: Math.round((ui.implemented / ui.total) * 100) || 0,
-      },
-    };
-  } catch {
-    return {
-      triggers: { implemented: 13, total: 21, percentage: 62 },
-      conditions: { implemented: 14, total: 19, percentage: 74 },
-      effects: { implemented: 15, total: 19, percentage: 79 },
-      ui: { implemented: 8, total: 14, percentage: 57 },
-    };
-  }
 };
 
 const fetchGitHubCommits = async (): Promise<ParsedCommit[]> => {
@@ -301,19 +226,12 @@ const formatAuthorsString = (authors: string[]): string => {
 
 const OverviewPage: React.FC<OverviewPageProps> = ({
   jokerCount,
-  jokers,
   metadata,
   setMetadata,
   onExport,
   onNavigate,
+  modName,
 }) => {
-  const [stats, setStats] = React.useState<ImplementationStats>({
-    triggers: { implemented: 13, total: 19, percentage: 68 },
-    conditions: { implemented: 14, total: 20, percentage: 70 },
-    effects: { implemented: 15, total: 22, percentage: 68 },
-    ui: { implemented: 8, total: 14, percentage: 57 },
-  });
-
   const [commits, setCommits] = React.useState<ParsedCommit[]>([]);
   const [commitsLoading, setCommitsLoading] = React.useState(true);
 
@@ -336,8 +254,6 @@ const OverviewPage: React.FC<OverviewPageProps> = ({
   const [tempDescription, setTempDescription] = useState(displayDescription);
 
   React.useEffect(() => {
-    parseImplementationStats().then(setStats);
-
     fetchGitHubCommits().then((fetchedCommits) => {
       setCommits(fetchedCommits);
       setCommitsLoading(false);
@@ -419,54 +335,17 @@ const OverviewPage: React.FC<OverviewPageProps> = ({
     }
   };
 
-  const validateJoker = (joker: JokerData) => {
-    const issues = [];
-    if (!joker.imagePreview) issues.push("Missing image");
-    if (!joker.name || joker.name.trim() === "" || joker.name === "New Joker")
-      issues.push("Generic or missing name");
-    if (!joker.rules || joker.rules.length === 0)
-      issues.push("No rules defined");
-    return issues;
-  };
-
-  const incompleteJokers = jokers.filter(
-    (joker) => validateJoker(joker).length > 0
-  );
-  const completeJokers = jokers.filter(
-    (joker) => validateJoker(joker).length === 0
-  );
-
   return (
-    <div className="p-8 max-w-7xl mx-auto font-lexend">
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-4xl text-white-light font-light tracking-wide mb-3">
-            Project Overview
-          </h1>
-          <div className="flex items-center gap-6 text-white-darker text-sm">
-            <div className="flex items-center">
-              <DocumentTextIcon className="h-4 w-4 mr-2 text-mint" />
-              {displayName} • {jokerCount} joker
-              {jokerCount !== 1 ? "s" : ""}
-            </div>
-            {incompleteJokers.length > 0 && (
-              <div className="flex items-center text-balatro-orange">
-                <ExclamationTriangleIcon className="h-4 w-4 mr-1" />
-                {incompleteJokers.length} incomplete
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-
-      <div className="bg-black-dark border-2 border-black-lighter rounded-xl p-8 mb-8">
-        <div className="flex items-center gap-3 mb-8">
-          <CubeIcon className="h-6 w-6 text-mint" />
-          <h2 className="text-2xl text-white-light font-light">Your Project</h2>
-        </div>
-
+    <div className="min-h-screen font-lexend max-w-7xl mx-auto">
+      <div className="p-8">
+        <h1 className="text-3xl text-white-light tracking-widest text-center">
+          Mod Overview
+        </h1>
+        <h1 className="text-xl text-white-dark font-light tracking-widest mb-6 text-center">
+          {modName}
+        </h1>
         <div className="mb-8">
-          <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between mb-8 gap-8">
+          <div className="">
             <div className="space-y-6 flex-1">
               <div className="group">
                 {editingName ? (
@@ -475,7 +354,7 @@ const OverviewPage: React.FC<OverviewPageProps> = ({
                       type="text"
                       value={tempName}
                       onChange={(e) => setTempName(e.target.value)}
-                      className="text-4xl font-bold bg-transparent border-b-2 border-mint text-white-light focus:outline-none"
+                      className="text-4xl font-bold border-b-2 border-mint text-white-light focus:outline-none"
                       autoFocus
                       onKeyDown={(e) => {
                         if (e.key === "Enter") handleNameSave();
@@ -515,7 +394,7 @@ const OverviewPage: React.FC<OverviewPageProps> = ({
                       type="text"
                       value={tempAuthor}
                       onChange={(e) => setTempAuthor(e.target.value)}
-                      className="text-lg bg-transparent border-b-2 border-mint text-white-darker focus:outline-none"
+                      className="text-lg border-b-2 border-mint text-white-darker focus:outline-none"
                       autoFocus
                       placeholder="Author One, Author Two"
                       onKeyDown={(e) => {
@@ -556,7 +435,7 @@ const OverviewPage: React.FC<OverviewPageProps> = ({
                       type="text"
                       value={tempVersion}
                       onChange={(e) => setTempVersion(e.target.value)}
-                      className="bg-transparent border-b-2 border-mint px-3 py-2 text-mint focus:outline-none"
+                      className="border-b-2 border-mint px-3 py-2 text-mint focus:outline-none"
                       autoFocus
                       onKeyDown={(e) => {
                         if (e.key === "Enter") handleVersionSave();
@@ -595,7 +474,7 @@ const OverviewPage: React.FC<OverviewPageProps> = ({
                     <textarea
                       value={tempDescription}
                       onChange={(e) => setTempDescription(e.target.value)}
-                      className="w-full h-16 bg-transparent border-b-2 border-mint text-white-light focus:outline-none resize-none"
+                      className="w-full h-16 border-b-2 border-mint text-white-light focus:outline-none resize-none"
                       autoFocus
                       placeholder="Describe your mod..."
                       onKeyDown={(e) => {
@@ -637,32 +516,10 @@ const OverviewPage: React.FC<OverviewPageProps> = ({
                 )}
               </div>
             </div>
-
-            <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 lg:w-auto w-full">
-              <div className="text-center p-4 bg-black-darker border border-mint/20 rounded-xl">
-                <div className="text-2xl font-bold text-mint mb-1">
-                  {jokerCount}
-                </div>
-                <div className="text-white-darker text-sm">Jokers</div>
-              </div>
-
-              <div className="text-center p-4 bg-black-darker border border-green-400/30 rounded-xl">
-                <div className="text-2xl font-bold text-green-400 mb-1">
-                  {completeJokers.length}
-                </div>
-                <div className="text-white-darker text-sm">Complete</div>
-              </div>
-              <div className="text-center p-4 bg-black-darker border border-orange-400/30 rounded-xl">
-                <div className="text-2xl font-bold text-orange-400 mb-1">
-                  {incompleteJokers.length}
-                </div>
-                <div className="text-white-darker text-sm">Incomplete</div>
-              </div>
-            </div>
           </div>
         </div>
 
-        <div className="border-t border-black-lighter pt-8">
+        <div className="">
           <div className="flex items-center gap-3 mb-6">
             <WrenchScrewdriverIcon className="h-5 w-5 text-mint" />
             <h3 className="text-xl text-white-light font-medium">
@@ -673,7 +530,7 @@ const OverviewPage: React.FC<OverviewPageProps> = ({
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <button
               onClick={() => onNavigate("jokers")}
-              className="group flex items-center gap-4 p-6 bg-black-darker border border-black-lighter hover:border-mint/50 rounded-xl transition-all cursor-pointer hover:bg-gradient-to-r hover:from-black-darker hover:to-mint/5"
+              className="group flex items-center gap-4 p-6 border border-black-lighter hover:border-mint/50 rounded-xl transition-all cursor-pointer hover:bg-gradient-to-r hover:from-black-darker hover:to-mint/5"
             >
               <div className="p-3 bg-mint/20 rounded-xl group-hover:bg-mint/30 transition-all group-hover:scale-110">
                 <PlusIcon className="h-6 w-6 text-mint" />
@@ -683,14 +540,14 @@ const OverviewPage: React.FC<OverviewPageProps> = ({
                   Create Joker
                 </div>
                 <div className="text-white-darker text-sm">
-                  Design new joker cards
+                  Design new jokers
                 </div>
               </div>
             </button>
 
             <button
               onClick={() => onNavigate("metadata")}
-              className="group flex items-center gap-4 p-6 bg-black-darker border border-black-lighter hover:border-mint/50 rounded-xl transition-all cursor-pointer hover:bg-gradient-to-r hover:from-black-darker hover:to-mint/5"
+              className="group flex items-center gap-4 p-6 border border-black-lighter hover:border-mint/50 rounded-xl transition-all cursor-pointer hover:bg-gradient-to-r hover:from-black-darker hover:to-mint/5"
             >
               <div className="p-3 bg-mint/20 rounded-xl group-hover:bg-mint/30 transition-all group-hover:scale-110">
                 <DocumentTextIcon className="h-6 w-6 text-mint" />
@@ -724,172 +581,117 @@ const OverviewPage: React.FC<OverviewPageProps> = ({
             </button>
           </div>
         </div>
-      </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 mb-8">
-        <div className="lg:col-span-3 bg-black-dark border-2 border-black-lighter rounded-xl p-6">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-3">
-              <CodeBracketSquareIcon className="h-6 w-6 text-mint" />
-              <h2 className="text-2xl text-white-light font-light">
-                Recent Development
+        <div className=" mt-8 pt-8">
+          <div className="flex justify-center mt-6">
+            <div className="flex items-center">
+              <h2 className="text-2xl text-white-light tracking-widest font-light">
+                Track Development
               </h2>
             </div>
-            <a
-              href="https://github.com/Jayd-H/joker-forge"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-sm text-mint hover:text-mint-light transition-colors px-3 py-2 bg-mint/10 rounded-lg border border-mint/30 hover:bg-mint/20"
-            >
-              View on GitHub
-            </a>
           </div>
+          <div className="">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <CodeBracketSquareIcon className="h-6 w-6 text-mint" />
+                <h2 className="text-xl text-white-light tracking-wide">
+                  Recent GitHub Commits
+                </h2>
+              </div>
+              <a
+                href="https://github.com/Jayd-H/joker-forge"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm text-mint hover:text-mint-light transition-colors px-3 py-2 bg-mint/10 rounded-lg border border-mint/30 hover:bg-mint/20"
+              >
+                View on GitHub
+              </a>
+            </div>
 
-          <div className="space-y-3 max-h-96 overflow-y-auto custom-scrollbar pr-2">
-            {commitsLoading ? (
-              <div className="space-y-3">
-                {[...Array(4)].map((_, i) => (
-                  <div key={i} className="animate-pulse">
-                    <div className="flex items-center gap-3 p-4 bg-black-darker rounded-xl">
-                      <div className="w-8 h-8 bg-black-lighter rounded-lg"></div>
-                      <div className="flex-1">
-                        <div className="h-4 bg-black-lighter rounded mb-2"></div>
-                        <div className="h-3 bg-black-lighter rounded w-3/4"></div>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : commits.length === 0 ? (
-              <div className="text-center py-8">
-                <ExclamationTriangleIcon className="h-12 w-12 text-white-darker mx-auto mb-3 opacity-50" />
-                <div className="text-white-darker text-sm">
-                  Unable to load commits
-                </div>
-              </div>
-            ) : (
-              commits.map((commit) => (
-                <a
-                  key={commit.sha}
-                  href={commit.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="block p-4 bg-black-darker border border-black-lighter rounded-xl hover:border-mint/30 transition-all group"
-                >
-                  <div className="flex items-start gap-3">
-                    <div className="flex-shrink-0 mt-0.5">
-                      {commit.type ? (
-                        <div
-                          className={`p-2 ${commit.type.bgColor} border border-white/10 rounded-lg`}
-                        >
-                          <commit.type.icon
-                            className={`h-4 w-4 ${commit.type.color}`}
-                          />
+            <div className="space-y-3 max-h-94 overflow-y-auto custom-scrollbar pr-2">
+              {commitsLoading ? (
+                <div className="space-y-3">
+                  {[...Array(4)].map((_, i) => (
+                    <div key={i} className="animate-pulse">
+                      <div className="flex items-center gap-3 p-4 rounded-xl">
+                        <div className="w-8 h-8 rounded-lg"></div>
+                        <div className="flex-1">
+                          <div className="h-4  rounded mb-2"></div>
+                          <div className="h-3 rounded w-3/4"></div>
                         </div>
-                      ) : (
-                        <div className="w-3 h-3 bg-white-darker rounded-full mt-2"></div>
-                      )}
+                      </div>
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-2">
-                        {commit.type && (
-                          <span
-                            className={`text-xs px-2 py-1 ${commit.type.bgColor} ${commit.type.color} rounded font-medium border border-white/10`}
+                  ))}
+                </div>
+              ) : commits.length === 0 ? (
+                <div className="text-center py-8">
+                  <ExclamationTriangleIcon className="h-12 w-12 text-white-darker mx-auto mb-3 opacity-50" />
+                  <div className="text-white-darker text-sm">
+                    Unable to load commits
+                  </div>
+                </div>
+              ) : (
+                commits.map((commit) => (
+                  <a
+                    key={commit.sha}
+                    href={commit.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block p-4 border border-black-lighter rounded-xl hover:border-mint/30 transition-all group"
+                  >
+                    <div className="flex items-start gap-3">
+                      <div className="flex-shrink-0 mt-0.5">
+                        {commit.type ? (
+                          <div
+                            className={`p-2 ${commit.type.bgColor} border border-white/10 rounded-lg`}
                           >
-                            {commit.type.label}
-                          </span>
+                            <commit.type.icon
+                              className={`h-4 w-4 ${commit.type.color}`}
+                            />
+                          </div>
+                        ) : (
+                          <div className="w-3 h-3 bg-white-darker rounded-full mt-2"></div>
                         )}
-                        <span className="text-xs text-white-darker font-mono bg-black px-2 py-1 rounded">
-                          {commit.sha}
-                        </span>
                       </div>
-                      <div className="text-sm text-white-light group-hover:text-mint transition-colors mb-2 leading-relaxed">
-                        {commit.message}
-                      </div>
-                      <div className="flex items-center gap-2 text-xs text-white-darker">
-                        <span className="font-medium">{commit.author}</span>
-                        <span>•</span>
-                        <span>{formatTimeAgo(commit.date)}</span>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-2">
+                          {commit.type && (
+                            <span
+                              className={`text-xs px-2 py-1 ${commit.type.bgColor} ${commit.type.color} rounded font-medium border border-white/10`}
+                            >
+                              {commit.type.label}
+                            </span>
+                          )}
+                          <span className="text-xs text-white-darker font-mono px-2 py-1 rounded">
+                            {commit.sha}
+                          </span>
+                        </div>
+                        <div className="text-sm text-white-light group-hover:text-mint transition-colors mb-2 leading-relaxed">
+                          {commit.message}
+                        </div>
+                        <div className="flex items-center gap-2 text-xs text-white-darker">
+                          <span className="font-medium">{commit.author}</span>
+                          <span>•</span>
+                          <span>{formatTimeAgo(commit.date)}</span>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </a>
-              ))
-            )}
-          </div>
-        </div>
-
-        <div className="lg:col-span-1 bg-black-dark border-2 border-black-lighter rounded-xl p-6">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-3">
-              <BeakerIcon className="h-6 w-6 text-mint" />
-              <h2 className="text-xl text-white-light font-light">Checklist</h2>
+                  </a>
+                ))
+              )}
             </div>
           </div>
-
-          <div className="space-y-3 mb-6">
-            {[
-              { name: "Triggers", data: stats.triggers, color: "bg-trigger" },
-              {
-                name: "Conditions",
-                data: stats.conditions,
-                color: "bg-condition",
-              },
-              { name: "Effects", data: stats.effects, color: "bg-effect" },
-              { name: "UI Features", data: stats.ui, color: "bg-mint" },
-            ].map((item) => (
-              <div key={item.name} className="p-3 bg-black-darker rounded-lg">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-white-light font-medium text-sm">
-                    {item.name}
-                  </span>
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs text-white-darker">
-                      {item.data.implemented}/{item.data.total}
-                    </span>
-                    <span className="text-white-light font-bold text-sm">
-                      {item.data.percentage}%
-                    </span>
-                  </div>
-                </div>
-                <div className="w-full bg-black-light rounded-full h-2">
-                  <div
-                    className={`${item.color} h-2 rounded-full transition-all duration-1000 ease-out`}
-                    style={{ width: `${item.data.percentage}%` }}
-                  ></div>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <div className="pt-4 border-t border-black-lighter">
-            <div className="flex items-center justify-center gap-2 mb-2">
-              <FireIcon className="h-4 w-4 text-orange-400" />
-              <span className="text-sm text-orange-400 font-medium">
-                v0.1.5
-              </span>
-            </div>
-            <h1 className="text-sm mb-2 text-white-darker text-center">
-              See full checkist in the README
-            </h1>
-          </div>
-          <a href="https://github.com/Jayd-H/joker-forge/blob/main/README.md" target="_blank" rel="noopener noreferrer">  
-            <h1 className=" text-mint hover:underline text-center">
-              View README
-            </h1>
-          </a>
-        </div>
-      </div>
-
-      <div className="bg-black-dark border-2 border-black-lighter rounded-xl p-8">
-        <div className="flex items-center gap-3 mb-6">
-          <InformationCircleIcon className="h-6 w-6 text-mint" />
-          <h2 className="text-2xl text-white-light font-light">
-            About Joker Forge
-          </h2>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className=" mt-8 pt-8">
+          <div className="flex justify-center mt-6">
+            <h2 className="text-2xl text-white-light tracking-widest font-light mb-6">
+              What is Joker Forge?
+            </h2>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-6">
           <div className="lg:col-span-2 space-y-6">
             <div>
               <h3 className="text-xl text-white-light font-medium mb-4">
@@ -923,7 +725,7 @@ const OverviewPage: React.FC<OverviewPageProps> = ({
             </div>
           </div>
 
-          <div className="bg-black-darker border border-black-lighter rounded-xl p-6">
+          <div className=" border-black-lighter rounded-xl p-6">
             <h4 className="text-white-light font-medium mb-6 flex items-center gap-2">
               <SparklesIcon className="h-5 w-5 text-mint" />
               How It Works

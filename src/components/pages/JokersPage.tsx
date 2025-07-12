@@ -4,9 +4,7 @@ import {
   PlusIcon,
   DocumentTextIcon,
   MagnifyingGlassIcon,
-  FunnelIcon,
   ArrowsUpDownIcon,
-  ExclamationTriangleIcon,
 } from "@heroicons/react/24/outline";
 import JokerCard from "../JokerCard";
 import EditJokerInfo from "../EditJokerInfo";
@@ -138,30 +136,6 @@ const isPlaceholderJoker = (imagePath: string): boolean => {
     imagePath.includes("placeholder-joker") ||
     imagePath.startsWith("data:image")
   );
-};
-
-const validateJoker = (
-  joker: JokerData,
-  isPlaceholderJoker: (imagePath: string) => boolean
-) => {
-  const issues = [];
-
-  if (
-    !joker.imagePreview ||
-    (!isPlaceholderJoker(joker.imagePreview) && !joker.imagePreview)
-  ) {
-    issues.push("Missing image");
-  }
-
-  if (!joker.name || joker.name.trim() === "" || joker.name === "New Joker") {
-    issues.push("Generic or missing name");
-  }
-
-  if (!joker.rules || joker.rules.length === 0) {
-    issues.push("No rules defined");
-  }
-
-  return issues;
 };
 
 const JokersPage: React.FC<JokersPageProps> = ({
@@ -395,12 +369,6 @@ const JokersPage: React.FC<JokersPageProps> = ({
     setShowSortMenu(!showSortMenu);
   };
 
-  const handleFiltersToggle = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (showSortMenu) setShowSortMenu(false);
-    setShowFilters(!showFilters);
-  };
-
   const filteredAndSortedJokers = useMemo(() => {
     const filtered = jokers.filter((joker) => {
       const matchesSearch =
@@ -443,17 +411,6 @@ const JokersPage: React.FC<JokersPageProps> = ({
     },
   ];
 
-  const validationStats = useMemo(() => {
-    const incompleteJokers = jokers.filter(
-      (joker) => validateJoker(joker, isPlaceholderJoker).length > 0
-    );
-    return {
-      total: jokers.length,
-      incomplete: incompleteJokers.length,
-      complete: jokers.length - incompleteJokers.length,
-    };
-  }, [jokers]);
-
   const getRarityColor = (rarity: number | null) => {
     switch (rarity) {
       case 1:
@@ -476,38 +433,36 @@ const JokersPage: React.FC<JokersPageProps> = ({
   return (
     <div className="min-h-screen">
       <div className="p-8 font-lexend max-w-7xl mx-auto">
-        <div className="flex items-center justify-between mb-8">
+        <h1 className="text-3xl text-white-light tracking-widest text-center">
+          Jokers
+        </h1>
+        <h1 className="text-xl text-white-dark font-light tracking-widest mb-6 text-center">
+          {modName}
+        </h1>
+        <div className="flex justify-center mb-2">
+          <Button
+            variant="primary"
+            onClick={handleAddNewJoker}
+            icon={<PlusIcon className="h-5 w-5" />}
+            size="md"
+            className="shadow-lg hover:shadow-2xl transition-shadow"
+          >
+            Add New Joker
+          </Button>
+        </div>
+        <div className="flex items-center mb-2">
           <div>
-            <h1 className="text-4xl text-white-light font-light tracking-wide mb-3 bg-gradient-to-r from-white-light to-mint bg-clip-text">
-              Jokers
-            </h1>
             <div className="flex items-center gap-6 text-white-darker text-sm">
               <div className="flex items-center">
                 <DocumentTextIcon className="h-4 w-4 mr-2 text-mint" />
                 {modName} • {filteredAndSortedJokers.length} of {jokers.length}{" "}
                 joker{jokers.length !== 1 ? "s" : ""}
               </div>
-              {validationStats.incomplete > 0 && (
-                <div className="flex items-center text-balatro-orange">
-                  <ExclamationTriangleIcon className="h-4 w-4 mr-1" />
-                  {validationStats.incomplete} incomplete
-                </div>
-              )}
             </div>
           </div>
-
-          <Button
-            variant="primary"
-            onClick={handleAddNewJoker}
-            icon={<PlusIcon className="h-5 w-5" />}
-            size="lg"
-            className="shadow-lg hover:shadow-xl transition-shadow"
-          >
-            Add New Joker
-          </Button>
         </div>
 
-        <div className="mb-8 bg-gradient-to-r from-black-dark to-black border-2 border-black-lighter rounded-2xl p-6 shadow-lg backdrop-blur-sm">
+        <div className="mb-8">
           <div className="flex flex-col lg:flex-row gap-4">
             <div className="flex-1 relative group">
               <MagnifyingGlassIcon className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-white-darker group-focus-within:text-mint transition-colors" />
@@ -516,7 +471,7 @@ const JokersPage: React.FC<JokersPageProps> = ({
                 placeholder="Search jokers by name or description..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full bg-black-darker border-2 border-black-lighter rounded-xl pl-12 pr-4 py-4 text-white-light placeholder-white-darker focus:outline-none focus:border-mint focus:bg-black transition-all duration-200"
+                className="w-full bg-black-darker shadow-2xl border-2 border-black-lighter rounded-lg pl-12 pr-4 py-4 text-white-light tracking-wider placeholder-white-darker focus:outline-none focus:border-mint transition-all duration-200"
               />
             </div>
 
@@ -525,64 +480,19 @@ const JokersPage: React.FC<JokersPageProps> = ({
                 <button
                   ref={sortButtonRef}
                   onClick={handleSortMenuToggle}
-                  className="flex items-center gap-2 bg-black-dark text-white-light px-4 py-4 border-2 border-black-lighter rounded-xl hover:border-mint transition-colors cursor-pointer"
+                  className="flex items-center gap-2 bg-black-dark text-white-light px-4 py-4 border-2 border-black-lighter rounded-lg hover:border-mint transition-colors cursor-pointer"
                 >
                   <ArrowsUpDownIcon className="h-4 w-4" />
                   <span className="whitespace-nowrap">{currentSortLabel}</span>
                 </button>
               </div>
-
-              <div className="relative">
-                <button
-                  ref={filtersButtonRef}
-                  onClick={handleFiltersToggle}
-                  className={`flex items-center gap-2 px-4 py-4 border-2 rounded-xl transition-colors cursor-pointer ${
-                    showFilters
-                      ? "bg-mint-dark text-black-darker border-mint"
-                      : "bg-black-dark text-white-light border-black-lighter hover:border-mint"
-                  }`}
-                >
-                  <FunnelIcon className="h-4 w-4" />
-                  <span>Filters</span>
-                </button>
-              </div>
             </div>
           </div>
-
-          {(searchTerm || rarityFilter !== null) && (
-            <div className="mt-4 flex flex-wrap gap-2">
-              {searchTerm && (
-                <div className="flex items-center gap-2 bg-mint/15 border border-mint/40 rounded-lg px-3 py-1.5 text-sm backdrop-blur-sm">
-                  <span className="text-mint">Search: "{searchTerm}"</span>
-                  <button
-                    onClick={() => setSearchTerm("")}
-                    className="text-mint hover:text-mint-light font-bold"
-                  >
-                    ×
-                  </button>
-                </div>
-              )}
-              {rarityFilter !== null && (
-                <div className="flex items-center gap-2 bg-mint/15 border border-mint/40 rounded-lg px-3 py-1.5 text-sm backdrop-blur-sm">
-                  <span className="text-mint">
-                    Rarity:{" "}
-                    {rarityOptions.find((r) => r.value === rarityFilter)?.label}
-                  </span>
-                  <button
-                    onClick={() => setRarityFilter(null)}
-                    className="text-mint hover:text-mint-light font-bold"
-                  >
-                    ×
-                  </button>
-                </div>
-              )}
-            </div>
-          )}
         </div>
 
         {filteredAndSortedJokers.length === 0 && jokers.length > 0 ? (
           <div className="flex flex-col items-center justify-center text-center py-20">
-            <div className="bg-gradient-to-br from-black-dark to-black border-2 border-black-lighter rounded-2xl p-8 max-w-md shadow-lg">
+            <div className="rounded-2xl p-8 max-w-md">
               <MagnifyingGlassIcon className="h-16 w-16 text-mint opacity-60 mb-4 mx-auto" />
               <h3 className="text-white-light text-xl font-light mb-3">
                 No Jokers Found
@@ -605,14 +515,14 @@ const JokersPage: React.FC<JokersPageProps> = ({
           </div>
         ) : filteredAndSortedJokers.length === 0 ? (
           <div className="flex flex-col items-center justify-center text-center py-20">
-            <div className="bg-gradient-to-br from-black-dark to-black border-2 border-black-lighter rounded-2xl p-8 max-w-md shadow-lg">
+            <div className="rounded-2xl p-8 max-w-md">
               <DocumentTextIcon className="h-16 w-16 text-mint opacity-60 mb-4 mx-auto" />
               <h3 className="text-white-light text-xl font-light mb-3">
-                No Jokers Yet
+                No Jokers Yet :(
               </h3>
               <p className="text-white-darker text-sm mb-6 leading-relaxed">
-                Get started by creating your first custom joker. You can define
-                its appearance, stats, and unique gameplay effects.
+                Create your first joker to get started with editing its
+                information and defining its custom rules.
               </p>
               <Button
                 variant="primary"
@@ -625,7 +535,7 @@ const JokersPage: React.FC<JokersPageProps> = ({
             </div>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+          <div className="grid lg:grid-cols-2 md:grid-cols-1 gap-14">
             {filteredAndSortedJokers.map((joker) => (
               <JokerCard
                 key={joker.id}

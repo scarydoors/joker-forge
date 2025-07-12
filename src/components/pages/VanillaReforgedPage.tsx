@@ -1,16 +1,29 @@
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo, useEffect, startTransition } from "react";
 import ReactDOM from "react-dom";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   MagnifyingGlassIcon,
   FunnelIcon,
   ArrowsUpDownIcon,
   DocumentDuplicateIcon,
+  DocumentTextIcon,
+  StarIcon,
+  LockOpenIcon,
+  LockClosedIcon,
+  EyeIcon,
+  EyeSlashIcon,
+  ExclamationCircleIcon,
+  BuildingStorefrontIcon,
+  NoSymbolIcon,
+  ClockIcon,
+  CurrencyDollarIcon,
 } from "@heroicons/react/24/outline";
 import { PuzzlePieceIcon } from "@heroicons/react/24/solid";
-import { FolderIcon } from "@heroicons/react/24/solid";
 import { JokerData } from "../JokerCard";
 import { formatBalatroText } from "../generic/balatroTextFormatter";
 import RuleBuilder from "../ruleBuilder/RuleBuilder";
+import Button from "../generic/Button";
+import Tooltip from "../generic/Tooltip";
 
 interface VanillaReforgedPageProps {
   onDuplicateToProject?: (joker: JokerData) => void;
@@ -23,11 +36,58 @@ type SortOption = {
   sortFn: (a: JokerData, b: JokerData) => number;
 };
 
+const useAsyncJokersLoader = () => {
+  const [vanillaJokers, setVanillaJokers] = useState<JokerData[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let isCancelled = false;
+
+    const loadJokers = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        const response = await fetch("/vanillareforged.json");
+        if (!response.ok) {
+          throw new Error("Failed to fetch vanilla jokers data");
+        }
+
+        const data = await response.json();
+
+        if (!isCancelled) {
+          startTransition(() => {
+            setVanillaJokers(data.jokers || []);
+            setLoading(false);
+          });
+        }
+      } catch (err) {
+        if (!isCancelled) {
+          console.error("Error fetching vanilla jokers:", err);
+          setError(err instanceof Error ? err.message : "Unknown error");
+          setVanillaJokers([]);
+          setLoading(false);
+        }
+      }
+    };
+
+    const timeoutId = setTimeout(loadJokers, 0);
+
+    return () => {
+      isCancelled = true;
+      clearTimeout(timeoutId);
+    };
+  }, []);
+
+  return { vanillaJokers, loading, error };
+};
+
 const VanillaReforgedPage: React.FC<VanillaReforgedPageProps> = ({
   onDuplicateToProject,
   onNavigateToJokers,
 }) => {
-  const [vanillaJokers, setVanillaJokers] = useState<JokerData[]>([]);
+  const { vanillaJokers, loading } = useAsyncJokersLoader();
   const [searchTerm, setSearchTerm] = useState("");
   const [rarityFilter, setRarityFilter] = useState<number | null>(null);
   const [showFilters, setShowFilters] = useState(false);
@@ -84,13 +144,22 @@ const VanillaReforgedPage: React.FC<VanillaReforgedPageProps> = ({
         label: "Cost (High to Low)",
         sortFn: (a, b) => (b.cost || 0) - (a.cost || 0),
       },
+      {
+        value: "rules-desc",
+        label: "Rules (Most to Least)",
+        sortFn: (a, b) => (b.rules?.length || 0) - (a.rules?.length || 0),
+      },
+      {
+        value: "rules-asc",
+        label: "Rules (Least to Most)",
+        sortFn: (a, b) => (a.rules?.length || 0) - (b.rules?.length || 0),
+      },
     ],
     []
   );
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      // Check if click is outside sort button AND sort menu
       if (
         sortButtonRef.current &&
         !sortButtonRef.current.contains(event.target as Node) &&
@@ -99,7 +168,6 @@ const VanillaReforgedPage: React.FC<VanillaReforgedPageProps> = ({
       ) {
         setShowSortMenu(false);
       }
-      // Check if click is outside filters button AND filters menu
       if (
         filtersButtonRef.current &&
         !filtersButtonRef.current.contains(event.target as Node) &&
@@ -138,20 +206,9 @@ const VanillaReforgedPage: React.FC<VanillaReforgedPageProps> = ({
     }
   }, [showFilters]);
 
-  useEffect(() => {
-    const fetchVanillaJokers = async () => {
-      const response = await fetch("/vanillareforged.json");
-      if (!response.ok) {
-        throw new Error("Failed to fetch vanilla jokers data");
-      }
-      const data = await response.json();
-      setVanillaJokers(data.jokers || []);
-    };
-
-    fetchVanillaJokers();
-  }, []);
-
   const filteredAndSortedJokers = useMemo(() => {
+    if (loading || !vanillaJokers.length) return [];
+
     const filtered = vanillaJokers.filter((joker) => {
       const matchesSearch =
         joker.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -168,31 +225,34 @@ const VanillaReforgedPage: React.FC<VanillaReforgedPageProps> = ({
     }
 
     return filtered;
-  }, [vanillaJokers, searchTerm, rarityFilter, sortBy, sortOptions]);
+  }, [vanillaJokers, searchTerm, rarityFilter, sortBy, sortOptions, loading]);
 
-  const rarityOptions = [
-    { value: null, label: "All Rarities", count: vanillaJokers.length },
-    {
-      value: 1,
-      label: "Common",
-      count: vanillaJokers.filter((j) => j.rarity === 1).length,
-    },
-    {
-      value: 2,
-      label: "Uncommon",
-      count: vanillaJokers.filter((j) => j.rarity === 2).length,
-    },
-    {
-      value: 3,
-      label: "Rare",
-      count: vanillaJokers.filter((j) => j.rarity === 3).length,
-    },
-    {
-      value: 4,
-      label: "Legendary",
-      count: vanillaJokers.filter((j) => j.rarity === 4).length,
-    },
-  ];
+  const rarityOptions = useMemo(
+    () => [
+      { value: null, label: "All Rarities", count: vanillaJokers.length },
+      {
+        value: 1,
+        label: "Common",
+        count: vanillaJokers.filter((j) => j.rarity === 1).length,
+      },
+      {
+        value: 2,
+        label: "Uncommon",
+        count: vanillaJokers.filter((j) => j.rarity === 2).length,
+      },
+      {
+        value: 3,
+        label: "Rare",
+        count: vanillaJokers.filter((j) => j.rarity === 3).length,
+      },
+      {
+        value: 4,
+        label: "Legendary",
+        count: vanillaJokers.filter((j) => j.rarity === 4).length,
+      },
+    ],
+    [vanillaJokers]
+  );
 
   const handleDuplicateJoker = (joker: JokerData) => {
     if (onDuplicateToProject) {
@@ -209,7 +269,6 @@ const VanillaReforgedPage: React.FC<VanillaReforgedPageProps> = ({
     }
   };
 
-  // this ideally should not be hardcoded but we live and we learn or whatever
   const handleViewRules = (joker: JokerData) => {
     if (joker.rules && joker.rules.length === 1) {
       joker.rules[0].position = { x: 500, y: 100 };
@@ -254,34 +313,73 @@ const VanillaReforgedPage: React.FC<VanillaReforgedPageProps> = ({
     sortOptions.find((option) => option.value === sortBy)?.label ||
     "Name (A-Z)";
 
+  const filterKey = `${searchTerm}-${rarityFilter}-${sortBy}`;
+
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.05,
+        delayChildren: 0.1,
+      },
+    },
+  };
+
+  const itemVariants = {
+    hidden: {
+      opacity: 0,
+      y: 15,
+      scale: 0.98,
+    },
+    visible: (index: number) => ({
+      opacity: 1,
+      y: 0,
+      scale: 1,
+      transition: {
+        type: "spring",
+        stiffness: 200,
+        damping: 20,
+        duration: 0.4,
+        delay: index < 10 ? index * 0.05 : 0,
+      },
+    }),
+  };
+
+  const staticVariants = {
+    visible: {
+      opacity: 1,
+      y: 0,
+      scale: 1,
+    },
+  };
+
   return (
     <div className="min-h-screen">
       <div className="p-8 font-lexend max-w-7xl mx-auto">
-        <div className="flex items-center justify-between mb-8">
+        <h1 className="text-3xl text-white-light tracking-widest text-center">
+          Vanilla Reforged
+        </h1>
+        <h1 className="text-xl text-white-dark font-light tracking-widest mb-6 text-center">
+          Reference Collection
+        </h1>
+
+        <div className="flex items-center mb-2">
           <div>
-            <h1 className="text-4xl text-white-light font-light tracking-wide mb-3">
-              Vanilla Reforged
-            </h1>
             <div className="flex items-center gap-6 text-white-darker text-sm">
               <div className="flex items-center">
-                <FolderIcon className="h-4 w-4 mr-2 text-mint" />
-                {filteredAndSortedJokers.length} of {vanillaJokers.length}{" "}
-                vanilla jokers
+                <DocumentTextIcon className="h-4 w-4 mr-2 text-mint" />
+                Vanilla Collection •{" "}
+                {loading
+                  ? "Loading..."
+                  : `${filteredAndSortedJokers.length} of ${vanillaJokers.length}`}{" "}
+                joker{vanillaJokers.length !== 1 ? "s" : ""}
               </div>
-            </div>
-          </div>
-
-          <div className="text-right">
-            <div className="text-white-light font-medium mb-1">
-              Reference Collection
-            </div>
-            <div className="text-white-darker text-sm">
-              Duplicate jokers to your project
             </div>
           </div>
         </div>
 
-        <div className="mb-8 bg-gradient-to-r from-black-dark to-black border-2 border-black-lighter rounded-2xl p-6 shadow-lg backdrop-blur-sm">
+        <div className="mb-8">
           <div className="flex flex-col lg:flex-row gap-4">
             <div className="flex-1 relative group">
               <MagnifyingGlassIcon className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-white-darker group-focus-within:text-mint transition-colors" />
@@ -290,7 +388,7 @@ const VanillaReforgedPage: React.FC<VanillaReforgedPageProps> = ({
                 placeholder="Search vanilla jokers by name or description..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full bg-black-darker border-2 border-black-lighter rounded-xl pl-12 pr-4 py-4 text-white-light placeholder-white-darker focus:outline-none focus:border-mint focus:bg-black transition-all duration-200"
+                className="w-full bg-black-darker shadow-2xl border-2 border-black-lighter rounded-lg pl-12 pr-4 py-4 text-white-light tracking-wider placeholder-white-darker focus:outline-none focus:border-mint transition-all duration-200"
               />
             </div>
 
@@ -299,7 +397,7 @@ const VanillaReforgedPage: React.FC<VanillaReforgedPageProps> = ({
                 <button
                   ref={sortButtonRef}
                   onClick={handleSortMenuToggle}
-                  className="flex items-center gap-2 bg-black-dark text-white-light px-4 py-4 border-2 border-black-lighter rounded-xl hover:border-mint transition-colors cursor-pointer"
+                  className="flex items-center gap-2 bg-black-dark text-white-light px-4 py-4 border-2 border-black-lighter rounded-lg hover:border-mint transition-colors cursor-pointer"
                 >
                   <ArrowsUpDownIcon className="h-4 w-4" />
                   <span className="whitespace-nowrap">{currentSortLabel}</span>
@@ -310,7 +408,7 @@ const VanillaReforgedPage: React.FC<VanillaReforgedPageProps> = ({
                 <button
                   ref={filtersButtonRef}
                   onClick={handleFiltersToggle}
-                  className={`flex items-center gap-2 px-4 py-4 border-2 rounded-xl transition-colors cursor-pointer ${
+                  className={`flex items-center gap-2 px-4 py-4 border-2 rounded-lg transition-colors cursor-pointer ${
                     showFilters
                       ? "bg-mint-dark text-black-darker border-mint"
                       : "bg-black-dark text-white-light border-black-lighter hover:border-mint"
@@ -322,73 +420,110 @@ const VanillaReforgedPage: React.FC<VanillaReforgedPageProps> = ({
               </div>
             </div>
           </div>
-
-          {(searchTerm || rarityFilter !== null) && (
-            <div className="mt-4 flex flex-wrap gap-2">
-              {searchTerm && (
-                <div className="flex items-center gap-2 bg-mint/15 border border-mint/40 rounded-lg px-3 py-1.5 text-sm backdrop-blur-sm">
-                  <span className="text-mint">Search: "{searchTerm}"</span>
-                  <button
-                    onClick={() => setSearchTerm("")}
-                    className="text-mint hover:text-mint-light font-bold cursor-pointer"
-                  >
-                    ×
-                  </button>
-                </div>
-              )}
-              {rarityFilter !== null && (
-                <div className="flex items-center gap-2 bg-mint/15 border border-mint/40 rounded-lg px-3 py-1.5 text-sm backdrop-blur-sm">
-                  <span className="text-mint">
-                    Rarity:{" "}
-                    {rarityOptions.find((r) => r.value === rarityFilter)?.label}
-                  </span>
-                  <button
-                    onClick={() => setRarityFilter(null)}
-                    className="text-mint hover:text-mint-light font-bold cursor-pointer"
-                  >
-                    ×
-                  </button>
-                </div>
-              )}
-            </div>
-          )}
         </div>
 
-        {filteredAndSortedJokers.length === 0 ? (
-          <div className="flex flex-col items-center justify-center text-center py-20">
-            <div className="bg-gradient-to-br from-black-dark to-black border-2 border-black-lighter rounded-2xl p-8 max-w-md shadow-lg">
-              <MagnifyingGlassIcon className="h-16 w-16 text-mint opacity-60 mb-4 mx-auto" />
-              <h3 className="text-white-light text-xl font-light mb-3">
-                No Jokers Found
-              </h3>
-              <p className="text-white-darker text-sm mb-6 leading-relaxed">
-                No vanilla jokers match your current search and filter criteria.
-                Try adjusting your filters or search terms.
-              </p>
-              <button
-                onClick={() => {
-                  setSearchTerm("");
-                  setRarityFilter(null);
-                }}
-                className="w-full bg-black-dark text-white-light border-2 border-black-lighter rounded-lg px-4 py-2 hover:border-mint transition-colors cursor-pointer"
-              >
-                Clear All Filters
-              </button>
-            </div>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-            {filteredAndSortedJokers.map((joker) => (
-              <div key={joker.id} className="relative">
-                <VanillaJokerCard
-                  joker={joker}
-                  onDuplicate={() => handleDuplicateJoker(joker)}
-                  onViewRules={() => handleViewRules(joker)}
-                />
+        <AnimatePresence mode="wait">
+          {loading ? (
+            <motion.div
+              key="loading"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="flex flex-col items-center justify-center text-center py-20"
+            >
+              <div className="rounded-2xl p-8 max-w-md">
+                <div className="animate-spin h-16 w-16 border-4 border-mint border-t-transparent rounded-full mx-auto mb-4"></div>
+                <h3 className="text-white-light text-xl font-light mb-3">
+                  Loading Vanilla Jokers
+                </h3>
+                <p className="text-white-darker text-sm leading-relaxed">
+                  Fetching the complete vanilla jokers collection...
+                </p>
               </div>
-            ))}
-          </div>
-        )}
+            </motion.div>
+          ) : filteredAndSortedJokers.length === 0 &&
+            vanillaJokers.length > 0 ? (
+            <motion.div
+              key="no-results"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="flex flex-col items-center justify-center text-center py-20"
+            >
+              <div className="rounded-2xl p-8 max-w-md">
+                <MagnifyingGlassIcon className="h-16 w-16 text-mint opacity-60 mb-4 mx-auto" />
+                <h3 className="text-white-light text-xl font-light mb-3">
+                  No Jokers Found
+                </h3>
+                <p className="text-white-darker text-sm mb-6 leading-relaxed">
+                  No vanilla jokers match your current search and filter
+                  criteria. Try adjusting your filters or search terms.
+                </p>
+                <Button
+                  variant="secondary"
+                  onClick={() => {
+                    setSearchTerm("");
+                    setRarityFilter(null);
+                  }}
+                  fullWidth
+                >
+                  Clear All Filters
+                </Button>
+              </div>
+            </motion.div>
+          ) : filteredAndSortedJokers.length === 0 ? (
+            <motion.div
+              key="no-data"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="flex flex-col items-center justify-center text-center py-20"
+            >
+              <div className="rounded-2xl p-8 max-w-md">
+                <DocumentTextIcon className="h-16 w-16 text-mint opacity-60 mb-4 mx-auto" />
+                <h3 className="text-white-light text-xl font-light mb-3">
+                  No Vanilla Jokers Available
+                </h3>
+                <p className="text-white-darker text-sm mb-6 leading-relaxed">
+                  Unable to load the vanilla jokers collection. Please try
+                  refreshing the page.
+                </p>
+                <Button
+                  variant="primary"
+                  onClick={() => window.location.reload()}
+                  fullWidth
+                >
+                  Refresh Page
+                </Button>
+              </div>
+            </motion.div>
+          ) : (
+            <motion.div
+              key={`content-${filterKey}`}
+              variants={containerVariants}
+              initial="hidden"
+              animate="visible"
+              exit="hidden"
+              className="grid lg:grid-cols-2 md:grid-cols-1 gap-14"
+            >
+              {filteredAndSortedJokers.map((joker, index) => (
+                <motion.div
+                  key={joker.id}
+                  variants={index < 10 ? itemVariants : staticVariants}
+                  initial={index < 10 ? "hidden" : "visible"}
+                  animate="visible"
+                  custom={index}
+                >
+                  <VanillaJokerCard
+                    joker={joker}
+                    onDuplicate={() => handleDuplicateJoker(joker)}
+                    onViewRules={() => handleViewRules(joker)}
+                  />
+                </motion.div>
+              ))}
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {showRuleBuilder && currentJokerForRules && (
           <RuleBuilder
@@ -486,17 +621,19 @@ const VanillaReforgedPage: React.FC<VanillaReforgedPageProps> = ({
 
             {(searchTerm || rarityFilter !== null) && (
               <div className="p-3">
-                <button
+                <Button
+                  variant="secondary"
+                  size="sm"
                   onClick={(e) => {
                     e.stopPropagation();
                     setSearchTerm("");
                     setRarityFilter(null);
                     setShowFilters(false);
                   }}
-                  className="w-full bg-black-dark text-white-light border border-black-lighter rounded-lg px-3 py-2 hover:border-mint transition-colors text-sm cursor-pointer"
+                  fullWidth
                 >
                   Clear All Filters
-                </button>
+                </Button>
               </div>
             )}
           </div>,
@@ -512,11 +649,56 @@ interface VanillaJokerCardProps {
   onViewRules: () => void;
 }
 
+const PropertyIcon: React.FC<{
+  icon: React.ReactNode;
+  tooltip: string;
+  variant: "disabled" | "warning" | "success" | "info" | "special";
+  isEnabled: boolean;
+}> = ({ icon, tooltip, variant, isEnabled }) => {
+  const [isHovered, setIsHovered] = useState(false);
+
+  const variantStyles = {
+    disabled: isEnabled
+      ? "bg-black-dark border-black-lighter text-white-darker"
+      : "bg-black-darker border-black-dark text-black-light opacity-50",
+    warning: isEnabled
+      ? "bg-balatro-orange/20 border-balatro-orange/40 text-balatro-orange"
+      : "bg-black-darker border-black-dark text-black-light opacity-50",
+    success: isEnabled
+      ? "bg-balatro-green/20 border-balatro-green/40 text-balatro-green"
+      : "bg-black-darker border-black-dark text-black-light opacity-50",
+    info: isEnabled
+      ? "bg-balatro-blue/20 border-balatro-blue/40 text-balatro-blue"
+      : "bg-black-darker border-black-dark text-black-light opacity-50",
+    special: isEnabled
+      ? "bg-balatro-purple/20 border-balatro-purple/40 text-balatro-purple"
+      : "bg-black-darker border-black-dark text-black-light opacity-50",
+  };
+
+  return (
+    <Tooltip content={tooltip} show={isHovered}>
+      <div
+        className={`flex items-center justify-center w-7 h-7 rounded-lg border-2 transition-all duration-200 ${variantStyles[variant]}`}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+      >
+        <div className="w-4 h-4">{icon}</div>
+      </div>
+    </Tooltip>
+  );
+};
+
 const VanillaJokerCard: React.FC<VanillaJokerCardProps> = ({
   joker,
   onDuplicate,
   onViewRules,
 }) => {
+  const [imageLoadError, setImageLoadError] = useState(false);
+  const [fallbackAttempted, setFallbackAttempted] = useState(false);
+  const [hoveredButton, setHoveredButton] = useState<string | null>(null);
+  const [tooltipDelayTimeout, setTooltipDelayTimeout] =
+    useState<NodeJS.Timeout | null>(null);
+
   const safeRarity =
     typeof joker.rarity === "number" && joker.rarity >= 1 && joker.rarity <= 4
       ? joker.rarity
@@ -564,123 +746,236 @@ const VanillaJokerCard: React.FC<VanillaJokerCardProps> = ({
   const rarityText = getRarityText(safeRarity);
   const rarityStyles = getRarityStyles(safeRarity);
   const rulesCount = joker.rules?.length || 0;
-  const hasRules = rulesCount > 0;
+
+  const blueprintCompat = joker.blueprint_compat !== false;
+  const eternalCompat = joker.eternal_compat !== false;
+  const isUnlocked = joker.unlocked !== false;
+  const isDiscovered = joker.discovered !== false;
+  const forceEternal = joker.force_eternal === true;
+  const forcePerishable = joker.force_perishable === true;
+  const forceRental = joker.force_rental === true;
+  const appearsInShop = joker.appears_in_shop !== false;
+
+  const propertyIcons = [
+    {
+      icon: <DocumentTextIcon className="w-full h-full" />,
+      tooltip: blueprintCompat
+        ? "Blueprint Compatible"
+        : "Cannot be copied by Blueprint",
+      variant: "disabled" as const,
+      isEnabled: blueprintCompat,
+    },
+    {
+      icon: <StarIcon className="w-full h-full" />,
+      tooltip: eternalCompat ? "Eternal Compatible" : "Cannot be made Eternal",
+      variant: "disabled" as const,
+      isEnabled: eternalCompat,
+    },
+    {
+      icon: isUnlocked ? (
+        <LockOpenIcon className="w-full h-full" />
+      ) : (
+        <LockClosedIcon className="w-full h-full" />
+      ),
+      tooltip: isUnlocked ? "Unlocked by Default" : "Locked by Default",
+      variant: "warning" as const,
+      isEnabled: isUnlocked,
+    },
+    {
+      icon: isDiscovered ? (
+        <EyeIcon className="w-full h-full" />
+      ) : (
+        <EyeSlashIcon className="w-full h-full" />
+      ),
+      tooltip: isDiscovered ? "Visible in Collection" : "Hidden in Collection",
+      variant: "info" as const,
+      isEnabled: isDiscovered,
+    },
+    {
+      icon: <ExclamationCircleIcon className="w-full h-full" />,
+      tooltip: forceEternal
+        ? "Always Spawns Eternal"
+        : "Normal Eternal Spawning",
+      variant: "special" as const,
+      isEnabled: forceEternal,
+    },
+    {
+      icon: <ClockIcon className="w-full h-full" />,
+      tooltip: forcePerishable
+        ? "Always Spawns Perishable"
+        : "Normal Perishable Spawning",
+      variant: "warning" as const,
+      isEnabled: forcePerishable,
+    },
+    {
+      icon: <CurrencyDollarIcon className="w-full h-full" />,
+      tooltip: forceRental ? "Always Spawns Rental" : "Normal Rental Spawning",
+      variant: "info" as const,
+      isEnabled: forceRental,
+    },
+    {
+      icon: appearsInShop ? (
+        <BuildingStorefrontIcon className="w-full h-full" />
+      ) : (
+        <NoSymbolIcon className="w-full h-full" />
+      ),
+      tooltip: appearsInShop
+        ? joker.rarity === 4
+          ? "Forced Shop Appearance"
+          : "Appears in Shop"
+        : "Doesn't Appear in Shop",
+      variant:
+        appearsInShop && joker.rarity === 4
+          ? ("special" as const)
+          : ("success" as const),
+      isEnabled: appearsInShop,
+    },
+  ];
+
+  const handleButtonHover = (buttonType: string) => {
+    if (tooltipDelayTimeout) {
+      clearTimeout(tooltipDelayTimeout);
+    }
+    const timeout = setTimeout(() => {
+      setHoveredButton(buttonType);
+    }, 500);
+    setTooltipDelayTimeout(timeout);
+  };
+
+  const handleButtonLeave = () => {
+    if (tooltipDelayTimeout) {
+      clearTimeout(tooltipDelayTimeout);
+      setTooltipDelayTimeout(null);
+    }
+    setHoveredButton(null);
+  };
 
   return (
     <div className="flex gap-4 relative">
       <div className="relative flex flex-col items-center">
-        <div className="px-4 -mb-6 z-20 py-1 rounded-lg border-2 text-xl font-bold transition-all bg-black font-game tracking-widest border-balatro-money text-balatro-money w-20 text-center">
+        <div className="px-4 -mb-6 z-20 py-1 rounded-md border-2 font-bold transition-all bg-black tracking-widest border-balatro-money text-balatro-money w-18 text-center">
           ${joker.cost || 4}
         </div>
 
         <div className="w-42 z-10 relative">
-          {joker.imagePreview ? (
-            <img
-              src={joker.imagePreview}
-              alt={joker.name}
-              className="w-full h-full object-contain"
-              draggable="false"
-            />
-          ) : (
-            <img
-              src="/images/placeholder-joker.png"
-              alt="Default Joker"
-              className="w-full h-full object-contain"
-              draggable="false"
-            />
-          )}
+          <div className="relative">
+            {joker.imagePreview && !imageLoadError ? (
+              <>
+                <img
+                  src={joker.imagePreview}
+                  alt={joker.name}
+                  className="w-full h-full object-contain"
+                  draggable="false"
+                  onError={() => setImageLoadError(true)}
+                />
+                {joker.overlayImagePreview && (
+                  <img
+                    src={joker.overlayImagePreview}
+                    alt={`${joker.name} overlay`}
+                    className="absolute inset-0 w-full h-full object-contain"
+                    draggable="false"
+                  />
+                )}
+              </>
+            ) : (
+              <img
+                src={
+                  !fallbackAttempted
+                    ? "/images/placeholderjokers/placeholder-joker.png"
+                    : "/images/placeholder-joker.png"
+                }
+                alt="Default Joker"
+                className="w-full h-full object-contain"
+                draggable="false"
+                onError={() => {
+                  if (!fallbackAttempted) {
+                    setFallbackAttempted(true);
+                  }
+                }}
+              />
+            )}
+          </div>
         </div>
 
         <div className="relative z-30">
           <div
-            className={`px-6 py-1 -mt-6 rounded-lg border-2 text-xl font-game tracking-wide font-medium transition-all ${rarityStyles.bg} ${rarityStyles.border} ${rarityStyles.text}`}
+            className={`px-6 py-1 -mt-6 rounded-md border-2 text-sm tracking-wide font-medium transition-all ${rarityStyles.bg} ${rarityStyles.border} ${rarityStyles.text}`}
           >
             {rarityText}
           </div>
         </div>
       </div>
 
-      <div className="my-auto relative bg-black-dark border-2 border-black-lighter rounded-xl p-4 pl-10 -ml-12 flex-1 min-h-fit">
+      <div className="my-auto border-l-2 pl-4 border-black-light relative flex-1 min-h-fit">
         <div className="flex flex-col h-full">
           <div className="flex-1">
             <div className="mb-3 h-7 flex items-start overflow-hidden">
               <h3
-                className="text-white-lighter text-xl tracking-wide font-game leading-tight line-clamp-1"
+                className="text-white-lighter text-xl tracking-wide leading-tight line-clamp-1"
                 style={{ lineHeight: "1.75rem" }}
               >
                 {joker.name}
               </h3>
             </div>
 
-            <div className="mb-4 h-16 flex items-start overflow-hidden">
+            <div className="mb-4 h-12 flex items-start overflow-hidden">
               <div
-                className="text-white-darker text-sm leading-relaxed font-game w-full line-clamp-3"
+                className="text-white-darker text-sm leading-relaxed w-full line-clamp-3"
                 dangerouslySetInnerHTML={{
                   __html: formatBalatroText(joker.description),
                 }}
               />
             </div>
 
-            {(joker.blueprint_compat === false ||
-              joker.eternal_compat === false) && (
-              <div className="flex items-center gap-3 mb-4">
-                {joker.blueprint_compat === false && (
-                  <div className="flex items-center gap-1 px-2 py-1 bg-balatro-red/20 border border-balatro-red/40 rounded-md">
-                    <span className="text-balatro-red text-xs font-medium">
-                      No Blueprint
-                    </span>
-                  </div>
-                )}
-
-                {joker.eternal_compat === false && (
-                  <div className="flex items-center gap-1 px-2 py-1 bg-balatro-red/20 border border-balatro-red/40 rounded-md">
-                    <span className="text-balatro-red text-xs font-medium">
-                      No Eternal
-                    </span>
-                  </div>
-                )}
-              </div>
-            )}
+            <div className="flex items-center justify-between mb-4 h-8 flex-wrap">
+              {propertyIcons.map((iconConfig, index) => (
+                <PropertyIcon
+                  key={index}
+                  icon={iconConfig.icon}
+                  tooltip={iconConfig.tooltip}
+                  variant={iconConfig.variant}
+                  isEnabled={iconConfig.isEnabled}
+                />
+              ))}
+            </div>
           </div>
 
-          <div className="flex items-center justify-center bg-black rounded-lg overflow-hidden">
-            <div
-              className="flex flex-1 hover:bg-white/10 transition-colors cursor-pointer group"
-              onClick={onDuplicate}
+          <div className="flex items-center px-12 justify-between overflow-hidden">
+            <Tooltip
+              content="Duplicate to Project"
+              show={hoveredButton === "duplicate"}
             >
-              <div className="flex-1 flex items-center justify-center py-3 px-3">
-                <div className="flex items-center gap-2">
-                  <DocumentDuplicateIcon className="h-6 w-6 text-white-darker group-hover:text-mint transition-colors" />
-                  <span className="text-white-darker group-hover:text-mint transition-colors text-sm font-medium">
-                    Duplicate
-                  </span>
+              <div
+                className="flex flex-1 transition-colors cursor-pointer group"
+                onClick={onDuplicate}
+                onMouseEnter={() => handleButtonHover("duplicate")}
+                onMouseLeave={handleButtonLeave}
+              >
+                <div className="flex-1 flex items-center justify-center py-3 px-3">
+                  <DocumentDuplicateIcon className="h-6 w-6 text-white group-hover:text-mint-lighter transition-colors" />
                 </div>
               </div>
-            </div>
+            </Tooltip>
             <div className="w-px bg-black-lighter py-3"></div>
-            <div
-              className={`flex flex-1 hover:bg-white/10 transition-colors group ${
-                hasRules ? "cursor-pointer" : "cursor-not-allowed opacity-50"
-              }`}
-              onClick={hasRules ? onViewRules : undefined}
-            >
-              <div className="flex-1 flex items-center justify-center py-3 px-3">
-                <div className="relative">
-                  <PuzzlePieceIcon
-                    className={`h-6 w-6 transition-colors ${
-                      hasRules
-                        ? "text-white-darker group-hover:text-mint"
-                        : "text-white-darker"
-                    }`}
-                  />
-                  {rulesCount > 0 && hasRules && (
-                    <div className="absolute -top-2 -right-2 bg-mint text-black text-xs font-bold rounded-full w-4 h-4 flex items-center justify-center shadow-sm">
-                      {rulesCount}
-                    </div>
-                  )}
+            <Tooltip content="View Rules" show={hoveredButton === "rules"}>
+              <div
+                className="flex flex-1 hover:text-mint-light transition-colors cursor-pointer group"
+                onClick={onViewRules}
+                onMouseEnter={() => handleButtonHover("rules")}
+                onMouseLeave={handleButtonLeave}
+              >
+                <div className="flex-1 flex items-center justify-center py-3 px-3">
+                  <div className="relative">
+                    <PuzzlePieceIcon className="h-6 w-6 group-hover:text-mint-lighter text-white transition-colors" />
+                    {rulesCount > 0 && (
+                      <div className="absolute -top-2 -right-2 bg-mint text-black text-xs font-bold rounded-full w-4 h-4 flex items-center justify-center shadow-sm">
+                        {rulesCount}
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
+            </Tooltip>
           </div>
         </div>
       </div>
