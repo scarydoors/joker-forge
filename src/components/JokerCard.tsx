@@ -6,8 +6,16 @@ import {
   DocumentIcon,
   StarIcon,
   TrashIcon,
-  ExclamationTriangleIcon,
   ArrowDownTrayIcon,
+  LockOpenIcon,
+  LockClosedIcon,
+  EyeIcon,
+  EyeSlashIcon,
+  ExclamationCircleIcon,
+  BuildingStorefrontIcon,
+  NoSymbolIcon,
+  ClockIcon,
+  CurrencyDollarIcon,
 } from "@heroicons/react/24/solid";
 
 import Tooltip from "./generic/Tooltip";
@@ -72,6 +80,7 @@ export interface JokerData {
   rules?: Rule[];
   userVariables?: UserVariable[];
   placeholderCreditIndex?: number;
+  jokerKey?: string;
 }
 
 interface JokerCardProps {
@@ -83,6 +92,48 @@ interface JokerCardProps {
   onExport: () => void;
   onQuickUpdate: (updates: Partial<JokerData>) => void;
 }
+
+const PropertyIcon: React.FC<{
+  icon: React.ReactNode;
+  tooltip: string;
+  variant: "disabled" | "warning" | "success" | "info" | "special";
+  isEnabled: boolean;
+  onClick: () => void;
+}> = ({ icon, tooltip, variant, isEnabled, onClick }) => {
+  const [isHovered, setIsHovered] = useState(false);
+
+  const variantStyles = {
+    disabled: isEnabled
+      ? "bg-black-dark border-black-lighter text-white-darker"
+      : "bg-black-darker border-black-dark text-black-light opacity-50",
+    warning: isEnabled
+      ? "bg-balatro-orange/20 border-balatro-orange/40 text-balatro-orange"
+      : "bg-black-darker border-black-dark text-black-light opacity-50",
+    success: isEnabled
+      ? "bg-balatro-green/20 border-balatro-green/40 text-balatro-green"
+      : "bg-black-darker border-black-dark text-black-light opacity-50",
+    info: isEnabled
+      ? "bg-balatro-blue/20 border-balatro-blue/40 text-balatro-blue"
+      : "bg-black-darker border-black-dark text-black-light opacity-50",
+    special: isEnabled
+      ? "bg-balatro-purple/20 border-balatro-purple/40 text-balatro-purple"
+      : "bg-black-darker border-black-dark text-black-light opacity-50",
+  };
+
+  return (
+    <Tooltip content={tooltip} show={isHovered}>
+      <div
+        className={`flex items-center justify-center w-7 h-7 rounded-lg border-2 transition-all duration-200 cursor-pointer ${variantStyles[variant]}`}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        onClick={onClick}
+      >
+        <div className="w-4 h-4">{icon}</div>
+      </div>
+    </Tooltip>
+  );
+};
+
 const getRarityText = (rarity: number) => {
   const rarityMap: Record<number, string> = {
     1: "Common",
@@ -136,7 +187,6 @@ const JokerCard: React.FC<JokerCardProps> = ({
   const [tempName, setTempName] = useState(joker.name);
   const [tempCost, setTempCost] = useState(joker.cost || 4);
   const [tempDescription, setTempDescription] = useState(joker.description);
-  const [hoveredIcon, setHoveredIcon] = useState<string | null>(null);
   const [hoveredButton, setHoveredButton] = useState<string | null>(null);
   const [hoveredTrash, setHoveredTrash] = useState(false);
   const [tooltipDelayTimeout, setTooltipDelayTimeout] =
@@ -190,19 +240,6 @@ const JokerCard: React.FC<JokerCardProps> = ({
     setShowRarityMenu(false);
   };
 
-  const validateJoker = (joker: JokerData) => {
-    const issues = [];
-    if (!joker.imagePreview) issues.push("Missing image");
-    if (!joker.name || joker.name.trim() === "" || joker.name === "New Joker")
-      issues.push("Generic or missing name");
-    if (!joker.rules || joker.rules.length === 0)
-      issues.push("No rules defined");
-    return issues;
-  };
-
-  const validationIssues = validateJoker(joker);
-  const hasIssues = validationIssues.length > 0;
-
   const handleButtonHover = (buttonType: string) => {
     if (tooltipDelayTimeout) {
       clearTimeout(tooltipDelayTimeout);
@@ -239,10 +276,105 @@ const JokerCard: React.FC<JokerCardProps> = ({
     setHoveredTrash(false);
   };
 
+  // Normalize boolean values to fix TypeScript warnings
+  const blueprintCompat = joker.blueprint_compat !== false;
+  const eternalCompat = joker.eternal_compat !== false;
+  const isUnlocked = joker.unlocked !== false;
+  const isDiscovered = joker.discovered !== false;
+  const forceEternal = joker.force_eternal === true;
+  const forcePerishable = joker.force_perishable === true;
+  const forceRental = joker.force_rental === true;
+  const appearsInShop = joker.appears_in_shop !== false;
+
+  // Property icon configuration
+  const propertyIcons = [
+    {
+      icon: <DocumentIcon className="w-full h-full" />,
+      tooltip: blueprintCompat
+        ? "Blueprint Compatible"
+        : "Cannot be copied by Blueprint",
+      variant: "disabled" as const,
+      isEnabled: blueprintCompat,
+      onClick: () => onQuickUpdate({ blueprint_compat: !blueprintCompat }),
+    },
+    {
+      icon: <StarIcon className="w-full h-full" />,
+      tooltip: eternalCompat ? "Eternal Compatible" : "Cannot be made Eternal",
+      variant: "disabled" as const,
+      isEnabled: eternalCompat,
+      onClick: () => onQuickUpdate({ eternal_compat: !eternalCompat }),
+    },
+    {
+      icon: isUnlocked ? (
+        <LockOpenIcon className="w-full h-full" />
+      ) : (
+        <LockClosedIcon className="w-full h-full" />
+      ),
+      tooltip: isUnlocked ? "Unlocked by Default" : "Locked by Default",
+      variant: "warning" as const,
+      isEnabled: isUnlocked,
+      onClick: () => onQuickUpdate({ unlocked: !isUnlocked }),
+    },
+    {
+      icon: isDiscovered ? (
+        <EyeIcon className="w-full h-full" />
+      ) : (
+        <EyeSlashIcon className="w-full h-full" />
+      ),
+      tooltip: isDiscovered ? "Visible in Collection" : "Hidden in Collection",
+      variant: "info" as const,
+      isEnabled: isDiscovered,
+      onClick: () => onQuickUpdate({ discovered: !isDiscovered }),
+    },
+    {
+      icon: <ExclamationCircleIcon className="w-full h-full" />,
+      tooltip: forceEternal
+        ? "Always Spawns Eternal"
+        : "Normal Eternal Spawning",
+      variant: "special" as const,
+      isEnabled: forceEternal,
+      onClick: () => onQuickUpdate({ force_eternal: !forceEternal }),
+    },
+    {
+      icon: <ClockIcon className="w-full h-full" />,
+      tooltip: forcePerishable
+        ? "Always Spawns Perishable"
+        : "Normal Perishable Spawning",
+      variant: "warning" as const,
+      isEnabled: forcePerishable,
+      onClick: () => onQuickUpdate({ force_perishable: !forcePerishable }),
+    },
+    {
+      icon: <CurrencyDollarIcon className="w-full h-full" />,
+      tooltip: forceRental ? "Always Spawns Rental" : "Normal Rental Spawning",
+      variant: "info" as const,
+      isEnabled: forceRental,
+      onClick: () => onQuickUpdate({ force_rental: !forceRental }),
+    },
+    {
+      icon: appearsInShop ? (
+        <BuildingStorefrontIcon className="w-full h-full" />
+      ) : (
+        <NoSymbolIcon className="w-full h-full" />
+      ),
+      tooltip: appearsInShop
+        ? joker.rarity === 4
+          ? "Forced Shop Appearance"
+          : "Appears in Shop"
+        : "Doesn't Appear in Shop",
+      variant:
+        appearsInShop && joker.rarity === 4
+          ? ("special" as const)
+          : ("success" as const),
+      isEnabled: appearsInShop,
+      onClick: () => onQuickUpdate({ appears_in_shop: !appearsInShop }),
+    },
+  ];
+
   return (
     <div className="flex gap-4 relative">
       <div className="relative flex flex-col items-center">
-        <div className="px-4 -mb-6 z-20 py-1 rounded-lg border-2 text-xl font-bold cursor-pointer transition-all bg-black font-game tracking-widest border-balatro-money text-balatro-money w-20 text-center">
+        <div className="px-4 -mb-6 z-20 py-1 rounded-md border-2 font-bold cursor-pointer transition-all bg-black  tracking-widest border-balatro-money text-balatro-money w-18 text-center">
           {editingCost ? (
             <input
               type="number"
@@ -272,21 +404,6 @@ const JokerCard: React.FC<JokerCardProps> = ({
         </div>
 
         <div className="w-42 z-10 relative">
-          {hasIssues && (
-            <Tooltip
-              content={validationIssues.join(", ")}
-              show={hoveredIcon === "warning"}
-              position="top"
-            >
-              <div
-                className="absolute top-2 left-2 bg-black border-2 border-balatro-orange rounded-lg p-1 cursor-pointer transition-all flex items-center justify-center z-30"
-                onMouseEnter={() => setHoveredIcon("warning")}
-                onMouseLeave={() => setHoveredIcon(null)}
-              >
-                <ExclamationTriangleIcon className="h-5 w-5 text-balatro-orange" />
-              </div>
-            </Tooltip>
-          )}
           <div className="relative">
             {joker.imagePreview && !imageLoadError ? (
               <>
@@ -328,14 +445,14 @@ const JokerCard: React.FC<JokerCardProps> = ({
 
         <div className="relative z-30">
           <div
-            className={`px-6 py-1 -mt-6 rounded-lg border-2 text-xl font-game tracking-wide font-medium cursor-pointer transition-all ${rarityStyles.bg} ${rarityStyles.border} ${rarityStyles.text}`}
+            className={`px-6 py-1 -mt-6 rounded-md border-2 text-sm tracking-wide font-medium cursor-pointer transition-all ${rarityStyles.bg} ${rarityStyles.border} ${rarityStyles.text}`}
             onClick={() => setShowRarityMenu(!showRarityMenu)}
           >
             {rarityText}
           </div>
 
           {showRarityMenu && (
-            <div className="absolute top-full left-1/2 -translate-x-1/2 mt-1 bg-black-darker border-2 border-black-lighter rounded-lg shadow-lg z-50 overflow-hidden">
+            <div className="absolute top-full left-1/2 -translate-x-1/2 mt-1 border-2 border-black-lighter rounded-lg shadow-lg z-50 overflow-hidden">
               {rarities.map((rarity) => (
                 <div
                   key={rarity.value}
@@ -350,7 +467,7 @@ const JokerCard: React.FC<JokerCardProps> = ({
         </div>
       </div>
 
-      <div className="my-auto relative bg-black-dark border-2 shadow-lg border-black-light rounded-xl p-4 pl-10 -ml-12 flex-1 min-h-fit">
+      <div className="my-auto border-l-2 pl-4 border-black-light relative flex-1 min-h-fit">
         <Tooltip content="Delete Joker" show={hoveredTrash}>
           <div
             className="absolute -top-3 -right-3 bg-black-dark border-2 border-balatro-red rounded-lg p-1 hover:bg-balatro-redshadow cursor-pointer transition-colors flex items-center justify-center z-10"
@@ -401,21 +518,15 @@ const JokerCard: React.FC<JokerCardProps> = ({
                         setNameValidationError("");
                       }
                     }}
-                    className={`text-white-lighter text-xl tracking-wide font-game leading-tight bg-transparent border-none outline-none w-full cursor-text ${
+                    className={`text-white-lighter text-xl tracking-wide leading-tight bg-transparent border-none outline-none w-full cursor-text ${
                       nameValidationError ? "border-b-2 border-balatro-red" : ""
                     }`}
                     autoFocus
                   />
-                  {nameValidationError && (
-                    <div className="text-balatro-red text-xs mt-1 flex items-center gap-1">
-                      <ExclamationTriangleIcon className="h-3 w-3" />
-                      <span>{nameValidationError}</span>
-                    </div>
-                  )}
                 </div>
               ) : (
                 <h3
-                  className="text-white-lighter text-xl tracking-wide font-game leading-tight cursor-pointer line-clamp-1"
+                  className="text-white-lighter text-xl tracking-wide leading-tight cursor-pointer line-clamp-1"
                   onClick={() => {
                     setTempName(joker.name);
                     setEditingName(true);
@@ -441,12 +552,12 @@ const JokerCard: React.FC<JokerCardProps> = ({
                       setEditingDescription(false);
                     }
                   }}
-                  className="text-white-darker text-sm leading-relaxed font-game bg-transparent border-none outline-none resize-none w-full cursor-text h-full"
+                  className="text-white-darker text-sm leading-relaxed bg-transparent border-none outline-none resize-none w-full cursor-text h-full"
                   autoFocus
                 />
               ) : (
                 <div
-                  className="text-white-darker text-sm leading-relaxed font-game cursor-pointer w-full line-clamp-3"
+                  className="text-white-darker text-sm leading-relaxed cursor-pointer w-full line-clamp-3"
                   onClick={() => {
                     setTempDescription(joker.description);
                     setEditingDescription(true);
@@ -457,67 +568,45 @@ const JokerCard: React.FC<JokerCardProps> = ({
                 />
               )}
             </div>
-            <div className="flex items-center gap-3 mb-2 h-6">
-              {joker.blueprint_compat === false && (
-                <Tooltip
-                  content="Cannot be copied by Blueprint"
-                  show={hoveredIcon === "blueprint"}
-                >
-                  <div
-                    className="relative flex items-center"
-                    onMouseEnter={() => setHoveredIcon("blueprint")}
-                    onMouseLeave={() => setHoveredIcon(null)}
-                  >
-                    <div className="flex items-center gap-1 px-2 py-1 bg-gray-600/20 border border-gray-500/40 rounded-md">
-                      <DocumentIcon className="h-3 w-3 text-gray-400" />
-                    </div>
-                  </div>
-                </Tooltip>
-              )}
 
-              {joker.eternal_compat === false && (
-                <Tooltip
-                  content="Cannot be made Eternal"
-                  show={hoveredIcon === "eternal"}
-                >
-                  <div
-                    className="relative flex items-center"
-                    onMouseEnter={() => setHoveredIcon("eternal")}
-                    onMouseLeave={() => setHoveredIcon(null)}
-                  >
-                    <div className="flex items-center gap-1 px-2 py-1 bg-gray-600/20 border border-gray-500/40 rounded-md">
-                      <StarIcon className="h-3 w-3 text-gray-400" />
-                    </div>
-                  </div>
-                </Tooltip>
-              )}
+            <div className="flex items-center justify-between mb-4 h-8 flex-wrap">
+              {propertyIcons.map((iconConfig, index) => (
+                <PropertyIcon
+                  key={index}
+                  icon={iconConfig.icon}
+                  tooltip={iconConfig.tooltip}
+                  variant={iconConfig.variant}
+                  isEnabled={iconConfig.isEnabled}
+                  onClick={iconConfig.onClick}
+                />
+              ))}
             </div>
           </div>
 
-          <div className="flex items-center justify-center bg-black rounded-lg overflow-hidden">
+          <div className="flex items-center justify-between overflow-hidden">
             <Tooltip content="Edit Info" show={hoveredButton === "edit"}>
               <div
-                className="flex flex-1 hover:bg-black-light transition-colors cursor-pointer group"
+                className="flex flex-1 transition-colors cursor-pointer group"
                 onClick={onEditInfo}
                 onMouseEnter={() => handleButtonHover("edit")}
                 onMouseLeave={handleButtonLeave}
               >
                 <div className="flex-1 flex items-center justify-center px-3 py-3">
-                  <PencilIcon className="h-6 w-6 text-white-darker group-hover:text-white-light transition-colors" />
+                  <PencilIcon className="h-6 w-6 text-white group-hover:text-mint-lighter transition-colors" />
                 </div>
               </div>
             </Tooltip>
             <div className="w-px bg-black-lighter py-3"></div>
             <Tooltip content="Edit Rules" show={hoveredButton === "rules"}>
               <div
-                className="flex flex-1 hover:bg-white/10 transition-colors cursor-pointer group"
+                className="flex flex-1 hover:text-mint-light transition-colors cursor-pointer group"
                 onClick={onEditRules}
                 onMouseEnter={() => handleButtonHover("rules")}
                 onMouseLeave={handleButtonLeave}
               >
                 <div className="flex-1 flex items-center justify-center py-3 px-3">
                   <div className="relative">
-                    <PuzzlePieceIcon className="h-6 w-6 text-white-darker group-hover:text-mint transition-colors" />
+                    <PuzzlePieceIcon className="h-6 w-6 group-hover:text-mint-lighter text-white transition-colors" />
                     {rulesCount > 0 && (
                       <div className="absolute -top-2 -right-2 bg-mint text-black text-xs font-bold rounded-full w-4 h-4 flex items-center justify-center shadow-sm">
                         {rulesCount}
@@ -530,26 +619,26 @@ const JokerCard: React.FC<JokerCardProps> = ({
             <div className="w-px bg-black-lighter py-3"></div>
             <Tooltip content="Export Joker" show={hoveredButton === "export"}>
               <div
-                className="flex flex-1 hover:bg-white/10 transition-colors cursor-pointer group"
+                className="flex flex-1 transition-colors cursor-pointer group"
                 onClick={onExport}
                 onMouseEnter={() => handleButtonHover("export")}
                 onMouseLeave={handleButtonLeave}
               >
                 <div className="flex-1 flex items-center justify-center py-3 px-3">
-                  <ArrowDownTrayIcon className="h-6 w-6 text-white-darker group-hover:text-white-light transition-colors" />
+                  <ArrowDownTrayIcon className="h-6 w-6 text-white group-hover:text-mint-lighter transition-colors" />
                 </div>
               </div>
             </Tooltip>
             <div className="w-px bg-black-lighter py-3"></div>
             <Tooltip content="Duplicate" show={hoveredButton === "duplicate"}>
               <div
-                className="flex flex-1 hover:bg-white/10 transition-colors cursor-pointer group"
+                className="flex flex-1 transition-colors cursor-pointer group"
                 onClick={onDuplicate}
                 onMouseEnter={() => handleButtonHover("duplicate")}
                 onMouseLeave={handleButtonLeave}
               >
                 <div className="flex-1 flex items-center justify-center py-3 px-3">
-                  <DocumentDuplicateIcon className="h-6 w-6 text-white-darker group-hover:text-white-light transition-colors" />
+                  <DocumentDuplicateIcon className="h-6 w-6 text-white group-hover:text-mint-lighter transition-colors" />
                 </div>
               </div>
             </Tooltip>
