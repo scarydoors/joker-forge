@@ -917,6 +917,54 @@ const generateLocVarsFunction = (
   const variableMapping: string[] = [];
   const colorVariables: string[] = [];
 
+  // Helper function to wrap game variable code with safety checks
+  const wrapGameVariableCode = (code: string): string => {
+    // If the code contains G.jokers.cards, wrap with full safety check
+    if (code.includes("G.jokers.cards")) {
+      return code.replace(
+        "G.jokers.cards",
+        "(G.jokers and G.jokers.cards or {})"
+      );
+    }
+    // If the code contains #G.jokers.cards, wrap with full safety check
+    if (code.includes("#G.jokers.cards")) {
+      return code.replace(
+        "#G.jokers.cards",
+        "(G.jokers and G.jokers.cards and #G.jokers.cards or 0)"
+      );
+    }
+    // Similar patterns for other game objects
+    if (code.includes("#G.hand.cards")) {
+      return code.replace(
+        "#G.hand.cards",
+        "(G.hand and G.hand.cards and #G.hand.cards or 0)"
+      );
+    }
+    if (code.includes("#G.deck.cards")) {
+      return code.replace(
+        "#G.deck.cards",
+        "(G.deck and G.deck.cards and #G.deck.cards or 0)"
+      );
+    }
+    if (code.includes("#G.consumeables.cards")) {
+      return code.replace(
+        "#G.consumeables.cards",
+        "(G.consumeables and G.consumeables.cards and #G.consumeables.cards or 0)"
+      );
+    }
+    // For other G.GAME properties, still add or 0
+    if (
+      code.includes("G.GAME") ||
+      code.includes("G.jokers") ||
+      code.includes("G.hand") ||
+      code.includes("G.deck") ||
+      code.includes("G.consumeables")
+    ) {
+      return `(${code} or 0)`;
+    }
+    return code;
+  };
+
   if (hasRandomGroups) {
     const nonPassiveRules =
       joker.rules?.filter((rule) => rule.trigger !== "passive") || [];
@@ -968,19 +1016,25 @@ const generateLocVarsFunction = (
     for (const gameVar of remainingGameVars) {
       if (currentIndex >= maxVariableIndex) break;
       const varName = gameVar.name.replace(/\s+/g, "").toLowerCase();
+      let gameVarCode: string;
+
       if (gameVar.multiplier === 1 && gameVar.startsFrom === 0) {
-        variableMapping.push(gameVar.code);
+        gameVarCode = wrapGameVariableCode(gameVar.code);
       } else if (gameVar.startsFrom === 0) {
-        variableMapping.push(`(${gameVar.code}) * ${gameVar.multiplier}`);
+        gameVarCode = `(${wrapGameVariableCode(gameVar.code)}) * ${
+          gameVar.multiplier
+        }`;
       } else if (gameVar.multiplier === 1) {
-        variableMapping.push(
-          `card.ability.extra.${varName} + (${gameVar.code})`
-        );
+        gameVarCode = `card.ability.extra.${varName} + (${wrapGameVariableCode(
+          gameVar.code
+        )})`;
       } else {
-        variableMapping.push(
-          `card.ability.extra.${varName} + (${gameVar.code}) * ${gameVar.multiplier}`
-        );
+        gameVarCode = `card.ability.extra.${varName} + (${wrapGameVariableCode(
+          gameVar.code
+        )}) * ${gameVar.multiplier}`;
       }
+
+      variableMapping.push(gameVarCode);
       currentIndex++;
     }
 
@@ -1061,19 +1115,25 @@ const generateLocVarsFunction = (
     for (const gameVar of gameVariables) {
       if (currentIndex >= maxVariableIndex) break;
       const varName = gameVar.name.replace(/\s+/g, "").toLowerCase();
+      let gameVarCode: string;
+
       if (gameVar.multiplier === 1 && gameVar.startsFrom === 0) {
-        variableMapping.push(gameVar.code);
+        gameVarCode = wrapGameVariableCode(gameVar.code);
       } else if (gameVar.startsFrom === 0) {
-        variableMapping.push(`(${gameVar.code}) * ${gameVar.multiplier}`);
+        gameVarCode = `(${wrapGameVariableCode(gameVar.code)}) * ${
+          gameVar.multiplier
+        }`;
       } else if (gameVar.multiplier === 1) {
-        variableMapping.push(
-          `card.ability.extra.${varName} + (${gameVar.code})`
-        );
+        gameVarCode = `card.ability.extra.${varName} + (${wrapGameVariableCode(
+          gameVar.code
+        )})`;
       } else {
-        variableMapping.push(
-          `card.ability.extra.${varName} + (${gameVar.code}) * ${gameVar.multiplier}`
-        );
+        gameVarCode = `card.ability.extra.${varName} + (${wrapGameVariableCode(
+          gameVar.code
+        )}) * ${gameVar.multiplier}`;
       }
+
+      variableMapping.push(gameVarCode);
       currentIndex++;
     }
   }
@@ -1092,7 +1152,9 @@ const generateLocVarsFunction = (
           !variableMapping.includes(locVar) &&
           variableMapping.length < maxVariableIndex
         ) {
-          variableMapping.push(locVar);
+          // Also wrap passive effect loc vars if they contain game variables
+          const wrappedLocVar = wrapGameVariableCode(locVar);
+          variableMapping.push(wrappedLocVar);
         }
       });
     }
