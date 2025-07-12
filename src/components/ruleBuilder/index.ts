@@ -15,10 +15,10 @@ export type {
 } from "./types";
 
 // Export constants and helpers
-export { TRIGGERS, getTriggerById } from "./data/Triggers";
+export { TRIGGERS, getTriggerById } from "../data/Triggers";
 
-export { CONDITION_TYPES, getConditionTypeById } from "./data/Conditions";
+export { CONDITION_TYPES, getConditionTypeById } from "../data/Conditions";
 
-export { EFFECT_TYPES, getEffectTypeById } from "./data/Effects";
+export { EFFECT_TYPES, getEffectTypeById } from "../data/Effects";
 
 export { LOGICAL_OPERATORS } from "./types";

@@ -11,12 +11,12 @@ import {
   TRIGGERS,
   TRIGGER_CATEGORIES,
   type CategoryDefinition,
-} from "./data/Triggers";
+} from "../data/Triggers";
 import {
   getConditionsForTrigger,
   CONDITION_CATEGORIES,
-} from "./data/Conditions";
-import { getEffectsForTrigger, EFFECT_CATEGORIES } from "./data/Effects";
+} from "../data/Conditions";
+import { getEffectsForTrigger, EFFECT_CATEGORIES } from "../data/Effects";
 import BlockComponent from "./BlockComponent";
 import {
   SwatchIcon,

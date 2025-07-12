@@ -16,9 +16,9 @@ import {
   getAllVariables,
   addPokerHandVariablesToOptions,
 } from "../codeGeneration/variableUtils";
-import { getTriggerById } from "./data/Triggers";
-import { getConditionTypeById } from "./data/Conditions";
-import { getEffectTypeById } from "./data/Effects";
+import { getTriggerById } from "../data/Triggers";
+import { getConditionTypeById } from "../data/Conditions";
+import { getEffectTypeById } from "../data/Effects";
 import InputField from "../generic/InputField";
 import InputDropdown from "../generic/InputDropdown";
 import Button from "../generic/Button";
@@ -37,7 +37,7 @@ import {
   validateVariableName,
   validateCustomMessage,
 } from "../generic/validationUtils";
-import { GameVariable, getGameVariableById } from "./data/GameVars";
+import { GameVariable, getGameVariableById } from "../data/GameVars";
 import { CubeIcon } from "@heroicons/react/24/outline";
 import { SelectedItem } from "./types";
 

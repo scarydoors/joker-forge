@@ -1,4 +1,4 @@
-import { ConditionTypeDefinition } from "../types";
+import { ConditionTypeDefinition } from "../ruleBuilder/types";
 import {
   RectangleStackIcon,
   UserIcon,

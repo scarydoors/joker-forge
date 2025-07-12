@@ -1,4 +1,4 @@
-import { getGameVariableById } from "../ruleBuilder/data/GameVars";
+import { getGameVariableById } from "../data/GameVars";
 
 export interface ParsedGameVariable {
   isGameVariable: boolean;

@@ -13,9 +13,9 @@ import type {
   Effect,
   RandomGroup,
 } from "./types";
-import { getTriggerById } from "./data/Triggers";
-import { getConditionTypeById } from "./data/Conditions";
-import { getEffectTypeById } from "./data/Effects";
+import { getTriggerById } from "../data/Triggers";
+import { getConditionTypeById } from "../data/Conditions";
+import { getEffectTypeById } from "../data/Effects";
 import BlockComponent from "./BlockComponent";
 import {
   ChevronDownIcon,

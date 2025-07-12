@@ -1,7 +1,7 @@
 import type { Rule, Effect } from "../ruleBuilder/types";
 import type { JokerData, UserVariable } from "../JokerCard";
 import { parseGameVariable } from "./gameVariableUtils";
-import { getGameVariableById } from "../ruleBuilder/data/GameVars";
+import { getGameVariableById } from "../data/GameVars";
 
 export interface VariableInfo {
   name: string;

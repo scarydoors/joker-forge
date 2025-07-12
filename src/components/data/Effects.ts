@@ -1,4 +1,4 @@
-import { EffectTypeDefinition } from "../types";
+import { EffectTypeDefinition } from "../ruleBuilder/types";
 import {
   ChartBarIcon,
   BanknotesIcon,

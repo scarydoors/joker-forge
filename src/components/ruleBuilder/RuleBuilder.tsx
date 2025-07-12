@@ -35,10 +35,10 @@ import {
   CheckCircleIcon,
   ArrowsPointingInIcon,
 } from "@heroicons/react/24/outline";
-import { getConditionTypeById } from "./data/Conditions";
-import { getEffectTypeById } from "./data/Effects";
+import { getConditionTypeById } from "../data/Conditions";
+import { getEffectTypeById } from "../data/Effects";
 import GameVariables from "./GameVariables";
-import { GameVariable } from "./data/GameVars";
+import { GameVariable } from "../data/GameVars";
 
 interface RuleBuilderProps {
   isOpen: boolean;
