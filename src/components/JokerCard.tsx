@@ -81,6 +81,7 @@ export interface JokerData {
   userVariables?: UserVariable[];
   placeholderCreditIndex?: number;
   jokerKey?: string;
+  hasUserUploadedImage?: boolean;
 }
 
 interface JokerCardProps {

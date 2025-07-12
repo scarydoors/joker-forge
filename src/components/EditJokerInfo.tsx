@@ -105,19 +105,15 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
             const index = indexStr?.trim();
             const name = nameStr?.trim();
 
-            console.log(`Parsed - Index: "${index}", Name: "${name}"`);
-
             if (index && name) {
               const indexNum = parseInt(index);
               if (!isNaN(indexNum)) {
                 credits[indexNum] = name;
-                console.log(`Added credit: ${indexNum} -> ${name}`);
               }
             }
           }
         });
 
-        console.log("Final credits object:", credits);
         setPlaceholderCredits(credits);
       } catch (error) {
         console.error("Failed to load placeholder credits:", error);
@@ -152,6 +148,7 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
         unlocked: joker.unlocked !== false,
         discovered: joker.discovered !== false,
         jokerKey: joker.jokerKey || slugify(joker.name),
+        hasUserUploadedImage: joker.hasUserUploadedImage || false,
       });
       setPlaceholderError(false);
       setLastDescription(joker.description || "");
@@ -569,6 +566,7 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
             setFormData({
               ...formData,
               imagePreview: finalImageData,
+              hasUserUploadedImage: true,
             });
             setPlaceholderError(false);
           } else {
@@ -584,6 +582,10 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
   };
 
   const getImageCredit = (joker: JokerData): string | null => {
+    if (joker.hasUserUploadedImage) {
+      return null;
+    }
+
     if (
       joker.placeholderCreditIndex &&
       placeholderCredits[joker.placeholderCreditIndex]
