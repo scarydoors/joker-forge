@@ -112,7 +112,7 @@ const AcknowledgementsPage: React.FC = () => {
         <p className="text-white-dark text-lg mt-6 text-center">
           Joker Forge would not be possible without Balatro itself, so thanks to{" "}
           <a
-            href="https://github.com/username/repo"
+            href="https://localthunk.com/"
             className="text-mint hover:underline"
           >
             LocalThunk
