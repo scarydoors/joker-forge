@@ -120,9 +120,16 @@ const ChanceInput: React.FC<ChanceInputProps> = React.memo(
     const [isRangeMode, setIsRangeMode] = React.useState(
       typeof value === "string" && value.startsWith("RANGE:")
     );
+    const [inputValue, setInputValue] = React.useState("");
 
     const numericValue = typeof value === "number" ? value : 1;
     const actualValue = value || numericValue;
+
+    React.useEffect(() => {
+      if (typeof value === "number") {
+        setInputValue(value.toString());
+      }
+    }, [value]);
 
     const parseRangeValue = (rangeStr: string) => {
       if (rangeStr.startsWith("RANGE:")) {
@@ -185,6 +192,23 @@ const ChanceInput: React.FC<ChanceInputProps> = React.memo(
       }
     };
 
+    const handleNumberChange = (
+      e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    ) => {
+      const newValue = e.target.value;
+      setInputValue(newValue);
+
+      if (newValue === "" || newValue === "-") {
+        onChange(0);
+        return;
+      }
+
+      const parsed = parseFloat(newValue);
+      if (!isNaN(parsed)) {
+        onChange(parsed);
+      }
+    };
+
     return (
       <div className="flex flex-col gap-2 items-center">
         <div className="flex items-center gap-2">
@@ -232,10 +256,9 @@ const ChanceInput: React.FC<ChanceInputProps> = React.memo(
               type="number"
               value={rangeValues.min.toString()}
               onChange={(e) => {
-                const newMin = parseInt(e.target.value);
+                const newMin = parseFloat(e.target.value) || 1;
                 onChange(`RANGE:${newMin}|${rangeValues.max}`);
               }}
-              min="1"
               size="sm"
               className="w-16"
               placeholder="Min"
@@ -245,10 +268,9 @@ const ChanceInput: React.FC<ChanceInputProps> = React.memo(
               type="number"
               value={rangeValues.max.toString()}
               onChange={(e) => {
-                const newMax = parseInt(e.target.value);
+                const newMax = parseFloat(e.target.value) || 1;
                 onChange(`RANGE:${rangeValues.min}|${newMax}`);
               }}
-              min="1"
               size="sm"
               className="w-16"
               placeholder="Max"
@@ -281,12 +303,8 @@ const ChanceInput: React.FC<ChanceInputProps> = React.memo(
         ) : (
           <InputField
             type="number"
-            value={numericValue.toString()}
-            onChange={(e) => {
-              const val = parseInt(e.target.value);
-              onChange(isNaN(val) ? 0 : val);
-            }}
-            min="1"
+            value={inputValue}
+            onChange={handleNumberChange}
             size="sm"
             className="w-20"
           />
@@ -328,8 +346,14 @@ const ParameterField: React.FC<ParameterFieldProps> = ({
   const [isRangeMode, setIsRangeMode] = React.useState(
     typeof value === "string" && value.startsWith("RANGE:")
   );
-
+  const [inputValue, setInputValue] = React.useState("");
   const [inputError, setInputError] = React.useState<string>("");
+
+  React.useEffect(() => {
+    if (param.type === "number" && typeof value === "number") {
+      setInputValue(value.toString());
+    }
+  }, [param.type, value]);
 
   React.useEffect(() => {
     const isVar =
@@ -509,6 +533,7 @@ const ParameterField: React.FC<ParameterFieldProps> = ({
           setIsVariableMode(false);
           setIsRangeMode(false);
           onChange(numericValue);
+          setInputValue(numericValue.toString());
         } else if (mode === "variable") {
           setIsVariableMode(true);
           setIsRangeMode(false);
@@ -517,6 +542,48 @@ const ParameterField: React.FC<ParameterFieldProps> = ({
           setIsVariableMode(false);
           setIsRangeMode(true);
           onChange("RANGE:1|5");
+        }
+      };
+
+      const handleNumberChange = (
+        e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+      ) => {
+        const newValue = e.target.value;
+        setInputValue(newValue);
+
+        if (newValue === "" || newValue === "-") {
+          onChange(0);
+          return;
+        }
+
+        const parsed = parseFloat(newValue);
+        if (!isNaN(parsed)) {
+          onChange(parsed);
+        }
+      };
+
+      const handleGameVariableChange = (
+        field: "multiplier" | "startsFrom",
+        newValue: string
+      ) => {
+        const parsed = parseFloat(newValue) || 0;
+        if (field === "multiplier") {
+          onChange(
+            `GAMEVAR:${gameVariableId}|${parsed}|${gameVariableStartsFrom}`
+          );
+        } else {
+          onChange(
+            `GAMEVAR:${gameVariableId}|${gameVariableMultiplier}|${parsed}`
+          );
+        }
+      };
+
+      const handleRangeChange = (field: "min" | "max", newValue: string) => {
+        const parsed = parseFloat(newValue) || 1;
+        if (field === "min") {
+          onChange(`RANGE:${parsed}|${rangeValues.max}`);
+        } else {
+          onChange(`RANGE:${rangeValues.min}|${parsed}`);
         }
       };
 
@@ -577,7 +644,10 @@ const ParameterField: React.FC<ParameterFieldProps> = ({
                   </span>
                 </div>
                 <button
-                  onClick={() => onChange(numericValue)}
+                  onClick={() => {
+                    onChange(numericValue);
+                    setInputValue(numericValue.toString());
+                  }}
                   className="p-1 text-mint hover:text-white transition-colors cursor-pointer"
                   title="Remove game variable"
                 >
@@ -591,12 +661,9 @@ const ParameterField: React.FC<ParameterFieldProps> = ({
                 <InputField
                   type="number"
                   value={gameVariableStartsFrom.toString()}
-                  onChange={(e) => {
-                    const newStartsFrom = parseFloat(e.target.value) || 0;
-                    onChange(
-                      `GAMEVAR:${gameVariableId}|${gameVariableMultiplier}|${newStartsFrom}`
-                    );
-                  }}
+                  onChange={(e) =>
+                    handleGameVariableChange("startsFrom", e.target.value)
+                  }
                   size="sm"
                 />
               </div>
@@ -607,12 +674,9 @@ const ParameterField: React.FC<ParameterFieldProps> = ({
                 <InputField
                   type="number"
                   value={gameVariableMultiplier.toString()}
-                  onChange={(e) => {
-                    const newMultiplier = parseFloat(e.target.value);
-                    onChange(
-                      `GAMEVAR:${gameVariableId}|${newMultiplier}|${gameVariableStartsFrom}`
-                    );
-                  }}
+                  onChange={(e) =>
+                    handleGameVariableChange("multiplier", e.target.value)
+                  }
                   size="sm"
                 />
               </div>
@@ -641,10 +705,7 @@ const ParameterField: React.FC<ParameterFieldProps> = ({
                 <InputField
                   type="number"
                   value={rangeValues.min.toString()}
-                  onChange={(e) => {
-                    const newMin = parseFloat(e.target.value);
-                    onChange(`RANGE:${newMin}|${rangeValues.max}`);
-                  }}
+                  onChange={(e) => handleRangeChange("min", e.target.value)}
                   size="sm"
                 />
               </div>
@@ -655,10 +716,7 @@ const ParameterField: React.FC<ParameterFieldProps> = ({
                 <InputField
                   type="number"
                   value={rangeValues.max.toString()}
-                  onChange={(e) => {
-                    const newMax = parseFloat(e.target.value);
-                    onChange(`RANGE:${rangeValues.min}|${newMax}`);
-                  }}
+                  onChange={(e) => handleRangeChange("max", e.target.value)}
                   size="sm"
                 />
               </div>
@@ -690,21 +748,8 @@ const ParameterField: React.FC<ParameterFieldProps> = ({
           ) : (
             <InputField
               type="number"
-              value={numericValue.toString()}
-              onChange={(e) => {
-                const val = parseFloat(e.target.value);
-                onChange(isNaN(val) ? 0 : val);
-              }}
-              min={param.min?.toString()}
-              max={param.max?.toString()}
-              step={
-                param.id === "value" &&
-                typeof value === "number" &&
-                value > 0 &&
-                value < 1
-                  ? "0.1"
-                  : "1"
-              }
+              value={inputValue}
+              onChange={handleNumberChange}
               size="sm"
               labelPosition="center"
             />
