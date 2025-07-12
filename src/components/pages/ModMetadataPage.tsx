@@ -66,19 +66,20 @@ const validateModMetadata = (metadata: ModMetadata): ModMetadataValidation => {
     errors.id = "Mod ID cannot be 'Steamodded', 'Lovely', or 'Balatro'";
   }
 
-  if (!metadata.name.trim()) {
+  if (!metadata.name || !metadata.name.trim()) {
     errors.name = "Mod name is required";
   }
 
   if (
     !metadata.author ||
     metadata.author.length === 0 ||
+    !metadata.author[0] ||
     !metadata.author[0].trim()
   ) {
     errors.author = "At least one author is required";
   }
 
-  if (!metadata.description.trim()) {
+  if (!metadata.description || !metadata.description.trim()) {
     errors.description = "Description is required";
   }
 
@@ -144,7 +145,7 @@ const parseAuthorsString = (authorsString: string): string[] => {
 };
 
 const formatAuthorsString = (authors: string[]): string => {
-  return authors.join(", ");
+  return (authors || []).join(", ");
 };
 
 const parseDependenciesString = (dependenciesString: string): string[] => {
@@ -155,7 +156,7 @@ const parseDependenciesString = (dependenciesString: string): string[] => {
 };
 
 const formatDependenciesString = (dependencies: string[]): string => {
-  return dependencies.join("\n");
+  return (dependencies || []).join("\n");
 };
 
 interface ModMetadataPageProps {
@@ -179,6 +180,7 @@ const ModMetadataPage: React.FC<ModMetadataPageProps> = ({
   const [providesString, setProvidesString] = useState(
     formatDependenciesString(metadata.provides)
   );
+  const [hasInitialized, setHasInitialized] = useState(false);
 
   const previousNameRef = useRef(metadata.name);
   const metadataRef = useRef(metadata);
@@ -187,6 +189,69 @@ const ModMetadataPage: React.FC<ModMetadataPageProps> = ({
     metadataRef.current = metadata;
   });
 
+  useEffect(() => {
+    if (!hasInitialized) {
+      const needsDefaults =
+        !metadata.id ||
+        !metadata.name ||
+        !metadata.author ||
+        !Array.isArray(metadata.author) ||
+        metadata.author.length === 0 ||
+        !metadata.description ||
+        !metadata.prefix ||
+        !metadata.main_file ||
+        !metadata.version ||
+        typeof metadata.priority !== "number" ||
+        !metadata.badge_colour ||
+        !metadata.badge_text_colour ||
+        !metadata.display_name ||
+        !metadata.dependencies ||
+        !Array.isArray(metadata.dependencies) ||
+        !metadata.conflicts ||
+        !Array.isArray(metadata.conflicts) ||
+        !metadata.provides ||
+        !Array.isArray(metadata.provides);
+
+      if (needsDefaults) {
+        setMetadata({
+          id: metadata.id || DEFAULT_MOD_METADATA.id,
+          name: metadata.name || DEFAULT_MOD_METADATA.name,
+          author:
+            Array.isArray(metadata.author) && metadata.author.length > 0
+              ? metadata.author
+              : DEFAULT_MOD_METADATA.author,
+          description: metadata.description || DEFAULT_MOD_METADATA.description,
+          prefix: metadata.prefix || DEFAULT_MOD_METADATA.prefix,
+          main_file: metadata.main_file || DEFAULT_MOD_METADATA.main_file,
+          version: metadata.version || DEFAULT_MOD_METADATA.version,
+          priority:
+            typeof metadata.priority === "number"
+              ? metadata.priority
+              : DEFAULT_MOD_METADATA.priority,
+          badge_colour:
+            metadata.badge_colour || DEFAULT_MOD_METADATA.badge_colour,
+          badge_text_colour:
+            metadata.badge_text_colour ||
+            DEFAULT_MOD_METADATA.badge_text_colour,
+          display_name:
+            metadata.display_name ||
+            metadata.name ||
+            DEFAULT_MOD_METADATA.display_name,
+          dependencies: Array.isArray(metadata.dependencies)
+            ? metadata.dependencies
+            : DEFAULT_MOD_METADATA.dependencies,
+          conflicts: Array.isArray(metadata.conflicts)
+            ? metadata.conflicts
+            : DEFAULT_MOD_METADATA.conflicts,
+          provides: Array.isArray(metadata.provides)
+            ? metadata.provides
+            : DEFAULT_MOD_METADATA.provides,
+        });
+      }
+      setHasInitialized(true);
+    }
+  }, [metadata, setMetadata, hasInitialized]);
+
   const updateMetadata = useCallback(
     (updates: Partial<ModMetadata>) => {
       setMetadata({ ...metadataRef.current, ...updates });
@@ -194,7 +259,6 @@ const ModMetadataPage: React.FC<ModMetadataPageProps> = ({
     [setMetadata]
   );
 
-  // Auto-generate ID and prefix from name, but only when name changes from user input
   useEffect(() => {
     const currentMetadata = metadataRef.current;
 
@@ -208,7 +272,6 @@ const ModMetadataPage: React.FC<ModMetadataPageProps> = ({
       const generatedId = generateModIdFromName(currentMetadata.name);
       const generatedPrefix = generatePrefixFromId(generatedId);
 
-      // Only update if the generated values are different from current values
       if (
         currentMetadata.id !== generatedId ||
         currentMetadata.prefix !== generatedPrefix ||
@@ -256,7 +319,7 @@ const ModMetadataPage: React.FC<ModMetadataPageProps> = ({
           Mod Metadata
         </h1>
         <h1 className="text-xl text-white-dark font-light tracking-widest mb-8 text-center">
-          {metadata.name}
+          {metadata.name || ""}
         </h1>
       </div>
 
@@ -269,7 +332,7 @@ const ModMetadataPage: React.FC<ModMetadataPageProps> = ({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <InputField
-                value={metadata.name}
+                value={metadata.name || ""}
                 onChange={(e) => updateMetadata({ name: e.target.value })}
                 placeholder="My Custom Mod"
                 darkmode={true}
@@ -287,7 +350,7 @@ const ModMetadataPage: React.FC<ModMetadataPageProps> = ({
 
             <div>
               <InputField
-                value={metadata.id}
+                value={metadata.id || ""}
                 onChange={(e) => updateMetadata({ id: e.target.value })}
                 placeholder="mycustommod"
                 darkmode={true}
@@ -325,7 +388,7 @@ const ModMetadataPage: React.FC<ModMetadataPageProps> = ({
 
             <div>
               <InputField
-                value={metadata.prefix}
+                value={metadata.prefix || ""}
                 onChange={(e) => updateMetadata({ prefix: e.target.value })}
                 placeholder="mycustom"
                 darkmode={true}
@@ -347,7 +410,7 @@ const ModMetadataPage: React.FC<ModMetadataPageProps> = ({
                 Description
               </label>
               <textarea
-                value={metadata.description}
+                value={metadata.description || ""}
                 onChange={(e) =>
                   updateMetadata({ description: e.target.value })
                 }
@@ -363,7 +426,7 @@ const ModMetadataPage: React.FC<ModMetadataPageProps> = ({
 
             <div>
               <InputField
-                value={metadata.main_file}
+                value={metadata.main_file || ""}
                 onChange={(e) => updateMetadata({ main_file: e.target.value })}
                 placeholder="main.lua"
                 darkmode={true}
@@ -389,7 +452,7 @@ const ModMetadataPage: React.FC<ModMetadataPageProps> = ({
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
             <div>
               <InputField
-                value={metadata.display_name}
+                value={metadata.display_name || ""}
                 onChange={(e) =>
                   updateMetadata({ display_name: e.target.value })
                 }
@@ -405,7 +468,7 @@ const ModMetadataPage: React.FC<ModMetadataPageProps> = ({
 
             <div>
               <InputField
-                value={metadata.badge_colour}
+                value={metadata.badge_colour || ""}
                 onChange={(e) =>
                   updateMetadata({ badge_colour: e.target.value })
                 }
@@ -426,7 +489,7 @@ const ModMetadataPage: React.FC<ModMetadataPageProps> = ({
 
             <div>
               <InputField
-                value={metadata.badge_text_colour}
+                value={metadata.badge_text_colour || ""}
                 onChange={(e) =>
                   updateMetadata({ badge_text_colour: e.target.value })
                 }
@@ -454,19 +517,19 @@ const ModMetadataPage: React.FC<ModMetadataPageProps> = ({
               <div
                 className="px-3 py-1 rounded text-xs font-bold border"
                 style={{
-                  backgroundColor: isValidHexColor(metadata.badge_colour)
+                  backgroundColor: isValidHexColor(metadata.badge_colour || "")
                     ? `#${metadata.badge_colour}`
                     : "#666665",
-                  color: isValidHexColor(metadata.badge_text_colour)
+                  color: isValidHexColor(metadata.badge_text_colour || "")
                     ? `#${metadata.badge_text_colour}`
                     : "#FFFFFF",
-                  borderColor: isValidHexColor(metadata.badge_colour)
+                  borderColor: isValidHexColor(metadata.badge_colour || "")
                     ? `#${metadata.badge_colour}`
                     : "#666665",
                 }}
               >
                 {metadata.display_name ||
-                  metadata.name?.substring(0, 8) ||
+                  (metadata.name && metadata.name.substring(0, 8)) ||
                   "MOD"}
               </div>
             </div>
@@ -483,7 +546,7 @@ const ModMetadataPage: React.FC<ModMetadataPageProps> = ({
               <div className="space-y-6">
                 <div>
                   <InputField
-                    value={metadata.version}
+                    value={metadata.version || ""}
                     onChange={(e) =>
                       updateMetadata({ version: e.target.value })
                     }
@@ -506,12 +569,14 @@ const ModMetadataPage: React.FC<ModMetadataPageProps> = ({
 
                 <div>
                   <InputField
-                    value={metadata.priority.toString()}
-                    onChange={(e) =>
-                      updateMetadata({
-                        priority: parseInt(e.target.value) || 0,
-                      })
-                    }
+                    value={(metadata.priority || 0).toString()}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      const numValue = value === "" ? 0 : parseInt(value);
+                      if (!isNaN(numValue)) {
+                        updateMetadata({ priority: numValue });
+                      }
+                    }}
                     placeholder="0"
                     darkmode={true}
                     icon={<CubeIcon className="h-5 w-5 text-mint stroke-2" />}
@@ -531,20 +596,26 @@ const ModMetadataPage: React.FC<ModMetadataPageProps> = ({
               <div className="space-y-2 text-xs">
                 <div className="flex justify-between">
                   <span className="text-white-darker">Name:</span>
-                  <span className="text-white-light">{metadata.name}</span>
+                  <span className="text-white-light">
+                    {metadata.name || "N/A"}
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-white-darker">ID:</span>
-                  <span className="text-white-light">{metadata.id}</span>
+                  <span className="text-white-light">
+                    {metadata.id || "N/A"}
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-white-darker">Version:</span>
-                  <span className="text-white-light">{metadata.version}</span>
+                  <span className="text-white-light">
+                    {metadata.version || "N/A"}
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-white-darker">Author:</span>
                   <span className="text-white-light">
-                    {metadata.author.join(", ")}
+                    {(metadata.author || []).join(", ") || "N/A"}
                   </span>
                 </div>
               </div>
