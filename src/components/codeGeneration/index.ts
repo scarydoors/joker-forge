@@ -27,6 +27,7 @@ import {
   getSuitByValue,
   getRankByValue,
 } from "../data/BalatroUtils";
+import { slugify } from "../EditJokerInfo";
 
 export interface ModMetadata {
   id: string;
@@ -70,13 +71,16 @@ const generateSingleJokerCode = (
   atlasKey: string,
   currentPosition: number
 ): { code: string; nextPosition: number } => {
-  const passiveEffects = processPassiveEffects(joker);
+  const jokerKey = joker.jokerKey || slugify(joker.name);
+  const jokerWithKey = { ...joker, jokerKey };
+
+  const passiveEffects = processPassiveEffects(jokerWithKey);
   const nonPassiveRules =
-    joker.rules?.filter((rule) => rule.trigger !== "passive") || [];
+    jokerWithKey.rules?.filter((rule) => rule.trigger !== "passive") || [];
 
   let calculateResult: CalculateFunctionResult | null = null;
   if (nonPassiveRules.length > 0) {
-    calculateResult = generateCalculateFunction(nonPassiveRules, joker);
+    calculateResult = generateCalculateFunction(nonPassiveRules, jokerWithKey);
   }
 
   const configItems: string[] = [];
@@ -98,15 +102,15 @@ const generateSingleJokerCode = (
     }
   });
 
-  if (joker.userVariables && joker.userVariables.length > 0) {
-    joker.userVariables.forEach((variable) => {
+  if (jokerWithKey.userVariables && jokerWithKey.userVariables.length > 0) {
+    jokerWithKey.userVariables.forEach((variable) => {
       if (variable.type === "number" || !variable.type) {
         configItems.push(`${variable.name} = ${variable.initialValue || 0}`);
       }
     });
   }
 
-  const gameVariables = extractGameVariablesFromRules(joker.rules || []);
+  const gameVariables = extractGameVariablesFromRules(jokerWithKey.rules || []);
   gameVariables.forEach((gameVar) => {
     const varName = gameVar.name.replace(/\s+/g, "").toLowerCase();
     configItems.push(`${varName} = ${gameVar.startsFrom}`);
@@ -123,14 +127,14 @@ const generateSingleJokerCode = (
     });
   }
 
-  if (joker.rules && joker.rules.length > 0) {
-    const nonPassiveRules = joker.rules.filter(
+  if (jokerWithKey.rules && jokerWithKey.rules.length > 0) {
+    const nonPassiveRules = jokerWithKey.rules.filter(
       (rule) => rule.trigger !== "passive"
     );
     const variables = extractVariablesFromRules(nonPassiveRules);
 
     const userVariableNames = new Set(
-      joker.userVariables?.map((v) => v.name) || []
+      jokerWithKey.userVariables?.map((v) => v.name) || []
     );
     const autoVariables = variables.filter(
       (v) => !userVariableNames.has(v.name)
@@ -146,16 +150,15 @@ const generateSingleJokerCode = (
 
   const effectsConfig = configItems.join(",\n            ");
 
-  // Calculate atlas position
   const jokersPerRow = 10;
   const col = currentPosition % jokersPerRow;
   const row = Math.floor(currentPosition / jokersPerRow);
 
   let nextPosition = currentPosition + 1;
 
-  let jokerCode = `SMODS.Joker{ --${joker.name}
-    name = "${joker.name}",
-    key = "${joker.jokerKey || "unknown_joker"}",
+  let jokerCode = `SMODS.Joker{ --${jokerWithKey.name}
+    name = "${jokerWithKey.name}",
+    key = "${jokerKey}",
     config = {
         extra = {`;
 
@@ -168,26 +171,34 @@ const generateSingleJokerCode = (
         }
     },
     loc_txt = {
-        ['name'] = '${joker.name}',
-        ['text'] = ${formatJokerDescription(joker)}
+        ['name'] = '${jokerWithKey.name}',
+        ['text'] = ${formatJokerDescription(jokerWithKey)}
     },
     pos = {
         x = ${col},
         y = ${row}
     },
-    cost = ${joker.cost !== undefined ? joker.cost : 4},
-    rarity = ${joker.rarity},
+    cost = ${jokerWithKey.cost !== undefined ? jokerWithKey.cost : 4},
+    rarity = ${jokerWithKey.rarity},
     blueprint_compat = ${
-      joker.blueprint_compat !== undefined ? joker.blueprint_compat : true
+      jokerWithKey.blueprint_compat !== undefined
+        ? jokerWithKey.blueprint_compat
+        : true
     },
     eternal_compat = ${
-      joker.eternal_compat !== undefined ? joker.eternal_compat : true
+      jokerWithKey.eternal_compat !== undefined
+        ? jokerWithKey.eternal_compat
+        : true
     },
-    unlocked = ${joker.unlocked !== undefined ? joker.unlocked : true},
-    discovered = ${joker.discovered !== undefined ? joker.discovered : true},
+    unlocked = ${
+      jokerWithKey.unlocked !== undefined ? jokerWithKey.unlocked : true
+    },
+    discovered = ${
+      jokerWithKey.discovered !== undefined ? jokerWithKey.discovered : true
+    },
     atlas = '${atlasKey}'`;
 
-  if (joker.overlayImagePreview) {
+  if (jokerWithKey.overlayImagePreview) {
     const soulCol = nextPosition % jokersPerRow;
     const soulRow = Math.floor(nextPosition / jokersPerRow);
 
@@ -197,18 +208,18 @@ const generateSingleJokerCode = (
         y = ${soulRow}
     }`;
 
-    nextPosition++; // Increment again for the overlay
+    nextPosition++;
   }
 
   if (
-    (joker.rarity !== 4 && joker.appears_in_shop === false) ||
-    (joker.rarity === 4 && joker.appears_in_shop === true)
+    (jokerWithKey.rarity !== 4 && jokerWithKey.appears_in_shop === false) ||
+    (jokerWithKey.rarity === 4 && jokerWithKey.appears_in_shop === true)
   ) {
     jokerCode += `,
 
     in_pool = function(self, args)
         return ${
-          joker.rarity === 4 && joker.appears_in_shop === true
+          jokerWithKey.rarity === 4 && jokerWithKey.appears_in_shop === true
             ? "true"
             : "false"
         }
@@ -216,13 +227,13 @@ const generateSingleJokerCode = (
   }
 
   const locVarsCode = generateLocVarsFunction(
-    joker,
+    jokerWithKey,
     passiveEffects,
     calculateResult?.configVariables || []
   );
   jokerCode += `,\n\n    ${locVarsCode}`;
 
-  const setStickerCode = generateSetAbilityFunction(joker);
+  const setStickerCode = generateSetAbilityFunction(jokerWithKey);
   if (setStickerCode) {
     jokerCode += `,\n\n    ${setStickerCode}`;
   }
@@ -365,14 +376,23 @@ export const exportJokersAsMod = async (
 
 export const exportSingleJoker = (joker: JokerData): void => {
   try {
-    const result = generateSingleJokerCode(joker, "Joker", 0);
-    const jokerCode = result.code;
+    const jokerKey = joker.jokerKey || slugify(joker.name);
+    const jokerWithKey = { ...joker, jokerKey };
+
+    const result = generateSingleJokerCode(jokerWithKey, "Joker", 0);
+    let jokerCode = result.code;
+
+    const hookCode = generateHooks([jokerWithKey], "modprefix");
+    if (hookCode.trim()) {
+      jokerCode = `${jokerCode} 
+      ${hookCode}`;
+    }
 
     const blob = new Blob([jokerCode], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `${joker.jokerKey || "unknown_joker"}.lua`;
+    a.download = `${jokerKey}.lua`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -1197,8 +1217,6 @@ export const getEffectVariableName = (fallback: string): string => {
 };
 
 const generateHooks = (jokers: JokerData[], modPrefix: string): string => {
-  if (!modPrefix) return "";
-
   let allHooks = "";
 
   const hooksByType: Record<

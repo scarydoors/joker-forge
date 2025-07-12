@@ -28,7 +28,8 @@ interface EditJokerInfoProps {
   onDelete: (jokerId: string) => void;
 }
 
-const slugify = (text: string): string => {
+// eslint-disable-next-line react-refresh/only-export-components
+export const slugify = (text: string): string => {
   return (
     text
       .toLowerCase()
