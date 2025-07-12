@@ -1,5 +1,5 @@
 import type { Effect } from "../../ruleBuilder/types";
-import type { EffectReturn } from "./AddChipsEffect";
+import type { EffectReturn } from "../effectUtils";
 
 export const generateChangeSuitVariableReturn = (
   effect: Effect

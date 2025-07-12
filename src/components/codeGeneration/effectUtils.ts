@@ -1,10 +1,6 @@
 import type { Effect } from "../ruleBuilder/types";
 import type { JokerData } from "../JokerCard";
 import { coordinateVariableConflicts } from "./variableUtils";
-import {
-  generateAddChipsReturn,
-  type EffectReturn,
-} from "./effects/AddChipsEffect";
 import { generateAddMultReturn } from "./effects/AddMultEffect";
 import { generateApplyXMultReturn } from "./effects/ApplyXMultEffect";
 import { generateAddDollarsReturn } from "./effects/AddDollarsEffect";
@@ -71,19 +67,13 @@ import {
   generateEditJokerSlotsReturn,
   generatePassiveJokerSlots,
 } from "./effects/EditJokerSlotsEffect";
+import { generateAddChipsReturn } from "./effects/AddChipsEffect";
 
 export interface RandomGroup {
   id: string;
   chance_numerator: number;
   chance_denominator: number;
   effects: Effect[];
-}
-
-export interface ReturnStatementResult {
-  statement: string;
-  colour: string;
-  preReturnCode?: string;
-  isRandomChance?: boolean;
 }
 
 export interface PassiveEffectResult {
@@ -99,22 +89,51 @@ export interface PassiveEffectResult {
   };
 }
 
+export interface ConfigExtraVariable {
+  name: string;
+  value: number | string;
+  description?: string;
+}
+
+export interface EffectReturn {
+  statement: string;
+  message?: string;
+  colour: string;
+  configVariables?: ConfigExtraVariable[];
+}
+
+export interface ReturnStatementResult {
+  statement: string;
+  colour: string;
+  preReturnCode?: string;
+  isRandomChance?: boolean;
+  configVariables?: ConfigExtraVariable[];
+}
+
+export interface CalculateFunctionResult {
+  code: string;
+  configVariables: ConfigExtraVariable[];
+}
+
 export function generateEffectReturnStatement(
   regularEffects: Effect[] = [],
   randomGroups: RandomGroup[] = [],
   triggerType: string = "hand_played",
-  ruleId?: string
+  ruleId?: string,
+  variableNameMap?: Map<string, string>
 ): ReturnStatementResult {
   if (regularEffects.length === 0 && randomGroups.length === 0) {
     return {
       statement: "",
       colour: "G.C.WHITE",
+      configVariables: [],
     };
   }
 
   let combinedPreReturnCode = "";
   let mainReturnStatement = "";
   let primaryColour = "G.C.WHITE";
+  const allConfigVariables: ConfigExtraVariable[] = [];
 
   if (regularEffects.length > 0) {
     const { preReturnCode: regularPreCode, modifiedEffects } =
@@ -128,13 +147,23 @@ export function generateEffectReturnStatement(
           _effectIndex: index,
         };
 
-        return generateSingleEffect(effectWithContext, triggerType);
+        return generateSingleEffect(
+          effectWithContext,
+          triggerType,
+          variableNameMap
+        );
       })
       .filter((ret) => ret.statement || ret.message);
 
     if (regularPreCode) {
       combinedPreReturnCode += regularPreCode;
     }
+
+    effectReturns.forEach((effectReturn) => {
+      if (effectReturn.configVariables) {
+        allConfigVariables.push(...effectReturn.configVariables);
+      }
+    });
 
     const processedEffects: EffectReturn[] = [];
     effectReturns.forEach((effect) => {
@@ -162,7 +191,6 @@ export function generateEffectReturnStatement(
   if (randomGroups.length > 0) {
     const randomGroupStatements: string[] = [];
 
-    // Create mapping of denominators to odds variable names
     const denominators = [
       ...new Set(randomGroups.map((group) => group.chance_denominator)),
     ];
@@ -170,12 +198,29 @@ export function generateEffectReturnStatement(
 
     if (denominators.length === 1) {
       denominatorToOddsVar[denominators[0]] = "card.ability.extra.odds";
+      allConfigVariables.push({
+        name: "odds",
+        value: denominators[0],
+        description: "Probability denominator",
+      });
     } else {
       denominators.forEach((denom, index) => {
         if (index === 0) {
           denominatorToOddsVar[denom] = "card.ability.extra.odds";
+          allConfigVariables.push({
+            name: "odds",
+            value: denom,
+            description: "First probability denominator",
+          });
         } else {
           denominatorToOddsVar[denom] = `card.ability.extra.odds${index + 1}`;
+          allConfigVariables.push({
+            name: `odds${index + 1}`,
+            value: denom,
+            description: `${index + 1}${getOrdinalSuffix(
+              index + 1
+            )} probability denominator`,
+          });
         }
       });
     }
@@ -192,9 +237,19 @@ export function generateEffectReturnStatement(
             _effectIndex: index,
           };
 
-          return generateSingleEffect(effectWithContext, triggerType);
+          return generateSingleEffect(
+            effectWithContext,
+            triggerType,
+            variableNameMap
+          );
         })
         .filter((ret) => ret.statement || ret.message);
+
+      effectReturns.forEach((effectReturn) => {
+        if (effectReturn.configVariables) {
+          allConfigVariables.push(...effectReturn.configVariables);
+        }
+      });
 
       if (effectReturns.length === 0) return;
 
@@ -218,7 +273,6 @@ export function generateEffectReturnStatement(
         });
       });
 
-      // Use the mapped odds variable instead of hardcoded denominator
       const oddsVar = denominatorToOddsVar[group.chance_denominator];
       const probabilityCheck =
         group.chance_numerator === 1
@@ -231,7 +285,6 @@ export function generateEffectReturnStatement(
                         `;
       }
 
-      // Convert effects to SMODS.calculate_effect calls for random groups
       const effectCalls: string[] = [];
       processedEffects.forEach((effect) => {
         if (effect.statement && effect.statement.trim()) {
@@ -284,7 +337,8 @@ export function generateEffectReturnStatement(
       if (randomGroups.length > 0 && randomGroups[0].effects.length > 0) {
         const firstEffect = generateSingleEffect(
           randomGroups[0].effects[0],
-          triggerType
+          triggerType,
+          variableNameMap
         );
         primaryColour = firstEffect.colour || "G.C.WHITE";
       }
@@ -296,34 +350,36 @@ export function generateEffectReturnStatement(
     colour: primaryColour,
     preReturnCode: combinedPreReturnCode || undefined,
     isRandomChance: randomGroups.length > 0,
+    configVariables: allConfigVariables,
   };
 }
 
 const generateSingleEffect = (
   effect: Effect,
-  triggerType: string
+  triggerType: string,
+  variableNameMap?: Map<string, string>
 ): EffectReturn => {
   switch (effect.type) {
     case "add_chips":
-      return generateAddChipsReturn(effect);
+      return generateAddChipsReturn(effect, variableNameMap);
     case "add_mult":
-      return generateAddMultReturn(effect);
+      return generateAddMultReturn(effect, variableNameMap);
     case "apply_x_mult":
-      return generateApplyXMultReturn(effect);
+      return generateApplyXMultReturn(effect, variableNameMap);
     case "add_dollars":
-      return generateAddDollarsReturn(effect);
+      return generateAddDollarsReturn(effect, variableNameMap);
     case "retrigger_cards":
-      return generateRetriggerReturn(effect);
+      return generateRetriggerReturn(effect, variableNameMap);
     case "destroy_self":
       return generateDestroySelfReturn(effect);
     case "edit_hand":
-      return generateEditHandReturn(effect);
+      return generateEditHandReturn(effect, variableNameMap);
     case "edit_discard":
-      return generateEditDiscardReturn(effect);
+      return generateEditDiscardReturn(effect, variableNameMap);
     case "edit_hand_size":
-      return generateEditHandSizeReturn(effect);
+      return generateEditHandSizeReturn(effect, variableNameMap);
     case "level_up_hand":
-      return generateLevelUpHandReturn(triggerType, effect);
+      return generateLevelUpHandReturn(triggerType, effect, variableNameMap);
     case "add_card_to_deck":
       return generateAddCardToDeckReturn(effect, triggerType);
     case "copy_triggered_card":
@@ -353,23 +409,23 @@ const generateSingleEffect = (
     case "destroy_joker":
       return generateDestroyJokerReturn(effect, triggerType);
     case "apply_x_chips":
-      return generateApplyXChipsReturn(effect);
+      return generateApplyXChipsReturn(effect, variableNameMap);
     case "create_tag":
       return generateCreateTagReturn(effect, triggerType);
     case "apply_exp_mult":
-      return generateApplyExpMultReturn(effect);
+      return generateApplyExpMultReturn(effect, variableNameMap);
     case "apply_exp_chips":
-      return generateApplyExpChipsReturn(effect);
+      return generateApplyExpChipsReturn(effect, variableNameMap);
     case "show_message":
       return generateShowMessageReturn(effect);
     case "set_dollars":
-      return generateSetDollarsReturn(effect);
+      return generateSetDollarsReturn(effect, variableNameMap);
     case "disable_boss_blind":
       return generateDisableBossBlindReturn(effect, triggerType);
     case "prevent_game_over":
       return generateSavedReturn(effect);
     case "add_sell_value":
-      return generateAddSellValueReturn(effect, triggerType);
+      return generateAddSellValueReturn(effect, triggerType, variableNameMap);
     case "balance":
       return generateBalanceReturn(effect);
     case "change_suit_variable":
@@ -381,7 +437,7 @@ const generateSingleEffect = (
     case "permanent_bonus":
       return generatePermaBonusReturn(effect);
     case "set_ante":
-      return generateSetAnteReturn(effect, triggerType);
+      return generateSetAnteReturn(effect, triggerType, variableNameMap);
     case "add_card_to_hand":
       return generateAddCardToHandReturn(effect, triggerType);
     case "copy_triggered_card_to_hand":
@@ -389,9 +445,9 @@ const generateSingleEffect = (
     case "copy_played_card_to_hand":
       return generateCopyCardToHandReturn(effect, triggerType);
     case "edit_consumable_slots":
-      return generateEditConsumableSlotsReturn(effect);
+      return generateEditConsumableSlotsReturn(effect, variableNameMap);
     case "edit_joker_slots":
-      return generateEditJokerSlotsReturn(effect);
+      return generateEditJokerSlotsReturn(effect, variableNameMap);
 
     default:
       return {
@@ -613,4 +669,10 @@ function extractPreReturnCode(statement: string): {
   }
 
   return { cleanedStatement: statement };
+}
+
+function getOrdinalSuffix(num: number): string {
+  if (num === 2) return "nd";
+  if (num === 3) return "rd";
+  return "th";
 }

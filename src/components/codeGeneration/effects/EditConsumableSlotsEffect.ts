@@ -1,4 +1,4 @@
-import type { EffectReturn } from "./AddChipsEffect";
+import type { EffectReturn, ConfigExtraVariable } from "../effectUtils";
 import type { Effect } from "../../ruleBuilder/types";
 import type { PassiveEffectResult } from "../effectUtils";
 import {
@@ -8,13 +8,44 @@ import {
 } from "../gameVariableUtils";
 
 export const generateEditConsumableSlotsReturn = (
-  effect: Effect
+  effect: Effect,
+  variableNameMap?: Map<string, string>
 ): EffectReturn => {
   const operation = effect.params?.operation || "add";
   const effectValue = effect.params.value || 1;
+  const parsed = parseGameVariable(effectValue);
+  const rangeParsed = parseRangeVariable(effectValue);
 
-  // For regular effects, we hardcode the value instead of using variables
-  const valueCode = effectValue.toString();
+  let valueCode: string;
+  const configVariables: ConfigExtraVariable[] = [];
+
+  if (parsed.isGameVariable) {
+    valueCode = generateGameVariableCode(effectValue);
+  } else if (rangeParsed.isRangeVariable) {
+    const variableName = "consumable_slots";
+    const actualVariableName =
+      variableNameMap?.get(variableName) || variableName;
+    const seedName = `${actualVariableName}_${effect.id.substring(0, 8)}`;
+    valueCode = `pseudorandom('${seedName}', card.ability.extra.${actualVariableName}_min, card.ability.extra.${actualVariableName}_max)`;
+
+    configVariables.push(
+      { name: `${actualVariableName}_min`, value: rangeParsed.min || 1 },
+      { name: `${actualVariableName}_max`, value: rangeParsed.max || 5 }
+    );
+  } else if (typeof effectValue === "string") {
+    const actualVariableName = variableNameMap?.get(effectValue) || effectValue;
+    valueCode = `card.ability.extra.${actualVariableName}`;
+  } else {
+    const variableName = "consumable_slots";
+    const actualVariableName =
+      variableNameMap?.get(variableName) || variableName;
+    valueCode = `card.ability.extra.${actualVariableName}`;
+
+    configVariables.push({
+      name: actualVariableName,
+      value: Number(effectValue) || 1,
+    });
+  }
 
   const customMessage = effect.customMessage;
   let statement = "";
@@ -80,6 +111,7 @@ export const generateEditConsumableSlotsReturn = (
   return {
     statement,
     colour: "G.C.GREEN",
+    configVariables: configVariables.length > 0 ? configVariables : undefined,
   };
 };
 

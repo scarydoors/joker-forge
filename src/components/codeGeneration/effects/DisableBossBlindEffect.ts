@@ -1,4 +1,4 @@
-import type { EffectReturn } from "./AddChipsEffect";
+import type { EffectReturn } from "../effectUtils";
 import type { Effect } from "../../ruleBuilder/types";
 import type { PassiveEffectResult } from "../effectUtils";
 

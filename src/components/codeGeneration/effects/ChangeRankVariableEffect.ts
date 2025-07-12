@@ -1,6 +1,6 @@
 import type { Effect } from "../../ruleBuilder/types";
-import type { EffectReturn } from "./AddChipsEffect";
 import { getRankId } from "../../data/BalatroUtils";
+import { EffectReturn } from "../effectUtils";
 
 export const generateChangeRankVariableReturn = (
   effect: Effect
@@ -14,7 +14,7 @@ export const generateChangeRankVariableReturn = (
     statement = `__PRE_RETURN_CODE__
                     if G.playing_cards then
                         local valid_${variableName}_cards = {}
-                        for *, v in ipairs(G.playing*cards) do
+                        for _, v in ipairs(G.playing_cards) do
                             if not SMODS.has_no_rank(v) then
                                 valid_${variableName}_cards[#valid_${variableName}_cards + 1] = v
                             end

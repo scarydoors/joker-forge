@@ -1,4 +1,4 @@
-import type { EffectReturn } from "./AddChipsEffect";
+import type { EffectReturn } from "../effectUtils";
 import type { Effect } from "../../ruleBuilder/types";
 
 const SPECTRAL_CARD_KEYS: Record<string, string> = {

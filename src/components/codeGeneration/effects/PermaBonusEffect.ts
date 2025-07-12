@@ -1,39 +1,54 @@
 import type { Effect } from "../../ruleBuilder/types";
-import { getEffectVariableName } from "../index";
 import {
   generateGameVariableCode,
   parseGameVariable,
   parseRangeVariable,
 } from "../gameVariableUtils";
+import type { EffectReturn, ConfigExtraVariable } from "../effectUtils";
 
-export interface EffectReturn {
-  statement: string;
-  message?: string;
-  colour: string;
-}
-
-export const generatePermaBonusReturn = (effect: Effect): EffectReturn => {
+export const generatePermaBonusReturn = (
+  effect: Effect,
+  variableNameMap?: Map<string, string>
+): EffectReturn => {
   const effectValue = effect.params.value;
   const bonusType = effect.params.bonus_type as string;
   const parsed = parseGameVariable(effectValue);
   const rangeParsed = parseRangeVariable(effectValue);
 
   let valueCode: string;
+  const configVariables: ConfigExtraVariable[] = [];
 
   if (parsed.isGameVariable) {
     valueCode = generateGameVariableCode(effectValue);
   } else if (rangeParsed.isRangeVariable) {
-    const variableName = getEffectVariableName(effect.id, "perma_bonus");
-    const seedName = `${variableName}_${effect.id.substring(0, 8)}`;
-    valueCode = `pseudorandom('${seedName}', card.ability.extra.${variableName}_min, card.ability.extra.${variableName}_max)`;
+    const variableName = "perma_bonus";
+    const actualVariableName =
+      variableNameMap?.get(variableName) || variableName;
+    const seedName = `${actualVariableName}_${effect.id.substring(0, 8)}`;
+    valueCode = `pseudorandom('${seedName}', card.ability.extra.${actualVariableName}_min, card.ability.extra.${actualVariableName}_max)`;
+
+    configVariables.push(
+      { name: `${actualVariableName}_min`, value: rangeParsed.min || 1 },
+      { name: `${actualVariableName}_max`, value: rangeParsed.max || 5 }
+    );
   } else if (typeof effectValue === "string") {
     if (effectValue.endsWith("_value")) {
       valueCode = effectValue;
     } else {
-      valueCode = `card.ability.extra.${effectValue}`;
+      const actualVariableName =
+        variableNameMap?.get(effectValue) || effectValue;
+      valueCode = `card.ability.extra.${actualVariableName}`;
     }
   } else {
-    valueCode = (effectValue as number | string).toString();
+    const variableName = "perma_bonus";
+    const actualVariableName =
+      variableNameMap?.get(variableName) || variableName;
+    valueCode = `card.ability.extra.${actualVariableName}`;
+
+    configVariables.push({
+      name: actualVariableName,
+      value: Number(effectValue) || 1,
+    });
   }
 
   const customMessage = effect.customMessage;
@@ -44,6 +59,7 @@ export const generatePermaBonusReturn = (effect: Effect): EffectReturn => {
   const result: EffectReturn = {
     statement: `__PRE_RETURN_CODE__${preReturnCode}__PRE_RETURN_CODE_END__extra = { message = localize('k_upgrade_ex'), colour = G.C.CHIPS }, card = card`,
     colour: "G.C.CHIPS",
+    configVariables: configVariables.length > 0 ? configVariables : undefined,
   };
 
   if (customMessage) {

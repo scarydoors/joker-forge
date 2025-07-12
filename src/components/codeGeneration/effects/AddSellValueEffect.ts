@@ -1,6 +1,5 @@
-import type { EffectReturn } from "./AddChipsEffect";
+import type { EffectReturn, ConfigExtraVariable } from "../effectUtils";
 import type { Effect } from "../../ruleBuilder/types";
-import { getEffectVariableName } from "../index";
 import {
   generateGameVariableCode,
   parseGameVariable,
@@ -9,7 +8,8 @@ import {
 
 export const generateAddSellValueReturn = (
   effect: Effect,
-  triggerType: string
+  triggerType: string,
+  variableNameMap?: Map<string, string>
 ): EffectReturn => {
   const target = (effect.params?.target as string) || "self";
   const effectValue = effect.params.value;
@@ -17,22 +17,39 @@ export const generateAddSellValueReturn = (
   const rangeParsed = parseRangeVariable(effectValue);
 
   let valueCode: string;
+  const configVariables: ConfigExtraVariable[] = [];
 
   if (parsed.isGameVariable) {
     valueCode = generateGameVariableCode(effectValue);
   } else if (rangeParsed.isRangeVariable) {
-    const variableName = getEffectVariableName(effect.id, "sell_value");
-    const seedName = `${variableName}_${effect.id.substring(0, 8)}`;
-    valueCode = `pseudorandom('${seedName}', card.ability.extra.${variableName}_min, card.ability.extra.${variableName}_max)`;
+    const variableName = "sell_value";
+    const actualVariableName =
+      variableNameMap?.get(variableName) || variableName;
+    const seedName = `${actualVariableName}_${effect.id.substring(0, 8)}`;
+    valueCode = `pseudorandom('${seedName}', card.ability.extra.${actualVariableName}_min, card.ability.extra.${actualVariableName}_max)`;
+
+    configVariables.push(
+      { name: `${actualVariableName}_min`, value: rangeParsed.min || 1 },
+      { name: `${actualVariableName}_max`, value: rangeParsed.max || 5 }
+    );
   } else if (typeof effectValue === "string") {
     if (effectValue.endsWith("_value")) {
       valueCode = effectValue;
     } else {
-      valueCode = `card.ability.extra.${effectValue}`;
+      const actualVariableName =
+        variableNameMap?.get(effectValue) || effectValue;
+      valueCode = `card.ability.extra.${actualVariableName}`;
     }
   } else {
-    const variableName = getEffectVariableName(effect.id, "sell_value");
-    valueCode = `card.ability.extra.${variableName}`;
+    const variableName = "sell_value";
+    const actualVariableName =
+      variableNameMap?.get(variableName) || variableName;
+    valueCode = `card.ability.extra.${actualVariableName}`;
+
+    configVariables.push({
+      name: actualVariableName,
+      value: Number(effectValue) || 1,
+    });
   }
 
   const customMessage = effect.customMessage;
@@ -66,20 +83,17 @@ export const generateAddSellValueReturn = (
             end`;
   }
 
-  if (isScoring) {
-    return {
-      statement: `__PRE_RETURN_CODE__${sellValueCode}
-                __PRE_RETURN_CODE_END__`,
-      message: customMessage ? `"${customMessage}"` : `localize('k_val_up')`,
-      colour: "G.C.MONEY",
-    };
-  } else {
-    return {
-      statement: `func = function()${sellValueCode}
+  const result: EffectReturn = {
+    statement: isScoring
+      ? `__PRE_RETURN_CODE__${sellValueCode}
+                __PRE_RETURN_CODE_END__`
+      : `func = function()${sellValueCode}
                     return true
                 end`,
-      message: customMessage ? `"${customMessage}"` : `localize('k_val_up')`,
-      colour: "G.C.MONEY",
-    };
-  }
+    message: customMessage ? `"${customMessage}"` : `localize('k_val_up')`,
+    colour: "G.C.MONEY",
+    configVariables: configVariables.length > 0 ? configVariables : undefined,
+  };
+
+  return result;
 };

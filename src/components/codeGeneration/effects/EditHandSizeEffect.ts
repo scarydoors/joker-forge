@@ -1,4 +1,4 @@
-import type { EffectReturn } from "./AddChipsEffect";
+import type { EffectReturn, ConfigExtraVariable } from "../effectUtils";
 import type { Effect } from "../../ruleBuilder/types";
 import type { PassiveEffectResult } from "../effectUtils";
 import {
@@ -7,26 +7,47 @@ import {
   parseRangeVariable,
 } from "../gameVariableUtils";
 
-export const generateEditHandSizeReturn = (effect: Effect): EffectReturn => {
+export const generateEditHandSizeReturn = (
+  effect: Effect,
+  variableNameMap?: Map<string, string>
+): EffectReturn => {
   const operation = effect.params?.operation || "add";
   const effectValue = effect.params.value;
   const parsed = parseGameVariable(effectValue);
   const rangeParsed = parseRangeVariable(effectValue);
 
   let valueCode: string;
+  const configVariables: ConfigExtraVariable[] = [];
 
   if (parsed.isGameVariable) {
     valueCode = generateGameVariableCode(effectValue as string);
   } else if (rangeParsed.isRangeVariable) {
-    const seedName = `handsize_${effect.id.substring(0, 8)}`;
-    valueCode = `pseudorandom('${seedName}', ${rangeParsed.min}, ${rangeParsed.max})`;
+    const variableName = "hand_size";
+    const actualVariableName =
+      variableNameMap?.get(variableName) || variableName;
+    const seedName = `${actualVariableName}_${effect.id.substring(0, 8)}`;
+    valueCode = `pseudorandom('${seedName}', card.ability.extra.${actualVariableName}_min, card.ability.extra.${actualVariableName}_max)`;
+
+    configVariables.push(
+      { name: `${actualVariableName}_min`, value: rangeParsed.min || 1 },
+      { name: `${actualVariableName}_max`, value: rangeParsed.max || 5 }
+    );
   } else if (typeof effectValue === "string") {
-    valueCode = `card.ability.extra.${effectValue}`;
+    const actualVariableName = variableNameMap?.get(effectValue) || effectValue;
+    valueCode = `card.ability.extra.${actualVariableName}`;
   } else if (
     typeof effectValue === "number" ||
     typeof effectValue === "boolean"
   ) {
-    valueCode = (effectValue as number | boolean).toString();
+    const variableName = "hand_size";
+    const actualVariableName =
+      variableNameMap?.get(variableName) || variableName;
+    valueCode = `card.ability.extra.${actualVariableName}`;
+
+    configVariables.push({
+      name: actualVariableName,
+      value: Number(effectValue) || 1,
+    });
   } else {
     valueCode = "";
   }
@@ -86,6 +107,7 @@ export const generateEditHandSizeReturn = (effect: Effect): EffectReturn => {
   return {
     statement,
     colour: "G.C.BLUE",
+    configVariables: configVariables.length > 0 ? configVariables : undefined,
   };
 };
 

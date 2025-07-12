@@ -1,46 +1,61 @@
 import type { Effect } from "../../ruleBuilder/types";
-import { getEffectVariableName } from "../index";
 import {
   generateGameVariableCode,
   parseGameVariable,
   parseRangeVariable,
 } from "../gameVariableUtils";
+import type { EffectReturn, ConfigExtraVariable } from "../effectUtils";
 
-export interface EffectReturn {
-  statement: string;
-  message?: string;
-  colour: string;
-}
-
-export const generateAddChipsReturn = (effect: Effect): EffectReturn => {
+export const generateAddChipsReturn = (
+  effect: Effect,
+  variableNameMap?: Map<string, string>
+): EffectReturn => {
   const effectValue = effect.params.value;
   const parsed = parseGameVariable(effectValue);
   const rangeParsed = parseRangeVariable(effectValue);
 
   let valueCode: string;
+  const configVariables: ConfigExtraVariable[] = [];
 
   if (parsed.isGameVariable) {
     valueCode = generateGameVariableCode(effectValue);
   } else if (rangeParsed.isRangeVariable) {
-    const variableName = getEffectVariableName(effect.id, "chips");
-    const seedName = `${variableName}_${effect.id.substring(0, 8)}`;
-    valueCode = `pseudorandom('${seedName}', card.ability.extra.${variableName}_min, card.ability.extra.${variableName}_max)`;
+    const variableName = "chips";
+    const actualVariableName =
+      variableNameMap?.get(variableName) || variableName;
+    const seedName = `${actualVariableName}_${effect.id.substring(0, 8)}`;
+    valueCode = `pseudorandom('${seedName}', card.ability.extra.${actualVariableName}_min, card.ability.extra.${actualVariableName}_max)`;
+
+    configVariables.push(
+      { name: `${actualVariableName}_min`, value: rangeParsed.min || 1 },
+      { name: `${actualVariableName}_max`, value: rangeParsed.max || 5 }
+    );
   } else if (typeof effectValue === "string") {
     if (effectValue.endsWith("_value")) {
       valueCode = effectValue;
     } else {
-      valueCode = `card.ability.extra.${effectValue}`;
+      const actualVariableName =
+        variableNameMap?.get(effectValue) || effectValue;
+      valueCode = `card.ability.extra.${actualVariableName}`;
     }
   } else {
-    const variableName = getEffectVariableName(effect.id, "chips");
-    valueCode = `card.ability.extra.${variableName}`;
+    const variableName = "chips";
+    const actualVariableName =
+      variableNameMap?.get(variableName) || variableName;
+    valueCode = `card.ability.extra.${actualVariableName}`;
+
+    configVariables.push({
+      name: actualVariableName,
+      value: Number(effectValue) || 10,
+    });
   }
 
   const customMessage = effect.customMessage;
 
   const result: EffectReturn = {
     statement: `chips = ${valueCode}`,
-    colour: "",
+    colour: "G.C.CHIPS",
+    configVariables: configVariables.length > 0 ? configVariables : undefined,
   };
 
   if (customMessage) {

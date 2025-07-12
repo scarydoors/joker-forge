@@ -1,4 +1,4 @@
-import type { EffectReturn } from "./AddChipsEffect";
+import type { EffectReturn, ConfigExtraVariable } from "../effectUtils";
 import type { Effect } from "../../ruleBuilder/types";
 import type { PassiveEffectResult } from "../effectUtils";
 import {
@@ -7,9 +7,46 @@ import {
   parseRangeVariable,
 } from "../gameVariableUtils";
 
-export const generateEditJokerSlotsReturn = (effect: Effect): EffectReturn => {
+export const generateEditJokerSlotsReturn = (
+  effect: Effect,
+  variableNameMap?: Map<string, string>
+): EffectReturn => {
   const operation = effect.params?.operation || "add";
   const effectValue = effect.params.value || 1;
+  const parsed = parseGameVariable(effectValue);
+  const rangeParsed = parseRangeVariable(effectValue);
+
+  let valueCode: string;
+  const configVariables: ConfigExtraVariable[] = [];
+
+  if (parsed.isGameVariable) {
+    valueCode = generateGameVariableCode(effectValue);
+  } else if (rangeParsed.isRangeVariable) {
+    const variableName = "joker_slots";
+    const actualVariableName =
+      variableNameMap?.get(variableName) || variableName;
+    const seedName = `${actualVariableName}_${effect.id.substring(0, 8)}`;
+    valueCode = `pseudorandom('${seedName}', card.ability.extra.${actualVariableName}_min, card.ability.extra.${actualVariableName}_max)`;
+
+    configVariables.push(
+      { name: `${actualVariableName}_min`, value: rangeParsed.min || 1 },
+      { name: `${actualVariableName}_max`, value: rangeParsed.max || 5 }
+    );
+  } else if (typeof effectValue === "string") {
+    const actualVariableName = variableNameMap?.get(effectValue) || effectValue;
+    valueCode = `card.ability.extra.${actualVariableName}`;
+  } else {
+    const variableName = "joker_slots";
+    const actualVariableName =
+      variableNameMap?.get(variableName) || variableName;
+    valueCode = `card.ability.extra.${actualVariableName}`;
+
+    configVariables.push({
+      name: actualVariableName,
+      value: Number(effectValue) || 1,
+    });
+  }
+
   const customMessage = effect.customMessage;
   let statement = "";
 
@@ -17,10 +54,10 @@ export const generateEditJokerSlotsReturn = (effect: Effect): EffectReturn => {
     case "add": {
       const addMessage = customMessage
         ? `"${customMessage}"`
-        : `"+"..tostring(${effectValue}).." Joker Slot"`;
+        : `"+"..tostring(${valueCode}).." Joker Slot"`;
       statement = `func = function()
                 card_eval_status_text(context.blueprint_card or card, 'extra', nil, nil, nil, {message = ${addMessage}, colour = G.C.DARK_EDITION})
-                G.jokers.config.card_limit = G.jokers.config.card_limit + ${effectValue}
+                G.jokers.config.card_limit = G.jokers.config.card_limit + ${valueCode}
                 return true
             end`;
       break;
@@ -28,10 +65,10 @@ export const generateEditJokerSlotsReturn = (effect: Effect): EffectReturn => {
     case "subtract": {
       const subtractMessage = customMessage
         ? `"${customMessage}"`
-        : `"-"..tostring(${effectValue}).." Joker Slot"`;
+        : `"-"..tostring(${valueCode}).." Joker Slot"`;
       statement = `func = function()
                 card_eval_status_text(context.blueprint_card or card, 'extra', nil, nil, nil, {message = ${subtractMessage}, colour = G.C.RED})
-                G.jokers.config.card_limit = math.max(1, G.jokers.config.card_limit - ${effectValue})
+                G.jokers.config.card_limit = math.max(1, G.jokers.config.card_limit - ${valueCode})
                 return true
             end`;
       break;
@@ -39,10 +76,10 @@ export const generateEditJokerSlotsReturn = (effect: Effect): EffectReturn => {
     case "set": {
       const setMessage = customMessage
         ? `"${customMessage}"`
-        : `"Joker Slots set to "..tostring(${effectValue})`;
+        : `"Joker Slots set to "..tostring(${valueCode})`;
       statement = `func = function()
                 card_eval_status_text(context.blueprint_card or card, 'extra', nil, nil, nil, {message = ${setMessage}, colour = G.C.BLUE})
-                G.jokers.config.card_limit = ${effectValue}
+                G.jokers.config.card_limit = ${valueCode}
                 return true
             end`;
       break;
@@ -50,10 +87,10 @@ export const generateEditJokerSlotsReturn = (effect: Effect): EffectReturn => {
     default: {
       const defaultMessage = customMessage
         ? `"${customMessage}"`
-        : `"+"..tostring(${effectValue}).." Joker Slot"`;
+        : `"+"..tostring(${valueCode}).." Joker Slot"`;
       statement = `func = function()
                 card_eval_status_text(context.blueprint_card or card, 'extra', nil, nil, nil, {message = ${defaultMessage}, colour = G.C.DARK_EDITION})
-                G.jokers.config.card_limit = G.jokers.config.card_limit + ${effectValue}
+                G.jokers.config.card_limit = G.jokers.config.card_limit + ${valueCode}
                 return true
             end`;
     }
@@ -62,6 +99,7 @@ export const generateEditJokerSlotsReturn = (effect: Effect): EffectReturn => {
   return {
     statement,
     colour: "G.C.DARK_EDITION",
+    configVariables: configVariables.length > 0 ? configVariables : undefined,
   };
 };
 

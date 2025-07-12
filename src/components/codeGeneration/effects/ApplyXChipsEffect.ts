@@ -1,21 +1,19 @@
 import type { Effect } from "../../ruleBuilder/types";
-import { getEffectVariableName } from "../index";
 import {
   generateGameVariableCode,
   parseGameVariable,
 } from "../gameVariableUtils";
+import type { EffectReturn, ConfigExtraVariable } from "../effectUtils";
 
-export interface EffectReturn {
-  statement: string;
-  message?: string;
-  colour: string;
-}
-
-export const generateApplyXChipsReturn = (effect: Effect): EffectReturn => {
+export const generateApplyXChipsReturn = (
+  effect: Effect,
+  variableNameMap?: Map<string, string>
+): EffectReturn => {
   const effectValue = effect.params.value;
   const parsed = parseGameVariable(effectValue);
 
   let valueCode: string;
+  const configVariables: ConfigExtraVariable[] = [];
 
   if (parsed.isGameVariable) {
     valueCode = generateGameVariableCode(effectValue);
@@ -23,11 +21,20 @@ export const generateApplyXChipsReturn = (effect: Effect): EffectReturn => {
     if (effectValue.endsWith("_value")) {
       valueCode = effectValue;
     } else {
-      valueCode = `card.ability.extra.${effectValue}`;
+      const actualVariableName =
+        variableNameMap?.get(effectValue) || effectValue;
+      valueCode = `card.ability.extra.${actualVariableName}`;
     }
   } else {
-    const variableName = getEffectVariableName(effect.id, "xchips");
-    valueCode = `card.ability.extra.${variableName}`;
+    const variableName = "xchips";
+    const actualVariableName =
+      variableNameMap?.get(variableName) || variableName;
+    valueCode = `card.ability.extra.${actualVariableName}`;
+
+    configVariables.push({
+      name: actualVariableName,
+      value: Number(effectValue) || 1.5,
+    });
   }
 
   const customMessage = effect.customMessage;
@@ -35,6 +42,7 @@ export const generateApplyXChipsReturn = (effect: Effect): EffectReturn => {
   const result: EffectReturn = {
     statement: `xchips = ${valueCode}`,
     colour: "",
+    configVariables: configVariables.length > 0 ? configVariables : undefined,
   };
 
   if (customMessage) {

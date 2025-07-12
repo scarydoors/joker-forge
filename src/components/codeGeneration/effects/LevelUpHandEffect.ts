@@ -1,6 +1,5 @@
-import type { EffectReturn } from "./AddChipsEffect";
+import type { EffectReturn, ConfigExtraVariable } from "../effectUtils";
 import type { Effect } from "../../ruleBuilder/types";
-import { getEffectVariableName } from "../index";
 import {
   generateGameVariableCode,
   parseGameVariable,
@@ -9,11 +8,13 @@ import {
 
 export const generateLevelUpHandReturn = (
   triggerType: string = "hand_played",
-  effect?: Effect
+  effect?: Effect,
+  variableNameMap?: Map<string, string>
 ): EffectReturn => {
   const customMessage = effect?.customMessage;
 
   let valueCode: string;
+  const configVariables: ConfigExtraVariable[] = [];
 
   if (effect) {
     const effectValue = effect.params.value;
@@ -23,14 +24,30 @@ export const generateLevelUpHandReturn = (
     if (parsed.isGameVariable) {
       valueCode = generateGameVariableCode(effectValue);
     } else if (rangeParsed.isRangeVariable) {
-      const variableName = getEffectVariableName(effect.id, "levels");
-      const seedName = `${variableName}_${effect.id.substring(0, 8)}`;
-      valueCode = `pseudorandom('${seedName}', card.ability.extra.${variableName}_min, card.ability.extra.${variableName}_max)`;
+      const variableName = "levels";
+      const actualVariableName =
+        variableNameMap?.get(variableName) || variableName;
+      const seedName = `${actualVariableName}_${effect.id.substring(0, 8)}`;
+      valueCode = `pseudorandom('${seedName}', card.ability.extra.${actualVariableName}_min, card.ability.extra.${actualVariableName}_max)`;
+
+      configVariables.push(
+        { name: `${actualVariableName}_min`, value: rangeParsed.min || 1 },
+        { name: `${actualVariableName}_max`, value: rangeParsed.max || 5 }
+      );
     } else if (typeof effectValue === "string") {
-      valueCode = `card.ability.extra.${effectValue}`;
+      const actualVariableName =
+        variableNameMap?.get(effectValue) || effectValue;
+      valueCode = `card.ability.extra.${actualVariableName}`;
     } else {
-      const variableName = getEffectVariableName(effect.id, "levels");
-      valueCode = `card.ability.extra.${variableName}`;
+      const variableName = "levels";
+      const actualVariableName =
+        variableNameMap?.get(variableName) || variableName;
+      valueCode = `card.ability.extra.${actualVariableName}`;
+
+      configVariables.push({
+        name: actualVariableName,
+        value: Number(effectValue) || 1,
+      });
     }
   } else {
     valueCode = "card.ability.extra.levels";
@@ -63,6 +80,8 @@ export const generateLevelUpHandReturn = (
           ? `"${customMessage}"`
           : `localize('k_level_up_ex')`,
         colour: "G.C.RED",
+        configVariables:
+          configVariables.length > 0 ? configVariables : undefined,
       };
     } else {
       return {
@@ -72,6 +91,8 @@ export const generateLevelUpHandReturn = (
           ? `"${customMessage}"`
           : `localize('k_level_up_ex')`,
         colour: "G.C.RED",
+        configVariables:
+          configVariables.length > 0 ? configVariables : undefined,
       };
     }
   }
@@ -86,6 +107,7 @@ export const generateLevelUpHandReturn = (
         ? `"${customMessage}"`
         : `localize('k_level_up_ex')`,
       colour: "G.C.RED",
+      configVariables: configVariables.length > 0 ? configVariables : undefined,
     };
   } else {
     return {
@@ -97,6 +119,7 @@ export const generateLevelUpHandReturn = (
         ? `"${customMessage}"`
         : `localize('k_level_up_ex')`,
       colour: "G.C.RED",
+      configVariables: configVariables.length > 0 ? configVariables : undefined,
     };
   }
 };
