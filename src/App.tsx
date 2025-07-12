@@ -17,7 +17,6 @@ import ModMetadataPage, {
 import ConsumablesPage from "./components/pages/ConsumablesPage";
 import DecksPage from "./components/pages/DecksPage";
 import EditionsPage from "./components/pages/EditionsPage";
-import EnhancementsPage from "./components/pages/EnhancementsPage";
 import VanillaRemadePage from "./components/pages/VanillaReforgedPage";
 import ExtraCreditPage from "./components/pages/ExtraCreditPage";
 import AcknowledgementsPage from "./components/pages/AcknowledgementsPage";
@@ -30,6 +29,7 @@ import {
 } from "./components/JSONImportExport";
 import Alert from "./components/generic/Alert";
 import Modal from "./components/generic/Modal";
+import Button from "./components/generic/Button";
 import {
   CheckCircleIcon,
   FolderIcon,
@@ -56,6 +56,7 @@ function AppContent() {
   const navigate = useNavigate();
 
   const currentSection = location.pathname.slice(1) || "overview";
+  const isExpanded = currentSection === "overview" || currentSection === "";
 
   const [modMetadata, setModMetadata] =
     useState<ModMetadata>(DEFAULT_MOD_METADATA);
@@ -396,7 +397,17 @@ function AppContent() {
         modName={modMetadata.name}
         authorName={modMetadata.author.join(", ")}
       />
-      <div className="flex-1 flex flex-col overflow-y-auto custom-scrollbar">
+      <motion.div
+        className="flex-1 flex flex-col overflow-y-auto custom-scrollbar"
+        animate={{
+          marginLeft: isExpanded ? 0 : 0,
+        }}
+        transition={{
+          type: "spring",
+          stiffness: 300,
+          damping: 30,
+        }}
+      >
         <Routes>
           <Route
             path="/"
@@ -452,7 +463,6 @@ function AppContent() {
           <Route path="/consumables" element={<ConsumablesPage />} />
           <Route path="/decks" element={<DecksPage />} />
           <Route path="/editions" element={<EditionsPage />} />
-          <Route path="/enhancements" element={<EnhancementsPage />} />
           <Route
             path="/vanilla"
             element={
@@ -482,7 +492,7 @@ function AppContent() {
           <Route path="/acknowledgements" element={<AcknowledgementsPage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
-      </div>
+      </motion.div>
 
       <AnimatePresence>
         {autoSaveStatus !== "idle" && (
@@ -513,10 +523,10 @@ function AppContent() {
       {showRestoreModal && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
           <div className="bg-black-dark border-2 border-black-lighter rounded-xl p-6 max-w-md mx-4">
-            <h3 className="text-white-light text-lg font-medium tracking-wide mb-3">
+            <h3 className="text-white-light text-lg font-medium tracking-widest mb-4">
               Restore Auto-Saved Project?
             </h3>
-            <p className="text-white-dark tracking-wide text-sm mb-4">
+            <p className="text-white-dark tracking-wide text-sm mb-6">
               We found an auto-saved version of your project from{" "}
               {(() => {
                 const metadata = getAutoSaveMetadata();
@@ -527,19 +537,23 @@ function AppContent() {
               })()}{" "}
               Would you like to restore it?
             </p>
-            <div className="flex gap-3">
-              <button
+            <div className="flex gap-4">
+              <Button
+                color="primary"
+                variant="primary"
                 onClick={handleRestoreAutoSave}
-                className="flex-1 bg-mint text-black-dark hover:text-black-darker px-4 py-2 rounded-lg cursor-pointer hover:bg-mint-light transition-colors font-medium"
+                className="w-full"
               >
                 Restore
-              </button>
-              <button
+              </Button>
+              <Button
+                color="secondary"
+                variant="secondary"
+                className="w-full"
                 onClick={handleDiscardAutoSave}
-                className="flex-1 bg-black-lighter text-white-light px-4 py-2 cursor-pointer rounded-lg hover:bg-black-light transition-colors"
               >
                 Start Fresh
-              </button>
+              </Button>
             </div>
           </div>
         </div>
