@@ -582,8 +582,8 @@ const OverviewPage: React.FC<OverviewPageProps> = ({
           </div>
         </div>
 
-        <div className=" mt-8 pt-8">
-          <div className="flex justify-center mt-6">
+        <div className=" mt-28 pt-8">
+          <div className="flex justify-center mb-8">
             <div className="flex items-center">
               <h2 className="text-2xl text-white-light tracking-widest font-light">
                 Track Development
@@ -683,8 +683,8 @@ const OverviewPage: React.FC<OverviewPageProps> = ({
           </div>
         </div>
 
-        <div className=" mt-8 pt-8">
-          <div className="flex justify-center mt-6">
+        <div className=" mt-28 pt-8">
+          <div className="flex justify-center mb-8">
             <h2 className="text-2xl text-white-light tracking-widest font-light mb-6">
               What is Joker Forge?
             </h2>
