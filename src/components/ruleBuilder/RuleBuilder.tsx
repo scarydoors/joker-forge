@@ -39,6 +39,7 @@ import { getConditionTypeById } from "../data/Conditions";
 import { getEffectTypeById } from "../data/Effects";
 import GameVariables from "./GameVariables";
 import { GameVariable } from "../data/GameVars";
+import { motion } from "framer-motion";
 
 interface RuleBuilderProps {
   isOpen: boolean;
@@ -108,6 +109,9 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
       size: { width: 384, height: 600 },
     },
   });
+
+  const [isInitialLoadComplete, setIsInitialLoadComplete] = useState(false);
+  const [showNoRulesMessage, setShowNoRulesMessage] = useState(false);
 
   const modalRef = useRef<HTMLDivElement>(null);
   const transformRef = useRef<ReactZoomPanPinchRef>(null);
@@ -292,6 +296,23 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
       );
       setSelectedItem(null);
       setSelectedGameVariable(null);
+      setIsInitialLoadComplete(true);
+
+      // Reset the no rules message state
+      setShowNoRulesMessage(false);
+
+      // If there are no existing rules, delay showing the message
+      if (existingRules.length === 0) {
+        const timer = setTimeout(() => {
+          setShowNoRulesMessage(true);
+        }, 200); // 800ms delay
+
+        return () => clearTimeout(timer);
+      }
+    } else {
+      // Reset states when closing
+      setIsInitialLoadComplete(false);
+      setShowNoRulesMessage(false);
     }
   }, [isOpen, existingRules]);
 
@@ -1283,19 +1304,49 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
               Save & Close
             </Button>
           </div>
-          {rules.length === 0 && (
-            <div className="absolute inset-0 flex items-center justify-center z-40">
-              <div className="text-center bg-black-dark backdrop-blur-sm rounded-lg p-8 border-2 border-black-lighter">
-                <div className="text-white-darker text-lg mb-3">
-                  No Rules Created
-                </div>
-                <p className="text-white-darker text-sm max-w-md">
-                  Select a trigger from the Block Palette to create your first
-                  rule.
-                </p>
-              </div>
-            </div>
-          )}
+          {isInitialLoadComplete &&
+            rules.length === 0 &&
+            showNoRulesMessage && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                transition={{
+                  duration: 0.4,
+                  ease: "easeOut",
+                  delay: 0.1,
+                }}
+                className="absolute inset-0 flex items-center justify-center z-40"
+              >
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{
+                    duration: 0.3,
+                    delay: 0.2,
+                    ease: "easeOut",
+                  }}
+                  className="text-center bg-black-dark backdrop-blur-sm rounded-lg p-8 border-2 border-black-lighter shadow-2xl"
+                >
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.4, duration: 0.3 }}
+                    className="text-white-darker text-lg mb-3"
+                  >
+                    No Rules Created
+                  </motion.div>
+                  <motion.p
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.5, duration: 0.3 }}
+                    className="text-white-darker text-sm max-w-md"
+                  >
+                    Select a trigger from the Block Palette to create your first
+                    rule.
+                  </motion.p>
+                </motion.div>
+              </motion.div>
+            )}
           <DndContext
             sensors={sensors}
             collisionDetection={closestCenter}
