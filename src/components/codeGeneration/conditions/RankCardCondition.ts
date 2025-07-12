@@ -2,6 +2,7 @@ import type { Rule } from "../../ruleBuilder/types";
 import type { JokerData } from "../../JokerCard";
 import { generateGameVariableCode } from "../gameVariableUtils";
 import { parseRankVariable } from "../variableUtils";
+import { getRankId } from "../../data/BalatroUtils";
 
 export const generateRankCardConditionCode = (
   rules: Rule[],
@@ -377,20 +378,5 @@ end)()`;
     
     return rankFound
 end)()`;
-  }
-};
-
-const getRankId = (rank: string): number => {
-  switch (rank) {
-    case "A":
-      return 14;
-    case "K":
-      return 13;
-    case "Q":
-      return 12;
-    case "J":
-      return 11;
-    default:
-      return parseInt(rank) || 14;
   }
 };

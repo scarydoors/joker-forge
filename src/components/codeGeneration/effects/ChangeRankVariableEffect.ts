@@ -1,5 +1,6 @@
 import type { Effect } from "../../ruleBuilder/types";
 import type { EffectReturn } from "./AddChipsEffect";
+import { getRankId } from "../../data/BalatroUtils";
 
 export const generateChangeRankVariableReturn = (
   effect: Effect
@@ -7,14 +8,13 @@ export const generateChangeRankVariableReturn = (
   const variableName = (effect.params.variable_name as string) || "rankvar";
   const changeType = (effect.params.change_type as string) || "random";
   const specificRank = (effect.params.specific_rank as string) || "A";
-
   let statement = "";
 
   if (changeType === "random") {
     statement = `__PRE_RETURN_CODE__
                     if G.playing_cards then
                         local valid_${variableName}_cards = {}
-                        for _, v in ipairs(G.playing_cards) do
+                        for *, v in ipairs(G.playing*cards) do
                             if not SMODS.has_no_rank(v) then
                                 valid_${variableName}_cards[#valid_${variableName}_cards + 1] = v
                             end
@@ -44,19 +44,4 @@ export const generateChangeRankVariableReturn = (
   }
 
   return result;
-};
-
-const getRankId = (rank: string): number => {
-  switch (rank) {
-    case "A":
-      return 14;
-    case "K":
-      return 13;
-    case "Q":
-      return 12;
-    case "J":
-      return 11;
-    default:
-      return parseInt(rank) || 14;
-  }
 };

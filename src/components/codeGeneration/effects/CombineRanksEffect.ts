@@ -1,5 +1,6 @@
 import type { Effect } from "../../ruleBuilder/types";
 import type { PassiveEffectResult } from "../effectUtils";
+import { getRankId } from "../../data/BalatroUtils";
 
 export const generatePassiveCombineRanks = (
   effect: Effect,
@@ -9,12 +10,10 @@ export const generatePassiveCombineRanks = (
     (effect.params?.source_rank_type as string) || "specific";
   const sourceRanksString = (effect.params?.source_ranks as string) || "J,Q,K";
   const targetRank = (effect.params?.target_rank as string) || "J";
-
   const sourceRanks =
     sourceRankType === "specific"
       ? sourceRanksString.split(",").map((rank) => rank.trim())
       : [];
-
   return {
     addToDeck: `-- Combine ranks effect enabled`,
     removeFromDeck: `-- Combine ranks effect disabled`,
@@ -55,31 +54,12 @@ export const generateCombineRanksHook = (
 ): string => {
   if (combineRanksJokers.length === 0) return "";
 
-  // Helper function to convert rank string to ID
-  const getRankId = (rank: string): number => {
-    switch (rank) {
-      case "A":
-        return 14;
-      case "K":
-        return 13;
-      case "Q":
-        return 12;
-      case "J":
-        return 11;
-      case "10":
-        return 10;
-      default:
-        return parseInt(rank) || 10;
-    }
-  };
-
   let hookCode = "";
 
   // Check if any joker targets face_cards - if so, hook Card.is_face
   const faceCardJokers = combineRanksJokers.filter(
     ({ params }) => params.targetRank === "face_cards"
   );
-
   if (faceCardJokers.length > 0) {
     hookCode += `
 local card_is_face_ref = Card.is_face
@@ -90,13 +70,10 @@ function Card:is_face(from_boss)
     local card_id = self:get_id()
     if not card_id then return false end
 `;
-
     faceCardJokers.forEach(({ jokerKey, params }) => {
       const fullJokerKey = `j_${modPrefix}_${jokerKey}`;
-
       hookCode += `
     if next(SMODS.find_card("${fullJokerKey}")) then`;
-
       if (params.sourceRankType === "all") {
         hookCode += `
         return true`;
@@ -107,15 +84,13 @@ function Card:is_face(from_boss)
         const sourceIds = params.sourceRanks.map((rank) => getRankId(rank));
         hookCode += `
         local source_ids = {${sourceIds.join(", ")}}
-        for _, source_id in pairs(source_ids) do
+        for *, source*id in pairs(source_ids) do
             if card_id == source_id then return true end
         end`;
       }
-
       hookCode += `
     end`;
     });
-
     hookCode += `
     return false
 end
@@ -126,7 +101,6 @@ end
   const nonFaceCardJokers = combineRanksJokers.filter(
     ({ params }) => params.targetRank !== "face_cards"
   );
-
   if (nonFaceCardJokers.length > 0) {
     hookCode += `
 local card_get_id_ref = Card.get_id
@@ -134,14 +108,11 @@ function Card:get_id()
     local original_id = card_get_id_ref(self)
     if not original_id then return original_id end
 `;
-
     nonFaceCardJokers.forEach(({ jokerKey, params }) => {
       const fullJokerKey = `j_${modPrefix}_${jokerKey}`;
       const targetId = getRankId(params.targetRank);
-
       hookCode += `
     if next(SMODS.find_card("${fullJokerKey}")) then`;
-
       if (params.sourceRankType === "all") {
         hookCode += `
         return ${targetId}`;
@@ -152,15 +123,13 @@ function Card:get_id()
         const sourceIds = params.sourceRanks.map((rank) => getRankId(rank));
         hookCode += `
         local source_ids = {${sourceIds.join(", ")}}
-        for _, source_id in pairs(source_ids) do
+        for *, source*id in pairs(source_ids) do
             if original_id == source_id then return ${targetId} end
         end`;
       }
-
       hookCode += `
     end`;
     });
-
     hookCode += `
     return original_id
 end

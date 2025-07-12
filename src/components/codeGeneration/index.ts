@@ -22,6 +22,11 @@ import { generateShortcutHook } from "./effects/ShortcutEffect";
 import { generateShowmanHook } from "./effects/ShowmanEffect";
 import { generateCombineRanksHook } from "./effects/CombineRanksEffect";
 import { generateCombineSuitsHook } from "./effects/CombineSuitsEffect";
+import {
+  getRankId,
+  getSuitByValue,
+  getRankByValue,
+} from "../data/BalatroUtils";
 
 export interface ModMetadata {
   id: string;
@@ -304,14 +309,16 @@ const generateSetAbilityFunction = (joker: JokerData): string | null => {
   const variableInits: string[] = [];
 
   suitVariables.forEach((variable) => {
-    const defaultSuit = variable.initialSuit || "Spades";
+    const defaultSuit =
+      variable.initialSuit || getSuitByValue("Spades")?.value || "Spades";
     variableInits.push(
       `G.GAME.current_round.${variable.name}_card = { suit = '${defaultSuit}' }`
     );
   });
 
   rankVariables.forEach((variable) => {
-    const defaultRank = variable.initialRank || "Ace";
+    const defaultRank =
+      variable.initialRank || getRankByValue("A")?.label || "Ace";
     const defaultId = getRankId(defaultRank);
     variableInits.push(
       `G.GAME.current_round.${variable.name}_card = { rank = '${defaultRank}', id = ${defaultId} }`
@@ -334,21 +341,6 @@ const generateSetAbilityFunction = (joker: JokerData): string | null => {
   return `set_ability = function(self, card, initial)
         ${allCode.join("\n        ")}
     end`;
-};
-
-const getRankId = (rank: string): number => {
-  switch (rank) {
-    case "Ace":
-      return 14;
-    case "King":
-      return 13;
-    case "Queen":
-      return 12;
-    case "Jack":
-      return 11;
-    default:
-      return parseInt(rank) || 14;
-  }
 };
 
 const generateSingleJokerBase = (
@@ -1598,19 +1590,21 @@ const generateLocVarsFunction = (
 
     for (const suitVar of suitVariables) {
       if (currentIndex >= maxVariableIndex) break;
+      const defaultSuit = getSuitByValue("Spades")?.value || "Spades";
       variableMapping.push(
-        `localize((G.GAME.current_round.${suitVar.name}_card or {}).suit or 'Spades', 'suits_singular')`
+        `localize((G.GAME.current_round.${suitVar.name}_card or {}).suit or '${defaultSuit}', 'suits_singular')`
       );
       colorVariables.push(
-        `G.C.SUITS[(G.GAME.current_round.${suitVar.name}_card or {}).suit or 'Spades']`
+        `G.C.SUITS[(G.GAME.current_round.${suitVar.name}_card or {}).suit or '${defaultSuit}']`
       );
       currentIndex++;
     }
 
     for (const rankVar of rankVariables) {
       if (currentIndex >= maxVariableIndex) break;
+      const defaultRank = getRankByValue("A")?.label || "Ace";
       variableMapping.push(
-        `localize((G.GAME.current_round.${rankVar.name}_card or {}).rank or 'A', 'ranks')`
+        `localize((G.GAME.current_round.${rankVar.name}_card or {}).rank or '${defaultRank}', 'ranks')`
       );
       currentIndex++;
     }
@@ -1641,19 +1635,21 @@ const generateLocVarsFunction = (
 
     for (const suitVar of suitVariables) {
       if (currentIndex >= maxVariableIndex) break;
+      const defaultSuit = getSuitByValue("Spades")?.value || "Spades";
       variableMapping.push(
-        `localize((G.GAME.current_round.${suitVar.name}_card or {}).suit or 'Spades', 'suits_singular')`
+        `localize((G.GAME.current_round.${suitVar.name}_card or {}).suit or '${defaultSuit}', 'suits_singular')`
       );
       colorVariables.push(
-        `G.C.SUITS[(G.GAME.current_round.${suitVar.name}_card or {}).suit or 'Spades']`
+        `G.C.SUITS[(G.GAME.current_round.${suitVar.name}_card or {}).suit or '${defaultSuit}']`
       );
       currentIndex++;
     }
 
     for (const rankVar of rankVariables) {
       if (currentIndex >= maxVariableIndex) break;
+      const defaultRank = getRankByValue("A")?.label || "Ace";
       variableMapping.push(
-        `localize((G.GAME.current_round.${rankVar.name}_card or {}).rank or 'Ace', 'ranks')`
+        `localize((G.GAME.current_round.${rankVar.name}_card or {}).rank or '${defaultRank}', 'ranks')`
       );
       currentIndex++;
     }
