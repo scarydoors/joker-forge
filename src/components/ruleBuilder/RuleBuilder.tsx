@@ -1226,8 +1226,8 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
   const createAlternatingDotPattern = () => {
     const dotSize = 3;
     return `
-      radial-gradient(circle at 0px 0px, #26353B ${dotSize}px, transparent ${dotSize}px),
-      radial-gradient(circle at 0px 0px, #26353B ${dotSize}px, transparent ${dotSize}px)
+      radial-gradient(circle at 0px 0px, #1e2b30 ${dotSize}px, transparent ${dotSize}px),
+      radial-gradient(circle at 0px 0px, #1e2b30 ${dotSize}px, transparent ${dotSize}px)
     `;
   };
 
@@ -1237,10 +1237,10 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
 
   if (!isOpen) return null;
   return (
-    <div className="fixed inset-0 flex bg-black-darker items-center justify-center z-[60] font-lexend">
+    <div className="fixed inset-0 flex bg-black-dark items-center justify-center z-[60] font-lexend">
       <div
         ref={modalRef}
-        className="bg-black-dark rounded-lg w-full h-full overflow-hidden border-2 border-black-light flex flex-col"
+        className="bg-black-darker rounded-lg w-full h-full overflow-hidden border-2 border-black-light flex flex-col"
       >
         <div className="flex px-4 py-2 border-b-2 border-black-light z-50">
           <h2 className="text-xs text-white-light font-extralight tracking-widest mx-auto">
@@ -1258,10 +1258,10 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
               }px, ${(backgroundOffset.x + 20) % 40}px ${
                 (backgroundOffset.y + 20) % 40
               }px`,
-              backgroundColor: "#1E2B30",
+              backgroundColor: "#161E21",
             }}
           />
-          <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-50 bg-black-dark/90 backdrop-blur-md border border-black-lighter rounded-lg px-3 py-1 flex items-center gap-3">
+          <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-50 bg-black-dark backdrop-blur-md border border-black-lighter rounded-lg px-3 py-1 flex items-center gap-3">
             <div className="text-white-darker text-xs">
               Pan: {Math.round(panState.x)}, {Math.round(panState.y)}
             </div>
@@ -1285,7 +1285,7 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
           </div>
           {rules.length === 0 && (
             <div className="absolute inset-0 flex items-center justify-center z-40">
-              <div className="text-center bg-black-dark/80 backdrop-blur-sm rounded-lg p-8 border-2 border-black-lighter">
+              <div className="text-center bg-black-dark backdrop-blur-sm rounded-lg p-8 border-2 border-black-lighter">
                 <div className="text-white-darker text-lg mb-3">
                   No Rules Created
                 </div>
