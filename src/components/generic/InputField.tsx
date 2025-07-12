@@ -20,6 +20,7 @@ interface InputFieldProps
   multiline?: boolean;
   height?: string;
   size?: "sm" | "md" | "lg";
+  darkmode?: boolean;
   value: string;
   onChange: (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -44,6 +45,7 @@ const InputField = forwardRef<
       multiline = false,
       height = "auto",
       size = "md",
+      darkmode = false,
       className = "",
       value,
       onChange,
@@ -111,14 +113,21 @@ const InputField = forwardRef<
       }
     };
 
+    const getBackgroundClasses = () => {
+      if (darkmode) {
+        return "bg-black-darker border-black-light";
+      }
+      return "bg-black-dark border-black-lighter";
+    };
+
     const inputClasses = `
-    bg-black-dark text-white-light ${sizeClasses[size].padding} font-light ${
-      sizeClasses[size].text
-    }
+    ${getBackgroundClasses()} text-white-light ${
+      sizeClasses[size].padding
+    } font-light ${sizeClasses[size].text}
     ${useGameFont ? "font-game tracking-widest" : "font-lexend tracking-wide"}
     ${sizeClasses[size].contentPadding}
     focus:outline-none rounded-lg
-    border-2 border-black-lighter focus:border-mint transition-colors w-full
+    border-2 focus:border-mint transition-colors w-full
     ${error ? "border-balatro-red" : ""}
     ${
       props.type === "number"

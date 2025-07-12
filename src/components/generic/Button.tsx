@@ -30,18 +30,18 @@ const Button: React.FC<ButtonProps> = ({
 
   // Adjust size styles for icon-only buttons
   const sizeStyles = {
-    sm: isIconOnly ? "p-1 text-sm" : "px-3 py-1 text-sm",
-    md: isIconOnly ? "p-2 text-base" : "px-4 py-2 text-base",
-    lg: isIconOnly ? "p-3 text-lg" : "px-6 py-3 text-lg",
+    sm: isIconOnly ? "p-1 text-sm border-2" : "px-3 py-1 text-sm border-2",
+    md: isIconOnly ? "p-2 text-base border-3" : "px-4 py-2 text-base border-3",
+    lg: isIconOnly ? "p-3 text-lg border-3" : "px-6 py-3 text-lg border-3",
   }[size];
 
   const variantStyles = {
     primary:
-      "bg-black-dark text-mint-light border-2 border-mint-darker hover:bg-mint-dark hover:text-black-darker",
+      "bg-black-dark text-mint-light border-mint hover:text-mint-lighter hover:border-mint-lighter transition-colors",
     secondary:
-      "bg-black-dark text-white-light border-2 border-black-lighter hover:bg-black-lighter",
+      "bg-black-dark text-white-light border-black-lighter hover:bg-black-lighter",
     danger:
-      "bg-black-darker text-balatro-red border-2 border-balatro-redshadow hover:bg-balatro-redshadow hover:border-balatro-red hover:text-white-light",
+      "bg-black-darker text-balatro-red border-balatro-redshadow hover:bg-balatro-redshadow hover:border-balatro-red hover:text-white-light",
   }[variant];
 
   const disabledStyles = disabled
