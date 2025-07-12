@@ -52,7 +52,6 @@ import {
 } from "./effects/DiscountItemsEffect";
 import { generateChangePokerHandVariableReturn } from "./effects/ChangePokerHandVariableEffect";
 import { generatePassiveCopyJokerAbility } from "./effects/CopyJokerAbilityEffect";
-import { slugify } from "./index";
 import { generatePermaBonusReturn } from "./effects/PermaBonusEffect";
 import { generateSetAnteReturn } from "./effects/SetAnteEffect";
 import { generateAddCardToHandReturn } from "./effects/AddCardToHandEffect";
@@ -506,7 +505,8 @@ export const processPassiveEffects = (
     .forEach((rule) => {
       rule.effects?.forEach((effect) => {
         let passiveResult: PassiveEffectResult | null = null;
-        const jokerKey = slugify(joker.name);
+
+        const jokerKey = joker.jokerKey;
 
         switch (effect.type) {
           case "edit_hand_size":

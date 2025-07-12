@@ -2,10 +2,8 @@ import React, { useState, useRef, useEffect, useCallback } from "react";
 import {
   PhotoIcon,
   ArrowPathIcon,
-  XMarkIcon,
   SparklesIcon,
   BoltIcon,
-  PencilIcon,
   DocumentTextIcon,
   PuzzlePieceIcon,
   ExclamationTriangleIcon,
@@ -29,6 +27,16 @@ interface EditJokerInfoProps {
   onSave: (joker: JokerData) => void;
   onDelete: (jokerId: string) => void;
 }
+
+const slugify = (text: string): string => {
+  return (
+    text
+      .toLowerCase()
+      .replace(/[\s\W_]+/g, "")
+      .replace(/^[\d]/, "_$&") ||
+    `joker_${Math.random().toString(36).substring(2, 8)}`
+  );
+};
 
 const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
   isOpen,
@@ -143,6 +151,7 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
         eternal_compat: joker.eternal_compat !== false,
         unlocked: joker.unlocked !== false,
         discovered: joker.discovered !== false,
+        jokerKey: joker.jokerKey || slugify(joker.name),
       });
       setPlaceholderError(false);
       setLastDescription(joker.description || "");
@@ -470,6 +479,12 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
         ...formData,
         [field]: formattedValue,
       });
+    } else if (field === "name") {
+      setFormData({
+        ...formData,
+        [field]: value,
+        jokerKey: slugify(value),
+      });
     } else {
       setFormData({
         ...formData,
@@ -507,13 +522,10 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
           : formData.cost,
     };
 
-    // Only auto-adjust appears_in_shop when rarity actually changes
     if (previousRarity !== rarity) {
       if (rarity === 4 && previousRarity !== 4) {
-        // Switching TO legendary, set to false
         newFormData.appears_in_shop = false;
       } else if (previousRarity === 4 && rarity !== 4) {
-        // Switching FROM legendary to non-legendary, set to true
         newFormData.appears_in_shop = true;
       }
     }
@@ -738,36 +750,11 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
   return (
     <div className="fixed inset-0 flex bg-black-darker/80 backdrop-blur-sm items-center justify-center z-50 font-lexend">
       <div className="flex items-start gap-8 max-h-[90vh]">
-        {/* Main Edit Modal */}
         <div
           ref={modalRef}
-          className="bg-black-dark border border-mint/30 rounded-xl w-[100vh] h-[90vh] flex flex-col relative overflow-hidden"
+          className="bg-black-dark border-2 border-black-lighter rounded-lg w-[100vh] h-[90vh] flex flex-col relative overflow-hidden"
         >
-          {/* Header */}
-          <div className="flex items-center justify-between p-4 border-b border-black-lighter bg-black">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-mint/10 rounded-lg border border-mint/20">
-                <PencilIcon className="h-5 w-5 text-mint" />
-              </div>
-              <div>
-                <h3 className="text-white-light text-lg font-medium">
-                  Edit Joker
-                </h3>
-                <p className="text-white-darker text-sm">
-                  Customize appearance and properties
-                </p>
-              </div>
-            </div>
-            <button
-              onClick={onClose}
-              className="p-2 text-white-darker hover:text-white transition-colors rounded-lg hover:bg-white/5"
-            >
-              <XMarkIcon className="h-5 w-5" />
-            </button>
-          </div>
-
-          {/* Tab Navigation */}
-          <div className="flex border-b border-black-lighter bg-black">
+          <div className="flex ">
             {tabs.map((tab, index) => {
               const Icon = tab.icon;
               const isActive = activeTab === tab.id;
@@ -777,10 +764,10 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
                   onClick={() =>
                     setActiveTab(tab.id as "visual" | "description")
                   }
-                  className={`flex-1 flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium transition-all relative border-b-2 ${
+                  className={`flex-1 flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium bg-black transition-all relative border-b-2 ${
                     isActive
                       ? "text-mint-lighter bg-black-dark border-mint"
-                      : "text-white-darker hover:text-white-light hover:bg-black-dark/50 border-transparent"
+                      : "text-white-darker hover:text-white-light hover:bg-black-dark border-b-2 border-black-lighter"
                   }`}
                 >
                   <Icon className="h-4 w-4" />
@@ -793,12 +780,10 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
             })}
           </div>
 
-          {/* Content Area */}
           <div className="flex-1 overflow-hidden relative">
             <div className="h-full overflow-y-auto custom-scrollbar">
               {activeTab === "visual" && (
                 <div className="p-6 space-y-6">
-                  {/* Background Icons */}
                   <PuzzlePieceIcon className="absolute top-4 right-8 h-32 w-32 text-black-lighter/20 -rotate-12 pointer-events-none" />
 
                   <div className="space-y-6">
@@ -929,17 +914,28 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
                             }
                             placeholder="Enter joker name"
                             separator={true}
-                            useGameFont={true}
                             label="Joker Name"
-                            size="lg"
+                            size="md"
                             error={validationErrors.name}
                           />
-                          {validationErrors.name && (
-                            <div className="flex items-center gap-2 mt-1 text-balatro-red text-sm">
-                              <ExclamationTriangleIcon className="h-4 w-4" />
-                              <span>{validationErrors.name}</span>
-                            </div>
-                          )}
+                          <InputField
+                            value={formData.jokerKey || ""}
+                            onChange={(e) =>
+                              handleInputChange(
+                                "jokerKey",
+                                e.target.value,
+                                false
+                              )
+                            }
+                            placeholder="Enter joker key"
+                            separator={true}
+                            label="Joker Key (Code Name)"
+                            size="md"
+                          />
+                          <p className="text-xs text-white-darker -mt-2">
+                            Used in code generation. Auto-fills when you type
+                            the name.
+                          </p>
 
                           <div className="grid grid-cols-2 gap-4">
                             <InputDropdown
@@ -966,14 +962,13 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
                           </div>
 
                           <div>
-                            <h4 className="text-white-light font-medium text-base mb-3 flex items-center gap-2">
+                            <h4 className="text-white-light font-medium text-base mb-3 justify-center pt-2 flex tracking-wider items-center gap-2">
                               <BoltIcon className="h-5 w-5 text-mint" />
                               Joker Properties
                             </h4>
                             <div className="space-y-4 rounded-lg border border-black-lighter p-4 bg-black-darker/30">
-                              {/* --- Compatibility --- */}
                               <div>
-                                <p className="text-sm font-medium text-white-darker mb-2">
+                                <p className="text-xs font-medium tracking-widest text-white-darker mb-2">
                                   Compatibility
                                 </p>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2">
@@ -1003,13 +998,8 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
                                   />
                                 </div>
                               </div>
-
-                              {/* --- Separator --- */}
-                              <div className="border-t border-black-lighter/50"></div>
-
-                              {/* --- Default State --- */}
                               <div>
-                                <p className="text-sm font-medium text-white-darker mb-2">
+                                <p className="text-xs font-medium tracking-widest text-white-darker mb-2">
                                   Default State
                                 </p>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2">
@@ -1034,13 +1024,8 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
                                   />
                                 </div>
                               </div>
-
-                              {/* --- Separator --- */}
-                              <div className="border-t border-black-lighter/50"></div>
-
-                              {/* --- Forced Spawning --- */}
                               <div>
-                                <p className="text-sm font-medium text-white-darker mb-2">
+                                <p className="text-xs font-medium tracking-widest text-white-darker mb-2">
                                   Forced Spawning
                                 </p>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2">
@@ -1079,12 +1064,8 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
                                   />
                                 </div>
                               </div>
-                              {/* --- Separator --- */}
-                              <div className="border-t border-black-lighter/50"></div>
-
-                              {/* --- Shop Availability --- */}
                               <div>
-                                <p className="text-sm font-medium text-white-darker mb-2">
+                                <p className="text-xs font-medium tracking-widest text-white-darker mb-2">
                                   Shop Availability
                                 </p>
                                 <div className="grid grid-cols-1 gap-y-2">
@@ -1130,7 +1111,6 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
 
               {activeTab === "description" && (
                 <div className="p-6 space-y-6">
-                  {/* Background Icons */}
                   <DocumentTextIcon className="absolute top-12 right-16 h-28 w-28 text-black-lighter/20 -rotate-6 pointer-events-none" />
 
                   <div className="bg-black-darker border border-black-lighter rounded-xl p-6">
@@ -1264,7 +1244,6 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
                       multiline={true}
                       height="140px"
                       separator={true}
-                      useGameFont={true}
                       label="Description Text"
                       placeholder="Describe your joker's effects using Balatro formatting..."
                       error={validationErrors.description}
@@ -1281,8 +1260,7 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
             </div>
           </div>
 
-          {/* Footer Actions */}
-          <div className="flex gap-4 p-6 border-t border-black-lighter bg-black">
+          <div className="flex gap-4 p-4">
             <Button variant="secondary" onClick={onClose} className="flex-1">
               Cancel
             </Button>
@@ -1295,7 +1273,6 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
           </div>
         </div>
 
-        {/* Preview Section */}
         <div className="flex-shrink-0 relative my-auto pb-40">
           <div className="relative pl-24" style={{ zIndex: 1000 }}>
             <BalatroJokerCard joker={formData} size="lg" />

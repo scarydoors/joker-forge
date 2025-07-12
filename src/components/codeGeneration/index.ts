@@ -200,7 +200,7 @@ export const exportSingleJoker = (joker: JokerData): void => {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `${slugify(joker.name)}.lua`;
+    a.download = `${joker.jokerKey || "unknown_joker"}.lua`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -362,7 +362,7 @@ const generateSingleJokerBase = (
 
 SMODS.Joker{ --${joker.name}
     name = "${joker.name}",
-    key = "${slugify(joker.name)}",
+    key = "${joker.jokerKey || "unknown_joker"}",
     config = {
         extra = {`;
 
@@ -440,7 +440,7 @@ const generateJokerBase = (
 
   let jokerCode = `SMODS.Joker{ --${joker.name}
     name = "${joker.name}",
-    key = "${slugify(joker.name)}",
+    key = "${joker.jokerKey || "unknown_joker"}",
     config = {
         extra = {`;
 
@@ -1714,16 +1714,6 @@ const generateLocVarsFunction = (
     end`;
 };
 
-export const slugify = (text: string): string => {
-  return (
-    text
-      .toLowerCase()
-      .replace(/[\s\W_]+/g, "")
-      .replace(/^[\d]/, "_$&") ||
-    `joker_${Math.random().toString(36).substring(2, 8)}`
-  );
-};
-
 const formatJokerDescription = (joker: JokerData): string => {
   // First convert any HTML breaks to [s] tags
   const formatted = joker.description.replace(/<br\s*\/?>/gi, "[s]");
@@ -1765,7 +1755,7 @@ const generateHooks = (jokers: JokerData[], modPrefix: string): string => {
 
   jokers.forEach((joker) => {
     const passiveEffects = processPassiveEffects(joker);
-    const jokerKey = slugify(joker.name);
+    const jokerKey = joker.jokerKey || "unknown_joker";
 
     passiveEffects.forEach((effect) => {
       if (effect.needsHook) {
