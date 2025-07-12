@@ -77,11 +77,11 @@ html {
   --color-white-dark: #aab4c2;
   --color-white-darker: #96a1b0;
 
-  --color-black-lighter: #465a60;
-  --color-black-light: #3a4c53;
-  --color-black: #2f4047;
-  --color-black-dark: #26353b;
-  --color-black-darker: #1e2b30;
+  --color-black-lighter: #3a4c53;
+  --color-black-light: #2f4047;
+  --color-black: #26353b;
+  --color-black-dark: #1e2b30;
+  --color-black-darker: #161e21;
 
   --color-effect: #c0a435;
   --color-condition: #1d7bde;
