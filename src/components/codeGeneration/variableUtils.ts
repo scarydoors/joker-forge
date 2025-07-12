@@ -2,6 +2,14 @@ import type { Rule, Effect } from "../ruleBuilder/types";
 import type { JokerData, UserVariable } from "../JokerCard";
 import { parseGameVariable } from "./gameVariableUtils";
 import { getGameVariableById } from "../data/GameVars";
+import {
+  SUIT_VALUES,
+  RANK_VALUES,
+  RANK_LABELS,
+  ENHANCEMENT_VALUES,
+  EDITION_VALUES,
+  SEAL_VALUES,
+} from "../data/BalatroUtils";
 
 export interface VariableInfo {
   name: string;
@@ -359,7 +367,29 @@ const isReservedKeyword = (str: string): boolean => {
 };
 
 const isBuiltInValue = (str: string): boolean => {
-  const builtIns = new Set([
+  const suitValues = new Set(SUIT_VALUES);
+  const rankValues = new Set([...RANK_VALUES, ...RANK_LABELS]);
+  const enhancementValues = new Set(ENHANCEMENT_VALUES);
+  const editionValues = new Set(EDITION_VALUES);
+  const sealValues = new Set(SEAL_VALUES);
+
+  type SuitType = (typeof SUIT_VALUES)[number];
+  type RankType = (typeof RANK_VALUES)[number] | (typeof RANK_LABELS)[number];
+  type EnhancementType = (typeof ENHANCEMENT_VALUES)[number];
+  type EditionType = (typeof EDITION_VALUES)[number];
+  type SealType = (typeof SEAL_VALUES)[number];
+
+  if (
+    suitValues.has(str as SuitType) ||
+    rankValues.has(str as RankType) ||
+    enhancementValues.has(str as EnhancementType) ||
+    editionValues.has(str as EditionType) ||
+    sealValues.has(str as SealType)
+  ) {
+    return true;
+  }
+
+  const otherBuiltIns = new Set([
     "random",
     "none",
     "any",
@@ -411,47 +441,15 @@ const isBuiltInValue = (str: string): boolean => {
     "uncommon",
     "rare",
     "legendary",
-    "m_gold",
-    "m_steel",
-    "m_glass",
-    "m_wild",
-    "m_mult",
-    "m_lucky",
-    "m_stone",
-    "m_bonus",
-    "e_foil",
-    "e_holo",
-    "e_polychrome",
-    "e_negative",
+    "remove",
     "Gold",
     "Red",
     "Blue",
     "Purple",
-    "Spades",
-    "Hearts",
-    "Diamonds",
-    "Clubs",
-    "remove",
-    "2",
-    "3",
-    "4",
-    "5",
-    "6",
-    "7",
-    "8",
-    "9",
-    "10",
-    "J",
-    "Q",
-    "K",
-    "A",
     "T",
-    "Jack",
-    "Queen",
-    "King",
-    "Ace",
   ]);
-  return builtIns.has(str);
+
+  return otherBuiltIns.has(str);
 };
 
 export const extractVariablesFromRules = (rules: Rule[]): VariableInfo[] => {

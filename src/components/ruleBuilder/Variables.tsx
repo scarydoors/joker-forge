@@ -3,6 +3,13 @@ import { useDraggable } from "@dnd-kit/core";
 import { JokerData, UserVariable } from "../JokerCard";
 import { getVariableUsageDetails } from "../codeGeneration/variableUtils";
 import {
+  SUITS,
+  RANKS,
+  POKER_HANDS,
+  SUIT_VALUES,
+  POKER_HAND_VALUES,
+} from "../data/BalatroUtils";
+import {
   CommandLineIcon,
   XMarkIcon,
   Bars3Icon,
@@ -26,44 +33,20 @@ interface VariablesProps {
   onPositionChange: (position: { x: number; y: number }) => void;
 }
 
-const SUIT_OPTIONS = [
-  { value: "Spades", label: "♠ Spades" },
-  { value: "Hearts", label: "♥ Hearts" },
-  { value: "Diamonds", label: "♦ Diamonds" },
-  { value: "Clubs", label: "♣ Clubs" },
-];
+const SUIT_OPTIONS = SUITS.map((suit) => ({
+  value: suit.value,
+  label: `${suit.label}`,
+}));
 
-const RANK_OPTIONS = [
-  { value: "2", label: "2" },
-  { value: "3", label: "3" },
-  { value: "4", label: "4" },
-  { value: "5", label: "5" },
-  { value: "6", label: "6" },
-  { value: "7", label: "7" },
-  { value: "8", label: "8" },
-  { value: "9", label: "9" },
-  { value: "10", label: "10" },
-  { value: "Jack", label: "Jack" },
-  { value: "Queen", label: "Queen" },
-  { value: "King", label: "King" },
-  { value: "Ace", label: "Ace" },
-];
+const RANK_OPTIONS = RANKS.map((rank) => ({
+  value: rank.label,
+  label: rank.label,
+}));
 
-const POKER_HAND_OPTIONS = [
-  { value: "High Card", label: "High Card" },
-  { value: "Pair", label: "Pair" },
-  { value: "Two Pair", label: "Two Pair" },
-  { value: "Three of a Kind", label: "Three of a Kind" },
-  { value: "Straight", label: "Straight" },
-  { value: "Flush", label: "Flush" },
-  { value: "Full House", label: "Full House" },
-  { value: "Four of a Kind", label: "Four of a Kind" },
-  { value: "Five of a Kind", label: "Five of a Kind" },
-  { value: "Straight Flush", label: "Straight Flush" },
-  { value: "Royal Flush", label: "Royal Flush" },
-  { value: "Flush House", label: "Flush House" },
-  { value: "Flush Five", label: "Flush Five" },
-];
+const POKER_HAND_OPTIONS = POKER_HANDS.map((hand) => ({
+  value: hand.value,
+  label: hand.label,
+}));
 
 const VARIABLE_TYPE_OPTIONS = [
   { value: "number", label: "Number Variable", icon: HashtagIcon },
@@ -75,6 +58,23 @@ const VARIABLE_TYPE_OPTIONS = [
     icon: RectangleStackIcon,
   },
 ];
+
+type SuitValue = (typeof SUIT_VALUES)[number];
+type RankLabel =
+  | "2"
+  | "3"
+  | "4"
+  | "5"
+  | "6"
+  | "7"
+  | "8"
+  | "9"
+  | "10"
+  | "Jack"
+  | "Queen"
+  | "King"
+  | "Ace";
+type PokerHandValue = (typeof POKER_HAND_VALUES)[number];
 
 const Variables: React.FC<VariablesProps> = ({
   position,
@@ -89,39 +89,12 @@ const Variables: React.FC<VariablesProps> = ({
   >("number");
   const [newVariableName, setNewVariableName] = useState("");
   const [newVariableValue, setNewVariableValue] = useState("0");
-  const [newVariableSuit, setNewVariableSuit] = useState<
-    "Spades" | "Hearts" | "Diamonds" | "Clubs"
-  >("Spades");
-  const [newVariableRank, setNewVariableRank] = useState<
-    | "2"
-    | "3"
-    | "4"
-    | "5"
-    | "6"
-    | "7"
-    | "8"
-    | "9"
-    | "10"
-    | "Jack"
-    | "Queen"
-    | "King"
-    | "Ace"
-  >("Ace");
-  const [newVariablePokerHand, setNewVariablePokerHand] = useState<
-    | "High Card"
-    | "Pair"
-    | "Two Pair"
-    | "Three of a Kind"
-    | "Straight"
-    | "Flush"
-    | "Full House"
-    | "Four of a Kind"
-    | "Five of a Kind"
-    | "Straight Flush"
-    | "Royal Flush"
-    | "Flush House"
-    | "Flush Five"
-  >("High Card");
+  const [newVariableSuit, setNewVariableSuit] = useState<SuitValue>(
+    SUIT_VALUES[0]
+  );
+  const [newVariableRank, setNewVariableRank] = useState<RankLabel>("Ace");
+  const [newVariablePokerHand, setNewVariablePokerHand] =
+    useState<PokerHandValue>(POKER_HAND_VALUES[0]);
 
   const [nameValidationError, setNameValidationError] = useState<string>("");
   const [editValidationError, setEditValidationError] = useState<string>("");
@@ -131,40 +104,11 @@ const Variables: React.FC<VariablesProps> = ({
   >("number");
   const [editingName, setEditingName] = useState("");
   const [editingValue, setEditingValue] = useState(0);
-  const [editingSuit, setEditingSuit] = useState<
-    "Spades" | "Hearts" | "Diamonds" | "Clubs"
-  >("Spades");
-  const [editingRank, setEditingRank] = useState<
-    | "2"
-    | "3"
-    | "4"
-    | "5"
-    | "6"
-    | "7"
-    | "8"
-    | "9"
-    | "10"
-    | "Jack"
-    | "Queen"
-    | "King"
-    | "Ace"
-  >("Ace");
-  const [editingPokerHand, setEditingPokerHand] = useState<
-    | "High Card"
-    | "Pair"
-    | "Two Pair"
-    | "Three of a Kind"
-    | "Straight"
-    | "Flush"
-    | "Full House"
-    | "Four of a Kind"
-    | "Five of a Kind"
-    | "Straight Flush"
-    | "Royal Flush"
-    | "Flush House"
-    | "Flush Five"
-    | "Flush House"
-  >("High Card");
+  const [editingSuit, setEditingSuit] = useState<SuitValue>(SUIT_VALUES[0]);
+  const [editingRank, setEditingRank] = useState<RankLabel>("Ace");
+  const [editingPokerHand, setEditingPokerHand] = useState<PokerHandValue>(
+    POKER_HAND_VALUES[0]
+  );
 
   const { attributes, listeners, setNodeRef, transform } = useDraggable({
     id: "panel-variables",
@@ -262,9 +206,9 @@ const Variables: React.FC<VariablesProps> = ({
 
     setNewVariableName("");
     setNewVariableValue("0");
-    setNewVariableSuit("Spades");
+    setNewVariableSuit(SUIT_VALUES[0]);
     setNewVariableRank("Ace");
-    setNewVariablePokerHand("High Card");
+    setNewVariablePokerHand(POKER_HAND_VALUES[0]);
     setNewVariableType("number");
     setNameValidationError("");
     setShowAddForm(false);
@@ -280,9 +224,11 @@ const Variables: React.FC<VariablesProps> = ({
     setEditingName(variable.name);
     setEditingType(variable.type || "number");
     setEditingValue(variable.initialValue || 0);
-    setEditingSuit(variable.initialSuit || "Spades");
-    setEditingRank(variable.initialRank || "Ace");
-    setEditingPokerHand(variable.initialPokerHand || "High Card");
+    setEditingSuit((variable.initialSuit as SuitValue) || SUIT_VALUES[0]);
+    setEditingRank((variable.initialRank as RankLabel) || "Ace");
+    setEditingPokerHand(
+      (variable.initialPokerHand as PokerHandValue) || POKER_HAND_VALUES[0]
+    );
     setEditValidationError("");
   };
 
@@ -322,31 +268,16 @@ const Variables: React.FC<VariablesProps> = ({
 
   const getVariableDisplayValue = (variable: UserVariable) => {
     if (variable.type === "suit") {
-      const suit = variable.initialSuit || "Spades";
-      return `${getSuitSymbol(suit)} ${suit}`;
+      const suit = variable.initialSuit || SUIT_VALUES[0];
+      return suit;
     } else if (variable.type === "rank") {
       const rank = variable.initialRank || "Ace";
       return rank;
     } else if (variable.type === "pokerhand") {
-      const pokerHand = variable.initialPokerHand || "High Card";
+      const pokerHand = variable.initialPokerHand || POKER_HAND_VALUES[0];
       return pokerHand;
     } else {
       return variable.initialValue?.toString() || "0";
-    }
-  };
-
-  const getSuitSymbol = (suit: string) => {
-    switch (suit) {
-      case "Spades":
-        return "♠";
-      case "Hearts":
-        return "♥";
-      case "Diamonds":
-        return "♦";
-      case "Clubs":
-        return "♣";
-      default:
-        return "";
     }
   };
 
@@ -491,13 +422,7 @@ const Variables: React.FC<VariablesProps> = ({
                           label="Initial Suit"
                           value={editingSuit}
                           onChange={(value) =>
-                            setEditingSuit(
-                              value as
-                                | "Spades"
-                                | "Hearts"
-                                | "Diamonds"
-                                | "Clubs"
-                            )
+                            setEditingSuit(value as SuitValue)
                           }
                           options={SUIT_OPTIONS}
                           size="sm"
@@ -509,22 +434,7 @@ const Variables: React.FC<VariablesProps> = ({
                           label="Initial Rank"
                           value={editingRank}
                           onChange={(value) =>
-                            setEditingRank(
-                              value as
-                                | "2"
-                                | "3"
-                                | "4"
-                                | "5"
-                                | "6"
-                                | "7"
-                                | "8"
-                                | "9"
-                                | "10"
-                                | "Jack"
-                                | "Queen"
-                                | "King"
-                                | "Ace"
-                            )
+                            setEditingRank(value as RankLabel)
                           }
                           options={RANK_OPTIONS}
                           size="sm"
@@ -536,22 +446,7 @@ const Variables: React.FC<VariablesProps> = ({
                           label="Initial Poker Hand"
                           value={editingPokerHand}
                           onChange={(value) =>
-                            setEditingPokerHand(
-                              value as
-                                | "High Card"
-                                | "Pair"
-                                | "Two Pair"
-                                | "Three of a Kind"
-                                | "Straight"
-                                | "Flush"
-                                | "Full House"
-                                | "Four of a Kind"
-                                | "Five of a Kind"
-                                | "Straight Flush"
-                                | "Royal Flush"
-                                | "Flush House"
-                                | "Flush Five"
-                            )
+                            setEditingPokerHand(value as PokerHandValue)
                           }
                           options={POKER_HAND_OPTIONS}
                           size="sm"
@@ -687,11 +582,7 @@ const Variables: React.FC<VariablesProps> = ({
                   <InputDropdown
                     label="Initial Suit"
                     value={newVariableSuit}
-                    onChange={(value) =>
-                      setNewVariableSuit(
-                        value as "Spades" | "Hearts" | "Diamonds" | "Clubs"
-                      )
-                    }
+                    onChange={(value) => setNewVariableSuit(value as SuitValue)}
                     options={SUIT_OPTIONS}
                     size="sm"
                   />
@@ -701,24 +592,7 @@ const Variables: React.FC<VariablesProps> = ({
                   <InputDropdown
                     label="Initial Rank"
                     value={newVariableRank}
-                    onChange={(value) =>
-                      setNewVariableRank(
-                        value as
-                          | "2"
-                          | "3"
-                          | "4"
-                          | "5"
-                          | "6"
-                          | "7"
-                          | "8"
-                          | "9"
-                          | "10"
-                          | "Jack"
-                          | "Queen"
-                          | "King"
-                          | "Ace"
-                      )
-                    }
+                    onChange={(value) => setNewVariableRank(value as RankLabel)}
                     options={RANK_OPTIONS}
                     size="sm"
                   />
@@ -729,22 +603,7 @@ const Variables: React.FC<VariablesProps> = ({
                     label="Initial Poker Hand"
                     value={newVariablePokerHand}
                     onChange={(value) =>
-                      setNewVariablePokerHand(
-                        value as
-                          | "High Card"
-                          | "Pair"
-                          | "Two Pair"
-                          | "Three of a Kind"
-                          | "Straight"
-                          | "Flush"
-                          | "Full House"
-                          | "Four of a Kind"
-                          | "Five of a Kind"
-                          | "Straight Flush"
-                          | "Royal Flush"
-                          | "Flush House"
-                          | "Flush Five"
-                      )
+                      setNewVariablePokerHand(value as PokerHandValue)
                     }
                     options={POKER_HAND_OPTIONS}
                     size="sm"
@@ -768,9 +627,9 @@ const Variables: React.FC<VariablesProps> = ({
                       setShowAddForm(false);
                       setNewVariableName("");
                       setNewVariableValue("0");
-                      setNewVariableSuit("Spades");
+                      setNewVariableSuit(SUIT_VALUES[0]);
                       setNewVariableRank("Ace");
-                      setNewVariablePokerHand("High Card");
+                      setNewVariablePokerHand(POKER_HAND_VALUES[0]);
                       setNewVariableType("number");
                       setNameValidationError("");
                     }}
