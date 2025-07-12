@@ -52,6 +52,13 @@ interface CalculateFunctionResult {
   configVariables: ConfigExtraVariable[];
 }
 
+const ensureJokerKeys = (jokers: JokerData[]): JokerData[] => {
+  return jokers.map((joker) => ({
+    ...joker,
+    jokerKey: joker.jokerKey || slugify(joker.name),
+  }));
+};
+
 const convertRandomGroupsForCodegen = (
   randomGroups: import("../ruleBuilder/types").RandomGroup[]
 ) => {
@@ -71,16 +78,13 @@ const generateSingleJokerCode = (
   atlasKey: string,
   currentPosition: number
 ): { code: string; nextPosition: number } => {
-  const jokerKey = joker.jokerKey || slugify(joker.name);
-  const jokerWithKey = { ...joker, jokerKey };
-
-  const passiveEffects = processPassiveEffects(jokerWithKey);
+  const passiveEffects = processPassiveEffects(joker);
   const nonPassiveRules =
-    jokerWithKey.rules?.filter((rule) => rule.trigger !== "passive") || [];
+    joker.rules?.filter((rule) => rule.trigger !== "passive") || [];
 
   let calculateResult: CalculateFunctionResult | null = null;
   if (nonPassiveRules.length > 0) {
-    calculateResult = generateCalculateFunction(nonPassiveRules, jokerWithKey);
+    calculateResult = generateCalculateFunction(nonPassiveRules, joker);
   }
 
   const configItems: string[] = [];
@@ -102,15 +106,15 @@ const generateSingleJokerCode = (
     }
   });
 
-  if (jokerWithKey.userVariables && jokerWithKey.userVariables.length > 0) {
-    jokerWithKey.userVariables.forEach((variable) => {
+  if (joker.userVariables && joker.userVariables.length > 0) {
+    joker.userVariables.forEach((variable) => {
       if (variable.type === "number" || !variable.type) {
         configItems.push(`${variable.name} = ${variable.initialValue || 0}`);
       }
     });
   }
 
-  const gameVariables = extractGameVariablesFromRules(jokerWithKey.rules || []);
+  const gameVariables = extractGameVariablesFromRules(joker.rules || []);
   gameVariables.forEach((gameVar) => {
     const varName = gameVar.name.replace(/\s+/g, "").toLowerCase();
     configItems.push(`${varName} = ${gameVar.startsFrom}`);
@@ -127,14 +131,14 @@ const generateSingleJokerCode = (
     });
   }
 
-  if (jokerWithKey.rules && jokerWithKey.rules.length > 0) {
-    const nonPassiveRules = jokerWithKey.rules.filter(
+  if (joker.rules && joker.rules.length > 0) {
+    const nonPassiveRules = joker.rules.filter(
       (rule) => rule.trigger !== "passive"
     );
     const variables = extractVariablesFromRules(nonPassiveRules);
 
     const userVariableNames = new Set(
-      jokerWithKey.userVariables?.map((v) => v.name) || []
+      joker.userVariables?.map((v) => v.name) || []
     );
     const autoVariables = variables.filter(
       (v) => !userVariableNames.has(v.name)
@@ -156,9 +160,9 @@ const generateSingleJokerCode = (
 
   let nextPosition = currentPosition + 1;
 
-  let jokerCode = `SMODS.Joker{ --${jokerWithKey.name}
-    name = "${jokerWithKey.name}",
-    key = "${jokerKey}",
+  let jokerCode = `SMODS.Joker{ --${joker.name}
+    name = "${joker.name}",
+    key = "${joker.jokerKey}",
     config = {
         extra = {`;
 
@@ -171,34 +175,26 @@ const generateSingleJokerCode = (
         }
     },
     loc_txt = {
-        ['name'] = '${jokerWithKey.name}',
-        ['text'] = ${formatJokerDescription(jokerWithKey)}
+        ['name'] = '${joker.name}',
+        ['text'] = ${formatJokerDescription(joker)}
     },
     pos = {
         x = ${col},
         y = ${row}
     },
-    cost = ${jokerWithKey.cost !== undefined ? jokerWithKey.cost : 4},
-    rarity = ${jokerWithKey.rarity},
+    cost = ${joker.cost !== undefined ? joker.cost : 4},
+    rarity = ${joker.rarity},
     blueprint_compat = ${
-      jokerWithKey.blueprint_compat !== undefined
-        ? jokerWithKey.blueprint_compat
-        : true
+      joker.blueprint_compat !== undefined ? joker.blueprint_compat : true
     },
     eternal_compat = ${
-      jokerWithKey.eternal_compat !== undefined
-        ? jokerWithKey.eternal_compat
-        : true
+      joker.eternal_compat !== undefined ? joker.eternal_compat : true
     },
-    unlocked = ${
-      jokerWithKey.unlocked !== undefined ? jokerWithKey.unlocked : true
-    },
-    discovered = ${
-      jokerWithKey.discovered !== undefined ? jokerWithKey.discovered : true
-    },
+    unlocked = ${joker.unlocked !== undefined ? joker.unlocked : true},
+    discovered = ${joker.discovered !== undefined ? joker.discovered : true},
     atlas = '${atlasKey}'`;
 
-  if (jokerWithKey.overlayImagePreview) {
+  if (joker.overlayImagePreview) {
     const soulCol = nextPosition % jokersPerRow;
     const soulRow = Math.floor(nextPosition / jokersPerRow);
 
@@ -212,14 +208,14 @@ const generateSingleJokerCode = (
   }
 
   if (
-    (jokerWithKey.rarity !== 4 && jokerWithKey.appears_in_shop === false) ||
-    (jokerWithKey.rarity === 4 && jokerWithKey.appears_in_shop === true)
+    (joker.rarity !== 4 && joker.appears_in_shop === false) ||
+    (joker.rarity === 4 && joker.appears_in_shop === true)
   ) {
     jokerCode += `,
 
     in_pool = function(self, args)
         return ${
-          jokerWithKey.rarity === 4 && jokerWithKey.appears_in_shop === true
+          joker.rarity === 4 && joker.appears_in_shop === true
             ? "true"
             : "false"
         }
@@ -227,13 +223,13 @@ const generateSingleJokerCode = (
   }
 
   const locVarsCode = generateLocVarsFunction(
-    jokerWithKey,
+    joker,
     passiveEffects,
     calculateResult?.configVariables || []
   );
   jokerCode += `,\n\n    ${locVarsCode}`;
 
-  const setStickerCode = generateSetAbilityFunction(jokerWithKey);
+  const setStickerCode = generateSetAbilityFunction(joker);
   if (setStickerCode) {
     jokerCode += `,\n\n    ${setStickerCode}`;
   }
@@ -334,7 +330,9 @@ export const exportJokersAsMod = async (
     const zip = new JSZip();
     const atlasKey = "CustomJokers";
 
-    const mainLuaCode = generateLuaCode(jokers, {
+    const jokersWithKeys = ensureJokerKeys(jokers);
+
+    const mainLuaCode = generateLuaCode(jokersWithKeys, {
       modPrefix: metadata.prefix,
       atlasKey: atlasKey,
     });
@@ -344,18 +342,17 @@ export const exportJokersAsMod = async (
     const jokersFolder = zip.folder("jokers");
     let currentPosition = 0;
 
-    jokers.forEach((joker) => {
-      const jokerKey = joker.jokerKey || "unknown_joker";
+    jokersWithKeys.forEach((joker) => {
       const result = generateSingleJokerCode(joker, atlasKey, currentPosition);
-      jokersFolder!.file(`${jokerKey}.lua`, result.code);
+      jokersFolder!.file(`${joker.jokerKey}.lua`, result.code);
       currentPosition = result.nextPosition;
     });
 
     zip.file(`${metadata.id}.json`, generateModJson(metadata));
 
-    await addAtlasToZip(zip, jokers);
+    await addAtlasToZip(zip, jokersWithKeys);
 
-    console.log(jokers);
+    console.log(jokersWithKeys);
 
     const content = await zip.generateAsync({ type: "blob" });
     const url = URL.createObjectURL(content);
@@ -376,8 +373,9 @@ export const exportJokersAsMod = async (
 
 export const exportSingleJoker = (joker: JokerData): void => {
   try {
-    const jokerKey = joker.jokerKey || slugify(joker.name);
-    const jokerWithKey = { ...joker, jokerKey };
+    const jokerWithKey = joker.jokerKey
+      ? joker
+      : { ...joker, jokerKey: slugify(joker.name) };
 
     const result = generateSingleJokerCode(jokerWithKey, "Joker", 0);
     let jokerCode = result.code;
@@ -392,7 +390,7 @@ export const exportSingleJoker = (joker: JokerData): void => {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `${jokerKey}.lua`;
+    a.download = `${jokerWithKey.jokerKey}.lua`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -937,23 +935,19 @@ const generateLocVarsFunction = (
   const variableMapping: string[] = [];
   const colorVariables: string[] = [];
 
-  // Helper function to wrap game variable code with safety checks
   const wrapGameVariableCode = (code: string): string => {
-    // If the code contains G.jokers.cards, wrap with full safety check
     if (code.includes("G.jokers.cards")) {
       return code.replace(
         "G.jokers.cards",
         "(G.jokers and G.jokers.cards or {})"
       );
     }
-    // If the code contains #G.jokers.cards, wrap with full safety check
     if (code.includes("#G.jokers.cards")) {
       return code.replace(
         "#G.jokers.cards",
         "(G.jokers and G.jokers.cards and #G.jokers.cards or 0)"
       );
     }
-    // Similar patterns for other game objects
     if (code.includes("#G.hand.cards")) {
       return code.replace(
         "#G.hand.cards",
@@ -972,7 +966,6 @@ const generateLocVarsFunction = (
         "(G.consumeables and G.consumeables.cards and #G.consumeables.cards or 0)"
       );
     }
-    // For other G.GAME properties, still add or 0
     if (
       code.includes("G.GAME") ||
       code.includes("G.jokers") ||
@@ -1158,7 +1151,6 @@ const generateLocVarsFunction = (
     }
   }
 
-  // Add collected config variables to the mapping
   collectedConfigVariables.forEach((configVar) => {
     if (variableMapping.length < maxVariableIndex) {
       variableMapping.push(`card.ability.extra.${configVar.name}`);
@@ -1172,7 +1164,6 @@ const generateLocVarsFunction = (
           !variableMapping.includes(locVar) &&
           variableMapping.length < maxVariableIndex
         ) {
-          // Also wrap passive effect loc vars if they contain game variables
           const wrappedLocVar = wrapGameVariableCode(locVar);
           variableMapping.push(wrappedLocVar);
         }
@@ -1226,7 +1217,6 @@ const generateHooks = (jokers: JokerData[], modPrefix: string): string => {
 
   jokers.forEach((joker) => {
     const passiveEffects = processPassiveEffects(joker);
-    const jokerKey = joker.jokerKey || "unknown_joker";
 
     passiveEffects.forEach((effect) => {
       if (effect.needsHook) {
@@ -1235,7 +1225,7 @@ const generateHooks = (jokers: JokerData[], modPrefix: string): string => {
           hooksByType[hookType] = [];
         }
         hooksByType[hookType].push({
-          jokerKey,
+          jokerKey: joker.jokerKey!,
           params: effect.needsHook.effectParams,
         });
       }
