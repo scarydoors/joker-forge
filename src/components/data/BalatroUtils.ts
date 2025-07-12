@@ -435,14 +435,12 @@ export const isFaceCard = (rank: string): boolean => {
 
 // Check if a rank is even
 export const isEvenCard = (rank: string): boolean => {
-  return ["2", "4", "6", "8", "10", "Q", "Queen"].includes(rank);
+  return ["2", "4", "6", "8", "10"].includes(rank);
 };
 
 // Check if a rank is odd
 export const isOddCard = (rank: string): boolean => {
-  return ["A", "3", "5", "7", "9", "J", "K", "Ace", "Jack", "King"].includes(
-    rank
-  );
+  return ["A", "3", "5", "7", "9", "Ace"].includes(rank);
 };
 
 // Check if a suit is red
