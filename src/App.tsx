@@ -171,6 +171,34 @@ function AppContent() {
     []
   );
 
+  const isDataDifferentFromDefaults = useCallback(
+    (metadata: ModMetadata, jokerData: JokerData[]) => {
+      if (jokerData.length > 0) return true;
+
+      const defaultMetadata = DEFAULT_MOD_METADATA;
+
+      const significantFields: (keyof ModMetadata)[] = [
+        "name",
+        "author",
+        "description",
+        "id",
+        "prefix",
+      ];
+
+      for (const field of significantFields) {
+        if (
+          JSON.stringify(metadata[field]) !==
+          JSON.stringify(defaultMetadata[field])
+        ) {
+          return true;
+        }
+      }
+
+      return false;
+    },
+    []
+  );
+
   const debouncedSave = useCallback(
     (metadata: ModMetadata, jokerData: JokerData[]) => {
       if (saveTimeoutRef.current) {
@@ -199,7 +227,7 @@ function AppContent() {
   useEffect(() => {
     if (!hasLoadedInitialData) return;
 
-    if (!modMetadata.name && jokers.length === 0) return;
+    if (!isDataDifferentFromDefaults(modMetadata, jokers)) return;
 
     if (!hasDataChanged(modMetadata, jokers)) return;
 
@@ -238,6 +266,7 @@ function AppContent() {
     hasLoadedInitialData,
     debouncedSave,
     hasDataChanged,
+    isDataDifferentFromDefaults,
   ]);
 
   useEffect(() => {
