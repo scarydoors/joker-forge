@@ -7,6 +7,21 @@ import {
   SparklesIcon,
 } from "@heroicons/react/24/outline";
 import { CategoryDefinition } from "./Triggers";
+import {
+  RANKS,
+  RANK_GROUPS,
+  SUITS,
+  SUIT_GROUPS,
+  POKER_HANDS,
+  ENHANCEMENTS,
+  EDITIONS,
+  SEALS,
+  COMPARISON_OPERATORS,
+  CARD_SCOPES,
+  TAROT_CARDS,
+  PLANET_CARDS,
+  SPECTRAL_CARDS,
+} from "./BalatroUtils";
 
 export const GENERIC_TRIGGERS: string[] = [
   "blind_selected",
@@ -57,95 +72,6 @@ export const CONDITION_CATEGORIES: CategoryDefinition[] = [
   },
 ];
 
-const COMPARISON_OPERATORS = [
-  { value: "equals", label: "equals" },
-  { value: "not_equals", label: "not equals" },
-  { value: "greater_than", label: "greater than" },
-  { value: "less_than", label: "less than" },
-  { value: "greater_equals", label: "greater than or equal to" },
-  { value: "less_equals", label: "less than or equal to" },
-];
-
-const CARD_SCOPE = [
-  { value: "scoring", label: "Scoring cards only" },
-  { value: "all_played", label: "All played cards" },
-];
-
-const CARD_RANKS = [
-  { value: "2", label: "2" },
-  { value: "3", label: "3" },
-  { value: "4", label: "4" },
-  { value: "5", label: "5" },
-  { value: "6", label: "6" },
-  { value: "7", label: "7" },
-  { value: "8", label: "8" },
-  { value: "9", label: "9" },
-  { value: "10", label: "10" },
-  { value: "J", label: "Jack" },
-  { value: "Q", label: "Queen" },
-  { value: "K", label: "King" },
-  { value: "A", label: "Ace" },
-];
-
-const CARD_RANK_GROUPS = [
-  { value: "face", label: "Face Card (J,Q,K)" },
-  { value: "even", label: "Even Card (2,4,6,8,10,Q)" },
-  { value: "odd", label: "Odd Card (A,3,5,7,9,J,K)" },
-];
-
-const CARD_SUITS = [
-  { value: "Spades", label: "Spades" },
-  { value: "Hearts", label: "Hearts" },
-  { value: "Diamonds", label: "Diamonds" },
-  { value: "Clubs", label: "Clubs" },
-];
-
-const CARD_SUIT_GROUPS = [
-  { value: "red", label: "Red Suit (Hearts, Diamonds)" },
-  { value: "black", label: "Black Suit (Spades, Clubs)" },
-];
-
-const HAND_TYPES = [
-  { value: "High Card", label: "High Card" },
-  { value: "Pair", label: "Pair" },
-  { value: "Two Pair", label: "Two Pair" },
-  { value: "Three of a Kind", label: "Three of a Kind" },
-  { value: "Straight", label: "Straight" },
-  { value: "Flush", label: "Flush" },
-  { value: "Full House", label: "Full House" },
-  { value: "Four of a Kind", label: "Four of a Kind" },
-  { value: "Five of a Kind", label: "Five of a Kind" },
-  { value: "Straight Flush", label: "Straight Flush" },
-  { value: "Royal Flush", label: "Royal Flush" },
-  { value: "Flush House", label: "Flush House" },
-  { value: "Flush Five", label: "Flush Five" },
-];
-
-const ENHANCEMENT_TYPES = [
-  { value: "m_gold", label: "Gold" },
-  { value: "m_steel", label: "Steel" },
-  { value: "m_glass", label: "Glass" },
-  { value: "m_wild", label: "Wild" },
-  { value: "m_mult", label: "Mult" },
-  { value: "m_lucky", label: "Lucky" },
-  { value: "m_stone", label: "Stone" },
-  { value: "m_bonus", label: "Bonus" },
-];
-
-const EDITION_TYPES = [
-  { value: "e_foil", label: "Foil (+50 Chips)" },
-  { value: "e_holo", label: "Holographic (+10 Mult)" },
-  { value: "e_polychrome", label: "Polychrome (X1.5 Mult)" },
-  { value: "e_negative", label: "Negative (+1 Joker slot)" },
-];
-
-const SEAL_TYPES = [
-  { value: "gold", label: "Gold Seal ($3 when played)" },
-  { value: "red", label: "Red Seal (Retrigger card)" },
-  { value: "blue", label: "Blue Seal (Creates Planet card)" },
-  { value: "purple", label: "Purple Seal (Creates Tarot when discarded)" },
-];
-
 export const CONDITION_TYPES: ConditionTypeDefinition[] = [
   {
     id: "hand_type",
@@ -157,7 +83,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
         id: "card_scope",
         type: "select",
         label: "Card Scope",
-        options: CARD_SCOPE,
+        options: [...CARD_SCOPES],
         default: "scoring",
       },
       {
@@ -175,7 +101,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
         type: "select",
         label: "Hand Type",
         options: [
-          ...HAND_TYPES,
+          ...POKER_HANDS,
           { value: "most_played_hand", label: "Most Played Hand" },
           { value: "least_played_hand", label: "Least Played Hand" },
         ],
@@ -193,14 +119,14 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
         id: "card_scope",
         type: "select",
         label: "Card Scope",
-        options: CARD_SCOPE,
+        options: [...CARD_SCOPES],
         default: "scoring",
       },
       {
         id: "operator",
         type: "select",
         label: "Operator",
-        options: COMPARISON_OPERATORS,
+        options: [...COMPARISON_OPERATORS],
       },
       {
         id: "value",
@@ -223,7 +149,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
         id: "card_scope",
         type: "select",
         label: "Card Scope",
-        options: CARD_SCOPE,
+        options: [...CARD_SCOPES],
         default: "scoring",
       },
       {
@@ -239,7 +165,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
         id: "specific_suit",
         type: "select",
         label: "Suit",
-        options: CARD_SUITS,
+        options: [...SUITS],
         showWhen: {
           parameter: "suit_type",
           values: ["specific"],
@@ -249,7 +175,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
         id: "suit_group",
         type: "select",
         label: "Suit Group",
-        options: CARD_SUIT_GROUPS,
+        options: [...SUIT_GROUPS],
         showWhen: {
           parameter: "suit_type",
           values: ["group"],
@@ -291,7 +217,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
         id: "card_scope",
         type: "select",
         label: "Card Scope",
-        options: CARD_SCOPE,
+        options: [...CARD_SCOPES],
         default: "scoring",
       },
       {
@@ -307,7 +233,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
         id: "specific_rank",
         type: "select",
         label: "Rank",
-        options: CARD_RANKS,
+        options: [...RANKS],
         showWhen: {
           parameter: "rank_type",
           values: ["specific"],
@@ -317,7 +243,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
         id: "rank_group",
         type: "select",
         label: "Rank Group",
-        options: CARD_RANK_GROUPS,
+        options: [...RANK_GROUPS],
         showWhen: {
           parameter: "rank_type",
           values: ["group"],
@@ -359,7 +285,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
         id: "operator",
         type: "select",
         label: "Operator",
-        options: COMPARISON_OPERATORS,
+        options: [...COMPARISON_OPERATORS],
       },
       {
         id: "value",
@@ -392,7 +318,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
         id: "specific_suit",
         type: "select",
         label: "Suit",
-        options: CARD_SUITS,
+        options: [...SUITS],
         showWhen: {
           parameter: "suit_type",
           values: ["specific"],
@@ -402,7 +328,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
         id: "suit_group",
         type: "select",
         label: "Suit Group",
-        options: CARD_SUIT_GROUPS,
+        options: [...SUIT_GROUPS],
         showWhen: {
           parameter: "suit_type",
           values: ["group"],
@@ -454,7 +380,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
         id: "specific_rank",
         type: "select",
         label: "Rank",
-        options: CARD_RANKS,
+        options: [...RANKS],
         showWhen: {
           parameter: "rank_type",
           values: ["specific"],
@@ -464,7 +390,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
         id: "rank_group",
         type: "select",
         label: "Rank Group",
-        options: CARD_RANK_GROUPS,
+        options: [...RANK_GROUPS],
         showWhen: {
           parameter: "rank_type",
           values: ["group"],
@@ -522,7 +448,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
         id: "specific_rank",
         type: "select",
         label: "Rank",
-        options: CARD_RANKS,
+        options: [...RANKS],
         showWhen: {
           parameter: "rank_type",
           values: ["specific"],
@@ -532,7 +458,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
         id: "rank_group",
         type: "select",
         label: "Rank Group",
-        options: CARD_RANK_GROUPS,
+        options: [...RANK_GROUPS],
         showWhen: {
           parameter: "rank_type",
           values: ["group"],
@@ -567,7 +493,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
         id: "specific_suit",
         type: "select",
         label: "Suit",
-        options: CARD_SUITS,
+        options: [...SUITS],
         showWhen: {
           parameter: "suit_type",
           values: ["specific"],
@@ -577,7 +503,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
         id: "suit_group",
         type: "select",
         label: "Suit Group",
-        options: CARD_SUIT_GROUPS,
+        options: [...SUIT_GROUPS],
         showWhen: {
           parameter: "suit_type",
           values: ["group"],
@@ -602,10 +528,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
         id: "enhancement",
         type: "select",
         label: "Enhancement Type",
-        options: [
-          { value: "any", label: "Any Enhancement" },
-          ...ENHANCEMENT_TYPES,
-        ],
+        options: [{ value: "any", label: "Any Enhancement" }, ...ENHANCEMENTS],
       },
     ],
     category: "Hand & Cards",
@@ -629,7 +552,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
         options: [
           { value: "any", label: "Any Edition" },
           { value: "none", label: "No Edition" },
-          ...EDITION_TYPES,
+          ...EDITIONS,
         ],
       },
     ],
@@ -651,7 +574,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
         id: "seal",
         type: "select",
         label: "Seal Type",
-        options: [{ value: "any", label: "Any Seal" }, ...SEAL_TYPES],
+        options: [{ value: "any", label: "Any Seal" }, ...SEALS],
       },
     ],
     category: "Hand & Cards",
@@ -666,7 +589,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
         id: "operator",
         type: "select",
         label: "Operator",
-        options: COMPARISON_OPERATORS,
+        options: [...COMPARISON_OPERATORS],
       },
       {
         id: "value",
@@ -702,7 +625,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
         id: "operator",
         type: "select",
         label: "Operator",
-        options: COMPARISON_OPERATORS,
+        options: [...COMPARISON_OPERATORS],
       },
       {
         id: "value2",
@@ -723,7 +646,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
         id: "operator",
         type: "select",
         label: "Operator",
-        options: COMPARISON_OPERATORS,
+        options: [...COMPARISON_OPERATORS],
       },
       {
         id: "value",
@@ -745,7 +668,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
         id: "operator",
         type: "select",
         label: "Operator",
-        options: COMPARISON_OPERATORS,
+        options: [...COMPARISON_OPERATORS],
       },
       {
         id: "value",
@@ -775,7 +698,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
         id: "operator",
         type: "select",
         label: "Operator",
-        options: COMPARISON_OPERATORS,
+        options: [...COMPARISON_OPERATORS],
       },
       {
         id: "value",
@@ -828,7 +751,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
         id: "operator",
         type: "select",
         label: "Operator",
-        options: COMPARISON_OPERATORS,
+        options: [...COMPARISON_OPERATORS],
       },
       {
         id: "value",
@@ -872,63 +795,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
         id: "specific_card",
         type: "select",
         label: "Specific Card",
-        options: [
-          // Tarot Cards
-          { value: "c_fool", label: "The Fool" },
-          { value: "c_magician", label: "The Magician" },
-          { value: "c_high_priestess", label: "The High Priestess" },
-          { value: "c_empress", label: "The Empress" },
-          { value: "c_emperor", label: "The Emperor" },
-          { value: "c_hierophant", label: "The Hierophant" },
-          { value: "c_lovers", label: "The Lovers" },
-          { value: "c_chariot", label: "The Chariot" },
-          { value: "c_justice", label: "Justice" },
-          { value: "c_hermit", label: "The Hermit" },
-          { value: "c_wheel_of_fortune", label: "Wheel of Fortune" },
-          { value: "c_strength", label: "Strength" },
-          { value: "c_hanged_man", label: "The Hanged Man" },
-          { value: "c_death", label: "Death" },
-          { value: "c_temperance", label: "Temperance" },
-          { value: "c_devil", label: "The Devil" },
-          { value: "c_tower", label: "The Tower" },
-          { value: "c_star", label: "The Star" },
-          { value: "c_moon", label: "The Moon" },
-          { value: "c_sun", label: "The Sun" },
-          { value: "c_judgement", label: "Judgement" },
-          { value: "c_world", label: "The World" },
-          // Planet Cards
-          { value: "c_pluto", label: "Pluto" },
-          { value: "c_mercury", label: "Mercury" },
-          { value: "c_uranus", label: "Uranus" },
-          { value: "c_venus", label: "Venus" },
-          { value: "c_saturn", label: "Saturn" },
-          { value: "c_jupiter", label: "Jupiter" },
-          { value: "c_earth", label: "Earth" },
-          { value: "c_mars", label: "Mars" },
-          { value: "c_neptune", label: "Neptune" },
-          { value: "c_planet_x", label: "Planet X" },
-          { value: "c_ceres", label: "Ceres" },
-          { value: "c_eris", label: "Eris" },
-          // Spectral Cards
-          { value: "c_familiar", label: "Familiar" },
-          { value: "c_grim", label: "Grim" },
-          { value: "c_incantation", label: "Incantation" },
-          { value: "c_talisman", label: "Talisman" },
-          { value: "c_aura", label: "Aura" },
-          { value: "c_wraith", label: "Wraith" },
-          { value: "c_sigil", label: "Sigil" },
-          { value: "c_ouija", label: "Ouija" },
-          { value: "c_ectoplasm", label: "Ectoplasm" },
-          { value: "c_immolate", label: "Immolate" },
-          { value: "c_ankh", label: "Ankh" },
-          { value: "c_deja_vu", label: "Deja Vu" },
-          { value: "c_hex", label: "Hex" },
-          { value: "c_trance", label: "Trance" },
-          { value: "c_medium", label: "Medium" },
-          { value: "c_cryptid", label: "Cryptid" },
-          { value: "c_soul", label: "The Soul" },
-          { value: "c_black_hole", label: "Black Hole" },
-        ],
+        options: [...TAROT_CARDS, ...PLANET_CARDS, ...SPECTRAL_CARDS],
         showWhen: {
           parameter: "consumable_type",
           values: ["specific"],
@@ -959,31 +826,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
         id: "tarot_card",
         type: "select",
         label: "Specific Tarot Card",
-        options: [
-          { value: "any", label: "Any Tarot Card" },
-          { value: "the_fool", label: "The Fool" },
-          { value: "the_magician", label: "The Magician" },
-          { value: "the_high_priestess", label: "The High Priestess" },
-          { value: "the_empress", label: "The Empress" },
-          { value: "the_emperor", label: "The Emperor" },
-          { value: "the_hierophant", label: "The Hierophant" },
-          { value: "the_lovers", label: "The Lovers" },
-          { value: "the_chariot", label: "The Chariot" },
-          { value: "justice", label: "Justice" },
-          { value: "the_hermit", label: "The Hermit" },
-          { value: "the_wheel_of_fortune", label: "Wheel of Fortune" },
-          { value: "strength", label: "Strength" },
-          { value: "the_hanged_man", label: "The Hanged Man" },
-          { value: "death", label: "Death" },
-          { value: "temperance", label: "Temperance" },
-          { value: "the_devil", label: "The Devil" },
-          { value: "the_tower", label: "The Tower" },
-          { value: "the_star", label: "The Star" },
-          { value: "the_moon", label: "The Moon" },
-          { value: "the_sun", label: "The Sun" },
-          { value: "judgement", label: "Judgement" },
-          { value: "the_world", label: "The World" },
-        ],
+        options: [...TAROT_CARDS],
         showWhen: {
           parameter: "consumable_type",
           values: ["tarot"],
@@ -993,21 +836,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
         id: "planet_card",
         type: "select",
         label: "Specific Planet Card",
-        options: [
-          { value: "any", label: "Any Planet Card" },
-          { value: "pluto", label: "Pluto" },
-          { value: "mercury", label: "Mercury" },
-          { value: "uranus", label: "Uranus" },
-          { value: "venus", label: "Venus" },
-          { value: "saturn", label: "Saturn" },
-          { value: "jupiter", label: "Jupiter" },
-          { value: "earth", label: "Earth" },
-          { value: "mars", label: "Mars" },
-          { value: "neptune", label: "Neptune" },
-          { value: "planet_x", label: "Planet X" },
-          { value: "ceres", label: "Ceres" },
-          { value: "eris", label: "Eris" },
-        ],
+        options: [...PLANET_CARDS],
         showWhen: {
           parameter: "consumable_type",
           values: ["planet"],
@@ -1017,27 +846,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
         id: "spectral_card",
         type: "select",
         label: "Specific Spectral Card",
-        options: [
-          { value: "any", label: "Any Spectral Card" },
-          { value: "familiar", label: "Familiar" },
-          { value: "grim", label: "Grim" },
-          { value: "incantation", label: "Incantation" },
-          { value: "talisman", label: "Talisman" },
-          { value: "aura", label: "Aura" },
-          { value: "wraith", label: "Wraith" },
-          { value: "sigil", label: "Sigil" },
-          { value: "ouija", label: "Ouija" },
-          { value: "ectoplasm", label: "Ectoplasm" },
-          { value: "immolate", label: "Immolate" },
-          { value: "ankh", label: "Ankh" },
-          { value: "deja_vu", label: "Deja Vu" },
-          { value: "hex", label: "Hex" },
-          { value: "trance", label: "Trance" },
-          { value: "medium", label: "Medium" },
-          { value: "cryptid", label: "Cryptid" },
-          { value: "the_soul", label: "The Soul" },
-          { value: "black_hole", label: "Black Hole" },
-        ],
+        options: [...SPECTRAL_CARDS],
         showWhen: {
           parameter: "consumable_type",
           values: ["spectral"],
@@ -1089,7 +898,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
         id: "operator",
         type: "select",
         label: "Operator",
-        options: COMPARISON_OPERATORS,
+        options: [...COMPARISON_OPERATORS],
         default: "greater_equals",
       },
       {
@@ -1130,7 +939,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
         id: "operator",
         type: "select",
         label: "Operator",
-        options: COMPARISON_OPERATORS,
+        options: [...COMPARISON_OPERATORS],
       },
       {
         id: "value",
@@ -1174,7 +983,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
         id: "operator",
         type: "select",
         label: "Operator",
-        options: COMPARISON_OPERATORS,
+        options: [...COMPARISON_OPERATORS],
       },
       {
         id: "value",
@@ -1207,7 +1016,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
         id: "operator",
         type: "select",
         label: "Operator",
-        options: COMPARISON_OPERATORS,
+        options: [...COMPARISON_OPERATORS],
       },
       {
         id: "value",
@@ -1243,22 +1052,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
         id: "rank",
         type: "select",
         label: "Rank",
-        options: [
-          { value: "any", label: "Any Rank" },
-          { value: "2", label: "2" },
-          { value: "3", label: "3" },
-          { value: "4", label: "4" },
-          { value: "5", label: "5" },
-          { value: "6", label: "6" },
-          { value: "7", label: "7" },
-          { value: "8", label: "8" },
-          { value: "9", label: "9" },
-          { value: "10", label: "10" },
-          { value: "J", label: "Jack" },
-          { value: "Q", label: "Queen" },
-          { value: "K", label: "King" },
-          { value: "A", label: "Ace" },
-        ],
+        options: [{ value: "any", label: "Any Rank" }, ...RANKS],
         showWhen: {
           parameter: "property_type",
           values: ["rank"],
@@ -1270,12 +1064,8 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
         label: "Suit",
         options: [
           { value: "any", label: "Any Suit" },
-          { value: "red", label: "Red Suits" },
-          { value: "black", label: "Black Suits" },
-          { value: "Spades", label: "Spades" },
-          { value: "Hearts", label: "Hearts" },
-          { value: "Diamonds", label: "Diamonds" },
-          { value: "Clubs", label: "Clubs" },
+          ...SUIT_GROUPS,
+          ...SUITS,
         ],
         showWhen: {
           parameter: "property_type",
@@ -1289,13 +1079,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
         options: [
           { value: "any", label: "Any Enhancement" },
           { value: "none", label: "No Enhancement" },
-          { value: "m_gold", label: "Gold" },
-          { value: "m_steel", label: "Steel" },
-          { value: "m_glass", label: "Glass" },
-          { value: "m_wild", label: "Wild" },
-          { value: "m_mult", label: "Mult" },
-          { value: "m_lucky", label: "Lucky" },
-          { value: "m_stone", label: "Stone" },
+          ...ENHANCEMENTS,
         ],
         showWhen: {
           parameter: "property_type",
@@ -1309,10 +1093,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
         options: [
           { value: "any", label: "Any Seal" },
           { value: "none", label: "No Seal" },
-          { value: "Gold", label: "Gold Seal" },
-          { value: "Red", label: "Red Seal" },
-          { value: "Blue", label: "Blue Seal" },
-          { value: "Purple", label: "Purple Seal" },
+          ...SEALS,
         ],
         showWhen: {
           parameter: "property_type",
@@ -1326,10 +1107,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
         options: [
           { value: "any", label: "Any Edition" },
           { value: "none", label: "No Edition" },
-          { value: "e_foil", label: "Foil" },
-          { value: "e_holo", label: "Holographic" },
-          { value: "e_polychrome", label: "Polychrome" },
-          { value: "e_negative", label: "Negative" },
+          ...EDITIONS,
         ],
         showWhen: {
           parameter: "property_type",
@@ -1340,7 +1118,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
         id: "operator",
         type: "select",
         label: "Operator",
-        options: COMPARISON_OPERATORS,
+        options: [...COMPARISON_OPERATORS],
       },
       {
         id: "value",
