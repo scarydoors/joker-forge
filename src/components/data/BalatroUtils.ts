@@ -118,12 +118,12 @@ export const EDITION_LABELS = EDITIONS.map((edition) => edition.label);
 
 // Seals
 export const SEALS = [
-  { key: "gold", value: "gold", label: "Gold Seal ($3 when played)" },
-  { key: "red", value: "red", label: "Red Seal (Retrigger card)" },
-  { key: "blue", value: "blue", label: "Blue Seal (Creates Planet card)" },
+  { key: "Gold", value: "Gold", label: "Gold Seal ($3 when played)" },
+  { key: "Red", value: "Red", label: "Red Seal (Retrigger card)" },
+  { key: "Blue", value: "Blue", label: "Blue Seal (Creates Planet card)" },
   {
-    key: "purple",
-    value: "purple",
+    key: "Purple",
+    value: "Purple",
     label: "Purple Seal (Creates Tarot when discarded)",
   },
 ] as const;
