@@ -677,12 +677,12 @@ const generateCalculateFunction = (
             }
           }
 
-          const hasDeleteInThisRule = [
-            ...(rule.effects || []),
-            ...(rule.randomGroups?.flatMap((g) => g.effects) || []),
-          ].some((effect) => effect.type === "delete_triggered_card");
+          // Only set destroy flag immediately for regular delete effects
+          const hasDeleteInRegularEffects = (rule.effects || []).some(
+            (effect) => effect.type === "delete_triggered_card"
+          );
 
-          if (hasDeleteInThisRule) {
+          if (hasDeleteInRegularEffects) {
             calculateFunction += `
                 context.other_card.should_destroy = true`;
           }
@@ -777,7 +777,8 @@ const generateCalculateFunction = (
           }
         }
 
-        if (regularDeleteEffects.length > 0 || randomDeleteGroups.length > 0) {
+        // Only set destroy flag immediately for regular delete effects
+        if (regularDeleteEffects.length > 0) {
           calculateFunction += `
                 context.other_card.should_destroy = true`;
         }

@@ -69,6 +69,12 @@ import {
 } from "./effects/EditJokerSlotsEffect";
 import { generateAddChipsReturn } from "./effects/AddChipsEffect";
 
+interface ExtendedEffect extends Effect {
+  _isInRandomGroup?: boolean;
+  _ruleContext?: string;
+  _effectIndex?: number;
+}
+
 export interface RandomGroup {
   id: string;
   chance_numerator: number;
@@ -141,7 +147,7 @@ export function generateEffectReturnStatement(
 
     const effectReturns: EffectReturn[] = modifiedEffects
       .map((effect, index) => {
-        const effectWithContext = {
+        const effectWithContext: ExtendedEffect = {
           ...effect,
           _ruleContext: ruleId,
           _effectIndex: index,
@@ -231,10 +237,11 @@ export function generateEffectReturnStatement(
 
       const effectReturns: EffectReturn[] = modifiedEffects
         .map((effect, index) => {
-          const effectWithContext = {
+          const effectWithContext: ExtendedEffect = {
             ...effect,
             _ruleContext: ruleId,
             _effectIndex: index,
+            _isInRandomGroup: true, // Flag to indicate this is in a random group
           };
 
           return generateSingleEffect(
@@ -280,6 +287,22 @@ export function generateEffectReturnStatement(
           : `G.GAME.probabilities.normal * ${group.chance_numerator} / ${oddsVar}`;
 
       let groupContent = "";
+
+      // Check if this group has delete effects and set destroy flag inside probability check
+      const hasDeleteInGroup = group.effects.some(
+        (effect) => effect.type === "delete_triggered_card"
+      );
+
+      if (
+        hasDeleteInGroup &&
+        (triggerType === "card_scored" ||
+          triggerType === "card_held_in_hand" ||
+          triggerType === "card_held_in_hand_end_of_round")
+      ) {
+        groupContent += `context.other_card.should_destroy = true
+                        `;
+      }
+
       if (groupPreReturnCode && groupPreReturnCode.trim()) {
         groupContent += `${groupPreReturnCode}
                         `;
@@ -355,7 +378,7 @@ export function generateEffectReturnStatement(
 }
 
 const generateSingleEffect = (
-  effect: Effect,
+  effect: ExtendedEffect,
   triggerType: string,
   variableNameMap?: Map<string, string>
 ): EffectReturn => {
