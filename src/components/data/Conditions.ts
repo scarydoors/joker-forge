@@ -47,6 +47,7 @@ export const GENERIC_TRIGGERS: string[] = [
   "selling_self",
   "card_destroyed",
   "playing_card_added",
+  "game_over",
 ];
 
 export const CONDITION_CATEGORIES: CategoryDefinition[] = [
@@ -579,7 +580,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
     id: "player_money",
     label: "Player Money",
     description: "Check how much money the player has",
-    applicableTriggers: [...GENERIC_TRIGGERS, "game_over"],
+    applicableTriggers: [...GENERIC_TRIGGERS],
     params: [
       {
         id: "operator",
@@ -609,7 +610,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
     id: "generic_compare",
     label: "Generic Compare",
     description: "Compare two custom values with an operator",
-    applicableTriggers: [...GENERIC_TRIGGERS, "game_over"],
+    applicableTriggers: [...GENERIC_TRIGGERS],
     params: [
       {
         id: "value1",
@@ -636,7 +637,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
     id: "remaining_hands",
     label: "Remaining Hands",
     description: "Check how many hands the player has left",
-    applicableTriggers: [...GENERIC_TRIGGERS, "game_over"],
+    applicableTriggers: [...GENERIC_TRIGGERS],
     params: [
       {
         id: "operator",
@@ -658,7 +659,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
     id: "remaining_discards",
     label: "Remaining Discards",
     description: "Check how many discards the player has left",
-    applicableTriggers: [...GENERIC_TRIGGERS, "game_over"],
+    applicableTriggers: [...GENERIC_TRIGGERS],
     params: [
       {
         id: "operator",
@@ -688,7 +689,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
     id: "joker_count",
     label: "Joker Count",
     description: "Check how many jokers the player has",
-    applicableTriggers: [...GENERIC_TRIGGERS, "game_over"],
+    applicableTriggers: [...GENERIC_TRIGGERS],
     params: [
       {
         id: "operator",
@@ -710,7 +711,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
     id: "specific_joker",
     label: "Specific Joker",
     description: "Check if a specific joker is in your collection",
-    applicableTriggers: [...GENERIC_TRIGGERS, "game_over"],
+    applicableTriggers: [...GENERIC_TRIGGERS],
     params: [
       {
         id: "operator",
@@ -735,7 +736,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
     id: "internal_variable",
     label: "Internal Variable",
     description: "Check the value of an internal variable for this joker",
-    applicableTriggers: [...GENERIC_TRIGGERS, "game_over"],
+    applicableTriggers: [...GENERIC_TRIGGERS],
     params: [
       {
         id: "variable_name",
@@ -762,7 +763,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
     id: "consumable_held",
     label: "Consumable Held",
     description: "Check if a specific type of consumable is held",
-    applicableTriggers: [...GENERIC_TRIGGERS, "game_over"],
+    applicableTriggers: [...GENERIC_TRIGGERS],
     params: [
       {
         id: "operator",
@@ -855,7 +856,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
     id: "blind_type",
     label: "Blind Type",
     description: "Check the type of the current blind",
-    applicableTriggers: [...GENERIC_TRIGGERS, "game_over"],
+    applicableTriggers: [...GENERIC_TRIGGERS],
     params: [
       {
         id: "blind_type",
@@ -919,7 +920,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
     id: "triggered_boss_blind",
     label: "Boss Blind Triggered",
     description: "Check if the current boss blind's effect has been triggered",
-    applicableTriggers: [...GENERIC_TRIGGERS, "game_over"],
+    applicableTriggers: [...GENERIC_TRIGGERS],
     params: [],
     category: "Game State",
   },
@@ -927,7 +928,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
     id: "ante_level",
     label: "Ante Level",
     description: "Check the current ante level",
-    applicableTriggers: [...GENERIC_TRIGGERS, "game_over"],
+    applicableTriggers: [...GENERIC_TRIGGERS],
     params: [
       {
         id: "operator",
@@ -971,7 +972,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
     id: "hand_size",
     label: "Hand Size",
     description: "Check the current hand size",
-    applicableTriggers: [...GENERIC_TRIGGERS, "game_over"],
+    applicableTriggers: [...GENERIC_TRIGGERS],
     params: [
       {
         id: "operator",
@@ -992,7 +993,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
     id: "deck_size",
     label: "Deck Size",
     description: "Check the size of the deck",
-    applicableTriggers: [...GENERIC_TRIGGERS, "game_over"],
+    applicableTriggers: [...GENERIC_TRIGGERS],
     params: [
       {
         id: "size_type",
@@ -1023,7 +1024,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
     id: "deck_count",
     label: "Deck Count",
     description: "Count cards in your entire deck by property",
-    applicableTriggers: [...GENERIC_TRIGGERS, "game_over"],
+    applicableTriggers: [...GENERIC_TRIGGERS],
     params: [
       {
         id: "property_type",
