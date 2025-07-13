@@ -644,7 +644,14 @@ const generateCalculateFunction = (
 
         hasAnyConditions = false;
 
-        sortedRules.forEach((rule) => {
+        const rulesWithConditions = sortedRules.filter(
+          (rule) => generateConditionChain(rule, joker).length > 0
+        );
+        const rulesWithoutConditions = sortedRules.filter(
+          (rule) => generateConditionChain(rule, joker).length === 0
+        );
+
+        rulesWithConditions.forEach((rule) => {
           const regularNonRetriggerEffects = (rule.effects || []).filter(
             (e) => e.type !== "retrigger_cards"
           );
@@ -665,19 +672,11 @@ const generateCalculateFunction = (
 
           const conditionCode = generateConditionChain(rule, joker);
 
-          if (conditionCode) {
-            const conditional = hasAnyConditions ? "elseif" : "if";
-            calculateFunction += `
+          const conditional = hasAnyConditions ? "elseif" : "if";
+          calculateFunction += `
             ${conditional} ${conditionCode} then`;
-            hasAnyConditions = true;
-          } else {
-            if (hasAnyConditions) {
-              calculateFunction += `
-            else`;
-            }
-          }
+          hasAnyConditions = true;
 
-          // Only set destroy flag immediately for regular delete effects
           const hasDeleteInRegularEffects = (rule.effects || []).some(
             (effect) => effect.type === "delete_triggered_card"
           );
@@ -712,6 +711,123 @@ const generateCalculateFunction = (
           }
         });
 
+        if (rulesWithoutConditions.length > 0) {
+          const rulesWithRandomGroups = rulesWithoutConditions.filter(
+            (rule) => (rule.randomGroups || []).length > 0
+          );
+          const rulesWithoutRandomGroups = rulesWithoutConditions.filter(
+            (rule) =>
+              (rule.randomGroups || []).length === 0 &&
+              (rule.effects || []).length > 0
+          );
+
+          rulesWithRandomGroups.forEach((rule) => {
+            const regularNonRetriggerEffects = (rule.effects || []).filter(
+              (e) => e.type !== "retrigger_cards"
+            );
+            const randomNonRetriggerGroups = (rule.randomGroups || [])
+              .map((group) => ({
+                ...group,
+                effects: group.effects.filter(
+                  (e) => e.type !== "retrigger_cards"
+                ),
+              }))
+              .filter((group) => group.effects.length > 0);
+
+            if (
+              regularNonRetriggerEffects.length === 0 &&
+              randomNonRetriggerGroups.length === 0
+            )
+              return;
+
+            const conditional = hasAnyConditions ? "elseif" : "if";
+            calculateFunction += `
+            ${conditional} true then`;
+            hasAnyConditions = true;
+
+            const hasDeleteInRegularEffects = (rule.effects || []).some(
+              (effect) => effect.type === "delete_triggered_card"
+            );
+
+            if (hasDeleteInRegularEffects) {
+              calculateFunction += `
+                context.other_card.should_destroy = true`;
+            }
+
+            const effectResult = generateEffectReturnStatement(
+              regularNonRetriggerEffects,
+              convertRandomGroupsForCodegen(randomNonRetriggerGroups),
+              triggerType,
+              rule.id,
+              new Map()
+            );
+
+            if (effectResult.configVariables) {
+              effectResult.configVariables.forEach((configVar) => {
+                createVariableNameMap([configVar]);
+              });
+            }
+
+            if (effectResult.preReturnCode) {
+              calculateFunction += `
+                ${effectResult.preReturnCode}`;
+            }
+
+            if (effectResult.statement) {
+              calculateFunction += `
+                ${effectResult.statement}`;
+            }
+          });
+
+          if (rulesWithoutRandomGroups.length > 0) {
+            if (hasAnyConditions) {
+              calculateFunction += `
+            else`;
+            }
+
+            rulesWithoutRandomGroups.forEach((rule) => {
+              const regularNonRetriggerEffects = (rule.effects || []).filter(
+                (e) => e.type !== "retrigger_cards"
+              );
+
+              if (regularNonRetriggerEffects.length === 0) return;
+
+              const hasDeleteInRegularEffects = (rule.effects || []).some(
+                (effect) => effect.type === "delete_triggered_card"
+              );
+
+              if (hasDeleteInRegularEffects) {
+                calculateFunction += `
+                context.other_card.should_destroy = true`;
+              }
+
+              const effectResult = generateEffectReturnStatement(
+                regularNonRetriggerEffects,
+                [],
+                triggerType,
+                rule.id,
+                new Map()
+              );
+
+              if (effectResult.configVariables) {
+                effectResult.configVariables.forEach((configVar) => {
+                  createVariableNameMap([configVar]);
+                });
+              }
+
+              if (effectResult.preReturnCode) {
+                calculateFunction += `
+                ${effectResult.preReturnCode}`;
+              }
+
+              if (effectResult.statement) {
+                calculateFunction += `
+                ${effectResult.statement}`;
+              }
+            });
+          }
+        }
+
         if (hasAnyConditions) {
           calculateFunction += `
             end`;
@@ -735,7 +851,14 @@ const generateCalculateFunction = (
 
       let hasAnyConditions = false;
 
-      sortedRules.forEach((rule) => {
+      const rulesWithConditions = sortedRules.filter(
+        (rule) => generateConditionChain(rule, joker).length > 0
+      );
+      const rulesWithoutConditions = sortedRules.filter(
+        (rule) => generateConditionChain(rule, joker).length === 0
+      );
+
+      rulesWithConditions.forEach((rule) => {
         const regularDeleteEffects = (rule.effects || []).filter(
           (e) => e.type === "delete_triggered_card"
         );
@@ -765,19 +888,11 @@ const generateCalculateFunction = (
 
         const conditionCode = generateConditionChain(rule, joker);
 
-        if (conditionCode) {
-          const conditional = hasAnyConditions ? "elseif" : "if";
-          calculateFunction += `
+        const conditional = hasAnyConditions ? "elseif" : "if";
+        calculateFunction += `
             ${conditional} ${conditionCode} then`;
-          hasAnyConditions = true;
-        } else {
-          if (hasAnyConditions) {
-            calculateFunction += `
-            else`;
-          }
-        }
+        hasAnyConditions = true;
 
-        // Only set destroy flag immediately for regular delete effects
         if (regularDeleteEffects.length > 0) {
           calculateFunction += `
                 context.other_card.should_destroy = true`;
@@ -816,6 +931,146 @@ const generateCalculateFunction = (
         }
       });
 
+      if (rulesWithoutConditions.length > 0) {
+        const rulesWithRandomGroups = rulesWithoutConditions.filter(
+          (rule) => (rule.randomGroups || []).length > 0
+        );
+        const rulesWithoutRandomGroups = rulesWithoutConditions.filter(
+          (rule) =>
+            (rule.randomGroups || []).length === 0 &&
+            (rule.effects || []).length > 0
+        );
+
+        rulesWithRandomGroups.forEach((rule) => {
+          const regularDeleteEffects = (rule.effects || []).filter(
+            (e) => e.type === "delete_triggered_card"
+          );
+          const randomDeleteGroups = (rule.randomGroups || []).filter((group) =>
+            group.effects.some((e) => e.type === "delete_triggered_card")
+          );
+
+          const regularNonDeleteEffects = (rule.effects || []).filter(
+            (e) => e.type !== "delete_triggered_card"
+          );
+          const randomNonDeleteGroups = (rule.randomGroups || [])
+            .map((group) => ({
+              ...group,
+              effects: group.effects.filter(
+                (e) => e.type !== "delete_triggered_card"
+              ),
+            }))
+            .filter((group) => group.effects.length > 0);
+
+          if (
+            regularDeleteEffects.length === 0 &&
+            randomDeleteGroups.length === 0 &&
+            regularNonDeleteEffects.length === 0 &&
+            randomNonDeleteGroups.length === 0
+          )
+            return;
+
+          const conditional = hasAnyConditions ? "elseif" : "if";
+          calculateFunction += `
+            ${conditional} true then`;
+          hasAnyConditions = true;
+
+          if (regularDeleteEffects.length > 0) {
+            calculateFunction += `
+                context.other_card.should_destroy = true`;
+          }
+
+          const allEffects = [
+            ...regularNonDeleteEffects,
+            ...regularDeleteEffects,
+          ];
+          const allGroups = [...randomNonDeleteGroups, ...randomDeleteGroups];
+
+          if (allEffects.length > 0 || allGroups.length > 0) {
+            const effectResult = generateEffectReturnStatement(
+              allEffects,
+              convertRandomGroupsForCodegen(allGroups),
+              triggerType,
+              rule.id,
+              new Map()
+            );
+
+            if (effectResult.configVariables) {
+              effectResult.configVariables.forEach((configVar) => {
+                createVariableNameMap([configVar]);
+              });
+            }
+
+            if (effectResult.preReturnCode) {
+              calculateFunction += `
+                ${effectResult.preReturnCode}`;
+            }
+
+            if (effectResult.statement) {
+              calculateFunction += `
+                ${effectResult.statement}`;
+            }
+          }
+        });
+
+        if (rulesWithoutRandomGroups.length > 0) {
+          if (hasAnyConditions) {
+            calculateFunction += `
+            else`;
+          }
+
+          rulesWithoutRandomGroups.forEach((rule) => {
+            const regularDeleteEffects = (rule.effects || []).filter(
+              (e) => e.type === "delete_triggered_card"
+            );
+            const regularNonDeleteEffects = (rule.effects || []).filter(
+              (e) => e.type !== "delete_triggered_card"
+            );
+
+            if (
+              regularDeleteEffects.length === 0 &&
+              regularNonDeleteEffects.length === 0
+            )
+              return;
+
+            if (regularDeleteEffects.length > 0) {
+              calculateFunction += `
+                context.other_card.should_destroy = true`;
+            }
+
+            const allEffects = [
+              ...regularNonDeleteEffects,
+              ...regularDeleteEffects,
+            ];
+
+            if (allEffects.length > 0) {
+              const effectResult = generateEffectReturnStatement(
+                allEffects,
+                [],
+                triggerType,
+                rule.id,
+                new Map()
+              );
+
+              if (effectResult.configVariables) {
+                effectResult.configVariables.forEach((configVar) => {
+                  createVariableNameMap([configVar]);
+                });
+              }
+
+              if (effectResult.preReturnCode) {
+                calculateFunction += `
+                ${effectResult.preReturnCode}`;
+              }
+
+              if (effectResult.statement) {
+                calculateFunction += `
+                ${effectResult.statement}`;
+              }
+            }
+          });
+        }
+      }
+
       if (hasAnyConditions) {
         calculateFunction += `
             end`;
@@ -831,20 +1086,20 @@ const generateCalculateFunction = (
 
       let hasAnyConditions = false;
 
-      sortedRules.forEach((rule) => {
+      const rulesWithConditions = sortedRules.filter(
+        (rule) => generateConditionChain(rule, joker).length > 0
+      );
+      const rulesWithoutConditions = sortedRules.filter(
+        (rule) => generateConditionChain(rule, joker).length === 0
+      );
+
+      rulesWithConditions.forEach((rule) => {
         const conditionCode = generateConditionChain(rule, joker);
 
-        if (conditionCode) {
-          const conditional = hasAnyConditions ? "elseif" : "if";
-          calculateFunction += `
+        const conditional = hasAnyConditions ? "elseif" : "if";
+        calculateFunction += `
             ${conditional} ${conditionCode} then`;
-          hasAnyConditions = true;
-        } else {
-          if (hasAnyConditions) {
-            calculateFunction += `
-            else`;
-          }
-        }
+        hasAnyConditions = true;
 
         const effectResult = generateEffectReturnStatement(
           rule.effects || [],
@@ -870,6 +1125,81 @@ const generateCalculateFunction = (
                 ${effectResult.statement}`;
         }
       });
+
+      if (rulesWithoutConditions.length > 0) {
+        const rulesWithRandomGroups = rulesWithoutConditions.filter(
+          (rule) => (rule.randomGroups || []).length > 0
+        );
+        const rulesWithoutRandomGroups = rulesWithoutConditions.filter(
+          (rule) =>
+            (rule.randomGroups || []).length === 0 &&
+            (rule.effects || []).length > 0
+        );
+
+        rulesWithRandomGroups.forEach((rule) => {
+          const conditional = hasAnyConditions ? "elseif" : "if";
+          calculateFunction += `
+            ${conditional} true then`;
+          hasAnyConditions = true;
+
+          const effectResult = generateEffectReturnStatement(
+            rule.effects || [],
+            convertRandomGroupsForCodegen(rule.randomGroups || []),
+            triggerType,
+            rule.id,
+            new Map()
+          );
+
+          if (effectResult.configVariables) {
+            effectResult.configVariables.forEach((configVar) => {
+              createVariableNameMap([configVar]);
+            });
+          }
+
+          if (effectResult.preReturnCode) {
+            calculateFunction += `
+                ${effectResult.preReturnCode}`;
+          }
+
+          if (effectResult.statement) {
+            calculateFunction += `
+                ${effectResult.statement}`;
+          }
+        });
+
+        if (rulesWithoutRandomGroups.length > 0) {
+          if (hasAnyConditions) {
+            calculateFunction += `
+            else`;
+          }
+
+          rulesWithoutRandomGroups.forEach((rule) => {
+            const effectResult = generateEffectReturnStatement(
+              rule.effects || [],
+              [],
+              triggerType,
+              rule.id,
+              new Map()
+            );
+
+            if (effectResult.configVariables) {
+              effectResult.configVariables.forEach((configVar) => {
+                createVariableNameMap([configVar]);
+              });
+            }
+
+            if (effectResult.preReturnCode) {
+              calculateFunction += `
+                ${effectResult.preReturnCode}`;
+            }
+
+            if (effectResult.statement) {
+              calculateFunction += `
+                ${effectResult.statement}`;
+            }
+          });
+        }
+      }
 
       if (hasAnyConditions) {
         calculateFunction += `
