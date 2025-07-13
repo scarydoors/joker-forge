@@ -7,6 +7,7 @@ import {
   DocumentTextIcon,
   PuzzlePieceIcon,
   ExclamationTriangleIcon,
+  InformationCircleIcon,
 } from "@heroicons/react/24/outline";
 import InputField from "./generic/InputField";
 import InputDropdown from "./generic/InputDropdown";
@@ -18,6 +19,7 @@ import { getAllVariables } from "./codeGeneration/variableUtils";
 import {
   validateJokerName,
   validateDescription,
+  ValidationResult,
 } from "./generic/validationUtils";
 
 interface EditJokerInfoProps {
@@ -64,13 +66,13 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
     Record<number, string>
   >({});
 
-  const [validationErrors, setValidationErrors] = useState<{
-    name?: string;
-    description?: string;
+  const [validationResults, setValidationResults] = useState<{
+    name?: ValidationResult;
+    description?: ValidationResult;
   }>({});
 
   const validateField = (field: string, value: string) => {
-    let result;
+    let result: ValidationResult;
     switch (field) {
       case "name":
         result = validateJokerName(value);
@@ -82,9 +84,9 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
         return;
     }
 
-    setValidationErrors((prev) => ({
+    setValidationResults((prev) => ({
       ...prev,
-      [field]: result.isValid ? undefined : result.error,
+      [field]: result,
     }));
   };
 
@@ -129,9 +131,9 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
     const descValidation = validateDescription(formData.description);
 
     if (!nameValidation.isValid || !descValidation.isValid) {
-      setValidationErrors({
-        name: nameValidation.isValid ? undefined : nameValidation.error,
-        description: descValidation.isValid ? undefined : descValidation.error,
+      setValidationResults({
+        name: nameValidation,
+        description: descValidation,
       });
       return;
     }
@@ -154,7 +156,7 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
       setPlaceholderError(false);
       setLastDescription(joker.description || "");
       setLastFormattedText("");
-      setValidationErrors({});
+      setValidationResults({});
     }
   }, [isOpen, joker]);
 
@@ -471,11 +473,13 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
     value: string,
     shouldAutoFormat: boolean = true
   ) => {
+    let finalValue = value;
+
     if (field === "description" && shouldAutoFormat) {
-      const formattedValue = applyAutoFormatting(value);
+      finalValue = applyAutoFormatting(value);
       setFormData({
         ...formData,
-        [field]: formattedValue,
+        [field]: finalValue,
       });
     } else if (field === "name") {
       setFormData({
@@ -490,7 +494,7 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
       });
     }
 
-    validateField(field, value);
+    validateField(field, finalValue);
   };
 
   const handleNumberChange = (field: string, value: number) => {
@@ -750,6 +754,29 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
     }
   };
 
+  const getValidationMessage = (field: "name" | "description") => {
+    const result = validationResults[field];
+    if (!result) return null;
+
+    if (!result.isValid && result.error) {
+      return {
+        type: "error" as const,
+        message: result.error,
+        icon: ExclamationTriangleIcon,
+      };
+    }
+
+    if (result.isValid && result.warning) {
+      return {
+        type: "warning" as const,
+        message: result.warning,
+        icon: InformationCircleIcon,
+      };
+    }
+
+    return null;
+  };
+
   return (
     <div className="fixed inset-0 flex bg-black-darker/80 backdrop-blur-sm items-center justify-center z-50 font-lexend">
       <div className="flex items-start gap-8 max-h-[90vh]">
@@ -910,17 +937,23 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
                         </div>
 
                         <div className="flex-1 space-y-4">
-                          <InputField
-                            value={formData.name}
-                            onChange={(e) =>
-                              handleInputChange("name", e.target.value, false)
-                            }
-                            placeholder="Enter joker name"
-                            separator={true}
-                            label="Joker Name"
-                            size="md"
-                            error={validationErrors.name}
-                          />
+                          <div>
+                            <InputField
+                              value={formData.name}
+                              onChange={(e) =>
+                                handleInputChange("name", e.target.value, false)
+                              }
+                              placeholder="Enter joker name"
+                              separator={true}
+                              label="Joker Name"
+                              size="md"
+                              error={
+                                getValidationMessage("name")?.type === "error"
+                                  ? getValidationMessage("name")?.message
+                                  : undefined
+                              }
+                            />
+                          </div>
                           <InputField
                             value={formData.jokerKey || ""}
                             onChange={(e) =>
@@ -1249,14 +1282,22 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
                       separator={true}
                       label="Description Text"
                       placeholder="Describe your joker's effects using Balatro formatting..."
-                      error={validationErrors.description}
                     />
-                    {validationErrors.description && (
-                      <div className="flex items-center gap-2 mt-1 text-balatro-orange text-sm">
-                        <ExclamationTriangleIcon className="h-4 w-4" />
-                        <span>{validationErrors.description}</span>
-                      </div>
-                    )}
+                    {(() => {
+                      const validationMsg = getValidationMessage("description");
+                      return validationMsg ? (
+                        <div
+                          className={`flex items-center gap-2 mt-1 text-sm ${
+                            validationMsg.type === "error"
+                              ? "text-balatro-orange"
+                              : "text-yellow-500"
+                          }`}
+                        >
+                          <validationMsg.icon className="h-4 w-4" />
+                          <span>{validationMsg.message}</span>
+                        </div>
+                      ) : null;
+                    })()}
                   </div>
                 </div>
               )}
