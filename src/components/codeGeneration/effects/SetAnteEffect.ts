@@ -9,7 +9,8 @@ import type { EffectReturn, ConfigExtraVariable } from "../effectUtils";
 export const generateSetAnteReturn = (
   effect: Effect,
   triggerType: string,
-  variableNameMap?: Map<string, string>
+  variableNameMap?: Map<string, string>,
+  sameTypeCount: number = 0
 ): EffectReturn => {
   const operation = (effect.params?.operation as string) || "set";
   const effectValue = effect.params.value;
@@ -19,12 +20,14 @@ export const generateSetAnteReturn = (
   let valueCode: string;
   const configVariables: ConfigExtraVariable[] = [];
 
+  // Determine variable name based on how many effects of the same type came before this one
+  const variableName =
+    sameTypeCount === 0 ? "ante_value" : `ante_value${sameTypeCount + 1}`;
+  const actualVariableName = variableNameMap?.get(variableName) || variableName;
+
   if (parsed.isGameVariable) {
     valueCode = generateGameVariableCode(effectValue);
   } else if (rangeParsed.isRangeVariable) {
-    const variableName = "ante_value";
-    const actualVariableName =
-      variableNameMap?.get(variableName) || variableName;
     const seedName = `${actualVariableName}_${effect.id.substring(0, 8)}`;
     valueCode = `pseudorandom('${seedName}', card.ability.extra.${actualVariableName}_min, card.ability.extra.${actualVariableName}_max)`;
 
@@ -36,14 +39,10 @@ export const generateSetAnteReturn = (
     if (effectValue.endsWith("_value")) {
       valueCode = effectValue;
     } else {
-      const actualVariableName =
-        variableNameMap?.get(effectValue) || effectValue;
-      valueCode = `card.ability.extra.${actualVariableName}`;
+      const mappedVarName = variableNameMap?.get(effectValue) || effectValue;
+      valueCode = `card.ability.extra.${mappedVarName}`;
     }
   } else {
-    const variableName = "ante_value";
-    const actualVariableName =
-      variableNameMap?.get(variableName) || variableName;
     valueCode = `card.ability.extra.${actualVariableName}`;
 
     configVariables.push({
@@ -53,7 +52,6 @@ export const generateSetAnteReturn = (
   }
 
   const customMessage = effect.customMessage;
-
   let anteCode = "";
   let messageText = "";
 

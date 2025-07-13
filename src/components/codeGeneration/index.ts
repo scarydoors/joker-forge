@@ -475,30 +475,6 @@ const generateCalculateFunction = (
   });
 
   const allConfigVariables: ConfigExtraVariable[] = [];
-  const variableNameCounts = new Map<string, number>();
-
-  const createVariableNameMap = (
-    configVariables: ConfigExtraVariable[]
-  ): Map<string, string> => {
-    const nameMap = new Map<string, string>();
-
-    configVariables.forEach((configVar) => {
-      const count = variableNameCounts.get(configVar.name) || 0;
-      variableNameCounts.set(configVar.name, count + 1);
-
-      const finalName =
-        count === 0 ? configVar.name : `${configVar.name}${count + 1}`;
-
-      nameMap.set(configVar.name, finalName);
-
-      allConfigVariables.push({
-        ...configVar,
-        name: finalName,
-      });
-    });
-
-    return nameMap;
-  };
 
   let calculateFunction = `calculate = function(self, card, context)`;
 
@@ -579,14 +555,11 @@ const generateCalculateFunction = (
           regularRetriggerEffects,
           convertRandomGroupsForCodegen(randomRetriggerEffects),
           triggerType,
-          rule.id,
-          new Map()
+          rule.id
         );
 
         if (effectResult.configVariables) {
-          effectResult.configVariables.forEach((configVar) => {
-            createVariableNameMap([configVar]);
-          });
+          allConfigVariables.push(...effectResult.configVariables);
         }
 
         if (effectResult.preReturnCode) {
@@ -690,14 +663,11 @@ const generateCalculateFunction = (
             regularNonRetriggerEffects,
             convertRandomGroupsForCodegen(randomNonRetriggerGroups),
             triggerType,
-            rule.id,
-            new Map()
+            rule.id
           );
 
           if (effectResult.configVariables) {
-            effectResult.configVariables.forEach((configVar) => {
-              createVariableNameMap([configVar]);
-            });
+            allConfigVariables.push(...effectResult.configVariables);
           }
 
           if (effectResult.preReturnCode) {
@@ -758,14 +728,11 @@ const generateCalculateFunction = (
               regularNonRetriggerEffects,
               convertRandomGroupsForCodegen(randomNonRetriggerGroups),
               triggerType,
-              rule.id,
-              new Map()
+              rule.id
             );
 
             if (effectResult.configVariables) {
-              effectResult.configVariables.forEach((configVar) => {
-                createVariableNameMap([configVar]);
-              });
+              allConfigVariables.push(...effectResult.configVariables);
             }
 
             if (effectResult.preReturnCode) {
@@ -805,14 +772,11 @@ const generateCalculateFunction = (
                 regularNonRetriggerEffects,
                 [],
                 triggerType,
-                rule.id,
-                new Map()
+                rule.id
               );
 
               if (effectResult.configVariables) {
-                effectResult.configVariables.forEach((configVar) => {
-                  createVariableNameMap([configVar]);
-                });
+                allConfigVariables.push(...effectResult.configVariables);
               }
 
               if (effectResult.preReturnCode) {
@@ -909,14 +873,11 @@ const generateCalculateFunction = (
             allEffects,
             convertRandomGroupsForCodegen(allGroups),
             triggerType,
-            rule.id,
-            new Map()
+            rule.id
           );
 
           if (effectResult.configVariables) {
-            effectResult.configVariables.forEach((configVar) => {
-              createVariableNameMap([configVar]);
-            });
+            allConfigVariables.push(...effectResult.configVariables);
           }
 
           if (effectResult.preReturnCode) {
@@ -990,14 +951,11 @@ const generateCalculateFunction = (
               allEffects,
               convertRandomGroupsForCodegen(allGroups),
               triggerType,
-              rule.id,
-              new Map()
+              rule.id
             );
 
             if (effectResult.configVariables) {
-              effectResult.configVariables.forEach((configVar) => {
-                createVariableNameMap([configVar]);
-              });
+              allConfigVariables.push(...effectResult.configVariables);
             }
 
             if (effectResult.preReturnCode) {
@@ -1047,14 +1005,11 @@ const generateCalculateFunction = (
                 allEffects,
                 [],
                 triggerType,
-                rule.id,
-                new Map()
+                rule.id
               );
 
               if (effectResult.configVariables) {
-                effectResult.configVariables.forEach((configVar) => {
-                  createVariableNameMap([configVar]);
-                });
+                allConfigVariables.push(...effectResult.configVariables);
               }
 
               if (effectResult.preReturnCode) {
@@ -1105,14 +1060,11 @@ const generateCalculateFunction = (
           rule.effects || [],
           convertRandomGroupsForCodegen(rule.randomGroups || []),
           triggerType,
-          rule.id,
-          new Map()
+          rule.id
         );
 
         if (effectResult.configVariables) {
-          effectResult.configVariables.forEach((configVar) => {
-            createVariableNameMap([configVar]);
-          });
+          allConfigVariables.push(...effectResult.configVariables);
         }
 
         if (effectResult.preReturnCode) {
@@ -1146,14 +1098,11 @@ const generateCalculateFunction = (
             rule.effects || [],
             convertRandomGroupsForCodegen(rule.randomGroups || []),
             triggerType,
-            rule.id,
-            new Map()
+            rule.id
           );
 
           if (effectResult.configVariables) {
-            effectResult.configVariables.forEach((configVar) => {
-              createVariableNameMap([configVar]);
-            });
+            allConfigVariables.push(...effectResult.configVariables);
           }
 
           if (effectResult.preReturnCode) {
@@ -1178,14 +1127,11 @@ const generateCalculateFunction = (
               rule.effects || [],
               [],
               triggerType,
-              rule.id,
-              new Map()
+              rule.id
             );
 
             if (effectResult.configVariables) {
-              effectResult.configVariables.forEach((configVar) => {
-                createVariableNameMap([configVar]);
-              });
+              allConfigVariables.push(...effectResult.configVariables);
             }
 
             if (effectResult.preReturnCode) {

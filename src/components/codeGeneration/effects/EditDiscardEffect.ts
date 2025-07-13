@@ -9,7 +9,8 @@ import {
 
 export const generateEditDiscardReturn = (
   effect: Effect,
-  variableNameMap?: Map<string, string>
+  variableNameMap?: Map<string, string>,
+  sameTypeCount: number = 0
 ): EffectReturn => {
   const operation = effect.params?.operation || "add";
   const effectValue = effect.params.value;
@@ -19,12 +20,14 @@ export const generateEditDiscardReturn = (
   let valueCode: string;
   const configVariables: ConfigExtraVariable[] = [];
 
+  // Determine variable name based on how many effects of the same type came before this one
+  const variableName =
+    sameTypeCount === 0 ? "discards" : `discards${sameTypeCount + 1}`;
+  const actualVariableName = variableNameMap?.get(variableName) || variableName;
+
   if (parsed.isGameVariable) {
     valueCode = generateGameVariableCode(effectValue);
   } else if (rangeParsed.isRangeVariable) {
-    const variableName = "discards";
-    const actualVariableName =
-      variableNameMap?.get(variableName) || variableName;
     const seedName = `${actualVariableName}_${effect.id.substring(0, 8)}`;
     valueCode = `pseudorandom('${seedName}', card.ability.extra.${actualVariableName}_min, card.ability.extra.${actualVariableName}_max)`;
 
@@ -33,12 +36,9 @@ export const generateEditDiscardReturn = (
       { name: `${actualVariableName}_max`, value: rangeParsed.max || 5 }
     );
   } else if (typeof effectValue === "string") {
-    const actualVariableName = variableNameMap?.get(effectValue) || effectValue;
-    valueCode = `card.ability.extra.${actualVariableName}`;
+    const mappedVarName = variableNameMap?.get(effectValue) || effectValue;
+    valueCode = `card.ability.extra.${mappedVarName}`;
   } else {
-    const variableName = "discards";
-    const actualVariableName =
-      variableNameMap?.get(variableName) || variableName;
     valueCode = `card.ability.extra.${actualVariableName}`;
 
     configVariables.push({
