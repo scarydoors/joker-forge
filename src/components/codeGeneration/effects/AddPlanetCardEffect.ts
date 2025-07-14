@@ -1,20 +1,6 @@
 import type { EffectReturn } from "../effectUtils";
 import type { Effect } from "../../ruleBuilder/types";
-
-const PLANET_CARD_KEYS: Record<string, string> = {
-  pluto: "c_pluto",
-  mercury: "c_mercury",
-  uranus: "c_uranus",
-  venus: "c_venus",
-  saturn: "c_saturn",
-  jupiter: "c_jupiter",
-  earth: "c_earth",
-  mars: "c_mars",
-  neptune: "c_neptune",
-  planet_x: "c_planet_x",
-  ceres: "c_ceres",
-  eris: "c_eris",
-};
+import { PLANET_CARDS } from "../../data/BalatroUtils";
 
 export const generateAddPlanetCardReturn = (
   effect: Effect,
@@ -58,7 +44,9 @@ export const generateAddPlanetCardReturn = (
                 end`;
     }
   } else {
-    const planetKey = PLANET_CARD_KEYS[planetCard] || "c_pluto";
+    // Check if the planetCard exists in PLANET_CARDS, otherwise fallback to c_pluto
+    const planetCardData = PLANET_CARDS.find((card) => card.key === planetCard);
+    const planetKey = planetCardData ? planetCard : "c_pluto";
 
     if (isNegative) {
       planetCreationCode = `local created_planet = true

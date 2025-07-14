@@ -1,26 +1,6 @@
 import type { EffectReturn } from "../effectUtils";
 import type { Effect } from "../../ruleBuilder/types";
-
-const SPECTRAL_CARD_KEYS: Record<string, string> = {
-  familiar: "c_familiar",
-  grim: "c_grim",
-  incantation: "c_incantation",
-  talisman: "c_talisman",
-  aura: "c_aura",
-  wraith: "c_wraith",
-  sigil: "c_sigil",
-  ouija: "c_ouija",
-  ectoplasm: "c_ectoplasm",
-  immolate: "c_immolate",
-  ankh: "c_ankh",
-  deja_vu: "c_deja_vu",
-  hex: "c_hex",
-  trance: "c_trance",
-  medium: "c_medium",
-  cryptid: "c_cryptid",
-  the_soul: "c_soul",
-  black_hole: "c_black_hole",
-};
+import { SPECTRAL_CARDS } from "../../data/BalatroUtils";
 
 export const generateAddSpectralCardReturn = (
   effect: Effect,
@@ -64,7 +44,11 @@ export const generateAddSpectralCardReturn = (
                 end`;
     }
   } else {
-    const spectralKey = SPECTRAL_CARD_KEYS[spectralCard] || "c_familiar";
+    // Check if the spectralCard exists in SPECTRAL_CARDS, otherwise fallback to c_familiar
+    const spectralCardData = SPECTRAL_CARDS.find(
+      (card) => card.key === spectralCard
+    );
+    const spectralKey = spectralCardData ? spectralCard : "c_familiar";
 
     if (isNegative) {
       spectralCreationCode = `local created_spectral = true

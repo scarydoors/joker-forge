@@ -1,30 +1,6 @@
 import type { EffectReturn } from "../effectUtils";
 import type { Effect } from "../../ruleBuilder/types";
-
-const TAROT_CARD_KEYS: Record<string, string> = {
-  the_fool: "c_fool",
-  the_magician: "c_magician",
-  the_high_priestess: "c_high_priestess",
-  the_empress: "c_empress",
-  the_emperor: "c_emperor",
-  the_hierophant: "c_heirophant",
-  the_lovers: "c_lovers",
-  the_chariot: "c_chariot",
-  justice: "c_justice",
-  the_hermit: "c_hermit",
-  the_wheel_of_fortune: "c_wheel_of_fortune",
-  strength: "c_strength",
-  the_hanged_man: "c_hanged_man",
-  death: "c_death",
-  temperance: "c_temperance",
-  the_devil: "c_devil",
-  the_tower: "c_tower",
-  the_star: "c_star",
-  the_moon: "c_moon",
-  the_sun: "c_sun",
-  judgement: "c_judgement",
-  the_world: "c_world",
-};
+import { TAROT_CARDS } from "../../data/BalatroUtils";
 
 export const generateAddTarotCardReturn = (
   effect: Effect,
@@ -43,7 +19,9 @@ export const generateAddTarotCardReturn = (
   if (tarotCard === "random") {
     tarotKey = "nil, nil, nil, nil, nil, 'joker_forge_tarot'";
   } else {
-    const specificKey = TAROT_CARD_KEYS[tarotCard] || "c_fool";
+    // Check if the tarotCard exists in TAROT_CARDS, otherwise fallback to c_fool
+    const tarotCardData = TAROT_CARDS.find((card) => card.key === tarotCard);
+    const specificKey = tarotCardData ? tarotCard : "c_fool";
     tarotKey = `nil, nil, nil, nil, '${specificKey}'`;
   }
 
