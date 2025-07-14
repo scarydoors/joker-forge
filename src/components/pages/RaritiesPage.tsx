@@ -327,7 +327,7 @@ const RaritiesPage: React.FC<RaritiesPageProps> = ({
     <div className="min-h-screen">
       <div className="p-8 font-lexend max-w-7xl mx-auto">
         <h1 className="text-3xl text-white-light tracking-widest text-center">
-          Custom Rarities
+          Rarities
         </h1>
         <h1 className="text-xl text-white-dark font-light tracking-widest mb-6 text-center">
           {modName}
