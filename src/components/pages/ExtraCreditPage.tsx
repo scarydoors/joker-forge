@@ -67,12 +67,20 @@ const ExtraCreditPage: React.FC<ExtraCreditPageProps> = ({
       {
         value: "rarity-asc",
         label: "Rarity (Low to High)",
-        sortFn: (a, b) => a.rarity - b.rarity,
+        sortFn: (a, b) => {
+          const aNum = typeof a.rarity === "number" ? a.rarity : 999;
+          const bNum = typeof b.rarity === "number" ? b.rarity : 999;
+          return aNum - bNum;
+        },
       },
       {
         value: "rarity-desc",
         label: "Rarity (High to Low)",
-        sortFn: (a, b) => b.rarity - a.rarity,
+        sortFn: (a, b) => {
+          const aNum = typeof a.rarity === "number" ? a.rarity : 999;
+          const bNum = typeof b.rarity === "number" ? b.rarity : 999;
+          return bNum - aNum;
+        },
       },
       {
         value: "cost-asc",
@@ -83,6 +91,16 @@ const ExtraCreditPage: React.FC<ExtraCreditPageProps> = ({
         value: "cost-desc",
         label: "Cost (High to Low)",
         sortFn: (a, b) => (b.cost || 0) - (a.cost || 0),
+      },
+      {
+        value: "rules-desc",
+        label: "Rules (Most to Least)",
+        sortFn: (a, b) => (b.rules?.length || 0) - (a.rules?.length || 0),
+      },
+      {
+        value: "rules-asc",
+        label: "Rules (Least to Most)",
+        sortFn: (a, b) => (a.rules?.length || 0) - (b.rules?.length || 0),
       },
     ],
     []
@@ -271,7 +289,9 @@ const ExtraCreditPage: React.FC<ExtraCreditPageProps> = ({
                   {filteredAndSortedJokers.length} of {extraCreditJokers.length}{" "}
                   jokers from the{" "}
                   <a
-                    href="https://github.com/GuilloryCraft/ExtraCredit" target="_blank" rel="noopener noreferrer"
+                    href="https://github.com/GuilloryCraft/ExtraCredit"
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="text-mint-light hover:text-mint-lighter hover:underline decoration-dashed"
                   >
                     Extra Credit

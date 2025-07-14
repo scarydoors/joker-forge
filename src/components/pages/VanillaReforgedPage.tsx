@@ -127,12 +127,20 @@ const VanillaReforgedPage: React.FC<VanillaReforgedPageProps> = ({
       {
         value: "rarity-asc",
         label: "Rarity (Low to High)",
-        sortFn: (a, b) => a.rarity - b.rarity,
+        sortFn: (a, b) => {
+          const aNum = typeof a.rarity === "number" ? a.rarity : 999;
+          const bNum = typeof b.rarity === "number" ? b.rarity : 999;
+          return aNum - bNum;
+        },
       },
       {
         value: "rarity-desc",
         label: "Rarity (High to Low)",
-        sortFn: (a, b) => b.rarity - a.rarity,
+        sortFn: (a, b) => {
+          const aNum = typeof a.rarity === "number" ? a.rarity : 999;
+          const bNum = typeof b.rarity === "number" ? b.rarity : 999;
+          return bNum - aNum;
+        },
       },
       {
         value: "cost-asc",
