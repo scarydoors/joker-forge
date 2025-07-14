@@ -23,6 +23,13 @@ import { formatBalatroText } from "./generic/balatroTextFormatter";
 import type { Rule } from "./ruleBuilder/types";
 import { validateJokerName } from "./generic/validationUtils";
 
+import {
+  getRarityDisplayName,
+  getRarityBadgeColor,
+  getAllRarities,
+  type CustomRarity,
+} from "./data/BalatroUtils";
+
 export interface UserVariable {
   id: string;
   name: string;
@@ -67,7 +74,7 @@ export interface JokerData {
   description: string;
   imagePreview: string;
   overlayImagePreview?: string;
-  rarity: number;
+  rarity: number | string;
   cost?: number;
   blueprint_compat?: boolean;
   eternal_compat?: boolean;
@@ -92,6 +99,8 @@ interface JokerCardProps {
   onDuplicate: () => void;
   onExport: () => void;
   onQuickUpdate: (updates: Partial<JokerData>) => void;
+  customRarities?: CustomRarity[];
+  modPrefix: string;
 }
 
 const PropertyIcon: React.FC<{
@@ -135,43 +144,6 @@ const PropertyIcon: React.FC<{
   );
 };
 
-const getRarityText = (rarity: number) => {
-  const rarityMap: Record<number, string> = {
-    1: "Common",
-    2: "Uncommon",
-    3: "Rare",
-    4: "Legendary",
-  };
-  return rarityMap[rarity] || "Common";
-};
-
-const getRarityStyles = (rarity: number) => {
-  const styleMap: Record<number, { text: string; bg: string; border: string }> =
-    {
-      1: {
-        text: "text-balatro-blue",
-        bg: "bg-black",
-        border: "border-balatro-blue",
-      },
-      2: {
-        text: "text-balatro-green",
-        bg: "bg-black",
-        border: "border-balatro-green",
-      },
-      3: {
-        text: "text-balatro-red",
-        bg: "bg-black",
-        border: "border-balatro-red",
-      },
-      4: {
-        text: "text-balatro-purple",
-        bg: "bg-black",
-        border: "border-balatro-purple",
-      },
-    };
-  return styleMap[rarity] || styleMap[1];
-};
-
 const JokerCard: React.FC<JokerCardProps> = ({
   joker,
   onEditInfo,
@@ -180,6 +152,8 @@ const JokerCard: React.FC<JokerCardProps> = ({
   onDuplicate,
   onExport,
   onQuickUpdate,
+  customRarities = [],
+  modPrefix,
 }) => {
   const [showRarityMenu, setShowRarityMenu] = useState(false);
   const [editingName, setEditingName] = useState(false);
@@ -197,21 +171,28 @@ const JokerCard: React.FC<JokerCardProps> = ({
   const [fallbackAttempted, setFallbackAttempted] = useState(false);
 
   const safeRarity =
-    typeof joker.rarity === "number" && joker.rarity >= 1 && joker.rarity <= 4
+    typeof joker.rarity === "number" && joker.rarity >= 1
+      ? joker.rarity
+      : typeof joker.rarity === "string"
       ? joker.rarity
       : 1;
-  const rarityText = getRarityText(safeRarity);
-  const rarityStyles = getRarityStyles(safeRarity);
+
+  const rarityText = getRarityDisplayName(
+    safeRarity,
+    customRarities,
+    modPrefix
+  );
+  const rarityColor = getRarityBadgeColor(
+    safeRarity,
+    customRarities,
+    modPrefix
+  );
+
+  const allRarities = getAllRarities(customRarities, modPrefix);
+
   const rulesCount = joker.rules?.length || 0;
 
   const [nameValidationError, setNameValidationError] = useState<string>("");
-
-  const rarities = [
-    { value: 1, label: "Common", styles: getRarityStyles(1) },
-    { value: 2, label: "Uncommon", styles: getRarityStyles(2) },
-    { value: 3, label: "Rare", styles: getRarityStyles(3) },
-    { value: 4, label: "Legendary", styles: getRarityStyles(4) },
-  ];
 
   const handleNameSave = () => {
     const validation = validateJokerName(tempName);
@@ -236,7 +217,15 @@ const JokerCard: React.FC<JokerCardProps> = ({
     setEditingDescription(false);
   };
 
-  const handleRarityChange = (newRarity: number) => {
+  const handleRarityChange = (value: string) => {
+    let newRarity: number | string;
+
+    if (value.includes("_")) {
+      newRarity = value;
+    } else {
+      newRarity = parseInt(value, 10);
+    }
+
     onQuickUpdate({ rarity: newRarity });
     setShowRarityMenu(false);
   };
@@ -277,7 +266,6 @@ const JokerCard: React.FC<JokerCardProps> = ({
     setHoveredTrash(false);
   };
 
-  // Normalize boolean values to fix TypeScript warnings
   const blueprintCompat = joker.blueprint_compat !== false;
   const eternalCompat = joker.eternal_compat !== false;
   const isUnlocked = joker.unlocked !== false;
@@ -287,7 +275,6 @@ const JokerCard: React.FC<JokerCardProps> = ({
   const forceRental = joker.force_rental === true;
   const appearsInShop = joker.appears_in_shop !== false;
 
-  // Property icon configuration
   const propertyIcons = [
     {
       icon: <DocumentIcon className="w-full h-full" />,
@@ -446,7 +433,11 @@ const JokerCard: React.FC<JokerCardProps> = ({
 
         <div className="relative z-30">
           <div
-            className={`px-6 py-1 -mt-6 rounded-md border-2 text-sm tracking-wide font-medium cursor-pointer transition-all ${rarityStyles.bg} ${rarityStyles.border} ${rarityStyles.text}`}
+            className="px-6 py-1 -mt-6 rounded-md border-2 text-sm tracking-wide font-medium cursor-pointer transition-all bg-black"
+            style={{
+              borderColor: rarityColor,
+              color: rarityColor,
+            }}
             onClick={() => setShowRarityMenu(!showRarityMenu)}
           >
             {rarityText}
@@ -454,11 +445,18 @@ const JokerCard: React.FC<JokerCardProps> = ({
 
           {showRarityMenu && (
             <div className="absolute top-full left-1/2 -translate-x-1/2 mt-1 border-2 border-black-lighter rounded-lg shadow-lg z-50 overflow-hidden">
-              {rarities.map((rarity) => (
+              {allRarities.map((rarity) => (
                 <div
-                  key={rarity.value}
-                  className={`px-3 py-1 text-xs font-medium cursor-pointer transition-all hover:bg-opacity-20 ${rarity.styles.text} ${rarity.styles.bg} border-b border-black-lighter last:border-b-0`}
-                  onClick={() => handleRarityChange(rarity.value)}
+                  key={rarity.value.toString()}
+                  className="px-3 py-1 text-xs font-medium cursor-pointer transition-all hover:bg-opacity-20 bg-black border-b border-black-lighter last:border-b-0"
+                  style={{
+                    color: getRarityBadgeColor(
+                      rarity.value,
+                      customRarities,
+                      modPrefix
+                    ),
+                  }}
+                  onClick={() => handleRarityChange(rarity.value.toString())}
                 >
                   {rarity.label}
                 </div>

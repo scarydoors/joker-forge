@@ -28,7 +28,7 @@ import {
   getRankByValue,
 } from "../data/BalatroUtils";
 import { slugify } from "../EditJokerInfo";
-
+import { RarityData } from "../pages/RaritiesPage";
 export interface ModMetadata {
   id: string;
   name: string;
@@ -71,6 +71,39 @@ const convertRandomGroupsForCodegen = (
         ? 1
         : group.chance_denominator,
   }));
+};
+
+const generateCustomRaritiesCode = (customRarities: RarityData[]): string => {
+  if (customRarities.length === 0) {
+    return "";
+  }
+
+  let output = "";
+
+  customRarities.forEach((rarity) => {
+    const hexColor = rarity.badge_colour.startsWith("#")
+      ? rarity.badge_colour
+      : `#${rarity.badge_colour}`;
+
+    output += `SMODS.Rarity {
+    key = "${rarity.key}",
+    pools = {
+        ["Joker"] = true
+    },
+    default_weight = ${rarity.default_weight},
+    badge_colour = HEX('${hexColor.substring(1)}'),
+    loc_txt = {
+        name = "${rarity.name}"
+    },
+    get_weight = function(self, weight, object_type)
+        return weight
+    end,
+}
+
+`;
+  });
+
+  return output.trim();
 };
 
 const generateSingleJokerCode = (
@@ -183,7 +216,9 @@ const generateSingleJokerCode = (
         y = ${row}
     },
     cost = ${joker.cost !== undefined ? joker.cost : 4},
-    rarity = ${joker.rarity},
+    rarity = ${
+      typeof joker.rarity === "string" ? `"${joker.rarity}"` : joker.rarity
+    },
     blueprint_compat = ${
       joker.blueprint_compat !== undefined ? joker.blueprint_compat : true
     },
@@ -281,9 +316,10 @@ const generateLuaCode = (
   options: {
     modPrefix?: string;
     atlasKey?: string;
+    customRarities?: RarityData[];
   } = {}
 ): string => {
-  const { atlasKey = "CustomJokers" } = options;
+  const { atlasKey = "CustomJokers", customRarities = [] } = options;
 
   let output = `SMODS.Atlas({
     key = "${atlasKey}", 
@@ -306,7 +342,20 @@ local function load_jokers_folder()
             assert(SMODS.load_file("jokers/" .. file_name))()
         end
     end
+end`;
+
+  if (customRarities.length > 0) {
+    output += `
+
+local function load_rarities_file()
+    local mod_path = SMODS.current_mod.path
+    assert(SMODS.load_file("rarities.lua"))()
 end
+
+load_rarities_file()`;
+  }
+
+  output += `
 
 load_jokers_folder()
 `;
@@ -324,7 +373,8 @@ load_jokers_folder()
 
 export const exportJokersAsMod = async (
   jokers: JokerData[],
-  metadata: ModMetadata
+  metadata: ModMetadata,
+  customRarities: RarityData[] = []
 ): Promise<boolean> => {
   try {
     const zip = new JSZip();
@@ -335,9 +385,15 @@ export const exportJokersAsMod = async (
     const mainLuaCode = generateLuaCode(jokersWithKeys, {
       modPrefix: metadata.prefix,
       atlasKey: atlasKey,
+      customRarities: customRarities,
     });
 
     zip.file(metadata.main_file, mainLuaCode);
+
+    if (customRarities.length > 0) {
+      const raritiesCode = generateCustomRaritiesCode(customRarities);
+      zip.file("rarities.lua", raritiesCode);
+    }
 
     const jokersFolder = zip.folder("jokers");
     let currentPosition = 0;

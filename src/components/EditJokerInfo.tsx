@@ -21,6 +21,13 @@ import {
   validateDescription,
   ValidationResult,
 } from "./generic/validationUtils";
+import {
+  getRarityDropdownOptions,
+  getRarityByValue,
+  getRarityDisplayName,
+  getRarityBadgeColor,
+  type CustomRarity,
+} from "./data/BalatroUtils";
 
 interface EditJokerInfoProps {
   isOpen: boolean;
@@ -28,6 +35,8 @@ interface EditJokerInfoProps {
   onClose: () => void;
   onSave: (joker: JokerData) => void;
   onDelete: (jokerId: string) => void;
+  customRarities?: CustomRarity[];
+  modPrefix: string;
 }
 
 // eslint-disable-next-line react-refresh/only-export-components
@@ -47,6 +56,8 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
   onClose,
   onSave,
   onDelete,
+  customRarities = [],
+  modPrefix,
 }) => {
   const [formData, setFormData] = useState<JokerData>(joker);
   const [activeTab, setActiveTab] = useState<"visual" | "description">(
@@ -70,6 +81,8 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
     name?: ValidationResult;
     description?: ValidationResult;
   }>({});
+
+  const rarityOptions = getRarityDropdownOptions(customRarities, modPrefix);
 
   const validateField = (field: string, value: string) => {
     let result: ValidationResult;
@@ -512,28 +525,63 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
   };
 
   const handleRarityChange = (value: string) => {
-    const rarity = parseInt(value, 10);
-    const previousRarity = formData.rarity;
+    let newRarity: number | string;
 
+    if (value.includes("_")) {
+      newRarity = value;
+    } else {
+      newRarity = parseInt(value, 10);
+    }
+
+    const previousRarity = formData.rarity;
     const newFormData = {
       ...formData,
-      rarity,
+      rarity: newRarity,
       cost:
         formData.cost === getCostFromRarity(formData.rarity)
-          ? getCostFromRarity(rarity)
+          ? getCostFromRarity(newRarity)
           : formData.cost,
     };
 
-    if (previousRarity !== rarity) {
-      if (rarity === 4 && previousRarity !== 4) {
+    const isVanillaLegendary = typeof newRarity === "number" && newRarity === 4;
+    const wasVanillaLegendary =
+      typeof previousRarity === "number" && previousRarity === 4;
+
+    if (previousRarity !== newRarity) {
+      if (isVanillaLegendary && !wasVanillaLegendary) {
         newFormData.appears_in_shop = false;
-      } else if (previousRarity === 4 && rarity !== 4) {
+      } else if (wasVanillaLegendary && !isVanillaLegendary) {
         newFormData.appears_in_shop = true;
       }
     }
 
     setFormData(newFormData);
   };
+
+  const getCostFromRarity = (rarity: number | string): number => {
+    if (typeof rarity === "string") {
+      return 5;
+    }
+
+    const rarityData = getRarityByValue(rarity, customRarities, modPrefix);
+    if (rarityData?.isCustom) {
+      return 5;
+    }
+
+    switch (rarity) {
+      case 1:
+        return 4;
+      case 2:
+        return 5;
+      case 3:
+        return 6;
+      case 4:
+        return 20;
+      default:
+        return 5;
+    }
+  };
+
   const upscaleImage = (img: HTMLImageElement): string => {
     const canvas = document.createElement("canvas");
     const ctx = canvas.getContext("2d");
@@ -598,21 +646,6 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
       return placeholderCredits[joker.placeholderCreditIndex];
     }
     return null;
-  };
-
-  const getCostFromRarity = (rarity: number): number => {
-    switch (rarity) {
-      case 1:
-        return 4;
-      case 2:
-        return 5;
-      case 3:
-        return 6;
-      case 4:
-        return 8;
-      default:
-        return 5;
-    }
   };
 
   const handleDelete = () => {
@@ -712,13 +745,6 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
   const insertTag = (tag: string, autoClose: boolean = true) => {
     insertTagSmart(tag, autoClose);
   };
-
-  const rarityOptions = [
-    { value: "1", label: "Common" },
-    { value: "2", label: "Uncommon" },
-    { value: "3", label: "Rare" },
-    { value: "4", label: "Legendary" },
-  ];
 
   const tabs = [
     { id: "visual", label: "Visual & Properties", icon: PhotoIcon },
@@ -1319,7 +1345,20 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
 
         <div className="flex-shrink-0 relative my-auto pb-40">
           <div className="relative pl-24" style={{ zIndex: 1000 }}>
-            <BalatroJokerCard joker={formData} size="lg" />
+            <BalatroJokerCard
+              joker={formData}
+              size="lg"
+              rarityName={getRarityDisplayName(
+                formData.rarity,
+                customRarities,
+                modPrefix
+              )}
+              rarityColor={getRarityBadgeColor(
+                formData.rarity,
+                customRarities,
+                modPrefix
+              )}
+            />
           </div>
         </div>
       </div>

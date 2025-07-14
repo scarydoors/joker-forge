@@ -13,6 +13,7 @@ import Button from "../generic/Button";
 import { JokerData } from "../JokerCard";
 import { exportSingleJoker } from "../codeGeneration/index";
 import type { Rule } from "../ruleBuilder/types";
+import { type CustomRarity } from "../data/BalatroUtils";
 
 interface JokersPageProps {
   modName: string;
@@ -20,6 +21,8 @@ interface JokersPageProps {
   setJokers: React.Dispatch<React.SetStateAction<JokerData[]>>;
   selectedJokerId: string | null;
   setSelectedJokerId: React.Dispatch<React.SetStateAction<string | null>>;
+  customRarities?: CustomRarity[];
+  modPrefix: string;
 }
 
 type SortOption = {
@@ -144,6 +147,8 @@ const JokersPage: React.FC<JokersPageProps> = ({
   setJokers,
   selectedJokerId,
   setSelectedJokerId,
+  customRarities = [],
+  modPrefix,
 }) => {
   const [editingJoker, setEditingJoker] = useState<JokerData | null>(null);
   const [showRuleBuilder, setShowRuleBuilder] = useState(false);
@@ -185,12 +190,20 @@ const JokersPage: React.FC<JokersPageProps> = ({
       {
         value: "rarity-asc",
         label: "Rarity (Low to High)",
-        sortFn: (a, b) => a.rarity - b.rarity,
+        sortFn: (a, b) => {
+          const aNum = typeof a.rarity === "number" ? a.rarity : 999;
+          const bNum = typeof b.rarity === "number" ? b.rarity : 999;
+          return aNum - bNum;
+        },
       },
       {
         value: "rarity-desc",
         label: "Rarity (High to Low)",
-        sortFn: (a, b) => b.rarity - a.rarity,
+        sortFn: (a, b) => {
+          const aNum = typeof a.rarity === "number" ? a.rarity : 999;
+          const bNum = typeof b.rarity === "number" ? b.rarity : 999;
+          return bNum - aNum;
+        },
       },
       {
         value: "cost-asc",
@@ -374,8 +387,16 @@ const JokersPage: React.FC<JokersPageProps> = ({
       const matchesSearch =
         joker.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         joker.description.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesRarity =
-        rarityFilter === null || joker.rarity === rarityFilter;
+
+      let matchesRarity = true;
+      if (rarityFilter !== null) {
+        if (typeof joker.rarity === "number") {
+          matchesRarity = joker.rarity === rarityFilter;
+        } else {
+          matchesRarity = false;
+        }
+      }
+
       return matchesSearch && matchesRarity;
     });
 
@@ -546,6 +567,8 @@ const JokersPage: React.FC<JokersPageProps> = ({
                 onDuplicate={() => handleDuplicateJoker(joker)}
                 onExport={() => handleExportJoker(joker)}
                 onQuickUpdate={(updates) => handleQuickUpdate(joker, updates)}
+                customRarities={customRarities}
+                modPrefix={modPrefix}
               />
             ))}
           </div>
@@ -558,6 +581,8 @@ const JokersPage: React.FC<JokersPageProps> = ({
             onClose={() => setEditingJoker(null)}
             onSave={handleSaveJoker}
             onDelete={handleDeleteJoker}
+            customRarities={customRarities}
+            modPrefix={modPrefix}
           />
         )}
 

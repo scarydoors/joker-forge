@@ -14,6 +14,7 @@ import ModMetadataPage, {
   ModMetadata,
   DEFAULT_MOD_METADATA,
 } from "./components/pages/ModMetadataPage";
+import RaritiesPage from "./components/pages/RaritiesPage";
 import ConsumablesPage from "./components/pages/ConsumablesPage";
 import DecksPage from "./components/pages/DecksPage";
 import EditionsPage from "./components/pages/EditionsPage";
@@ -22,6 +23,7 @@ import ExtraCreditPage from "./components/pages/ExtraCreditPage";
 import AcknowledgementsPage from "./components/pages/AcknowledgementsPage";
 import NotFoundPage from "./components/pages/NotFoundPage";
 import { JokerData } from "./components/JokerCard";
+import { RarityData } from "./components/pages/RaritiesPage";
 import { exportJokersAsMod } from "./components/codeGeneration/index";
 import {
   exportModAsJSON,
@@ -46,6 +48,7 @@ interface AlertState {
 interface AutoSaveData {
   modMetadata: ModMetadata;
   jokers: JokerData[];
+  customRarities: RarityData[];
   timestamp: number;
 }
 
@@ -61,6 +64,7 @@ function AppContent() {
   const [modMetadata, setModMetadata] =
     useState<ModMetadata>(DEFAULT_MOD_METADATA);
   const [jokers, setJokers] = useState<JokerData[]>([]);
+  const [customRarities, setCustomRarities] = useState<RarityData[]>([]);
   const [selectedJokerId, setSelectedJokerId] = useState<string | null>(null);
   const [exportLoading, setExportLoading] = useState(false);
   const [alert, setAlert] = useState<AlertState>({
@@ -82,14 +86,20 @@ function AppContent() {
   const prevDataRef = useRef<{
     modMetadata: ModMetadata;
     jokers: JokerData[];
+    customRarities: RarityData[];
   } | null>(null);
 
   const saveToLocalStorage = useCallback(
-    (metadata: ModMetadata, jokerData: JokerData[]) => {
+    (
+      metadata: ModMetadata,
+      jokerData: JokerData[],
+      raritiesData: RarityData[]
+    ) => {
       try {
         const data: AutoSaveData = {
           modMetadata: metadata,
           jokers: jokerData,
+          customRarities: raritiesData,
           timestamp: Date.now(),
         };
         localStorage.setItem(AUTO_SAVE_KEY, JSON.stringify(data));
@@ -104,6 +114,7 @@ function AppContent() {
   const loadFromLocalStorage = useCallback((): {
     modMetadata: ModMetadata;
     jokers: JokerData[];
+    customRarities: RarityData[];
   } | null => {
     try {
       const savedData = localStorage.getItem(AUTO_SAVE_KEY);
@@ -121,6 +132,7 @@ function AppContent() {
       return {
         modMetadata: data.modMetadata,
         jokers: data.jokers,
+        customRarities: data.customRarities || [],
       };
     } catch (error) {
       console.warn("Failed to load auto-save:", error);
@@ -159,21 +171,30 @@ function AppContent() {
   }, []);
 
   const hasDataChanged = useCallback(
-    (metadata: ModMetadata, jokerData: JokerData[]) => {
+    (
+      metadata: ModMetadata,
+      jokerData: JokerData[],
+      raritiesData: RarityData[]
+    ) => {
       if (!prevDataRef.current) return true;
 
       const prevData = prevDataRef.current;
       return (
         JSON.stringify(prevData.modMetadata) !== JSON.stringify(metadata) ||
-        JSON.stringify(prevData.jokers) !== JSON.stringify(jokerData)
+        JSON.stringify(prevData.jokers) !== JSON.stringify(jokerData) ||
+        JSON.stringify(prevData.customRarities) !== JSON.stringify(raritiesData)
       );
     },
     []
   );
 
   const isDataDifferentFromDefaults = useCallback(
-    (metadata: ModMetadata, jokerData: JokerData[]) => {
-      if (jokerData.length > 0) return true;
+    (
+      metadata: ModMetadata,
+      jokerData: JokerData[],
+      raritiesData: RarityData[]
+    ) => {
+      if (jokerData.length > 0 || raritiesData.length > 0) return true;
 
       const defaultMetadata = DEFAULT_MOD_METADATA;
 
@@ -200,13 +221,17 @@ function AppContent() {
   );
 
   const debouncedSave = useCallback(
-    (metadata: ModMetadata, jokerData: JokerData[]) => {
+    (
+      metadata: ModMetadata,
+      jokerData: JokerData[],
+      raritiesData: RarityData[]
+    ) => {
       if (saveTimeoutRef.current) {
         clearTimeout(saveTimeoutRef.current);
       }
 
       saveTimeoutRef.current = setTimeout(() => {
-        saveToLocalStorage(metadata, jokerData);
+        saveToLocalStorage(metadata, jokerData, raritiesData);
       }, 500);
     },
     [saveToLocalStorage]
@@ -227,15 +252,16 @@ function AppContent() {
   useEffect(() => {
     if (!hasLoadedInitialData) return;
 
-    if (!isDataDifferentFromDefaults(modMetadata, jokers)) return;
+    if (!isDataDifferentFromDefaults(modMetadata, jokers, customRarities))
+      return;
 
-    if (!hasDataChanged(modMetadata, jokers)) return;
+    if (!hasDataChanged(modMetadata, jokers, customRarities)) return;
 
-    prevDataRef.current = { modMetadata, jokers };
+    prevDataRef.current = { modMetadata, jokers, customRarities };
 
     setAutoSaveStatus("saving");
 
-    debouncedSave(modMetadata, jokers);
+    debouncedSave(modMetadata, jokers, customRarities);
 
     if (statusTimeoutRef.current) {
       clearTimeout(statusTimeoutRef.current);
@@ -263,6 +289,7 @@ function AppContent() {
   }, [
     modMetadata,
     jokers,
+    customRarities,
     hasLoadedInitialData,
     debouncedSave,
     hasDataChanged,
@@ -288,10 +315,12 @@ function AppContent() {
     if (savedData) {
       setModMetadata(savedData.modMetadata);
       setJokers(savedData.jokers);
+      setCustomRarities(savedData.customRarities);
       setSelectedJokerId(null);
       prevDataRef.current = {
         modMetadata: savedData.modMetadata,
         jokers: savedData.jokers,
+        customRarities: savedData.customRarities,
       };
       showAlert(
         "success",
@@ -353,7 +382,7 @@ function AppContent() {
 
     setExportLoading(true);
     try {
-      await exportJokersAsMod(jokers, modMetadata);
+      await exportJokersAsMod(jokers, modMetadata, customRarities);
       setShowExportSuccessModal(true);
     } catch (error) {
       console.error("Export failed:", error);
@@ -369,7 +398,7 @@ function AppContent() {
 
   const handleExportJSON = () => {
     try {
-      exportModAsJSON(modMetadata, jokers);
+      exportModAsJSON(modMetadata, jokers, customRarities);
       showAlert(
         "success",
         "Mod Saved",
@@ -391,10 +420,12 @@ function AppContent() {
       if (importedData) {
         setModMetadata(importedData.metadata);
         setJokers(importedData.jokers);
+        setCustomRarities(importedData.customRarities || []);
         setSelectedJokerId(null);
         prevDataRef.current = {
           modMetadata: importedData.metadata,
           jokers: importedData.jokers,
+          customRarities: importedData.customRarities || [],
         };
         showAlert(
           "success",
@@ -486,6 +517,18 @@ function AppContent() {
                 setJokers={setJokers}
                 selectedJokerId={selectedJokerId}
                 setSelectedJokerId={setSelectedJokerId}
+                customRarities={customRarities}
+                modPrefix={modMetadata.prefix || ""}
+              />
+            }
+          />
+          <Route
+            path="/rarities"
+            element={
+              <RaritiesPage
+                modName={modMetadata.name}
+                rarities={customRarities}
+                setRarities={setCustomRarities}
               />
             }
           />

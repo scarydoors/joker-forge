@@ -1,3 +1,161 @@
+// Custom shit
+
+// Raritys!
+export interface CustomRarity {
+  id: string;
+  key: string;
+  name: string;
+  badge_colour: string;
+  default_weight: number;
+}
+
+export const VANILLA_RARITIES = [
+  { value: 1, label: "Common", key: "common" },
+  { value: 2, label: "Uncommon", key: "uncommon" },
+  { value: 3, label: "Rare", key: "rare" },
+  { value: 4, label: "Legendary", key: "legendary" },
+] as const;
+
+type VanillaRarity = {
+  value: number;
+  label: string;
+  key: string;
+  isCustom: false;
+};
+
+type CustomRarityOption = {
+  value: string;
+  label: string;
+  key: string;
+  isCustom: true;
+  customData: CustomRarity;
+};
+
+type RarityOption = VanillaRarity | CustomRarityOption;
+
+export const getAllRarities = (
+  customRarities: CustomRarity[] = [],
+  modPrefix: string = ""
+): RarityOption[] => {
+  const vanillaRarities: VanillaRarity[] = VANILLA_RARITIES.map(
+    (rarity, index) => ({
+      value: index + 1,
+      label: rarity.label,
+      key: rarity.key,
+      isCustom: false,
+    })
+  );
+
+  const customRarityOptions: CustomRarityOption[] = customRarities.map(
+    (rarity) => ({
+      value: `${modPrefix}_${rarity.key}`,
+      label: rarity.name,
+      key: rarity.key,
+      isCustom: true,
+      customData: rarity,
+    })
+  );
+
+  return [...vanillaRarities, ...customRarityOptions];
+};
+
+export const getRarityByValue = (
+  value: number | string,
+  customRarities: CustomRarity[] = [],
+  modPrefix: string = ""
+): RarityOption | undefined => {
+  const allRarities = getAllRarities(customRarities, modPrefix);
+  return allRarities.find((rarity) => rarity.value === value);
+};
+
+export const getRarityByKey = (
+  key: string,
+  customRarities: CustomRarity[] = [],
+  modPrefix: string = ""
+): RarityOption | undefined => {
+  const allRarities = getAllRarities(customRarities, modPrefix);
+  return allRarities.find((rarity) => rarity.key === key);
+};
+
+export const getRarityDisplayName = (
+  value: number | string,
+  customRarities: CustomRarity[] = [],
+  modPrefix: string = ""
+): string => {
+  const rarity = getRarityByValue(value, customRarities, modPrefix);
+  return rarity?.label || "Unknown";
+};
+
+export const getRarityBadgeColor = (
+  value: number | string,
+  customRarities: CustomRarity[] = [],
+  modPrefix: string = ""
+): string => {
+  const rarity = getRarityByValue(value, customRarities, modPrefix);
+
+  if (rarity?.isCustom) {
+    const color = rarity.customData.badge_colour;
+    return color.startsWith("#") ? color : `#${color}`;
+  }
+
+  const colorMap: Record<number, string> = {
+    1: "#009dff",
+    2: "#4BC292",
+    3: "#fe5f55",
+    4: "#b26cbb",
+  };
+
+  return colorMap[value as number] || "#666665";
+};
+
+export const getRarityStyles = (
+  value: number | string,
+  customRarities: CustomRarity[] = [],
+  modPrefix: string = ""
+) => {
+  const color = getRarityBadgeColor(value, customRarities, modPrefix);
+
+  return {
+    text: `text-[${color}]`,
+    bg: "bg-black",
+    border: `border-[${color}]`,
+    bgColor: color,
+  };
+};
+
+export const isCustomRarity = (
+  value: number | string,
+  customRarities: CustomRarity[] = [],
+  modPrefix: string = ""
+): boolean => {
+  if (typeof value === "string") {
+    return (
+      value.includes("_") &&
+      customRarities.some((r) => `${modPrefix}_${r.key}` === value)
+    );
+  }
+  return false;
+};
+
+export const getCustomRarityData = (
+  value: number | string,
+  customRarities: CustomRarity[] = [],
+  modPrefix: string = ""
+): CustomRarity | null => {
+  const rarity = getRarityByValue(value, customRarities, modPrefix);
+  return rarity?.isCustom ? rarity.customData : null;
+};
+
+export const getRarityDropdownOptions = (
+  customRarities: CustomRarity[] = [],
+  modPrefix: string = ""
+) => {
+  return getAllRarities(customRarities, modPrefix).map((rarity) => ({
+    value: rarity.value.toString(),
+    label: rarity.label,
+  }));
+};
+
 // Centralized Balatro game data and utilities
 
 // Ranks

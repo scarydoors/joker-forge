@@ -8,7 +8,7 @@ interface JokerData {
   description: string;
   imagePreview: string;
   overlayImagePreview?: string;
-  rarity: number;
+  rarity: number | string;
   cost?: number;
   blueprint_compat?: boolean;
   eternal_compat?: boolean;
@@ -21,6 +21,8 @@ interface BalatroJokerCardProps {
   onClick?: () => void;
   className?: string;
   size?: "sm" | "md" | "lg";
+  rarityName: string;
+  rarityColor: string;
 }
 
 const BalatroJokerCard: React.FC<BalatroJokerCardProps> = ({
@@ -28,6 +30,8 @@ const BalatroJokerCard: React.FC<BalatroJokerCardProps> = ({
   onClick,
   className = "",
   size = "md",
+  rarityName,
+  rarityColor,
 }) => {
   const [imageError, setImageError] = useState(false);
   const [placeholderError, setPlaceholderError] = useState(false);
@@ -36,36 +40,44 @@ const BalatroJokerCard: React.FC<BalatroJokerCardProps> = ({
     setImageError(false);
   }, [joker.imagePreview]);
 
-  const getRarityText = (rarity: number): string => {
-    const rarityMap: Record<number, string> = {
-      1: "Common",
-      2: "Uncommon",
-      3: "Rare",
-      4: "Legendary",
-    };
-    return rarityMap[rarity] || "Common";
+  const darkenColor = (hexColor: string, amount: number = 0.3): string => {
+    // Remove # if present
+    const hex = hexColor.replace("#", "");
+
+    // Parse RGB values
+    const r = parseInt(hex.substr(0, 2), 16);
+    const g = parseInt(hex.substr(2, 2), 16);
+    const b = parseInt(hex.substr(4, 2), 16);
+
+    // Darken each component
+    const newR = Math.max(0, Math.floor(r * (1 - amount)));
+    const newG = Math.max(0, Math.floor(g * (1 - amount)));
+    const newB = Math.max(0, Math.floor(b * (1 - amount)));
+
+    // Convert back to hex
+    const toHex = (n: number) => n.toString(16).padStart(2, "0");
+    return `#${toHex(newR)}${toHex(newG)}${toHex(newB)}`;
   };
 
-  const getRarityStyles = (rarity: number) => {
-    const styleMap: Record<number, { bg: string; shadow: string }> = {
-      1: {
-        bg: "bg-balatro-blueshadow",
-        shadow: "bg-balatro-blue",
-      },
-      2: {
-        bg: "bg-balatro-greenshadow",
-        shadow: "bg-balatro-green",
-      },
-      3: {
-        bg: "bg-balatro-redshadow",
-        shadow: "bg-balatro-red",
-      },
-      4: {
-        bg: "bg-balatro-purpleshadow",
-        shadow: "bg-balatro-purple",
-      },
+  const getRarityStyles = () => {
+    const vanillaStyles: Record<string, { bg: string; shadow: string }> = {
+      "#009dff": { bg: "bg-balatro-blueshadow", shadow: "bg-balatro-blue" },
+      "#4BC292": { bg: "bg-balatro-greenshadow", shadow: "bg-balatro-green" },
+      "#fe5f55": { bg: "bg-balatro-redshadow", shadow: "bg-balatro-red" },
+      "#b26cbb": { bg: "bg-balatro-purpleshadow", shadow: "bg-balatro-purple" },
     };
-    return styleMap[rarity] || styleMap[1];
+
+    // If it's a vanilla rarity, use the predefined styles
+    if (vanillaStyles[rarityColor]) {
+      return vanillaStyles[rarityColor];
+    }
+
+    // For custom rarities, generate a darkened shadow color
+    const shadowColor = darkenColor(rarityColor, 0.4);
+    return {
+      bg: shadowColor,
+      shadow: rarityColor,
+    };
   };
 
   const sizeClasses = {
@@ -84,8 +96,8 @@ const BalatroJokerCard: React.FC<BalatroJokerCardProps> = ({
   };
 
   const currentSize = sizeClasses[size];
-  const rarityStyles = getRarityStyles(joker.rarity);
-  const rarityText = getRarityText(joker.rarity);
+  const rarityStyles = getRarityStyles();
+  const isVanillaRarity = rarityStyles.bg.startsWith("bg-");
 
   const handleImageError = () => {
     setImageError(true);
@@ -175,16 +187,35 @@ const BalatroJokerCard: React.FC<BalatroJokerCardProps> = ({
                   </div>
 
                   <div className="relative mx-6 mt-3">
-                    <div
-                      className={`absolute inset-0 ${rarityStyles.bg} rounded-xl translate-y-1`}
-                    />
-                    <div
-                      className={`${rarityStyles.shadow} rounded-xl text-center text-lg text-balatro-white py-1 relative`}
-                    >
-                      <span className="relative text-shadow-pixel">
-                        {rarityText}
-                      </span>
-                    </div>
+                    {isVanillaRarity ? (
+                      <>
+                        <div
+                          className={`absolute inset-0 ${rarityStyles.bg} rounded-xl translate-y-1`}
+                        />
+                        <div
+                          className={`${rarityStyles.shadow} rounded-xl text-center text-lg text-balatro-white py-1 relative`}
+                        >
+                          <span className="relative text-shadow-pixel">
+                            {rarityName}
+                          </span>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <div
+                          className="absolute inset-0 rounded-xl translate-y-1"
+                          style={{ backgroundColor: rarityStyles.bg }}
+                        />
+                        <div
+                          className="rounded-xl text-center text-lg text-balatro-white py-1 relative"
+                          style={{ backgroundColor: rarityStyles.shadow }}
+                        >
+                          <span className="relative text-shadow-pixel">
+                            {rarityName}
+                          </span>
+                        </div>
+                      </>
+                    )}
                   </div>
                 </div>
               </div>

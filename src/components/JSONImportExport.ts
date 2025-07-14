@@ -1,20 +1,24 @@
 import { ModMetadata } from "./pages/ModMetadataPage";
 import { JokerData } from "./JokerCard";
+import { RarityData } from "./pages/RaritiesPage";
 
 export interface ExportedMod {
   metadata: ModMetadata;
   jokers: JokerData[];
+  customRarities: RarityData[];
   version: string;
   exportedAt: string;
 }
 
 export const exportModAsJSON = (
   metadata: ModMetadata,
-  jokers: JokerData[]
+  jokers: JokerData[],
+  customRarities: RarityData[] = []
 ): void => {
   const exportData: ExportedMod = {
     metadata,
     jokers,
+    customRarities,
     version: "1.0.0",
     exportedAt: new Date().toISOString(),
   };
@@ -39,6 +43,7 @@ export const exportModAsJSON = (
 export const importModFromJSON = (): Promise<{
   metadata: ModMetadata;
   jokers: JokerData[];
+  customRarities: RarityData[];
 } | null> => {
   return new Promise((resolve, reject) => {
     const input = document.createElement("input");
@@ -69,6 +74,7 @@ export const importModFromJSON = (): Promise<{
           resolve({
             metadata: importData.metadata,
             jokers: importData.jokers,
+            customRarities: importData.customRarities || [],
           });
         } catch (error) {
           console.error("Error parsing mod file:", error);
