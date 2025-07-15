@@ -9,7 +9,6 @@ import {
 export const generateLevelUpHandReturn = (
   triggerType: string = "hand_played",
   effect?: Effect,
-  variableNameMap?: Map<string, string>,
   sameTypeCount: number = 0
 ): EffectReturn => {
   const customMessage = effect?.customMessage;
@@ -21,30 +20,26 @@ export const generateLevelUpHandReturn = (
     const parsed = parseGameVariable(effectValue);
     const rangeParsed = parseRangeVariable(effectValue);
 
-    // Determine variable name based on how many effects of the same type came before this one
     const variableName =
       sameTypeCount === 0 ? "levels" : `levels${sameTypeCount + 1}`;
-    const actualVariableName =
-      variableNameMap?.get(variableName) || variableName;
 
     if (parsed.isGameVariable) {
       valueCode = generateGameVariableCode(effectValue);
     } else if (rangeParsed.isRangeVariable) {
-      const seedName = `${actualVariableName}_${effect.id.substring(0, 8)}`;
-      valueCode = `pseudorandom('${seedName}', card.ability.extra.${actualVariableName}_min, card.ability.extra.${actualVariableName}_max)`;
+      const seedName = `${variableName}_${effect.id.substring(0, 8)}`;
+      valueCode = `pseudorandom('${seedName}', card.ability.extra.${variableName}_min, card.ability.extra.${variableName}_max)`;
 
       configVariables.push(
-        { name: `${actualVariableName}_min`, value: rangeParsed.min || 1 },
-        { name: `${actualVariableName}_max`, value: rangeParsed.max || 5 }
+        { name: `${variableName}_min`, value: rangeParsed.min || 1 },
+        { name: `${variableName}_max`, value: rangeParsed.max || 5 }
       );
     } else if (typeof effectValue === "string") {
-      const mappedVarName = variableNameMap?.get(effectValue) || effectValue;
-      valueCode = `card.ability.extra.${mappedVarName}`;
+      valueCode = `card.ability.extra.${effectValue}`;
     } else {
-      valueCode = `card.ability.extra.${actualVariableName}`;
+      valueCode = `card.ability.extra.${variableName}`;
 
       configVariables.push({
-        name: actualVariableName,
+        name: variableName,
         value: Number(effectValue) || 1,
       });
     }

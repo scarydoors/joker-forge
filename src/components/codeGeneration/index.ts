@@ -29,6 +29,7 @@ import {
 } from "../data/BalatroUtils";
 import { slugify } from "../EditJokerInfo";
 import { RarityData } from "../pages/RaritiesPage";
+
 export interface ModMetadata {
   id: string;
   name: string;
@@ -531,6 +532,7 @@ const generateCalculateFunction = (
   });
 
   const allConfigVariables: ConfigExtraVariable[] = [];
+  const globalEffectCounts = new Map<string, number>();
 
   let calculateFunction = `calculate = function(self, card, context)`;
 
@@ -611,7 +613,8 @@ const generateCalculateFunction = (
           regularRetriggerEffects,
           convertRandomGroupsForCodegen(randomRetriggerEffects),
           triggerType,
-          rule.id
+          rule.id,
+          globalEffectCounts
         );
 
         if (effectResult.configVariables) {
@@ -719,7 +722,8 @@ const generateCalculateFunction = (
             regularNonRetriggerEffects,
             convertRandomGroupsForCodegen(randomNonRetriggerGroups),
             triggerType,
-            rule.id
+            rule.id,
+            globalEffectCounts
           );
 
           if (effectResult.configVariables) {
@@ -784,7 +788,8 @@ const generateCalculateFunction = (
               regularNonRetriggerEffects,
               convertRandomGroupsForCodegen(randomNonRetriggerGroups),
               triggerType,
-              rule.id
+              rule.id,
+              globalEffectCounts
             );
 
             if (effectResult.configVariables) {
@@ -828,7 +833,8 @@ const generateCalculateFunction = (
                 regularNonRetriggerEffects,
                 [],
                 triggerType,
-                rule.id
+                rule.id,
+                globalEffectCounts
               );
 
               if (effectResult.configVariables) {
@@ -929,7 +935,8 @@ const generateCalculateFunction = (
             allEffects,
             convertRandomGroupsForCodegen(allGroups),
             triggerType,
-            rule.id
+            rule.id,
+            globalEffectCounts
           );
 
           if (effectResult.configVariables) {
@@ -1007,7 +1014,8 @@ const generateCalculateFunction = (
               allEffects,
               convertRandomGroupsForCodegen(allGroups),
               triggerType,
-              rule.id
+              rule.id,
+              globalEffectCounts
             );
 
             if (effectResult.configVariables) {
@@ -1061,7 +1069,8 @@ const generateCalculateFunction = (
                 allEffects,
                 [],
                 triggerType,
-                rule.id
+                rule.id,
+                globalEffectCounts
               );
 
               if (effectResult.configVariables) {
@@ -1116,7 +1125,8 @@ const generateCalculateFunction = (
           rule.effects || [],
           convertRandomGroupsForCodegen(rule.randomGroups || []),
           triggerType,
-          rule.id
+          rule.id,
+          globalEffectCounts
         );
 
         if (effectResult.configVariables) {
@@ -1154,7 +1164,8 @@ const generateCalculateFunction = (
             rule.effects || [],
             convertRandomGroupsForCodegen(rule.randomGroups || []),
             triggerType,
-            rule.id
+            rule.id,
+            globalEffectCounts
           );
 
           if (effectResult.configVariables) {
@@ -1183,7 +1194,8 @@ const generateCalculateFunction = (
               rule.effects || [],
               [],
               triggerType,
-              rule.id
+              rule.id,
+              globalEffectCounts
             );
 
             if (effectResult.configVariables) {

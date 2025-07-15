@@ -125,7 +125,8 @@ export function generateEffectReturnStatement(
   regularEffects: Effect[] = [],
   randomGroups: RandomGroup[] = [],
   triggerType: string = "hand_played",
-  ruleId?: string
+  ruleId?: string,
+  globalEffectCounts?: Map<string, number>
 ): ReturnStatementResult {
   if (regularEffects.length === 0 && randomGroups.length === 0) {
     return {
@@ -134,30 +135,6 @@ export function generateEffectReturnStatement(
       configVariables: [],
     };
   }
-
-  const allEffects = [
-    ...regularEffects,
-    ...randomGroups.flatMap((group) => group.effects),
-  ];
-
-  const effectToVariableMap = new Map<Effect, Map<string, string>>();
-
-  allEffects.forEach((effect, globalIndex) => {
-    const sameTypeCount = allEffects
-      .slice(0, globalIndex)
-      .filter((e) => e.type === effect.type).length;
-
-    const variableMap = new Map<string, string>();
-
-    const baseVariableNames = getEffectBaseVariableNames(effect.type);
-    baseVariableNames.forEach((baseName) => {
-      const finalName =
-        sameTypeCount === 0 ? baseName : `${baseName}${sameTypeCount + 1}`;
-      variableMap.set(baseName, finalName);
-    });
-
-    effectToVariableMap.set(effect, variableMap);
-  });
 
   let combinedPreReturnCode = "";
   let mainReturnStatement = "";
@@ -169,20 +146,21 @@ export function generateEffectReturnStatement(
       coordinateVariableConflicts(regularEffects);
 
     const effectReturns: EffectReturn[] = modifiedEffects
-      .map((effect, index) => {
+      .map((effect) => {
         const effectWithContext: ExtendedEffect = {
           ...effect,
           _ruleContext: ruleId,
-          _effectIndex: index,
         };
 
-        const effectVariableMap = effectToVariableMap.get(effect) || new Map();
+        const currentCount = globalEffectCounts?.get(effect.type) || 0;
+        if (globalEffectCounts) {
+          globalEffectCounts.set(effect.type, currentCount + 1);
+        }
 
         return generateSingleEffect(
           effectWithContext,
           triggerType,
-          effectVariableMap,
-          modifiedEffects
+          currentCount
         );
       })
       .filter((ret) => ret.statement || ret.message);
@@ -262,22 +240,22 @@ export function generateEffectReturnStatement(
         coordinateVariableConflicts(group.effects);
 
       const effectReturns: EffectReturn[] = modifiedEffects
-        .map((effect, index) => {
+        .map((effect) => {
           const effectWithContext: ExtendedEffect = {
             ...effect,
             _ruleContext: ruleId,
-            _effectIndex: index,
             _isInRandomGroup: true,
           };
 
-          const effectVariableMap =
-            effectToVariableMap.get(effect) || new Map();
+          const currentCount = globalEffectCounts?.get(effect.type) || 0;
+          if (globalEffectCounts) {
+            globalEffectCounts.set(effect.type, currentCount + 1);
+          }
 
           return generateSingleEffect(
             effectWithContext,
             triggerType,
-            effectVariableMap,
-            modifiedEffects
+            currentCount
           );
         })
         .filter((ret) => ret.statement || ret.message);
@@ -388,13 +366,10 @@ export function generateEffectReturnStatement(
       mainReturnStatement = randomGroupStatements.join("\n                ");
       if (randomGroups.length > 0 && randomGroups[0].effects.length > 0) {
         const firstEffect = randomGroups[0].effects[0];
-        const firstEffectVariableMap =
-          effectToVariableMap.get(firstEffect) || new Map();
         const firstEffectResult = generateSingleEffect(
           firstEffect,
           triggerType,
-          firstEffectVariableMap,
-          randomGroups[0].effects
+          0
         );
         primaryColour = firstEffectResult.colour || "G.C.WHITE";
       }
@@ -413,42 +388,29 @@ export function generateEffectReturnStatement(
 const generateSingleEffect = (
   effect: ExtendedEffect,
   triggerType: string,
-  variableNameMap?: Map<string, string>,
-  allEffectsInRule?: Effect[]
+  sameTypeCount: number = 0
 ): EffectReturn => {
-  const effectIndex = effect._effectIndex || 0;
-  const sameTypeCount = allEffectsInRule
-    ? allEffectsInRule
-        .slice(0, effectIndex)
-        .filter((e) => e.type === effect.type).length
-    : 0;
-
   switch (effect.type) {
     case "add_chips":
-      return generateAddChipsReturn(effect, variableNameMap, sameTypeCount);
+      return generateAddChipsReturn(effect, sameTypeCount);
     case "add_mult":
-      return generateAddMultReturn(effect, variableNameMap, sameTypeCount);
+      return generateAddMultReturn(effect, sameTypeCount);
     case "apply_x_mult":
-      return generateApplyXMultReturn(effect, variableNameMap, sameTypeCount);
+      return generateApplyXMultReturn(effect, sameTypeCount);
     case "add_dollars":
-      return generateAddDollarsReturn(effect, variableNameMap, sameTypeCount);
+      return generateAddDollarsReturn(effect, sameTypeCount);
     case "retrigger_cards":
-      return generateRetriggerReturn(effect, variableNameMap, sameTypeCount);
+      return generateRetriggerReturn(effect, sameTypeCount);
     case "destroy_self":
       return generateDestroySelfReturn(effect);
     case "edit_hand":
-      return generateEditHandReturn(effect, variableNameMap, sameTypeCount);
+      return generateEditHandReturn(effect, sameTypeCount);
     case "edit_discard":
-      return generateEditDiscardReturn(effect, variableNameMap, sameTypeCount);
+      return generateEditDiscardReturn(effect, sameTypeCount);
     case "edit_hand_size":
-      return generateEditHandSizeReturn(effect, variableNameMap, sameTypeCount);
+      return generateEditHandSizeReturn(effect, sameTypeCount);
     case "level_up_hand":
-      return generateLevelUpHandReturn(
-        triggerType,
-        effect,
-        variableNameMap,
-        sameTypeCount
-      );
+      return generateLevelUpHandReturn(triggerType, effect, sameTypeCount);
     case "add_card_to_deck":
       return generateAddCardToDeckReturn(effect, triggerType);
     case "copy_triggered_card":
@@ -478,32 +440,23 @@ const generateSingleEffect = (
     case "destroy_joker":
       return generateDestroyJokerReturn(effect, triggerType);
     case "apply_x_chips":
-      return generateApplyXChipsReturn(effect, variableNameMap, sameTypeCount);
+      return generateApplyXChipsReturn(effect, sameTypeCount);
     case "create_tag":
       return generateCreateTagReturn(effect, triggerType);
     case "apply_exp_mult":
-      return generateApplyExpMultReturn(effect, variableNameMap, sameTypeCount);
+      return generateApplyExpMultReturn(effect, sameTypeCount);
     case "apply_exp_chips":
-      return generateApplyExpChipsReturn(
-        effect,
-        variableNameMap,
-        sameTypeCount
-      );
+      return generateApplyExpChipsReturn(effect, sameTypeCount);
     case "show_message":
       return generateShowMessageReturn(effect);
     case "set_dollars":
-      return generateSetDollarsReturn(effect, variableNameMap, sameTypeCount);
+      return generateSetDollarsReturn(effect, sameTypeCount);
     case "disable_boss_blind":
       return generateDisableBossBlindReturn(effect, triggerType);
     case "prevent_game_over":
       return generateSavedReturn(effect);
     case "add_sell_value":
-      return generateAddSellValueReturn(
-        effect,
-        triggerType,
-        variableNameMap,
-        sameTypeCount
-      );
+      return generateAddSellValueReturn(effect, triggerType, sameTypeCount);
     case "balance":
       return generateBalanceReturn(effect);
     case "change_suit_variable":
@@ -513,14 +466,9 @@ const generateSingleEffect = (
     case "change_pokerhand_variable":
       return generateChangePokerHandVariableReturn(effect);
     case "permanent_bonus":
-      return generatePermaBonusReturn(effect, variableNameMap, sameTypeCount);
+      return generatePermaBonusReturn(effect, sameTypeCount);
     case "set_ante":
-      return generateSetAnteReturn(
-        effect,
-        triggerType,
-        variableNameMap,
-        sameTypeCount
-      );
+      return generateSetAnteReturn(effect, triggerType, sameTypeCount);
     case "add_card_to_hand":
       return generateAddCardToHandReturn(effect, triggerType);
     case "copy_triggered_card_to_hand":
@@ -528,17 +476,9 @@ const generateSingleEffect = (
     case "copy_played_card_to_hand":
       return generateCopyCardToHandReturn(effect, triggerType);
     case "edit_consumable_slots":
-      return generateEditConsumableSlotsReturn(
-        effect,
-        variableNameMap,
-        sameTypeCount
-      );
+      return generateEditConsumableSlotsReturn(effect, sameTypeCount);
     case "edit_joker_slots":
-      return generateEditJokerSlotsReturn(
-        effect,
-        variableNameMap,
-        sameTypeCount
-      );
+      return generateEditJokerSlotsReturn(effect, sameTypeCount);
 
     default:
       return {
@@ -547,49 +487,6 @@ const generateSingleEffect = (
       };
   }
 };
-
-function getEffectBaseVariableNames(effectType: string): string[] {
-  switch (effectType) {
-    case "add_chips":
-      return ["chips"];
-    case "add_mult":
-      return ["mult"];
-    case "apply_x_mult":
-      return ["xmult"];
-    case "add_dollars":
-      return ["dollars"];
-    case "retrigger_cards":
-      return ["repetitions"];
-    case "edit_hand":
-      return ["hands"];
-    case "edit_discard":
-      return ["discards"];
-    case "edit_hand_size":
-      return ["hand_size"];
-    case "level_up_hand":
-      return ["levels"];
-    case "apply_x_chips":
-      return ["xchips"];
-    case "apply_exp_mult":
-      return ["emult"];
-    case "apply_exp_chips":
-      return ["echips"];
-    case "set_dollars":
-      return ["set_dollars"];
-    case "add_sell_value":
-      return ["sell_value"];
-    case "permanent_bonus":
-      return ["perma_bonus"];
-    case "set_ante":
-      return ["ante_value"];
-    case "edit_consumable_slots":
-      return ["consumable_slots"];
-    case "edit_joker_slots":
-      return ["joker_slots"];
-    default:
-      return [];
-  }
-}
 
 const buildReturnStatement = (effects: EffectReturn[]): string => {
   if (effects.length === 0) return "";
