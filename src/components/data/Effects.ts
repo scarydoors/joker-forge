@@ -258,7 +258,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
     id: "edit_hand",
     label: "Edit Hands",
     description: "Modify the number of hands available",
-    applicableTriggers: [...GENERIC_TRIGGERS],
+    applicableTriggers: [...GENERIC_TRIGGERS, "passive"],
     params: [
       {
         id: "operation",
@@ -285,7 +285,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
     id: "edit_discard",
     label: "Edit Discards",
     description: "Modify the number of discards available",
-    applicableTriggers: [...GENERIC_TRIGGERS],
+    applicableTriggers: [...GENERIC_TRIGGERS, "passive"],
     params: [
       {
         id: "operation",
@@ -312,7 +312,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
     id: "edit_hand_size",
     label: "Edit Hand Size",
     description: "Modify the hand size (number of cards you can hold)",
-    applicableTriggers: [...GENERIC_TRIGGERS],
+    applicableTriggers: [...GENERIC_TRIGGERS, "passive"],
     params: [
       {
         id: "operation",
