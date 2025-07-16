@@ -27,7 +27,6 @@ import { JokerData } from "../JokerCard";
 import RuleCard from "./RuleCard";
 import FloatingDock from "./FloatingDock";
 import BlockPalette from "./BlockPalette";
-import JokerInfo from "./JokerInfo";
 import Variables from "./Variables";
 import Inspector from "./Inspector";
 import Button from "../generic/Button";
@@ -35,19 +34,26 @@ import {
   CheckCircleIcon,
   ArrowsPointingInIcon,
 } from "@heroicons/react/24/outline";
-import { getConditionTypeById } from "../data/Conditions";
-import { getEffectTypeById } from "../data/Effects";
+import { getConditionTypeById } from "../data/Jokers/Conditions";
+import { getEffectTypeById } from "../data/Jokers/Effects";
 import GameVariables from "./GameVariables";
-import { GameVariable } from "../data/GameVars";
+import { GameVariable } from "../data/Jokers/GameVars";
 import { motion } from "framer-motion";
+import { getConsumableConditionTypeById } from "../data/Consumables/Conditions";
+import { getConsumableEffectTypeById } from "../data/Consumables/Effects";
+import { ConsumableData } from "../ConsumableCard";
+
+type ItemData = JokerData | ConsumableData;
+type ItemType = "joker" | "consumable";
 
 interface RuleBuilderProps {
   isOpen: boolean;
   onClose: () => void;
   onSave: (rules: Rule[]) => void;
   existingRules: Rule[];
-  joker: JokerData;
-  onUpdateJoker: (updates: Partial<JokerData>) => void;
+  item: ItemData;
+  onUpdateItem: (updates: Partial<ItemData>) => void;
+  itemType: ItemType;
 }
 
 type SelectedItem = {
@@ -70,9 +76,17 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
   onClose,
   onSave,
   existingRules = [],
-  joker,
-  onUpdateJoker,
+  item,
+  onUpdateItem,
+  itemType,
 }) => {
+  const getConditionType =
+    itemType === "joker"
+      ? getConditionTypeById
+      : getConsumableConditionTypeById;
+  const getEffectType =
+    itemType === "joker" ? getEffectTypeById : getConsumableEffectTypeById;
+
   const [rules, setRules] = useState<Rule[]>([]);
   const [selectedItem, setSelectedItem] = useState<SelectedItem>(null);
   const [panState, setPanState] = useState({ x: 0, y: 0, scale: 1 });
@@ -618,7 +632,7 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
   const addCondition = useCallback(
     (conditionType: string) => {
       if (!selectedItem) return;
-      const conditionTypeData = getConditionTypeById(conditionType);
+      const conditionTypeData = getConditionType(conditionType);
       const defaultParams: Record<string, unknown> = {};
       if (conditionTypeData) {
         conditionTypeData.params.forEach((param) => {
@@ -691,7 +705,7 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
         groupId: targetGroupId,
       });
     },
-    [selectedItem]
+    [selectedItem, getConditionType]
   );
 
   const addConditionGroup = (ruleId: string) => {
@@ -879,7 +893,7 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
   const addEffect = (effectType: string) => {
     if (!selectedItem) return;
 
-    const effectTypeData = getEffectTypeById(effectType);
+    const effectTypeData = getEffectType(effectType);
     const defaultParams: Record<string, unknown> = {};
     if (effectTypeData) {
       effectTypeData.params.forEach((param) => {
@@ -1265,7 +1279,7 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
       >
         <div className="flex px-4 py-2 border-b-2 border-black-light z-50">
           <h2 className="text-xs text-white-light font-extralight tracking-widest mx-auto">
-            Rule Builder for {joker.name}
+            Rule Builder - {itemType} Mode
           </h2>
         </div>
         <div className="flex-grow relative overflow-hidden">
@@ -1433,21 +1447,28 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
                             onToggleGroupOperator={toggleGroupOperator}
                             onUpdatePosition={updateRulePosition}
                             isRuleSelected={selectedItem?.ruleId === rule.id}
-                            joker={joker}
-                            generateConditionTitle={(condition) =>
-                              generateAutoTitle(
+                            item={item}
+                            itemType={itemType}
+                            generateConditionTitle={(condition) => {
+                              const conditionType = getConditionType(
+                                condition.type
+                              );
+                              if (!conditionType) return condition.type; // Fallback if type not found
+                              return generateAutoTitle(
                                 condition,
-                                getConditionTypeById(condition.type)!,
+                                conditionType,
                                 true
-                              )
-                            }
-                            generateEffectTitle={(effect) =>
-                              generateAutoTitle(
+                              );
+                            }}
+                            generateEffectTitle={(effect) => {
+                              const effectType = getEffectType(effect.type);
+                              if (!effectType) return effect.type; // Fallback if type not found
+                              return generateAutoTitle(
                                 effect,
-                                getEffectTypeById(effect.type)!,
+                                effectType,
                                 false
-                              )
-                            }
+                              );
+                            }}
                             getParameterCount={getParameterCount}
                             onUpdateConditionOperator={updateConditionOperator}
                           />
@@ -1470,24 +1491,16 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
                 onPositionChange={(position) =>
                   updatePanelPosition("blockPalette", position)
                 }
-              />
-            )}
-            {panels.jokerInfo.isVisible && (
-              <JokerInfo
-                position={panels.jokerInfo.position}
-                joker={joker}
-                rulesCount={rules.length}
-                onClose={() => togglePanel("jokerInfo")}
-                onPositionChange={(position) =>
-                  updatePanelPosition("jokerInfo", position)
-                }
+                itemType={itemType}
               />
             )}
             {panels.variables.isVisible && (
               <Variables
                 position={panels.variables.position}
-                joker={joker}
-                onUpdateJoker={onUpdateJoker}
+                joker={item as JokerData}
+                onUpdateJoker={
+                  onUpdateItem as (updates: Partial<JokerData>) => void
+                }
                 onClose={() => togglePanel("variables")}
                 onPositionChange={(position) =>
                   updatePanelPosition("variables", position)
@@ -1497,7 +1510,7 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
             {panels.inspector.isVisible && (
               <Inspector
                 position={panels.inspector.position}
-                joker={joker}
+                joker={item as JokerData}
                 selectedRule={getSelectedRule()}
                 selectedCondition={getSelectedCondition()}
                 selectedEffect={getSelectedEffect()}
@@ -1505,7 +1518,9 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
                 onUpdateCondition={updateCondition}
                 onUpdateEffect={updateEffect}
                 onUpdateRandomGroup={updateRandomGroup}
-                onUpdateJoker={onUpdateJoker}
+                onUpdateJoker={
+                  onUpdateItem as (updates: Partial<JokerData>) => void
+                }
                 onClose={() => togglePanel("inspector")}
                 onPositionChange={(position) =>
                   updatePanelPosition("inspector", position)
@@ -1516,6 +1531,7 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
                 selectedGameVariable={selectedGameVariable}
                 onGameVariableApplied={handleGameVariableApplied}
                 selectedItem={selectedItem}
+                itemType={itemType}
               />
             )}
 

@@ -15,10 +15,16 @@ import {
   addRankVariablesToOptions,
   getAllVariables,
   addPokerHandVariablesToOptions,
-} from "../codeGeneration/variableUtils";
-import { getTriggerById } from "../data/Triggers";
-import { getConditionTypeById } from "../data/Conditions";
-import { getEffectTypeById } from "../data/Effects";
+} from "../codeGeneration/Jokers/variableUtils";
+
+import { getTriggerById } from "../data/Jokers/Triggers";
+import { getConditionTypeById } from "../data/Jokers/Conditions";
+import { getEffectTypeById } from "../data/Jokers/Effects";
+
+import { getConsumableTriggerById } from "../data/Consumables/Triggers";
+import { getConsumableConditionTypeById } from "../data/Consumables/Conditions";
+import { getConsumableEffectTypeById } from "../data/Consumables/Effects";
+
 import InputField from "../generic/InputField";
 import InputDropdown from "../generic/InputDropdown";
 import Button from "../generic/Button";
@@ -37,7 +43,7 @@ import {
   validateVariableName,
   validateCustomMessage,
 } from "../generic/validationUtils";
-import { GameVariable, getGameVariableById } from "../data/GameVars";
+import { GameVariable, getGameVariableById } from "../data/Jokers/GameVars";
 import { CubeIcon } from "@heroicons/react/24/outline";
 import { SelectedItem } from "./types";
 
@@ -72,6 +78,7 @@ interface InspectorProps {
   selectedGameVariable: GameVariable | null;
   onGameVariableApplied: () => void;
   selectedItem: SelectedItem;
+  itemType: "joker" | "consumable";
 }
 
 interface ParameterFieldProps {
@@ -814,6 +821,7 @@ const Inspector: React.FC<InspectorProps> = ({
   selectedGameVariable,
   onGameVariableApplied,
   selectedItem,
+  itemType,
 }) => {
   const [customMessageValidationError, setCustomMessageValidationError] =
     useState<string>("");
@@ -833,6 +841,15 @@ const Inspector: React.FC<InspectorProps> = ({
         left: position.x,
         top: position.y,
       };
+
+  const getTrigger =
+    itemType === "joker" ? getTriggerById : getConsumableTriggerById;
+  const getConditionType =
+    itemType === "joker"
+      ? getConditionTypeById
+      : getConsumableConditionTypeById;
+  const getEffectType =
+    itemType === "joker" ? getEffectTypeById : getConsumableEffectTypeById;
 
   const availableVariables = getAllVariables(joker).map(
     (variable: { name: string }) => ({
@@ -942,7 +959,7 @@ const Inspector: React.FC<InspectorProps> = ({
 
   const renderTriggerInfo = () => {
     if (!selectedRule) return null;
-    const trigger = getTriggerById(selectedRule.trigger);
+    const trigger = getTrigger(selectedRule.trigger);
     if (!trigger) return null;
 
     return (
@@ -957,7 +974,7 @@ const Inspector: React.FC<InspectorProps> = ({
                 {trigger.label}
               </h4>
               <span className="text-white-darker text-xs uppercase tracking-wider">
-                Trigger Event
+                Trigger Event ({itemType})
               </span>
             </div>
           </div>
@@ -1005,7 +1022,7 @@ const Inspector: React.FC<InspectorProps> = ({
 
   const renderConditionEditor = () => {
     if (!selectedCondition || !selectedRule) return null;
-    const conditionType = getConditionTypeById(selectedCondition.type);
+    const conditionType = getConditionType(selectedCondition.type);
     if (!conditionType) return null;
 
     const paramsToRender = conditionType.params.filter((param) => {
@@ -1045,7 +1062,7 @@ const Inspector: React.FC<InspectorProps> = ({
                 {conditionType.label}
               </h4>
               <span className="text-white-darker text-xs uppercase tracking-wider">
-                Condition Logic
+                Condition Logic ({itemType})
               </span>
             </div>
           </div>
@@ -1177,7 +1194,7 @@ const Inspector: React.FC<InspectorProps> = ({
 
   const renderEffectEditor = () => {
     if (!selectedEffect || !selectedRule) return null;
-    const effectType = getEffectTypeById(selectedEffect.type);
+    const effectType = getEffectType(selectedEffect.type);
     if (!effectType) return null;
 
     const paramsToRender = effectType.params.filter((param) => {
@@ -1218,7 +1235,7 @@ const Inspector: React.FC<InspectorProps> = ({
                 {effectType.label}
               </h4>
               <span className="text-white-darker text-xs uppercase tracking-wider">
-                Effect Action
+                Effect Action ({itemType})
               </span>
             </div>
           </div>
@@ -1320,7 +1337,7 @@ const Inspector: React.FC<InspectorProps> = ({
           <Bars3Icon className="h-4 w-4 text-white-darker" />
           <ChartPieIcon className="h-5 w-5 text-white-light" />
           <h3 className="text-white-light text-sm font-medium tracking-wider">
-            Inspector
+            Inspector ({itemType})
           </h3>
         </div>
         <button

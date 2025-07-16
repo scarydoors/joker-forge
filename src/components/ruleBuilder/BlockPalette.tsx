@@ -7,16 +7,6 @@ import type {
   ConditionTypeDefinition,
   EffectTypeDefinition,
 } from "./types";
-import {
-  TRIGGERS,
-  TRIGGER_CATEGORIES,
-  type CategoryDefinition,
-} from "../data/Triggers";
-import {
-  getConditionsForTrigger,
-  CONDITION_CATEGORIES,
-} from "../data/Conditions";
-import { getEffectsForTrigger, EFFECT_CATEGORIES } from "../data/Effects";
 import BlockComponent from "./BlockComponent";
 import {
   SwatchIcon,
@@ -33,6 +23,33 @@ import {
   BeakerIcon,
 } from "@heroicons/react/16/solid";
 
+import {
+  TRIGGERS,
+  TRIGGER_CATEGORIES,
+  type CategoryDefinition,
+} from "../data/Jokers/Triggers";
+import {
+  getConditionsForTrigger,
+  CONDITION_CATEGORIES,
+} from "../data/Jokers/Conditions";
+import {
+  getEffectsForTrigger,
+  EFFECT_CATEGORIES,
+} from "../data/Jokers/Effects";
+
+import {
+  CONSUMABLE_TRIGGERS,
+  CONSUMABLE_TRIGGER_CATEGORIES,
+} from "../data/Consumables/Triggers";
+import {
+  getConsumableConditionsForTrigger,
+  CONSUMABLE_CONDITION_CATEGORIES,
+} from "../data/Consumables/Conditions";
+import {
+  getConsumableEffectsForTrigger,
+  CONSUMABLE_EFFECT_CATEGORIES,
+} from "../data/Consumables/Effects";
+
 interface BlockPaletteProps {
   position: { x: number; y: number };
   selectedRule: Rule | null;
@@ -41,6 +58,7 @@ interface BlockPaletteProps {
   onAddEffect: (effectType: string) => void;
   onClose: () => void;
   onPositionChange: (position: { x: number; y: number }) => void;
+  itemType: "joker" | "consumable";
 }
 
 type FilterType = "triggers" | "conditions" | "effects";
@@ -52,6 +70,7 @@ const BlockPalette: React.FC<BlockPaletteProps> = ({
   onAddCondition,
   onAddEffect,
   onClose,
+  itemType,
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(
@@ -67,6 +86,25 @@ const BlockPalette: React.FC<BlockPaletteProps> = ({
   const { attributes, listeners, setNodeRef, transform } = useDraggable({
     id: "panel-blockPalette",
   });
+
+  const triggers = itemType === "joker" ? TRIGGERS : CONSUMABLE_TRIGGERS;
+  const triggerCategories =
+    itemType === "joker" ? TRIGGER_CATEGORIES : CONSUMABLE_TRIGGER_CATEGORIES;
+  const conditionCategories =
+    itemType === "joker"
+      ? CONDITION_CATEGORIES
+      : CONSUMABLE_CONDITION_CATEGORIES;
+  const effectCategories =
+    itemType === "joker" ? EFFECT_CATEGORIES : CONSUMABLE_EFFECT_CATEGORIES;
+
+  const getConditionsForTriggerFn =
+    itemType === "joker"
+      ? getConditionsForTrigger
+      : getConsumableConditionsForTrigger;
+  const getEffectsForTriggerFn =
+    itemType === "joker"
+      ? getEffectsForTrigger
+      : getConsumableEffectsForTrigger;
 
   const style = transform
     ? {
@@ -96,17 +134,17 @@ const BlockPalette: React.FC<BlockPaletteProps> = ({
   }, [activeFilter]);
 
   const availableConditions = useMemo(() => {
-    return selectedRule ? getConditionsForTrigger(selectedRule.trigger) : [];
-  }, [selectedRule]);
+    return selectedRule ? getConditionsForTriggerFn(selectedRule.trigger) : [];
+  }, [selectedRule, getConditionsForTriggerFn]);
 
   const availableEffects = useMemo(() => {
-    return selectedRule ? getEffectsForTrigger(selectedRule.trigger) : [];
-  }, [selectedRule]);
+    return selectedRule ? getEffectsForTriggerFn(selectedRule.trigger) : [];
+  }, [selectedRule, getEffectsForTriggerFn]);
 
   const categorizedItems = useMemo(() => {
     const normalizedSearch = searchTerm.toLowerCase();
 
-    const filteredTriggers = TRIGGERS.filter(
+    const filteredTriggers = triggers.filter(
       (trigger) =>
         trigger.label.toLowerCase().includes(normalizedSearch) ||
         trigger.description.toLowerCase().includes(normalizedSearch)
@@ -117,7 +155,7 @@ const BlockPalette: React.FC<BlockPaletteProps> = ({
       { category: CategoryDefinition; items: TriggerDefinition[] }
     > = {};
 
-    TRIGGER_CATEGORIES.forEach((category) => {
+    triggerCategories.forEach((category) => {
       triggersByCategory[category.label] = {
         category,
         items: [],
@@ -159,7 +197,7 @@ const BlockPalette: React.FC<BlockPaletteProps> = ({
       { category: CategoryDefinition; items: ConditionTypeDefinition[] }
     > = {};
 
-    CONDITION_CATEGORIES.forEach((category) => {
+    conditionCategories.forEach((category) => {
       conditionsByCategory[category.label] = {
         category,
         items: [],
@@ -197,7 +235,7 @@ const BlockPalette: React.FC<BlockPaletteProps> = ({
       { category: CategoryDefinition; items: EffectTypeDefinition[] }
     > = {};
 
-    EFFECT_CATEGORIES.forEach((category) => {
+    effectCategories.forEach((category) => {
       effectsByCategory[category.label] = {
         category,
         items: [],
@@ -229,7 +267,15 @@ const BlockPalette: React.FC<BlockPaletteProps> = ({
       conditions: conditionsByCategory,
       effects: effectsByCategory,
     };
-  }, [searchTerm, availableConditions, availableEffects]);
+  }, [
+    searchTerm,
+    availableConditions,
+    availableEffects,
+    triggers,
+    triggerCategories,
+    conditionCategories,
+    effectCategories,
+  ]);
 
   const shouldShowSection = (sectionType: FilterType) => {
     if (!selectedRule && sectionType !== "triggers") {
@@ -385,7 +431,7 @@ const BlockPalette: React.FC<BlockPaletteProps> = ({
           <Bars3Icon className="h-4 w-4 text-white-darker" />
           <SwatchIcon className="h-5 w-5 text-white-light" />
           <h3 className="text-white-light text-sm font-medium tracking-wider">
-            Block Palette
+            Block Palette ({itemType})
           </h3>
         </div>
         <button

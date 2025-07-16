@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from "react";
 import { useDraggable } from "@dnd-kit/core";
 import { JokerData, UserVariable } from "../JokerCard";
-import { getVariableUsageDetails } from "../codeGeneration/variableUtils";
+import { getVariableUsageDetails } from "../codeGeneration/Jokers/variableUtils";
 import {
   SUITS,
   RANKS,

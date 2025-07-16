@@ -1,7 +1,6 @@
 import React from "react";
 import {
   SwatchIcon,
-  IdentificationIcon,
   CommandLineIcon,
   ChartPieIcon,
   CubeIcon,
@@ -29,12 +28,6 @@ const FloatingDock: React.FC<FloatingDockProps> = ({
       icon: SwatchIcon,
       label: "Block Palette",
       shortcut: "B",
-    },
-    {
-      id: "jokerInfo",
-      icon: IdentificationIcon,
-      label: "Joker Info",
-      shortcut: "I",
     },
     {
       id: "variables",

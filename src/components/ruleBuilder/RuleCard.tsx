@@ -13,9 +13,14 @@ import type {
   Effect,
   RandomGroup,
 } from "./types";
-import { getTriggerById } from "../data/Triggers";
-import { getConditionTypeById } from "../data/Conditions";
-import { getEffectTypeById } from "../data/Effects";
+
+import { getTriggerById } from "../data/Jokers/Triggers";
+import { getConditionTypeById } from "../data/Jokers/Conditions";
+import { getEffectTypeById } from "../data/Jokers/Effects";
+import { getConsumableTriggerById } from "../data/Consumables/Triggers";
+import { getConsumableConditionTypeById } from "../data/Consumables/Conditions";
+import { getConsumableEffectTypeById } from "../data/Consumables/Effects";
+
 import BlockComponent from "./BlockComponent";
 import {
   ChevronDownIcon,
@@ -31,6 +36,7 @@ import {
   XMarkIcon,
 } from "@heroicons/react/16/solid";
 import { JokerData } from "../JokerCard";
+import { ConsumableData } from "../ConsumableCard";
 
 interface RuleCardProps {
   rule: Rule;
@@ -62,7 +68,8 @@ interface RuleCardProps {
     position: { x: number; y: number }
   ) => void;
   isRuleSelected: boolean;
-  joker: JokerData;
+  item: JokerData | ConsumableData;
+  itemType: "joker" | "consumable";
   generateConditionTitle: (condition: Condition) => string;
   generateEffectTitle: (effect: Effect) => string;
   getParameterCount: (params: Record<string, unknown>) => number;
@@ -83,6 +90,7 @@ const SortableCondition: React.FC<{
   onDelete: () => void;
   parameterCount: number;
   dynamicTitle: string;
+  itemType: "joker" | "consumable";
 }> = ({
   condition,
   isSelected,
@@ -91,8 +99,14 @@ const SortableCondition: React.FC<{
   onDelete,
   parameterCount,
   dynamicTitle,
+  itemType,
 }) => {
-  const conditionType = getConditionTypeById(condition.type);
+  const getConditionType =
+    itemType === "joker"
+      ? getConditionTypeById
+      : getConsumableConditionTypeById;
+  const conditionType = getConditionType(condition.type);
+
   const { attributes, listeners, setNodeRef, transform, transition } =
     useSortable({ id: condition.id });
 
@@ -140,6 +154,7 @@ const SortableEffect: React.FC<{
   parameterCount: number;
   dynamicTitle: string;
   randomGroupId?: string;
+  itemType: "joker" | "consumable";
 }> = ({
   effect,
   isSelected,
@@ -147,8 +162,12 @@ const SortableEffect: React.FC<{
   onDelete,
   parameterCount,
   dynamicTitle,
+  itemType,
 }) => {
-  const effectType = getEffectTypeById(effect.type);
+  const getEffectType =
+    itemType === "joker" ? getEffectTypeById : getConsumableEffectTypeById;
+  const effectType = getEffectType(effect.type);
+
   const { attributes, listeners, setNodeRef, transform, transition } =
     useSortable({ id: effect.id });
 
@@ -245,7 +264,17 @@ const RuleCard: React.FC<RuleCardProps> = ({
   generateEffectTitle,
   getParameterCount,
   onUpdateConditionOperator,
+  itemType,
 }) => {
+  const getTrigger =
+    itemType === "joker" ? getTriggerById : getConsumableTriggerById;
+  const getConditionType =
+    itemType === "joker"
+      ? getConditionTypeById
+      : getConsumableConditionTypeById;
+  const getEffectType =
+    itemType === "joker" ? getEffectTypeById : getConsumableEffectTypeById;
+
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [descriptionVisible, setDescriptionVisible] = useState(true);
   const [showReopenButton, setShowReopenButton] = useState(false);
@@ -320,7 +349,7 @@ const RuleCard: React.FC<RuleCardProps> = ({
     }
   }, [descriptionVisible]);
 
-  const trigger = getTriggerById(rule.trigger);
+  const trigger = getTrigger(rule.trigger);
   const allConditions = rule.conditionGroups.flatMap(
     (group) => group.conditions
   );
@@ -428,13 +457,13 @@ const RuleCard: React.FC<RuleCardProps> = ({
     const conditionsText =
       totalConditions > 0
         ? ` > ${allConditions
-            .map((c) => getConditionTypeById(c.type)?.label || "Unknown")
+            .map((c) => getConditionType(c.type)?.label || "Unknown")
             .join(" AND ")}`
         : "";
     const effectsText =
       totalEffects > 0
         ? ` > ${rule.effects
-            .map((e) => getEffectTypeById(e.type)?.label || "Unknown")
+            .map((e) => getEffectType(e.type)?.label || "Unknown")
             .join(", ")}${
             rule.randomGroups.length > 0
               ? ` + ${totalRandomGroups} Random Groups`
@@ -518,6 +547,7 @@ const RuleCard: React.FC<RuleCardProps> = ({
                         }
                         parameterCount={getParameterCount(condition.params)}
                         dynamicTitle={generateConditionTitle(condition)}
+                        itemType={itemType}
                       />
                     </div>
                     {conditionIndex < group.conditions.length - 1 && (
@@ -596,24 +626,18 @@ const RuleCard: React.FC<RuleCardProps> = ({
                   <SortableEffect
                     effect={effect}
                     ruleId={rule.id}
-                    isSelected={isItemSelected(
-                      "effect",
-                      effect.id,
-                      undefined,
-                      group.id
-                    )}
+                    isSelected={isItemSelected("effect", effect.id)}
                     onSelect={() =>
                       onSelectItem({
                         type: "effect",
                         ruleId: rule.id,
                         itemId: effect.id,
-                        randomGroupId: group.id,
                       })
                     }
                     onDelete={() => onDeleteEffect(rule.id, effect.id)}
                     parameterCount={getParameterCount(effect.params)}
                     dynamicTitle={generateEffectTitle(effect)}
-                    randomGroupId={group.id}
+                    itemType={itemType}
                   />
                 </div>
               ))}
@@ -936,6 +960,7 @@ const RuleCard: React.FC<RuleCardProps> = ({
                         onDelete={() => onDeleteEffect(rule.id, effect.id)}
                         parameterCount={getParameterCount(effect.params)}
                         dynamicTitle={generateEffectTitle(effect)}
+                        itemType={itemType}
                       />
                     </div>
                   ))}
