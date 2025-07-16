@@ -1007,32 +1007,6 @@ const EditConsumableInfo: React.FC<EditConsumableInfoProps> = ({
                                   />
                                 </div>
                               </div>
-                              <div>
-                                <p className="text-xs font-medium tracking-widest text-white-darker mb-2">
-                                  Legendary Properties
-                                </p>
-                                <div className="grid grid-cols-1 gap-y-2">
-                                  <Checkbox
-                                    id="hidden_edit"
-                                    label="Hidden Legendary"
-                                    checked={formData.hidden === true}
-                                    onChange={(checked) =>
-                                      handleCheckboxChange("hidden", checked)
-                                    }
-                                  />
-                                  <Checkbox
-                                    id="can_repeat_soul_edit"
-                                    label="Can Repeat as Soul"
-                                    checked={formData.can_repeat_soul === true}
-                                    onChange={(checked) =>
-                                      handleCheckboxChange(
-                                        "can_repeat_soul",
-                                        checked
-                                      )
-                                    }
-                                  />
-                                </div>
-                              </div>
                             </div>
                           </div>
                         </div>
