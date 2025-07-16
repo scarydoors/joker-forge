@@ -1,5 +1,4 @@
 import type { Effect } from "../../ruleBuilder/types";
-import type { ConsumableData } from "../../ConsumableCard";
 import { generateAddDollarsReturn } from "./effects/AddDollarsEffect";
 import { generateEnhanceCardsReturn } from "./effects/EnhanceCardsEffect";
 import { generateChangeSuitReturn } from "./effects/ChangeSuitEffect";
@@ -7,15 +6,8 @@ import { generateChangeRankReturn } from "./effects/ChangeRankEffect";
 import { generateAddSealReturn } from "./effects/AddSealEffect";
 import { generateAddEditionReturn } from "./effects/AddEditionEffect";
 import { generateLevelUpHandReturn } from "./effects/LevelUpHandEffect";
-
-export interface PassiveEffectResult {
-  addToDeck?: string;
-  removeFromDeck?: string;
-  configVariables?: string[];
-  locVars?: string[];
-  calculateFunction?: string;
-}
-
+import { generateDestroySelectedCardsReturn } from "./effects/DestroySelectedCardsEffect";
+import { generateDestroyRandomCardsReturn } from "./effects/DestroyRandomCardsEffect";
 export interface EffectReturn {
   statement: string;
   message?: string;
@@ -153,6 +145,12 @@ const generateSingleEffect = (effect: Effect): EffectReturn => {
     case "level_up_hand":
       return generateLevelUpHandReturn(effect);
 
+    case "destroy_selected_cards":
+      return generateDestroySelectedCardsReturn(effect);
+
+    case "destroy_random_cards":
+      return generateDestroyRandomCardsReturn(effect);
+
     default:
       return {
         statement: "",
@@ -173,38 +171,6 @@ const buildConsumableEffectCode = (effects: EffectReturn[]): string => {
   });
 
   return effectCode.trim();
-};
-
-export const processPassiveEffects = (
-  consumable: ConsumableData
-): PassiveEffectResult[] => {
-  const passiveEffects: PassiveEffectResult[] = [];
-
-  if (!consumable.rules) return passiveEffects;
-
-  consumable.rules
-    .filter((rule) => rule.trigger === "passive")
-    .forEach((rule) => {
-      rule.effects?.forEach((effect) => {
-        let passiveResult: PassiveEffectResult | null = null;
-
-        switch (effect.type) {
-          case "edit_hand_size":
-            passiveResult = {
-              configVariables: [`hand_size = ${effect.params?.value || 1}`],
-              addToDeck: `G.hand:change_size(card.ability.extra.hand_size)`,
-              removeFromDeck: `G.hand:change_size(-card.ability.extra.hand_size)`,
-            };
-            break;
-        }
-
-        if (passiveResult) {
-          passiveEffects.push(passiveResult);
-        }
-      });
-    });
-
-  return passiveEffects;
 };
 
 function extractPreReturnCode(statement: string): {

@@ -6,6 +6,7 @@ import {
   SparklesIcon,
   CakeIcon,
   UserGroupIcon,
+  CursorArrowRaysIcon,
 } from "@heroicons/react/24/outline";
 import { CategoryDefinition } from "../Jokers/Triggers";
 import {
@@ -18,6 +19,10 @@ import {
 } from "../BalatroUtils";
 
 export const CONSUMABLE_EFFECT_CATEGORIES: CategoryDefinition[] = [
+  {
+    label: "Selected Cards",
+    icon: CursorArrowRaysIcon,
+  },
   {
     label: "Card Modification",
     icon: PencilSquareIcon,
@@ -45,6 +50,7 @@ export const CONSUMABLE_EFFECT_CATEGORIES: CategoryDefinition[] = [
 ];
 
 export const CONSUMABLE_EFFECT_TYPES: EffectTypeDefinition[] = [
+  // ===== SELECTED CARDS EFFECTS =====
   {
     id: "enhance_cards",
     label: "Enhance Selected Cards",
@@ -62,11 +68,11 @@ export const CONSUMABLE_EFFECT_TYPES: EffectTypeDefinition[] = [
         default: "m_bonus",
       },
     ],
-    category: "Card Modification",
+    category: "Selected Cards",
   },
   {
     id: "change_suit",
-    label: "Change Card Suit",
+    label: "Change Selected Cards Suit",
     description: "Change the suit of selected cards",
     applicableTriggers: ["consumable_used"],
     params: [
@@ -78,11 +84,11 @@ export const CONSUMABLE_EFFECT_TYPES: EffectTypeDefinition[] = [
         default: "Hearts",
       },
     ],
-    category: "Card Modification",
+    category: "Selected Cards",
   },
   {
     id: "change_rank",
-    label: "Change Card Rank",
+    label: "Change Selected Cards Rank",
     description: "Change the rank of selected cards",
     applicableTriggers: ["consumable_used"],
     params: [
@@ -97,7 +103,7 @@ export const CONSUMABLE_EFFECT_TYPES: EffectTypeDefinition[] = [
         default: "Ace",
       },
     ],
-    category: "Card Modification",
+    category: "Selected Cards",
   },
   {
     id: "add_seal",
@@ -116,7 +122,7 @@ export const CONSUMABLE_EFFECT_TYPES: EffectTypeDefinition[] = [
         default: "Gold",
       },
     ],
-    category: "Card Modification",
+    category: "Selected Cards",
   },
   {
     id: "add_edition",
@@ -138,13 +144,39 @@ export const CONSUMABLE_EFFECT_TYPES: EffectTypeDefinition[] = [
         default: "e_foil",
       },
     ],
+    category: "Selected Cards",
+  },
+  {
+    id: "destroy_selected_cards",
+    label: "Destroy Selected Cards",
+    description: "Destroy all currently selected cards",
+    applicableTriggers: ["consumable_used"],
+    params: [],
+    category: "Selected Cards",
+  },
+
+  // ===== OTHER EFFECTS =====
+  {
+    id: "destroy_random_cards",
+    label: "Destroy Random Cards",
+    description: "Destroy a number of random cards from hand",
+    applicableTriggers: ["consumable_used"],
+    params: [
+      {
+        id: "count",
+        type: "number",
+        label: "Number of Cards",
+        default: 1,
+        min: 1,
+        max: 8,
+      },
+    ],
     category: "Card Modification",
   },
   {
     id: "level_up_hand",
     label: "Level Up Poker Hand",
-    description:
-      "Level up a specific poker hand or random hand (slightly buggy for now lol)",
+    description: "Level up a specific poker hand or random hand",
     applicableTriggers: ["consumable_used"],
     params: [
       {
@@ -166,6 +198,7 @@ export const CONSUMABLE_EFFECT_TYPES: EffectTypeDefinition[] = [
         label: "Number of Levels",
         default: 1,
         min: 1,
+        max: 10,
       },
     ],
     category: "Hand Effects",
@@ -200,4 +233,16 @@ export function getConsumableEffectTypeById(
   id: string
 ): EffectTypeDefinition | undefined {
   return CONSUMABLE_EFFECT_TYPES.find((effect) => effect.id === id);
+}
+
+export function getSelectedCardEffects(): EffectTypeDefinition[] {
+  return CONSUMABLE_EFFECT_TYPES.filter(
+    (effect) => effect.category === "Selected Cards"
+  );
+}
+
+export function getNonSelectedCardEffects(): EffectTypeDefinition[] {
+  return CONSUMABLE_EFFECT_TYPES.filter(
+    (effect) => effect.category !== "Selected Cards"
+  );
 }

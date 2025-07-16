@@ -33,6 +33,12 @@ export const exportModCode = async (
   consumableSets: ConsumableSetData[] = []
 ): Promise<boolean> => {
   try {
+    console.log("Generating mod code...");
+    console.log("Jokers:", jokers);
+    console.log("Consumables:", consumables);
+    console.log("Metadata:", metadata);
+    console.log("Rarities:", customRarities);
+    console.log("Consumable Sets:", consumableSets);
     const zip = new JSZip();
 
     const mainLuaCode = generateMainLuaCode(

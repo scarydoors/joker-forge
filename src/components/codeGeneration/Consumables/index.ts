@@ -142,8 +142,16 @@ const generateSingleConsumableCode = (
   const activeRules =
     consumable.rules?.filter((rule) => rule.trigger !== "passive") || [];
 
+  // Collect config variables from all effects
   const configItems: string[] = [];
-  const effectsConfig = configItems.join(",\n            ");
+  activeRules.forEach((rule) => {
+    const effectResult = generateEffectReturnStatement(rule.effects || []);
+    if (effectResult.configVariables) {
+      configItems.push(...effectResult.configVariables);
+    }
+  });
+
+  const effectsConfig = configItems.join(",\n        ");
 
   const consumablesPerRow = 10;
   const col = currentPosition % consumablesPerRow;
