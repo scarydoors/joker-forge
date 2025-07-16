@@ -12,6 +12,7 @@ import {
   CodeBracketIcon,
   LinkIcon,
   SwatchIcon,
+  CakeIcon,
 } from "@heroicons/react/24/solid";
 import { JokerData } from "./JokerCard";
 
@@ -81,7 +82,7 @@ const Sidebar: React.FC<SidebarProps> = ({
     { id: "metadata", label: "Mod Metadata", icon: DocumentTextIcon },
     { id: "jokers", label: "Jokers", icon: PuzzlePieceIcon },
     { id: "rarities", label: "Rarities", icon: SwatchIcon },
-    //{ id: "consumables", label: "Consumables", icon: CakeIcon },
+    { id: "consumables", label: "Consumables", icon: CakeIcon },
     //{ id: "decks", label: "Decks", icon: RectangleStackIcon },
     //{ id: "editions", label: "Editions", icon: SparklesIcon },
   ];
@@ -113,7 +114,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       label: exportLoading ? "Exporting..." : "Export Mod",
       icon: ArrowUpTrayIcon,
       onClick: handleExport,
-      disabled: exportLoading || jokers.length === 0,
+      disabled: exportLoading,
     },
   ];
 
@@ -464,7 +465,7 @@ const Sidebar: React.FC<SidebarProps> = ({
             className="text-center mt-4"
           >
             <span className="text-xs text-mint font-medium tracking-widest">
-              v0.1.7
+              v0.2.0
             </span>
           </motion.div>
         </div>
