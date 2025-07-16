@@ -11,7 +11,7 @@ import EditJokerInfo from "../EditJokerInfo";
 import RuleBuilder from "../ruleBuilder/RuleBuilder";
 import Button from "../generic/Button";
 import { JokerData } from "../JokerCard";
-import { exportSingleJoker } from "../codeGeneration/index";
+import { exportSingleJoker } from "../codeGeneration/Jokers/index";
 import type { Rule } from "../ruleBuilder/types";
 import { type CustomRarity } from "../data/BalatroUtils";
 
@@ -595,8 +595,9 @@ const JokersPage: React.FC<JokersPageProps> = ({
             }}
             onSave={handleSaveRules}
             existingRules={currentJokerForRules.rules || []}
-            joker={currentJokerForRules}
-            onUpdateJoker={handleUpdateJokerFromRuleBuilder}
+            item={currentJokerForRules}
+            onUpdateItem={handleUpdateJokerFromRuleBuilder}
+            itemType="joker"
           />
         )}
       </div>

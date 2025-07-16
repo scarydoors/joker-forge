@@ -1,8 +1,9 @@
 import JSZip from "jszip";
 import { JokerData } from "../JokerCard";
+import { ConsumableData } from "../ConsumableCard";
 
-export const processJokerImages = async (
-  jokers: JokerData[],
+export const processImages = async (
+  items: (JokerData | ConsumableData)[],
   scale: number = 1
 ): Promise<{
   atlasDataUrl: string;
@@ -16,15 +17,15 @@ export const processJokerImages = async (
       throw new Error("Failed to get canvas context");
     }
 
-    const jokersPerRow = 10;
+    const itemsPerRow = 10;
 
-    const totalPositions = jokers.reduce((total, joker) => {
-      return total + (joker.overlayImagePreview ? 2 : 1);
+    const totalPositions = items.reduce((total, item) => {
+      return total + (item.overlayImagePreview ? 2 : 1);
     }, 0);
 
-    const rows = Math.ceil(totalPositions / jokersPerRow);
+    const rows = Math.ceil(totalPositions / itemsPerRow);
 
-    canvas.width = jokersPerRow * 71 * scale;
+    canvas.width = itemsPerRow * 71 * scale;
     canvas.height = rows * 95 * scale;
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -32,17 +33,16 @@ export const processJokerImages = async (
     const soulPositions: Record<number, { x: number; y: number }> = {};
     let currentPosition = 0;
 
-    const imagePromises = jokers.map((joker, index) => {
+    const imagePromises = items.map((item, index) => {
       const promises: Promise<void>[] = [];
 
       promises.push(
         new Promise<void>((resolve) => {
-          const imageSrc =
-            joker.imagePreview || "/images/placeholder-joker.png";
+          const imageSrc = item.imagePreview || "/images/placeholder-joker.png";
           const img = new Image();
           img.onload = () => {
-            const col = currentPosition % jokersPerRow;
-            const row = Math.floor(currentPosition / jokersPerRow);
+            const col = currentPosition % itemsPerRow;
+            const row = Math.floor(currentPosition / itemsPerRow);
             const x = col * 71 * scale;
             const y = row * 95 * scale;
 
@@ -78,13 +78,13 @@ export const processJokerImages = async (
         })
       );
 
-      if (joker.overlayImagePreview) {
+      if (item.overlayImagePreview) {
         promises.push(
           new Promise<void>((resolve) => {
             const img = new Image();
             img.onload = () => {
-              const col = currentPosition % jokersPerRow;
-              const row = Math.floor(currentPosition / jokersPerRow);
+              const col = currentPosition % itemsPerRow;
+              const row = Math.floor(currentPosition / itemsPerRow);
               const x = col * 71 * scale;
               const y = row * 95 * scale;
 
@@ -113,7 +113,7 @@ export const processJokerImages = async (
             };
 
             img.src =
-              joker.overlayImagePreview || "/images/placeholder-joker.png";
+              item.overlayImagePreview || "/images/placeholder-joker.png";
           })
         );
       }
@@ -128,7 +128,7 @@ export const processJokerImages = async (
       soulPositions,
     };
   } catch (error) {
-    console.error("Error processing joker images:", error);
+    console.error("Error processing images:", error);
     throw error;
   }
 };
@@ -149,22 +149,48 @@ export const dataURLToBlob = (dataUrl: string): Blob => {
 
 export const addAtlasToZip = async (
   zip: JSZip,
-  jokers: JokerData[]
-): Promise<Record<number, { x: number; y: number }>> => {
+  jokers: JokerData[],
+  consumables: ConsumableData[]
+): Promise<Record<string, Record<number, { x: number; y: number }>>> => {
   try {
     const assetsFolder = zip.folder("assets");
     const assets1xFolder = assetsFolder!.folder("1x");
     const assets2xFolder = assetsFolder!.folder("2x");
 
-    const atlas1xResult = await processJokerImages(jokers, 1);
-    const atlas1xBlob = dataURLToBlob(atlas1xResult.atlasDataUrl);
-    assets1xFolder!.file("CustomJokers.png", atlas1xBlob);
+    const soulPositions: Record<
+      string,
+      Record<number, { x: number; y: number }>
+    > = {};
 
-    const atlas2xResult = await processJokerImages(jokers, 2);
-    const atlas2xBlob = dataURLToBlob(atlas2xResult.atlasDataUrl);
-    assets2xFolder!.file("CustomJokers.png", atlas2xBlob);
+    if (jokers.length > 0) {
+      const jokerAtlas1xResult = await processImages(jokers, 1);
+      const jokerAtlas1xBlob = dataURLToBlob(jokerAtlas1xResult.atlasDataUrl);
+      assets1xFolder!.file("CustomJokers.png", jokerAtlas1xBlob);
 
-    return atlas1xResult.soulPositions;
+      const jokerAtlas2xResult = await processImages(jokers, 2);
+      const jokerAtlas2xBlob = dataURLToBlob(jokerAtlas2xResult.atlasDataUrl);
+      assets2xFolder!.file("CustomJokers.png", jokerAtlas2xBlob);
+
+      soulPositions["jokers"] = jokerAtlas1xResult.soulPositions;
+    }
+
+    if (consumables.length > 0) {
+      const consumableAtlas1xResult = await processImages(consumables, 1);
+      const consumableAtlas1xBlob = dataURLToBlob(
+        consumableAtlas1xResult.atlasDataUrl
+      );
+      assets1xFolder!.file("CustomConsumables.png", consumableAtlas1xBlob);
+
+      const consumableAtlas2xResult = await processImages(consumables, 2);
+      const consumableAtlas2xBlob = dataURLToBlob(
+        consumableAtlas2xResult.atlasDataUrl
+      );
+      assets2xFolder!.file("CustomConsumables.png", consumableAtlas2xBlob);
+
+      soulPositions["consumables"] = consumableAtlas1xResult.soulPositions;
+    }
+
+    return soulPositions;
   } catch (error) {
     console.error("Error adding atlas to zip:", error);
     throw error;

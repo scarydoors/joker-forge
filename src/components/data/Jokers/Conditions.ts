@@ -1,0 +1,1139 @@
+import { ConditionTypeDefinition } from "../../ruleBuilder/types";
+import {
+  RectangleStackIcon,
+  UserIcon,
+  ArchiveBoxIcon,
+  InformationCircleIcon,
+  SparklesIcon,
+} from "@heroicons/react/24/outline";
+import { CategoryDefinition } from "./Triggers";
+import {
+  RANKS,
+  RANK_GROUPS,
+  SUITS,
+  SUIT_GROUPS,
+  POKER_HANDS,
+  ENHANCEMENTS,
+  EDITIONS,
+  SEALS,
+  COMPARISON_OPERATORS,
+  CARD_SCOPES,
+  TAROT_CARDS,
+  PLANET_CARDS,
+  SPECTRAL_CARDS,
+} from "../BalatroUtils";
+
+export const GENERIC_TRIGGERS: string[] = [
+  "blind_selected",
+  "card_scored",
+  "hand_played",
+  "blind_skipped",
+  "boss_defeated",
+  "booster_opened",
+  "booster_skipped",
+  "consumable_used",
+  "hand_drawn",
+  "first_hand_drawn",
+  "shop_exited",
+  "card_discarded",
+  "hand_discarded",
+  "round_end",
+  "shop_reroll",
+  "card_held_in_hand",
+  "card_held_in_hand_end_of_round",
+  "after_hand_played",
+  "card_sold",
+  "card_bought",
+  "selling_self",
+  "card_destroyed",
+  "playing_card_added",
+  "game_over",
+];
+
+export const CONDITION_CATEGORIES: CategoryDefinition[] = [
+  {
+    label: "Hand & Cards",
+    icon: RectangleStackIcon,
+  },
+  {
+    label: "Player Resources",
+    icon: UserIcon,
+  },
+  {
+    label: "Deck & Jokers",
+    icon: ArchiveBoxIcon,
+  },
+  {
+    label: "Game State",
+    icon: InformationCircleIcon,
+  },
+  {
+    label: "Special",
+    icon: SparklesIcon,
+  },
+];
+
+export const CONDITION_TYPES: ConditionTypeDefinition[] = [
+  {
+    id: "hand_type",
+    label: "Hand Type",
+    description: "Check the type of poker hand",
+    applicableTriggers: ["hand_played", "card_scored", "after_hand_played"],
+    params: [
+      {
+        id: "card_scope",
+        type: "select",
+        label: "Card Scope",
+        options: [...CARD_SCOPES],
+        default: "scoring",
+      },
+      {
+        id: "operator",
+        type: "select",
+        label: "Operator",
+        options: [
+          { value: "contains", label: "contains" },
+          { value: "equals", label: "equals" },
+          { value: "not_equals", label: "not equals" },
+        ],
+      },
+      {
+        id: "value",
+        type: "select",
+        label: "Hand Type",
+        options: [
+          ...POKER_HANDS,
+          { value: "most_played_hand", label: "Most Played Hand" },
+          { value: "least_played_hand", label: "Least Played Hand" },
+        ],
+      },
+    ],
+    category: "Hand & Cards",
+  },
+  {
+    id: "card_count",
+    label: "Card Count",
+    description: "Check the number of cards in the played hand",
+    applicableTriggers: ["hand_played", "card_scored", "after_hand_played"],
+    params: [
+      {
+        id: "card_scope",
+        type: "select",
+        label: "Card Scope",
+        options: [...CARD_SCOPES],
+        default: "scoring",
+      },
+      {
+        id: "operator",
+        type: "select",
+        label: "Operator",
+        options: [...COMPARISON_OPERATORS],
+      },
+      {
+        id: "value",
+        type: "number",
+        label: "Number of Cards",
+        default: 5,
+      },
+    ],
+    category: "Hand & Cards",
+  },
+  {
+    id: "suit_count",
+    label: "Suit Count",
+    description: "Check how many cards of a specific suit are in the hand",
+    applicableTriggers: ["hand_played", "card_scored", "after_hand_played"],
+    params: [
+      {
+        id: "card_scope",
+        type: "select",
+        label: "Card Scope",
+        options: [...CARD_SCOPES],
+        default: "scoring",
+      },
+      {
+        id: "suit_type",
+        type: "select",
+        label: "Suit Type",
+        options: [
+          { value: "specific", label: "Specific Suit" },
+          { value: "group", label: "Suit Group" },
+        ],
+      },
+      {
+        id: "specific_suit",
+        type: "select",
+        label: "Suit",
+        options: [...SUITS],
+        showWhen: {
+          parameter: "suit_type",
+          values: ["specific"],
+        },
+      },
+      {
+        id: "suit_group",
+        type: "select",
+        label: "Suit Group",
+        options: [...SUIT_GROUPS],
+        showWhen: {
+          parameter: "suit_type",
+          values: ["group"],
+        },
+      },
+      {
+        id: "quantifier",
+        type: "select",
+        label: "Condition",
+        options: [
+          { value: "all", label: "All cards must be this suit" },
+          { value: "none", label: "No cards can be this suit" },
+          { value: "exactly", label: "Exactly N cards of this suit" },
+          { value: "at_least", label: "At least N cards of this suit" },
+          { value: "at_most", label: "At most N cards of this suit" },
+        ],
+      },
+      {
+        id: "count",
+        type: "number",
+        label: "Count",
+        default: 1,
+        min: 1,
+        showWhen: {
+          parameter: "quantifier",
+          values: ["exactly", "at_least", "at_most"],
+        },
+      },
+    ],
+    category: "Hand & Cards",
+  },
+  {
+    id: "rank_count",
+    label: "Rank Count",
+    description: "Check how many cards of a specific rank are in the hand",
+    applicableTriggers: ["hand_played", "card_scored", "after_hand_played"],
+    params: [
+      {
+        id: "card_scope",
+        type: "select",
+        label: "Card Scope",
+        options: [...CARD_SCOPES],
+        default: "scoring",
+      },
+      {
+        id: "rank_type",
+        type: "select",
+        label: "Rank Type",
+        options: [
+          { value: "specific", label: "Specific Rank" },
+          { value: "group", label: "Rank Group" },
+        ],
+      },
+      {
+        id: "specific_rank",
+        type: "select",
+        label: "Rank",
+        options: [...RANKS],
+        showWhen: {
+          parameter: "rank_type",
+          values: ["specific"],
+        },
+      },
+      {
+        id: "rank_group",
+        type: "select",
+        label: "Rank Group",
+        options: [...RANK_GROUPS],
+        showWhen: {
+          parameter: "rank_type",
+          values: ["group"],
+        },
+      },
+      {
+        id: "quantifier",
+        type: "select",
+        label: "Condition",
+        options: [
+          { value: "all", label: "All cards must be this rank" },
+          { value: "none", label: "No cards can be this rank" },
+          { value: "exactly", label: "Exactly N cards of this rank" },
+          { value: "at_least", label: "At least N cards of this rank" },
+          { value: "at_most", label: "At most N cards of this rank" },
+        ],
+      },
+      {
+        id: "count",
+        type: "number",
+        label: "Count",
+        default: 1,
+        min: 1,
+        showWhen: {
+          parameter: "quantifier",
+          values: ["exactly", "at_least", "at_most"],
+        },
+      },
+    ],
+    category: "Hand & Cards",
+  },
+  {
+    id: "discarded_card_count",
+    label: "Discarded Card Count",
+    description: "Check the number of cards in the discarded hand",
+    applicableTriggers: ["card_discarded", "hand_discarded"],
+    params: [
+      {
+        id: "operator",
+        type: "select",
+        label: "Operator",
+        options: [...COMPARISON_OPERATORS],
+      },
+      {
+        id: "value",
+        type: "number",
+        label: "Number of Cards",
+        default: 5,
+      },
+    ],
+    category: "Hand & Cards",
+  },
+  {
+    id: "discarded_suit_count",
+    label: "Discarded Suit Count",
+    description:
+      "Check how many cards of a specific suit are in the discarded hand",
+    applicableTriggers: ["card_discarded", "hand_discarded"],
+    params: [
+      {
+        id: "suit_type",
+        type: "select",
+        label: "Suit Type",
+        options: [
+          { value: "specific", label: "Specific Suit" },
+          { value: "group", label: "Suit Group" },
+        ],
+      },
+      {
+        id: "specific_suit",
+        type: "select",
+        label: "Suit",
+        options: [...SUITS],
+        showWhen: {
+          parameter: "suit_type",
+          values: ["specific"],
+        },
+      },
+      {
+        id: "suit_group",
+        type: "select",
+        label: "Suit Group",
+        options: [...SUIT_GROUPS],
+        showWhen: {
+          parameter: "suit_type",
+          values: ["group"],
+        },
+      },
+      {
+        id: "quantifier",
+        type: "select",
+        label: "Condition",
+        options: [
+          { value: "all", label: "All cards must be this suit" },
+          { value: "none", label: "No cards can be this suit" },
+          { value: "exactly", label: "Exactly N cards of this suit" },
+          { value: "at_least", label: "At least N cards of this suit" },
+          { value: "at_most", label: "At most N cards of this suit" },
+        ],
+      },
+      {
+        id: "count",
+        type: "number",
+        label: "Count",
+        default: 1,
+        min: 1,
+        showWhen: {
+          parameter: "quantifier",
+          values: ["exactly", "at_least", "at_most"],
+        },
+      },
+    ],
+    category: "Hand & Cards",
+  },
+  {
+    id: "discarded_rank_count",
+    label: "Discarded Rank Count",
+    description:
+      "Check how many cards of a specific rank are in the discarded hand",
+    applicableTriggers: ["card_discarded", "hand_discarded"],
+    params: [
+      {
+        id: "rank_type",
+        type: "select",
+        label: "Rank Type",
+        options: [
+          { value: "specific", label: "Specific Rank" },
+          { value: "group", label: "Rank Group" },
+        ],
+      },
+      {
+        id: "specific_rank",
+        type: "select",
+        label: "Rank",
+        options: [...RANKS],
+        showWhen: {
+          parameter: "rank_type",
+          values: ["specific"],
+        },
+      },
+      {
+        id: "rank_group",
+        type: "select",
+        label: "Rank Group",
+        options: [...RANK_GROUPS],
+        showWhen: {
+          parameter: "rank_type",
+          values: ["group"],
+        },
+      },
+      {
+        id: "quantifier",
+        type: "select",
+        label: "Condition",
+        options: [
+          { value: "all", label: "All cards must be this rank" },
+          { value: "none", label: "No cards can be this rank" },
+          { value: "exactly", label: "Exactly N cards of this rank" },
+          { value: "at_least", label: "At least N cards of this rank" },
+          { value: "at_most", label: "At most N cards of this rank" },
+        ],
+      },
+      {
+        id: "count",
+        type: "number",
+        label: "Count",
+        default: 1,
+        min: 1,
+        showWhen: {
+          parameter: "quantifier",
+          values: ["exactly", "at_least", "at_most"],
+        },
+      },
+    ],
+    category: "Hand & Cards",
+  },
+  {
+    id: "card_rank",
+    label: "Card Rank",
+    description: "Check the rank of the card",
+    applicableTriggers: [
+      "card_scored",
+      "card_discarded",
+      "card_held_in_hand",
+      "card_held_in_hand_end_of_round",
+      "card_destroyed",
+      "card_discarded",
+    ],
+    params: [
+      {
+        id: "rank_type",
+        type: "select",
+        label: "Rank Type",
+        options: [
+          { value: "specific", label: "Specific Rank" },
+          { value: "group", label: "Rank Group" },
+        ],
+      },
+      {
+        id: "specific_rank",
+        type: "select",
+        label: "Rank",
+        options: [...RANKS],
+        showWhen: {
+          parameter: "rank_type",
+          values: ["specific"],
+        },
+      },
+      {
+        id: "rank_group",
+        type: "select",
+        label: "Rank Group",
+        options: [...RANK_GROUPS],
+        showWhen: {
+          parameter: "rank_type",
+          values: ["group"],
+        },
+      },
+    ],
+    category: "Hand & Cards",
+  },
+  {
+    id: "card_suit",
+    label: "Card Suit",
+    description: "Check the suit of the card",
+    applicableTriggers: [
+      "card_scored",
+      "card_discarded",
+      "card_held_in_hand",
+      "card_held_in_hand_end_of_round",
+      "card_destroyed",
+      "card_discarded",
+    ],
+    params: [
+      {
+        id: "suit_type",
+        type: "select",
+        label: "Suit Type",
+        options: [
+          { value: "specific", label: "Specific Suit" },
+          { value: "group", label: "Suit Group" },
+        ],
+      },
+      {
+        id: "specific_suit",
+        type: "select",
+        label: "Suit",
+        options: [...SUITS],
+        showWhen: {
+          parameter: "suit_type",
+          values: ["specific"],
+        },
+      },
+      {
+        id: "suit_group",
+        type: "select",
+        label: "Suit Group",
+        options: [...SUIT_GROUPS],
+        showWhen: {
+          parameter: "suit_type",
+          values: ["group"],
+        },
+      },
+    ],
+    category: "Hand & Cards",
+  },
+  {
+    id: "card_enhancement",
+    label: "Card Enhancement",
+    description: "Check if the card has a specific enhancement",
+    applicableTriggers: [
+      "card_scored",
+      "card_discarded",
+      "card_held_in_hand",
+      "card_held_in_hand_end_of_round",
+      "card_destroyed",
+    ],
+    params: [
+      {
+        id: "enhancement",
+        type: "select",
+        label: "Enhancement Type",
+        options: [{ value: "any", label: "Any Enhancement" }, ...ENHANCEMENTS],
+      },
+    ],
+    category: "Hand & Cards",
+  },
+  {
+    id: "card_edition",
+    label: "Card Edition",
+    description: "Check if the card has a specific edition",
+    applicableTriggers: [
+      "card_scored",
+      "card_discarded",
+      "card_held_in_hand",
+      "card_held_in_hand_end_of_round",
+      "card_destroyed",
+    ],
+    params: [
+      {
+        id: "edition",
+        type: "select",
+        label: "Edition Type",
+        options: [
+          { value: "any", label: "Any Edition" },
+          { value: "none", label: "No Edition" },
+          ...EDITIONS,
+        ],
+      },
+    ],
+    category: "Hand & Cards",
+  },
+  {
+    id: "card_seal",
+    label: "Card Seal",
+    description: "Check if the card has a specific seal",
+    applicableTriggers: [
+      "card_scored",
+      "card_discarded",
+      "card_held_in_hand",
+      "card_held_in_hand_end_of_round",
+      "card_destroyed",
+    ],
+    params: [
+      {
+        id: "seal",
+        type: "select",
+        label: "Seal Type",
+        options: [{ value: "any", label: "Any Seal" }, ...SEALS],
+      },
+    ],
+    category: "Hand & Cards",
+  },
+  {
+    id: "player_money",
+    label: "Player Money",
+    description: "Check how much money the player has",
+    applicableTriggers: [...GENERIC_TRIGGERS],
+    params: [
+      {
+        id: "operator",
+        type: "select",
+        label: "Operator",
+        options: [...COMPARISON_OPERATORS],
+      },
+      {
+        id: "value",
+        type: "number",
+        label: "Amount ($)",
+        default: 10,
+      },
+    ],
+    category: "Player Resources",
+  },
+  {
+    id: "poker_hand_been_played",
+    label: "Poker Hand Been Played",
+    description:
+      "Check if the current poker hand has already been played this round",
+    applicableTriggers: ["hand_played", "card_scored", "after_hand_played"],
+    params: [],
+    category: "Hand & Cards",
+  },
+  {
+    id: "generic_compare",
+    label: "Generic Compare",
+    description: "Compare two custom values with an operator",
+    applicableTriggers: [...GENERIC_TRIGGERS],
+    params: [
+      {
+        id: "value1",
+        type: "number",
+        label: "First Value",
+        default: 0,
+      },
+      {
+        id: "operator",
+        type: "select",
+        label: "Operator",
+        options: [...COMPARISON_OPERATORS],
+      },
+      {
+        id: "value2",
+        type: "number",
+        label: "Second Value",
+        default: 0,
+      },
+    ],
+    category: "Special",
+  },
+  {
+    id: "remaining_hands",
+    label: "Remaining Hands",
+    description: "Check how many hands the player has left",
+    applicableTriggers: [...GENERIC_TRIGGERS],
+    params: [
+      {
+        id: "operator",
+        type: "select",
+        label: "Operator",
+        options: [...COMPARISON_OPERATORS],
+      },
+      {
+        id: "value",
+        type: "number",
+        label: "Number of Hands",
+        min: 0,
+        default: 1,
+      },
+    ],
+    category: "Player Resources",
+  },
+  {
+    id: "remaining_discards",
+    label: "Remaining Discards",
+    description: "Check how many discards the player has left",
+    applicableTriggers: [...GENERIC_TRIGGERS],
+    params: [
+      {
+        id: "operator",
+        type: "select",
+        label: "Operator",
+        options: [...COMPARISON_OPERATORS],
+      },
+      {
+        id: "value",
+        type: "number",
+        label: "Number of Discards",
+        min: 0,
+        default: 1,
+      },
+    ],
+    category: "Player Resources",
+  },
+  {
+    id: "glass_card_destroyed",
+    label: "Glass Card Destroyed",
+    description: "Check if any glass cards were destroyed/shattered",
+    applicableTriggers: ["card_destroyed"],
+    params: [],
+    category: "Hand & Cards",
+  },
+  {
+    id: "joker_count",
+    label: "Joker Count",
+    description: "Check how many jokers the player has",
+    applicableTriggers: [...GENERIC_TRIGGERS],
+    params: [
+      {
+        id: "operator",
+        type: "select",
+        label: "Operator",
+        options: [...COMPARISON_OPERATORS],
+      },
+      {
+        id: "value",
+        type: "number",
+        label: "Number of Jokers",
+        min: 0,
+        default: 1,
+      },
+    ],
+    category: "Deck & Jokers",
+  },
+  {
+    id: "specific_joker",
+    label: "Specific Joker",
+    description: "Check if a specific joker is in your collection",
+    applicableTriggers: [...GENERIC_TRIGGERS],
+    params: [
+      {
+        id: "operator",
+        type: "select",
+        label: "Condition",
+        options: [
+          { value: "has", label: "Has this joker" },
+          { value: "does_not_have", label: "Does not have this joker" },
+        ],
+        default: "has",
+      },
+      {
+        id: "joker_key",
+        type: "text",
+        label: "Joker Key (e.g., j_joker, j_greedy_joker, or just joker)",
+        default: "j_joker",
+      },
+    ],
+    category: "Deck & Jokers",
+  },
+  {
+    id: "internal_variable",
+    label: "Internal Variable",
+    description: "Check the value of an internal variable for this joker",
+    applicableTriggers: [...GENERIC_TRIGGERS],
+    params: [
+      {
+        id: "variable_name",
+        type: "text",
+        label: "Variable Name",
+        default: "var1",
+      },
+      {
+        id: "operator",
+        type: "select",
+        label: "Operator",
+        options: [...COMPARISON_OPERATORS],
+      },
+      {
+        id: "value",
+        type: "number",
+        label: "Value",
+        default: 0,
+      },
+    ],
+    category: "Special",
+  },
+  {
+    id: "consumable_held",
+    label: "Consumable Held",
+    description: "Check if a specific type of consumable is held",
+    applicableTriggers: [...GENERIC_TRIGGERS],
+    params: [
+      {
+        id: "operator",
+        type: "select",
+        label: "Condition",
+        options: [
+          { value: "has", label: "Has this consumable" },
+          { value: "does_not_have", label: "Does not have this consumable" },
+        ],
+        default: "has",
+      },
+      {
+        id: "consumable_type",
+        type: "select",
+        label: "Consumable Type",
+        options: [
+          { value: "any", label: "Any Consumable" },
+          { value: "tarot", label: "Any Tarot Card" },
+          { value: "planet", label: "Any Planet Card" },
+          { value: "spectral", label: "Any Spectral Card" },
+          { value: "specific", label: "Specific Card" },
+        ],
+        default: "any",
+      },
+      {
+        id: "specific_card",
+        type: "select",
+        label: "Specific Card",
+        options: [...TAROT_CARDS, ...PLANET_CARDS, ...SPECTRAL_CARDS],
+        showWhen: {
+          parameter: "consumable_type",
+          values: ["specific"],
+        },
+      },
+    ],
+    category: "Player Resources",
+  },
+  {
+    id: "consumable_type",
+    label: "Consumable Type",
+    description: "Check the type of consumable being bought or used",
+    applicableTriggers: ["card_bought", "consumable_used"],
+    params: [
+      {
+        id: "consumable_type",
+        type: "select",
+        label: "Consumable Type",
+        options: [
+          { value: "any", label: "Any Consumable" },
+          { value: "tarot", label: "Tarot Card" },
+          { value: "planet", label: "Planet Card" },
+          { value: "spectral", label: "Spectral Card" },
+        ],
+        default: "any",
+      },
+      {
+        id: "tarot_card",
+        type: "select",
+        label: "Specific Tarot Card",
+        options: [...TAROT_CARDS],
+        showWhen: {
+          parameter: "consumable_type",
+          values: ["tarot"],
+        },
+      },
+      {
+        id: "planet_card",
+        type: "select",
+        label: "Specific Planet Card",
+        options: [...PLANET_CARDS],
+        showWhen: {
+          parameter: "consumable_type",
+          values: ["planet"],
+        },
+      },
+      {
+        id: "spectral_card",
+        type: "select",
+        label: "Specific Spectral Card",
+        options: [...SPECTRAL_CARDS],
+        showWhen: {
+          parameter: "consumable_type",
+          values: ["spectral"],
+        },
+      },
+    ],
+    category: "Player Resources",
+  },
+  {
+    id: "blind_type",
+    label: "Blind Type",
+    description: "Check the type of the current blind",
+    applicableTriggers: [...GENERIC_TRIGGERS],
+    params: [
+      {
+        id: "blind_type",
+        type: "select",
+        label: "Blind Type",
+        options: [
+          { value: "small", label: "Small Blind" },
+          { value: "big", label: "Big Blind" },
+          { value: "boss", label: "Boss Blind" },
+        ],
+      },
+    ],
+    category: "Game State",
+  },
+  {
+    id: "check_blind_requirements",
+    label: "Blind Requirements",
+    description:
+      "Check what percentage of the blind requirement the current base hand score represents (e.g., 110% means you've exceeded the blind by 10%, values over 100% check if you've exceeded the blind)",
+    applicableTriggers: [
+      "after_hand_played",
+      "hand_played",
+      "card_scored",
+      "round_end",
+      "hand_discarded",
+      "card_discarded",
+      "selling_self",
+      "card_sold",
+      "hand_drawn",
+      "first_hand_drawn",
+      "game_over",
+      "card_destroyed",
+    ],
+    params: [
+      {
+        id: "operator",
+        type: "select",
+        label: "Operator",
+        options: [...COMPARISON_OPERATORS],
+        default: "greater_equals",
+      },
+      {
+        id: "percentage",
+        type: "number",
+        label: "Percentage (%)",
+        default: 25,
+      },
+    ],
+    category: "Game State",
+  },
+  {
+    id: "lucky_card_triggered",
+    label: "Lucky Card Triggered",
+    description:
+      "Check if a lucky card's special effect was triggered when scored",
+    applicableTriggers: ["card_scored"],
+    params: [],
+    category: "Hand & Cards",
+  },
+  {
+    id: "triggered_boss_blind",
+    label: "Boss Blind Triggered",
+    description: "Check if the current boss blind's effect has been triggered",
+    applicableTriggers: [...GENERIC_TRIGGERS],
+    params: [],
+    category: "Game State",
+  },
+  {
+    id: "ante_level",
+    label: "Ante Level",
+    description: "Check the current ante level",
+    applicableTriggers: [...GENERIC_TRIGGERS],
+    params: [
+      {
+        id: "operator",
+        type: "select",
+        label: "Operator",
+        options: [...COMPARISON_OPERATORS],
+      },
+      {
+        id: "value",
+        type: "number",
+        label: "Ante Level",
+        min: 1,
+        default: 1,
+      },
+    ],
+    category: "Game State",
+  },
+  {
+    id: "first_played_hand",
+    label: "First Played Hand",
+    description: "Check if this is the first hand played in the current round",
+    applicableTriggers: [
+      "hand_played",
+      "card_scored",
+      "card_discarded",
+      "after_hand_played",
+    ],
+    params: [],
+    category: "Game State",
+  },
+  {
+    id: "first_discarded_hand",
+    label: "First Discarded Hand",
+    description:
+      "Check if this is the first hand discarded in the current round",
+    applicableTriggers: ["card_discarded", "hand_discarded"],
+    params: [],
+    category: "Game State",
+  },
+  {
+    id: "hand_size",
+    label: "Hand Size",
+    description: "Check the current hand size",
+    applicableTriggers: [...GENERIC_TRIGGERS],
+    params: [
+      {
+        id: "operator",
+        type: "select",
+        label: "Operator",
+        options: [...COMPARISON_OPERATORS],
+      },
+      {
+        id: "value",
+        type: "number",
+        label: "Hand Size",
+        default: 8,
+      },
+    ],
+    category: "Player Resources",
+  },
+  {
+    id: "deck_size",
+    label: "Deck Size",
+    description: "Check the size of the deck",
+    applicableTriggers: [...GENERIC_TRIGGERS],
+    params: [
+      {
+        id: "size_type",
+        type: "select",
+        label: "Size Type",
+        options: [
+          { value: "remaining", label: "Remaining in Deck" },
+          { value: "total", label: "Total Deck Size" },
+        ],
+        default: "remaining",
+      },
+      {
+        id: "operator",
+        type: "select",
+        label: "Operator",
+        options: [...COMPARISON_OPERATORS],
+      },
+      {
+        id: "value",
+        type: "number",
+        label: "Number of Cards",
+        default: 52,
+      },
+    ],
+    category: "Deck & Jokers",
+  },
+  {
+    id: "deck_count",
+    label: "Deck Count",
+    description: "Count cards in your entire deck by property",
+    applicableTriggers: [...GENERIC_TRIGGERS],
+    params: [
+      {
+        id: "property_type",
+        type: "select",
+        label: "Property Type",
+        options: [
+          { value: "rank", label: "Rank" },
+          { value: "suit", label: "Suit" },
+          { value: "enhancement", label: "Enhancement" },
+          { value: "seal", label: "Seal" },
+          { value: "edition", label: "Edition" },
+        ],
+        default: "enhancement",
+      },
+      {
+        id: "rank",
+        type: "select",
+        label: "Rank",
+        options: [{ value: "any", label: "Any Rank" }, ...RANKS],
+        showWhen: {
+          parameter: "property_type",
+          values: ["rank"],
+        },
+      },
+      {
+        id: "suit",
+        type: "select",
+        label: "Suit",
+        options: [
+          { value: "any", label: "Any Suit" },
+          ...SUIT_GROUPS,
+          ...SUITS,
+        ],
+        showWhen: {
+          parameter: "property_type",
+          values: ["suit"],
+        },
+      },
+      {
+        id: "enhancement",
+        type: "select",
+        label: "Enhancement",
+        options: [
+          { value: "any", label: "Any Enhancement" },
+          { value: "none", label: "No Enhancement" },
+          ...ENHANCEMENTS,
+        ],
+        showWhen: {
+          parameter: "property_type",
+          values: ["enhancement"],
+        },
+      },
+      {
+        id: "seal",
+        type: "select",
+        label: "Seal",
+        options: [
+          { value: "any", label: "Any Seal" },
+          { value: "none", label: "No Seal" },
+          ...SEALS,
+        ],
+        showWhen: {
+          parameter: "property_type",
+          values: ["seal"],
+        },
+      },
+      {
+        id: "edition",
+        type: "select",
+        label: "Edition",
+        options: [
+          { value: "any", label: "Any Edition" },
+          { value: "none", label: "No Edition" },
+          ...EDITIONS,
+        ],
+        showWhen: {
+          parameter: "property_type",
+          values: ["edition"],
+        },
+      },
+      {
+        id: "operator",
+        type: "select",
+        label: "Operator",
+        options: [...COMPARISON_OPERATORS],
+      },
+      {
+        id: "value",
+        type: "number",
+        label: "Count",
+        default: 1,
+      },
+    ],
+    category: "Deck & Jokers",
+  },
+];
+
+export function getConditionTypeById(
+  id: string
+): ConditionTypeDefinition | undefined {
+  return CONDITION_TYPES.find((conditionType) => conditionType.id === id);
+}
+
+export function getConditionsForTrigger(
+  triggerId: string
+): ConditionTypeDefinition[] {
+  return CONDITION_TYPES.filter(
+    (condition) =>
+      condition.applicableTriggers &&
+      condition.applicableTriggers.includes(triggerId)
+  );
+}

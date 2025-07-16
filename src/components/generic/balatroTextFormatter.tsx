@@ -82,6 +82,7 @@ const BG_COLOR_MAP: Record<string, string> = {
   dark_edition: "bg-dark-rainbow",
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const parseBalatroText = (
   text: string,
   locVars?: { colours?: string[] }
@@ -249,6 +250,7 @@ export const BalatroText: React.FC<BalatroTextProps> = ({
   );
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const formatBalatroText = (
   text: string,
   locVars?: { colours?: string[] }

@@ -539,8 +539,9 @@ const VanillaReforgedPage: React.FC<VanillaReforgedPageProps> = ({
             onClose={handleCloseRuleBuilder}
             onSave={() => {}}
             existingRules={currentJokerForRules.rules || []}
-            joker={currentJokerForRules}
-            onUpdateJoker={() => {}}
+            item={currentJokerForRules}
+            onUpdateItem={() => {}}
+            itemType="joker"
           />
         )}
       </div>

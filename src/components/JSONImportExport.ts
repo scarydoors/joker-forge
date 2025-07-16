@@ -1,11 +1,15 @@
 import { ModMetadata } from "./pages/ModMetadataPage";
 import { JokerData } from "./JokerCard";
+import { ConsumableData } from "./ConsumableCard";
 import { RarityData } from "./pages/RaritiesPage";
+import { ConsumableSetData } from "./pages/ConsumablesPage";
 
 export interface ExportedMod {
   metadata: ModMetadata;
   jokers: JokerData[];
+  consumables: ConsumableData[];
   customRarities: RarityData[];
+  consumableSets: ConsumableSetData[];
   version: string;
   exportedAt: string;
 }
@@ -13,12 +17,16 @@ export interface ExportedMod {
 export const exportModAsJSON = (
   metadata: ModMetadata,
   jokers: JokerData[],
-  customRarities: RarityData[] = []
+  customRarities: RarityData[] = [],
+  consumables: ConsumableData[] = [],
+  consumableSets: ConsumableSetData[] = []
 ): void => {
   const exportData: ExportedMod = {
     metadata,
     jokers,
+    consumables,
     customRarities,
+    consumableSets,
     version: "1.0.0",
     exportedAt: new Date().toISOString(),
   };
@@ -43,7 +51,9 @@ export const exportModAsJSON = (
 export const importModFromJSON = (): Promise<{
   metadata: ModMetadata;
   jokers: JokerData[];
+  consumables: ConsumableData[];
   customRarities: RarityData[];
+  consumableSets: ConsumableSetData[];
 } | null> => {
   return new Promise((resolve, reject) => {
     const input = document.createElement("input");
@@ -71,10 +81,26 @@ export const importModFromJSON = (): Promise<{
             throw new Error("Invalid jokers data");
           }
 
+          if (
+            importData.consumables &&
+            !Array.isArray(importData.consumables)
+          ) {
+            throw new Error("Invalid consumables data");
+          }
+
+          if (
+            importData.consumableSets &&
+            !Array.isArray(importData.consumableSets)
+          ) {
+            throw new Error("Invalid consumable sets data");
+          }
+
           resolve({
             metadata: importData.metadata,
             jokers: importData.jokers,
+            consumables: importData.consumables || [],
             customRarities: importData.customRarities || [],
+            consumableSets: importData.consumableSets || [],
           });
         } catch (error) {
           console.error("Error parsing mod file:", error);
