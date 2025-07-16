@@ -175,7 +175,7 @@ export const CONSUMABLE_EFFECT_TYPES: EffectTypeDefinition[] = [
   },
   {
     id: "level_up_hand",
-    label: "Level Up Poker Hand",
+    label: "Level Up Poker Hand (BUGGY BUT WORKS)",
     description: "Level up a specific poker hand or random hand",
     applicableTriggers: ["consumable_used"],
     params: [
