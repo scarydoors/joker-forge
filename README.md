@@ -148,6 +148,7 @@ The plan here is to implement enough triggers, conditions, and effects, so as th
 - [ ] **Alter Blind Requirement** - I.E. 2X blind requirement, 0.5x blind requirement
 - [ ] **Add/Subtract/Set Joker Slots** - Would be cool i guess lol
 - [ ] **Add/Subtract/Set Consumable Slots** - also self-explanatory
+- [ ] **Apply Edition to Joker** - Apply an edition to a random/set Joker owned
 
 
 ---
