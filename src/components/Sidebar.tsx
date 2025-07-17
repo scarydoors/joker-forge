@@ -37,7 +37,6 @@ const Sidebar: React.FC<SidebarProps> = ({
   onExportJSON,
   onImportJSON,
   exportLoading = false,
-  jokers = [],
 }) => {
   const isExpanded =
     selectedSection === "overview" ||
@@ -260,7 +259,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 
             <button
               onClick={handleExport}
-              disabled={exportLoading || jokers.length === 0}
+              disabled={exportLoading}
               className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-black-darker border-2 border-mint-dark rounded-lg text-mint-light hover:text-black-dark font-medium hover:bg-mint hover:border-mint-darker transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <ArrowUpTrayIcon className="h-4 w-4" />
