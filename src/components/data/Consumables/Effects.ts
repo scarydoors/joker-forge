@@ -19,7 +19,6 @@ import {
   TAROT_CARDS,
   PLANET_CARDS,
   SPECTRAL_CARDS,
-  CONSUMABLE_TYPES,
 } from "../BalatroUtils";
 
 export const CONSUMABLE_EFFECT_CATEGORIES: CategoryDefinition[] = [
