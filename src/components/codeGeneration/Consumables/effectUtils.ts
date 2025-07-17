@@ -10,6 +10,7 @@ import { generateDestroySelectedCardsReturn } from "./effects/DestroySelectedCar
 import { generateDestroyRandomCardsReturn } from "./effects/DestroyRandomCardsEffect";
 import { generateDoubleDollarsReturn } from "./effects/DoubleDollarsEffect";
 import { generateAddDollarsFromJokersReturn } from "./effects/AddDollarsFromJokersEffect";
+import { generateCreateConsumableReturn } from "./effects/CreateConsumableEffect";
 
 export interface EffectReturn {
   statement: string;
@@ -135,6 +136,9 @@ const generateSingleEffect = (effect: Effect): EffectReturn => {
 
     case "add_dollars_from_jokers":
       return generateAddDollarsFromJokersReturn(effect);
+
+    case "create_consumable":
+      return generateCreateConsumableReturn(effect);
 
     case "enhance_cards":
       return generateEnhanceCardsReturn(effect);

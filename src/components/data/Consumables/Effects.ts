@@ -16,6 +16,10 @@ import {
   SEALS,
   EDITIONS,
   POKER_HANDS,
+  TAROT_CARDS,
+  PLANET_CARDS,
+  SPECTRAL_CARDS,
+  CONSUMABLE_TYPES,
 } from "../BalatroUtils";
 
 export const CONSUMABLE_EFFECT_CATEGORIES: CategoryDefinition[] = [
@@ -253,6 +257,75 @@ export const CONSUMABLE_EFFECT_TYPES: EffectTypeDefinition[] = [
       },
     ],
     category: "Economy",
+  },
+  {
+    id: "create_consumable",
+    label: "Create Consumable",
+    description:
+      "Create consumable cards and add them to your consumables area",
+    applicableTriggers: ["consumable_used"],
+    params: [
+      {
+        id: "set",
+        type: "select",
+        label: "Consumable Set",
+        options: [
+          { value: "random", label: "Random Consumable" },
+          { value: "Tarot", label: "Tarot" },
+          { value: "Planet", label: "Planet" },
+          { value: "Spectral", label: "Spectral" },
+        ],
+        default: "random",
+      },
+      {
+        id: "specific_card",
+        type: "select",
+        label: "Specific Card",
+        options: [
+          { value: "random", label: "Random from Set" },
+          ...TAROT_CARDS,
+        ],
+        showWhen: {
+          parameter: "set",
+          values: ["Tarot"],
+        },
+      },
+      {
+        id: "specific_card",
+        type: "select",
+        label: "Specific Card",
+        options: [
+          { value: "random", label: "Random from Set" },
+          ...PLANET_CARDS,
+        ],
+        showWhen: {
+          parameter: "set",
+          values: ["Planet"],
+        },
+      },
+      {
+        id: "specific_card",
+        type: "select",
+        label: "Specific Card",
+        options: [
+          { value: "random", label: "Random from Set" },
+          ...SPECTRAL_CARDS,
+        ],
+        showWhen: {
+          parameter: "set",
+          values: ["Spectral"],
+        },
+      },
+      {
+        id: "count",
+        type: "number",
+        label: "Number of Cards",
+        default: 1,
+        min: 1,
+        max: 5,
+      },
+    ],
+    category: "Consumables",
   },
 ];
 
