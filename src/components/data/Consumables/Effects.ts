@@ -219,6 +219,41 @@ export const CONSUMABLE_EFFECT_TYPES: EffectTypeDefinition[] = [
     ],
     category: "Economy",
   },
+  {
+    id: "double_dollars",
+    label: "Double Dollars",
+    description: "Double your current money up to a specified limit",
+    applicableTriggers: ["consumable_used"],
+    params: [
+      {
+        id: "limit",
+        type: "number",
+        label: "Maximum Amount to Gain",
+        default: 20,
+        min: 1,
+        max: 999,
+      },
+    ],
+    category: "Economy",
+  },
+  {
+    id: "add_dollars_from_jokers",
+    label: "Add Dollars from Joker Sell Value",
+    description:
+      "Gain money equal to the total sell value of all jokers, up to a limit",
+    applicableTriggers: ["consumable_used"],
+    params: [
+      {
+        id: "limit",
+        type: "number",
+        label: "Maximum Amount to Gain",
+        default: 50,
+        min: 1,
+        max: 999,
+      },
+    ],
+    category: "Economy",
+  },
 ];
 
 export function getConsumableEffectsForTrigger(

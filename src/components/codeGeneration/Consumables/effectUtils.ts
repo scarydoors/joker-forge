@@ -8,6 +8,9 @@ import { generateAddEditionReturn } from "./effects/AddEditionEffect";
 import { generateLevelUpHandReturn } from "./effects/LevelUpHandEffect";
 import { generateDestroySelectedCardsReturn } from "./effects/DestroySelectedCardsEffect";
 import { generateDestroyRandomCardsReturn } from "./effects/DestroyRandomCardsEffect";
+import { generateDoubleDollarsReturn } from "./effects/DoubleDollarsEffect";
+import { generateAddDollarsFromJokersReturn } from "./effects/AddDollarsFromJokersEffect";
+
 export interface EffectReturn {
   statement: string;
   message?: string;
@@ -126,6 +129,12 @@ const generateSingleEffect = (effect: Effect): EffectReturn => {
   switch (effect.type) {
     case "add_dollars":
       return generateAddDollarsReturn(effect);
+
+    case "double_dollars":
+      return generateDoubleDollarsReturn(effect);
+
+    case "add_dollars_from_jokers":
+      return generateAddDollarsFromJokersReturn(effect);
 
     case "enhance_cards":
       return generateEnhanceCardsReturn(effect);
