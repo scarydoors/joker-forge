@@ -208,7 +208,7 @@ export const CONSUMABLE_EFFECT_TYPES: EffectTypeDefinition[] = [
   },
   {
     id: "add_dollars",
-    label: "Add Money",
+    label: "Add Dollars",
     description: "Give the player money",
     applicableTriggers: ["consumable_used"],
     params: [
