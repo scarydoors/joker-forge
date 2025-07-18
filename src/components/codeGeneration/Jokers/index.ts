@@ -49,19 +49,24 @@ export const generateJokersCode = (
   jokers: JokerData[],
   options: JokerGenerationOptions = {}
 ): { jokersCode: Record<string, string>; hooks: string } => {
-  const { atlasKey = "CustomJokers" } = options;
+  const { atlasKey = "CustomJokers", modPrefix = "" } = options;
 
   const jokersWithKeys = ensureJokerKeys(jokers);
   const jokersCode: Record<string, string> = {};
   let currentPosition = 0;
 
   jokersWithKeys.forEach((joker) => {
-    const result = generateSingleJokerCode(joker, atlasKey, currentPosition);
+    const result = generateSingleJokerCode(
+      joker,
+      atlasKey,
+      currentPosition,
+      modPrefix
+    );
     jokersCode[`${joker.jokerKey}.lua`] = result.code;
     currentPosition = result.nextPosition;
   });
 
-  const hooks = generateHooks(jokersWithKeys, options.modPrefix || "");
+  const hooks = generateHooks(jokersWithKeys, modPrefix);
 
   return { jokersCode, hooks };
 };
@@ -118,7 +123,8 @@ export const generateCustomRaritiesCode = (
 const generateSingleJokerCode = (
   joker: JokerData,
   atlasKey: string,
-  currentPosition: number
+  currentPosition: number,
+  modPrefix: string = ""
 ): { code: string; nextPosition: number } => {
   const passiveEffects = processPassiveEffects(joker);
   const nonPassiveRules =
@@ -225,9 +231,16 @@ const generateSingleJokerCode = (
         y = ${row}
     },
     cost = ${joker.cost !== undefined ? joker.cost : 4},
-    rarity = ${
-      typeof joker.rarity === "string" ? `"${joker.rarity}"` : joker.rarity
-    },
+    rarity = ${(() => {
+      if (typeof joker.rarity === "string") {
+        const prefixedRarity = modPrefix
+          ? `${modPrefix}_${joker.rarity}`
+          : joker.rarity;
+        return `"${prefixedRarity}"`;
+      } else {
+        return joker.rarity;
+      }
+    })()},
     blueprint_compat = ${
       joker.blueprint_compat !== undefined ? joker.blueprint_compat : true
     },
@@ -326,7 +339,12 @@ export const exportSingleJoker = (joker: JokerData): void => {
       ? joker
       : { ...joker, jokerKey: slugify(joker.name) };
 
-    const result = generateSingleJokerCode(jokerWithKey, "Joker", 0);
+    const result = generateSingleJokerCode(
+      jokerWithKey,
+      "Joker",
+      0,
+      "modprefix"
+    );
     let jokerCode = result.code;
 
     const hookCode = generateHooks([jokerWithKey], "modprefix");

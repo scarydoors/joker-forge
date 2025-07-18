@@ -1,6 +1,9 @@
-// Custom shit
+import { Rule } from "../ruleBuilder/types";
 
-// Raritys!
+// =============================================================================
+// DATA REGISTRY INTERFACES
+// =============================================================================
+
 export interface CustomRarity {
   id: string;
   key: string;
@@ -8,6 +11,129 @@ export interface CustomRarity {
   badge_colour: string;
   default_weight: number;
 }
+
+export interface ConsumableData {
+  id: string;
+  name: string;
+  description: string;
+  imagePreview: string;
+  overlayImagePreview?: string;
+  set: "Tarot" | "Planet" | "Spectral" | string;
+  cost?: number;
+  unlocked?: boolean;
+  discovered?: boolean;
+  hidden?: boolean;
+  can_repeat_soul?: boolean;
+  rules?: Rule[];
+  placeholderCreditIndex?: number;
+  consumableKey?: string;
+  hasUserUploadedImage?: boolean;
+}
+
+export interface ConsumableSetData {
+  id: string;
+  key: string;
+  name: string;
+  primary_colour: string;
+  secondary_colour: string;
+  shader?: string;
+  collection_rows: [number, number];
+  default_card?: string;
+  shop_rate?: number;
+  collection_name?: string;
+}
+
+// =============================================================================
+// DATA REGISTRY SYSTEM
+// =============================================================================
+
+interface RegistryState {
+  customRarities: CustomRarity[];
+  consumableSets: ConsumableSetData[];
+  consumables: ConsumableData[];
+  modPrefix: string;
+}
+
+let registryState: RegistryState = {
+  customRarities: [],
+  consumableSets: [],
+  consumables: [],
+  modPrefix: "",
+};
+
+const VANILLA_RARITIES_DATA = [
+  { value: "common", label: "Common" },
+  { value: "uncommon", label: "Uncommon" },
+  { value: "rare", label: "Rare" },
+  { value: "legendary", label: "Legendary" },
+];
+
+const VANILLA_CONSUMABLE_SETS = [
+  { value: "Tarot", label: "Tarot", key: "tarot" },
+  { value: "Planet", label: "Planet", key: "planet" },
+  { value: "Spectral", label: "Spectral", key: "spectral" },
+];
+
+export const DataRegistry = {
+  update: (
+    customRarities: CustomRarity[],
+    consumableSets: ConsumableSetData[],
+    consumables: ConsumableData[],
+    modPrefix: string
+  ) => {
+    registryState = {
+      customRarities,
+      consumableSets,
+      consumables,
+      modPrefix,
+    };
+  },
+
+  getRarities: (): Array<{ value: string; label: string }> => {
+    const custom = registryState.customRarities.map((rarity) => ({
+      value: rarity.key,
+      label: rarity.name,
+    }));
+    return [...VANILLA_RARITIES_DATA, ...custom];
+  },
+
+  getConsumableSets: (): Array<{
+    value: string;
+    label: string;
+    key: string;
+  }> => {
+    const custom = registryState.consumableSets.map((set) => ({
+      value: set.key,
+      label: set.name,
+      key: set.key,
+    }));
+    return [...VANILLA_CONSUMABLE_SETS, ...custom];
+  },
+
+  getConsumables: (): Array<{ value: string; label: string; set: string }> => {
+    const custom = registryState.consumables.map((consumable) => ({
+      value: `${registryState.modPrefix}_${
+        consumable.consumableKey ||
+        consumable.name.toLowerCase().replace(/\s+/g, "_")
+      }`,
+      label: consumable.name,
+      set: consumable.set,
+    }));
+    return [...custom];
+  },
+
+  getState: () => ({ ...registryState }),
+};
+
+// =============================================================================
+// RARITIES SECTION
+// =============================================================================
+
+export const RARITIES = () => DataRegistry.getRarities();
+export const RARITY_VALUES = () =>
+  DataRegistry.getRarities().map((r) => r.value);
+export const RARITY_LABELS = () =>
+  DataRegistry.getRarities().map((r) => r.label);
 
 export const VANILLA_RARITIES = [
   { value: 1, label: "Common", key: "common" },
@@ -34,8 +160,7 @@ type CustomRarityOption = {
 type RarityOption = VanillaRarity | CustomRarityOption;
 
 export const getAllRarities = (
-  customRarities: CustomRarity[] = [],
-  modPrefix: string = ""
+  customRarities: CustomRarity[] = registryState.customRarities
 ): RarityOption[] => {
   const vanillaRarities: VanillaRarity[] = VANILLA_RARITIES.map(
     (rarity, index) => ({
@@ -48,7 +173,7 @@ export const getAllRarities = (
 
   const customRarityOptions: CustomRarityOption[] = customRarities.map(
     (rarity) => ({
-      value: `${modPrefix}_${rarity.key}`,
+      value: rarity.key,
       label: rarity.name,
       key: rarity.key,
       isCustom: true,
@@ -58,40 +183,35 @@ export const getAllRarities = (
 
   return [...vanillaRarities, ...customRarityOptions];
 };
-
 export const getRarityByValue = (
   value: number | string,
-  customRarities: CustomRarity[] = [],
-  modPrefix: string = ""
+  customRarities: CustomRarity[] = registryState.customRarities
 ): RarityOption | undefined => {
-  const allRarities = getAllRarities(customRarities, modPrefix);
+  const allRarities = getAllRarities(customRarities);
   return allRarities.find((rarity) => rarity.value === value);
 };
 
 export const getRarityByKey = (
   key: string,
-  customRarities: CustomRarity[] = [],
-  modPrefix: string = ""
+  customRarities: CustomRarity[] = registryState.customRarities
 ): RarityOption | undefined => {
-  const allRarities = getAllRarities(customRarities, modPrefix);
+  const allRarities = getAllRarities(customRarities);
   return allRarities.find((rarity) => rarity.key === key);
 };
 
 export const getRarityDisplayName = (
   value: number | string,
-  customRarities: CustomRarity[] = [],
-  modPrefix: string = ""
+  customRarities: CustomRarity[] = registryState.customRarities
 ): string => {
-  const rarity = getRarityByValue(value, customRarities, modPrefix);
+  const rarity = getRarityByValue(value, customRarities);
   return rarity?.label || "Unknown";
 };
 
 export const getRarityBadgeColor = (
   value: number | string,
-  customRarities: CustomRarity[] = [],
-  modPrefix: string = ""
+  customRarities: CustomRarity[] = registryState.customRarities
 ): string => {
-  const rarity = getRarityByValue(value, customRarities, modPrefix);
+  const rarity = getRarityByValue(value, customRarities);
 
   if (rarity?.isCustom) {
     const color = rarity.customData.badge_colour;
@@ -110,10 +230,9 @@ export const getRarityBadgeColor = (
 
 export const getRarityStyles = (
   value: number | string,
-  customRarities: CustomRarity[] = [],
-  modPrefix: string = ""
+  customRarities: CustomRarity[] = registryState.customRarities
 ) => {
-  const color = getRarityBadgeColor(value, customRarities, modPrefix);
+  const color = getRarityBadgeColor(value, customRarities);
 
   return {
     text: `text-[${color}]`,
@@ -125,8 +244,8 @@ export const getRarityStyles = (
 
 export const isCustomRarity = (
   value: number | string,
-  customRarities: CustomRarity[] = [],
-  modPrefix: string = ""
+  customRarities: CustomRarity[] = registryState.customRarities,
+  modPrefix: string = registryState.modPrefix
 ): boolean => {
   if (typeof value === "string") {
     return (
@@ -139,24 +258,144 @@ export const isCustomRarity = (
 
 export const getCustomRarityData = (
   value: number | string,
-  customRarities: CustomRarity[] = [],
-  modPrefix: string = ""
+  customRarities: CustomRarity[] = registryState.customRarities
 ): CustomRarity | null => {
-  const rarity = getRarityByValue(value, customRarities, modPrefix);
+  const rarity = getRarityByValue(value, customRarities);
   return rarity?.isCustom ? rarity.customData : null;
 };
 
 export const getRarityDropdownOptions = (
-  customRarities: CustomRarity[] = [],
-  modPrefix: string = ""
+  customRarities: CustomRarity[] = registryState.customRarities
 ) => {
-  return getAllRarities(customRarities, modPrefix).map((rarity) => ({
+  return getAllRarities(customRarities).map((rarity) => ({
     value: rarity.value.toString(),
     label: rarity.label,
   }));
 };
 
-// Centralized Balatro game data and utilities
+// =============================================================================
+// CONSUMABLES SECTION
+// =============================================================================
+
+export const CONSUMABLE_SETS = () => DataRegistry.getConsumableSets();
+export const CONSUMABLE_SET_VALUES = () =>
+  DataRegistry.getConsumableSets().map((s) => s.value);
+export const CONSUMABLE_SET_LABELS = () =>
+  DataRegistry.getConsumableSets().map((s) => s.label);
+
+export const CUSTOM_CONSUMABLES = () => DataRegistry.getConsumables();
+export const CUSTOM_CONSUMABLE_VALUES = () =>
+  DataRegistry.getConsumables().map((c) => c.value);
+export const CUSTOM_CONSUMABLE_LABELS = () =>
+  DataRegistry.getConsumables().map((c) => c.label);
+
+type VanillaConsumableSet = {
+  value: string;
+  label: string;
+  key: string;
+  isCustom: false;
+};
+
+type CustomConsumableSetOption = {
+  value: string;
+  label: string;
+  key: string;
+  isCustom: true;
+  customData: ConsumableSetData;
+};
+
+type ConsumableSetOption = VanillaConsumableSet | CustomConsumableSetOption;
+
+export const getAllConsumableSets = (
+  customSets: ConsumableSetData[] = registryState.consumableSets
+): ConsumableSetOption[] => {
+  const vanillaSets: VanillaConsumableSet[] = VANILLA_CONSUMABLE_SETS.map(
+    (set) => ({
+      value: set.value,
+      label: set.label,
+      key: set.key,
+      isCustom: false,
+    })
+  );
+
+  const customSetOptions: CustomConsumableSetOption[] = customSets.map(
+    (set) => ({
+      value: set.key,
+      label: set.name,
+      key: set.key,
+      isCustom: true,
+      customData: set,
+    })
+  );
+
+  return [...vanillaSets, ...customSetOptions];
+};
+
+export const getConsumableSetByValue = (
+  value: string,
+  customSets: ConsumableSetData[] = registryState.consumableSets
+): ConsumableSetOption | undefined => {
+  const allSets = getAllConsumableSets(customSets);
+  return allSets.find((set) => set.value === value);
+};
+
+export const getConsumableSetByKey = (
+  key: string,
+  customSets: ConsumableSetData[] = registryState.consumableSets
+): ConsumableSetOption | undefined => {
+  const allSets = getAllConsumableSets(customSets);
+  return allSets.find((set) => set.key === key);
+};
+
+export const isCustomConsumableSet = (
+  value: string,
+  customSets: ConsumableSetData[] = registryState.consumableSets,
+  modPrefix: string = registryState.modPrefix
+): boolean => {
+  return (
+    value.includes("_") &&
+    customSets.some((s) => `${modPrefix}_${s.key}` === value)
+  );
+};
+
+export const getCustomConsumableSetData = (
+  value: string,
+  customSets: ConsumableSetData[] = registryState.consumableSets
+): ConsumableSetData | null => {
+  const set = getConsumableSetByValue(value, customSets);
+  return set?.isCustom ? set.customData : null;
+};
+
+export const getConsumablesBySet = (
+  setKey: string,
+  customConsumables: ConsumableData[] = registryState.consumables
+): ConsumableData[] => {
+  return customConsumables.filter((consumable) => consumable.set === setKey);
+};
+
+export const getConsumableSetDropdownOptions = (
+  customSets: ConsumableSetData[] = registryState.consumableSets
+) => {
+  return getAllConsumableSets(customSets).map((set) => ({
+    value: set.value,
+    label: set.label,
+  }));
+};
+
+// =============================================================================
+// REGISTRY UPDATE FUNCTION
+// =============================================================================
+
+export const updateDataRegistry = (
+  customRarities: CustomRarity[],
+  consumableSets: ConsumableSetData[],
+  consumables: ConsumableData[],
+  modPrefix: string
+) => {
+  DataRegistry.update(customRarities, consumableSets, consumables, modPrefix);
+};
+
+//* ==== Centralized Balatro game data and utilities ====
 
 // Ranks
 export const RANKS = [
@@ -203,18 +442,6 @@ export const SUIT_GROUPS = [
 ] as const;
 
 export const SUIT_GROUP_VALUES = SUIT_GROUPS.map((group) => group.value);
-
-// Rarities
-export const RARITIES = [
-  { value: "common", label: "Common" },
-  { value: "uncommon", label: "Uncommon" },
-  { value: "rare", label: "Rare" },
-  { value: "epic", label: "Epic" },
-  { value: "legendary", label: "Legendary" },
-] as const;
-
-export const RARITY_VALUES = RARITIES.map((rarity) => rarity.value);
-export const RARITY_LABELS = RARITIES.map((rarity) => rarity.label);
 
 // Poker Hands
 export const POKER_HANDS = [
