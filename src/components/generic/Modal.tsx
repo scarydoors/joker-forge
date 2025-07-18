@@ -28,16 +28,9 @@ const Modal: React.FC<ModalProps> = ({
   children,
   buttons = [],
   showCloseButton = true,
-  closeOnBackdropClick = true,
   maxWidth = "max-w-lg",
   icon,
 }) => {
-  const handleBackdropClick = (e: React.MouseEvent) => {
-    if (e.target === e.currentTarget && closeOnBackdropClick) {
-      onClose();
-    }
-  };
-
   const getButtonStyles = (variant: string = "primary") => {
     switch (variant) {
       case "primary":
@@ -60,7 +53,6 @@ const Modal: React.FC<ModalProps> = ({
           exit={{ opacity: 0 }}
           transition={{ duration: 0.2 }}
           className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[9999] p-4 font-lexend"
-          onClick={handleBackdropClick}
         >
           <motion.div
             initial={{ scale: 0.9, opacity: 0, y: 20 }}
