@@ -80,11 +80,10 @@ const RarityCard: React.FC<RarityCardProps> = ({
 
       <div className="flex items-start gap-4 mb-4">
         <div
-          className="w-16 h-16 rounded-xl flex items-center justify-center text-white font-bold text-sm border-2"
+          className="w-16 h-16 rounded-xl flex items-center justify-center text-[#fff] font-bold text-sm border-2"
           style={{
             backgroundColor: getBadgeColor(),
             borderColor: getBadgeColor(),
-            color: "#000000",
           }}
         >
           {rarity.name.substring(0, 3).toUpperCase()}

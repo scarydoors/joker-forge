@@ -102,7 +102,7 @@ const ConsumableSetCard: React.FC<ConsumableSetCardProps> = ({
             borderColor: getPrimaryColor(),
           }}
         >
-          <span className="relative text-white text-shadow-pixel">
+          <span className="relative text-[#fff]">
             {set.name.substring(0, 3).toUpperCase()}
           </span>
         </div>
@@ -140,7 +140,9 @@ const ConsumableSetCard: React.FC<ConsumableSetCardProps> = ({
 
           <div className="flex items-center gap-2 mb-2">
             <span className="text-white-darker text-sm">Key:</span>
-            <span className="text-mint text-sm font-mono">{set.key}</span>
+            <span className="text-white-light text-sm font-mono">
+              {set.key}
+            </span>
           </div>
 
           <div className="flex items-center gap-2 mb-2">
@@ -482,7 +484,7 @@ const EditConsumableSetModal: React.FC<EditConsumableSetModalProps> = ({
                       backgroundColor: getPreviewColor(),
                     }}
                   >
-                    <span className="relative font-bold text-white">
+                    <span className="relative font-bold text-[#fff]">
                       {setFormData.name || "Set"}
                     </span>
                   </div>
