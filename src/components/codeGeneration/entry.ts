@@ -1,11 +1,11 @@
 import JSZip from "jszip";
 import { JokerData } from "../JokerCard";
-import { ConsumableData } from "../ConsumableCard";
+import { ConsumableData } from "../data/BalatroUtils";
 import { RarityData } from "../pages/RaritiesPage";
 import { addAtlasToZip } from "./ImageProcessor";
 import { generateJokersCode, generateCustomRaritiesCode } from "./Jokers/index";
 import { generateConsumablesCode } from "./Consumables/index";
-import { ConsumableSetData } from "../pages/ConsumablesPage";
+import { ConsumableSetData } from "../data/BalatroUtils";
 
 export interface ModMetadata {
   id: string;

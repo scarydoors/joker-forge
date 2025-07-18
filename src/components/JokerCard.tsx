@@ -153,7 +153,6 @@ const JokerCard: React.FC<JokerCardProps> = ({
   onExport,
   onQuickUpdate,
   customRarities = [],
-  modPrefix,
 }) => {
   const [showRarityMenu, setShowRarityMenu] = useState(false);
   const [editingName, setEditingName] = useState(false);
@@ -177,18 +176,10 @@ const JokerCard: React.FC<JokerCardProps> = ({
       ? joker.rarity
       : 1;
 
-  const rarityText = getRarityDisplayName(
-    safeRarity,
-    customRarities,
-    modPrefix
-  );
-  const rarityColor = getRarityBadgeColor(
-    safeRarity,
-    customRarities,
-    modPrefix
-  );
+  const rarityText = getRarityDisplayName(safeRarity, customRarities);
+  const rarityColor = getRarityBadgeColor(safeRarity, customRarities);
 
-  const allRarities = getAllRarities(customRarities, modPrefix);
+  const allRarities = getAllRarities(customRarities);
 
   const rulesCount = joker.rules?.length || 0;
 
@@ -218,15 +209,16 @@ const JokerCard: React.FC<JokerCardProps> = ({
   };
 
   const handleRarityChange = (value: string) => {
-    let newRarity: number | string;
+    const parsedValue = parseInt(value, 10);
 
-    if (value.includes("_")) {
-      newRarity = value;
+    // If it's a valid vanilla rarity number (1-4), use as number
+    if (!isNaN(parsedValue) && parsedValue >= 1 && parsedValue <= 4) {
+      onQuickUpdate({ rarity: parsedValue });
     } else {
-      newRarity = parseInt(value, 10);
+      // Otherwise it's a custom rarity, use as string
+      onQuickUpdate({ rarity: value });
     }
 
-    onQuickUpdate({ rarity: newRarity });
     setShowRarityMenu(false);
   };
 
@@ -450,11 +442,7 @@ const JokerCard: React.FC<JokerCardProps> = ({
                   key={rarity.value.toString()}
                   className="px-3 py-1 text-xs font-medium cursor-pointer transition-all hover:bg-opacity-20 bg-black border-b border-black-lighter last:border-b-0"
                   style={{
-                    color: getRarityBadgeColor(
-                      rarity.value,
-                      customRarities,
-                      modPrefix
-                    ),
+                    color: getRarityBadgeColor(rarity.value, customRarities),
                   }}
                   onClick={() => handleRarityChange(rarity.value.toString())}
                 >

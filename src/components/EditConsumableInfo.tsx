@@ -14,13 +14,13 @@ import InputDropdown from "./generic/InputDropdown";
 import Checkbox from "./generic/Checkbox";
 import Button from "./generic/Button";
 import BalatroJokerCard from "./generic/BalatroJokerCard";
-import { ConsumableData } from "./ConsumableCard";
+import { ConsumableData } from "./data/BalatroUtils";
 import {
   validateJokerName,
   validateDescription,
   ValidationResult,
 } from "./generic/validationUtils";
-import { ConsumableSetData } from "./pages/ConsumablesPage";
+import { ConsumableSetData } from "./data/BalatroUtils";
 
 interface EditConsumableInfoProps {
   isOpen: boolean;

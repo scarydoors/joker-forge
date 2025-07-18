@@ -1,8 +1,8 @@
 import { ModMetadata } from "./pages/ModMetadataPage";
 import { JokerData } from "./JokerCard";
-import { ConsumableData } from "./ConsumableCard";
+import { ConsumableData } from "./data/BalatroUtils";
 import { RarityData } from "./pages/RaritiesPage";
-import { ConsumableSetData } from "./pages/ConsumablesPage";
+import { ConsumableSetData } from "./data/BalatroUtils";
 
 export interface ExportedMod {
   metadata: ModMetadata;

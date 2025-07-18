@@ -1,5 +1,5 @@
-import { ConsumableData } from "../../ConsumableCard";
-import { ConsumableSetData } from "../../pages/ConsumablesPage";
+import { ConsumableData } from "../../data/BalatroUtils";
+import { ConsumableSetData } from "../../data/BalatroUtils";
 import { generateConditionChain } from "./conditionUtils";
 import { generateEffectReturnStatement } from "./effectUtils";
 import { slugify } from "../../EditConsumableInfo";

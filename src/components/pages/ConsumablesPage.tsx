@@ -19,23 +19,11 @@ import Button from "../generic/Button";
 import InputField from "../generic/InputField";
 import InputDropdown from "../generic/InputDropdown";
 import Modal from "../generic/Modal";
-import { ConsumableData } from "../ConsumableCard";
+import { ConsumableData } from "../data/BalatroUtils";
 import RuleBuilder from "../ruleBuilder/RuleBuilder";
 import type { Rule } from "../ruleBuilder/types";
 import { validateJokerName } from "../generic/validationUtils";
-
-export interface ConsumableSetData {
-  id: string;
-  key: string;
-  name: string;
-  primary_colour: string;
-  secondary_colour: string;
-  shader?: string;
-  collection_rows: [number, number];
-  default_card?: string;
-  shop_rate?: number;
-  collection_name?: string;
-}
+import { ConsumableSetData } from "../data/BalatroUtils";
 
 interface ConsumablesPageProps {
   modName: string;

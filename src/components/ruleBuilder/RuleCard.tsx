@@ -36,7 +36,7 @@ import {
   XMarkIcon,
 } from "@heroicons/react/16/solid";
 import { JokerData } from "../JokerCard";
-import { ConsumableData } from "../ConsumableCard";
+import { ConsumableData } from "../data/BalatroUtils";
 
 interface RuleCardProps {
   rule: Rule;
