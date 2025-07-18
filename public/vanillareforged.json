@@ -8149,7 +8149,7 @@
               "id": "f906e034-7076-48dd-9220-61bd0666e70e",
               "type": "apply_x_mult",
               "params": {
-                "value": "GAMEVAR:uncommon_jokers|1.5|0"
+                "value": "GAMEVAR:uncommon_jokers|1.5|1"
               }
             }
           ],
