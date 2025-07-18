@@ -21,6 +21,8 @@ import {
   TAROT_CARDS,
   PLANET_CARDS,
   SPECTRAL_CARDS,
+  CUSTOM_CONSUMABLES,
+  CONSUMABLE_SETS,
 } from "../BalatroUtils";
 
 export const GENERIC_TRIGGERS: string[] = [
@@ -766,25 +768,12 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
     applicableTriggers: [...GENERIC_TRIGGERS],
     params: [
       {
-        id: "operator",
-        type: "select",
-        label: "Condition",
-        options: [
-          { value: "has", label: "Has this consumable" },
-          { value: "does_not_have", label: "Does not have this consumable" },
-        ],
-        default: "has",
-      },
-      {
         id: "consumable_type",
         type: "select",
         label: "Consumable Type",
-        options: [
+        options: () => [
           { value: "any", label: "Any Consumable" },
-          { value: "tarot", label: "Any Tarot Card" },
-          { value: "planet", label: "Any Planet Card" },
-          { value: "spectral", label: "Any Spectral Card" },
-          { value: "specific", label: "Specific Card" },
+          ...CONSUMABLE_SETS(),
         ],
         default: "any",
       },
@@ -792,11 +781,90 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
         id: "specific_card",
         type: "select",
         label: "Specific Card",
-        options: [...TAROT_CARDS, ...PLANET_CARDS, ...SPECTRAL_CARDS],
-        showWhen: {
-          parameter: "consumable_type",
-          values: ["specific"],
+        options: (parentValues: Record<string, unknown>) => {
+          const selectedSet = parentValues?.consumable_type as string;
+
+          if (!selectedSet || selectedSet === "any") {
+            return [];
+          }
+
+          // Handle vanilla sets
+          if (selectedSet === "Tarot") {
+            const vanillaCards = TAROT_CARDS.map((card) => ({
+              value: card.key,
+              label: card.label,
+            }));
+
+            const customCards = CUSTOM_CONSUMABLES()
+              .filter((consumable) => consumable.set === "Tarot")
+              .map((consumable) => ({
+                value: consumable.value,
+                label: consumable.label,
+              }));
+
+            return [
+              { value: "any", label: "Any from Set" },
+              ...vanillaCards,
+              ...customCards,
+            ];
+          }
+
+          if (selectedSet === "Planet") {
+            const vanillaCards = PLANET_CARDS.map((card) => ({
+              value: card.key,
+              label: card.label,
+            }));
+
+            const customCards = CUSTOM_CONSUMABLES()
+              .filter((consumable) => consumable.set === "Planet")
+              .map((consumable) => ({
+                value: consumable.value,
+                label: consumable.label,
+              }));
+
+            return [
+              { value: "any", label: "Any from Set" },
+              ...vanillaCards,
+              ...customCards,
+            ];
+          }
+
+          if (selectedSet === "Spectral") {
+            const vanillaCards = SPECTRAL_CARDS.map((card) => ({
+              value: card.key,
+              label: card.label,
+            }));
+
+            const customCards = CUSTOM_CONSUMABLES()
+              .filter((consumable) => consumable.set === "Spectral")
+              .map((consumable) => ({
+                value: consumable.value,
+                label: consumable.label,
+              }));
+
+            return [
+              { value: "any", label: "Any from Set" },
+              ...vanillaCards,
+              ...customCards,
+            ];
+          }
+
+          // Handle custom sets
+          const setKey = selectedSet.includes("_")
+            ? selectedSet.split("_").slice(1).join("_")
+            : selectedSet;
+
+          const customConsumablesInSet = CUSTOM_CONSUMABLES().filter(
+            (consumable) =>
+              consumable.set === setKey || consumable.set === selectedSet
+          );
+
+          return [
+            { value: "any", label: "Any from Set" },
+            ...customConsumablesInSet,
+          ];
         },
+        default: "any",
       },
     ],
     category: "Player Resources",
@@ -811,43 +879,100 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
         id: "consumable_type",
         type: "select",
         label: "Consumable Type",
-        options: [
+        options: () => [
           { value: "any", label: "Any Consumable" },
-          { value: "tarot", label: "Tarot Card" },
-          { value: "planet", label: "Planet Card" },
-          { value: "spectral", label: "Spectral Card" },
+          ...CONSUMABLE_SETS(),
         ],
         default: "any",
       },
       {
-        id: "tarot_card",
+        id: "specific_card",
         type: "select",
-        label: "Specific Tarot Card",
-        options: [...TAROT_CARDS],
-        showWhen: {
-          parameter: "consumable_type",
-          values: ["tarot"],
+        label: "Specific Card",
+        options: (parentValues: Record<string, unknown>) => {
+          const selectedSet = parentValues?.consumable_type as string;
+
+          if (!selectedSet || selectedSet === "any") {
+            return [];
+          }
+
+          // Handle vanilla sets
+          if (selectedSet === "Tarot") {
+            const vanillaCards = TAROT_CARDS.map((card) => ({
+              value: card.key,
+              label: card.label,
+            }));
+
+            const customCards = CUSTOM_CONSUMABLES()
+              .filter((consumable) => consumable.set === "Tarot")
+              .map((consumable) => ({
+                value: consumable.value,
+                label: consumable.label,
+              }));
+
+            return [
+              { value: "any", label: "Any from Set" },
+              ...vanillaCards,
+              ...customCards,
+            ];
+          }
+
+          if (selectedSet === "Planet") {
+            const vanillaCards = PLANET_CARDS.map((card) => ({
+              value: card.key,
+              label: card.label,
+            }));
+
+            const customCards = CUSTOM_CONSUMABLES()
+              .filter((consumable) => consumable.set === "Planet")
+              .map((consumable) => ({
+                value: consumable.value,
+                label: consumable.label,
+              }));
+
+            return [
+              { value: "any", label: "Any from Set" },
+              ...vanillaCards,
+              ...customCards,
+            ];
+          }
+
+          if (selectedSet === "Spectral") {
+            const vanillaCards = SPECTRAL_CARDS.map((card) => ({
+              value: card.key,
+              label: card.label,
+            }));
+
+            const customCards = CUSTOM_CONSUMABLES()
+              .filter((consumable) => consumable.set === "Spectral")
+              .map((consumable) => ({
+                value: consumable.value,
+                label: consumable.label,
+              }));
+
+            return [
+              { value: "any", label: "Any from Set" },
+              ...vanillaCards,
+              ...customCards,
+            ];
+          }
+
+          // Handle custom sets
+          const setKey = selectedSet.includes("_")
+            ? selectedSet.split("_").slice(1).join("_")
+            : selectedSet;
+
+          const customConsumablesInSet = CUSTOM_CONSUMABLES().filter(
+            (consumable) =>
+              consumable.set === setKey || consumable.set === selectedSet
+          );
+
+          return [
+            { value: "any", label: "Any from Set" },
+            ...customConsumablesInSet,
+          ];
         },
-      },
-      {
-        id: "planet_card",
-        type: "select",
-        label: "Specific Planet Card",
-        options: [...PLANET_CARDS],
-        showWhen: {
-          parameter: "consumable_type",
-          values: ["planet"],
-        },
-      },
-      {
-        id: "spectral_card",
-        type: "select",
-        label: "Specific Spectral Card",
-        options: [...SPECTRAL_CARDS],
-        showWhen: {
-          parameter: "consumable_type",
-          values: ["spectral"],
-        },
+        default: "any",
       },
     ],
     category: "Player Resources",

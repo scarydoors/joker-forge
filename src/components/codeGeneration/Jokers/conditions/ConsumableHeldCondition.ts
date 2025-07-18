@@ -5,53 +5,106 @@ export const generateConsumableHeldConditionCode = (
 ): string | null => {
   const condition = rules[0].conditionGroups[0].conditions[0];
   const consumableType = (condition.params.consumable_type as string) || "any";
-  const operator = (condition.params.operator as string) || "has";
-
-  const hasCondition = operator === "has";
+  const specificCard = (condition.params.specific_card as string) || "any";
 
   if (consumableType === "any") {
-    return hasCondition
-      ? `#G.consumeables.cards > 0`
-      : `#G.consumeables.cards == 0`;
+    return `#G.consumeables.cards > 0`;
   }
 
-  if (consumableType === "tarot") {
-    return `(function()
+  // Handle vanilla sets
+  if (consumableType === "Tarot") {
+    if (specificCard === "any") {
+      return `(function()
     for _, consumable_card in pairs(G.consumeables.cards or {}) do
         if consumable_card.ability.set == 'Tarot' then
-            return ${hasCondition}
+            return true
         end
     end
-    return ${!hasCondition}
+    return false
 end)()`;
+    } else {
+      const normalizedCardKey = specificCard.startsWith("c_")
+        ? specificCard
+        : `c_${specificCard}`;
+
+      return `(function()
+    for _, consumable_card in pairs(G.consumeables.cards or {}) do
+        if consumable_card.config.center.key == "${normalizedCardKey}" then
+            return true
+        end
+    end
+    return false
+end)()`;
+    }
   }
 
-  if (consumableType === "planet") {
-    return `(function()
+  if (consumableType === "Planet") {
+    if (specificCard === "any") {
+      return `(function()
     for _, consumable_card in pairs(G.consumeables.cards or {}) do
         if consumable_card.ability.set == 'Planet' then
-            return ${hasCondition}
+            return true
         end
     end
-    return ${!hasCondition}
+    return false
 end)()`;
+    } else {
+      const normalizedCardKey = specificCard.startsWith("c_")
+        ? specificCard
+        : `c_${specificCard}`;
+
+      return `(function()
+    for _, consumable_card in pairs(G.consumeables.cards or {}) do
+        if consumable_card.config.center.key == "${normalizedCardKey}" then
+            return true
+        end
+    end
+    return false
+end)()`;
+    }
   }
 
-  if (consumableType === "spectral") {
-    return `(function()
+  if (consumableType === "Spectral") {
+    if (specificCard === "any") {
+      return `(function()
     for _, consumable_card in pairs(G.consumeables.cards or {}) do
         if consumable_card.ability.set == 'Spectral' then
-            return ${hasCondition}
+            return true
         end
     end
-    return ${!hasCondition}
+    return false
 end)()`;
+    } else {
+      const normalizedCardKey = specificCard.startsWith("c_")
+        ? specificCard
+        : `c_${specificCard}`;
+
+      return `(function()
+    for _, consumable_card in pairs(G.consumeables.cards or {}) do
+        if consumable_card.config.center.key == "${normalizedCardKey}" then
+            return true
+        end
+    end
+    return false
+end)()`;
+    }
   }
 
-  if (consumableType === "specific") {
-    const specificCard = (condition.params.specific_card as string) || "c_fool";
+  // Handle custom consumable sets
+  const setKey = consumableType.includes("_")
+    ? consumableType.split("_").slice(1).join("_")
+    : consumableType;
 
-    // Ensure the card key has the c_ prefix if not provided
+  if (specificCard === "any") {
+    return `(function()
+    for _, consumable_card in pairs(G.consumeables.cards or {}) do
+        if consumable_card.ability.set == '${setKey}' or consumable_card.ability.set == '${consumableType}' then
+            return true
+        end
+    end
+    return false
+end)()`;
+  } else {
     const normalizedCardKey = specificCard.startsWith("c_")
       ? specificCard
       : `c_${specificCard}`;
@@ -59,12 +112,10 @@ end)()`;
     return `(function()
     for _, consumable_card in pairs(G.consumeables.cards or {}) do
         if consumable_card.config.center.key == "${normalizedCardKey}" then
-            return ${hasCondition}
+            return true
         end
     end
-    return ${!hasCondition}
+    return false
 end)()`;
   }
-
-  return null;
 };
