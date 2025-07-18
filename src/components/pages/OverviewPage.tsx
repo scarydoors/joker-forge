@@ -225,7 +225,6 @@ const formatAuthorsString = (authors: string[]): string => {
 };
 
 const OverviewPage: React.FC<OverviewPageProps> = ({
-  jokerCount,
   metadata,
   setMetadata,
   onExport,
@@ -564,7 +563,6 @@ const OverviewPage: React.FC<OverviewPageProps> = ({
 
             <button
               onClick={onExport}
-              disabled={jokerCount === 0}
               className="group flex items-center gap-4 p-6 bg-gradient-to-r from-mint/10 to-mint/5 border border-mint/30 hover:border-mint rounded-xl transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:border-mint/30 hover:from-mint/15 hover:to-mint/10"
             >
               <div className="p-3 bg-mint/30 rounded-xl group-hover:bg-mint/40 transition-all group-hover:scale-110">
