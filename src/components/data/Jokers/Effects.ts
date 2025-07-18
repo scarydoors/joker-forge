@@ -24,6 +24,8 @@ import {
   RARITIES,
   CONSUMABLE_TYPES,
   TAGS,
+  CUSTOM_CONSUMABLES,
+  CONSUMABLE_SETS,
 } from "../BalatroUtils";
 
 export const EFFECT_CATEGORIES: CategoryDefinition[] = [
@@ -701,7 +703,10 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
         id: "rarity",
         type: "select",
         label: "Rarity",
-        options: [{ value: "random", label: "Any Rarity" }, ...RARITIES],
+        options: () => [
+          { value: "random", label: "Any Rarity" },
+          ...RARITIES(),
+        ],
         default: "random",
         showWhen: {
           parameter: "joker_type",
@@ -864,77 +869,109 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
     category: "Jokers",
   },
   {
-    id: "create_tarot_card",
-    label: "Create Tarot Card",
-    description: "Create a specific or random Tarot card",
+    id: "create_consumable",
+    label: "Create Consumable",
+    description:
+      "Create consumable cards and add them to your consumables area",
     applicableTriggers: [...GENERIC_TRIGGERS],
     params: [
       {
-        id: "tarot_card",
+        id: "set",
         type: "select",
-        label: "Tarot Card",
-        options: [
-          { value: "random", label: "Random Tarot Card" },
-          ...TAROT_CARDS,
+        label: "Consumable Set",
+        options: () => [
+          { value: "random", label: "Random Consumable" },
+          ...CONSUMABLE_SETS(),
         ],
         default: "random",
       },
       {
-        id: "is_negative",
+        id: "specific_card",
         type: "select",
-        label: "Edition",
-        options: [
-          { value: "none", label: "No Edition" },
-          { value: "negative", label: "Negative Edition" },
-        ],
-        default: "none",
-      },
-    ],
-    category: "Consumables",
-  },
-  {
-    id: "create_planet_card",
-    label: "Create Planet Card",
-    description: "Create a specific or random Planet card",
-    applicableTriggers: [...GENERIC_TRIGGERS],
-    params: [
-      {
-        id: "planet_card",
-        type: "select",
-        label: "Planet Card",
-        options: [
-          { value: "random", label: "Random Planet Card" },
-          ...PLANET_CARDS,
-        ],
-        default: "random",
-      },
-      {
-        id: "is_negative",
-        type: "select",
-        label: "Edition",
-        options: [
-          { value: "none", label: "No Edition" },
-          { value: "negative", label: "Negative Edition" },
-        ],
-        default: "none",
-      },
-    ],
-    category: "Consumables",
-  },
-  {
-    id: "create_spectral_card",
-    label: "Create Spectral Card",
-    description: "Create a specific or random Spectral card",
-    applicableTriggers: [...GENERIC_TRIGGERS],
-    params: [
-      {
-        id: "spectral_card",
-        type: "select",
-        label: "Spectral Card",
-        options: [
-          { value: "random", label: "Random Spectral Card" },
-          ...SPECTRAL_CARDS,
-        ],
+        label: "Specific Card",
+        options: (parentValues: Record<string, unknown>) => {
+          const selectedSet = parentValues?.set as string;
+
+          if (!selectedSet || selectedSet === "random") {
+            return [{ value: "random", label: "Random from Set" }];
+          }
+
+          // Handle vanilla sets
+          if (selectedSet === "Tarot") {
+            const vanillaCards = TAROT_CARDS.map((card) => ({
+              value: card.key,
+              label: card.label,
+            }));
+
+            const customCards = CUSTOM_CONSUMABLES()
+              .filter((consumable) => consumable.set === "Tarot")
+              .map((consumable) => ({
+                value: consumable.value,
+                label: consumable.label,
+              }));
+
+            return [
+              { value: "random", label: "Random from Set" },
+              ...vanillaCards,
+              ...customCards,
+            ];
+          }
+
+          if (selectedSet === "Planet") {
+            const vanillaCards = PLANET_CARDS.map((card) => ({
+              value: card.key,
+              label: card.label,
+            }));
+
+            const customCards = CUSTOM_CONSUMABLES()
+              .filter((consumable) => consumable.set === "Planet")
+              .map((consumable) => ({
+                value: consumable.value,
+                label: consumable.label,
+              }));
+
+            return [
+              { value: "random", label: "Random from Set" },
+              ...vanillaCards,
+              ...customCards,
+            ];
+          }
+
+          if (selectedSet === "Spectral") {
+            const vanillaCards = SPECTRAL_CARDS.map((card) => ({
+              value: card.key,
+              label: card.label,
+            }));
+
+            const customCards = CUSTOM_CONSUMABLES()
+              .filter((consumable) => consumable.set === "Spectral")
+              .map((consumable) => ({
+                value: consumable.value,
+                label: consumable.label,
+              }));
+
+            return [
+              { value: "random", label: "Random from Set" },
+              ...vanillaCards,
+              ...customCards,
+            ];
+          }
+
+          // Handle custom sets
+          const setKey = selectedSet.includes("_")
+            ? selectedSet.split("_").slice(1).join("_")
+            : selectedSet;
+
+          const customConsumablesInSet = CUSTOM_CONSUMABLES().filter(
+            (consumable) =>
+              consumable.set === setKey || consumable.set === selectedSet
+          );
+
+          return [
+            { value: "random", label: "Random from Set" },
+            ...customConsumablesInSet,
+          ];
+        },
         default: "random",
       },
       {

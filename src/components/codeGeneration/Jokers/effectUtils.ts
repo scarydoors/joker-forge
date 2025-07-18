@@ -15,9 +15,6 @@ import { generateCopyCardToDeckReturn } from "./effects/CopyCardToDeckEffect";
 import { generateDeleteCardReturn } from "./effects/DeleteCardEffect";
 import { generateEditCardReturn } from "./effects/EditCardEffect";
 import { generateModifyInternalVariableReturn } from "./effects/ModifyInternalVariableEffect";
-import { generateAddTarotCardReturn } from "./effects/AddTarotCardEffect";
-import { generateAddPlanetCardReturn } from "./effects/AddPlanetCardEffect";
-import { generateAddSpectralCardReturn } from "./effects/AddSpectralCardEffect";
 import { generateDestroyConsumableReturn } from "./effects/DestroyConsumableEffect";
 import { generateCopyConsumableReturn } from "./effects/CopyConsumableEffect";
 import { generateCreateJokerReturn } from "./effects/CreateJokerEffect";
@@ -68,6 +65,7 @@ import {
   generatePassiveJokerSlots,
 } from "./effects/EditJokerSlotsEffect";
 import { generateAddChipsReturn } from "./effects/AddChipsEffect";
+import { generateCreateConsumableReturn } from "./effects/CreateConsumableEffect";
 
 interface ExtendedEffect extends Effect {
   _isInRandomGroup?: boolean;
@@ -423,12 +421,6 @@ const generateSingleEffect = (
       return generateEditCardReturn(effect, triggerType);
     case "modify_internal_variable":
       return generateModifyInternalVariableReturn(effect, triggerType);
-    case "create_tarot_card":
-      return generateAddTarotCardReturn(effect, triggerType);
-    case "create_planet_card":
-      return generateAddPlanetCardReturn(effect, triggerType);
-    case "create_spectral_card":
-      return generateAddSpectralCardReturn(effect, triggerType);
     case "destroy_consumable":
       return generateDestroyConsumableReturn(effect, triggerType);
     case "copy_consumable":
@@ -479,6 +471,8 @@ const generateSingleEffect = (
       return generateEditConsumableSlotsReturn(effect, sameTypeCount);
     case "edit_joker_slots":
       return generateEditJokerSlotsReturn(effect, sameTypeCount);
+    case "create_consumable":
+      return generateCreateConsumableReturn(effect, triggerType);
 
     default:
       return {
