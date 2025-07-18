@@ -41,7 +41,7 @@ import { GameVariable } from "../data/Jokers/GameVars";
 import { motion } from "framer-motion";
 import { getConsumableConditionTypeById } from "../data/Consumables/Conditions";
 import { getConsumableEffectTypeById } from "../data/Consumables/Effects";
-import { ConsumableData } from "../ConsumableCard";
+import { ConsumableData } from "../data/BalatroUtils";
 
 type ItemData = JokerData | ConsumableData;
 type ItemType = "joker" | "consumable";

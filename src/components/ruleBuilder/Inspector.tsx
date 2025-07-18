@@ -441,11 +441,23 @@ const ParameterField: React.FC<ParameterFieldProps> = ({
 
   switch (param.type) {
     case "select": {
-      let options =
-        param.options?.map((option) => ({
+      let options: Array<{ value: string; label: string }> = [];
+
+      if (typeof param.options === "function") {
+        // Check if the function expects parentValues parameter
+        if (param.options.length > 0) {
+          // Function expects parentValues
+          options = param.options(parentValues || {});
+        } else {
+          // Function with no parameters, but expects parentValues argument
+          options = param.options(parentValues || {});
+        }
+      } else if (Array.isArray(param.options)) {
+        options = param.options.map((option) => ({
           value: option.value,
           label: option.label,
-        })) || [];
+        }));
+      }
 
       if (param.id === "specific_suit" && joker) {
         options = addSuitVariablesToOptions(options, joker);

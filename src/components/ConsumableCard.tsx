@@ -12,26 +12,8 @@ import {
 
 import Tooltip from "./generic/Tooltip";
 import { formatBalatroText } from "./generic/balatroTextFormatter";
-import type { Rule } from "./ruleBuilder/types";
 import { validateJokerName } from "./generic/validationUtils";
-
-export interface ConsumableData {
-  id: string;
-  name: string;
-  description: string;
-  imagePreview: string;
-  overlayImagePreview?: string;
-  set: "Tarot" | "Planet" | "Spectral" | string;
-  cost?: number;
-  unlocked?: boolean;
-  discovered?: boolean;
-  hidden?: boolean;
-  can_repeat_soul?: boolean;
-  rules?: Rule[];
-  placeholderCreditIndex?: number;
-  consumableKey?: string;
-  hasUserUploadedImage?: boolean;
-}
+import { ConsumableData } from "./data/BalatroUtils";
 
 interface ConsumableCardProps {
   consumable: ConsumableData;

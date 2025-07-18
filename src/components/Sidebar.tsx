@@ -11,7 +11,6 @@ import {
   BookmarkIcon,
   CodeBracketIcon,
   LinkIcon,
-  SwatchIcon,
   CakeIcon,
 } from "@heroicons/react/24/solid";
 import { JokerData } from "./JokerCard";
@@ -80,7 +79,6 @@ const Sidebar: React.FC<SidebarProps> = ({
     { id: "overview", label: "Overview", icon: HomeIcon },
     { id: "metadata", label: "Mod Metadata", icon: DocumentTextIcon },
     { id: "jokers", label: "Jokers", icon: PuzzlePieceIcon },
-    { id: "rarities", label: "Rarities", icon: SwatchIcon },
     { id: "consumables", label: "Consumables", icon: CakeIcon },
     //{ id: "decks", label: "Decks", icon: RectangleStackIcon },
     //{ id: "editions", label: "Editions", icon: SparklesIcon },

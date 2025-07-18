@@ -1,6 +1,6 @@
 import JSZip from "jszip";
 import { JokerData } from "../JokerCard";
-import { ConsumableData } from "../ConsumableCard";
+import { ConsumableData } from "../data/BalatroUtils";
 
 export const processImages = async (
   items: (JokerData | ConsumableData)[],

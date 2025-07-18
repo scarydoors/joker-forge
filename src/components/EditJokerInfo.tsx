@@ -57,7 +57,6 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
   onSave,
   onDelete,
   customRarities = [],
-  modPrefix,
 }) => {
   const [formData, setFormData] = useState<JokerData>(joker);
   const [activeTab, setActiveTab] = useState<"visual" | "description">(
@@ -82,7 +81,7 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
     description?: ValidationResult;
   }>({});
 
-  const rarityOptions = getRarityDropdownOptions(customRarities, modPrefix);
+  const rarityOptions = getRarityDropdownOptions(customRarities);
 
   const validateField = (field: string, value: string) => {
     let result: ValidationResult;
@@ -525,12 +524,15 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
   };
 
   const handleRarityChange = (value: string) => {
+    const parsedValue = parseInt(value, 10);
     let newRarity: number | string;
 
-    if (value.includes("_")) {
-      newRarity = value;
+    // If it's a valid vanilla rarity number (1-4), use as number
+    if (!isNaN(parsedValue) && parsedValue >= 1 && parsedValue <= 4) {
+      newRarity = parsedValue;
     } else {
-      newRarity = parseInt(value, 10);
+      // Otherwise it's a custom rarity, use as string
+      newRarity = value;
     }
 
     const previousRarity = formData.rarity;
@@ -563,7 +565,7 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
       return 5;
     }
 
-    const rarityData = getRarityByValue(rarity, customRarities, modPrefix);
+    const rarityData = getRarityByValue(rarity, customRarities);
     if (rarityData?.isCustom) {
       return 5;
     }
@@ -1348,16 +1350,8 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
             <BalatroJokerCard
               joker={formData}
               size="lg"
-              rarityName={getRarityDisplayName(
-                formData.rarity,
-                customRarities,
-                modPrefix
-              )}
-              rarityColor={getRarityBadgeColor(
-                formData.rarity,
-                customRarities,
-                modPrefix
-              )}
+              rarityName={getRarityDisplayName(formData.rarity, customRarities)}
+              rarityColor={getRarityBadgeColor(formData.rarity, customRarities)}
             />
           </div>
         </div>

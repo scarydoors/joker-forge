@@ -15,6 +15,7 @@ export interface RandomGroup {
   chance_denominator: number | string;
   effects: Effect[];
 }
+
 // A group of conditions with a logical operator (AND/OR)
 export interface ConditionGroup {
   id: string;
@@ -53,24 +54,26 @@ export interface ShowWhenCondition {
   values: string[];
 }
 
+// Interface for condition parameter options
+export interface ConditionParameterOption {
+  value: string;
+  label: string;
+}
+
 // Interface for condition parameters
 export interface ConditionParameter {
   id: string;
   type: "select" | "number" | "range" | "text";
   label: string;
   description?: string;
-  options?: ConditionParameterOption[];
+  options?:
+    | ConditionParameterOption[]
+    | (() => ConditionParameterOption[])
+    | ((parentValues: Record<string, unknown>) => ConditionParameterOption[]);
   min?: number;
   max?: number;
   default?: unknown;
-  // When this parameter should be shown based on other parameter values
   showWhen?: ShowWhenCondition;
-}
-
-// Interface for condition parameter options
-export interface ConditionParameterOption {
-  value: string;
-  label: string;
 }
 
 // Interface for condition type definitions
@@ -83,24 +86,26 @@ export interface ConditionTypeDefinition {
   category: string;
 }
 
+// Interface for effect parameter options
+export interface EffectParameterOption {
+  value: string;
+  label: string;
+}
+
 // Interface for effect parameters
 export interface EffectParameter {
   id: string;
   type: "select" | "number" | "range" | "text";
   label: string;
   description?: string;
-  options?: EffectParameterOption[];
+  options?:
+    | EffectParameterOption[]
+    | (() => EffectParameterOption[])
+    | ((parentValues: Record<string, unknown>) => EffectParameterOption[]);
   min?: number;
   max?: number;
   default?: unknown;
-  // When this parameter should be shown based on other parameter values
   showWhen?: ShowWhenCondition;
-}
-
-// Interface for effect parameter options
-export interface EffectParameterOption {
-  value: string;
-  label: string;
 }
 
 // Interface for effect type definitions

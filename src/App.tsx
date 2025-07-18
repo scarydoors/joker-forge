@@ -7,6 +7,7 @@ import {
   useNavigate,
 } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
+import { PuzzlePieceIcon, SwatchIcon } from "@heroicons/react/24/outline";
 import Sidebar from "./components/Sidebar";
 import OverviewPage from "./components/pages/OverviewPage";
 import JokersPage from "./components/pages/JokersPage";
@@ -15,16 +16,15 @@ import ModMetadataPage, {
   DEFAULT_MOD_METADATA,
 } from "./components/pages/ModMetadataPage";
 import RaritiesPage from "./components/pages/RaritiesPage";
-import ConsumablesPage, {
-  ConsumableSetData,
-} from "./components/pages/ConsumablesPage";
+import { ConsumableSetData } from "./components/data/BalatroUtils";
+import ConsumablesPage from "./components/pages/ConsumablesPage";
 import DecksPage from "./components/pages/DecksPage";
 import EditionsPage from "./components/pages/EditionsPage";
 import VanillaRemadePage from "./components/pages/VanillaReforgedPage";
 import AcknowledgementsPage from "./components/pages/AcknowledgementsPage";
 import NotFoundPage from "./components/pages/NotFoundPage";
 import { JokerData } from "./components/JokerCard";
-import { ConsumableData } from "./components/ConsumableCard";
+import { ConsumableData } from "./components/data/BalatroUtils";
 import { RarityData } from "./components/pages/RaritiesPage";
 import { exportModCode } from "./components/codeGeneration/entry";
 import {
@@ -39,6 +39,7 @@ import {
   FolderIcon,
   ExclamationCircleIcon,
 } from "@heroicons/react/24/outline";
+import { updateDataRegistry } from "./components/data/BalatroUtils";
 
 interface AlertState {
   isVisible: boolean;
@@ -57,6 +58,64 @@ interface AutoSaveData {
 }
 
 const AUTO_SAVE_KEY = "joker-forge-autosave";
+
+const FloatingTabDock: React.FC<{
+  activeTab: "jokers" | "rarities";
+  onTabChange: (tab: "jokers" | "rarities") => void;
+}> = ({ activeTab, onTabChange }) => {
+  const tabs = [
+    {
+      id: "jokers" as const,
+      icon: PuzzlePieceIcon,
+      label: "Jokers",
+    },
+    {
+      id: "rarities" as const,
+      icon: SwatchIcon,
+      label: "Rarities",
+    },
+  ];
+
+  return (
+    <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-40">
+      <div className="bg-black-dark border-2 border-black-lighter rounded-full px-3 py-2 shadow-2xl">
+        <div className="flex items-center gap-2">
+          {tabs.map((tab) => {
+            const Icon = tab.icon;
+            const isActive = activeTab === tab.id;
+
+            return (
+              <button
+                key={tab.id}
+                onClick={() => onTabChange(tab.id)}
+                className={`
+                  relative group p-3 rounded-full transition-all duration-200 cursor-pointer
+                  ${
+                    isActive
+                      ? "bg-mint/20 border-2 border-mint text-mint scale-110"
+                      : "bg-black-darker/50 border-2 border-black-lighter text-white-darker hover:border-mint hover:text-mint hover:scale-105"
+                  }
+                `}
+                title={tab.label}
+              >
+                <Icon className="h-5 w-5" />
+
+                <div className="absolute -top-12 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
+                  <div className="bg-black-darker border border-black-lighter rounded-lg px-2 py-1 whitespace-nowrap">
+                    <span className="text-white-light text-xs font-medium">
+                      {tab.label}
+                    </span>
+                  </div>
+                  <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-black-lighter"></div>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+};
 
 function AppContent() {
   const location = useLocation();
@@ -88,6 +147,9 @@ function AppContent() {
   const [showRestoreModal, setShowRestoreModal] = useState(false);
   const [hasLoadedInitialData, setHasLoadedInitialData] = useState(false);
   const [showExportSuccessModal, setShowExportSuccessModal] = useState(false);
+  const [jokersRaritiesTab, setJokersRaritiesTab] = useState<
+    "jokers" | "rarities"
+  >("jokers");
 
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const statusTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -125,6 +187,15 @@ function AppContent() {
     },
     []
   );
+
+  useEffect(() => {
+    updateDataRegistry(
+      customRarities,
+      consumableSets,
+      consumables,
+      modMetadata.prefix || ""
+    );
+  }, [customRarities, consumableSets, consumables, modMetadata.prefix]);
 
   const loadFromLocalStorage = useCallback((): {
     modMetadata: ModMetadata;
@@ -537,6 +608,8 @@ function AppContent() {
     }
   };
 
+  const showFloatingDock = currentSection === "jokers";
+
   return (
     <div className="h-screen bg-black-darker flex overflow-hidden">
       <Sidebar
@@ -605,25 +678,25 @@ function AppContent() {
           <Route
             path="/jokers"
             element={
-              <JokersPage
-                modName={modMetadata.name}
-                jokers={jokers}
-                setJokers={setJokers}
-                selectedJokerId={selectedJokerId}
-                setSelectedJokerId={setSelectedJokerId}
-                customRarities={customRarities}
-                modPrefix={modMetadata.prefix || ""}
-              />
-            }
-          />
-          <Route
-            path="/rarities"
-            element={
-              <RaritiesPage
-                modName={modMetadata.name}
-                rarities={customRarities}
-                setRarities={setCustomRarities}
-              />
+              <>
+                {jokersRaritiesTab === "jokers" ? (
+                  <JokersPage
+                    modName={modMetadata.name}
+                    jokers={jokers}
+                    setJokers={setJokers}
+                    selectedJokerId={selectedJokerId}
+                    setSelectedJokerId={setSelectedJokerId}
+                    customRarities={customRarities}
+                    modPrefix={modMetadata.prefix || ""}
+                  />
+                ) : (
+                  <RaritiesPage
+                    modName={modMetadata.name}
+                    rarities={customRarities}
+                    setRarities={setCustomRarities}
+                  />
+                )}
+              </>
             }
           />
           <Route
@@ -660,6 +733,13 @@ function AppContent() {
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </motion.div>
+
+      {showFloatingDock && (
+        <FloatingTabDock
+          activeTab={jokersRaritiesTab}
+          onTabChange={setJokersRaritiesTab}
+        />
+      )}
 
       <AnimatePresence>
         {autoSaveStatus !== "idle" && (

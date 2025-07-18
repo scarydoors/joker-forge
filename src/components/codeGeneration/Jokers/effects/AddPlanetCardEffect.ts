@@ -1,3 +1,5 @@
+//! DEPRECIATED FILE
+
 import type { EffectReturn } from "../effectUtils";
 import type { Effect } from "../../../ruleBuilder/types";
 import { PLANET_CARDS } from "../../../data/BalatroUtils";
