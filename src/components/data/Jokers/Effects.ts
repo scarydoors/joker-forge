@@ -503,7 +503,10 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
         id: "new_rank",
         type: "select",
         label: "New Rank",
-        options: [{ value: "none", label: "Don't Change" }, ...RANKS],
+        options: [
+          { value: "none", label: "Don't Change" },
+          ...RANKS.map((rank) => ({ value: rank.label, label: rank.label })),
+        ],
         default: "none",
       },
       {
