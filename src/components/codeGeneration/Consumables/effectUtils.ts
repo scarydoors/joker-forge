@@ -14,6 +14,8 @@ import { generateCreateConsumableReturn } from "./effects/CreateConsumableEffect
 import { generateEditHandSizeReturn } from "./effects/EditHandSizeEffect";
 import { generateEditHandsReturn } from "./effects/EditHandsEffect";
 import { generateEditDiscardsReturn } from "./effects/EditDiscardsEffect";
+import { generateConvertAllCardsToSuitReturn } from "./effects/ConvertAllCardsToSuitEffect";
+import { generateConvertAllCardsToRankReturn } from "./effects/ConvertAllCardsToRankEffect";
 
 export interface EffectReturn {
   statement: string;
@@ -175,6 +177,12 @@ const generateSingleEffect = (effect: Effect): EffectReturn => {
 
     case "edit_discards":
       return generateEditDiscardsReturn(effect);
+
+    case "convert_all_cards_to_suit":
+      return generateConvertAllCardsToSuitReturn(effect);
+
+    case "convert_all_cards_to_rank":
+      return generateConvertAllCardsToRankReturn(effect);
 
     default:
       return {

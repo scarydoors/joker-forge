@@ -248,6 +248,41 @@ export const CONSUMABLE_EFFECT_TYPES: EffectTypeDefinition[] = [
 
   // ===== OTHER EFFECTS =====
   {
+    id: "convert_all_cards_to_suit",
+    label: "Convert All Cards to Suit",
+    description: "Convert all cards in hand to a specific suit",
+    applicableTriggers: ["consumable_used"],
+    params: [
+      {
+        id: "suit",
+        type: "select",
+        label: "Target Suit",
+        options: [...SUITS, { value: "random", label: "Random Suit" }],
+        default: "Hearts",
+      },
+    ],
+    category: "Card Modification",
+  },
+  {
+    id: "convert_all_cards_to_rank",
+    label: "Convert All Cards to Rank",
+    description: "Convert all cards in hand to a specific rank",
+    applicableTriggers: ["consumable_used"],
+    params: [
+      {
+        id: "rank",
+        type: "select",
+        label: "Target Rank",
+        options: [
+          ...RANKS.map((rank) => ({ value: rank.label, label: rank.label })),
+          { value: "random", label: "Random Rank" },
+        ],
+        default: "Ace",
+      },
+    ],
+    category: "Card Modification",
+  },
+  {
     id: "destroy_random_cards",
     label: "Destroy Random Cards",
     description: "Destroy a number of random cards from hand",
