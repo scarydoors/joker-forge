@@ -11,6 +11,9 @@ import { generateDestroyRandomCardsReturn } from "./effects/DestroyRandomCardsEf
 import { generateDoubleDollarsReturn } from "./effects/DoubleDollarsEffect";
 import { generateAddDollarsFromJokersReturn } from "./effects/AddDollarsFromJokersEffect";
 import { generateCreateConsumableReturn } from "./effects/CreateConsumableEffect";
+import { generateEditHandSizeReturn } from "./effects/EditHandSizeEffect";
+import { generateEditHandsReturn } from "./effects/EditHandsEffect";
+import { generateEditDiscardsReturn } from "./effects/EditDiscardsEffect";
 
 export interface EffectReturn {
   statement: string;
@@ -163,6 +166,15 @@ const generateSingleEffect = (effect: Effect): EffectReturn => {
 
     case "destroy_random_cards":
       return generateDestroyRandomCardsReturn(effect);
+
+    case "edit_hand_size":
+      return generateEditHandSizeReturn(effect);
+
+    case "edit_hands":
+      return generateEditHandsReturn(effect);
+
+    case "edit_discards":
+      return generateEditDiscardsReturn(effect);
 
     default:
       return {

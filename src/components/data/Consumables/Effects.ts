@@ -160,6 +160,92 @@ export const CONSUMABLE_EFFECT_TYPES: EffectTypeDefinition[] = [
     category: "Selected Cards",
   },
 
+  // ===== HAND EFFECTS =====
+  {
+    id: "edit_hand_size",
+    label: "Edit Hand Size",
+    description: "Add, subtract, or set the player's hand size",
+    applicableTriggers: ["consumable_used"],
+    params: [
+      {
+        id: "operation",
+        type: "select",
+        label: "Operation",
+        options: [
+          { value: "add", label: "Add" },
+          { value: "subtract", label: "Subtract" },
+          { value: "set", label: "Set" },
+        ],
+        default: "add",
+      },
+      {
+        id: "value",
+        type: "number",
+        label: "Amount",
+        default: 1,
+        min: 1,
+        max: 50,
+      },
+    ],
+    category: "Hand Effects",
+  },
+  {
+    id: "edit_hands",
+    label: "Edit Hands",
+    description: "Add, subtract, or set the player's hands for this round",
+    applicableTriggers: ["consumable_used"],
+    params: [
+      {
+        id: "operation",
+        type: "select",
+        label: "Operation",
+        options: [
+          { value: "add", label: "Add" },
+          { value: "subtract", label: "Subtract" },
+          { value: "set", label: "Set" },
+        ],
+        default: "add",
+      },
+      {
+        id: "value",
+        type: "number",
+        label: "Amount",
+        default: 1,
+        min: 1,
+        max: 50,
+      },
+    ],
+    category: "Hand Effects",
+  },
+  {
+    id: "edit_discards",
+    label: "Edit Discards",
+    description: "Add, subtract, or set the player's discards for this round",
+    applicableTriggers: ["consumable_used"],
+    params: [
+      {
+        id: "operation",
+        type: "select",
+        label: "Operation",
+        options: [
+          { value: "add", label: "Add" },
+          { value: "subtract", label: "Subtract" },
+          { value: "set", label: "Set" },
+        ],
+        default: "add",
+      },
+      {
+        id: "value",
+        type: "number",
+        label: "Amount",
+        default: 1,
+        min: 1,
+        max: 50,
+      },
+    ],
+    category: "Hand Effects",
+  },
+
   // ===== OTHER EFFECTS =====
   {
     id: "destroy_random_cards",
