@@ -336,7 +336,7 @@ const EditConsumableSetModal: React.FC<EditConsumableSetModalProps> = ({
                   />
                   <div className="grid grid-cols-2 gap-3">
                     <InputField
-                      label="Collection Rows"
+                      label="Collection Row 1"
                       value={
                         setFormData.collection_rows?.[0]?.toString() || "4"
                       }
@@ -353,7 +353,7 @@ const EditConsumableSetModal: React.FC<EditConsumableSetModalProps> = ({
                       max="10"
                     />
                     <InputField
-                      label="Collection Columns"
+                      label="Collection Row 2"
                       value={
                         setFormData.collection_rows?.[1]?.toString() || "5"
                       }
