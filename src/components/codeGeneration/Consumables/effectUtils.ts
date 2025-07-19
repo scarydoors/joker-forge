@@ -14,6 +14,7 @@ import { generateConvertAllCardsToSuitReturn } from "./effects/ConvertAllCardsTo
 import { generateConvertAllCardsToRankReturn } from "./effects/ConvertAllCardsToRankEffect";
 import { generateEditCardsReturn } from "./effects/EditCardsEffect";
 import { generateEditCardsInHandReturn } from "./effects/EditCardsInHandEffect";
+import { generateCreateJokerReturn } from "./effects/CreateJokerEffect";
 
 export interface EffectReturn {
   statement: string;
@@ -172,6 +173,9 @@ const generateSingleEffect = (effect: Effect): EffectReturn => {
 
     case "edit_cards_in_hand":
       return generateEditCardsInHandReturn(effect);
+
+    case "create_joker":
+      return generateCreateJokerReturn(effect);
 
     default:
       return {

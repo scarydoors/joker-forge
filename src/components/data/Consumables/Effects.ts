@@ -21,6 +21,7 @@ import {
   SPECTRAL_CARDS,
   CUSTOM_CONSUMABLES,
   CONSUMABLE_SETS,
+  RARITIES,
 } from "../BalatroUtils";
 
 export const CONSUMABLE_EFFECT_CATEGORIES: CategoryDefinition[] = [
@@ -539,6 +540,63 @@ export const CONSUMABLE_EFFECT_TYPES: EffectTypeDefinition[] = [
       },
     ],
     category: "Card Modification",
+  },
+  {
+    id: "create_joker",
+    label: "Create Joker",
+    description:
+      "Create a random or specific joker card. For creating jokers from your own mod, it is j_[modprefix]_[joker_name]. You can find your mod prefix in the mod metadata page.",
+    applicableTriggers: ["consumable_used"],
+    params: [
+      {
+        id: "joker_type",
+        type: "select",
+        label: "Joker Type",
+        options: [
+          { value: "random", label: "Random Joker" },
+          { value: "specific", label: "Specific Joker" },
+        ],
+        default: "random",
+      },
+      {
+        id: "rarity",
+        type: "select",
+        label: "Rarity",
+        options: () => [
+          { value: "random", label: "Any Rarity" },
+          ...RARITIES(),
+        ],
+        default: "random",
+        showWhen: {
+          parameter: "joker_type",
+          values: ["random"],
+        },
+      },
+      {
+        id: "joker_key",
+        type: "text",
+        label: "Joker Key (e.g., j_joker, j_greedy_joker)",
+        default: "j_joker",
+        showWhen: {
+          parameter: "joker_type",
+          values: ["specific"],
+        },
+      },
+      {
+        id: "edition",
+        type: "select",
+        label: "Edition",
+        options: [
+          { value: "none", label: "No Edition" },
+          ...EDITIONS.map((edition) => ({
+            value: edition.key,
+            label: edition.label,
+          })),
+        ],
+        default: "none",
+      },
+    ],
+    category: "Consumables",
   },
 ];
 
