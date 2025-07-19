@@ -57,9 +57,10 @@ export const CONSUMABLE_EFFECT_CATEGORIES: CategoryDefinition[] = [
 export const CONSUMABLE_EFFECT_TYPES: EffectTypeDefinition[] = [
   // ===== SELECTED CARDS EFFECTS =====
   {
-    id: "enhance_cards",
-    label: "Enhance Selected Cards",
-    description: "Apply an enhancement to the selected cards",
+    id: "edit_cards",
+    label: "Edit Selected Cards",
+    description:
+      "Apply multiple modifications to selected cards (enhancement, seal, edition, suit, rank)",
     applicableTriggers: ["consumable_used"],
     params: [
       {
@@ -67,96 +68,60 @@ export const CONSUMABLE_EFFECT_TYPES: EffectTypeDefinition[] = [
         type: "select",
         label: "Enhancement Type",
         options: [
+          { value: "none", label: "No Change" },
           ...ENHANCEMENTS,
           { value: "random", label: "Random Enhancement" },
         ],
-        default: "m_bonus",
+        default: "none",
       },
-    ],
-    category: "Selected Cards",
-  },
-  {
-    id: "change_suit",
-    label: "Change Selected Cards Suit",
-    description: "Change the suit of selected cards",
-    applicableTriggers: ["consumable_used"],
-    params: [
-      {
-        id: "suit",
-        type: "select",
-        label: "New Suit",
-        options: [...SUITS, { value: "random", label: "Random Suit" }],
-        default: "Hearts",
-      },
-    ],
-    category: "Selected Cards",
-  },
-  {
-    id: "change_rank",
-    label: "Change Selected Cards Rank",
-    description: "Change the rank of selected cards",
-    applicableTriggers: ["consumable_used"],
-    params: [
-      {
-        id: "rank",
-        type: "select",
-        label: "New Rank",
-        options: [
-          ...RANKS.map((rank) => ({ value: rank.label, label: rank.label })),
-          { value: "random", label: "Random Rank" },
-        ],
-        default: "Ace",
-      },
-    ],
-    category: "Selected Cards",
-  },
-  {
-    id: "add_seal",
-    label: "Add Seal to Selected Cards",
-    description: "Apply a seal to the selected cards",
-    applicableTriggers: ["consumable_used"],
-    params: [
       {
         id: "seal",
         type: "select",
         label: "Seal Type",
         options: [
+          { value: "none", label: "No Change" },
           ...SEALS.map((seal) => ({ value: seal.value, label: seal.label })),
           { value: "random", label: "Random Seal" },
         ],
-        default: "Gold",
+        default: "none",
       },
-    ],
-    category: "Selected Cards",
-  },
-  {
-    id: "add_edition",
-    label: "Add Edition to Selected Cards",
-    description: "Apply an edition to the selected cards",
-    applicableTriggers: ["consumable_used"],
-    params: [
       {
         id: "edition",
         type: "select",
         label: "Edition Type",
         options: [
+          { value: "none", label: "No Change" },
           ...EDITIONS.map((edition) => ({
             value: edition.key,
             label: edition.label,
           })),
           { value: "random", label: "Random Edition" },
         ],
-        default: "e_foil",
+        default: "none",
+      },
+      {
+        id: "suit",
+        type: "select",
+        label: "Suit",
+        options: [
+          { value: "none", label: "No Change" },
+          ...SUITS,
+          { value: "random", label: "Random Suit" },
+        ],
+        default: "none",
+      },
+      {
+        id: "rank",
+        type: "select",
+        label: "Rank",
+        options: [
+          { value: "none", label: "No Change" },
+          ...RANKS.map((rank) => ({ value: rank.label, label: rank.label })),
+          { value: "random", label: "Random Rank" },
+        ],
+        default: "none",
       },
     ],
-    category: "Selected Cards",
-  },
-  {
-    id: "destroy_selected_cards",
-    label: "Destroy Selected Cards",
-    description: "Destroy all currently selected cards",
-    applicableTriggers: ["consumable_used"],
-    params: [],
     category: "Selected Cards",
   },
 

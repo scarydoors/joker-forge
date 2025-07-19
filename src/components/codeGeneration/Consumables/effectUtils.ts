@@ -1,10 +1,6 @@
 import type { Effect } from "../../ruleBuilder/types";
 import { generateAddDollarsReturn } from "./effects/AddDollarsEffect";
-import { generateEnhanceCardsReturn } from "./effects/EnhanceCardsEffect";
-import { generateChangeSuitReturn } from "./effects/ChangeSuitEffect";
-import { generateChangeRankReturn } from "./effects/ChangeRankEffect";
-import { generateAddSealReturn } from "./effects/AddSealEffect";
-import { generateAddEditionReturn } from "./effects/AddEditionEffect";
+
 import { generateLevelUpHandReturn } from "./effects/LevelUpHandEffect";
 import { generateDestroySelectedCardsReturn } from "./effects/DestroySelectedCardsEffect";
 import { generateDestroyRandomCardsReturn } from "./effects/DestroyRandomCardsEffect";
@@ -16,6 +12,7 @@ import { generateEditHandsReturn } from "./effects/EditHandsEffect";
 import { generateEditDiscardsReturn } from "./effects/EditDiscardsEffect";
 import { generateConvertAllCardsToSuitReturn } from "./effects/ConvertAllCardsToSuitEffect";
 import { generateConvertAllCardsToRankReturn } from "./effects/ConvertAllCardsToRankEffect";
+import { generateEditCardsReturn } from "./effects/EditCardsEffect";
 
 export interface EffectReturn {
   statement: string;
@@ -133,6 +130,9 @@ export function generateEffectReturnStatement(
 
 const generateSingleEffect = (effect: Effect): EffectReturn => {
   switch (effect.type) {
+    case "edit_cards":
+      return generateEditCardsReturn(effect);
+
     case "add_dollars":
       return generateAddDollarsReturn(effect);
 
@@ -144,21 +144,6 @@ const generateSingleEffect = (effect: Effect): EffectReturn => {
 
     case "create_consumable":
       return generateCreateConsumableReturn(effect);
-
-    case "enhance_cards":
-      return generateEnhanceCardsReturn(effect);
-
-    case "change_suit":
-      return generateChangeSuitReturn(effect);
-
-    case "change_rank":
-      return generateChangeRankReturn(effect);
-
-    case "add_seal":
-      return generateAddSealReturn(effect);
-
-    case "add_edition":
-      return generateAddEditionReturn(effect);
 
     case "level_up_hand":
       return generateLevelUpHandReturn(effect);
