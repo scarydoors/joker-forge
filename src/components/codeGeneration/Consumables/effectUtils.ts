@@ -13,6 +13,7 @@ import { generateEditDiscardsReturn } from "./effects/EditDiscardsEffect";
 import { generateConvertAllCardsToSuitReturn } from "./effects/ConvertAllCardsToSuitEffect";
 import { generateConvertAllCardsToRankReturn } from "./effects/ConvertAllCardsToRankEffect";
 import { generateEditCardsReturn } from "./effects/EditCardsEffect";
+import { generateEditCardsInHandReturn } from "./effects/EditCardsInHandEffect";
 
 export interface EffectReturn {
   statement: string;
@@ -168,6 +169,9 @@ const generateSingleEffect = (effect: Effect): EffectReturn => {
 
     case "convert_all_cards_to_rank":
       return generateConvertAllCardsToRankReturn(effect);
+
+    case "edit_cards_in_hand":
+      return generateEditCardsInHandReturn(effect);
 
     default:
       return {

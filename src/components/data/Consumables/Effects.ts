@@ -464,6 +464,82 @@ export const CONSUMABLE_EFFECT_TYPES: EffectTypeDefinition[] = [
     ],
     category: "Consumables",
   },
+  {
+    id: "edit_cards_in_hand",
+    label: "Edit Cards in Hand",
+    description:
+      "Apply multiple modifications to random cards in hand (enhancement, seal, edition, suit, rank)",
+    applicableTriggers: ["consumable_used"],
+    params: [
+      {
+        id: "amount",
+        type: "number",
+        label: "Number of Cards",
+        default: 1,
+        min: 1,
+        max: 8,
+      },
+      {
+        id: "enhancement",
+        type: "select",
+        label: "Enhancement Type",
+        options: [
+          { value: "none", label: "No Change" },
+          ...ENHANCEMENTS,
+          { value: "random", label: "Random Enhancement" },
+        ],
+        default: "none",
+      },
+      {
+        id: "seal",
+        type: "select",
+        label: "Seal Type",
+        options: [
+          { value: "none", label: "No Change" },
+          ...SEALS.map((seal) => ({ value: seal.value, label: seal.label })),
+          { value: "random", label: "Random Seal" },
+        ],
+        default: "none",
+      },
+      {
+        id: "edition",
+        type: "select",
+        label: "Edition Type",
+        options: [
+          { value: "none", label: "No Change" },
+          ...EDITIONS.map((edition) => ({
+            value: edition.key,
+            label: edition.label,
+          })),
+          { value: "random", label: "Random Edition" },
+        ],
+        default: "none",
+      },
+      {
+        id: "suit",
+        type: "select",
+        label: "Suit",
+        options: [
+          { value: "none", label: "No Change" },
+          ...SUITS,
+          { value: "random", label: "Random Suit" },
+        ],
+        default: "none",
+      },
+      {
+        id: "rank",
+        type: "select",
+        label: "Rank",
+        options: [
+          { value: "none", label: "No Change" },
+          ...RANKS.map((rank) => ({ value: rank.label, label: rank.label })),
+          { value: "random", label: "Random Rank" },
+        ],
+        default: "none",
+      },
+    ],
+    category: "Card Modification",
+  },
 ];
 
 export function getConsumableEffectsForTrigger(
