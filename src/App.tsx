@@ -720,11 +720,18 @@ function AppContent() {
             path="/vanilla"
             element={
               <VanillaRemadePage
-                onDuplicateToProject={(joker) => {
-                  setJokers([...jokers, joker]);
+                onDuplicateToProject={(item, type) => {
+                  if (type === "joker") {
+                    setJokers([...jokers, item as JokerData]);
+                  } else if (type === "consumable") {
+                    setConsumables([...consumables, item as ConsumableData]);
+                  }
                 }}
                 onNavigateToJokers={() => {
                   navigate("/jokers");
+                }}
+                onNavigateToConsumables={() => {
+                  navigate("/consumables");
                 }}
               />
             }
