@@ -2,9 +2,7 @@
   "metadata": {
     "id": "vanillaremade",
     "name": "VanillaRemade",
-    "author": [
-      "Jayd"
-    ],
+    "author": ["Jayd"],
     "description": "All vanilla jokers, remade with JokerForge.",
     "prefix": "vanillar",
     "main_file": "main.lua",
@@ -13,9 +11,7 @@
     "badge_colour": "666665",
     "badge_text_colour": "FFFFFF",
     "display_name": "VanillaRemade",
-    "dependencies": [
-      "Steamodded (>=1.0.0~BETA-0404a)"
-    ],
+    "dependencies": ["Steamodded (>=1.0.0~BETA-0404a)"],
     "conflicts": [],
     "provides": []
   },
@@ -8907,6 +8903,66 @@
       ],
       "placeholderCreditIndex": 15,
       "consumableKey": "thetower",
+      "can_repeat_soul": false,
+      "hasUserUploadedImage": true
+    },
+    {
+      "id": "4aaee7ca-ba13-4ee6-b0fd-3c7a15a35de6",
+      "name": "The Hanged Man",
+      "description": "Destroys up to {C:attention}2{} selected cards",
+      "imagePreview": "data:image/png;base64,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",
+      "overlayImagePreview": "",
+      "set": "Tarot",
+      "cost": 3,
+      "unlocked": true,
+      "discovered": true,
+      "hidden": false,
+      "rules": [
+        {
+          "id": "4b79ac74-eaf3-4bce-8edc-6d00d2eb763d",
+          "trigger": "consumable_used",
+          "conditionGroups": [
+            {
+              "id": "597ea70f-bb72-4160-a52a-3e4db7faa6e6",
+              "operator": "and",
+              "conditions": [
+                {
+                  "id": "433cc375-6f82-4d3d-aa1a-f1094bbbee9b",
+                  "type": "cards_selected",
+                  "negate": false,
+                  "params": {
+                    "operator": "greater_than",
+                    "value": 0
+                  }
+                },
+                {
+                  "id": "3cd31d76-ffa3-4af5-8a66-e0ab90543ddb",
+                  "type": "cards_selected",
+                  "negate": false,
+                  "params": {
+                    "operator": "less_equals",
+                    "value": 2
+                  }
+                }
+              ]
+            }
+          ],
+          "effects": [
+            {
+              "id": "31cbe492-eaa3-4f1a-b845-50488c25d971",
+              "type": "destroy_selected_cards",
+              "params": {}
+            }
+          ],
+          "randomGroups": [],
+          "position": {
+            "x": 1035.5,
+            "y": 474
+          }
+        }
+      ],
+      "placeholderCreditIndex": 5,
+      "consumableKey": "thehangedman",
       "can_repeat_soul": false,
       "hasUserUploadedImage": true
     },
