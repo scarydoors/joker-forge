@@ -399,11 +399,22 @@ export const CONSUMABLE_EFFECT_TYPES: EffectTypeDefinition[] = [
     category: "Hand Effects",
   },
   {
-    id: "add_dollars",
-    label: "Add Dollars",
-    description: "Give the player money",
+    id: "edit_dollars",
+    label: "Edit Dollars",
+    description: "Add, subtract, or set the player's money",
     applicableTriggers: ["consumable_used"],
     params: [
+      {
+        id: "operation",
+        type: "select",
+        label: "Operation",
+        options: [
+          { value: "add", label: "Add" },
+          { value: "subtract", label: "Subtract" },
+          { value: "set", label: "Set" },
+        ],
+        default: "add",
+      },
       {
         id: "value",
         type: "number",

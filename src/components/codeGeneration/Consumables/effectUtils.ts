@@ -1,6 +1,4 @@
 import type { Effect } from "../../ruleBuilder/types";
-import { generateAddDollarsReturn } from "./effects/AddDollarsEffect";
-
 import { generateLevelUpHandReturn } from "./effects/LevelUpHandEffect";
 import { generateDestroySelectedCardsReturn } from "./effects/DestroySelectedCardsEffect";
 import { generateDestroyRandomCardsReturn } from "./effects/DestroyRandomCardsEffect";
@@ -17,6 +15,7 @@ import { generateEditCardsInHandReturn } from "./effects/EditCardsInHandEffect";
 import { generateCreateJokerReturn } from "./effects/CreateJokerEffect";
 import { generateIncrementRankReturn } from "./effects/IncrementRankEffect";
 import { generateAddCardsToHandReturn } from "./effects/AddCardsToHandEffect";
+import { generateEditDollarsReturn } from "./effects/EditDollarsEffect";
 
 export interface EffectReturn {
   statement: string;
@@ -137,11 +136,11 @@ const generateSingleEffect = (effect: Effect): EffectReturn => {
     case "edit_cards":
       return generateEditCardsReturn(effect);
 
-    case "add_dollars":
-      return generateAddDollarsReturn(effect);
-
     case "double_dollars":
       return generateDoubleDollarsReturn(effect);
+
+    case "edit_dollars":
+      return generateEditDollarsReturn(effect);
 
     case "add_dollars_from_jokers":
       return generateAddDollarsFromJokersReturn(effect);

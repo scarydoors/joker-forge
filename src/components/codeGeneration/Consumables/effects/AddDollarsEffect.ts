@@ -1,3 +1,5 @@
+//! DEPRECATED: refer to 'setdollars' effect instead
+
 import type { Effect } from "../../../ruleBuilder/types";
 import type { EffectReturn } from "../effectUtils";
 
