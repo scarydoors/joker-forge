@@ -161,6 +161,60 @@ export const CONSUMABLE_EFFECT_TYPES: EffectTypeDefinition[] = [
     ],
     category: "Selected Cards",
   },
+  {
+    id: "copy_selected_cards",
+    label: "Copy Selected Cards",
+    description: "Create copies of selected cards with customizable properties",
+    applicableTriggers: ["consumable_used"],
+    params: [
+      {
+        id: "copies",
+        type: "number",
+        label: "Number of Copies per Card",
+        default: 1,
+        min: 1,
+        max: 5,
+      },
+      {
+        id: "enhancement",
+        type: "select",
+        label: "Enhancement Type",
+        options: [
+          { value: "none", label: "Keep Original Enhancement" },
+          ...ENHANCEMENTS,
+          { value: "random", label: "Random Enhancement" },
+        ],
+        default: "none",
+      },
+      {
+        id: "seal",
+        type: "select",
+        label: "Seal Type",
+        options: [
+          { value: "none", label: "Keep Original Seal" },
+          ...SEALS.map((seal) => ({ value: seal.value, label: seal.label })),
+          { value: "random", label: "Random Seal" },
+        ],
+        default: "none",
+      },
+      {
+        id: "edition",
+        type: "select",
+        label: "Edition Type",
+        options: [
+          { value: "none", label: "Keep Original Edition" },
+          { value: "remove", label: "Remove Edition" },
+          ...EDITIONS.map((edition) => ({
+            value: edition.key,
+            label: edition.label,
+          })),
+          { value: "random", label: "Random Edition" },
+        ],
+        default: "none",
+      },
+    ],
+    category: "Selected Cards",
+  },
 
   // ===== HAND EFFECTS =====
   {
