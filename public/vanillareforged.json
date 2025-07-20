@@ -10144,6 +10144,153 @@
       "hasUserUploadedImage": true
     },
     {
+      "id": "d59bd71f-e4fa-44c3-870b-134112ec3a32",
+      "name": "Familiar",
+      "description": "Destroy {C:attention}1{} random card in your hand,[s]add {C:attention}3{} random {C:enhanced}Enhanced{} {C:attention}face cards{} to your hand",
+      "imagePreview": "data:image/png;base64,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",
+      "overlayImagePreview": "",
+      "set": "Spectral",
+      "cost": 4,
+      "unlocked": true,
+      "discovered": true,
+      "hidden": false,
+      "rules": [
+        {
+          "id": "19736af2-ad9e-4b37-b212-f48c5cab09f8",
+          "trigger": "consumable_used",
+          "conditionGroups": [],
+          "effects": [
+            {
+              "id": "fcd2fc0c-e407-4c9b-9a89-b52ad60d6f75",
+              "type": "destroy_random_cards",
+              "params": {
+                "count": 1
+              }
+            },
+            {
+              "id": "c8a95a91-dea8-483e-ab8f-2702d3fe438e",
+              "type": "add_cards_to_hand",
+              "params": {
+                "count": 3,
+                "rank": "Face Cards",
+                "suit": "none",
+                "enhancement": "random",
+                "seal": "none",
+                "edition": "none"
+              }
+            }
+          ],
+          "randomGroups": [],
+          "position": {
+            "x": 1035.5,
+            "y": 474
+          }
+        }
+      ],
+      "placeholderCreditIndex": 15,
+      "consumableKey": "familiar",
+      "can_repeat_soul": false,
+      "hasUserUploadedImage": true
+    },
+    {
+      "id": "884f528b-89cf-4d77-9fcf-f2af5eea532f",
+      "name": "Grim",
+      "description": "Destroy {C:attention}1{} random card in your hand,[s] add {C:attention}2{} random {C:enhanced}Enhanced{} {C:attention}Aces{} to your hand",
+      "imagePreview": "data:image/png;base64,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",
+      "overlayImagePreview": "",
+      "set": "Spectral",
+      "cost": 4,
+      "unlocked": true,
+      "discovered": true,
+      "hidden": false,
+      "rules": [
+        {
+          "id": "19736af2-ad9e-4b37-b212-f48c5cab09f8",
+          "trigger": "consumable_used",
+          "conditionGroups": [],
+          "effects": [
+            {
+              "id": "fcd2fc0c-e407-4c9b-9a89-b52ad60d6f75",
+              "type": "destroy_random_cards",
+              "params": {
+                "count": 1
+              }
+            },
+            {
+              "id": "c8a95a91-dea8-483e-ab8f-2702d3fe438e",
+              "type": "add_cards_to_hand",
+              "params": {
+                "count": 2,
+                "rank": "Ace",
+                "suit": "none",
+                "enhancement": "random",
+                "seal": "none",
+                "edition": "none"
+              }
+            }
+          ],
+          "randomGroups": [],
+          "position": {
+            "x": 1035.5,
+            "y": 474
+          }
+        }
+      ],
+      "placeholderCreditIndex": 10,
+      "consumableKey": "grim",
+      "can_repeat_soul": false,
+      "hasUserUploadedImage": true
+    },
+    {
+      "id": "ad1303e3-e5c3-429d-b990-77f1b27814ba",
+      "name": "Incantation",
+      "description": "Destroy {C:attention}1{} random card in your hand,[s] add {C:attention}4{} random {C:enhanced}Enhanced{} {C:attention}numbered cards{} to your hand",
+      "imagePreview": "data:image/png;base64,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",
+      "overlayImagePreview": "",
+      "set": "Spectral",
+      "cost": 4,
+      "unlocked": true,
+      "discovered": true,
+      "hidden": false,
+      "rules": [
+        {
+          "id": "19736af2-ad9e-4b37-b212-f48c5cab09f8",
+          "trigger": "consumable_used",
+          "conditionGroups": [],
+          "effects": [
+            {
+              "id": "fcd2fc0c-e407-4c9b-9a89-b52ad60d6f75",
+              "type": "destroy_random_cards",
+              "params": {
+                "count": 1
+              }
+            },
+            {
+              "id": "c8a95a91-dea8-483e-ab8f-2702d3fe438e",
+              "type": "add_cards_to_hand",
+              "params": {
+                "count": 4,
+                "rank": "Numbered Cards",
+                "suit": "none",
+                "enhancement": "random",
+                "seal": "none",
+                "edition": "none"
+              }
+            }
+          ],
+          "randomGroups": [],
+          "position": {
+            "x": 1035.5,
+            "y": 474
+          }
+        }
+      ],
+      "placeholderCreditIndex": 14,
+      "consumableKey": "incantation",
+      "can_repeat_soul": false,
+      "hasUserUploadedImage": true
+    },
+    {
       "id": "5084882f-f44b-4881-9f09-bc5aa5577a14",
       "name": "Aura",
       "description": "Add {C:dark_edition}Foil{}, {C:dark_edition}Holographic{}, or {C:dark_edition}Polychrome{} effect to {C:attention}1{} selected card in hand",
