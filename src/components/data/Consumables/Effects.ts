@@ -125,6 +125,42 @@ export const CONSUMABLE_EFFECT_TYPES: EffectTypeDefinition[] = [
     ],
     category: "Selected Cards",
   },
+  {
+    id: "destroy_selected_cards",
+    label: "Destroy Selected Cards",
+    description: "Destroy all currently selected cards",
+    applicableTriggers: ["consumable_used"],
+    params: [],
+    category: "Selected Cards",
+  },
+  {
+    id: "increment_rank",
+    label: "Increment/Decrement Rank",
+    description:
+      "Increase or decrease the rank of selected cards by a specified amount",
+    applicableTriggers: ["consumable_used"],
+    params: [
+      {
+        id: "operation",
+        type: "select",
+        label: "Operation",
+        options: [
+          { value: "increment", label: "Increment (+)" },
+          { value: "decrement", label: "Decrement (-)" },
+        ],
+        default: "increment",
+      },
+      {
+        id: "value",
+        type: "number",
+        label: "Amount",
+        default: 1,
+        min: 1,
+        max: 13,
+      },
+    ],
+    category: "Selected Cards",
+  },
 
   // ===== HAND EFFECTS =====
   {
@@ -264,14 +300,6 @@ export const CONSUMABLE_EFFECT_TYPES: EffectTypeDefinition[] = [
       },
     ],
     category: "Card Modification",
-  },
-  {
-    id: "destroy_selected_cards",
-    label: "Destroy Selected Cards",
-    description: "Destroy all currently selected cards",
-    applicableTriggers: ["consumable_used"],
-    params: [],
-    category: "Selected Cards",
   },
   {
     id: "level_up_hand",
