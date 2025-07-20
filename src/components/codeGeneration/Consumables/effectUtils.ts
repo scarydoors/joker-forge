@@ -16,6 +16,7 @@ import { generateEditCardsReturn } from "./effects/EditCardsEffect";
 import { generateEditCardsInHandReturn } from "./effects/EditCardsInHandEffect";
 import { generateCreateJokerReturn } from "./effects/CreateJokerEffect";
 import { generateIncrementRankReturn } from "./effects/IncrementRankEffect";
+import { generateAddCardsToHandReturn } from "./effects/AddCardsToHandEffect";
 
 export interface EffectReturn {
   statement: string;
@@ -180,6 +181,9 @@ const generateSingleEffect = (effect: Effect): EffectReturn => {
 
     case "increment_rank":
       return generateIncrementRankReturn(effect);
+
+    case "add_cards_to_hand":
+      return generateAddCardsToHandReturn(effect);
 
     default:
       return {
