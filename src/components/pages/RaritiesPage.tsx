@@ -130,7 +130,7 @@ const RarityCard: React.FC<RarityCardProps> = ({
             {editingWeight ? (
               <input
                 type="number"
-                step="0.01"
+                step="0.001"
                 min="0"
                 value={tempWeight}
                 onChange={(e) => setTempWeight(parseFloat(e.target.value) || 0)}
@@ -191,6 +191,35 @@ const RaritiesPage: React.FC<RaritiesPageProps> = ({
   const [editingRarity, setEditingRarity] = useState<RarityData | null>(null);
   const [showEditModal, setShowEditModal] = useState(false);
   const [formData, setFormData] = useState<Partial<RarityData>>({});
+
+  const [isEditingWeight, setIsEditingWeight] = useState(false);
+  const [weightInputValue, setWeightInputValue] = useState("");
+
+  const handleWeightClick = () => {
+    setWeightInputValue((formData.default_weight || 0).toString());
+    setIsEditingWeight(true);
+  };
+
+  const handleWeightInputBlur = () => {
+    const numValue = parseFloat(weightInputValue);
+    if (!isNaN(numValue) && numValue >= 0 && numValue <= 1) {
+      setFormData((prev) => ({
+        ...prev,
+        default_weight: numValue,
+      }));
+    }
+    setIsEditingWeight(false);
+  };
+
+  const handleWeightInputKeyDown = (
+    e: React.KeyboardEvent<HTMLInputElement>
+  ) => {
+    if (e.key === "Enter") {
+      handleWeightInputBlur();
+    } else if (e.key === "Escape") {
+      setIsEditingWeight(false);
+    }
+  };
 
   const filteredRarities = useMemo(() => {
     return rarities.filter(
@@ -479,7 +508,7 @@ const RaritiesPage: React.FC<RaritiesPageProps> = ({
                             type="range"
                             min="0"
                             max="1"
-                            step="0.01"
+                            step="0.001"
                             value={formData.default_weight || 0}
                             onChange={(e) =>
                               setFormData((prev) => ({
@@ -489,12 +518,33 @@ const RaritiesPage: React.FC<RaritiesPageProps> = ({
                             }
                             className="flex-1 h-2 bg-black-lighter rounded appearance-none cursor-pointer"
                           />
-                          <span className="text-mint font-mono w-16 text-sm">
-                            {(formData.default_weight || 0).toFixed(2)}
-                          </span>
+                          {isEditingWeight ? (
+                            <input
+                              type="number"
+                              min="0"
+                              max="1"
+                              step="0.001"
+                              value={weightInputValue}
+                              onChange={(e) =>
+                                setWeightInputValue(e.target.value)
+                              }
+                              onBlur={handleWeightInputBlur}
+                              onKeyDown={handleWeightInputKeyDown}
+                              autoFocus
+                              className="text-mint font-mono w-16 text-sm rounded px-1 py-0.5 text-center border-0 outline-none focus:ring-1 focus:ring-mint/30 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                            />
+                          ) : (
+                            <span
+                              className="text-mint font-mono w-16 text-sm cursor-pointer hover:bg-black-lighter rounded px-1 py-0.5 text-center"
+                              onClick={handleWeightClick}
+                            >
+                              {(formData.default_weight || 0).toFixed(3)}
+                            </span>
+                          )}
                         </div>
                         <p className="text-xs text-white-darker">
-                          Higher values appear more frequently.
+                          Higher values appear more frequently. Click the value
+                          to edit directly.
                         </p>
                       </div>
                     </div>
