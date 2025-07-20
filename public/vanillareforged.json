@@ -10331,6 +10331,54 @@
       "hasUserUploadedImage": true
     },
     {
+      "id": "7bbc4a12-e014-40a6-936f-d206d35b3c46",
+      "name": "Wraith",
+      "description": "A {C:purple}custom{} consumable with {C:blue}unique{} effects.",
+      "imagePreview": "data:image/png;base64,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",
+      "overlayImagePreview": "",
+      "set": "Spectral",
+      "cost": 3,
+      "unlocked": true,
+      "discovered": true,
+      "hidden": false,
+      "rules": [
+        {
+          "id": "e1ec0c2b-9a6d-45fa-941e-be82731f70a8",
+          "trigger": "consumable_used",
+          "conditionGroups": [],
+          "effects": [
+            {
+              "id": "cdbc79ef-a6f1-4659-86d0-16db0942c88d",
+              "type": "create_joker",
+              "params": {
+                "joker_type": "random",
+                "rarity": "rare",
+                "joker_key": "j_joker",
+                "edition": "none"
+              }
+            },
+            {
+              "id": "13d27ccb-b300-4d61-bfbf-287d75cc1094",
+              "type": "edit_dollars",
+              "params": {
+                "operation": "set",
+                "value": 0
+              }
+            }
+          ],
+          "randomGroups": [],
+          "position": {
+            "x": 715.5,
+            "y": 318
+          }
+        }
+      ],
+      "placeholderCreditIndex": 11,
+      "consumableKey": "wraith",
+      "can_repeat_soul": false,
+      "hasUserUploadedImage": true
+    },
+    {
       "id": "5084882f-f44b-4881-9f09-bc5aa5577a14",
       "name": "Aura",
       "description": "Add {C:dark_edition}Foil{}, {C:dark_edition}Holographic{}, or {C:dark_edition}Polychrome{} effect to {C:attention}1{} selected card in hand",
