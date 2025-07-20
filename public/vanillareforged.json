@@ -10517,6 +10517,62 @@
       "hasUserUploadedImage": true
     },
     {
+      "id": "ffe094ea-30ee-4506-b39f-396e57d4a4cd",
+      "name": "Cyrptid",
+      "description": "\tCreate {C:attention}2{} copies of {C:attention}1{} selected card in your hand",
+      "imagePreview": "data:image/png;base64,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",
+      "overlayImagePreview": "",
+      "set": "Spectral",
+      "cost": 4,
+      "unlocked": true,
+      "discovered": true,
+      "hidden": false,
+      "rules": [
+        {
+          "id": "d8e0ac83-f6c5-44e5-8759-bc88289fa5f4",
+          "trigger": "consumable_used",
+          "conditionGroups": [
+            {
+              "id": "06de8411-c24b-43bf-b940-b943147193db",
+              "operator": "and",
+              "conditions": [
+                {
+                  "id": "067641ee-3ffa-4d03-aaed-987d542d146d",
+                  "type": "cards_selected",
+                  "negate": false,
+                  "params": {
+                    "operator": "equals",
+                    "value": 1
+                  }
+                }
+              ]
+            }
+          ],
+          "effects": [
+            {
+              "id": "995b3249-8e0a-4f21-a098-577d97c6497d",
+              "type": "copy_selected_cards",
+              "params": {
+                "copies": 2,
+                "enhancement": "none",
+                "seal": "none",
+                "edition": "none"
+              }
+            }
+          ],
+          "randomGroups": [],
+          "position": {
+            "x": 715.5,
+            "y": 318
+          }
+        }
+      ],
+      "placeholderCreditIndex": 20,
+      "consumableKey": "cyrptid",
+      "can_repeat_soul": false,
+      "hasUserUploadedImage": true
+    },
+    {
       "id": "5084882f-f44b-4881-9f09-bc5aa5577a14",
       "name": "Aura",
       "description": "Add {C:dark_edition}Foil{}, {C:dark_edition}Holographic{}, or {C:dark_edition}Polychrome{} effect to {C:attention}1{} selected card in hand",
