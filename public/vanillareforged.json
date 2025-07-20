@@ -10081,6 +10081,69 @@
       "hasUserUploadedImage": true
     },
     {
+      "id": "854b4fa1-c54a-4b01-b6eb-530b45c37073",
+      "name": "Strength",
+      "description": "Increases rank of up to {C:attention}2{} selected cards by {C:attention}1{}",
+      "imagePreview": "data:image/png;base64,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",
+      "overlayImagePreview": "",
+      "set": "Tarot",
+      "cost": 3,
+      "unlocked": true,
+      "discovered": true,
+      "hidden": false,
+      "rules": [
+        {
+          "id": "1e55de25-bd0f-423f-893f-b129949c1288",
+          "trigger": "consumable_used",
+          "conditionGroups": [
+            {
+              "id": "0f8a2154-13d9-443c-b28f-16bcde51a3b8",
+              "operator": "and",
+              "conditions": [
+                {
+                  "id": "8efd9983-c347-4fd7-a1d7-ded41ed89b6c",
+                  "type": "cards_selected",
+                  "negate": false,
+                  "params": {
+                    "operator": "greater_than",
+                    "value": 0
+                  }
+                },
+                {
+                  "id": "f31e4e6f-55c9-4dbf-81a5-1b14524269d7",
+                  "type": "cards_selected",
+                  "negate": false,
+                  "params": {
+                    "operator": "less_equals",
+                    "value": 2
+                  }
+                }
+              ]
+            }
+          ],
+          "effects": [
+            {
+              "id": "34a86579-f1b8-4cc3-a4fc-f5e6236780e1",
+              "type": "increment_rank",
+              "params": {
+                "operation": "increment",
+                "value": 1
+              }
+            }
+          ],
+          "randomGroups": [],
+          "position": {
+            "x": 715.5,
+            "y": 318
+          }
+        }
+      ],
+      "placeholderCreditIndex": 9,
+      "consumableKey": "strength",
+      "can_repeat_soul": false,
+      "hasUserUploadedImage": true
+    },
+    {
       "id": "5084882f-f44b-4881-9f09-bc5aa5577a14",
       "name": "Aura",
       "description": "Add {C:dark_edition}Foil{}, {C:dark_edition}Holographic{}, or {C:dark_edition}Polychrome{} effect to {C:attention}1{} selected card in hand",
