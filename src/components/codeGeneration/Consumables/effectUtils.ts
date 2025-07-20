@@ -18,6 +18,7 @@ import { generateAddCardsToHandReturn } from "./effects/AddCardsToHandEffect";
 import { generateEditDollarsReturn } from "./effects/EditDollarsEffect";
 import { generateCopyRandomJokerReturn } from "./effects/CopyRandomJokerEffect";
 import { generateDestroyRandomJokerReturn } from "./effects/DestroyRandomJokerEffect";
+import { generateEditionRandomJokerReturn } from "./effects/EditionRandomJokerEffect";
 
 export interface EffectReturn {
   statement: string;
@@ -191,6 +192,9 @@ const generateSingleEffect = (effect: Effect): EffectReturn => {
 
     case "destroy_random_joker":
       return generateDestroyRandomJokerReturn(effect);
+
+    case "edition_random_joker":
+      return generateEditionRandomJokerReturn(effect);
 
     default:
       return {

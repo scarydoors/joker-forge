@@ -767,6 +767,47 @@ export const CONSUMABLE_EFFECT_TYPES: EffectTypeDefinition[] = [
     ],
     category: "Jokers",
   },
+  {
+    id: "edition_random_joker",
+    label: "Apply Edition to Random Joker",
+    description: "Apply an edition to random jokers in your joker area",
+    applicableTriggers: ["consumable_used"],
+    params: [
+      {
+        id: "amount",
+        type: "number",
+        label: "Number of Jokers to Apply Edition",
+        default: 1,
+        min: 1,
+        max: 5,
+      },
+      {
+        id: "edition",
+        type: "select",
+        label: "Edition to Apply",
+        options: [
+          ...EDITIONS.map((edition) => ({
+            value: edition.key,
+            label: edition.label,
+          })),
+          { value: "random", label: "Random Edition" },
+          { value: "remove", label: "Remove Edition" },
+        ],
+        default: "e_foil",
+      },
+      {
+        id: "target_type",
+        type: "select",
+        label: "Target Jokers",
+        options: [
+          { value: "editionless", label: "Only Editionless Jokers" },
+          { value: "any", label: "Any Jokers" },
+        ],
+        default: "editionless",
+      },
+    ],
+    category: "Jokers",
+  },
 ];
 
 export function getConsumableEffectsForTrigger(
