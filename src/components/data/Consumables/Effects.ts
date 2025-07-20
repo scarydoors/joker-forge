@@ -266,6 +266,14 @@ export const CONSUMABLE_EFFECT_TYPES: EffectTypeDefinition[] = [
     category: "Card Modification",
   },
   {
+    id: "destroy_selected_cards",
+    label: "Destroy Selected Cards",
+    description: "Destroy all currently selected cards",
+    applicableTriggers: ["consumable_used"],
+    params: [],
+    category: "Selected Cards",
+  },
+  {
     id: "level_up_hand",
     label: "Level Up Poker Hand (BUGGY BUT WORKS)",
     description: "Level up a specific poker hand or random hand",
