@@ -10079,6 +10079,63 @@
       "consumableKey": "immolate",
       "can_repeat_soul": false,
       "hasUserUploadedImage": true
+    },
+    {
+      "id": "5084882f-f44b-4881-9f09-bc5aa5577a14",
+      "name": "Aura",
+      "description": "Add {C:dark_edition}Foil{}, {C:dark_edition}Holographic{}, or {C:dark_edition}Polychrome{} effect to {C:attention}1{} selected card in hand",
+      "imagePreview": "data:image/png;base64,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",
+      "overlayImagePreview": "",
+      "set": "Spectral",
+      "cost": 4,
+      "unlocked": true,
+      "discovered": true,
+      "hidden": false,
+      "rules": [
+        {
+          "id": "186bdff7-7cff-4309-9592-9a5e4d9f920b",
+          "trigger": "consumable_used",
+          "conditionGroups": [
+            {
+              "id": "ca375fca-2cb1-4429-bca9-e05157cbaa34",
+              "operator": "and",
+              "conditions": [
+                {
+                  "id": "04dd8ec6-1a7b-4a09-9472-afe09513c54a",
+                  "type": "cards_selected",
+                  "negate": false,
+                  "params": {
+                    "operator": "equals",
+                    "value": 1
+                  }
+                }
+              ]
+            }
+          ],
+          "effects": [
+            {
+              "id": "aad407da-9cba-4842-a322-157832825ee9",
+              "type": "edit_cards",
+              "params": {
+                "enhancement": "none",
+                "seal": "none",
+                "edition": "random",
+                "suit": "none",
+                "rank": "none"
+              }
+            }
+          ],
+          "randomGroups": [],
+          "position": {
+            "x": 1035.5,
+            "y": 474
+          }
+        }
+      ],
+      "placeholderCreditIndex": 8,
+      "consumableKey": "aura",
+      "can_repeat_soul": false,
+      "hasUserUploadedImage": true
     }
   ],
   "customRarities": [],
