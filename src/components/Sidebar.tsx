@@ -462,7 +462,7 @@ const Sidebar: React.FC<SidebarProps> = ({
             className="text-center mt-4"
           >
             <span className="text-xs text-mint font-medium tracking-widest">
-              v0.2.2
+              v0.2.4
             </span>
           </motion.div>
         </div>
