@@ -6,6 +6,7 @@ import {
   CakeIcon,
   UserGroupIcon,
   CursorArrowRaysIcon,
+  HandRaisedIcon,
 } from "@heroicons/react/24/outline";
 import { CategoryDefinition } from "../Jokers/Triggers";
 import {
@@ -38,7 +39,7 @@ export const CONSUMABLE_EFFECT_CATEGORIES: CategoryDefinition[] = [
   },
   {
     label: "Hand Effects",
-    icon: UserGroupIcon,
+    icon: HandRaisedIcon,
   },
   {
     label: "Consumables",
@@ -47,6 +48,10 @@ export const CONSUMABLE_EFFECT_CATEGORIES: CategoryDefinition[] = [
   {
     label: "Special",
     icon: SparklesIcon,
+  },
+  {
+    label: "Jokers",
+    icon: UserGroupIcon,
   },
 ];
 
@@ -710,7 +715,57 @@ export const CONSUMABLE_EFFECT_TYPES: EffectTypeDefinition[] = [
         default: "none",
       },
     ],
-    category: "Consumables",
+    category: "Jokers",
+  },
+  {
+    id: "copy_random_joker",
+    label: "Copy Random Joker",
+    description: "Create copies of random jokers in your joker area",
+    applicableTriggers: ["consumable_used"],
+    params: [
+      {
+        id: "amount",
+        type: "number",
+        label: "Number of Jokers to Copy",
+        default: 1,
+        min: 1,
+        max: 5,
+      },
+      {
+        id: "edition",
+        type: "select",
+        label: "Edition to Apply",
+        options: [
+          { value: "none", label: "Keep Original Edition" },
+          { value: "remove", label: "Remove Edition" },
+          ...EDITIONS.map((edition) => ({
+            value: edition.key,
+            label: edition.label,
+          })),
+          { value: "random", label: "Random Edition" },
+        ],
+        default: "none",
+      },
+    ],
+    category: "Jokers",
+  },
+  {
+    id: "destroy_random_joker",
+    label: "Destroy Random Joker",
+    description:
+      "Destroy random jokers from your joker area (eternal jokers are safe)",
+    applicableTriggers: ["consumable_used"],
+    params: [
+      {
+        id: "amount",
+        type: "number",
+        label: "Number of Jokers to Destroy",
+        default: 1,
+        min: 1,
+        max: 5,
+      },
+    ],
+    category: "Jokers",
   },
 ];
 
