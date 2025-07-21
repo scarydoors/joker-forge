@@ -10763,6 +10763,41 @@
       "consumableKey": "blackhole",
       "can_repeat_soul": false,
       "hasUserUploadedImage": true
+    },
+    {
+      "id": "caf9bfbf-d6dc-4cad-b686-6bb46f25421a",
+      "name": "The Fool",
+      "description": "\tCreates the last {C:tarot}Tarot{} or {C:planet}Planet{} card[s] used during this run[s]{C:tarot}The Fool{} excluded",
+      "imagePreview": "data:image/png;base64,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",
+      "overlayImagePreview": "",
+      "set": "Tarot",
+      "cost": 3,
+      "unlocked": true,
+      "discovered": true,
+      "hidden": false,
+      "rules": [
+        {
+          "id": "1ffbf32b-58d7-425e-a016-79c18fb537ad",
+          "trigger": "consumable_used",
+          "conditionGroups": [],
+          "effects": [
+            {
+              "id": "299b99b2-31bb-4bf3-a2a8-55d33b51dfeb",
+              "type": "fool_effect",
+              "params": {}
+            }
+          ],
+          "randomGroups": [],
+          "position": {
+            "x": 715.5,
+            "y": 318
+          }
+        }
+      ],
+      "placeholderCreditIndex": 6,
+      "consumableKey": "thefool",
+      "can_repeat_soul": false,
+      "hasUserUploadedImage": true
     }
   ],
   "customRarities": [],
