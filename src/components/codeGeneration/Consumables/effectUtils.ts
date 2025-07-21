@@ -49,7 +49,8 @@ export interface RandomGroup {
 
 export function generateEffectReturnStatement(
   regularEffects: Effect[] = [],
-  randomGroups: RandomGroup[] = []
+  randomGroups: RandomGroup[] = [],
+  modprefix: string
 ): ReturnStatementResult {
   if (regularEffects.length === 0 && randomGroups.length === 0) {
     return {
@@ -67,7 +68,7 @@ export function generateEffectReturnStatement(
 
   if (regularEffects.length > 0) {
     const effectReturns: EffectReturn[] = regularEffects
-      .map((effect) => generateSingleEffect(effect))
+      .map((effect) => generateSingleEffect(effect, modprefix))
       .filter((ret) => ret.statement || ret.message);
 
     effectReturns.forEach((effectReturn) => {
@@ -105,7 +106,7 @@ export function generateEffectReturnStatement(
   if (randomGroups.length > 0) {
     randomGroups.forEach((group) => {
       const effectReturns: EffectReturn[] = group.effects
-        .map((effect) => generateSingleEffect(effect))
+        .map((effect) => generateSingleEffect(effect, modprefix))
         .filter((ret) => ret.statement || ret.message);
 
       effectReturns.forEach((effectReturn) => {
@@ -150,7 +151,10 @@ export function generateEffectReturnStatement(
   };
 }
 
-const generateSingleEffect = (effect: Effect): EffectReturn => {
+const generateSingleEffect = (
+  effect: Effect,
+  modprefix: string
+): EffectReturn => {
   switch (effect.type) {
     case "edit_cards":
       return generateEditCardsReturn(effect);
@@ -195,7 +199,7 @@ const generateSingleEffect = (effect: Effect): EffectReturn => {
       return generateEditCardsInHandReturn(effect);
 
     case "create_joker":
-      return generateCreateJokerReturn(effect);
+      return generateCreateJokerReturn(effect, modprefix);
 
     case "increment_rank":
       return generateIncrementRankReturn(effect);

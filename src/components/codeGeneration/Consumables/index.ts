@@ -24,12 +24,9 @@ export const generateConsumablesCode = (
   consumables: ConsumableData[],
   options: ConsumableGenerationOptions = {}
 ): { consumablesCode: Record<string, string> } => {
-  const {
-    atlasKey = "CustomConsumables",
-    consumableSets = [],
-    modPrefix = "",
-  } = options;
+  const { atlasKey = "CustomConsumables", consumableSets = [] } = options;
 
+  const modPrefix = options.modPrefix || "";
   const consumablesWithKeys = ensureConsumableKeys(consumables);
   const consumablesCode: Record<string, string> = {};
   let currentPosition = 0;
@@ -51,7 +48,8 @@ export const generateConsumablesCode = (
     const result = generateSingleConsumableCode(
       consumable,
       atlasKey,
-      currentPosition
+      currentPosition,
+      modPrefix
     );
     consumablesCode[`${consumable.consumableKey}.lua`] = result.code;
     currentPosition = result.nextPosition;
@@ -137,7 +135,8 @@ ${cardsArray}
 const generateSingleConsumableCode = (
   consumable: ConsumableData,
   atlasKey: string,
-  currentPosition: number
+  currentPosition: number,
+  modPrefix: string
 ): { code: string; nextPosition: number } => {
   const activeRules =
     consumable.rules?.filter((rule) => rule.trigger !== "passive") || [];
@@ -145,7 +144,11 @@ const generateSingleConsumableCode = (
   // Collect config variables from all effects
   const configItems: string[] = [];
   activeRules.forEach((rule) => {
-    const effectResult = generateEffectReturnStatement(rule.effects || []);
+    const effectResult = generateEffectReturnStatement(
+      rule.effects || [],
+      [],
+      ""
+    );
     if (effectResult.configVariables) {
       configItems.push(...effectResult.configVariables);
     }
@@ -211,13 +214,13 @@ const generateSingleConsumableCode = (
     ${locVarsCode},`;
   }
 
-  const useCode = generateUseFunction(activeRules);
+  const useCode = generateUseFunction(activeRules, modPrefix);
   if (useCode) {
     consumableCode += `
     ${useCode},`;
   }
 
-  const canUseCode = generateCanUseFunction(activeRules);
+  const canUseCode = generateCanUseFunction(activeRules, modPrefix);
   if (canUseCode) {
     consumableCode += `
     ${canUseCode},`;
@@ -233,7 +236,7 @@ const generateSingleConsumableCode = (
   };
 };
 
-const generateUseFunction = (rules: Rule[]): string => {
+const generateUseFunction = (rules: Rule[], modPrefix: string): string => {
   if (rules.length === 0) {
     return `use = function(self, card, area, copier)
         
@@ -252,7 +255,11 @@ const generateUseFunction = (rules: Rule[]): string => {
         if ${conditionCode} then`;
     }
 
-    const effectResult = generateEffectReturnStatement(rule.effects || []);
+    const effectResult = generateEffectReturnStatement(
+      rule.effects || [],
+      [],
+      modPrefix
+    );
 
     if (effectResult.preReturnCode) {
       ruleCode += `
@@ -278,7 +285,7 @@ const generateUseFunction = (rules: Rule[]): string => {
   return useFunction;
 };
 
-const generateCanUseFunction = (rules: Rule[]): string => {
+const generateCanUseFunction = (rules: Rule[], modPrefix: string): string => {
   if (rules.length === 0) {
     return `can_use = function(self, card)
         return true
@@ -294,7 +301,11 @@ const generateCanUseFunction = (rules: Rule[]): string => {
       ruleConditions.push(`(${conditionCode})`);
     }
 
-    const effectResult = generateEffectReturnStatement(rule.effects || []);
+    const effectResult = generateEffectReturnStatement(
+      rule.effects || [],
+      [],
+      modPrefix
+    );
     if (effectResult.customCanUse) {
       customCanUseConditions.push(`(${effectResult.customCanUse})`);
     }
