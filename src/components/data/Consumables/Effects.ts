@@ -649,6 +649,15 @@ export const CONSUMABLE_EFFECT_TYPES: EffectTypeDefinition[] = [
     category: "Consumables",
   },
   {
+    id: "fool_effect",
+    label: "Create Last Used Consumable",
+    description:
+      "Create a copy of the last Tarot or Planet card that was used (like The Fool)",
+    applicableTriggers: ["consumable_used"],
+    params: [],
+    category: "Consumables",
+  },
+  {
     id: "edit_cards_in_hand",
     label: "Edit Cards in Hand",
     description:

@@ -21,12 +21,14 @@ import { generateDestroyRandomJokerReturn } from "./effects/DestroyRandomJokerEf
 import { generateEditionRandomJokerReturn } from "./effects/EditionRandomJokerEffect";
 import { generateCopySelectedCardsReturn } from "./effects/CopySelectedCardsEffect";
 import { generateConvertLeftToRightReturn } from "./effects/ConvertLeftToRightEffect";
+import { generateFoolEffectReturn } from "./effects/FoolEffect";
 
 export interface EffectReturn {
   statement: string;
   message?: string;
   colour: string;
   configVariables?: string[];
+  customCanUse?: string;
 }
 
 export interface ReturnStatementResult {
@@ -35,6 +37,7 @@ export interface ReturnStatementResult {
   preReturnCode?: string;
   isRandomChance?: boolean;
   configVariables?: string[];
+  customCanUse?: string;
 }
 
 export interface RandomGroup {
@@ -59,6 +62,7 @@ export function generateEffectReturnStatement(
   let combinedPreReturnCode = "";
   let mainReturnStatement = "";
   let primaryColour = "G.C.WHITE";
+  const customCanUseConditions: string[] = [];
   const allConfigVariables: string[] = [];
 
   if (regularEffects.length > 0) {
@@ -69,6 +73,9 @@ export function generateEffectReturnStatement(
     effectReturns.forEach((effectReturn) => {
       if (effectReturn.configVariables) {
         allConfigVariables.push(...effectReturn.configVariables);
+      }
+      if (effectReturn.customCanUse) {
+        customCanUseConditions.push(effectReturn.customCanUse);
       }
     });
 
@@ -105,6 +112,9 @@ export function generateEffectReturnStatement(
         if (effectReturn.configVariables) {
           allConfigVariables.push(...effectReturn.configVariables);
         }
+        if (effectReturn.customCanUse) {
+          customCanUseConditions.push(effectReturn.customCanUse);
+        }
       });
 
       if (effectReturns.length === 0) return;
@@ -133,6 +143,10 @@ export function generateEffectReturnStatement(
     preReturnCode: combinedPreReturnCode || undefined,
     isRandomChance: randomGroups.length > 0,
     configVariables: allConfigVariables,
+    customCanUse:
+      customCanUseConditions.length > 0
+        ? customCanUseConditions.join(" and ")
+        : undefined,
   };
 }
 
@@ -203,6 +217,9 @@ const generateSingleEffect = (effect: Effect): EffectReturn => {
 
     case "convert_left_to_right":
       return generateConvertLeftToRightReturn(effect);
+
+    case "fool_effect":
+      return generateFoolEffectReturn(effect);
 
     default:
       return {

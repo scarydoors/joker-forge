@@ -286,21 +286,29 @@ const generateCanUseFunction = (rules: Rule[]): string => {
   }
 
   const ruleConditions: string[] = [];
+  const customCanUseConditions: string[] = [];
 
   rules.forEach((rule) => {
     const conditionCode = generateConditionChain(rule);
     if (conditionCode) {
       ruleConditions.push(`(${conditionCode})`);
     }
+
+    const effectResult = generateEffectReturnStatement(rule.effects || []);
+    if (effectResult.customCanUse) {
+      customCanUseConditions.push(`(${effectResult.customCanUse})`);
+    }
   });
 
-  if (ruleConditions.length === 0) {
+  const allConditions = [...ruleConditions, ...customCanUseConditions];
+
+  if (allConditions.length === 0) {
     return `can_use = function(self, card)
         return true
     end`;
   }
 
-  const combinedCondition = ruleConditions.join(" or ");
+  const combinedCondition = allConditions.join(" and ");
 
   return `can_use = function(self, card)
         return ${combinedCondition}
