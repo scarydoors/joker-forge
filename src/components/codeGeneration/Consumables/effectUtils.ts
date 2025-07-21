@@ -20,6 +20,7 @@ import { generateCopyRandomJokerReturn } from "./effects/CopyRandomJokerEffect";
 import { generateDestroyRandomJokerReturn } from "./effects/DestroyRandomJokerEffect";
 import { generateEditionRandomJokerReturn } from "./effects/EditionRandomJokerEffect";
 import { generateCopySelectedCardsReturn } from "./effects/CopySelectedCardsEffect";
+import { generateConvertLeftToRightReturn } from "./effects/ConvertLeftToRightEffect";
 
 export interface EffectReturn {
   statement: string;
@@ -199,6 +200,9 @@ const generateSingleEffect = (effect: Effect): EffectReturn => {
 
     case "copy_selected_cards":
       return generateCopySelectedCardsReturn(effect);
+
+    case "convert_left_to_right":
+      return generateConvertLeftToRightReturn(effect);
 
     default:
       return {

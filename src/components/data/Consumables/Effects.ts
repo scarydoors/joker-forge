@@ -215,6 +215,15 @@ export const CONSUMABLE_EFFECT_TYPES: EffectTypeDefinition[] = [
     ],
     category: "Selected Cards",
   },
+  {
+    id: "convert_left_to_right",
+    label: "Convert Left to Right",
+    description:
+      "Convert all selected cards to match the rightmost selected card (like Death tarot)",
+    applicableTriggers: ["consumable_used"],
+    params: [],
+    category: "Selected Cards",
+  },
 
   // ===== HAND EFFECTS =====
   {
