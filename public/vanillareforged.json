@@ -2,9 +2,7 @@
   "metadata": {
     "id": "vanillaremade",
     "name": "VanillaRemade",
-    "author": [
-      "Jayd"
-    ],
+    "author": ["Jayd"],
     "description": "All vanilla jokers, remade with JokerForge.",
     "prefix": "vanillar",
     "main_file": "main.lua",
@@ -13,9 +11,7 @@
     "badge_colour": "666665",
     "badge_text_colour": "FFFFFF",
     "display_name": "VanillaRemade",
-    "dependencies": [
-      "Steamodded (>=1.0.0~BETA-0404a)"
-    ],
+    "dependencies": ["Steamodded (>=1.0.0~BETA-0404a)"],
     "conflicts": [],
     "provides": []
   },
@@ -10573,6 +10569,57 @@
       ],
       "placeholderCreditIndex": 20,
       "consumableKey": "cryptid",
+      "can_repeat_soul": false,
+      "hasUserUploadedImage": true
+    },
+    {
+      "id": "4827fefc-12ed-4633-ac34-8ccd60e61b9e",
+      "name": "Death",
+      "description": "Select {C:attention}2{} cards, convert the {C:attention}left{} card into the {C:attention}right{} card[s]{C:inactive}(Drag to rearrange){}",
+      "imagePreview": "data:image/png;base64,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",
+      "overlayImagePreview": "",
+      "set": "Tarot",
+      "cost": 3,
+      "unlocked": true,
+      "discovered": true,
+      "hidden": false,
+      "rules": [
+        {
+          "id": "5bd3771e-fcc2-4c66-ac79-5b6feb28b5f8",
+          "trigger": "consumable_used",
+          "conditionGroups": [
+            {
+              "id": "f02ecf55-0dc9-4d42-bfa2-fca92e4037cc",
+              "operator": "and",
+              "conditions": [
+                {
+                  "id": "9f4794d1-1298-4238-9d78-48a281fa156e",
+                  "type": "cards_selected",
+                  "negate": false,
+                  "params": {
+                    "operator": "equals",
+                    "value": 2
+                  }
+                }
+              ]
+            }
+          ],
+          "effects": [
+            {
+              "id": "5e1537c7-118f-4367-b18b-565bf1acb765",
+              "type": "convert_left_to_right",
+              "params": {}
+            }
+          ],
+          "randomGroups": [],
+          "position": {
+            "x": 1035.5,
+            "y": 474
+          }
+        }
+      ],
+      "placeholderCreditIndex": 17,
+      "consumableKey": "death",
       "can_repeat_soul": false,
       "hasUserUploadedImage": true
     },
