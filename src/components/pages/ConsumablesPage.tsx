@@ -384,16 +384,16 @@ const EditConsumableSetModal: React.FC<EditConsumableSetModalProps> = ({
                       min="0"
                       max="10"
                       step="0.1"
-                      value={setFormData.shop_rate || 1}
+                      value={setFormData.shop_rate ?? 1}
                       onChange={(e) =>
                         onFormDataChange({
-                          shop_rate: parseFloat(e.target.value) || 1,
+                          shop_rate: parseFloat(e.target.value),
                         })
                       }
                       className="flex-1 h-2 bg-black-lighter rounded appearance-none cursor-pointer"
                     />
                     <span className="text-mint font-mono w-16 text-sm">
-                      {(setFormData.shop_rate || 1).toFixed(1)}
+                      {(setFormData.shop_rate ?? 1).toFixed(1)}
                     </span>
                   </div>
                   <p className="text-xs text-white-darker">
