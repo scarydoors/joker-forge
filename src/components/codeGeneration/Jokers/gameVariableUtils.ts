@@ -56,7 +56,6 @@ export const parseRangeVariable = (value: unknown): ParsedRangeVariable => {
 
 export const generateGameVariableCode = (
   value: unknown,
-  fallbackVariableName?: string
 ): string => {
   const parsed = parseGameVariable(value);
 
@@ -80,12 +79,8 @@ export const generateGameVariableCode = (
     }
   }
 
-  if (typeof value === "string" && fallbackVariableName) {
+  if (typeof value === "string") {
     return `card.ability.extra.${value}`;
-  }
-
-  if (fallbackVariableName) {
-    return `card.ability.extra.${fallbackVariableName}`;
   }
 
   return typeof value === "number" ? value.toString() : "0";
