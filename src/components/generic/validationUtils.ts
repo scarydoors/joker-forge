@@ -129,18 +129,18 @@ export const validateDescription = (description: string): ValidationResult => {
   const errors: string[] = [];
 
   // Check for unescaped backslashes
-  if (description.includes("\\") && !description.includes("\\\\")) {
-    errors.push("Unescaped backslashes may cause code generation issues");
-  }
+  // if (description.includes("\\") && !description.includes("\\\\")) {
+  //   errors.push("Unescaped backslashes may cause code generation issues");
+  // }
 
-  // Check for quotation marks
-  if (description.includes('"')) {
-    errors.push('Double quotes (") may cause code generation issues');
-  }
+  // // Check for quotation marks
+  // if (description.includes('"')) {
+  //   errors.push('Double quotes (") may cause code generation issues');
+  // }
 
-  if (description.includes("'")) {
-    errors.push("Single quotes (') may cause code generation issues");
-  }
+  // if (description.includes("'")) {
+  //   errors.push("Single quotes (') may cause code generation issues");
+  // }
 
   // Check for raw newlines (not [s] tags)
   const rawNewlinePattern = /(?<!\[s\])\n|(?<!\[s\])\r/;
@@ -150,10 +150,10 @@ export const validateDescription = (description: string): ValidationResult => {
     );
   }
 
-  // Check for backticks
-  if (description.includes("`")) {
-    errors.push("Backticks (`) may cause code generation issues");
-  }
+  // // Check for backticks
+  // if (description.includes("`")) {
+  //   errors.push("Backticks (`) may cause code generation issues");
+  // }
 
   // Check for unclosed formatting tags
   const openTags = (description.match(/\{[^}]*$/g) || []).length;
