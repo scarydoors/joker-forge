@@ -42,7 +42,7 @@ export const generateSetDollarsReturn = (
 
     configVariables.push({
       name: variableName,
-      value: Number(effectValue) || 5,
+      value: Number(effectValue ?? 5),
     });
   }
 
