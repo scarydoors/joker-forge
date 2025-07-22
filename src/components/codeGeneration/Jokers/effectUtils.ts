@@ -48,7 +48,6 @@ import { generatePermaBonusReturn } from "./effects/PermaBonusEffect";
 import { generateSetAnteReturn } from "./effects/SetAnteEffect";
 import { generateAddCardToHandReturn } from "./effects/AddCardToHandEffect";
 import { generateCopyCardToHandReturn } from "./effects/CopyCardToHandEffect";
-import { generateDoubleProbabilityEffect } from "./effects/DoubleProbabilityEffect";
 import { generatePassiveSplashEffect } from "./effects/SplashEffect";
 import { generatePassiveAllowDebt } from "./effects/AllowDebtEffect";
 import { generateReduceFlushStraightRequirementsReturn } from "./effects/ReduceFlushStraightRequirementsEffect";
@@ -654,10 +653,6 @@ export const processPassiveEffects = (
           }
           case "discount_items": {
             passiveResult = generateDiscountItemsReturn(effect, jokerKey);
-            break;
-          }
-          case "double_probability": {
-            passiveResult = generateDoubleProbabilityEffect();
             break;
           }
           case "copy_joker_ability": {

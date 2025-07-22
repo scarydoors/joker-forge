@@ -1554,15 +1554,6 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
     category: "Card Effects",
   },
   {
-    id: "double_probability",
-    label: "Double Probability",
-    description:
-      "Double all probability chances (like lucky cards, card destruction, etc.)",
-    applicableTriggers: ["passive"],
-    params: [],
-    category: "Special",
-  },
-  {
     id: "splash_effect",
     label: "Every Played Card is Scored (Splash)",
     description: "When a hand is played, every card in it is scored",
