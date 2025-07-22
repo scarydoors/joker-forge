@@ -63,7 +63,14 @@ export const generateConditionChain = (
     return groupConditions[0];
   }
 
-  return `(${groupConditions.join(") and (")})`;
+  let result = groupConditions[0];
+  for (let i = 1; i < groupConditions.length; i++) {
+    const prevGroup = rule.conditionGroups[i - 1];
+    const operator = prevGroup.operator === "or" ? " or " : " and ";
+    result += operator + groupConditions[i];
+  }
+
+  return `(${result})`;
 };
 
 const generateConditionGroupCode = (
