@@ -43,6 +43,8 @@ const Sidebar: React.FC<SidebarProps> = ({
     !selectedSection;
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
 
+  const version: string = "v0.2.6";
+
   const handleSectionClick = (section: string) => {
     if (section === "github") {
       window.open("https://github.com/Jayd-H/joker-forge", "_blank");
@@ -268,7 +270,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 
             <div className="text-center mt-4">
               <span className="text-xs text-mint font-medium tracking-widest">
-                v0.2.5
+                {version}
               </span>
             </div>
           </motion.div>
@@ -462,7 +464,7 @@ const Sidebar: React.FC<SidebarProps> = ({
             className="text-center mt-4"
           >
             <span className="text-xs text-mint font-medium tracking-widest">
-              v0.2.5
+              {version}
             </span>
           </motion.div>
         </div>
