@@ -358,18 +358,19 @@ const generateLocVarsFunction = (consumable: ConsumableData): string => {
 const formatConsumableDescription = (consumable: ConsumableData): string => {
   const formatted = consumable.description.replace(/<br\s*\/?>/gi, "[s]");
 
-  const lines = formatted
+  const escaped = formatted.replace(/\n/g, "[s]") 
+  const lines = escaped
     .split("[s]")
     .map((line) => line.trim())
     .filter((line) => line.length > 0);
 
   if (lines.length === 0) {
-    lines.push(formatted.trim());
+    lines.push(escaped.trim());
   }
 
   return `{
 ${lines
-  .map((line, i) => `        [${i + 1}] = '${line.replace(/'/g, "\\'")}'`)
+  .map((line, i) => `        [${i + 1}] = '${line.replace(/\\/g, "\\\\").replace(/"/g,"\\\"").replace(/'/g, "\\'")}'`)
   .join(",\n")}
     }`;
 };
