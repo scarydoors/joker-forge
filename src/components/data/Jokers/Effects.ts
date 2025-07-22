@@ -659,9 +659,9 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
     category: "Card Effects",
   },
   {
-    id: "add_sell_value",
-    label: "Add Sell Value",
-    description: "Increase the sell value of jokers/consumables",
+    id: "set_sell_value",
+    label: "Set Sell Value",
+    description: "Modify the sell value of jokers/consumables",
     applicableTriggers: [...GENERIC_TRIGGERS],
     params: [
       {
@@ -676,9 +676,20 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
         default: "self",
       },
       {
+        id: "operation",
+        type: "select",
+        label: "Operation",
+        options: [
+          { value: "add", label: "Add" },
+          { value: "subtract", label: "Subtract" },
+          { value: "set", label: "Set to" },
+        ],
+        default: "add",
+      },
+      {
         id: "value",
         type: "number",
-        label: "Sell Value to Add",
+        label: "Sell Value Amount",
         default: 1,
         min: 0,
       },

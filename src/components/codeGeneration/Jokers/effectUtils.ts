@@ -35,7 +35,7 @@ import {
   generatePassiveDisableBossBlind,
 } from "./effects/DisableBossBlindEffect";
 import { generateSavedReturn } from "./effects/SavedEffect";
-import { generateAddSellValueReturn } from "./effects/AddSellValueEffect";
+import { generateSetSellValueReturn } from "./effects/SetSellValueEffect";
 import { generateBalanceReturn } from "./effects/BalanceEffect";
 import { generateChangeSuitVariableReturn } from "./effects/ChangeSuitVariableEffect";
 import { generateChangeRankVariableReturn } from "./effects/ChangeRankVariableEffect";
@@ -447,8 +447,8 @@ const generateSingleEffect = (
       return generateDisableBossBlindReturn(effect, triggerType);
     case "prevent_game_over":
       return generateSavedReturn(effect);
-    case "add_sell_value":
-      return generateAddSellValueReturn(effect, triggerType, sameTypeCount);
+    case "set_sell_value":
+      return generateSetSellValueReturn(effect, triggerType, sameTypeCount);
     case "balance":
       return generateBalanceReturn(effect);
     case "change_suit_variable":
