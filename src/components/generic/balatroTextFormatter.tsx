@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import React from "react";
 
 interface ParsedSegment {
@@ -90,7 +91,6 @@ const BG_COLOR_MAP: Record<string, string> = {
   dark_edition: "bg-dark-rainbow",
 };
 
-// eslint-disable-next-line react-refresh/only-export-components
 export const parseBalatroText = (
   text: string,
   locVars?: { colours?: string[] }
@@ -258,7 +258,6 @@ export const BalatroText: React.FC<BalatroTextProps> = ({
   );
 };
 
-// eslint-disable-next-line react-refresh/only-export-components
 export const formatBalatroText = (
   text: string,
   locVars?: { colours?: string[] }
@@ -292,7 +291,6 @@ export const formatBalatroText = (
     .join("");
 };
 
-// eslint-disable-next-line react-refresh/only-export-components
 export const applyAutoFormatting = (
   text: string,
   lastFormattedText: string,
@@ -352,7 +350,7 @@ export const applyAutoFormatting = (
       hasChanges = true;
     } else if (lowerWord.match(/^(edition)$/)) {
       const capitalizedWord = word.charAt(0).toUpperCase() + word.slice(1);
-      words[i] = `{C:edition}${capitalizedWord}{}`;
+      words[i] = `{C:dark_edition}${capitalizedWord}{}`;
       hasChanges = true;
     } else if (word.match(/^-\d+(\.\d+)?$/)) {
       words[i] = `{C:red}${word}{}`;
@@ -387,13 +385,12 @@ export const applyAutoFormatting = (
       if (prevSuit && prevSpace && prevSpace.match(/^\s+$/)) {
         const lowerSuit = prevSuit.toLowerCase();
         if (lowerSuit.match(/^(hearts?|spades?|clubs?|diamonds?)$/)) {
-          // Always use plural form for tags, regardless of what user typed
           let suitName: string;
           if (lowerSuit.match(/^hearts?$/)) suitName = "hearts";
           else if (lowerSuit.match(/^spades?$/)) suitName = "spades";
           else if (lowerSuit.match(/^clubs?$/)) suitName = "clubs";
           else if (lowerSuit.match(/^diamonds?$/)) suitName = "diamonds";
-          else suitName = lowerSuit; // fallback
+          else suitName = lowerSuit;
 
           const capitalizedSuit =
             prevSuit.charAt(0).toUpperCase() + prevSuit.slice(1);
