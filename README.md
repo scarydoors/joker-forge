@@ -140,12 +140,12 @@ The plan here is to implement enough triggers, conditions, and effects, so as th
 - [x] **Combine Ranks** - Treat two or more ranks as the same rank
 - [x] **Cards May Appear Multiple Times** - Showman logic
 - [x] **Allowing Debt** - Credit Card logic
+- [X] **Alter Blind Requirement** - I.E. 2X blind requirement, 0.5x blind requirement
+- [X] **Beat Current Blind** - Completes the current blind
 
 #### Not Implemented Yet
 
-- [ ] **Beat Current Blind** - Completes the current blind
 - [ ] **Destroy Card in Hand** - Destroys a random or set (by index, rank, suit) card in hand
-- [ ] **Alter Blind Requirement** - I.E. 2X blind requirement, 0.5x blind requirement
 - [ ] **Add/Subtract/Set Joker Slots** - Would be cool i guess lol
 - [ ] **Add/Subtract/Set Consumable Slots** - also self-explanatory
 - [ ] **Apply Edition to Joker** - Apply an edition to a random/set Joker owned
