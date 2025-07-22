@@ -1180,6 +1180,14 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
     category: "Game Rules",
   },
   {
+    id: "beat_current_blind",
+    label: "Beat Current Blind",
+    description: "Instantly beat the current boss blind",
+    applicableTriggers: ['after_hand_played'],
+    params: [],
+    category: "Game Rules",
+  },
+  {
     id: "modify_blind_requirement",
     label: "Modify Blind Requirement",
     description: "Changes the score requirement of a blind",

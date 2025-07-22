@@ -66,6 +66,7 @@ import {
 import { generateAddChipsReturn } from "./effects/AddChipsEffect";
 import { generateCreateConsumableReturn } from "./effects/CreateConsumableEffect";
 import { generateModifyBlindRequirementReturn } from "./effects/ModifyBlindRequirementEffect";
+import { generateBeatCurrentBlindReturn } from "./effects/BeatCurrentBlindEffect";
 
 interface ExtendedEffect extends Effect {
   _isInRandomGroup?: boolean;
@@ -508,6 +509,8 @@ const generateSingleEffect = (
       return generateCreateConsumableReturn(effect, triggerType);
     case "modify_blind_requirement":
       return generateModifyBlindRequirementReturn(effect, sameTypeCount)
+    case "beat_current_blind":
+      return generateBeatCurrentBlindReturn(effect)
     default:
       return {
         statement: "",
