@@ -53,19 +53,47 @@ export const generateSetAnteReturn = (
 
   switch (operation) {
     case "set":
-      anteCode = `G.GAME.round_resets.ante = ${valueCode}`;
+      anteCode = `local mod = ${valueCode} - G.GAME.round_resets.ante
+		ease_ante(mod)
+		G.E_MANAGER:add_event(Event({
+			func = function()
+				G.GAME.round_resets.blind_ante = ${valueCode}
+				return true
+			end,
+		}))`;
       messageText = customMessage || `"Ante set to " .. ${valueCode} .. "!"`;
       break;
     case "add":
-      anteCode = `G.GAME.round_resets.ante = G.GAME.round_resets.ante + ${valueCode}`;
+      anteCode = `local mod = ${valueCode}
+		ease_ante(mod)
+		G.E_MANAGER:add_event(Event({
+			func = function()
+				G.GAME.round_resets.blind_ante = G.GAME.round_resets.blind_ante + mod
+				return true
+			end,
+		}))`;
       messageText = customMessage || `"Ante +" .. ${valueCode}`;
       break;
     case "subtract":
-      anteCode = `G.GAME.round_resets.ante = G.GAME.round_resets.ante - ${valueCode}`;
+      anteCode = `local mod = -${valueCode}
+		ease_ante(mod)
+		G.E_MANAGER:add_event(Event({
+			func = function()
+				G.GAME.round_resets.blind_ante = G.GAME.round_resets.blind_ante + mod
+				return true
+			end,
+		}))`;
       messageText = customMessage || `"Ante -" .. ${valueCode}`;
       break;
     default:
-      anteCode = `G.GAME.round_resets.ante = ${valueCode}`;
+      anteCode = `local mod = ${valueCode} - G.GAME.round_resets.ante
+		ease_ante(mod)
+		G.E_MANAGER:add_event(Event({
+			func = function()
+				G.GAME.round_resets.blind_ante = ${valueCode}
+				return true
+			end,
+		}))`;
       messageText = customMessage || `"Ante set to " .. ${valueCode} .. "!"`;
   }
 
