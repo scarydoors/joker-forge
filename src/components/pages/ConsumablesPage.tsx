@@ -611,7 +611,7 @@ const getRandomPlaceholderConsumable = async (): Promise<{
   if (upscaledPlaceholders && upscaledPlaceholders.length > 0) {
     const randomIndex = Math.floor(Math.random() * upscaledPlaceholders.length);
     const imagePath = availablePlaceholders?.[randomIndex];
-    const match = imagePath?.match(/placeholder-joker-(\d+)\.png/);
+    const match = imagePath?.match(/placeholder-consumable-(\d+)\.png/);
     const imageNumber = match ? parseInt(match[1], 10) : randomIndex + 1;
 
     return {
@@ -627,7 +627,7 @@ const getRandomPlaceholderConsumable = async (): Promise<{
     upscaledPlaceholders = upscaled;
     const randomIndex = Math.floor(Math.random() * upscaled.length);
     const match = availablePlaceholders[randomIndex].match(
-      /placeholder-joker-(\d+)\.png/
+      /placeholder-consumable-(\d+)\.png/
     );
     const imageNumber = match ? parseInt(match[1], 10) : 1;
 
@@ -651,7 +651,7 @@ const getRandomPlaceholderConsumable = async (): Promise<{
   let keepChecking = true;
 
   while (keepChecking) {
-    const imagePath = `/images/placeholderjokers/placeholder-joker-${counter}.png`;
+    const imagePath = `/images/placeholderconsumables/placeholder-consumable-${counter}.png`;
 
     if (await checkImage(imagePath)) {
       placeholders.push(imagePath);
@@ -664,7 +664,7 @@ const getRandomPlaceholderConsumable = async (): Promise<{
   availablePlaceholders = placeholders;
 
   if (placeholders.length === 0) {
-    return { imageData: "/images/placeholder-joker.png" };
+    return { imageData: "/images/placeholder-consumable.png" };
   }
 
   const upscaled = await Promise.all(
@@ -673,7 +673,7 @@ const getRandomPlaceholderConsumable = async (): Promise<{
   upscaledPlaceholders = upscaled;
 
   const randomIndex = Math.floor(Math.random() * upscaled.length);
-  const match = placeholders[randomIndex].match(/placeholder-joker-(\d+)\.png/);
+  const match = placeholders[randomIndex].match(/placeholder-consumable-(\d+)\.png/);
   const imageNumber = match ? parseInt(match[1], 15) : 1;
 
   return {
@@ -684,8 +684,8 @@ const getRandomPlaceholderConsumable = async (): Promise<{
 
 const isPlaceholderConsumable = (imagePath: string): boolean => {
   return (
-    imagePath.includes("/images/placeholderjokers/") ||
-    imagePath.includes("placeholder-joker") ||
+    imagePath.includes("/images/placeholderconsumables/") ||
+    imagePath.includes("placeholder-consumable") ||
     imagePath.startsWith("data:image")
   );
 };

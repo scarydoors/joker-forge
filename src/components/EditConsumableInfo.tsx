@@ -127,7 +127,7 @@ const EditConsumableInfo: React.FC<EditConsumableInfoProps> = ({
   useEffect(() => {
     const loadCredits = async () => {
       try {
-        const response = await fetch("/images/placeholderjokers/credit.txt");
+        const response = await fetch("/images/placeholderconsumables/credit.txt");
         const text = await response.text();
         console.log("Raw credit file content:", JSON.stringify(text));
 
