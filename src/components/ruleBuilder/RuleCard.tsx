@@ -22,11 +22,7 @@ import { getConsumableConditionTypeById } from "../data/Consumables/Conditions";
 import { getConsumableEffectTypeById } from "../data/Consumables/Effects";
 
 import BlockComponent from "./BlockComponent";
-import {
-  ChevronDownIcon,
-  ChevronUpIcon,
-  Bars3Icon,
-} from "@heroicons/react/24/outline";
+import { ChevronDownIcon, Bars3Icon } from "@heroicons/react/24/outline";
 import {
   TrashIcon,
   PlusIcon,
@@ -268,16 +264,8 @@ const RuleCard: React.FC<RuleCardProps> = ({
 }) => {
   const getTrigger =
     itemType === "joker" ? getTriggerById : getConsumableTriggerById;
-  const getConditionType =
-    itemType === "joker"
-      ? getConditionTypeById
-      : getConsumableConditionTypeById;
-  const getEffectType =
-    itemType === "joker" ? getEffectTypeById : getConsumableEffectTypeById;
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [descriptionVisible, setDescriptionVisible] = useState(true);
-  const [showReopenButton, setShowReopenButton] = useState(false);
   const [isDisabled, setIsDisabled] = useState(false);
   const [groupOperators, setGroupOperators] = useState<Record<string, string>>(
     {}
@@ -340,15 +328,6 @@ const RuleCard: React.FC<RuleCardProps> = ({
     }
   }, [isDragging, handleMouseMove, handleMouseUp]);
 
-  useEffect(() => {
-    if (!descriptionVisible) {
-      const timer = setTimeout(() => setShowReopenButton(true), 250);
-      return () => clearTimeout(timer);
-    } else {
-      setShowReopenButton(false);
-    }
-  }, [descriptionVisible]);
-
   const trigger = getTrigger(rule.trigger);
   const allConditions = rule.conditionGroups.flatMap(
     (group) => group.conditions
@@ -357,7 +336,6 @@ const RuleCard: React.FC<RuleCardProps> = ({
   const totalEffects =
     rule.effects.length +
     rule.randomGroups.reduce((sum, group) => sum + group.effects.length, 0);
-  const totalRandomGroups = rule.randomGroups.length;
 
   const snapFadeUp = {
     initial: { opacity: 0, y: 15 },
@@ -382,11 +360,6 @@ const RuleCard: React.FC<RuleCardProps> = ({
     initial: { opacity: 0, scale: 0.8, y: 10 },
     animate: { opacity: 1, scale: 1, y: 0 },
     exit: { opacity: 0, scale: 0.8, y: -10 },
-  };
-  const descriptionSlideDown = {
-    initial: { opacity: 0, y: -10 },
-    animate: { opacity: 1, y: 0 },
-    exit: { opacity: 0, y: -10 },
   };
 
   const isItemSelected = (
@@ -450,27 +423,6 @@ const RuleCard: React.FC<RuleCardProps> = ({
     const newOperator = (groupOperators[key] || "AND") === "AND" ? "OR" : "AND";
     setGroupOperators((prev) => ({ ...prev, [key]: newOperator }));
     onToggleGroupOperator?.(rule.id, groupId);
-  };
-
-  const generateDescription = () => {
-    const triggerText = trigger?.label || "Unknown Trigger";
-    const conditionsText =
-      totalConditions > 0
-        ? ` > ${allConditions
-            .map((c) => getConditionType(c.type)?.label || "Unknown")
-            .join(" AND ")}`
-        : "";
-    const effectsText =
-      totalEffects > 0
-        ? ` > ${rule.effects
-            .map((e) => getEffectType(e.type)?.label || "Unknown")
-            .join(", ")}${
-            rule.randomGroups.length > 0
-              ? ` + ${totalRandomGroups} Random Groups`
-              : ""
-          }`
-        : "";
-    return `${triggerText}${conditionsText}${effectsText}`;
   };
 
   const renderConditionGroup = (group: ConditionGroup, groupIndex: number) => {
@@ -979,54 +931,6 @@ const RuleCard: React.FC<RuleCardProps> = ({
             </motion.div>
           </motion.div>
         </motion.div>
-
-        <AnimatePresence>
-          {descriptionVisible && (
-            <motion.div
-              className="absolute top-full left-0 w-full mt-2 bg-black-dark border-2 border-black-lighter rounded-lg p-2 z-10"
-              variants={descriptionSlideDown}
-              initial="initial"
-              animate="animate"
-              exit="exit"
-              transition={{ duration: 0.2 }}
-            >
-              <div className="flex justify-between items-start mb-1">
-                <div className="text-white-darker text-xs tracking-wider">
-                  DESCRIPTION
-                </div>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setDescriptionVisible(false);
-                  }}
-                  className="w-5 h-5 bg-black-darker rounded-lg flex items-center justify-center border-2 border-black-lighter hover:bg-black-light transition-colors"
-                  title="Hide Description"
-                >
-                  <ChevronUpIcon className="h-3 w-3 text-white-darker" />
-                </button>
-              </div>
-              <div className="text-white-darker text-xs leading-relaxed">
-                {generateDescription()}
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {showReopenButton && (
-          <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2">
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                setShowReopenButton(false);
-                setTimeout(() => setDescriptionVisible(true), 50);
-              }}
-              className="w-7 h-7 bg-black-darker rounded-lg flex items-center justify-center border-2 border-black-lighter hover:bg-black-light transition-colors"
-              title="Show Description"
-            >
-              <ChevronDownIcon className="h-4 w-4 text-white-darker" />
-            </button>
-          </div>
-        )}
       </motion.div>
     </div>
   );
