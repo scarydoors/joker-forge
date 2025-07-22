@@ -3,7 +3,6 @@ import type { JokerData } from "../../JokerCard";
 import { coordinateVariableConflicts } from "./variableUtils";
 import { generateAddMultReturn } from "./effects/AddMultEffect";
 import { generateApplyXMultReturn } from "./effects/ApplyXMultEffect";
-import { generateAddDollarsReturn } from "./effects/AddDollarsEffect";
 import { generateRetriggerReturn } from "./effects/RetriggerEffect";
 import { generateDestroySelfReturn } from "./effects/DestroySelfEffect";
 import { generateEditHandReturn } from "./effects/EditHandEffect";
@@ -395,8 +394,6 @@ const generateSingleEffect = (
       return generateAddMultReturn(effect, sameTypeCount);
     case "apply_x_mult":
       return generateApplyXMultReturn(effect, sameTypeCount);
-    case "add_dollars":
-      return generateAddDollarsReturn(effect, sameTypeCount);
     case "retrigger_cards":
       return generateRetriggerReturn(effect, sameTypeCount);
     case "destroy_self":

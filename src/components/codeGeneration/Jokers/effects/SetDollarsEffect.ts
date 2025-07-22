@@ -10,6 +10,7 @@ export const generateSetDollarsReturn = (
   effect: Effect,
   sameTypeCount: number = 0
 ): EffectReturn => {
+  const operation = (effect.params?.operation as string) || "add";
   const effectValue = effect.params.value;
   const parsed = parseGameVariable(effectValue);
   const rangeParsed = parseRangeVariable(effectValue);
@@ -18,7 +19,7 @@ export const generateSetDollarsReturn = (
   const configVariables: ConfigExtraVariable[] = [];
 
   const variableName =
-    sameTypeCount === 0 ? "set_dollars" : `set_dollars${sameTypeCount + 1}`;
+    sameTypeCount === 0 ? "dollars" : `dollars${sameTypeCount + 1}`;
 
   if (parsed.isGameVariable) {
     valueCode = generateGameVariableCode(effectValue);
@@ -41,27 +42,77 @@ export const generateSetDollarsReturn = (
 
     configVariables.push({
       name: variableName,
-      value: Number(effectValue) || 10,
+      value: Number(effectValue) || 5,
     });
   }
 
   const customMessage = effect.customMessage;
-  const setMessage = customMessage
-    ? `"${customMessage}"`
-    : `"Set to $"..tostring(${valueCode})`;
 
-  const result: EffectReturn = {
-    statement: `func = function()
-                local target_amount = ${valueCode}
-                local current_amount = G.GAME.dollars
-                local difference = target_amount - current_amount
-                ease_dollars(difference)
-                card_eval_status_text(context.blueprint_card or card, 'extra', nil, nil, nil, {message = ${setMessage}, colour = G.C.MONEY})
-                return true
-            end`,
-    colour: "G.C.MONEY",
-    configVariables: configVariables.length > 0 ? configVariables : undefined,
-  };
+  let result: EffectReturn;
+
+  switch (operation) {
+    case "add": {
+      result = {
+        statement: `dollars = ${valueCode}`,
+        colour: "G.C.MONEY",
+        configVariables:
+          configVariables.length > 0 ? configVariables : undefined,
+      };
+
+      if (customMessage) {
+        result.message = `"${customMessage}"`;
+      }
+      break;
+    }
+
+    case "subtract": {
+      result = {
+        statement: `dollars = -${valueCode}`,
+        colour: "G.C.MONEY",
+        configVariables:
+          configVariables.length > 0 ? configVariables : undefined,
+      };
+
+      if (customMessage) {
+        result.message = `"${customMessage}"`;
+      }
+      break;
+    }
+
+    case "set": {
+      const setMessage = customMessage
+        ? `"${customMessage}"`
+        : `"Set to $"..tostring(${valueCode})`;
+
+      result = {
+        statement: `func = function()
+                    local target_amount = ${valueCode}
+                    local current_amount = G.GAME.dollars
+                    local difference = target_amount - current_amount
+                    ease_dollars(difference)
+                    card_eval_status_text(context.blueprint_card or card, 'extra', nil, nil, nil, {message = ${setMessage}, colour = G.C.MONEY})
+                    return true
+                end`,
+        colour: "G.C.MONEY",
+        configVariables:
+          configVariables.length > 0 ? configVariables : undefined,
+      };
+      break;
+    }
+
+    default: {
+      result = {
+        statement: `dollars = ${valueCode}`,
+        colour: "G.C.MONEY",
+        configVariables:
+          configVariables.length > 0 ? configVariables : undefined,
+      };
+
+      if (customMessage) {
+        result.message = `"${customMessage}"`;
+      }
+    }
+  }
 
   return result;
 };

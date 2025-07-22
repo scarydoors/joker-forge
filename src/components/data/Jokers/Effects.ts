@@ -153,33 +153,27 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
     category: "Scoring",
   },
   {
-    id: "add_dollars",
-    label: "Add Dollars",
-    description: "Add money directly to your balance",
+    id: "set_dollars",
+    label: "Set Dollars",
+    description: "Modify your money balance",
     applicableTriggers: [...GENERIC_TRIGGERS],
     params: [
+      {
+        id: "operation",
+        type: "select",
+        label: "Operation",
+        options: [
+          { value: "add", label: "Add" },
+          { value: "subtract", label: "Subtract" },
+          { value: "set", label: "Set to" },
+        ],
+        default: "add",
+      },
       {
         id: "value",
         type: "number",
         label: "Amount",
         default: 5,
-        min: -100,
-      },
-    ],
-    category: "Economy",
-  },
-  {
-    id: "set_dollars",
-    label: "Set Dollars",
-    description: "Set your money to a specific amount",
-    applicableTriggers: [...GENERIC_TRIGGERS],
-    params: [
-      {
-        id: "value",
-        type: "number",
-        label: "Amount",
-        default: 10,
-        min: -100,
       },
     ],
     category: "Economy",
