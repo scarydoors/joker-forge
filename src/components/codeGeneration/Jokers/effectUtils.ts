@@ -103,6 +103,7 @@ export interface EffectReturn {
   message?: string;
   colour: string;
   configVariables?: ConfigExtraVariable[];
+  effectType?: string;
 }
 
 export interface ReturnStatementResult {
@@ -154,11 +155,15 @@ export function generateEffectReturnStatement(
           globalEffectCounts.set(effect.type, currentCount + 1);
         }
 
-        return generateSingleEffect(
+        const result = generateSingleEffect(
           effectWithContext,
           triggerType,
           currentCount
         );
+        return {
+          ...result,
+          effectType: effect.type,
+        };
       })
       .filter((ret) => ret.statement || ret.message);
 
@@ -249,11 +254,15 @@ export function generateEffectReturnStatement(
             globalEffectCounts.set(effect.type, currentCount + 1);
           }
 
-          return generateSingleEffect(
+          const result = generateSingleEffect(
             effectWithContext,
             triggerType,
             currentCount
           );
+          return {
+            ...result,
+            effectType: effect.type,
+          };
         })
         .filter((ret) => ret.statement || ret.message);
 
@@ -312,8 +321,35 @@ export function generateEffectReturnStatement(
                         `;
       }
 
+      const isRetriggerEffect = (effect: EffectReturn): boolean => {
+        return (
+          effect.effectType === "retrigger_cards" ||
+          (effect.statement
+            ? effect.statement.includes("repetitions") ||
+              effect.statement.includes("repetition")
+            : false)
+        );
+      };
+
+      const retriggerEffects = processedEffects.filter(isRetriggerEffect);
+      const nonRetriggerEffects = processedEffects.filter(
+        (effect) => !isRetriggerEffect(effect)
+      );
+
+      if (retriggerEffects.length > 0) {
+        const retriggerStatements = retriggerEffects
+          .filter((effect) => effect.statement && effect.statement.trim())
+          .map((effect) => effect.statement);
+
+        if (retriggerStatements.length > 0) {
+          const returnObj = `{${retriggerStatements.join(", ")}}`;
+          groupContent += `return ${returnObj}
+                        `;
+        }
+      }
+
       const effectCalls: string[] = [];
-      processedEffects.forEach((effect) => {
+      nonRetriggerEffects.forEach((effect) => {
         if (effect.statement && effect.statement.trim()) {
           const effectObj = `{${effect.statement}}`;
           effectCalls.push(`SMODS.calculate_effect(${effectObj}, card)`);
@@ -327,7 +363,9 @@ export function generateEffectReturnStatement(
         }
       });
 
-      groupContent += effectCalls.join("\n                        ");
+      if (effectCalls.length > 0) {
+        groupContent += effectCalls.join("\n                        ");
+      }
 
       const groupStatement = `if pseudorandom('group_${groupIndex}_${group.id.substring(
         0,
