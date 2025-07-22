@@ -1180,6 +1180,34 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
     category: "Game Rules",
   },
   {
+    id: "modify_blind_requirement",
+    label: "Modify Blind Requirement",
+    description: "Changes the score requirement of a blind",
+    applicableTriggers: ["blind_selected"],
+    params: [
+      {
+        id: "operation",
+        type: "select",
+        label: "Operation",
+        options: [
+          { value: "add", label: "Add" },
+          { value: "subtract", label: "Subtract" },
+          { value: "set", label: "Set to" },
+          { value: "multiply", label: "Multiply" },
+          { value: "divide", label: "Divide" },
+        ],
+        default: "multiply",
+      },
+      {
+        id: "value",
+        type: "number",
+        label: "Amount",
+        default: 2,
+      },
+    ],
+    category: "Game Rules",
+  },
+  {
     id: "free_rerolls",
     label: "Free Rerolls",
     description: "Provide free shop rerolls",
