@@ -1448,7 +1448,7 @@ const formatJokerDescription = (joker: JokerData): string => {
   const lines = escaped
     .split("[s]")
     .map((line) => line.trim())
-    .filter((line) => line.length > 0);
+    // .filter((line) => line.length > 0);
 
   if (lines.length === 0) {
     lines.push(escaped.trim());
