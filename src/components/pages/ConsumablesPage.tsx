@@ -647,12 +647,17 @@ const getRandomPlaceholderConsumable = async (): Promise<{
   };
 
   const placeholders: string[] = [];
+  let counter = 1;
+  let keepChecking = true;
 
-  for (let counter = 1; counter <= 15; counter++) {
+  while (keepChecking) {
     const imagePath = `/images/placeholderjokers/placeholder-joker-${counter}.png`;
 
     if (await checkImage(imagePath)) {
       placeholders.push(imagePath);
+      counter++;
+    } else {
+      keepChecking = false;
     }
   }
 
