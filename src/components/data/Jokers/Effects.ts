@@ -154,7 +154,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
   },
   {
     id: "set_dollars",
-    label: "Set Dollars",
+    label: "Edit Dollars",
     description: "Modify your money balance",
     applicableTriggers: [...GENERIC_TRIGGERS],
     params: [
@@ -654,7 +654,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
   },
   {
     id: "set_sell_value",
-    label: "Set Sell Value",
+    label: "Edit Sell Value",
     description: "Modify the sell value of jokers/consumables",
     applicableTriggers: [...GENERIC_TRIGGERS],
     params: [
