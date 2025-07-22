@@ -65,6 +65,7 @@ import {
 } from "./effects/EditJokerSlotsEffect";
 import { generateAddChipsReturn } from "./effects/AddChipsEffect";
 import { generateCreateConsumableReturn } from "./effects/CreateConsumableEffect";
+import { generateModifyBlindRequirementReturn } from "./effects/ModifyBlindRequirementEffect";
 
 interface ExtendedEffect extends Effect {
   _isInRandomGroup?: boolean;
@@ -505,7 +506,8 @@ const generateSingleEffect = (
       return generateEditJokerSlotsReturn(effect, sameTypeCount);
     case "create_consumable":
       return generateCreateConsumableReturn(effect, triggerType);
-
+    case "modify_blind_requirement":
+      return generateModifyBlindRequirementReturn(effect, sameTypeCount)
     default:
       return {
         statement: "",
