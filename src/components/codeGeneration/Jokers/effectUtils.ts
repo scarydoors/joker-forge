@@ -295,10 +295,10 @@ export function generateEffectReturnStatement(
       });
 
       const oddsVar = denominatorToOddsVar[group.chance_denominator];
-      const probabilityCheck =
-        group.chance_numerator === 1
-          ? `G.GAME.probabilities.normal / ${oddsVar}`
-          : `G.GAME.probabilities.normal * ${group.chance_numerator} / ${oddsVar}`;
+      const probabilityIdentifier = `group_${groupIndex}_${group.id.substring(
+        0,
+        8
+      )}`;
 
       let groupContent = "";
 
@@ -367,10 +367,7 @@ export function generateEffectReturnStatement(
         groupContent += effectCalls.join("\n                        ");
       }
 
-      const groupStatement = `if pseudorandom('group_${groupIndex}_${group.id.substring(
-        0,
-        8
-      )}') < ${probabilityCheck} then
+      const groupStatement = `if SMODS.pseudorandom_probability(card, '${probabilityIdentifier}', ${group.chance_numerator}, ${oddsVar}, '${probabilityIdentifier}') then
                         ${groupContent}
                     end`;
 
