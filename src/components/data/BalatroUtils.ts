@@ -455,7 +455,6 @@ export const POKER_HANDS = [
   { value: "Four of a Kind", label: "Four of a Kind" },
   { value: "Five of a Kind", label: "Five of a Kind" },
   { value: "Straight Flush", label: "Straight Flush" },
-  { value: "Royal Flush", label: "Royal Flush" },
   { value: "Flush House", label: "Flush House" },
   { value: "Flush Five", label: "Flush Five" },
 ] as const;
