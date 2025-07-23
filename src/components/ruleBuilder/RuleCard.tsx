@@ -52,6 +52,7 @@ interface RuleCardProps {
     randomGroupId?: string;
   }) => void;
   onDeleteRule: (ruleId: string) => void;
+  onDuplicateRule: (ruleId: string) => void;
   onDeleteCondition: (ruleId: string, conditionId: string) => void;
   onDeleteConditionGroup: (ruleId: string, groupId: string) => void;
   onDeleteEffect: (ruleId: string, effectId: string) => void;
@@ -246,6 +247,7 @@ const RuleCard: React.FC<RuleCardProps> = ({
   ruleIndex,
   selectedItem,
   onSelectItem,
+  onDuplicateRule,
   onDeleteRule,
   onDeleteCondition,
   onDeleteConditionGroup,
@@ -402,7 +404,7 @@ const RuleCard: React.FC<RuleCardProps> = ({
   };
 
   const handleEditName = () => console.log("Edit rule name");
-  const handleDuplicateRule = () => console.log("Duplicate rule");
+  const handleDuplicateRule = () => onDuplicateRule(rule.id);
   const handleToggleDisabled = () => setIsDisabled(!isDisabled);
 
   const handleConditionOperatorToggle = (

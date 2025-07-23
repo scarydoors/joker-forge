@@ -626,6 +626,43 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
     );
   };
 
+      const duplicateRule  = (ruleId: string) => {
+        const newRuleId = crypto.randomUUID();
+      setRules((prevRules) => {
+        const ruleToDuplicate = prevRules.find((r) => r.id === ruleId);
+        if (!ruleToDuplicate) {
+          return prevRules;
+        }
+
+        const newRule = {
+          ...ruleToDuplicate,
+          id: newRuleId,
+          position: {
+            x: (ruleToDuplicate.position?.x || 0) + 30,
+            y: (ruleToDuplicate.position?.y || 0) + 30,
+          },
+          conditionGroups: ruleToDuplicate.conditionGroups.map((group) => ({
+            ...group,
+            id: crypto.randomUUID(),
+            conditions: group.conditions.map((condition) => ({
+              ...condition,
+              id: crypto.randomUUID(),
+            })),
+          })),
+          effects: ruleToDuplicate.effects.map((effect) => ({
+            ...effect,
+            id: crypto.randomUUID(),
+          })),
+          randomGroups: ruleToDuplicate.randomGroups.map((group) => ({
+            ...group,
+            id: crypto.randomUUID(),
+          })),
+        };
+        setSelectedItem({ type: "trigger", ruleId: newRuleId });
+        return [...prevRules, newRule];
+      });
+    };
+
   const addTrigger = (triggerId: string) => {
     const centerPos = getCenterPosition();
     const newRule: Rule = {
@@ -1451,6 +1488,7 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
                             ruleIndex={index}
                             selectedItem={selectedItem}
                             onSelectItem={setSelectedItem}
+                            onDuplicateRule={duplicateRule}
                             onDeleteRule={deleteRule}
                             onDeleteCondition={deleteCondition}
                             onDeleteConditionGroup={deleteConditionGroup}
