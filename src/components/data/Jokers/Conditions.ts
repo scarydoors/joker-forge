@@ -36,6 +36,7 @@ export const GENERIC_TRIGGERS: string[] = [
   "consumable_used",
   "hand_drawn",
   "first_hand_drawn",
+  "shop_entered",
   "shop_exited",
   "card_discarded",
   "hand_discarded",
