@@ -580,6 +580,42 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
     category: "Hand & Cards",
   },
   {
+    id: "card_index",
+    label: "Card Index",
+    description: "Check if the card is at a specific position in the hand",
+    applicableTriggers: [
+      "card_scored",
+      "card_held_in_hand",
+      "card_held_in_hand_end_of_round",
+      "card_discarded",
+    ],
+    params: [
+      {
+        id: "index_type",
+        type: "select",
+        label: "Position Type",
+        options: [
+          { value: "number", label: "Specific Number" },
+          { value: "first", label: "First Card" },
+          { value: "last", label: "Last Card" },
+        ],
+        default: "first",
+      },
+      {
+        id: "index_number",
+        type: "number",
+        label: "Position Number",
+        default: 1,
+        min: 1,
+        showWhen: {
+          parameter: "index_type",
+          values: ["number"],
+        },
+      },
+    ],
+    category: "Hand & Cards",
+  },
+  {
     id: "player_money",
     label: "Player Money",
     description: "Check how much money the player has",
