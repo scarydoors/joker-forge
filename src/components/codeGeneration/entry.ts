@@ -55,19 +55,22 @@ export const exportModCode = async (
       customRarities,
       consumables,
       consumableSets
-    )
-    zip.file(ret.filename, ret.jsonString)
+    );
+    zip.file(ret.filename, ret.jsonString);
 
     if (customRarities.length > 0) {
       const raritiesCode = generateCustomRaritiesCode(customRarities);
       zip.file("rarities.lua", raritiesCode);
     }
 
+    console.log("mod metadata: ", metadata.prefix);
+
     if (jokers.length > 0) {
-      const { jokersCode } = generateJokersCode(jokers, {
-        modPrefix: metadata.prefix,
-        atlasKey: "CustomJokers",
-      });
+      const { jokersCode } = generateJokersCode(
+        jokers,
+        "CustomJokers",
+        metadata.prefix
+      );
 
       const jokersFolder = zip.folder("jokers");
       Object.entries(jokersCode).forEach(([filename, code]) => {

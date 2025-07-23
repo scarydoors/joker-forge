@@ -125,6 +125,7 @@ export function generateEffectReturnStatement(
   regularEffects: Effect[] = [],
   randomGroups: RandomGroup[] = [],
   triggerType: string = "hand_played",
+  modprefix: string,
   ruleId?: string,
   globalEffectCounts?: Map<string, number>
 ): ReturnStatementResult {
@@ -160,7 +161,8 @@ export function generateEffectReturnStatement(
         const result = generateSingleEffect(
           effectWithContext,
           triggerType,
-          currentCount
+          currentCount,
+          modprefix
         );
         return {
           ...result,
@@ -259,7 +261,8 @@ export function generateEffectReturnStatement(
           const result = generateSingleEffect(
             effectWithContext,
             triggerType,
-            currentCount
+            currentCount,
+            modprefix
           );
           return {
             ...result,
@@ -403,7 +406,8 @@ export function generateEffectReturnStatement(
         const firstEffectResult = generateSingleEffect(
           firstEffect,
           triggerType,
-          0
+          0,
+          modprefix
         );
         primaryColour = firstEffectResult.colour || "G.C.WHITE";
       }
@@ -422,7 +426,8 @@ export function generateEffectReturnStatement(
 const generateSingleEffect = (
   effect: ExtendedEffect,
   triggerType: string,
-  sameTypeCount: number = 0
+  sameTypeCount: number = 0,
+  modprefix: string
 ): EffectReturn => {
   switch (effect.type) {
     case "add_chips":
@@ -460,7 +465,7 @@ const generateSingleEffect = (
     case "copy_consumable":
       return generateCopyConsumableReturn(effect, triggerType);
     case "create_joker":
-      return generateCreateJokerReturn(effect, triggerType);
+      return generateCreateJokerReturn(effect, triggerType, modprefix);
     case "copy_joker":
       return generateCopyJokerReturn(effect, triggerType);
     case "destroy_joker":
@@ -508,9 +513,9 @@ const generateSingleEffect = (
     case "create_consumable":
       return generateCreateConsumableReturn(effect, triggerType);
     case "modify_blind_requirement":
-      return generateModifyBlindRequirementReturn(effect, sameTypeCount)
+      return generateModifyBlindRequirementReturn(effect, sameTypeCount);
     case "beat_current_blind":
-      return generateBeatCurrentBlindReturn(effect)
+      return generateBeatCurrentBlindReturn(effect);
     default:
       return {
         statement: "",
