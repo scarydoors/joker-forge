@@ -37,7 +37,7 @@ export const exportModAsJSON = (
 
   const filename = `${metadata.id || "custom-mod"}-${new Date()
     .toISOString()
-    .slice(0, 10)}.json`;
+    .slice(0, 10)}.jokerforge`;
 
   const a = document.createElement("a");
   a.href = url;
@@ -58,7 +58,7 @@ export const importModFromJSON = (): Promise<{
   return new Promise((resolve, reject) => {
     const input = document.createElement("input");
     input.type = "file";
-    input.accept = ".json";
+    input.accept = ".json,.jokerforge";
 
     input.onchange = (event) => {
       const file = (event.target as HTMLInputElement).files?.[0];
