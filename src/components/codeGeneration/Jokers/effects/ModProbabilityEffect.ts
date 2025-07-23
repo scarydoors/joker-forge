@@ -6,11 +6,12 @@ import {
   parseRangeVariable,
 } from "../gameVariableUtils";
 
-export const generateFixProbabilityReturn = (
+export const generateModProbabilityReturn = (
   effect: Effect,
   sameTypeCount: number = 0
 ): EffectReturn => {
-  const part = effect.params?.part || "numerator";
+  const chance_part = effect.params?.part || "numerator";
+  const operation = effect.params?.operation || "multiply";
   const effectValue = effect.params.value;
   const parsed = parseGameVariable(effectValue);
   const rangeParsed = parseRangeVariable(effectValue);
@@ -19,7 +20,7 @@ export const generateFixProbabilityReturn = (
   const configVariables: ConfigExtraVariable[] = [];
 
   const variableName =
-    sameTypeCount === 0 ? "set_probability" : `set_probability${sameTypeCount + 1}`;
+    sameTypeCount === 0 ? "mod_probability" : `mod_probability${sameTypeCount + 1}`;
 
   if (parsed.isGameVariable) {
     valueCode = generateGameVariableCode(effectValue);
@@ -45,27 +46,23 @@ export const generateFixProbabilityReturn = (
   let statement = `
   __PRE_RETURN_CODE__
   `;
-
-  switch (part) {
-    case "numerator": {
-      statement += `
-        numerator = ${valueCode}`;
+  
+  switch (operation) {
+    case "increment": {
+      statement += `${chance_part} = ${chance_part} + ${valueCode}`;
       break;
     }
-    case "denominator": {
-      statement += `
-        denominator = ${valueCode}`;
+    case "decrement": {
+      statement += `${chance_part} = ${chance_part} - ${valueCode}`;
       break;
     }
-    case "both": {
-      statement += `
-        numerator = ${valueCode}
-        denominator = ${valueCode}`;
+    case "multiply": {
+      statement += `${chance_part} = ${chance_part} * ${valueCode}`;
       break;
     }
-    default: {
-      statement += `
-        numerator = ${valueCode}`;
+    case "divide": {
+      statement += `${chance_part} = ${chance_part} / ${valueCode}`;
+      break;
     }
   }
 

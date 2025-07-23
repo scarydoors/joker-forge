@@ -67,6 +67,7 @@ import { generateCreateConsumableReturn } from "./effects/CreateConsumableEffect
 import { generateModifyBlindRequirementReturn } from "./effects/ModifyBlindRequirementEffect";
 import { generateBeatCurrentBlindReturn } from "./effects/BeatCurrentBlindEffect";
 import { generateFixProbabilityReturn } from "./effects/FixProbabilityEffect";
+import { generateModProbabilityReturn } from "./effects/ModProbabilityEffect";
 
 interface ExtendedEffect extends Effect {
   _isInRandomGroup?: boolean;
@@ -340,6 +341,9 @@ export function generateEffectReturnStatement(
       const hasFixProbablityEffects = processedEffects.some(
         (effect) => effect.effectType === "fix_probability"
       )
+      const hasModProbablityEffects = processedEffects.some(
+        (effect) => effect.effectType === "mod_probability"
+      )
 
       if (retriggerEffects.length > 0) {
         const retriggerStatements = retriggerEffects
@@ -373,7 +377,7 @@ export function generateEffectReturnStatement(
       }
       
       
-      const groupStatement = hasFixProbablityEffects ? // prevents stack overflow
+      const groupStatement = hasFixProbablityEffects || hasModProbablityEffects ? // prevents stack overflow
                   `if pseudorandom('${probabilityIdentifier}') < ${group.chance_numerator} / ${oddsVar} then
                         ${groupContent}
                     end`:
@@ -521,6 +525,8 @@ const generateSingleEffect = (
       return generateBeatCurrentBlindReturn(effect)
     case "fix_probability":
       return generateFixProbabilityReturn(effect, sameTypeCount)
+    case "mod_probability":
+      return generateModProbabilityReturn(effect, sameTypeCount)
     default:
       return {
         statement: "",

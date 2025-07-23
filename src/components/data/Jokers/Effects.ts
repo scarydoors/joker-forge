@@ -3,6 +3,7 @@ import {
   ChartBarIcon,
   BanknotesIcon,
   Cog6ToothIcon,
+  ReceiptPercentIcon,
   PencilSquareIcon,
   SparklesIcon,
   CakeIcon,
@@ -52,6 +53,10 @@ export const EFFECT_CATEGORIES: CategoryDefinition[] = [
   {
     label: "Game Rules",
     icon: Cog6ToothIcon,
+  },
+  {
+    label: "Probability",
+    icon: ReceiptPercentIcon,
   },
   {
     label: "Special",
@@ -1631,14 +1636,14 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
   },
   {
     id: "fix_probability",
-    label: "Set probability",
+    label: "Set Probability",
     description: "Set the numerator or the denominator of a chance roll",
     applicableTriggers: [...GENERIC_TRIGGERS],
     params: [
       {
         id: "part",
         type: "select",
-        label: "Part of the chance roll",
+        label: "Numerator or Denominator",
         options: [
           { value: "numerator", label: "Numerator" },
           { value: "denominator", label: "Denominator" },
@@ -1654,7 +1659,44 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
         min: 0,
       },
     ],
-    category: "Special",
+    category: "Probability",
+  },
+  {
+    id: "mod_probability",
+    label: "Modify Probability",
+    description: "Set the numerator or the denominator of a chance roll",
+    applicableTriggers: [...GENERIC_TRIGGERS],
+    params: [
+      {
+        id: "part",
+        type: "select",
+        label: "Numerator or Denominator",
+        options: [
+          { value: "numerator", label: "Numerator" },
+          { value: "denominator", label: "Denominator" },
+        ],
+        default: "numerator",
+      },
+      {
+        id: "operation",
+        type: "select",
+        label: "Operation",
+        options: [
+          { value: "increment", label: "Increment by value" },
+          { value: "decrement", label: "Decrement by value" },
+          { value: "multiply", label: "Multiply" },
+          { value: "divide", label: "Divide" },
+        ],
+        default: "multiply",
+      },
+      {
+        id: "value",
+        type: "number",
+        label: "Amount",
+        default: 2,
+      },
+    ],
+    category: "Probability",
   },
 ];
 
