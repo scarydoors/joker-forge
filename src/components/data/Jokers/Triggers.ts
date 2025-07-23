@@ -201,6 +201,13 @@ export const TRIGGERS: TriggerDefinition[] = [
     category: "Special",
   },
   {
+    id: "change_probability",
+    label: "Change Probability",
+    description:
+      "Change Probability in any way",
+    category: "Special",
+  },
+  {
     id: "passive",
     label: "Passive (Always Active)",
     description:

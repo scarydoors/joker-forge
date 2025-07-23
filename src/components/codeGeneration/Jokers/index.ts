@@ -1022,7 +1022,8 @@ const generateCalculateFunction = (
 
       calculateFunction += `
         end`;
-    } else if (hasFixProbablityEffects) {
+    } else if (hasFixProbablityEffects || hasModProbablityEffects) {
+      if (hasFixProbablityEffects) {
       calculateFunction += `
         if context.fix_probability and not context.blueprint then
         local numerator, denominator = context.numerator, context.denominator`;
@@ -1091,82 +1092,45 @@ const generateCalculateFunction = (
         denominator = denominator
       }
         end`;
-
-      const hasNonFixProbabilityEffects = sortedRules.some((rule) => {
-        const regularNonFixProbabilityEffects = (rule.effects || []).filter(
-          (e) => e.type !== "fix_probability"
-        );
-        const randomNonFixProbabilityGroups = (rule.randomGroups || [])
-          .map((group) => ({
-            ...group,
-            effects: group.effects.filter((e) => e.type !== "fix_probability"),
-          }))
-          .filter((group) => group.effects.length > 0);
-
-        return (
-          regularNonFixProbabilityEffects.length > 0 ||
-          randomNonFixProbabilityGroups.length > 0
-        );
-      });
-
-      if (hasNonFixProbabilityEffects) {
-        const nonFixProbabilityContextCheck = generateTriggerContext(triggerType, sortedRules);
-
+      }
+      if (hasModProbablityEffects) {
         calculateFunction += `
-        if ${nonFixProbabilityContextCheck.check} then`;
+          if context.mod_probability and not context.blueprint then
+          local numerator, denominator = context.numerator, context.denominator`;
 
-        if (hasDeleteEffects) {
-          calculateFunction += `
-            context.other_card.should_destroy = false`;
-        }
+        let hasAnyConditions = false;
 
-        hasAnyConditions = false;
-
-        const rulesWithConditions = sortedRules.filter(
-          (rule) => generateConditionChain(rule, joker).length > 0
-        );
-        const rulesWithoutConditions = sortedRules.filter(
-          (rule) => generateConditionChain(rule, joker).length === 0
-        );
-
-        rulesWithConditions.forEach((rule) => {
-          const regularNonFixProbabilityEffects = (rule.effects || []).filter(
-            (e) => e.type !== "fix_probability"
+        sortedRules.forEach((rule) => {
+          const regularModProbablityEffects = (rule.effects || []).filter(
+            (e) => e.type === "mod_probability"
           );
-          const randomNonFixProbabilityGroups = (rule.randomGroups || [])
-            .map((group) => ({
-              ...group,
-              effects: group.effects.filter(
-                (e) => e.type !== "fix_probability"
-              ),
-            }))
-            .filter((group) => group.effects.length > 0);
+          const randomModProbablityEffects = (rule.randomGroups || []).filter(
+            (group) => group.effects.some((e) => e.type === "mod_probability")
+          );
 
           if (
-            regularNonFixProbabilityEffects.length === 0 &&
-            randomNonFixProbabilityGroups.length === 0
+            regularModProbablityEffects.length === 0 &&
+            randomModProbablityEffects.length === 0
           )
             return;
 
           const conditionCode = generateConditionChain(rule, joker);
 
-          const conditional = hasAnyConditions ? "elseif" : "if";
-          calculateFunction += `
-            ${conditional} ${conditionCode} then`;
-          hasAnyConditions = true;
-
-          const hasDeleteInRegularEffects = (rule.effects || []).some(
-            (effect) => effect.type === "delete_triggered_card"
-          );
-
-          if (hasDeleteInRegularEffects) {
+          if (conditionCode) {
+            const conditional = hasAnyConditions ? "elseif" : "if";
             calculateFunction += `
-                context.other_card.should_destroy = true`;
+              ${conditional} ${conditionCode} then`;
+            hasAnyConditions = true;
+          } else {
+            if (hasAnyConditions) {
+              calculateFunction += `
+              else`;
+            }
           }
 
           const effectResult = generateEffectReturnStatement(
-            regularNonFixProbabilityEffects,
-            convertRandomGroupsForCodegen(randomNonFixProbabilityGroups),
+            regularModProbablityEffects,
+            convertRandomGroupsForCodegen(randomModProbablityEffects),
             triggerType,
             rule.id,
             globalEffectCounts
@@ -1178,421 +1142,26 @@ const generateCalculateFunction = (
 
           if (effectResult.preReturnCode) {
             calculateFunction += `
-                ${effectResult.preReturnCode}`;
+                  ${effectResult.preReturnCode}`;
           }
 
           if (effectResult.statement) {
             calculateFunction += `
-                ${effectResult.statement}`;
+                  ${effectResult.statement}`;
           }
         });
 
-        if (rulesWithoutConditions.length > 0) {
-          const rulesWithRandomGroups = rulesWithoutConditions.filter(
-            (rule) => (rule.randomGroups || []).length > 0
-          );
-          const rulesWithoutRandomGroups = rulesWithoutConditions.filter(
-            (rule) =>
-              (rule.randomGroups || []).length === 0 &&
-              (rule.effects || []).length > 0
-          );
-
-          rulesWithRandomGroups.forEach((rule) => {
-            const regularNonFixProbabilityEffects = (rule.effects || []).filter(
-              (e) => e.type !== "fix_probability"
-            );
-            const randomNonFixProbabilityGroups = (rule.randomGroups || [])
-              .map((group) => ({
-                ...group,
-                effects: group.effects.filter(
-                  (e) => e.type !== "fix_probability"
-                ),
-              }))
-              .filter((group) => group.effects.length > 0);
-
-            if (
-              regularNonFixProbabilityEffects.length === 0 &&
-              randomNonFixProbabilityGroups.length === 0
-            )
-              return;
-
-            const conditional = hasAnyConditions ? "elseif" : "if";
-            calculateFunction += `
-            ${conditional} true then`;
-            hasAnyConditions = true;
-
-            const hasDeleteInRegularEffects = (rule.effects || []).some(
-              (effect) => effect.type === "delete_triggered_card"
-            );
-
-            if (hasDeleteInRegularEffects) {
-              calculateFunction += `
-                context.other_card.should_destroy = true`;
-            }
-
-            const effectResult = generateEffectReturnStatement(
-              regularNonFixProbabilityEffects,
-              convertRandomGroupsForCodegen(randomNonFixProbabilityGroups),
-              triggerType,
-              rule.id,
-              globalEffectCounts
-            );
-
-            if (effectResult.configVariables) {
-              allConfigVariables.push(...effectResult.configVariables);
-            }
-
-            if (effectResult.preReturnCode) {
-              calculateFunction += `
-                ${effectResult.preReturnCode}`;
-            }
-
-            if (effectResult.statement) {
-              calculateFunction += `
-                ${effectResult.statement}`;
-            }
-          });
-
-          if (rulesWithoutRandomGroups.length > 0) {
-            if (hasAnyConditions) {
-              calculateFunction += `
-            else`;
-            }
-
-            rulesWithoutRandomGroups.forEach((rule) => {
-              const regularNonFixProbabilityEffects = (rule.effects || []).filter(
-                (e) => e.type !== "fix_probability"
-              );
-
-              if (regularNonFixProbabilityEffects.length === 0) return;
-
-              const hasDeleteInRegularEffects = (rule.effects || []).some(
-                (effect) => effect.type === "delete_triggered_card"
-              );
-
-              if (hasDeleteInRegularEffects) {
-                calculateFunction += `
-                context.other_card.should_destroy = true`;
-              }
-
-              const effectResult = generateEffectReturnStatement(
-                regularNonFixProbabilityEffects,
-                [],
-                triggerType,
-                rule.id,
-                globalEffectCounts
-              );
-
-              if (effectResult.configVariables) {
-                allConfigVariables.push(...effectResult.configVariables);
-              }
-
-              if (effectResult.preReturnCode) {
-                calculateFunction += `
-                ${effectResult.preReturnCode}`;
-              }
-
-              if (effectResult.statement) {
-                calculateFunction += `
-                ${effectResult.statement}`;
-              }
-            });
-          }
-        }
-
         if (hasAnyConditions) {
           calculateFunction += `
-            end`;
+              end`;
         }
 
         calculateFunction += `
-        end`;
-      }
-    } else if (hasModProbablityEffects) {
-      calculateFunction += `
-        if context.mod_probability and not context.blueprint then
-        local numerator, denominator = context.numerator, context.denominator`;
-
-      let hasAnyConditions = false;
-
-      sortedRules.forEach((rule) => {
-        const regularModProbablityEffects = (rule.effects || []).filter(
-          (e) => e.type === "mod_probability"
-        );
-        const randomModProbablityEffects = (rule.randomGroups || []).filter(
-          (group) => group.effects.some((e) => e.type === "mod_probability")
-        );
-
-        if (
-          regularModProbablityEffects.length === 0 &&
-          randomModProbablityEffects.length === 0
-        )
-          return;
-
-        const conditionCode = generateConditionChain(rule, joker);
-
-        if (conditionCode) {
-          const conditional = hasAnyConditions ? "elseif" : "if";
-          calculateFunction += `
-            ${conditional} ${conditionCode} then`;
-          hasAnyConditions = true;
-        } else {
-          if (hasAnyConditions) {
-            calculateFunction += `
-            else`;
-          }
+        return {
+          numerator = numerator, 
+          denominator = denominator
         }
-
-        const effectResult = generateEffectReturnStatement(
-          regularModProbablityEffects,
-          convertRandomGroupsForCodegen(randomModProbablityEffects),
-          triggerType,
-          rule.id,
-          globalEffectCounts
-        );
-
-        if (effectResult.configVariables) {
-          allConfigVariables.push(...effectResult.configVariables);
-        }
-
-        if (effectResult.preReturnCode) {
-          calculateFunction += `
-                ${effectResult.preReturnCode}`;
-        }
-
-        if (effectResult.statement) {
-          calculateFunction += `
-                ${effectResult.statement}`;
-        }
-      });
-
-      if (hasAnyConditions) {
-        calculateFunction += `
-            end`;
-      }
-
-      calculateFunction += `
-      return {
-        numerator = numerator, 
-        denominator = denominator
-      }
-        end`;
-
-      const hasNonModProbabilityEffects = sortedRules.some((rule) => {
-        const regularNonModProbabilityEffects = (rule.effects || []).filter(
-          (e) => e.type !== "mod_probability"
-        );
-        const randomNonModProbabilityGroups = (rule.randomGroups || [])
-          .map((group) => ({
-            ...group,
-            effects: group.effects.filter((e) => e.type !== "mod_probability"),
-          }))
-          .filter((group) => group.effects.length > 0);
-
-        return (
-          regularNonModProbabilityEffects.length > 0 ||
-          randomNonModProbabilityGroups.length > 0
-        );
-      });
-
-      if (hasNonModProbabilityEffects) {
-        const nonModProbabilityContextCheck = generateTriggerContext(triggerType, sortedRules);
-
-        calculateFunction += `
-        if ${nonModProbabilityContextCheck.check} then`;
-
-        if (hasDeleteEffects) {
-          calculateFunction += `
-            context.other_card.should_destroy = false`;
-        }
-
-        hasAnyConditions = false;
-
-        const rulesWithConditions = sortedRules.filter(
-          (rule) => generateConditionChain(rule, joker).length > 0
-        );
-        const rulesWithoutConditions = sortedRules.filter(
-          (rule) => generateConditionChain(rule, joker).length === 0
-        );
-
-        rulesWithConditions.forEach((rule) => {
-          const regularNonModProbabilityEffects = (rule.effects || []).filter(
-            (e) => e.type !== "mod_probability"
-          );
-          const randomNonModProbabilityGroups = (rule.randomGroups || [])
-            .map((group) => ({
-              ...group,
-              effects: group.effects.filter(
-                (e) => e.type !== "mod_probability"
-              ),
-            }))
-            .filter((group) => group.effects.length > 0);
-
-          if (
-            regularNonModProbabilityEffects.length === 0 &&
-            randomNonModProbabilityGroups.length === 0
-          )
-            return;
-
-          const conditionCode = generateConditionChain(rule, joker);
-
-          const conditional = hasAnyConditions ? "elseif" : "if";
-          calculateFunction += `
-            ${conditional} ${conditionCode} then`;
-          hasAnyConditions = true;
-
-          const hasDeleteInRegularEffects = (rule.effects || []).some(
-            (effect) => effect.type === "delete_triggered_card"
-          );
-
-          if (hasDeleteInRegularEffects) {
-            calculateFunction += `
-                context.other_card.should_destroy = true`;
-          }
-
-          const effectResult = generateEffectReturnStatement(
-            regularNonModProbabilityEffects,
-            convertRandomGroupsForCodegen(randomNonModProbabilityGroups),
-            triggerType,
-            rule.id,
-            globalEffectCounts
-          );
-
-          if (effectResult.configVariables) {
-            allConfigVariables.push(...effectResult.configVariables);
-          }
-
-          if (effectResult.preReturnCode) {
-            calculateFunction += `
-                ${effectResult.preReturnCode}`;
-          }
-
-          if (effectResult.statement) {
-            calculateFunction += `
-                ${effectResult.statement}`;
-          }
-        });
-
-        if (rulesWithoutConditions.length > 0) {
-          const rulesWithRandomGroups = rulesWithoutConditions.filter(
-            (rule) => (rule.randomGroups || []).length > 0
-          );
-          const rulesWithoutRandomGroups = rulesWithoutConditions.filter(
-            (rule) =>
-              (rule.randomGroups || []).length === 0 &&
-              (rule.effects || []).length > 0
-          );
-
-          rulesWithRandomGroups.forEach((rule) => {
-            const regularNonModProbabilityEffects = (rule.effects || []).filter(
-              (e) => e.type !== "mod_probability"
-            );
-            const randomNonModProbabilityGroups = (rule.randomGroups || [])
-              .map((group) => ({
-                ...group,
-                effects: group.effects.filter(
-                  (e) => e.type !== "mod_probability"
-                ),
-              }))
-              .filter((group) => group.effects.length > 0);
-
-            if (
-              regularNonModProbabilityEffects.length === 0 &&
-              randomNonModProbabilityGroups.length === 0
-            )
-              return;
-
-            const conditional = hasAnyConditions ? "elseif" : "if";
-            calculateFunction += `
-            ${conditional} true then`;
-            hasAnyConditions = true;
-
-            const hasDeleteInRegularEffects = (rule.effects || []).some(
-              (effect) => effect.type === "delete_triggered_card"
-            );
-
-            if (hasDeleteInRegularEffects) {
-              calculateFunction += `
-                context.other_card.should_destroy = true`;
-            }
-
-            const effectResult = generateEffectReturnStatement(
-              regularNonModProbabilityEffects,
-              convertRandomGroupsForCodegen(randomNonModProbabilityGroups),
-              triggerType,
-              rule.id,
-              globalEffectCounts
-            );
-
-            if (effectResult.configVariables) {
-              allConfigVariables.push(...effectResult.configVariables);
-            }
-
-            if (effectResult.preReturnCode) {
-              calculateFunction += `
-                ${effectResult.preReturnCode}`;
-            }
-
-            if (effectResult.statement) {
-              calculateFunction += `
-                ${effectResult.statement}`;
-            }
-          });
-
-          if (rulesWithoutRandomGroups.length > 0) {
-            if (hasAnyConditions) {
-              calculateFunction += `
-            else`;
-            }
-
-            rulesWithoutRandomGroups.forEach((rule) => {
-              const regularNonModProbabilityEffects = (rule.effects || []).filter(
-                (e) => e.type !== "mod_probability"
-              );
-
-              if (regularNonModProbabilityEffects.length === 0) return;
-
-              const hasDeleteInRegularEffects = (rule.effects || []).some(
-                (effect) => effect.type === "delete_triggered_card"
-              );
-
-              if (hasDeleteInRegularEffects) {
-                calculateFunction += `
-                context.other_card.should_destroy = true`;
-              }
-
-              const effectResult = generateEffectReturnStatement(
-                regularNonModProbabilityEffects,
-                [],
-                triggerType,
-                rule.id,
-                globalEffectCounts
-              );
-
-              if (effectResult.configVariables) {
-                allConfigVariables.push(...effectResult.configVariables);
-              }
-
-              if (effectResult.preReturnCode) {
-                calculateFunction += `
-                ${effectResult.preReturnCode}`;
-              }
-
-              if (effectResult.statement) {
-                calculateFunction += `
-                ${effectResult.statement}`;
-              }
-            });
-          }
-        }
-
-        if (hasAnyConditions) {
-          calculateFunction += `
-            end`;
-        }
-
-        calculateFunction += `
-        end`;
+          end`;
       }
 
     } else {
