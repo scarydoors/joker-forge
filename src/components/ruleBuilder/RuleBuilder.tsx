@@ -10,6 +10,7 @@ import {
   useSensors,
   PointerSensor,
   KeyboardSensor,
+  DragStartEvent,
   DragEndEvent,
   closestCenter,
 } from "@dnd-kit/core";
@@ -69,10 +70,11 @@ interface PanelState {
   isVisible: boolean;
   position: { x: number; y: number };
   size: { width: number; height: number };
+  positionSet: boolean; 
 }
 
 const RuleBuilder: React.FC<RuleBuilderProps> = ({
-  isOpen,
+  isOpen, 
   onClose,
   onSave,
   existingRules = [],
@@ -80,6 +82,8 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
   onUpdateItem,
   itemType,
 }) => {
+  const [activeId, setActiveId] = useState<string | null>(null);
+
   const getConditionType =
     itemType === "joker"
       ? getConditionTypeById
@@ -97,30 +101,35 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
       isVisible: true,
       position: { x: 20, y: 20 },
       size: { width: 320, height: 1200 },
+      positionSet: true,
     },
     jokerInfo: {
       id: "jokerInfo",
       isVisible: false,
       position: { x: 0, y: 0 },
       size: { width: 320, height: 200 },
+      positionSet: false,
     },
     variables: {
       id: "variables",
       isVisible: false,
       position: { x: 0, y: 0 },
       size: { width: 320, height: 300 },
+      positionSet: false,
     },
     gameVariables: {
       id: "gameVariables",
       isVisible: false,
       position: { x: 20, y: 20 },
       size: { width: 320, height: 500 },
+      positionSet: true,
     },
     inspector: {
       id: "inspector",
       isVisible: false,
       position: { x: 0, y: 0 },
       size: { width: 384, height: 600 },
+      positionSet: false,
     },
   });
 
@@ -291,9 +300,10 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
         [panelId]: {
           ...panel,
           isVisible: !panel.isVisible,
-          position: panel.isVisible
+          position: panel.isVisible || panel.positionSet
             ? panel.position
             : findPosition(prev, panelId),
+            positionSet: panel.positionSet || !panel.isVisible,
         },
       };
       return newState;
@@ -395,6 +405,7 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
       [panelId]: {
         ...prev[panelId],
         position,
+        positionSet: true,
       },
     }));
   };
@@ -614,6 +625,43 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
       prev.map((rule) => (rule.id === ruleId ? { ...rule, position } : rule))
     );
   };
+
+      const duplicateRule  = (ruleId: string) => {
+        const newRuleId = crypto.randomUUID();
+      setRules((prevRules) => {
+        const ruleToDuplicate = prevRules.find((r) => r.id === ruleId);
+        if (!ruleToDuplicate) {
+          return prevRules;
+        }
+
+        const newRule = {
+          ...ruleToDuplicate,
+          id: newRuleId,
+          position: {
+            x: (ruleToDuplicate.position?.x || 0) + 30,
+            y: (ruleToDuplicate.position?.y || 0) + 30,
+          },
+          conditionGroups: ruleToDuplicate.conditionGroups.map((group) => ({
+            ...group,
+            id: crypto.randomUUID(),
+            conditions: group.conditions.map((condition) => ({
+              ...condition,
+              id: crypto.randomUUID(),
+            })),
+          })),
+          effects: ruleToDuplicate.effects.map((effect) => ({
+            ...effect,
+            id: crypto.randomUUID(),
+          })),
+          randomGroups: ruleToDuplicate.randomGroups.map((group) => ({
+            ...group,
+            id: crypto.randomUUID(),
+          })),
+        };
+        setSelectedItem({ type: "trigger", ruleId: newRuleId });
+        return [...prevRules, newRule];
+      });
+    };
 
   const addTrigger = (triggerId: string) => {
     const centerPos = getCenterPosition();
@@ -1125,7 +1173,9 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
     return Object.keys(params).length;
   };
 
-  const handleDragStart = () => {};
+  const handleDragStart = (event: DragStartEvent) => {
+    setActiveId(event.active.id as string);
+  };
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over, delta } = event;
@@ -1141,6 +1191,7 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
         };
         updatePanelPosition(panelId, newPosition);
       }
+      setActiveId(null);
       return;
     }
 
@@ -1366,7 +1417,7 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
             collisionDetection={closestCenter}
             onDragStart={handleDragStart}
             onDragEnd={handleDragEnd}
-            modifiers={[restrictToVerticalAxis]}
+            modifiers={activeId && activeId.startsWith('panel-') ? [] : [restrictToVerticalAxis]}
           >
             <TransformWrapper
               ref={transformRef}
@@ -1437,6 +1488,7 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
                             ruleIndex={index}
                             selectedItem={selectedItem}
                             onSelectItem={setSelectedItem}
+                            onDuplicateRule={duplicateRule}
                             onDeleteRule={deleteRule}
                             onDeleteCondition={deleteCondition}
                             onDeleteConditionGroup={deleteConditionGroup}

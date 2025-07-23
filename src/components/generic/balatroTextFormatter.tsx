@@ -93,9 +93,19 @@ const BG_COLOR_MAP: Record<string, string> = {
 
 export const parseBalatroText = (
   text: string,
-  locVars?: { colours?: string[] }
+  locVars?: { colours?: string[]; vars?: (string | number)[] }
 ): ParsedSegment[] => {
   const segments: ParsedSegment[] = [];
+
+  if (locVars && locVars.vars) {
+    text = text.replace(/#(\d+)#/g, (match, varIndex) => {
+      const index = parseInt(varIndex, 10) - 1;
+      if (locVars.vars && index >= 0 && index < locVars.vars.length) {
+        return String(locVars.vars[index]);
+      }
+      return match;
+    });
+  }
 
   text = text.replace(/\[s\]/g, "\n");
 
