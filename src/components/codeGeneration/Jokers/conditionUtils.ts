@@ -41,6 +41,8 @@ import { generatePokerHandBeenPlayedConditionCode } from "./conditions/PokerHand
 import { generateTriggeredBossBlindConditionCode } from "./conditions/TriggeredBossBlindCondition";
 import { generateLuckyCardTriggeredConditionCode } from "./conditions/LuckyCardTriggeredCondition";
 import { generateCardIndexConditionCode } from "./conditions/CardIndexCondition";
+import { generateProbabilityIdentifierConditionCode } from "./conditions/ProbabilityIdentifierCondition";
+import { generateProbabilityPartCompareConditionCode } from "./conditions/ProbabilityPartCompareCondition";
 
 export const generateConditionChain = (
   rule: Rule,
@@ -238,6 +240,12 @@ const generateSingleConditionCode = (
 
     case "lucky_card_triggered":
       return generateLuckyCardTriggeredConditionCode();
+    
+    case "probability_identifier":
+      return generateProbabilityIdentifierConditionCode([singleConditionRule]);
+    
+    case "probability_part_compare":
+      return generateProbabilityPartCompareConditionCode([singleConditionRule]);
 
     case "card_index":
       return generateCardIndexConditionCode([singleConditionRule]);

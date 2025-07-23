@@ -3,6 +3,7 @@ import {
   ChartBarIcon,
   BanknotesIcon,
   Cog6ToothIcon,
+  ReceiptPercentIcon,
   PencilSquareIcon,
   SparklesIcon,
   CakeIcon,
@@ -52,6 +53,10 @@ export const EFFECT_CATEGORIES: CategoryDefinition[] = [
   {
     label: "Game Rules",
     icon: Cog6ToothIcon,
+  },
+  {
+    label: "Probability",
+    icon: ReceiptPercentIcon,
   },
   {
     label: "Special",
@@ -1554,15 +1559,6 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
     category: "Card Effects",
   },
   {
-    id: "double_probability",
-    label: "Double Probability",
-    description:
-      "Double all probability chances (like lucky cards, card destruction, etc.)",
-    applicableTriggers: ["passive"],
-    params: [],
-    category: "Special",
-  },
-  {
     id: "splash_effect",
     label: "Every Played Card is Scored (Splash)",
     description: "When a hand is played, every card in it is scored",
@@ -1637,6 +1633,70 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
       },
     ],
     category: "Special",
+  },
+  {
+    id: "fix_probability",
+    label: "Set Probability",
+    description: "Set the Numerator or the Denominator of a chance roll",
+    applicableTriggers: ["change_probability"],
+    params: [
+      {
+        id: "part",
+        type: "select",
+        label: "Numerator or Denominator",
+        options: [
+          { value: "numerator", label: "Numerator" },
+          { value: "denominator", label: "Denominator" },
+          { value: "both", label: "Both" },
+        ],
+        default: "numerator",
+      },
+      {
+        id: "value",
+        type: "number",
+        label: "Amount",
+        default: 1,
+        min: 0,
+      },
+    ],
+    category: "Probability",
+  },
+  {
+    id: "mod_probability",
+    label: "Modify Probability",
+    description: "Modify the Numerator or the Denominator of a chance roll",
+    applicableTriggers: ["change_probability"],
+    params: [
+      {
+        id: "part",
+        type: "select",
+        label: "Numerator or Denominator",
+        options: [
+          { value: "numerator", label: "Numerator" },
+          { value: "denominator", label: "Denominator" },
+        ],
+        default: "numerator",
+      },
+      {
+        id: "operation",
+        type: "select",
+        label: "Operation",
+        options: [
+          { value: "increment", label: "Increment by value" },
+          { value: "decrement", label: "Decrement by value" },
+          { value: "multiply", label: "Multiply" },
+          { value: "divide", label: "Divide" },
+        ],
+        default: "multiply",
+      },
+      {
+        id: "value",
+        type: "number",
+        label: "Amount",
+        default: 2,
+      },
+    ],
+    category: "Probability",
   },
 ];
 
