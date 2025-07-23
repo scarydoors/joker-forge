@@ -92,6 +92,12 @@ export const generateTriggerContext = (
         comment: "-- When first hand is drawn",
       };
 
+    case "shop_entered":
+      return {
+        check: "context.starting_shop and not context.blueprint",
+        comment: "-- When entering shop",
+      };
+
     case "shop_exited":
       return {
         check: "context.ending_shop and not context.blueprint",
