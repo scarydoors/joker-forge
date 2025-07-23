@@ -243,7 +243,7 @@ const Sidebar: React.FC<SidebarProps> = ({
               <span className="text-sm font-medium tracking-wide">
                 Import Mod{" "}
               </span>
-              <span className="text-xs">(JSON)</span>
+              <span className="text-xs">(JOKERFORGE)</span>
             </button>
 
             <button
@@ -254,7 +254,7 @@ const Sidebar: React.FC<SidebarProps> = ({
               <span className="text-sm font-medium tracking-wide">
                 Save Mod
               </span>
-              <span className="text-xs">(JSON)</span>
+              <span className="text-xs">(JOKERFORGE)</span>
             </button>
 
             <button

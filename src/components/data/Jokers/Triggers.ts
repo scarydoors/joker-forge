@@ -144,10 +144,16 @@ export const TRIGGERS: TriggerDefinition[] = [
     category: "Economy",
   },
   {
+    id: "buying_self",
+    label: "When This Card is Bought",
+    description: "Triggers when this specific joker is bought.",
+    category: "Economy",
+  },
+  {
     id: "card_bought",
     label: "When a Card is Bought",
     description: "Triggers when any card is bought from the shop.",
-    category: "Packs & Consumables",
+    category: "Economy",
   },
   {
     id: "booster_opened",
@@ -186,6 +192,12 @@ export const TRIGGERS: TriggerDefinition[] = [
     label: "When First Hand is Drawn",
     description: "Triggers only for the first hand drawn in each round.",
     category: "Gameplay",
+  },
+  {
+    id: "shop_entered",
+    label: "When Shop is Entered",
+    description: "Triggers when the player enters the shop.",
+    category: "Round Events",
   },
   {
     id: "shop_exited",

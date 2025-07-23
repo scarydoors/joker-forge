@@ -37,6 +37,7 @@ import { generateConsumableTypeConditionCode } from "./conditions/ConsumableType
 import { generatePokerHandBeenPlayedConditionCode } from "./conditions/PokerHandBeenPlayedCondition";
 import { generateTriggeredBossBlindConditionCode } from "./conditions/TriggeredBossBlindCondition";
 import { generateLuckyCardTriggeredConditionCode } from "./conditions/LuckyCardTriggeredCondition";
+import { generateCardIndexConditionCode } from "./conditions/CardIndexCondition";
 import { generateProbabilityIdentifierConditionCode } from "./conditions/ProbabilityIdentifierCondition";
 import { generateProbabilityPartCompareConditionCode } from "./conditions/ProbabilityPartCompareCondition";
 
@@ -233,6 +234,9 @@ const generateSingleConditionCode = (
     
     case "probability_part_compare":
       return generateProbabilityPartCompareConditionCode([singleConditionRule]);
+
+    case "card_index":
+      return generateCardIndexConditionCode([singleConditionRule]);
 
     default:
       return null;

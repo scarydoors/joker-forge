@@ -27,12 +27,6 @@ import {
 } from "../../data/BalatroUtils";
 import { slugify } from "../../EditJokerInfo";
 import { RarityData } from "../../pages/RaritiesPage";
-
-interface JokerGenerationOptions {
-  modPrefix?: string;
-  atlasKey?: string;
-}
-
 interface CalculateFunctionResult {
   code: string;
   configVariables: ConfigExtraVariable[];
@@ -47,10 +41,9 @@ const ensureJokerKeys = (jokers: JokerData[]): JokerData[] => {
 
 export const generateJokersCode = (
   jokers: JokerData[],
-  options: JokerGenerationOptions = {}
+  atlasKey: string,
+  modPrefix: string
 ): { jokersCode: Record<string, string>; hooks: string } => {
-  const { atlasKey = "CustomJokers", modPrefix = "" } = options;
-
   const jokersWithKeys = ensureJokerKeys(jokers);
   const jokersCode: Record<string, string> = {};
   let currentPosition = 0;
@@ -124,7 +117,7 @@ const generateSingleJokerCode = (
   joker: JokerData,
   atlasKey: string,
   currentPosition: number,
-  modPrefix: string = ""
+  modPrefix: string
 ): { code: string; nextPosition: number } => {
   const passiveEffects = processPassiveEffects(joker);
   const nonPassiveRules =
@@ -132,7 +125,11 @@ const generateSingleJokerCode = (
 
   let calculateResult: CalculateFunctionResult | null = null;
   if (nonPassiveRules.length > 0) {
-    calculateResult = generateCalculateFunction(nonPassiveRules, joker);
+    calculateResult = generateCalculateFunction(
+      nonPassiveRules,
+      joker,
+      modPrefix
+    );
   }
 
   const configItems: string[] = [];
@@ -431,7 +428,8 @@ const generateSetAbilityFunction = (joker: JokerData): string | null => {
 
 const generateCalculateFunction = (
   rules: Rule[],
-  joker: JokerData
+  joker: JokerData,
+  modprefix: string
 ): CalculateFunctionResult => {
   const rulesByTrigger: Record<string, Rule[]> = {};
   rules.forEach((rule) => {
@@ -537,6 +535,7 @@ const generateCalculateFunction = (
           regularRetriggerEffects,
           convertRandomGroupsForCodegen(randomRetriggerEffects),
           triggerType,
+          modprefix,
           rule.id,
           globalEffectCounts
         );
@@ -646,6 +645,7 @@ const generateCalculateFunction = (
             regularNonRetriggerEffects,
             convertRandomGroupsForCodegen(randomNonRetriggerGroups),
             triggerType,
+            modprefix,
             rule.id,
             globalEffectCounts
           );
@@ -712,6 +712,7 @@ const generateCalculateFunction = (
               regularNonRetriggerEffects,
               convertRandomGroupsForCodegen(randomNonRetriggerGroups),
               triggerType,
+              modprefix,
               rule.id,
               globalEffectCounts
             );
@@ -757,6 +758,7 @@ const generateCalculateFunction = (
                 regularNonRetriggerEffects,
                 [],
                 triggerType,
+                modprefix,
                 rule.id,
                 globalEffectCounts
               );
@@ -859,6 +861,7 @@ const generateCalculateFunction = (
             allEffects,
             convertRandomGroupsForCodegen(allGroups),
             triggerType,
+            modprefix,
             rule.id,
             globalEffectCounts
           );
@@ -938,6 +941,7 @@ const generateCalculateFunction = (
               allEffects,
               convertRandomGroupsForCodegen(allGroups),
               triggerType,
+              modprefix,
               rule.id,
               globalEffectCounts
             );
@@ -993,6 +997,7 @@ const generateCalculateFunction = (
                 allEffects,
                 [],
                 triggerType,
+                modprefix,
                 rule.id,
                 globalEffectCounts
               );
@@ -1191,6 +1196,7 @@ const generateCalculateFunction = (
           rule.effects || [],
           convertRandomGroupsForCodegen(rule.randomGroups || []),
           triggerType,
+          modprefix,
           rule.id,
           globalEffectCounts
         );
@@ -1230,6 +1236,7 @@ const generateCalculateFunction = (
             rule.effects || [],
             convertRandomGroupsForCodegen(rule.randomGroups || []),
             triggerType,
+            modprefix,
             rule.id,
             globalEffectCounts
           );
@@ -1260,6 +1267,7 @@ const generateCalculateFunction = (
               rule.effects || [],
               [],
               triggerType,
+              modprefix,
               rule.id,
               globalEffectCounts
             );
@@ -1600,18 +1608,22 @@ const generateLocVarsFunction = (
 const formatJokerDescription = (joker: JokerData): string => {
   const formatted = joker.description.replace(/<br\s*\/?>/gi, "[s]");
 
-  const escaped = formatted.replace(/\n/g, "[s]") 
-  const lines = escaped
-    .split("[s]")
-    .map((line) => line.trim())
-    // .filter((line) => line.length > 0);
+  const escaped = formatted.replace(/\n/g, "[s]");
+  const lines = escaped.split("[s]").map((line) => line.trim());
+  // .filter((line) => line.length > 0);
 
   if (lines.length === 0) {
     lines.push(escaped.trim());
   }
 
   return `{\n${lines
-    .map((line, i) => `            [${i + 1}] = '${line.replace(/\\/g, "\\\\").replace(/"/g,"\\\"").replace(/'/g, "\\'")}'`)
+    .map(
+      (line, i) =>
+        `            [${i + 1}] = '${line
+          .replace(/\\/g, "\\\\")
+          .replace(/"/g, '\\"')
+          .replace(/'/g, "\\'")}'`
+    )
     .join(",\n")}\n        }`;
 };
 

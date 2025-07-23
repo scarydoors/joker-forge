@@ -52,6 +52,7 @@ interface RuleCardProps {
     randomGroupId?: string;
   }) => void;
   onDeleteRule: (ruleId: string) => void;
+  onDuplicateRule: (ruleId: string) => void;
   onDeleteCondition: (ruleId: string, conditionId: string) => void;
   onDeleteConditionGroup: (ruleId: string, groupId: string) => void;
   onDeleteEffect: (ruleId: string, effectId: string) => void;
@@ -74,6 +75,7 @@ interface RuleCardProps {
     conditionId: string,
     operator: "and" | "or"
   ) => void;
+  onRuleDoubleClick: () => void;
 }
 
 const SortableCondition: React.FC<{
@@ -246,6 +248,7 @@ const RuleCard: React.FC<RuleCardProps> = ({
   ruleIndex,
   selectedItem,
   onSelectItem,
+  onDuplicateRule,
   onDeleteRule,
   onDeleteCondition,
   onDeleteConditionGroup,
@@ -261,6 +264,7 @@ const RuleCard: React.FC<RuleCardProps> = ({
   getParameterCount,
   onUpdateConditionOperator,
   itemType,
+  onRuleDoubleClick,
 }) => {
   const getTrigger =
     itemType === "joker" ? getTriggerById : getConsumableTriggerById;
@@ -402,7 +406,7 @@ const RuleCard: React.FC<RuleCardProps> = ({
   };
 
   const handleEditName = () => console.log("Edit rule name");
-  const handleDuplicateRule = () => console.log("Duplicate rule");
+  const handleDuplicateRule = () => onDuplicateRule(rule.id);
   const handleToggleDisabled = () => setIsDisabled(!isDisabled);
 
   const handleConditionOperatorToggle = (
@@ -612,6 +616,10 @@ const RuleCard: React.FC<RuleCardProps> = ({
       onClick={(e) => {
         e.stopPropagation();
         onSelectItem({ type: "trigger", ruleId: rule.id });
+      }}
+      onDoubleClick={(e) => {
+        e.stopPropagation();
+        onRuleDoubleClick();
       }}
       onMouseDown={handleCardMouseDown}
     >

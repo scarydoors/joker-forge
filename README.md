@@ -37,16 +37,15 @@ The plan here is to implement enough triggers, conditions, and effects, so as th
 - [x] **Card Sold** - When a card is sold
 - [x] **When this Card is Sold** - When this specific card is sold
 - [x] **Card Destroyed** - When a card is destroyed
+- [x] **When shop is Entered** - When the shop is entered
+- [x] **When this Joker is Bought** - When specifically this joker is bought (different from add to deck)
 
 #### Not Implemented Yet
 
 - [ ] **Ante Start** - At the start of an ante
 - [ ] **Joker Added/Removed** - When a Joker is added/removed from your list (Joker Stencil)
 - [ ] **When a Card is Modified** - When any card is modified (enhanced, etc) (difficult)
-- [ ] **When shop is Entered** - WHne the shop is entered
 - [ ] **When a Playing Card is Added** - When a playing card is added to your deck (Hologram)
-- [ ] **When this Joker is Bought** - When specifically this joker is bought (different from add to deck)
-
 ---
 
 ### Conditions

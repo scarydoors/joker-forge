@@ -562,7 +562,7 @@ function AppContent() {
       showAlert(
         "success",
         "Mod Saved",
-        "Your mod has been saved as a JSON file successfully!"
+        "Your mod has been saved as a jokerforge file!"
       );
     } catch (error) {
       console.error("JSON export failed:", error);

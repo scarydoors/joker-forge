@@ -92,6 +92,12 @@ export const generateTriggerContext = (
         comment: "-- When first hand is drawn",
       };
 
+    case "shop_entered":
+      return {
+        check: "context.starting_shop and not context.blueprint",
+        comment: "-- When entering shop",
+      };
+
     case "shop_exited":
       return {
         check: "context.ending_shop and not context.blueprint",
@@ -145,6 +151,12 @@ export const generateTriggerContext = (
       return {
         check: "context.selling_self and not context.blueprint",
         comment: "-- When this specific joker is sold",
+      };
+
+    case "buying_self":
+      return {
+        check: "context.buying_card and context.card.config.center.key == self.key and context.cardarea == G.jokers and not context.blueprint",
+        comment: "-- When this specific joker is bought",
       };
 
     case "game_over":

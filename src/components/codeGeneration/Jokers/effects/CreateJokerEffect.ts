@@ -3,7 +3,8 @@ import type { Effect } from "../../../ruleBuilder/types";
 
 export const generateCreateJokerReturn = (
   effect: Effect,
-  triggerType: string
+  triggerType: string,
+  modprefix: string
 ): EffectReturn => {
   const jokerType = (effect.params?.joker_type as string) || "random";
   const rarity = (effect.params?.rarity as string) || "random";
@@ -13,126 +14,84 @@ export const generateCreateJokerReturn = (
 
   const scoringTriggers = ["hand_played", "card_scored"];
   const isScoring = scoringTriggers.includes(triggerType);
-
   const isNegative = edition === "e_negative";
-  const hasEdition = edition !== "none";
 
-  let jokerCreationCode = "";
+  // Build SMODS.add_card parameters
+  const cardParams = ["set = 'Joker'"];
 
   if (jokerType === "specific" && jokerKey) {
-    // Create specific joker using create_card
-    const editionCode = hasEdition
-      ? `\n                        joker_card:set_edition("${edition}", true)`
-      : "";
-
-    if (isNegative) {
-      jokerCreationCode = `local created_joker = true
-                G.E_MANAGER:add_event(Event({
-                    func = function()
-                        local joker_card = create_card('Joker', G.jokers, nil, nil, nil, nil, '${jokerKey}')${editionCode}
-                        joker_card:add_to_deck()
-                        G.jokers:emplace(joker_card)
-                        return true
-                    end
-                }))`;
-    } else {
-      jokerCreationCode = `local created_joker = false
-                if #G.jokers.cards + G.GAME.joker_buffer < G.jokers.config.card_limit then
-                    created_joker = true
-                    G.GAME.joker_buffer = G.GAME.joker_buffer + 1
-                    G.E_MANAGER:add_event(Event({
-                        func = function()
-                            local joker_card = create_card('Joker', G.jokers, nil, nil, nil, nil, '${jokerKey}')${editionCode}
-                            joker_card:add_to_deck()
-                            G.jokers:emplace(joker_card)
-                            G.GAME.joker_buffer = 0
-                            return true
-                        end
-                    }))
-                end`;
-    }
-  } else {
-    // Create random joker using SMODS.add_card with string rarities
-    let rarityString = "";
-
-    if (rarity !== "random") {
-      const rarityStringMap: Record<string, string> = {
-        common: "Common",
-        uncommon: "Uncommon",
-        rare: "Rare",
-        legendary: "Legendary",
-      };
-      rarityString = rarityStringMap[rarity] || "";
-    }
-
-    if (isNegative) {
-      // Negative edition jokers bypass slot limits
-      if (rarityString) {
-        jokerCreationCode = `local created_joker = true
-                G.E_MANAGER:add_event(Event({
-                    func = function()
-                        local joker_card = SMODS.add_card({
-                            set = 'Joker',
-                            rarity = '${rarityString}',
-                            key_append = 'joker_forge_random'
-                        })
-                        joker_card:set_edition("e_negative", true)
-                        return true
-                    end
-                }))`;
-      } else {
-        jokerCreationCode = `local created_joker = true
-                G.E_MANAGER:add_event(Event({
-                    func = function()
-                        local joker_card = create_card('Joker', G.jokers, nil, nil, nil, nil, nil, 'joker_forge_random')
-                        joker_card:set_edition("e_negative", true)
-                        joker_card:add_to_deck()
-                        G.jokers:emplace(joker_card)
-                        return true
-                    end
-                }))`;
-      }
-    } else {
-      // Normal jokers respect slot limits
-      if (rarityString) {
-        jokerCreationCode = `local created_joker = false
-                if #G.jokers.cards + G.GAME.joker_buffer < G.jokers.config.card_limit then
-                    created_joker = true
-                    G.GAME.joker_buffer = G.GAME.joker_buffer + 1
-                    G.E_MANAGER:add_event(Event({
-                        func = function()
-                            SMODS.add_card({
-                                set = 'Joker',
-                                rarity = '${rarityString}',
-                                key_append = 'joker_forge_random'
-                            })
-                            G.GAME.joker_buffer = 0
-                            return true
-                        end
-                    }))
-                end`;
-      } else {
-        const editionCode = hasEdition
-          ? `\n                            joker_card:set_edition("${edition}", true)`
-          : "";
-
-        jokerCreationCode = `local created_joker = false
-                if #G.jokers.cards + G.GAME.joker_buffer < G.jokers.config.card_limit then
-                    created_joker = true
-                    G.GAME.joker_buffer = G.GAME.joker_buffer + 1
-                    G.E_MANAGER:add_event(Event({
-                        func = function()
-                            local joker_card = create_card('Joker', G.jokers, nil, nil, nil, nil, nil, 'joker_forge_random')${editionCode}
-                            joker_card:add_to_deck()
-                            G.jokers:emplace(joker_card)
-                            G.GAME.joker_buffer = 0
-                            return true
-                        end
-                    }))
-                end`;
-      }
-    }
+    cardParams.push(`key = '${jokerKey}'`);
+  } else if (rarity !== "random") {
+    const rarityMap: Record<string, string> = {
+      common: "Common",
+      uncommon: "Uncommon",
+      rare: "Rare",
+      legendary: "Legendary",
+    };
+    const isVanillaRarity = Object.keys(rarityMap).includes(
+      rarity.toLowerCase()
+    );
+    const finalRarity = isVanillaRarity
+      ? rarityMap[rarity.toLowerCase()]
+      : modprefix
+      ? `${modprefix}_${rarity}`
+      : rarity;
+    cardParams.push(`rarity = '${finalRarity}'`);
   }
+
+  // Build the creation code
+  const lines: string[] = [];
+
+  // Slot limit check (skip for negative edition)
+  if (!isNegative) {
+    lines.push("local created_joker = false");
+    lines.push(
+      "if #G.jokers.cards + G.GAME.joker_buffer < G.jokers.config.card_limit then"
+    );
+    lines.push("    created_joker = true");
+    lines.push("    G.GAME.joker_buffer = G.GAME.joker_buffer + 1");
+  } else {
+    lines.push("local created_joker = true");
+  }
+
+  // Event wrapper
+  lines.push("    G.E_MANAGER:add_event(Event({");
+  lines.push("        func = function()");
+
+  // Card creation
+  if (edition !== "none") {
+    lines.push(
+      `            local joker_card = SMODS.add_card({ ${cardParams.join(
+        ", "
+      )} })`
+    );
+    lines.push("            if joker_card then");
+    const editionLua = edition.startsWith("e_")
+      ? edition.substring(2)
+      : edition;
+    lines.push(
+      `                joker_card:set_edition({ ${editionLua} = true }, true)`
+    );
+    lines.push("            end");
+  } else {
+    lines.push(`            SMODS.add_card({ ${cardParams.join(", ")} })`);
+  }
+
+  // Buffer cleanup
+  if (!isNegative) {
+    lines.push("            G.GAME.joker_buffer = 0");
+  }
+
+  lines.push("            return true");
+  lines.push("        end");
+  lines.push("    }))");
+
+  // Close slot limit check
+  if (!isNegative) {
+    lines.push("end");
+  }
+
+  const jokerCreationCode = lines.join("\n                ");
 
   if (isScoring) {
     return {

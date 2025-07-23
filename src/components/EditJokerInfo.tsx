@@ -16,6 +16,7 @@ import Button from "./generic/Button";
 import BalatroJokerCard from "./generic/BalatroJokerCard";
 import { JokerData } from "./JokerCard";
 import { getAllVariables } from "./codeGeneration/Jokers/variableUtils";
+import { UserVariable } from "./JokerCard";
 import {
   validateJokerName,
   validateDescription,
@@ -507,6 +508,15 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
   };
 
   const allVariables = getAllVariables(formData);
+
+  const VariableDisplay = (variable: UserVariable) => {
+    if (variable.type === "suit") return variable.initialSuit || "Spades";
+    if (variable.type === "rank") return variable.initialRank || "Ace";
+    if (variable.type === "pokerhand") return variable.initialPokerHand || "High Card";
+    return variable.initialValue?.toString() || "0";
+  };
+
+  const VariableValues = allVariables.map(VariableDisplay);
 
   const insertVariable = (variableIndex: number) => {
     const placeholder = `#${variableIndex}#`;
@@ -1197,7 +1207,12 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
         <div className="flex-shrink-0 relative my-auto pb-40">
           <div className="relative pl-24" style={{ zIndex: 1000 }}>
             <BalatroJokerCard
-              joker={formData}
+              joker={{
+                ...formData,
+              locVars: {
+                vars: VariableValues
+              },
+            }}
               size="lg"
               rarityName={getRarityDisplayName(formData.rarity, customRarities)}
               rarityColor={getRarityBadgeColor(formData.rarity, customRarities)}
