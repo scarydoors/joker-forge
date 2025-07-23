@@ -66,7 +66,7 @@ import { generateAddChipsReturn } from "./effects/AddChipsEffect";
 import { generateCreateConsumableReturn } from "./effects/CreateConsumableEffect";
 import { generateModifyBlindRequirementReturn } from "./effects/ModifyBlindRequirementEffect";
 import { generateBeatCurrentBlindReturn } from "./effects/BeatCurrentBlindEffect";
-import { generateSetProbabilityReturn } from "./effects/SetProbability";
+import { generateFixProbabilityReturn } from "./effects/FixProbabilityEffect";
 
 interface ExtendedEffect extends Effect {
   _isInRandomGroup?: boolean;
@@ -520,7 +520,7 @@ const generateSingleEffect = (
     case "beat_current_blind":
       return generateBeatCurrentBlindReturn(effect)
     case "fix_probability":
-      return generateSetProbabilityReturn(effect, sameTypeCount)
+      return generateFixProbabilityReturn(effect, sameTypeCount)
     default:
       return {
         statement: "",

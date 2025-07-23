@@ -6,7 +6,7 @@ import {
   parseRangeVariable,
 } from "../gameVariableUtils";
 
-export const generateSetProbabilityReturn = (
+export const generateFixProbabilityReturn = (
   effect: Effect,
   sameTypeCount: number = 0
 ): EffectReturn => {
