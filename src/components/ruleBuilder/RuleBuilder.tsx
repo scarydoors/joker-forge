@@ -84,6 +84,10 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
 }) => {
   const [activeId, setActiveId] = useState<string | null>(null);
 
+  const [inspectorIsOpen, setInspectorIsOpen] = useState(false);
+
+  const [isFirstSelection, setIsFirstSelection] = useState(true);
+
   const getConditionType =
     itemType === "joker"
       ? getConditionTypeById
@@ -321,6 +325,7 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
       setSelectedItem(null);
       setSelectedGameVariable(null);
       setIsInitialLoadComplete(true);
+      setIsFirstSelection(true);
 
       // Reset the no rules message state
       setShowNoRulesMessage(false);
@@ -391,10 +396,20 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
   }, [isOpen, handleSaveAndClose, togglePanel]);
 
   useEffect(() => {
-    if (selectedItem && !panels.inspector.isVisible) {
-      togglePanel("inspector");
+    if (!selectedItem) return;
+
+    if (inspectorIsOpen) {
+      if (!panels.inspector.isVisible) {
+        togglePanel("inspector");
+      }
+      setInspectorIsOpen(false)
+    } else if (isFirstSelection) {
+      if (!panels.inspector.isVisible) {
+        togglePanel("inspector");
+      }
+      setIsFirstSelection(false);
     }
-  }, [selectedItem, panels.inspector.isVisible, togglePanel]);
+  }, [selectedItem, inspectorIsOpen, isFirstSelection, panels.inspector.isVisible, togglePanel]);
 
   const updatePanelPosition = (
     panelId: string,
@@ -1523,6 +1538,9 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
                             }}
                             getParameterCount={getParameterCount}
                             onUpdateConditionOperator={updateConditionOperator}
+                            onRuleDoubleClick={() => {
+                              setInspectorIsOpen(true);
+                            }}
                           />
                         </div>
                       ))}

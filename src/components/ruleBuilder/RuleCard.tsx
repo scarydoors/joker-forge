@@ -75,6 +75,7 @@ interface RuleCardProps {
     conditionId: string,
     operator: "and" | "or"
   ) => void;
+  onRuleDoubleClick: () => void;
 }
 
 const SortableCondition: React.FC<{
@@ -263,6 +264,7 @@ const RuleCard: React.FC<RuleCardProps> = ({
   getParameterCount,
   onUpdateConditionOperator,
   itemType,
+  onRuleDoubleClick,
 }) => {
   const getTrigger =
     itemType === "joker" ? getTriggerById : getConsumableTriggerById;
@@ -614,6 +616,10 @@ const RuleCard: React.FC<RuleCardProps> = ({
       onClick={(e) => {
         e.stopPropagation();
         onSelectItem({ type: "trigger", ruleId: rule.id });
+      }}
+      onDoubleClick={(e) => {
+        e.stopPropagation();
+        onRuleDoubleClick();
       }}
       onMouseDown={handleCardMouseDown}
     >
