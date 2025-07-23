@@ -337,6 +337,9 @@ export function generateEffectReturnStatement(
       const nonRetriggerEffects = processedEffects.filter(
         (effect) => !isRetriggerEffect(effect)
       );
+      const hasFixProbablityEffects = processedEffects.some(
+        (effect) => effect.effectType === "fix_probability_effect"
+      )
 
       if (retriggerEffects.length > 0) {
         const retriggerStatements = retriggerEffects
@@ -368,12 +371,17 @@ export function generateEffectReturnStatement(
       if (effectCalls.length > 0) {
         groupContent += effectCalls.join("\n                        ");
       }
-
-      const groupStatement = `if SMODS.pseudorandom_probability(card, '${probabilityIdentifier}', ${group.chance_numerator}, ${oddsVar}, '${probabilityIdentifier}') then
+      
+      
+      const groupStatement = hasFixProbablityEffects ? // prevents stack overflow
+                  `if pseudorandom('${probabilityIdentifier}') < ${group.chance_numerator} / ${oddsVar} then
                         ${groupContent}
-                    end`;
-
+                    end`:
+                  `if SMODS.pseudorandom_probability(card, '${probabilityIdentifier}', ${group.chance_numerator}, ${oddsVar}, '${probabilityIdentifier}') then
+                      ${groupContent}
+                  end`;
       randomGroupStatements.push(groupStatement);
+
     });
 
     if (mainReturnStatement && randomGroupStatements.length > 0) {
