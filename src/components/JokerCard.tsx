@@ -91,6 +91,16 @@ export interface JokerData {
   hasUserUploadedImage?: boolean;
 }
 
+const slugify = (text: string): string => {
+  return (
+    text
+    .toLowerCase()
+    .replace(/[\s\W_]+/g, "")
+    .replace(/^[\d]/, "_$&") ||
+    `joker_${Math.random().toString(36).substring(2,8)}`
+  );
+};
+
 interface JokerCardProps {
   joker: JokerData;
   onEditInfo: () => void;
@@ -193,7 +203,7 @@ const JokerCard: React.FC<JokerCardProps> = ({
       return;
     }
 
-    onQuickUpdate({ name: tempName });
+    onQuickUpdate({ name: tempName, jokerKey: slugify(tempName) });
     setEditingName(false);
     setNameValidationError("");
   };
