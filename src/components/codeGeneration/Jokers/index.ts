@@ -476,7 +476,7 @@ const generateCalculateFunction = (
         [
           ...(rule.effects || []),
           ...(rule.randomGroups?.flatMap((g) => g.effects) || []),
-        ].some((effect) => effect.type === "fix_probability_effect")
+        ].some((effect) => effect.type === "fix_probability")
       );
 
     if (hasDeleteEffects) {
@@ -1024,10 +1024,10 @@ const generateCalculateFunction = (
 
       sortedRules.forEach((rule) => {
         const regularFixProbablityEffects = (rule.effects || []).filter(
-          (e) => e.type === "fix_probability_effect"
+          (e) => e.type === "fix_probability"
         );
         const randomFixProbablityEffects = (rule.randomGroups || []).filter(
-          (group) => group.effects.some((e) => e.type === "fix_probability_effect")
+          (group) => group.effects.some((e) => e.type === "fix_probability")
         );
 
         if (
@@ -1087,12 +1087,12 @@ const generateCalculateFunction = (
 
       const hasNonFixProbabilityEffects = sortedRules.some((rule) => {
         const regularNonFixProbabilityEffects = (rule.effects || []).filter(
-          (e) => e.type !== "fix_probability_effect"
+          (e) => e.type !== "fix_probability"
         );
         const randomNonFixProbabilityGroups = (rule.randomGroups || [])
           .map((group) => ({
             ...group,
-            effects: group.effects.filter((e) => e.type !== "fix_probability_effect"),
+            effects: group.effects.filter((e) => e.type !== "fix_probability"),
           }))
           .filter((group) => group.effects.length > 0);
 
@@ -1124,13 +1124,13 @@ const generateCalculateFunction = (
 
         rulesWithConditions.forEach((rule) => {
           const regularNonFixProbabilityEffects = (rule.effects || []).filter(
-            (e) => e.type !== "fix_probability_effect"
+            (e) => e.type !== "fix_probability"
           );
           const randomNonFixProbabilityGroups = (rule.randomGroups || [])
             .map((group) => ({
               ...group,
               effects: group.effects.filter(
-                (e) => e.type !== "fix_probability_effect"
+                (e) => e.type !== "fix_probability"
               ),
             }))
             .filter((group) => group.effects.length > 0);
@@ -1192,13 +1192,13 @@ const generateCalculateFunction = (
 
           rulesWithRandomGroups.forEach((rule) => {
             const regularNonFixProbabilityEffects = (rule.effects || []).filter(
-              (e) => e.type !== "fix_probability_effect"
+              (e) => e.type !== "fix_probability"
             );
             const randomNonFixProbabilityGroups = (rule.randomGroups || [])
               .map((group) => ({
                 ...group,
                 effects: group.effects.filter(
-                  (e) => e.type !== "fix_probability_effect"
+                  (e) => e.type !== "fix_probability"
                 ),
               }))
               .filter((group) => group.effects.length > 0);

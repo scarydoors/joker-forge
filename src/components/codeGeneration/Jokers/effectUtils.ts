@@ -338,7 +338,7 @@ export function generateEffectReturnStatement(
         (effect) => !isRetriggerEffect(effect)
       );
       const hasFixProbablityEffects = processedEffects.some(
-        (effect) => effect.effectType === "fix_probability_effect"
+        (effect) => effect.effectType === "fix_probability"
       )
 
       if (retriggerEffects.length > 0) {
@@ -519,7 +519,7 @@ const generateSingleEffect = (
       return generateModifyBlindRequirementReturn(effect, sameTypeCount)
     case "beat_current_blind":
       return generateBeatCurrentBlindReturn(effect)
-    case "fix_probability_effect":
+    case "fix_probability":
       return generateSetProbabilityReturn(effect, sameTypeCount)
     default:
       return {
