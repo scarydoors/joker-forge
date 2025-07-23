@@ -48,7 +48,7 @@ export const DEFAULT_MOD_METADATA: ModMetadata = {
   badge_colour: "666665",
   badge_text_colour: "FFFFFF",
   display_name: "My Custom Mod",
-  dependencies: ["Steamodded (>=1.0.0~BETA-0404a)"],
+  dependencies: ["Steamodded (>=1.0.0~BETA-0711a)"],
   conflicts: [],
   provides: [],
 };
