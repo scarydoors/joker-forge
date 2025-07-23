@@ -1,8 +1,9 @@
-import { ConditionTypeDefinition } from "../../ruleBuilder/types";
+import { ConditionParameterOption, ConditionTypeDefinition } from "../../ruleBuilder/types";
 import {
   RectangleStackIcon,
   UserIcon,
   ArchiveBoxIcon,
+  ReceiptPercentIcon,
   InformationCircleIcon,
   SparklesIcon,
 } from "@heroicons/react/24/outline";
@@ -52,6 +53,31 @@ export const GENERIC_TRIGGERS: string[] = [
   "game_over",
 ];
 
+export const PROBABILITY_IDENTIFIERS: {
+  jokers: ConditionParameterOption[],
+  consumables: ConditionParameterOption[],
+  enhancements: ConditionParameterOption[],
+} = {
+  jokers: [
+    {value:"8ball",label:"8 Ball"},
+    {value:"gros_michel",label:"Gros Michel"},
+    {value:"business",label:"Business Card"},
+    {value:"space",label:"Space Joker"},
+    {value:"cavendish",label:"Cavendish"},
+    {value:"parking",label:"Reserved Parking"},
+    {value:"halu1",label:"Hallucination"},
+    {value:"bloodstone",label:"Bloodstone"},
+  ],
+  consumables: [
+    {value:"wheel_of_fortune",label:"Wheel of Fortune"},
+  ],
+  enhancements: [
+    {value:"lucky_mult",label:"Lucky Card Mult"},
+    {value:"lucky_money",label:"Lucky Card Money"},
+    {value:"glass",label:"Glass Card"},
+  ]
+}
+
 export const CONDITION_CATEGORIES: CategoryDefinition[] = [
   {
     label: "Hand & Cards",
@@ -64,6 +90,10 @@ export const CONDITION_CATEGORIES: CategoryDefinition[] = [
   {
     label: "Deck & Jokers",
     icon: ArchiveBoxIcon,
+  },
+  {
+    label: "Probability",
+    icon: ReceiptPercentIcon,
   },
   {
     label: "Game State",
@@ -1244,6 +1274,75 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
       },
     ],
     category: "Deck & Jokers",
+  },
+  {
+    id: "probability_identifier",
+    label: "Detect Probability",
+    description: "Check what specific card rolled",
+    applicableTriggers: ["change_probability"],
+    params: [
+      {
+        id: "property_type",
+        type: "select",
+        label: "Property Type",
+        options: [
+          {value:"jokers",label:"Jokers"},
+          {value:"consumables",label:"Consumables"},
+          {value:"enhancements",label:"Enhancements"},
+        ],
+        default: "jokers",
+      },
+      {
+        id: "specific_card",
+        type: "select",
+        label: "Specific Card",
+        options: (parentValues) => {
+          switch (parentValues?.property_type) {
+            case "jokers": 
+              return [...PROBABILITY_IDENTIFIERS.jokers];
+            case "consumables":
+              return [...PROBABILITY_IDENTIFIERS.consumables];
+            case "enhancements":
+              return [...PROBABILITY_IDENTIFIERS.enhancements];
+            default:
+              return [...PROBABILITY_IDENTIFIERS.jokers];
+          }
+        },
+        default: "8ball",
+      },
+    ],
+    category: "Probability",
+  },
+  {
+    id: "probability_part_compare",
+    label: "Probability Compare",
+    description: "Compare the Numerator or the Denominator with a custom value",
+    applicableTriggers: ["change_probability"],
+    params: [
+      {
+        id: "part",
+        type: "select",
+        label: "Numerator or Denominator",
+        options: [
+          {value: "numerator", label: "Numerator"},
+          {value: "denominator", label: "Denominator"}
+        ],
+        default: "numerator"
+      },
+      {
+        id: "operator",
+        type: "select",
+        label: "Operator",
+        options: [...COMPARISON_OPERATORS],
+      },
+      {
+        id: "value",
+        type: "number",
+        label: "Second Value",
+        default: 1,
+      },
+    ],
+    category: "Probability",
   },
 ];
 
