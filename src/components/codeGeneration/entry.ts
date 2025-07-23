@@ -6,6 +6,7 @@ import { addAtlasToZip } from "./ImageProcessor";
 import { generateJokersCode, generateCustomRaritiesCode } from "./Jokers/index";
 import { generateConsumablesCode } from "./Consumables/index";
 import { ConsumableSetData } from "../data/BalatroUtils";
+import { modToJson } from "../JSONImportExport";
 
 export interface ModMetadata {
   id: string;
@@ -47,6 +48,15 @@ export const exportModCode = async (
       customRarities
     );
     zip.file(metadata.main_file, mainLuaCode);
+
+    const ret = modToJson(
+      metadata,
+      jokers,
+      customRarities,
+      consumables,
+      consumableSets
+    )
+    zip.file(ret.filename, ret.jsonString)
 
     if (customRarities.length > 0) {
       const raritiesCode = generateCustomRaritiesCode(customRarities);

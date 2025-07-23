@@ -14,13 +14,13 @@ export interface ExportedMod {
   exportedAt: string;
 }
 
-export const exportModAsJSON = (
+export const modToJson = (
   metadata: ModMetadata,
   jokers: JokerData[],
   customRarities: RarityData[] = [],
   consumables: ConsumableData[] = [],
   consumableSets: ConsumableSetData[] = []
-): void => {
+): {filename: string, jsonString: string} => {
   const exportData: ExportedMod = {
     metadata,
     jokers,
@@ -32,16 +32,35 @@ export const exportModAsJSON = (
   };
 
   const jsonString = JSON.stringify(exportData, null, 2);
-  const blob = new Blob([jsonString], { type: "application/json" });
-  const url = URL.createObjectURL(blob);
-
   const filename = `${metadata.id || "custom-mod"}-${new Date()
     .toISOString()
-    .slice(0, 10)}.json`;
+    .slice(0, 10)}.jokerforge`;
+
+  return {filename, jsonString}
+}
+
+export const exportModAsJSON = (
+  metadata: ModMetadata,
+  jokers: JokerData[],
+  customRarities: RarityData[] = [],
+  consumables: ConsumableData[] = [],
+  consumableSets: ConsumableSetData[] = []
+): void => {
+
+  const ret = modToJson(
+    metadata,
+    jokers,
+    customRarities,
+    consumables,
+    consumableSets
+  )
+  const blob = new Blob([ret.jsonString], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+
 
   const a = document.createElement("a");
   a.href = url;
-  a.download = filename;
+  a.download = ret.filename;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
@@ -58,7 +77,7 @@ export const importModFromJSON = (): Promise<{
   return new Promise((resolve, reject) => {
     const input = document.createElement("input");
     input.type = "file";
-    input.accept = ".json";
+    input.accept = ".json,.jokerforge";
 
     input.onchange = (event) => {
       const file = (event.target as HTMLInputElement).files?.[0];
