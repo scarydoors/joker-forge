@@ -10,6 +10,7 @@ import {
   useSensors,
   PointerSensor,
   KeyboardSensor,
+  DragStartEvent,
   DragEndEvent,
   closestCenter,
 } from "@dnd-kit/core";
@@ -72,7 +73,7 @@ interface PanelState {
 }
 
 const RuleBuilder: React.FC<RuleBuilderProps> = ({
-  isOpen,
+  isOpen, 
   onClose,
   onSave,
   existingRules = [],
@@ -80,6 +81,8 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
   onUpdateItem,
   itemType,
 }) => {
+  const [activeId, setActiveId] = useState<string | null>(null);
+
   const getConditionType =
     itemType === "joker"
       ? getConditionTypeById
@@ -1125,7 +1128,9 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
     return Object.keys(params).length;
   };
 
-  const handleDragStart = () => {};
+  const handleDragStart = (event: DragStartEvent) => {
+    setActiveId(event.active.id as string);
+  };
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over, delta } = event;
@@ -1141,6 +1146,7 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
         };
         updatePanelPosition(panelId, newPosition);
       }
+      setActiveId(null);
       return;
     }
 
@@ -1366,7 +1372,7 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
             collisionDetection={closestCenter}
             onDragStart={handleDragStart}
             onDragEnd={handleDragEnd}
-            modifiers={[restrictToVerticalAxis]}
+            modifiers={activeId && activeId.startsWith('panel-') ? [] : [restrictToVerticalAxis]}
           >
             <TransformWrapper
               ref={transformRef}
