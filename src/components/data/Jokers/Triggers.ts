@@ -207,6 +207,13 @@ export const TRIGGERS: TriggerDefinition[] = [
       "Permanent effects that modify game rules or state while the joker is in play.",
     category: "Special",
   },
+  {
+    id: "fix_probability",
+    label: "Set Probability",
+    description:
+      "Set the numerator and denominator of probability rolls",
+    category: "Special",
+  },
 ];
 
 // Helper function to get a specific trigger by ID
