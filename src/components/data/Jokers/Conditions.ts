@@ -48,6 +48,7 @@ export const GENERIC_TRIGGERS: string[] = [
   "card_sold",
   "card_bought",
   "selling_self",
+  "buying_self",
   "card_destroyed",
   "playing_card_added",
   "game_over",
