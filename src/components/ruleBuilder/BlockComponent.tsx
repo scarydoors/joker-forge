@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect} from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
   TrashIcon,
@@ -10,7 +10,6 @@ import {
   BeakerIcon,
   PercentBadgeIcon,
 } from "@heroicons/react/16/solid";
-import { text } from "stream/consumers";
 
 interface BlockComponentProps {
   label: string;
@@ -45,7 +44,6 @@ const BlockComponent: React.FC<BlockComponentProps> = ({
   dragHandleProps,
   variant = "default",
 }) => {
-
   const getTypeConfig = () => {
     switch (type) {
       case "trigger":
@@ -100,8 +98,9 @@ const BlockComponent: React.FC<BlockComponentProps> = ({
   useEffect(() => {
     const CheckOverflow = () => {
       if (textRef.current && containerRef.current) {
-        const overflowAmount = textRef.current.scrollWidth - containerRef.current.clientWidth;
-          setHasOverflow(overflowAmount > 10);
+        const overflowAmount =
+          textRef.current.scrollWidth - containerRef.current.clientWidth;
+        setHasOverflow(overflowAmount > 10);
       } else {
         setHasOverflow(false);
       }
@@ -187,29 +186,38 @@ const BlockComponent: React.FC<BlockComponentProps> = ({
             )}
           </div>
           <div ref={containerRef} className="flex-grow min-w-0 overflow-hidden">
-          <motion.div
-          ref={textRef}
-          className="text-white text-sm tracking-wide whitespace-nowrap"
-          animate={{
-            x: hasOverflow ? [0, -(textRef.current.scrollWidth - containerRef.current.clientWidth)] : 0,
-          }}
-          transition={
-            hasOverflow
-            ? {
-              x: {
-                repeat: Infinity,
-                repeatType: "mirror",
-                duration: (textRef.current?.scrollWidth || 0) / 75,
-                ease: "linear",
-                delay: 1.5,
-                repeatDelay: 1.5,
-              },
-            }
-            : { duration: 0 }
-          }
-          >
-          {isNegated ? `NOT ${displayTitle}` : displayTitle}
-          </motion.div>
+            <motion.div
+              ref={textRef}
+              className="text-white text-sm tracking-wide whitespace-nowrap"
+              animate={{
+                x:
+                  hasOverflow && textRef.current && containerRef.current
+                    ? [
+                        0,
+                        -(
+                          textRef.current.scrollWidth -
+                          containerRef.current.clientWidth
+                        ),
+                      ]
+                    : 0,
+              }}
+              transition={
+                hasOverflow
+                  ? {
+                      x: {
+                        repeat: Infinity,
+                        repeatType: "mirror",
+                        duration: (textRef.current?.scrollWidth || 0) / 75,
+                        ease: "linear",
+                        delay: 1.5,
+                        repeatDelay: 1.5,
+                      },
+                    }
+                  : { duration: 0 }
+              }
+            >
+              {isNegated ? `NOT ${displayTitle}` : displayTitle}
+            </motion.div>
           </div>
         </div>
       </div>
