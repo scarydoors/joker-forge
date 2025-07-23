@@ -70,6 +70,7 @@ interface PanelState {
   isVisible: boolean;
   position: { x: number; y: number };
   size: { width: number; height: number };
+  positionSet: boolean; 
 }
 
 const RuleBuilder: React.FC<RuleBuilderProps> = ({
@@ -100,30 +101,35 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
       isVisible: true,
       position: { x: 20, y: 20 },
       size: { width: 320, height: 1200 },
+      positionSet: true,
     },
     jokerInfo: {
       id: "jokerInfo",
       isVisible: false,
       position: { x: 0, y: 0 },
       size: { width: 320, height: 200 },
+      positionSet: false,
     },
     variables: {
       id: "variables",
       isVisible: false,
       position: { x: 0, y: 0 },
       size: { width: 320, height: 300 },
+      positionSet: false,
     },
     gameVariables: {
       id: "gameVariables",
       isVisible: false,
       position: { x: 20, y: 20 },
       size: { width: 320, height: 500 },
+      positionSet: true,
     },
     inspector: {
       id: "inspector",
       isVisible: false,
       position: { x: 0, y: 0 },
       size: { width: 384, height: 600 },
+      positionSet: false,
     },
   });
 
@@ -294,9 +300,10 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
         [panelId]: {
           ...panel,
           isVisible: !panel.isVisible,
-          position: panel.isVisible
+          position: panel.isVisible || panel.positionSet
             ? panel.position
             : findPosition(prev, panelId),
+            positionSet: panel.positionSet || !panel.isVisible,
         },
       };
       return newState;
@@ -398,6 +405,7 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
       [panelId]: {
         ...prev[panelId],
         position,
+        positionSet: true,
       },
     }));
   };
