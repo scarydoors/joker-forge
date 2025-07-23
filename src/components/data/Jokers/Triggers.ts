@@ -147,13 +147,13 @@ export const TRIGGERS: TriggerDefinition[] = [
     id: "buying_self",
     label: "When This Card is Bought",
     description: "Triggers when this specific joker is bought.",
-    category: "Packs & Consumables",
+    category: "Economy",
   },
   {
     id: "card_bought",
     label: "When a Card is Bought",
     description: "Triggers when any card is bought from the shop.",
-    category: "Packs & Consumables",
+    category: "Economy",
   },
   {
     id: "booster_opened",
