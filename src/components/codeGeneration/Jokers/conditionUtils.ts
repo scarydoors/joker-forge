@@ -19,7 +19,9 @@ import { generateRemainingDiscardsConditionCode } from "./conditions/RemainingDi
 import { generateJokerCountConditionCode } from "./conditions/JokerCountCondition";
 import { generateBlindTypeConditionCode } from "./conditions/BlindTypeCondition";
 import { generateCardEnhancementConditionCode } from "./conditions/CardEnhancementCondition";
+import { generateEnhancementCountConditionCode } from "./conditions/EnhancementCountCondition";
 import { generateCardSealConditionCode } from "./conditions/CardSealCondition";
+import { generateSealCountConditionCode } from "./conditions/SealCountCondition";
 import { generateInternalVariableConditionCode } from "./conditions/InternalVariableCondition";
 import { generateFirstPlayedHandConditionCode } from "./conditions/FirstHandPlayedCondition";
 import { generateFirstDiscardedHandConditionCode } from "./conditions/FirstDiscardedHandCondition";
@@ -28,6 +30,7 @@ import { generateHandSizeConditionCode } from "./conditions/HandSizeCondition";
 import { generateDeckSizeConditionCode } from "./conditions/DeckSizeCondition";
 import { generateDeckCountConditionCode } from "./conditions/DeckCountCondition";
 import { generateCardEditionConditionCode } from "./conditions/CardEditionCondition";
+import { generateEditionCountConditionCode } from "./conditions/EditionCountCondition";
 import { generateSpecificJokerConditionCode } from "./conditions/SpecificJokerCondition";
 import { generateGenericCompareConditionCode } from "./conditions/GenericCompareCondition";
 import { generateConsumableHeldConditionCode } from "./conditions/ConsumableHeldCondition";
@@ -154,9 +157,15 @@ const generateSingleConditionCode = (
 
     case "discarded_card_count":
       return generateDiscardedCardCountConditionCode([singleConditionRule]);
+    
+    case "enhancement_count":
+      return generateEnhancementCountConditionCode([singleConditionRule])
 
     case "card_enhancement":
       return generateCardEnhancementConditionCode([singleConditionRule]);
+    
+    case "seal_count":
+      return generateSealCountConditionCode([singleConditionRule]);
 
     case "card_seal":
       return generateCardSealConditionCode([singleConditionRule]);
@@ -199,6 +208,9 @@ const generateSingleConditionCode = (
 
     case "card_edition":
       return generateCardEditionConditionCode([singleConditionRule]);
+    
+    case "edition_count":
+      return generateEditionCountConditionCode([singleConditionRule]);
 
     case "specific_joker":
       return generateSpecificJokerConditionCode([singleConditionRule]);

@@ -1,5 +1,6 @@
 import { ConditionTypeDefinition } from "../../ruleBuilder/types";
 import {
+  HandRaisedIcon,
   RectangleStackIcon,
   UserIcon,
   ArchiveBoxIcon,
@@ -56,7 +57,11 @@ export const GENERIC_TRIGGERS: string[] = [
 
 export const CONDITION_CATEGORIES: CategoryDefinition[] = [
   {
-    label: "Hand & Cards",
+    label: "Hand",
+    icon: HandRaisedIcon,
+  },
+  {
+    label: "Card",
     icon: RectangleStackIcon,
   },
   {
@@ -112,7 +117,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
         ],
       },
     ],
-    category: "Hand & Cards",
+    category: "Hand",
   },
   {
     id: "card_count",
@@ -140,7 +145,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
         default: 5,
       },
     ],
-    category: "Hand & Cards",
+    category: "Hand",
   },
   {
     id: "suit_count",
@@ -208,7 +213,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
         },
       },
     ],
-    category: "Hand & Cards",
+    category: "Hand",
   },
   {
     id: "rank_count",
@@ -276,7 +281,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
         },
       },
     ],
-    category: "Hand & Cards",
+    category: "Hand",
   },
   {
     id: "discarded_card_count",
@@ -297,7 +302,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
         default: 5,
       },
     ],
-    category: "Hand & Cards",
+    category: "Hand",
   },
   {
     id: "discarded_suit_count",
@@ -359,7 +364,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
         },
       },
     ],
-    category: "Hand & Cards",
+    category: "Hand",
   },
   {
     id: "discarded_rank_count",
@@ -421,7 +426,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
         },
       },
     ],
-    category: "Hand & Cards",
+    category: "Hand",
   },
   {
     id: "card_rank",
@@ -466,7 +471,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
         },
       },
     ],
-    category: "Hand & Cards",
+    category: "Card",
   },
   {
     id: "card_suit",
@@ -511,7 +516,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
         },
       },
     ],
-    category: "Hand & Cards",
+    category: "Card",
   },
   {
     id: "card_enhancement",
@@ -532,7 +537,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
         options: [{ value: "any", label: "Any Enhancement" }, ...ENHANCEMENTS],
       },
     ],
-    category: "Hand & Cards",
+    category: "Card",
   },
   {
     id: "card_edition",
@@ -557,7 +562,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
         ],
       },
     ],
-    category: "Hand & Cards",
+    category: "Card",
   },
   {
     id: "card_seal",
@@ -578,7 +583,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
         options: [{ value: "any", label: "Any Seal" }, ...SEALS],
       },
     ],
-    category: "Hand & Cards",
+    category: "Card",
   },
   {
     id: "card_index",
@@ -614,7 +619,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
         },
       },
     ],
-    category: "Hand & Cards",
+    category: "Card",
   },
   {
     id: "player_money",
@@ -638,13 +643,115 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
     category: "Player Resources",
   },
   {
+    id: "enhancement_count",
+    label: "Enhancement Count",
+    description: "Check how many cards with a specific enhancement are in the hand",
+    applicableTriggers: ["hand_played", "card_scored", "after_hand_played"],
+    params: [
+      {
+        id: "card_scope",
+        type: "select",
+        label: "Card Scope",
+        options: [...CARD_SCOPES],
+        default: "scoring",
+      },
+      {
+        id: "enhancement",
+        type: "select",
+        label: "Enhancement Type",
+        options: [{ value: "any", label: "Any Enhancement" }, ...ENHANCEMENTS],
+      },
+      {
+        id: "operator",
+        type: "select",
+        label: "Operator",
+        options: [...COMPARISON_OPERATORS],
+      },
+      {
+        id: "value",
+        type: "number",
+        label: "Count",
+        default: 1,
+      },
+    ],
+    category: "Hand",
+  },
+  {
+    id: "edition_count",
+    label: "Edition Count",
+    description: "Check how many cards with a specific edition are in the hand",
+    applicableTriggers: ["hand_played", "card_scored", "after_hand_played"],
+    params: [
+      {
+        id: "card_scope",
+        type: "select",
+        label: "Card Scope",
+        options: [...CARD_SCOPES],
+        default: "scoring",
+      },
+      {
+        id: "edition",
+        type: "select",
+        label: "Edition Type",
+        options: [{ value: "any", label: "Any Edition" }, ...EDITIONS],
+      },
+      {
+        id: "operator",
+        type: "select",
+        label: "Operator",
+        options: [...COMPARISON_OPERATORS],
+      },
+      {
+        id: "value",
+        type: "number",
+        label: "Count",
+        default: 1,
+      },
+    ],
+    category: "Hand",
+  },
+  {
+    id: "seal_count",
+    label: "Seal Count",
+    description: "Check how many cards with a specific seal are in the hand",
+    applicableTriggers: ["hand_played", "card_scored", "after_hand_played"],
+    params: [
+      {
+        id: "card_scope",
+        type: "select",
+        label: "Card Scope",
+        options: [...CARD_SCOPES],
+        default: "scoring",
+      },
+      {
+        id: "seal",
+        type: "select",
+        label: "Seal Type",
+        options: [{ value: "any", label: "Any Seal" }, ...SEALS],
+      },
+      {
+        id: "operator",
+        type: "select",
+        label: "Operator",
+        options: [...COMPARISON_OPERATORS],
+      },
+      {
+        id: "value",
+        type: "number",
+        label: "Count",
+        default: 1,
+      },
+    ],
+    category: "Hand",
+  },
+  {
     id: "poker_hand_been_played",
     label: "Poker Hand Been Played",
     description:
       "Check if the current poker hand has already been played this round",
     applicableTriggers: ["hand_played", "card_scored", "after_hand_played"],
     params: [],
-    category: "Hand & Cards",
+    category: "Hand",
   },
   {
     id: "generic_compare",
@@ -723,7 +830,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
     description: "Check if any glass cards were destroyed/shattered",
     applicableTriggers: ["card_destroyed"],
     params: [],
-    category: "Hand & Cards",
+    category: "Hand",
   },
   {
     id: "joker_count",
@@ -1077,7 +1184,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
       "Check if a lucky card's special effect was triggered when scored",
     applicableTriggers: ["card_scored"],
     params: [],
-    category: "Hand & Cards",
+    category: "Card",
   },
   {
     id: "triggered_boss_blind",
