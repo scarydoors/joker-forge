@@ -14,6 +14,10 @@ interface JokerData {
   eternal_compat?: boolean;
   unlocked?: boolean;
   discovered?: boolean;
+  locVars?: {
+    colours?: string[]
+    vars?: (string | number)[];
+  } 
 }
 
 interface BalatroJokerCardProps {
@@ -180,6 +184,7 @@ const BalatroJokerCard: React.FC<BalatroJokerCardProps> = ({
                             joker.description ||
                             "A custom joker with unique effects."
                           }
+                          locVars={joker.locVars}
                           noWrap={true}
                         />
                       </div>
