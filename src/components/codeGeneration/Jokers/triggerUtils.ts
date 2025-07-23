@@ -153,6 +153,12 @@ export const generateTriggerContext = (
         comment: "-- When this specific joker is sold",
       };
 
+    case "buying_self":
+      return {
+        check: "context.buying_card and context.card.config.center.key == self.key and context.cardarea == G.jokers and not context.blueprint",
+        comment: "-- When this specific joker is bought",
+      };
+
     case "game_over":
       return {
         check:
