@@ -6447,20 +6447,24 @@
       "discovered": true,
       "rules": [
         {
-          "id": "417fdd0d-2aea-4ae2-aaad-7cd231aea041",
-          "trigger": "passive",
+          "id": "6bd89a08-ce8d-4ae4-b54f-44c3be10791b",
+          "trigger": "change_probability",
           "conditionGroups": [],
           "effects": [
             {
-              "id": "c3ac5a88-f73f-4a8b-9baf-febafc4dbd05",
-              "type": "double_probability",
-              "params": {}
+              "id": "ff5953c9-362e-4289-8c5b-a34c23be059f",
+              "type": "mod_probability",
+              "params": {
+                "part": "numerator",
+                "operation": "multiply",
+                "value": 2
+              }
             }
           ],
           "randomGroups": [],
           "position": {
-            "x": 1027.5,
-            "y": 474
+            "x": 676,
+            "y": 150.5
           }
         }
       ],

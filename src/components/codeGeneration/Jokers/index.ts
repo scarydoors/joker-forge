@@ -470,6 +470,20 @@ const generateCalculateFunction = (
         ].some((effect) => effect.type === "delete_triggered_card")
       );
 
+    const hasFixProbablityEffects = sortedRules.some((rule) =>
+        [
+          ...(rule.effects || []),
+          ...(rule.randomGroups?.flatMap((g) => g.effects) || []),
+        ].some((effect) => effect.type === "fix_probability")
+      );
+
+    const hasModProbablityEffects = sortedRules.some((rule) =>
+        [
+          ...(rule.effects || []),
+          ...(rule.randomGroups?.flatMap((g) => g.effects) || []),
+        ].some((effect) => effect.type === "mod_probability")
+      );
+
     if (hasDeleteEffects) {
       calculateFunction += `
         if context.destroy_card and context.destroy_card.should_destroy and not context.blueprint then
@@ -1013,6 +1027,148 @@ const generateCalculateFunction = (
 
       calculateFunction += `
         end`;
+    } else if (hasFixProbablityEffects || hasModProbablityEffects) {
+      if (hasFixProbablityEffects) {
+      calculateFunction += `
+        if context.fix_probability and not context.blueprint then
+        local numerator, denominator = context.numerator, context.denominator`;
+
+      let hasAnyConditions = false;
+
+      sortedRules.forEach((rule) => {
+        const regularFixProbablityEffects = (rule.effects || []).filter(
+          (e) => e.type === "fix_probability"
+        );
+        const randomFixProbablityEffects = (rule.randomGroups || []).filter(
+          (group) => group.effects.some((e) => e.type === "fix_probability")
+        );
+
+        if (
+          regularFixProbablityEffects.length === 0 &&
+          randomFixProbablityEffects.length === 0
+        )
+          return;
+
+        const conditionCode = generateConditionChain(rule, joker);
+
+        if (conditionCode) {
+          const conditional = hasAnyConditions ? "elseif" : "if";
+          calculateFunction += `
+            ${conditional} ${conditionCode} then`;
+          hasAnyConditions = true;
+        } else {
+          if (hasAnyConditions) {
+            calculateFunction += `
+            else`;
+          }
+        }
+
+        const effectResult = generateEffectReturnStatement(
+          regularFixProbablityEffects,
+          convertRandomGroupsForCodegen(randomFixProbablityEffects),
+          triggerType,
+          rule.id,
+          globalEffectCounts
+        );
+
+        if (effectResult.configVariables) {
+          allConfigVariables.push(...effectResult.configVariables);
+        }
+
+        if (effectResult.preReturnCode) {
+          calculateFunction += `
+                ${effectResult.preReturnCode}`;
+        }
+
+        if (effectResult.statement) {
+          calculateFunction += `
+                ${effectResult.statement}`;
+        }
+      });
+
+      if (hasAnyConditions) {
+        calculateFunction += `
+            end`;
+      }
+
+      calculateFunction += `
+      return {
+        numerator = numerator, 
+        denominator = denominator
+      }
+        end`;
+      }
+      if (hasModProbablityEffects) {
+        calculateFunction += `
+          if context.mod_probability and not context.blueprint then
+          local numerator, denominator = context.numerator, context.denominator`;
+
+        let hasAnyConditions = false;
+
+        sortedRules.forEach((rule) => {
+          const regularModProbablityEffects = (rule.effects || []).filter(
+            (e) => e.type === "mod_probability"
+          );
+          const randomModProbablityEffects = (rule.randomGroups || []).filter(
+            (group) => group.effects.some((e) => e.type === "mod_probability")
+          );
+
+          if (
+            regularModProbablityEffects.length === 0 &&
+            randomModProbablityEffects.length === 0
+          )
+            return;
+
+          const conditionCode = generateConditionChain(rule, joker);
+
+          if (conditionCode) {
+            const conditional = hasAnyConditions ? "elseif" : "if";
+            calculateFunction += `
+              ${conditional} ${conditionCode} then`;
+            hasAnyConditions = true;
+          } else {
+            if (hasAnyConditions) {
+              calculateFunction += `
+              else`;
+            }
+          }
+
+          const effectResult = generateEffectReturnStatement(
+            regularModProbablityEffects,
+            convertRandomGroupsForCodegen(randomModProbablityEffects),
+            triggerType,
+            rule.id,
+            globalEffectCounts
+          );
+
+          if (effectResult.configVariables) {
+            allConfigVariables.push(...effectResult.configVariables);
+          }
+
+          if (effectResult.preReturnCode) {
+            calculateFunction += `
+                  ${effectResult.preReturnCode}`;
+          }
+
+          if (effectResult.statement) {
+            calculateFunction += `
+                  ${effectResult.statement}`;
+          }
+        });
+
+        if (hasAnyConditions) {
+          calculateFunction += `
+              end`;
+        }
+
+        calculateFunction += `
+        return {
+          numerator = numerator, 
+          denominator = denominator
+        }
+          end`;
+      }
+
     } else {
       const triggerContext = generateTriggerContext(triggerType, sortedRules);
 

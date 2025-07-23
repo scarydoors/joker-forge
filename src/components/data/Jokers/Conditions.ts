@@ -1,8 +1,9 @@
-import { ConditionTypeDefinition } from "../../ruleBuilder/types";
+import { ConditionParameterOption, ConditionTypeDefinition } from "../../ruleBuilder/types";
 import {
   RectangleStackIcon,
   UserIcon,
   ArchiveBoxIcon,
+  ReceiptPercentIcon,
   InformationCircleIcon,
   SparklesIcon,
 } from "@heroicons/react/24/outline";
@@ -54,6 +55,31 @@ export const GENERIC_TRIGGERS: string[] = [
   "game_over",
 ];
 
+export const PROBABILITY_IDENTIFIERS: {
+  jokers: ConditionParameterOption[],
+  consumables: ConditionParameterOption[],
+  enhancements: ConditionParameterOption[],
+} = {
+  jokers: [
+    {value:"8ball",label:"8 Ball"},
+    {value:"gros_michel",label:"Gros Michel"},
+    {value:"business",label:"Business Card"},
+    {value:"space",label:"Space Joker"},
+    {value:"cavendish",label:"Cavendish"},
+    {value:"parking",label:"Reserved Parking"},
+    {value:"halu1",label:"Hallucination"},
+    {value:"bloodstone",label:"Bloodstone"},
+  ],
+  consumables: [
+    {value:"wheel_of_fortune",label:"Wheel of Fortune"},
+  ],
+  enhancements: [
+    {value:"lucky_mult",label:"Lucky Card Mult"},
+    {value:"lucky_money",label:"Lucky Card Money"},
+    {value:"glass",label:"Glass Card"},
+  ]
+}
+
 export const CONDITION_CATEGORIES: CategoryDefinition[] = [
   {
     label: "Hand & Cards",
@@ -66,6 +92,10 @@ export const CONDITION_CATEGORIES: CategoryDefinition[] = [
   {
     label: "Deck & Jokers",
     icon: ArchiveBoxIcon,
+  },
+  {
+    label: "Probability",
+    icon: ReceiptPercentIcon,
   },
   {
     label: "Game State",
@@ -620,7 +650,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
     id: "player_money",
     label: "Player Money",
     description: "Check how much money the player has",
-    applicableTriggers: [...GENERIC_TRIGGERS],
+    applicableTriggers: [...GENERIC_TRIGGERS, "change_probability"],
     params: [
       {
         id: "operator",
@@ -650,7 +680,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
     id: "generic_compare",
     label: "Generic Compare",
     description: "Compare two custom values with an operator",
-    applicableTriggers: [...GENERIC_TRIGGERS],
+    applicableTriggers: [...GENERIC_TRIGGERS, "change_probability"],
     params: [
       {
         id: "value1",
@@ -677,7 +707,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
     id: "remaining_hands",
     label: "Remaining Hands",
     description: "Check how many hands the player has left",
-    applicableTriggers: [...GENERIC_TRIGGERS],
+    applicableTriggers: [...GENERIC_TRIGGERS, "change_probability"],
     params: [
       {
         id: "operator",
@@ -699,7 +729,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
     id: "remaining_discards",
     label: "Remaining Discards",
     description: "Check how many discards the player has left",
-    applicableTriggers: [...GENERIC_TRIGGERS],
+    applicableTriggers: [...GENERIC_TRIGGERS, "change_probability"],
     params: [
       {
         id: "operator",
@@ -729,7 +759,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
     id: "joker_count",
     label: "Joker Count",
     description: "Check how many jokers the player has",
-    applicableTriggers: [...GENERIC_TRIGGERS],
+    applicableTriggers: [...GENERIC_TRIGGERS, "change_probability"],
     params: [
       {
         id: "operator",
@@ -751,7 +781,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
     id: "specific_joker",
     label: "Specific Joker",
     description: "Check if a specific joker is in your collection",
-    applicableTriggers: [...GENERIC_TRIGGERS],
+    applicableTriggers: [...GENERIC_TRIGGERS, "change_probability"],
     params: [
       {
         id: "operator",
@@ -776,7 +806,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
     id: "internal_variable",
     label: "Internal Variable",
     description: "Check the value of an internal variable for this joker",
-    applicableTriggers: [...GENERIC_TRIGGERS],
+    applicableTriggers: [...GENERIC_TRIGGERS, "change_probability"],
     params: [
       {
         id: "variable_name",
@@ -803,7 +833,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
     id: "consumable_held",
     label: "Consumable Held",
     description: "Check if a specific type of consumable is held",
-    applicableTriggers: [...GENERIC_TRIGGERS],
+    applicableTriggers: [...GENERIC_TRIGGERS, "change_probability"],
     params: [
       {
         id: "consumable_type",
@@ -1019,7 +1049,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
     id: "blind_type",
     label: "Blind Type",
     description: "Check the type of the current blind",
-    applicableTriggers: [...GENERIC_TRIGGERS],
+    applicableTriggers: [...GENERIC_TRIGGERS, "change_probability"],
     params: [
       {
         id: "blind_type",
@@ -1091,7 +1121,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
     id: "ante_level",
     label: "Ante Level",
     description: "Check the current ante level",
-    applicableTriggers: [...GENERIC_TRIGGERS],
+    applicableTriggers: [...GENERIC_TRIGGERS, "change_probability"],
     params: [
       {
         id: "operator",
@@ -1135,7 +1165,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
     id: "hand_size",
     label: "Hand Size",
     description: "Check the current hand size",
-    applicableTriggers: [...GENERIC_TRIGGERS],
+    applicableTriggers: [...GENERIC_TRIGGERS, "change_probability"],
     params: [
       {
         id: "operator",
@@ -1156,7 +1186,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
     id: "deck_size",
     label: "Deck Size",
     description: "Check the size of the deck",
-    applicableTriggers: [...GENERIC_TRIGGERS],
+    applicableTriggers: [...GENERIC_TRIGGERS, "change_probability"],
     params: [
       {
         id: "size_type",
@@ -1187,7 +1217,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
     id: "deck_count",
     label: "Deck Count",
     description: "Count cards in your entire deck by property",
-    applicableTriggers: [...GENERIC_TRIGGERS],
+    applicableTriggers: [...GENERIC_TRIGGERS, "change_probability"],
     params: [
       {
         id: "property_type",
@@ -1282,6 +1312,75 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
       },
     ],
     category: "Deck & Jokers",
+  },
+  {
+    id: "probability_identifier",
+    label: "Detect Probability",
+    description: "Check what specific card rolled",
+    applicableTriggers: ["change_probability"],
+    params: [
+      {
+        id: "property_type",
+        type: "select",
+        label: "Property Type",
+        options: [
+          {value:"jokers",label:"Jokers"},
+          {value:"consumables",label:"Consumables"},
+          {value:"enhancements",label:"Enhancements"},
+        ],
+        default: "jokers",
+      },
+      {
+        id: "specific_card",
+        type: "select",
+        label: "Specific Card",
+        options: (parentValues) => {
+          switch (parentValues?.property_type) {
+            case "jokers": 
+              return [...PROBABILITY_IDENTIFIERS.jokers];
+            case "consumables":
+              return [...PROBABILITY_IDENTIFIERS.consumables];
+            case "enhancements":
+              return [...PROBABILITY_IDENTIFIERS.enhancements];
+            default:
+              return [...PROBABILITY_IDENTIFIERS.jokers];
+          }
+        },
+        default: "8ball",
+      },
+    ],
+    category: "Probability",
+  },
+  {
+    id: "probability_part_compare",
+    label: "Probability Compare",
+    description: "Compare the Numerator or the Denominator with a custom value",
+    applicableTriggers: ["change_probability"],
+    params: [
+      {
+        id: "part",
+        type: "select",
+        label: "Numerator or Denominator",
+        options: [
+          {value: "numerator", label: "Numerator"},
+          {value: "denominator", label: "Denominator"}
+        ],
+        default: "numerator"
+      },
+      {
+        id: "operator",
+        type: "select",
+        label: "Operator",
+        options: [...COMPARISON_OPERATORS],
+      },
+      {
+        id: "value",
+        type: "number",
+        label: "Second Value",
+        default: 1,
+      },
+    ],
+    category: "Probability",
   },
 ];
 
