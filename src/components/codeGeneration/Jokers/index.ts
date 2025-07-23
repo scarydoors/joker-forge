@@ -1085,6 +1085,223 @@ const generateCalculateFunction = (
       }
         end`;
 
+      const hasNonFixProbabilityEffects = sortedRules.some((rule) => {
+        const regularNonFixProbabilityEffects = (rule.effects || []).filter(
+          (e) => e.type !== "fix_probability_effect"
+        );
+        const randomNonFixProbabilityGroups = (rule.randomGroups || [])
+          .map((group) => ({
+            ...group,
+            effects: group.effects.filter((e) => e.type !== "fix_probability_effect"),
+          }))
+          .filter((group) => group.effects.length > 0);
+
+        return (
+          regularNonFixProbabilityEffects.length > 0 ||
+          randomNonFixProbabilityGroups.length > 0
+        );
+      });
+
+      if (hasNonFixProbabilityEffects) {
+        const nonFixProbabilityContextCheck = generateTriggerContext(triggerType, sortedRules);
+
+        calculateFunction += `
+        if ${nonFixProbabilityContextCheck.check} then`;
+
+        if (hasDeleteEffects) {
+          calculateFunction += `
+            context.other_card.should_destroy = false`;
+        }
+
+        hasAnyConditions = false;
+
+        const rulesWithConditions = sortedRules.filter(
+          (rule) => generateConditionChain(rule, joker).length > 0
+        );
+        const rulesWithoutConditions = sortedRules.filter(
+          (rule) => generateConditionChain(rule, joker).length === 0
+        );
+
+        rulesWithConditions.forEach((rule) => {
+          const regularNonFixProbabilityEffects = (rule.effects || []).filter(
+            (e) => e.type !== "fix_probability_effect"
+          );
+          const randomNonFixProbabilityGroups = (rule.randomGroups || [])
+            .map((group) => ({
+              ...group,
+              effects: group.effects.filter(
+                (e) => e.type !== "fix_probability_effect"
+              ),
+            }))
+            .filter((group) => group.effects.length > 0);
+
+          if (
+            regularNonFixProbabilityEffects.length === 0 &&
+            randomNonFixProbabilityGroups.length === 0
+          )
+            return;
+
+          const conditionCode = generateConditionChain(rule, joker);
+
+          const conditional = hasAnyConditions ? "elseif" : "if";
+          calculateFunction += `
+            ${conditional} ${conditionCode} then`;
+          hasAnyConditions = true;
+
+          const hasDeleteInRegularEffects = (rule.effects || []).some(
+            (effect) => effect.type === "delete_triggered_card"
+          );
+
+          if (hasDeleteInRegularEffects) {
+            calculateFunction += `
+                context.other_card.should_destroy = true`;
+          }
+
+          const effectResult = generateEffectReturnStatement(
+            regularNonFixProbabilityEffects,
+            convertRandomGroupsForCodegen(randomNonFixProbabilityGroups),
+            triggerType,
+            rule.id,
+            globalEffectCounts
+          );
+
+          if (effectResult.configVariables) {
+            allConfigVariables.push(...effectResult.configVariables);
+          }
+
+          if (effectResult.preReturnCode) {
+            calculateFunction += `
+                ${effectResult.preReturnCode}`;
+          }
+
+          if (effectResult.statement) {
+            calculateFunction += `
+                ${effectResult.statement}`;
+          }
+        });
+
+        if (rulesWithoutConditions.length > 0) {
+          const rulesWithRandomGroups = rulesWithoutConditions.filter(
+            (rule) => (rule.randomGroups || []).length > 0
+          );
+          const rulesWithoutRandomGroups = rulesWithoutConditions.filter(
+            (rule) =>
+              (rule.randomGroups || []).length === 0 &&
+              (rule.effects || []).length > 0
+          );
+
+          rulesWithRandomGroups.forEach((rule) => {
+            const regularNonFixProbabilityEffects = (rule.effects || []).filter(
+              (e) => e.type !== "fix_probability_effect"
+            );
+            const randomNonFixProbabilityGroups = (rule.randomGroups || [])
+              .map((group) => ({
+                ...group,
+                effects: group.effects.filter(
+                  (e) => e.type !== "fix_probability_effect"
+                ),
+              }))
+              .filter((group) => group.effects.length > 0);
+
+            if (
+              regularNonFixProbabilityEffects.length === 0 &&
+              randomNonFixProbabilityGroups.length === 0
+            )
+              return;
+
+            const conditional = hasAnyConditions ? "elseif" : "if";
+            calculateFunction += `
+            ${conditional} true then`;
+            hasAnyConditions = true;
+
+            const hasDeleteInRegularEffects = (rule.effects || []).some(
+              (effect) => effect.type === "delete_triggered_card"
+            );
+
+            if (hasDeleteInRegularEffects) {
+              calculateFunction += `
+                context.other_card.should_destroy = true`;
+            }
+
+            const effectResult = generateEffectReturnStatement(
+              regularNonFixProbabilityEffects,
+              convertRandomGroupsForCodegen(randomNonFixProbabilityGroups),
+              triggerType,
+              rule.id,
+              globalEffectCounts
+            );
+
+            if (effectResult.configVariables) {
+              allConfigVariables.push(...effectResult.configVariables);
+            }
+
+            if (effectResult.preReturnCode) {
+              calculateFunction += `
+                ${effectResult.preReturnCode}`;
+            }
+
+            if (effectResult.statement) {
+              calculateFunction += `
+                ${effectResult.statement}`;
+            }
+          });
+
+          if (rulesWithoutRandomGroups.length > 0) {
+            if (hasAnyConditions) {
+              calculateFunction += `
+            else`;
+            }
+
+            rulesWithoutRandomGroups.forEach((rule) => {
+              const regularNonRetriggerEffects = (rule.effects || []).filter(
+                (e) => e.type !== "retrigger_cards"
+              );
+
+              if (regularNonRetriggerEffects.length === 0) return;
+
+              const hasDeleteInRegularEffects = (rule.effects || []).some(
+                (effect) => effect.type === "delete_triggered_card"
+              );
+
+              if (hasDeleteInRegularEffects) {
+                calculateFunction += `
+                context.other_card.should_destroy = true`;
+              }
+
+              const effectResult = generateEffectReturnStatement(
+                regularNonRetriggerEffects,
+                [],
+                triggerType,
+                rule.id,
+                globalEffectCounts
+              );
+
+              if (effectResult.configVariables) {
+                allConfigVariables.push(...effectResult.configVariables);
+              }
+
+              if (effectResult.preReturnCode) {
+                calculateFunction += `
+                ${effectResult.preReturnCode}`;
+              }
+
+              if (effectResult.statement) {
+                calculateFunction += `
+                ${effectResult.statement}`;
+              }
+            });
+          }
+        }
+
+        if (hasAnyConditions) {
+          calculateFunction += `
+            end`;
+        }
+
+        calculateFunction += `
+        end`;
+      }
+
     } else {
       const triggerContext = generateTriggerContext(triggerType, sortedRules);
 

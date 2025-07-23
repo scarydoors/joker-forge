@@ -1633,7 +1633,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
     id: "fix_probability_effect",
     label: "Set probability",
     description: "Set the numerator or the denominator of a chance roll",
-    applicableTriggers: ["fix_probability"],
+    applicableTriggers: [...GENERIC_TRIGGERS],
     params: [
       {
         id: "part",
