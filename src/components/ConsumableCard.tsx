@@ -322,8 +322,10 @@ const ConsumableCard: React.FC<ConsumableCardProps> = ({
           >
             <button
               onClick={(e) => {
-                e.stopPropagation();
-                onDelete();
+                if (window.confirm("Are you sure you want to delete this consumable?")) {
+                  e.stopPropagation();
+                  onDelete();
+                }
               }}
               className="w-full h-full flex items-center cursor-pointer justify-center"
             >
