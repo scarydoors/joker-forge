@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useState, useRef, useEffect} from "react";
+import { motion } from "framer-motion";
 import {
   TrashIcon,
   ExclamationTriangleIcon,
@@ -9,6 +10,7 @@ import {
   BeakerIcon,
   PercentBadgeIcon,
 } from "@heroicons/react/16/solid";
+import { text } from "stream/consumers";
 
 interface BlockComponentProps {
   label: string;
@@ -43,6 +45,7 @@ const BlockComponent: React.FC<BlockComponentProps> = ({
   dragHandleProps,
   variant = "default",
 }) => {
+
   const getTypeConfig = () => {
     switch (type) {
       case "trigger":
@@ -89,6 +92,29 @@ const BlockComponent: React.FC<BlockComponentProps> = ({
 
   const config = getTypeConfig();
   const displayTitle = dynamicTitle || label;
+
+  const [hasOverflow, setHasOverflow] = useState(false);
+  const textRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const CheckOverflow = () => {
+      if (textRef.current && containerRef.current) {
+        const overflowAmount = textRef.current.scrollWidth - containerRef.current.clientWidth;
+          setHasOverflow(overflowAmount > 10);
+      } else {
+        setHasOverflow(false);
+      }
+    };
+
+    const timer = setTimeout(CheckOverflow, 100);
+    window.addEventListener("resize", CheckOverflow);
+
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener("resize", CheckOverflow);
+    };
+  }, [displayTitle, variant]);
 
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -160,10 +186,30 @@ const BlockComponent: React.FC<BlockComponentProps> = ({
               </div>
             )}
           </div>
-          <div className="flex-grow min-w-0">
-            <div className="text-white text-sm tracking-wide truncate">
-              {isNegated ? `NOT ${displayTitle}` : displayTitle}
-            </div>
+          <div ref={containerRef} className="flex-grow min-w-0 overflow-hidden">
+          <motion.div
+          ref={textRef}
+          className="text-white text-sm tracking-wide whitespace-nowrap"
+          animate={{
+            x: hasOverflow ? [0, -(textRef.current.scrollWidth - containerRef.current.clientWidth)] : 0,
+          }}
+          transition={
+            hasOverflow
+            ? {
+              x: {
+                repeat: Infinity,
+                repeatType: "mirror",
+                duration: (textRef.current?.scrollWidth || 0) / 75,
+                ease: "linear",
+                delay: 1.5,
+                repeatDelay: 1.5,
+              },
+            }
+            : { duration: 0 }
+          }
+          >
+          {isNegated ? `NOT ${displayTitle}` : displayTitle}
+          </motion.div>
           </div>
         </div>
       </div>
