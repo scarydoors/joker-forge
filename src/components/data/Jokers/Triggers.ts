@@ -188,6 +188,12 @@ export const TRIGGERS: TriggerDefinition[] = [
     category: "Gameplay",
   },
   {
+    id: "shop_entered",
+    label: "When Shop is Entered",
+    description: "Triggers when the player enters the shop.",
+    category: "Round Events",
+  },
+  {
     id: "shop_exited",
     label: "When Shop is Exited",
     description: "Triggers when the player exits the shop.",
