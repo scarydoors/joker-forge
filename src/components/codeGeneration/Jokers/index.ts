@@ -1068,6 +1068,7 @@ const generateCalculateFunction = (
           convertRandomGroupsForCodegen(randomFixProbablityEffects),
           triggerType,
           rule.id,
+          modprefix,
           globalEffectCounts
         );
 
@@ -1138,6 +1139,7 @@ const generateCalculateFunction = (
             convertRandomGroupsForCodegen(randomModProbablityEffects),
             triggerType,
             rule.id,
+            modprefix,
             globalEffectCounts
           );
 
