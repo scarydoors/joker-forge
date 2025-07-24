@@ -1398,29 +1398,6 @@ const generateLocVarsFunction = (
   };
 
   if (hasRandomGroups) {
-    const nonPassiveRules =
-      joker.rules?.filter((rule) => rule.trigger !== "passive") || [];
-    const randomGroups = nonPassiveRules.flatMap(
-      (rule) => rule.randomGroups || []
-    );
-    const denominators = [
-      ...new Set(randomGroups.map((group) => group.chance_denominator)),
-    ];
-
-    variableMapping.push("G.GAME.probabilities.normal");
-
-    if (denominators.length === 1) {
-      variableMapping.push("card.ability.extra.odds");
-    } else {
-      denominators.forEach((_, index) => {
-        if (index === 0) {
-          variableMapping.push("card.ability.extra.odds");
-        } else {
-          variableMapping.push(`card.ability.extra.odds${index + 1}`);
-        }
-      });
-    }
-
     const remainingVars = allVariables.filter(
       (v) =>
         v.name !== "numerator" &&
@@ -1437,7 +1414,7 @@ const generateLocVarsFunction = (
         !gv.name.toLowerCase().includes("denominator")
     );
 
-    let currentIndex = denominators.length + 1;
+    let currentIndex = 0;
 
     for (const variable of remainingVars) {
       if (currentIndex >= maxVariableIndex) break;
@@ -1592,16 +1569,61 @@ const generateLocVarsFunction = (
 
   const finalVars = variableMapping.slice(0, maxVariableIndex);
 
-  let locVarsReturn = `{vars = {${finalVars.join(", ")}}}`;
+  let locVarsReturn: string;
 
-  if (colorVariables.length > 0) {
-    locVarsReturn = `{vars = {${finalVars.join(
+  if (hasRandomGroups) {
+    const nonPassiveRules =
+      joker.rules?.filter((rule) => rule.trigger !== "passive") || [];
+    const randomGroups = nonPassiveRules.flatMap(
+      (rule) => rule.randomGroups || []
+    );
+    const denominators = [
+      ...new Set(randomGroups.map((group) => group.chance_denominator)),
+    ];
+    const numerators = [
+      ...new Set(randomGroups.map((group) => group.chance_numerator)),
+    ];
+
+    if (denominators.length === 1 && numerators.length === 1) {
+      const oddsVar = "card.ability.extra.odds";
+      const probabilityIdentifier = `group_0_${randomGroups[0].id.substring(
+        0,
+        8
+      )}`;
+
+      const nonProbabilityVars = finalVars.filter(
+        (varName) =>
+          !varName.includes("card.ability.extra.odds") &&
+          !varName.includes("card.ability.extra.numerator") &&
+          !varName.includes("card.ability.extra.denominator")
+      );
+
+      locVarsReturn = `local new_numerator, new_denominator = SMODS.get_probability_vars(card, ${
+        numerators[0]
+      }, ${oddsVar}, '${probabilityIdentifier}')
+        return {vars = {${nonProbabilityVars.join(
+          ", "
+        )}, new_numerator, new_denominator}}`;
+    } else {
+      locVarsReturn = `{vars = {${finalVars.join(", ")}}}`;
+    }
+  } else {
+    locVarsReturn = `{vars = {${finalVars.join(", ")}}}`;
+  }
+
+  if (colorVariables.length > 0 && !hasRandomGroups) {
+    const varsOnly = finalVars.join(", ");
+    locVarsReturn = `{vars = {${varsOnly}}, colours = {${colorVariables.join(
       ", "
-    )}}, colours = {${colorVariables.join(", ")}}}`;
+    )}}}`;
   }
 
   return `loc_vars = function(self, info_queue, card)
-        return ${locVarsReturn}
+        ${
+          locVarsReturn.includes("local")
+            ? locVarsReturn
+            : `return ${locVarsReturn}`
+        }
     end`;
 };
 
