@@ -1603,7 +1603,7 @@ const generateLocVarsFunction = (
       }, ${oddsVar}, '${probabilityIdentifier}') --Please-work
         return {vars = {${nonProbabilityVars.join(
           ", "
-        )}, new_numerator, new_denominator}}`;
+        )}${nonProbabilityVars.length > 0? `, ` : ``}new_numerator, new_denominator}}`;
     } else {
       locVarsReturn = `{vars = {${finalVars.join(", ")}}}`;
     }
