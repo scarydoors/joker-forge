@@ -598,14 +598,14 @@ export const GAME_VARIABLE_CATEGORIES: GameVariableCategory[] = [
         label: "Total Hand Levels",
         description: "Sum of all poker hand levels",
         category: "poker_hands",
-        code: "(function() local total = 0; for hand, data in pairs(G.GAME.hands) do if data.level >= 1 then total = total + data.level end end; return total end)()",
+        code: "(function() local total = 0; for hand, data in pairs(G.GAME.hands) do if data.level >= to_big(1) then total = total + data.level end end; return total end)()",
       },
       {
         id: "hand_levels_above_one",
         label: "Hand Levels Above One",
         description: "Total levels minus base level for each hand",
         category: "poker_hands",
-        code: "(function() local total_levels = 0; local total_hands = 0; for hand, data in pairs(G.GAME.hands) do if data.level >= 1 then total_hands = total_hands + 1; total_levels = total_levels + data.level end end; return total_levels - total_hands end)()",
+        code: "(function() local total_levels = 0; local total_hands = 0; for hand, data in pairs(G.GAME.hands) do if data.level >= to_big(1) then total_hands = total_hands + 1; total_levels = total_levels + data.level end end; return total_levels - total_hands end)()",
       },
     ],
     subcategories: [
