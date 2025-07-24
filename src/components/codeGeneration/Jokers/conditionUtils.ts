@@ -43,6 +43,7 @@ import { generateLuckyCardTriggeredConditionCode } from "./conditions/LuckyCardT
 import { generateCardIndexConditionCode } from "./conditions/CardIndexCondition";
 import { generateProbabilityIdentifierConditionCode } from "./conditions/ProbabilityIdentifierCondition";
 import { generateProbabilityPartCompareConditionCode } from "./conditions/ProbabilityPartCompareCondition";
+import { generateHandLevelConditionCode } from "./conditions/HandLevelCondition";
 
 export const generateConditionChain = (
   rule: Rule,
@@ -183,6 +184,9 @@ const generateSingleConditionCode = (
 
     case "joker_count":
       return generateJokerCountConditionCode([singleConditionRule]);
+
+    case "hand_level":
+      return generateHandLevelConditionCode([singleConditionRule]);
 
     case "blind_type":
       return generateBlindTypeConditionCode([singleConditionRule]);

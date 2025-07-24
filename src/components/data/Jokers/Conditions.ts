@@ -1163,6 +1163,49 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
     ],
     category: "Player Resources",
   },
+    {
+    id: "hand_level",
+    label: "Hand Level",
+    description: "Check the level of a poker hand",
+    applicableTriggers: [...GENERIC_TRIGGERS, "change_probability"],
+    params: [
+      {
+        id: "operator",
+        type: "select",
+        label: "Operator",
+        options: [...COMPARISON_OPERATORS],
+      },
+      {
+        id: "hand_selection",
+        type: "select",
+        label: "Hand Selection",
+        options: [
+          { value: "played", label: "Played Hand" },
+          { value: "specific", label: "Specific Hand" },
+          { value: "any", label: "Any Hand" },
+        ],
+        default: "any",
+      },
+      {
+        id: "specific_hand",
+        type: "select",
+        label: "Specific Hand",
+        options: [...POKER_HANDS],
+        showWhen: {
+          parameter: "hand_selection",
+          values: ["specific"],
+        },
+      },
+      {
+        id: "value",
+        type: "number",
+        label: "Hand Level",
+        min: 0,
+        default: 1,
+      },
+    ],
+    category: "Game State",
+  },
   {
     id: "blind_type",
     label: "Blind Type",

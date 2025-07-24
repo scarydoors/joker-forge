@@ -82,15 +82,15 @@ The plan here is to implement enough triggers, conditions, and effects, so as th
 - [x] **Consumable Held** - Check for specific consumable/s held
 - [x] **Score Threshold** - Check if score meets requirement (Mr. Bones)
 - [x] **Lucky Card Triggered** - Check if a lucky card succesfully triggered (Lucky Cat)
+- [x] **Edition Count** - Check how many cards with editions are in hand played
+- [x] **Enhancement Count** - Check how many cards with enhancements are in hand played
+- [x] **Seal Count** - Check how many cards with seals are in hand played
+- [x] **Check Specific Poker Hand Level** - Check a specific poker hands level
 
 #### Not Implemented Yet
 
 - [ ] **Consumable Count** - Check number of consumables owned
 - [ ] **Culmative Chip/Rank Check** - Check for if cards rank/chips add up to a certain number
-- [ ] **Edition Count** - Check how many cards with editions are in hand played
-- [ ] **Enhancement Count** - Check how many cards with enhancements are in hand played
-- [ ] **Seal Count** - Check how many cards with seals are in hand played
-- [ ] **Check Specific Poker Hand Level** - Check a specific poker hands level
 
 ---
 
