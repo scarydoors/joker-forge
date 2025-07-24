@@ -1317,9 +1317,7 @@ const generateLocVarsFunction = (
 ): string => {
   const descriptionHasVariables = joker.description.includes("#");
   if (!descriptionHasVariables) {
-    return `loc_vars = function(self, info_queue, card)
-        return {vars = {}}
-    end`;
+    return ``;
   }
 
   const variablePlaceholders = joker.description.match(/#(\d+)#/g) || [];
@@ -1331,9 +1329,7 @@ const generateLocVarsFunction = (
   );
 
   if (maxVariableIndex === 0) {
-    return `loc_vars = function(self, info_queue, card)
-        return {vars = {}}
-    end`;
+    return ``;
   }
 
   const allVariables = getAllVariables(joker);
