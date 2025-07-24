@@ -207,10 +207,10 @@ const EditConsumableInfo: React.FC<EditConsumableInfoProps> = ({
     };
 
     document.addEventListener("mousedown", handleClickOutside);
-    document.addEventListener("touchstart", handleClickOutside)
+    document.addEventListener("touchend", handleClickOutside)
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
-      document.removeEventListener("touchstart", handleClickOutside);
+      document.removeEventListener("touchend", handleClickOutside);
     };
   }, [isOpen, handleSave]);
 
@@ -1026,7 +1026,11 @@ const EditConsumableInfo: React.FC<EditConsumableInfoProps> = ({
             <Button variant="primary" onClick={handleSave} className="flex-1">
               Save Changes
             </Button>
-            <Button onClick={handleDelete} variant="danger" className="px-8">
+            <Button 
+            onClick={handleDelete}
+            onTouchEnd={handleDelete}
+            variant="danger"
+            className="px-8">
               Delete
             </Button>
           </div>

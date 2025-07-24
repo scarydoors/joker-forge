@@ -187,10 +187,10 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
     };
 
     document.addEventListener("mousedown", handleClickOutside);
-    document.addEventListener("touchstart", handleClickOutside);
+    document.addEventListener("touchend", handleClickOutside);
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
-      document.removeEventListener("touchstart", handleClickOutside);
+      document.removeEventListener("touchend", handleClickOutside);
     };
   }, [isOpen, handleSave]);
 
@@ -1197,7 +1197,11 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
             <Button variant="secondary" onClick={onClose} className="flex-1">
               Cancel
             </Button>
-            <Button variant="primary" onClick={handleSave} className="flex-1">
+            <Button
+            variant="primary"
+            onClick={handleSave} 
+            onTouchEnd={handleSave}
+            className="flex-1">
               Save Changes
             </Button>
             <Button onClick={handleDelete} variant="danger" className="px-8">
