@@ -197,7 +197,7 @@ const EditConsumableInfo: React.FC<EditConsumableInfoProps> = ({
   useEffect(() => {
     if (!isOpen) return;
 
-    const handleClickOutside = (event: MouseEvent | TouchEvent) => {
+    const handleClickOutside = (event: MouseEvent) => {
       if (
         modalRef.current &&
         !modalRef.current.contains(event.target as Node)
@@ -207,10 +207,8 @@ const EditConsumableInfo: React.FC<EditConsumableInfoProps> = ({
     };
 
     document.addEventListener("mousedown", handleClickOutside);
-    document.addEventListener("touchend", handleClickOutside)
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
-      document.removeEventListener("touchend", handleClickOutside);
     };
   }, [isOpen, handleSave]);
 
