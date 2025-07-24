@@ -1607,6 +1607,14 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
     category: "Special",
   },
   {
+    id: "force_game_over",
+    label: "Force Game Over",
+    description: "Forces the run to end (ignores Mr. Bones)",
+    applicableTriggers: [...GENERIC_TRIGGERS],
+    params: [],
+    category: "Special",
+  },
+  {
     id: "show_message",
     label: "Show Message",
     description: "Display a custom message with specified color",
