@@ -55,13 +55,21 @@ export const generateJokersCode = (
       currentPosition,
       modPrefix
     );
-    jokersCode[`${joker.jokerKey}.lua`] = result.code;
+
+    let jokerCode = result.code;
+
+    const hookCode = generateHooks([joker], modPrefix);
+    if (hookCode.trim()) {
+      jokerCode = `${jokerCode}
+
+${hookCode}`;
+    }
+
+    jokersCode[`${joker.jokerKey}.lua`] = jokerCode;
     currentPosition = result.nextPosition;
   });
 
-  const hooks = generateHooks(jokersWithKeys, modPrefix);
-
-  return { jokersCode, hooks };
+  return { jokersCode, hooks: "" };
 };
 
 const convertRandomGroupsForCodegen = (
@@ -473,18 +481,18 @@ const generateCalculateFunction = (
       );
 
     const hasFixProbablityEffects = sortedRules.some((rule) =>
-        [
-          ...(rule.effects || []),
-          ...(rule.randomGroups?.flatMap((g) => g.effects) || []),
-        ].some((effect) => effect.type === "fix_probability")
-      );
+      [
+        ...(rule.effects || []),
+        ...(rule.randomGroups?.flatMap((g) => g.effects) || []),
+      ].some((effect) => effect.type === "fix_probability")
+    );
 
     const hasModProbablityEffects = sortedRules.some((rule) =>
-        [
-          ...(rule.effects || []),
-          ...(rule.randomGroups?.flatMap((g) => g.effects) || []),
-        ].some((effect) => effect.type === "mod_probability")
-      );
+      [
+        ...(rule.effects || []),
+        ...(rule.randomGroups?.flatMap((g) => g.effects) || []),
+      ].some((effect) => effect.type === "mod_probability")
+    );
 
     if (hasDeleteEffects) {
       calculateFunction += `
@@ -1031,70 +1039,70 @@ const generateCalculateFunction = (
         end`;
     } else if (hasFixProbablityEffects || hasModProbablityEffects) {
       if (hasFixProbablityEffects) {
-      calculateFunction += `
+        calculateFunction += `
         if context.fix_probability and not context.blueprint then
         local numerator, denominator = context.numerator, context.denominator`;
 
-      let hasAnyConditions = false;
+        let hasAnyConditions = false;
 
-      sortedRules.forEach((rule) => {
-        const regularFixProbablityEffects = (rule.effects || []).filter(
-          (e) => e.type === "fix_probability"
-        );
-        const randomFixProbablityEffects = (rule.randomGroups || []).filter(
-          (group) => group.effects.some((e) => e.type === "fix_probability")
-        );
+        sortedRules.forEach((rule) => {
+          const regularFixProbablityEffects = (rule.effects || []).filter(
+            (e) => e.type === "fix_probability"
+          );
+          const randomFixProbablityEffects = (rule.randomGroups || []).filter(
+            (group) => group.effects.some((e) => e.type === "fix_probability")
+          );
 
-        if (
-          regularFixProbablityEffects.length === 0 &&
-          randomFixProbablityEffects.length === 0
-        )
-          return;
+          if (
+            regularFixProbablityEffects.length === 0 &&
+            randomFixProbablityEffects.length === 0
+          )
+            return;
 
-        const conditionCode = generateConditionChain(rule, joker);
+          const conditionCode = generateConditionChain(rule, joker);
 
-        if (conditionCode) {
-          const conditional = hasAnyConditions ? "elseif" : "if";
-          calculateFunction += `
-            ${conditional} ${conditionCode} then`;
-          hasAnyConditions = true;
-        } else {
-          if (hasAnyConditions) {
+          if (conditionCode) {
+            const conditional = hasAnyConditions ? "elseif" : "if";
             calculateFunction += `
+            ${conditional} ${conditionCode} then`;
+            hasAnyConditions = true;
+          } else {
+            if (hasAnyConditions) {
+              calculateFunction += `
             else`;
+            }
           }
-        }
 
-        const effectResult = generateEffectReturnStatement(
-          regularFixProbablityEffects,
-          convertRandomGroupsForCodegen(randomFixProbablityEffects),
-          triggerType,
-          rule.id,
-          modprefix,
-          globalEffectCounts
-        );
+          const effectResult = generateEffectReturnStatement(
+            regularFixProbablityEffects,
+            convertRandomGroupsForCodegen(randomFixProbablityEffects),
+            triggerType,
+            rule.id,
+            modprefix,
+            globalEffectCounts
+          );
 
-        if (effectResult.configVariables) {
-          allConfigVariables.push(...effectResult.configVariables);
-        }
+          if (effectResult.configVariables) {
+            allConfigVariables.push(...effectResult.configVariables);
+          }
 
-        if (effectResult.preReturnCode) {
-          calculateFunction += `
+          if (effectResult.preReturnCode) {
+            calculateFunction += `
                 ${effectResult.preReturnCode}`;
-        }
+          }
 
-        if (effectResult.statement) {
-          calculateFunction += `
+          if (effectResult.statement) {
+            calculateFunction += `
                 ${effectResult.statement}`;
-        }
-      });
+          }
+        });
 
-      if (hasAnyConditions) {
-        calculateFunction += `
+        if (hasAnyConditions) {
+          calculateFunction += `
             end`;
-      }
+        }
 
-      calculateFunction += `
+        calculateFunction += `
       return {
         numerator = numerator, 
         denominator = denominator
@@ -1172,7 +1180,6 @@ const generateCalculateFunction = (
         }
           end`;
       }
-
     } else {
       const triggerContext = generateTriggerContext(triggerType, sortedRules);
 
@@ -1601,9 +1608,9 @@ const generateLocVarsFunction = (
       locVarsReturn = `local new_numerator, new_denominator = SMODS.get_probability_vars(card, ${
         numerators[0]
       }, ${oddsVar}, '${probabilityIdentifier}') --Please-work
-        return {vars = {${nonProbabilityVars.join(
-          ", "
-        )}${nonProbabilityVars.length > 0? `, ` : ``}new_numerator, new_denominator}}`;
+        return {vars = {${nonProbabilityVars.join(", ")}${
+        nonProbabilityVars.length > 0 ? `, ` : ``
+      }new_numerator, new_denominator}}`;
     } else {
       locVarsReturn = `{vars = {${finalVars.join(", ")}}}`;
     }
