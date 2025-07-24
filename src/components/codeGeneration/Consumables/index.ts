@@ -326,12 +326,10 @@ const generateCanUseFunction = (rules: Rule[], modPrefix: string): string => {
     end`;
 };
 
-const generateLocVarsFunction = (consumable: ConsumableData): string => {
+const generateLocVarsFunction = (consumable: ConsumableData): string | null => {
   const descriptionHasVariables = consumable.description.includes("#");
   if (!descriptionHasVariables) {
-    return `loc_vars = function(self, info_queue, card)
-        return {vars = {}}
-    end`;
+    return null;
   }
 
   const variablePlaceholders = consumable.description.match(/#(\d+)#/g) || [];
@@ -343,9 +341,7 @@ const generateLocVarsFunction = (consumable: ConsumableData): string => {
   );
 
   if (maxVariableIndex === 0) {
-    return `loc_vars = function(self, info_queue, card)
-        return {vars = {}}
-    end`;
+    return null;
   }
 
   const variableMapping: string[] = [];

@@ -32,10 +32,7 @@ export const generateCreateConsumableReturn = (
                     func = function()
                         local random_sets = {'Tarot', 'Planet', 'Spectral'}
                         local random_set = random_sets[math.random(1, #random_sets)]
-                        local consumable_card = create_card(random_set, G.consumeables, nil, nil, nil, nil, nil, 'joker_forge_' .. random_set:lower())
-                        consumable_card:set_edition("e_negative", true)
-                        consumable_card:add_to_deck()
-                        G.consumeables:emplace(consumable_card)
+                        SMODS.add_card{set=random_set, edition = 'e_negative', key_append='joker_forge_' .. random_set:lower()}
                         return true
                     end
                 }))`;
@@ -48,9 +45,7 @@ export const generateCreateConsumableReturn = (
                         func = function()
                             local random_sets = {'Tarot', 'Planet', 'Spectral'}
                             local random_set = random_sets[math.random(1, #random_sets)]
-                            local consumable_card = create_card(random_set, G.consumeables, nil, nil, nil, nil, nil, 'joker_forge_' .. random_set:lower())
-                            consumable_card:add_to_deck()
-                            G.consumeables:emplace(consumable_card)
+                            SMODS.add_card{set=random_set, key_append='joker_forge_' .. random_set:lower()}
                             G.GAME.consumeable_buffer = 0
                             return true
                         end
@@ -80,28 +75,28 @@ export const generateCreateConsumableReturn = (
     }
 
     if (specificCard === "random") {
-      consumableKey = `nil, nil, nil, nil, nil, 'joker_forge_${set.toLowerCase()}'`;
+      consumableKey = `nil`;
     } else {
       // Validate the specific card exists in the appropriate set
       let cardExists = false;
       if (set === "Tarot") {
         cardExists = TAROT_CARDS.some((card) => card.key === specificCard);
         consumableKey = cardExists
-          ? `nil, nil, nil, nil, '${specificCard}'`
-          : `nil, nil, nil, nil, 'c_fool'`;
+          ? `'${specificCard}'`
+          : `'c_fool'`;
       } else if (set === "Planet") {
         cardExists = PLANET_CARDS.some((card) => card.key === specificCard);
         consumableKey = cardExists
-          ? `nil, nil, nil, nil, '${specificCard}'`
-          : `nil, nil, nil, nil, 'c_pluto'`;
+          ? `'${specificCard}'`
+          : `'c_pluto'`;
       } else if (set === "Spectral") {
         cardExists = SPECTRAL_CARDS.some((card) => card.key === specificCard);
         consumableKey = cardExists
-          ? `nil, nil, nil, nil, '${specificCard}'`
-          : `nil, nil, nil, nil, 'c_familiar'`;
+          ? `'${specificCard}'`
+          : `'c_familiar'`;
       } else {
         // Custom consumable
-        consumableKey = `nil, nil, nil, nil, '${specificCard}'`;
+        consumableKey = `'${specificCard}'`;
       }
     }
 
@@ -109,10 +104,7 @@ export const generateCreateConsumableReturn = (
       consumableCreationCode = `local created_consumable = true
                 G.E_MANAGER:add_event(Event({
                     func = function()
-                        local consumable_card = create_card(${setName}, G.consumeables, ${consumableKey})
-                        consumable_card:set_edition("e_negative", true)
-                        consumable_card:add_to_deck()
-                        G.consumeables:emplace(consumable_card)
+                        SMODS.add_card{set = ${setName}, key = ${consumableKey}, edition = 'e_negative', key_append = 'joker_forge_${set.toLowerCase()}'}
                         return true
                     end
                 }))`;
@@ -123,9 +115,7 @@ export const generateCreateConsumableReturn = (
                     G.GAME.consumeable_buffer = G.GAME.consumeable_buffer + 1
                     G.E_MANAGER:add_event(Event({
                         func = function()
-                            local consumable_card = create_card(${setName}, G.consumeables, ${consumableKey})
-                            consumable_card:add_to_deck()
-                            G.consumeables:emplace(consumable_card)
+                            SMODS.add_card{set = ${setName}, key = ${consumableKey}, key_append = 'joker_forge_${set.toLowerCase()}'}
                             G.GAME.consumeable_buffer = 0
                             return true
                         end

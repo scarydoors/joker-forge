@@ -281,7 +281,9 @@ const generateSingleJokerCode = (
     passiveEffects,
     calculateResult?.configVariables || []
   );
-  jokerCode += `,\n\n    ${locVarsCode}`;
+  if (locVarsCode) {
+    jokerCode += `,\n\n    ${locVarsCode}`;
+  }
 
   const setStickerCode = generateSetAbilityFunction(joker);
   if (setStickerCode) {
@@ -1314,12 +1316,10 @@ const generateLocVarsFunction = (
   joker: JokerData,
   passiveEffects: PassiveEffectResult[],
   collectedConfigVariables: ConfigExtraVariable[]
-): string => {
+): string | null => {
   const descriptionHasVariables = joker.description.includes("#");
   if (!descriptionHasVariables) {
-    return `loc_vars = function(self, info_queue, card)
-        return {vars = {}}
-    end`;
+    return null;
   }
 
   const variablePlaceholders = joker.description.match(/#(\d+)#/g) || [];
@@ -1331,9 +1331,7 @@ const generateLocVarsFunction = (
   );
 
   if (maxVariableIndex === 0) {
-    return `loc_vars = function(self, info_queue, card)
-        return {vars = {}}
-    end`;
+    return null;
   }
 
   const allVariables = getAllVariables(joker);
