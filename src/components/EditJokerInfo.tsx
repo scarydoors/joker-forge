@@ -671,7 +671,7 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
       <div className="flex items-start gap-8 max-h-[90vh]">
         <div
           ref={modalRef}
-          className="bg-black-dark border-2 border-black-lighter rounded-lg w-full md:w-[90vw] lg:w-[100vh] h-[90vh] flex flex-col relative overflow-hidden"
+          className="bg-black-dark border-2 border-black-lighter rounded-lg w-[100vh] h-[90vh] flex flex-col relative overflow-hidden"
         >
           <div className="flex ">
             {tabs.map((tab, index) => {
