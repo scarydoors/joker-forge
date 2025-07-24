@@ -25,6 +25,7 @@ import {
   SPECTRAL_CARDS,
   CUSTOM_CONSUMABLES,
   CONSUMABLE_SETS,
+  RARITIES,
 } from "../BalatroUtils";
 
 export const GENERIC_TRIGGERS: string[] = [
@@ -873,6 +874,16 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
         type: "select",
         label: "Operator",
         options: [...COMPARISON_OPERATORS],
+      },
+      {
+        id: "rarity",
+        type: "select",
+        label: "Rarity",
+        options: () => [
+          { value: "any", label: "Any Rarity" },
+          ...RARITIES(),
+        ],
+        default: "any",
       },
       {
         id: "value",

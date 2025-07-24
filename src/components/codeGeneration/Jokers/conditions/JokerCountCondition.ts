@@ -1,3 +1,4 @@
+import { RARITY_VALUES } from "../../../data/BalatroUtils";
 import type { Rule } from "../../../ruleBuilder/types";
 import { generateGameVariableCode } from "../gameVariableUtils";
 
@@ -6,6 +7,7 @@ export const generateJokerCountConditionCode = (
 ): string | null => {
   const condition = rules[0].conditionGroups[0].conditions[0];
   const operator = (condition.params.operator as string) || "equals";
+  const rarity = (condition.params.rarity as string) || "any";
   const value = generateGameVariableCode(condition.params.value);
 
   let comparison = "";
@@ -32,5 +34,19 @@ export const generateJokerCountConditionCode = (
       comparison = `== ${value}`;
   }
 
-  return `#G.jokers.cards ${comparison}`;
+  if (rarity === "any") {
+    return `#G.jokers.cards ${comparison}`;
+  }
+
+  const rarityValue = RARITY_VALUES().indexOf(rarity) + 1
+
+  return `(function()
+    local count = 0
+    for _, joker_owned in pairs(G.jokers.cards or {}) do
+        if joker_owned.config.center.rarity == ${rarityValue} then
+            count = count + 1
+        end
+    end
+    return count ${comparison}
+end)()`
 };
