@@ -77,9 +77,10 @@ export const generateLevelUpHandReturn = (
           configVariables.length > 0 ? configVariables : undefined,
       };
     } else {
+      const handToLevelUp = triggerType === "hand_played" ? "context.scoring_name" : '"High Card"'
       return {
         statement: `level_up = ${valueCode},
-                level_up_hand = context.scoring_name`,
+                level_up_hand = ${handToLevelUp}`,
         message: customMessage
           ? `"${customMessage}"`
           : `localize('k_level_up_ex')`,
