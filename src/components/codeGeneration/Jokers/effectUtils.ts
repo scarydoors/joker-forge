@@ -68,6 +68,7 @@ import { generateModifyBlindRequirementReturn } from "./effects/ModifyBlindRequi
 import { generateBeatCurrentBlindReturn } from "./effects/BeatCurrentBlindEffect";
 import { generateFixProbabilityReturn } from "./effects/FixProbabilityEffect";
 import { generateModProbabilityReturn } from "./effects/ModProbabilityEffect";
+import { generateForceGameOverReturn } from "./effects/ForceGameOverEffect";
 
 interface ExtendedEffect extends Effect {
   _isInRandomGroup?: boolean;
@@ -532,6 +533,8 @@ const generateSingleEffect = (
       return generateFixProbabilityReturn(effect, sameTypeCount)
     case "mod_probability":
       return generateModProbabilityReturn(effect, sameTypeCount)
+    case "force_game_over":
+      return generateForceGameOverReturn(effect)
     default:
       return {
         statement: "",

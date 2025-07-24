@@ -1600,10 +1600,10 @@ const generateLocVarsFunction = (
 
       locVarsReturn = `local new_numerator, new_denominator = SMODS.get_probability_vars(card, ${
         numerators[0]
-      }, ${oddsVar}, '${probabilityIdentifier}')
+      }, ${oddsVar}, '${probabilityIdentifier}') --Please-work
         return {vars = {${nonProbabilityVars.join(
           ", "
-        )}, new_numerator, new_denominator}}`;
+        )}${nonProbabilityVars.length > 0? `, ` : ``}new_numerator, new_denominator}}`;
     } else {
       locVarsReturn = `{vars = {${finalVars.join(", ")}}}`;
     }
@@ -1620,7 +1620,7 @@ const generateLocVarsFunction = (
 
   return `loc_vars = function(self, info_queue, card)
         ${
-          locVarsReturn.includes("local")
+          locVarsReturn.includes("--Please-work")
             ? locVarsReturn
             : `return ${locVarsReturn}`
         }

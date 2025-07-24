@@ -1413,22 +1413,28 @@
               ]
             }
           ],
-          "effects": [
-            {
-              "id": "906c445a-66ef-4636-bebe-2472182648a7",
-              "type": "add_dollars",
-              "params": {
-                "value": 2,
-                "has_random_chance": "true",
-                "chance_numerator": 1,
-                "chance_denominator": 2
-              }
-            }
-          ],
+          "effects": [],
           "position": {
-            "x": 1027,
-            "y": 474
-          }
+            "x": 613,
+            "y": 36
+          },
+          "randomGroups": [
+            {
+              "id": "f9c1eb04-cfd9-4cb6-9a54-bd98101927bb",
+              "chance_numerator": 1,
+              "chance_denominator": 2,
+              "effects": [
+                {
+                  "id": "778b3da9-e8e1-4af5-8168-1901f550e91d",
+                  "type": "set_dollars",
+                  "params": {
+                    "operation": "add",
+                    "value": 2
+                  }
+                }
+              ]
+            }
+          ]
         }
       ]
     },
@@ -2232,17 +2238,39 @@
           ],
           "effects": [
             {
-              "id": "5408fd65-4a3b-4275-ac1b-0c888ce4c32f",
-              "type": "add_dollars",
+              "id": "2c4bb899-e068-48ae-9c57-080eed6e8091",
+              "type": "set_dollars",
               "params": {
-                "value": "GAMEVAR:discards_remaining|2"
+                "operation": "add",
+                "value": "GAMEVAR:discards_remaining|2|0"
               }
             }
           ],
           "randomGroups": [],
           "position": {
-            "x": 1016,
-            "y": 336
+            "x": 1009,
+            "y": 320
+          }
+        },
+        {
+          "id": "5ae9d1da-fa5c-4288-a941-321b5c5f0d3b",
+          "trigger": "blind_selected",
+          "conditionGroups": [],
+          "effects": [
+            {
+              "id": "7fb217f9-927a-415b-ae5f-39fb85c88c63",
+              "type": "modify_internal_variable",
+              "params": {
+                "variable_name": "discardedbool",
+                "value": 0,
+                "operation": "set"
+              }
+            }
+          ],
+          "randomGroups": [],
+          "position": {
+            "x": 1357,
+            "y": 323.5
           }
         }
       ],
@@ -2347,9 +2375,10 @@
           ],
           "effects": [
             {
-              "id": "32c4da6f-42a5-4130-ae9b-2180f6b4a0fc",
-              "type": "add_dollars",
+              "id": "3d2c9b3d-6da2-44d9-b22f-9b639c76ffc2",
+              "type": "set_dollars",
               "params": {
+                "operation": "add",
                 "value": 3
               }
             },
@@ -2648,9 +2677,10 @@
           "conditionGroups": [],
           "effects": [
             {
-              "id": "564404af-6cd0-4b34-a7d0-fd9ef61919a1",
-              "type": "add_dollars",
+              "id": "90121e3c-785c-447b-a533-74056f5c114a",
+              "type": "set_dollars",
               "params": {
+                "operation": "add",
                 "value": "moneyvar"
               }
             }
@@ -3510,10 +3540,11 @@
           ],
           "effects": [
             {
-              "id": "ee35ce2c-64fc-4407-98a2-9dfa1071b284",
-              "type": "add_dollars",
+              "id": "90121e3c-785c-447b-a533-74056f5c114a",
+              "type": "set_dollars",
               "params": {
-                "value": 4
+                "operation": "add",
+                "value": "moneyvar"
               }
             }
           ],
@@ -3832,9 +3863,10 @@
           ],
           "effects": [
             {
-              "id": "90696561-253b-4c7e-9887-971840238ebd",
-              "type": "add_dollars",
+              "id": "90121e3c-785c-447b-a533-74056f5c114a",
+              "type": "set_dollars",
               "params": {
+                "operation": "add",
                 "value": 1
               }
             }
@@ -4973,9 +5005,10 @@
           "conditionGroups": [],
           "effects": [
             {
-              "id": "5bfff65b-22d3-47e1-b3d7-46767818ef31",
-              "type": "add_dollars",
+              "id": "90121e3c-785c-447b-a533-74056f5c114a",
+              "type": "set_dollars",
               "params": {
+                "operation": "add",
                 "value": "GAMEVAR:money_per_5|1|0"
               }
             }
@@ -5008,9 +5041,10 @@
           "conditionGroups": [],
           "effects": [
             {
-              "id": "50606b0f-a348-48b2-8e06-665303fab84f",
-              "type": "add_dollars",
+              "id": "90121e3c-785c-447b-a533-74056f5c114a",
+              "type": "set_dollars",
               "params": {
+                "operation": "add",
                 "value": "GAMEVAR:unique_planets_used|1|0"
               }
             }
@@ -5166,9 +5200,10 @@
           ],
           "effects": [
             {
-              "id": "7fdc4664-99a9-4f7d-aab7-3c512c3ab8e4",
-              "type": "add_dollars",
+              "id": "90121e3c-785c-447b-a533-74056f5c114a",
+              "type": "set_dollars",
               "params": {
+                "operation": "add",
                 "value": 5
               }
             }
@@ -5763,9 +5798,10 @@
           ],
           "effects": [
             {
-              "id": "3a21a35c-5ce8-4c70-a09c-a129bd5ec507",
-              "type": "add_dollars",
+              "id": "90121e3c-785c-447b-a533-74056f5c114a",
+              "type": "set_dollars",
               "params": {
+                "operation": "add",
                 "value": 4
               }
             }
@@ -6427,9 +6463,10 @@
           ],
           "effects": [
             {
-              "id": "5758434a-caf9-428d-ab0c-48e5885065a8",
-              "type": "add_dollars",
+              "id": "90121e3c-785c-447b-a533-74056f5c114a",
+              "type": "set_dollars",
               "params": {
+                "operation": "add",
                 "value": 8
               }
             }
@@ -7032,7 +7069,7 @@
       ]
     },
     {
-      "id": "89bf5ff9-584d-4cb4-86e9-d2c79b90e736",
+      "id": "6dfbe29a-01ad-4a59-b863-3665e66d3705",
       "name": "Reserved Parking",
       "description": "Each {C:orange}face{} card held in hand has a {C:green}1 in 2{} chance to give {C:money}$1{}",
       "imagePreview": "data:image/png;base64,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",
@@ -7063,22 +7100,28 @@
               ]
             }
           ],
-          "effects": [
-            {
-              "id": "55502387-7a7f-44a4-8824-746850f3038d",
-              "type": "add_dollars",
-              "params": {
-                "value": 1,
-                "has_random_chance": "true",
-                "chance_numerator": 1,
-                "chance_denominator": 2
-              }
-            }
-          ],
+          "effects": [],
           "position": {
-            "x": 714,
-            "y": 249
-          }
+            "x": 663,
+            "y": 30
+          },
+          "randomGroups": [
+            {
+              "id": "3fc23869-ea42-4275-bb67-44c680c5b656",
+              "chance_numerator": 1,
+              "chance_denominator": 2,
+              "effects": [
+                {
+                  "id": "06ad3685-f7fd-476a-900b-001bae41b64a",
+                  "type": "set_dollars",
+                  "params": {
+                    "operation": "add",
+                    "value": 1
+                  }
+                }
+              ]
+            }
+          ]
         }
       ]
     },
@@ -7632,9 +7675,10 @@
           "conditionGroups": [],
           "effects": [
             {
-              "id": "ca9175a1-3df4-4b8d-8e2b-23959997dd47",
-              "type": "add_dollars",
+              "id": "90121e3c-785c-447b-a533-74056f5c114a",
+              "type": "set_dollars",
               "params": {
+                "operation": "add",
                 "value": 4
               }
             }
@@ -8092,9 +8136,10 @@
           "conditionGroups": [],
           "effects": [
             {
-              "id": "9142d30f-6123-4a95-9940-787ca4f35d71",
-              "type": "add_dollars",
+              "id": "90121e3c-785c-447b-a533-74056f5c114a",
+              "type": "set_dollars",
               "params": {
+                "operation": "add",
                 "value": "GAMEVAR:nines_in_deck|1|0"
               }
             }
@@ -10075,9 +10120,10 @@
               }
             },
             {
-              "id": "886f49dd-ea80-43ad-9878-e02a2ca7a8df",
-              "type": "add_dollars",
+              "id": "90121e3c-785c-447b-a533-74056f5c114a",
+              "type": "set_dollars",
               "params": {
+                "operation": "add",
                 "value": 20
               }
             }
