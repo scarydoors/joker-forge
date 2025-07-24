@@ -222,7 +222,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
     id: "level_up_hand",
     label: "Level Up Hand",
     description: "Increase the level of a poker hand",
-    applicableTriggers: ["hand_played", "hand_discarded"],
+    applicableTriggers: [...GENERIC_TRIGGERS],
     params: [
       {
         id: "hand_selection",
