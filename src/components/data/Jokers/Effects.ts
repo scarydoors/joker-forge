@@ -1615,6 +1615,75 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
     category: "Special",
   },
   {
+    id: "juice_up_joker",
+    label: "Juice Up The Joker",
+    description: "Make the joker play a animation",
+    applicableTriggers: [...GENERIC_TRIGGERS],
+    params: [
+      {
+        id: "mode",
+        type: "select",
+        label: "Juice Up Mode",
+        options: [
+          {value: "constant",label:"Constant"},
+          {value: "onetime",label:"One-time"},
+        ],
+        default: "constant"
+      },
+      {
+        id: "scale",
+        type: "number",
+        label: "Scale",
+        min: 0,
+        default: 1,
+      },
+      {
+        id: "rotation",
+        type: "number",
+        label: "Rotation",
+        min: 0,
+        default: 1,
+      },
+    ],
+    category: "Special",
+  },
+  {
+    id: "juice_up_card",
+    label: "Juice Up The Card",
+    description: "Make the Card play a animation",
+    applicableTriggers: [
+      "card_scored",
+      "card_held_in_hand",
+    ],
+    params: [
+      {
+        id: "mode",
+        type: "select",
+        label: "Juice Up Mode",
+        options: [
+          {value: "constant",label:"Constant"},
+          {value: "onetime",label:"One-time"},
+        ],
+        default: "constant"
+      },
+      {
+        id: "scale",
+        type: "number",
+        label: "Scale",
+        min: 0,
+        default: 1,
+      },
+      {
+        id: "rotation",
+        type: "number",
+        label: "Rotation",
+        min: 0,
+        default: 1,
+      },
+    ],
+    category: "Special",
+  },
+  {
     id: "show_message",
     label: "Show Message",
     description: "Display a custom message with specified color",
