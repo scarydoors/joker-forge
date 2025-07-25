@@ -1,10 +1,5 @@
 import type { EffectReturn } from "../effectUtils";
 import type { Effect } from "../../../ruleBuilder/types";
-import {
-  TAROT_CARDS,
-  PLANET_CARDS,
-  SPECTRAL_CARDS,
-} from "../../../data/BalatroUtils";
 
 export const generateCreateConsumableReturn = (
   effect: Effect,
@@ -77,27 +72,7 @@ export const generateCreateConsumableReturn = (
     if (specificCard === "random") {
       consumableKey = `nil`;
     } else {
-      // Validate the specific card exists in the appropriate set
-      let cardExists = false;
-      if (set === "Tarot") {
-        cardExists = TAROT_CARDS.some((card) => card.key === specificCard);
-        consumableKey = cardExists
-          ? `'${specificCard}'`
-          : `'c_fool'`;
-      } else if (set === "Planet") {
-        cardExists = PLANET_CARDS.some((card) => card.key === specificCard);
-        consumableKey = cardExists
-          ? `'${specificCard}'`
-          : `'c_pluto'`;
-      } else if (set === "Spectral") {
-        cardExists = SPECTRAL_CARDS.some((card) => card.key === specificCard);
-        consumableKey = cardExists
-          ? `'${specificCard}'`
-          : `'c_familiar'`;
-      } else {
-        // Custom consumable
-        consumableKey = `'${specificCard}'`;
-      }
+      consumableKey = `'${specificCard}'`;
     }
 
     if (isNegative) {
