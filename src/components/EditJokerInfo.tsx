@@ -39,6 +39,15 @@ interface EditJokerInfoProps {
   onDelete: (jokerId: string) => void;
   customRarities?: CustomRarity[];
   modPrefix: string;
+  showConfirmation: (options: {
+    type?: "default" | "warning" | "danger" | "success";
+    title: string;
+    description: string;
+    confirmText?: string;
+    cancelText?: string;
+    onConfirm: () => void;
+    onCancel?: () => void;
+  }) => void;
 }
 
 // eslint-disable-next-line react-refresh/only-export-components
@@ -59,6 +68,7 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
   onSave,
   onDelete,
   customRarities = [],
+  showConfirmation,
 }) => {
   const [formData, setFormData] = useState<JokerData>(joker);
   const [activeTab, setActiveTab] = useState<"visual" | "description">(
@@ -501,10 +511,17 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
   };
 
   const handleDelete = () => {
-    if (window.confirm("Are you sure you want to delete this joker?")) {
-      onDelete(joker.id);
-      onClose();
-    }
+    showConfirmation({
+      type: "danger",
+      title: "Delete Joker",
+      description: `Are you sure you want to delete "${formData.name}"? This action cannot be undone.`,
+      confirmText: "Delete Forever",
+      cancelText: "Keep It",
+      onConfirm: () => {
+        onDelete(joker.id);
+        onClose();
+      },
+    });
   };
 
   const allVariables = getAllVariables(formData);
@@ -512,7 +529,8 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
   const VariableDisplay = (variable: UserVariable) => {
     if (variable.type === "suit") return variable.initialSuit || "Spades";
     if (variable.type === "rank") return variable.initialRank || "Ace";
-    if (variable.type === "pokerhand") return variable.initialPokerHand || "High Card";
+    if (variable.type === "pokerhand")
+      return variable.initialPokerHand || "High Card";
     return variable.initialValue?.toString() || "0";
   };
 
@@ -1196,10 +1214,11 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
               Cancel
             </Button>
             <Button
-            variant="primary"
-            onClick={handleSave} 
-            onTouchEnd={handleSave}
-            className="flex-1">
+              variant="primary"
+              onClick={handleSave}
+              onTouchEnd={handleSave}
+              className="flex-1"
+            >
               Save Changes
             </Button>
             <Button onClick={handleDelete} variant="danger" className="px-8">
@@ -1213,10 +1232,10 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
             <BalatroJokerCard
               joker={{
                 ...formData,
-              locVars: {
-                vars: VariableValues
-              },
-            }}
+                locVars: {
+                  vars: VariableValues,
+                },
+              }}
               size="lg"
               rarityName={getRarityDisplayName(formData.rarity, customRarities)}
               rarityColor={getRarityBadgeColor(formData.rarity, customRarities)}

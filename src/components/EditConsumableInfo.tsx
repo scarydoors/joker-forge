@@ -31,6 +31,15 @@ interface EditConsumableInfoProps {
   onDelete: (consumableId: string) => void;
   modPrefix: string;
   availableSets: ConsumableSetData[];
+  showConfirmation: (options: {
+    type?: "default" | "warning" | "danger" | "success";
+    title: string;
+    description: string;
+    confirmText?: string;
+    cancelText?: string;
+    onConfirm: () => void;
+    onCancel?: () => void;
+  }) => void;
 }
 
 // eslint-disable-next-line react-refresh/only-export-components
@@ -51,6 +60,7 @@ const EditConsumableInfo: React.FC<EditConsumableInfoProps> = ({
   onSave,
   onDelete,
   availableSets,
+  showConfirmation,
 }) => {
   const [formData, setFormData] = useState<ConsumableData>(consumable);
   const [activeTab, setActiveTab] = useState<"visual" | "description">(
@@ -127,7 +137,9 @@ const EditConsumableInfo: React.FC<EditConsumableInfoProps> = ({
   useEffect(() => {
     const loadCredits = async () => {
       try {
-        const response = await fetch("/images/placeholderconsumables/credit.txt");
+        const response = await fetch(
+          "/images/placeholderconsumables/credit.txt"
+        );
         const text = await response.text();
         console.log("Raw credit file content:", JSON.stringify(text));
 
@@ -473,10 +485,17 @@ const EditConsumableInfo: React.FC<EditConsumableInfoProps> = ({
   };
 
   const handleDelete = () => {
-    if (window.confirm("Are you sure you want to delete this consumable?")) {
-      onDelete(consumable.id);
-      onClose();
-    }
+    showConfirmation({
+      type: "danger",
+      title: "Delete Consumable",
+      description: `Are you sure you want to delete "${formData.name}"? This action cannot be undone.`,
+      confirmText: "Delete Forever",
+      cancelText: "Keep It",
+      onConfirm: () => {
+        onDelete(consumable.id);
+        onClose();
+      },
+    });
   };
 
   const insertTagSmart = (tag: string, autoClose: boolean = true) => {
@@ -1024,11 +1043,12 @@ const EditConsumableInfo: React.FC<EditConsumableInfoProps> = ({
             <Button variant="primary" onClick={handleSave} className="flex-1">
               Save Changes
             </Button>
-            <Button 
-            onClick={handleDelete}
-            onTouchEnd={handleDelete}
-            variant="danger"
-            className="px-8">
+            <Button
+              onClick={handleDelete}
+              onTouchEnd={handleDelete}
+              variant="danger"
+              className="px-8"
+            >
               Delete
             </Button>
           </div>

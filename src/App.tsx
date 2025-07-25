@@ -32,6 +32,7 @@ import {
   importModFromJSON,
 } from "./components/JSONImportExport";
 import Alert from "./components/generic/Alert";
+import ConfirmationPopup from "./components/generic/ConfirmationPopup";
 import Modal from "./components/generic/Modal";
 import Button from "./components/generic/Button";
 import {
@@ -46,6 +47,19 @@ interface AlertState {
   type: "success" | "warning" | "error";
   title: string;
   content: string;
+}
+
+interface ConfirmationState {
+  isVisible: boolean;
+  type: "default" | "warning" | "danger" | "success";
+  title: string;
+  description: string;
+  confirmText: string;
+  cancelText: string;
+  confirmVariant?: "primary" | "secondary" | "danger";
+  icon?: React.ReactNode;
+  onConfirm: () => void;
+  onCancel?: () => void;
 }
 
 interface AutoSaveData {
@@ -141,6 +155,15 @@ function AppContent() {
     title: "",
     content: "",
   });
+  const [confirmation, setConfirmation] = useState<ConfirmationState>({
+    isVisible: false,
+    type: "default",
+    title: "",
+    description: "",
+    confirmText: "Confirm",
+    cancelText: "Cancel",
+    onConfirm: () => {},
+  });
   const [autoSaveStatus, setAutoSaveStatus] = useState<
     "idle" | "saving" | "saved"
   >("idle");
@@ -161,6 +184,54 @@ function AppContent() {
     customRarities: RarityData[];
     consumableSets: ConsumableSetData[];
   } | null>(null);
+
+  // Show confirmation function
+  const showConfirmation = useCallback(
+    (options: {
+      type?: "default" | "warning" | "danger" | "success";
+      title: string;
+      description: string;
+      confirmText?: string;
+      cancelText?: string;
+      confirmVariant?: "primary" | "secondary" | "danger";
+      icon?: React.ReactNode;
+      onConfirm: () => void;
+      onCancel?: () => void;
+    }) => {
+      setConfirmation({
+        isVisible: true,
+        type: options.type || "default",
+        title: options.title,
+        description: options.description,
+        confirmText: options.confirmText || "Confirm",
+        cancelText: options.cancelText || "Cancel",
+        confirmVariant: options.confirmVariant,
+        icon: options.icon,
+        onConfirm: options.onConfirm,
+        onCancel: options.onCancel,
+      });
+    },
+    []
+  );
+
+  // Hide confirmation function
+  const hideConfirmation = useCallback(() => {
+    setConfirmation((prev) => ({ ...prev, isVisible: false }));
+  }, []);
+
+  // Handle confirmation confirm
+  const handleConfirm = () => {
+    confirmation.onConfirm();
+    hideConfirmation();
+  };
+
+  // Handle confirmation cancel
+  const handleCancel = () => {
+    if (confirmation.onCancel) {
+      confirmation.onCancel();
+    }
+    hideConfirmation();
+  };
 
   const saveToLocalStorage = useCallback(
     (
@@ -688,12 +759,14 @@ function AppContent() {
                     setSelectedJokerId={setSelectedJokerId}
                     customRarities={customRarities}
                     modPrefix={modMetadata.prefix || ""}
+                    showConfirmation={showConfirmation}
                   />
                 ) : (
                   <RaritiesPage
                     modName={modMetadata.name}
                     rarities={customRarities}
                     setRarities={setCustomRarities}
+                    showConfirmation={showConfirmation}
                   />
                 )}
               </>
@@ -711,6 +784,7 @@ function AppContent() {
                 modPrefix={modMetadata.prefix || ""}
                 consumableSets={consumableSets}
                 setConsumableSets={setConsumableSets}
+                showConfirmation={showConfirmation}
               />
             }
           />
@@ -885,6 +959,19 @@ function AppContent() {
         title={alert.title}
         content={alert.content}
         onClose={hideAlert}
+      />
+
+      <ConfirmationPopup
+        isVisible={confirmation.isVisible}
+        type={confirmation.type}
+        title={confirmation.title}
+        description={confirmation.description}
+        confirmText={confirmation.confirmText}
+        cancelText={confirmation.cancelText}
+        confirmVariant={confirmation.confirmVariant}
+        icon={confirmation.icon}
+        onConfirm={handleConfirm}
+        onCancel={handleCancel}
       />
     </div>
   );

@@ -34,6 +34,17 @@ interface ConsumablesPageProps {
   modPrefix: string;
   consumableSets: ConsumableSetData[];
   setConsumableSets: React.Dispatch<React.SetStateAction<ConsumableSetData[]>>;
+  showConfirmation: (options: {
+    type?: "default" | "warning" | "danger" | "success";
+    title: string;
+    description: string;
+    confirmText?: string;
+    cancelText?: string;
+    confirmVariant?: "primary" | "secondary" | "danger";
+    icon?: React.ReactNode;
+    onConfirm: () => void;
+    onCancel?: () => void;
+  }) => void;
 }
 
 interface ConsumableSetCardProps {
@@ -673,7 +684,9 @@ const getRandomPlaceholderConsumable = async (): Promise<{
   upscaledPlaceholders = upscaled;
 
   const randomIndex = Math.floor(Math.random() * upscaled.length);
-  const match = placeholders[randomIndex].match(/placeholder-consumable-(\d+)\.png/);
+  const match = placeholders[randomIndex].match(
+    /placeholder-consumable-(\d+)\.png/
+  );
   const imageNumber = match ? parseInt(match[1], 15) : 1;
 
   return {
@@ -709,6 +722,7 @@ const ConsumablesPage: React.FC<ConsumablesPageProps> = ({
   modPrefix,
   consumableSets,
   setConsumableSets,
+  showConfirmation,
 }) => {
   const [activeTab, setActiveTab] = useState<"consumables" | "sets">(
     "consumables"
@@ -976,10 +990,19 @@ const ConsumablesPage: React.FC<ConsumablesPageProps> = ({
     closeSetModal();
   };
 
-  const handleDeleteSet = (setId: string) => {
-    setConsumableSets((prev) => prev.filter((s) => s.id !== setId));
+  const handleDeleteSet = (set: ConsumableSetData) => {
+    showConfirmation({
+      type: "danger",
+      title: "Delete Consumable Set",
+      description: `Are you sure you want to delete the "${set.name}" set? This action cannot be undone and may affect consumables using this set.`,
+      confirmText: "Delete Set",
+      cancelText: "Keep Set",
+      confirmVariant: "danger",
+      onConfirm: () => {
+        setConsumableSets((prev) => prev.filter((s) => s.id !== set.id));
+      },
+    });
   };
-
   const handleDuplicateSet = (set: ConsumableSetData) => {
     const duplicated: ConsumableSetData = {
       ...set,
@@ -1357,6 +1380,7 @@ const ConsumablesPage: React.FC<ConsumablesPageProps> = ({
                     setName={setName}
                     setColor={setColor}
                     availableSetOptions={availableSetOptions}
+                    showConfirmation={showConfirmation}
                   />
                 );
               })}
@@ -1409,7 +1433,7 @@ const ConsumablesPage: React.FC<ConsumablesPageProps> = ({
                 key={set.id}
                 set={set}
                 onEdit={() => handleEditSet(set)}
-                onDelete={() => handleDeleteSet(set.id)}
+                onDelete={() => handleDeleteSet(set)}
                 onDuplicate={() => handleDuplicateSet(set)}
                 onQuickUpdate={(updates) => handleQuickUpdateSet(set, updates)}
               />
@@ -1426,6 +1450,7 @@ const ConsumablesPage: React.FC<ConsumablesPageProps> = ({
             onDelete={handleDeleteConsumable}
             modPrefix={modPrefix}
             availableSets={consumableSets}
+            showConfirmation={showConfirmation}
           />
         )}
 

@@ -23,6 +23,17 @@ interface JokersPageProps {
   setSelectedJokerId: React.Dispatch<React.SetStateAction<string | null>>;
   customRarities?: CustomRarity[];
   modPrefix: string;
+  showConfirmation: (options: {
+    type?: "default" | "warning" | "danger" | "success";
+    title: string;
+    description: string;
+    confirmText?: string;
+    cancelText?: string;
+    confirmVariant?: "primary" | "secondary" | "danger";
+    icon?: React.ReactNode;
+    onConfirm: () => void;
+    onCancel?: () => void;
+  }) => void;
 }
 
 type SortOption = {
@@ -154,6 +165,7 @@ const JokersPage: React.FC<JokersPageProps> = ({
   setSelectedJokerId,
   customRarities = [],
   modPrefix,
+  showConfirmation,
 }) => {
   const [editingJoker, setEditingJoker] = useState<JokerData | null>(null);
   const [showRuleBuilder, setShowRuleBuilder] = useState(false);
@@ -574,6 +586,7 @@ const JokersPage: React.FC<JokersPageProps> = ({
                 onQuickUpdate={(updates) => handleQuickUpdate(joker, updates)}
                 customRarities={customRarities}
                 modPrefix={modPrefix}
+                showConfirmation={showConfirmation}
               />
             ))}
           </div>
@@ -588,6 +601,7 @@ const JokersPage: React.FC<JokersPageProps> = ({
             onDelete={handleDeleteJoker}
             customRarities={customRarities}
             modPrefix={modPrefix}
+            showConfirmation={showConfirmation}
           />
         )}
 

@@ -27,8 +27,18 @@ interface RaritiesPageProps {
   modName: string;
   rarities: RarityData[];
   setRarities: React.Dispatch<React.SetStateAction<RarityData[]>>;
+  showConfirmation: (options: {
+    type?: "default" | "warning" | "danger" | "success";
+    title: string;
+    description: string;
+    confirmText?: string;
+    cancelText?: string;
+    confirmVariant?: "primary" | "secondary" | "danger";
+    icon?: React.ReactNode;
+    onConfirm: () => void;
+    onCancel?: () => void;
+  }) => void;
 }
-
 interface RarityCardProps {
   rarity: RarityData;
   onEdit: () => void;
@@ -186,6 +196,7 @@ const RaritiesPage: React.FC<RaritiesPageProps> = ({
   modName,
   rarities,
   setRarities,
+  showConfirmation,
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [editingRarity, setEditingRarity] = useState<RarityData | null>(null);
@@ -289,8 +300,18 @@ const RaritiesPage: React.FC<RaritiesPageProps> = ({
     closeModal();
   };
 
-  const handleDeleteRarity = (rarityId: string) => {
-    setRarities((prev) => prev.filter((r) => r.id !== rarityId));
+  const handleDeleteRarity = (rarity: RarityData) => {
+    showConfirmation({
+      type: "danger",
+      title: "Delete Custom Rarity",
+      description: `Are you sure you want to delete the "${rarity.name}" rarity? This action cannot be undone and may affect jokers using this rarity.`,
+      confirmText: "Delete Rarity",
+      cancelText: "Keep Rarity",
+      confirmVariant: "danger",
+      onConfirm: () => {
+        setRarities((prev) => prev.filter((r) => r.id !== rarity.id));
+      },
+    });
   };
 
   const handleDuplicateRarity = (rarity: RarityData) => {
@@ -442,7 +463,7 @@ const RaritiesPage: React.FC<RaritiesPageProps> = ({
                 key={rarity.id}
                 rarity={rarity}
                 onEdit={() => handleEditRarity(rarity)}
-                onDelete={() => handleDeleteRarity(rarity.id)}
+                onDelete={() => handleDeleteRarity(rarity)}
                 onDuplicate={() => handleDuplicateRarity(rarity)}
                 onQuickUpdate={(updates) => handleQuickUpdate(rarity, updates)}
               />

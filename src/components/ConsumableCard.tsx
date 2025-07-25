@@ -25,6 +25,17 @@ interface ConsumableCardProps {
   setName: string;
   setColor: string;
   availableSetOptions: { value: string; label: string }[];
+  showConfirmation: (options: {
+    type?: "default" | "warning" | "danger" | "success";
+    title: string;
+    description: string;
+    confirmText?: string;
+    cancelText?: string;
+    confirmVariant?: "primary" | "secondary" | "danger";
+    icon?: React.ReactNode;
+    onConfirm: () => void;
+    onCancel?: () => void;
+  }) => void;
 }
 
 const getConsumableSetColor = (set: string): string => {
@@ -85,12 +96,13 @@ const ConsumableCard: React.FC<ConsumableCardProps> = ({
   consumable,
   onEditInfo,
   onEditRules,
-  onDelete,
   onDuplicate,
   onQuickUpdate,
   setName,
   setColor,
   availableSetOptions,
+  showConfirmation,
+  onDelete,
 }) => {
   const rulesCount = consumable.rules?.length || 0;
 
@@ -322,10 +334,16 @@ const ConsumableCard: React.FC<ConsumableCardProps> = ({
           >
             <button
               onClick={(e) => {
-                if (window.confirm("Are you sure you want to delete this consumable?")) {
-                  e.stopPropagation();
-                  onDelete();
-                }
+                e.stopPropagation();
+                showConfirmation({
+                  type: "danger",
+                  title: "Delete Consumable",
+                  description: `Are you sure you want to delete "${consumable.name}"? This action cannot be undone.`,
+                  confirmText: "Delete Forever",
+                  cancelText: "Keep It",
+                  confirmVariant: "danger",
+                  onConfirm: () => onDelete(),
+                });
               }}
               className="w-full h-full flex items-center cursor-pointer justify-center"
             >

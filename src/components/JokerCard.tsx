@@ -94,10 +94,10 @@ export interface JokerData {
 const slugify = (text: string): string => {
   return (
     text
-    .toLowerCase()
-    .replace(/[\s\W_]+/g, "")
-    .replace(/^[\d]/, "_$&") ||
-    `joker_${Math.random().toString(36).substring(2,8)}`
+      .toLowerCase()
+      .replace(/[\s\W_]+/g, "")
+      .replace(/^[\d]/, "_$&") ||
+    `joker_${Math.random().toString(36).substring(2, 8)}`
   );
 };
 
@@ -111,6 +111,17 @@ interface JokerCardProps {
   onQuickUpdate: (updates: Partial<JokerData>) => void;
   customRarities?: CustomRarity[];
   modPrefix: string;
+  showConfirmation: (options: {
+    type?: "default" | "warning" | "danger" | "success";
+    title: string;
+    description: string;
+    confirmText?: string;
+    cancelText?: string;
+    confirmVariant?: "primary" | "secondary" | "danger";
+    icon?: React.ReactNode;
+    onConfirm: () => void;
+    onCancel?: () => void;
+  }) => void;
 }
 
 const PropertyIcon: React.FC<{
@@ -163,6 +174,7 @@ const JokerCard: React.FC<JokerCardProps> = ({
   onExport,
   onQuickUpdate,
   customRarities = [],
+  showConfirmation,
 }) => {
   const [showRarityMenu, setShowRarityMenu] = useState(false);
   const [editingName, setEditingName] = useState(false);
@@ -473,10 +485,16 @@ const JokerCard: React.FC<JokerCardProps> = ({
           >
             <button
               onClick={(e) => {
-                if (window.confirm("Are you sure you want to delete this joker?")) {
-                  e.stopPropagation();
-                  onDelete();
-                }
+                e.stopPropagation();
+                showConfirmation({
+                  type: "danger",
+                  title: "Delete Joker",
+                  description: `Are you sure you want to delete "${joker.name}"? This action cannot be undone.`,
+                  confirmText: "Delete Forever",
+                  cancelText: "Keep It",
+                  confirmVariant: "danger",
+                  onConfirm: () => onDelete(),
+                });
               }}
               className="w-full h-full flex items-center cursor-pointer justify-center"
             >
