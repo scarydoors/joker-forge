@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import ReactDOM from "react-dom";
 import { ChevronDownIcon } from "@heroicons/react/24/outline";
+import { button } from "framer-motion/client";
 
 interface DropdownOption {
   value: string;
@@ -65,16 +66,27 @@ const InputDropdown: React.FC<InputDropdownProps> = ({
     };
   }, []);
 
-  useEffect(() => {
-    if (isOpen && buttonRef.current) {
-      const rect = buttonRef.current.getBoundingClientRect();
-      setDropdownPosition({
-        top: rect.bottom + 4,
-        left: rect.left,
-        width: rect.width,
-      });
+useEffect(() => {
+  if (isOpen && buttonRef.current && dropdownRef.current) {
+    const buttonRect = buttonRef.current.getBoundingClientRect();
+    const dropdownRect = dropdownRef.current.getBoundingClientRect();
+    const viewportHeight = window.innerHeight;
+
+    const spaceBelow = viewportHeight - buttonRect.bottom;
+    const spaceAbove = buttonRect.top;
+
+    let topPosition = buttonRect.bottom + 4;
+
+    if (spaceBelow < dropdownRect.height && spaceAbove > dropdownRect.height) {
+      topPosition = buttonRect.top - dropdownRect.height - 4;
     }
-  }, [isOpen]);
+    setDropdownPosition({
+      top: topPosition,
+      left: buttonRect.left,
+      width: buttonRect.width,
+    });
+  } 
+}, [isOpen]);
 
   const renderIcon = () => {
     if (icon) {
