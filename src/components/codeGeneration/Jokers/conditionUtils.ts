@@ -44,6 +44,7 @@ import { generateCardIndexConditionCode } from "./conditions/CardIndexCondition"
 import { generateProbabilityIdentifierConditionCode } from "./conditions/ProbabilityIdentifierCondition";
 import { generateProbabilityPartCompareConditionCode } from "./conditions/ProbabilityPartCompareCondition";
 import { generateHandLevelConditionCode } from "./conditions/HandLevelCondition";
+import { generateCumulativeChipsConditionCode } from "./conditions/CumulativeChipsCondition";
 
 export const generateConditionChain = (
   rule: Rule,
@@ -238,6 +239,9 @@ const generateSingleConditionCode = (
 
     case "poker_hand_been_played":
       return generatePokerHandBeenPlayedConditionCode();
+    
+    case "cumulative_chips":
+      return generateCumulativeChipsConditionCode([singleConditionRule]);
 
     case "triggered_boss_blind":
       return generateTriggeredBossBlindConditionCode();

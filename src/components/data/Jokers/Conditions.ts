@@ -784,6 +784,47 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
     params: [],
     category: "Hand",
   },
+    {
+    id: "cumulative_chips",
+    label: "Cumulative Chips",
+    description:
+      "Check the sum of chips in hand",
+    applicableTriggers: ["hand_played", "card_scored", "after_hand_played"],
+    params: [
+      {
+        id: "hand",
+        type: "select",
+        label: "Hand Selection",
+        options: [
+          {value: 'played', label: 'Played Hand'},
+          {value: 'held', label: 'Held in Hand'},
+        ],
+      },
+      {
+        id: "check",
+        type: "select",
+        label: "Check",
+        options: [
+          {value: 'base', label: 'Base Chips'},
+          {value: 'total', label: 'Total Chips'},
+        ],
+      },
+      {
+        id: "operator",
+        type: "select",
+        label: "Operator",
+        options: [...COMPARISON_OPERATORS],
+      },
+      {
+        id: "value",
+        type: "number",
+        label: "Amount",
+        default: 0,
+      },
+
+    ],
+    category: "Hand",
+  },
   {
     id: "generic_compare",
     label: "Generic Compare",

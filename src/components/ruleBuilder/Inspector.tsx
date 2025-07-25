@@ -37,6 +37,7 @@ import {
   PlusIcon,
   ExclamationTriangleIcon,
   ArrowsRightLeftIcon,
+  MinusCircleIcon,
 } from "@heroicons/react/24/outline";
 import { ChartPieIcon, PercentBadgeIcon } from "@heroicons/react/16/solid";
 import {
@@ -1062,7 +1063,7 @@ const Inspector: React.FC<InspectorProps> = ({
               selectedCondition.negate ? "Remove negation" : "Negate condition"
             }
           >
-            <XMarkIcon className="h-4 w-4" />
+            <MinusCircleIcon className="h-4 w-4" />
           </button>
 
           <div className="flex items-center gap-3 mb-3">

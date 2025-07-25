@@ -86,11 +86,11 @@ The plan here is to implement enough triggers, conditions, and effects, so as th
 - [x] **Enhancement Count** - Check how many cards with enhancements are in hand played
 - [x] **Seal Count** - Check how many cards with seals are in hand played
 - [x] **Check Specific Poker Hand Level** - Check a specific poker hands level
+- [x] **Culmative Chip/Rank Check** - Check for if cards rank/chips add up to a certain number
 
 #### Not Implemented Yet
 
 - [ ] **Consumable Count** - Check number of consumables owned
-- [ ] **Culmative Chip/Rank Check** - Check for if cards rank/chips add up to a certain number
 
 ---
 
