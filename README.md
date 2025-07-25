@@ -164,7 +164,7 @@ The plan here is to implement enough triggers, conditions, and effects, so as th
 - [x] **Atlas Generation** - Creates sprite atlases from uploaded images
 - [x] **Mod Packaging** - Complete mod folder structure with JSON metadata
 - [x] **Mod Metadata Editing** - Edit parameters like description, version, etc.
-- [x] **Sticker Compatibility** - Perishable, Rental, etc.
+- [x] **Sticker Compatibility** - Perishable, Rental, etc. 
 
 #### Not Implemented Yet
 
