@@ -69,6 +69,7 @@ import { generateBeatCurrentBlindReturn } from "./effects/BeatCurrentBlindEffect
 import { generateFixProbabilityReturn } from "./effects/FixProbabilityEffect";
 import { generateModProbabilityReturn } from "./effects/ModProbabilityEffect";
 import { generateForceGameOverReturn } from "./effects/ForceGameOverEffect";
+import { generateJuiceUpReturn } from "./effects/JuiceUpEffect";
 
 interface ExtendedEffect extends Effect {
   _isInRandomGroup?: boolean;
@@ -535,6 +536,10 @@ const generateSingleEffect = (
       return generateModProbabilityReturn(effect, sameTypeCount)
     case "force_game_over":
       return generateForceGameOverReturn(effect)
+    case "juice_up_joker":
+      return generateJuiceUpReturn(effect, sameTypeCount, "joker")
+    case "juice_up_card":
+      return generateJuiceUpReturn(effect, sameTypeCount, "card")
     default:
       return {
         statement: "",
