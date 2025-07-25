@@ -1,7 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import ReactDOM from "react-dom";
 import { ChevronDownIcon } from "@heroicons/react/24/outline";
-import { button } from "framer-motion/client";
 
 interface DropdownOption {
   value: string;
