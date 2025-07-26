@@ -125,6 +125,8 @@ export const DataRegistry = {
   getState: () => ({ ...registryState }),
 };
 
+export const getModPrefix = () => {return registryState.modPrefix}
+
 // =============================================================================
 // RARITIES SECTION
 // =============================================================================
