@@ -1,4 +1,4 @@
-import { RARITY_VALUES } from "../../../data/BalatroUtils";
+import { getAllRarities, getModPrefix} from "../../../data/BalatroUtils";
 import type { Rule } from "../../../ruleBuilder/types";
 import { generateGameVariableCode } from "../gameVariableUtils";
 
@@ -38,7 +38,9 @@ export const generateJokerCountConditionCode = (
     return `#G.jokers.cards ${comparison}`;
   }
 
-  const rarityValue = RARITY_VALUES().indexOf(rarity) + 1
+  const rarityData = getAllRarities().find((r) => r.key === rarity);
+  const modPrefix = getModPrefix();
+  const rarityValue = rarityData?.isCustom ? `"${modPrefix}_${rarity}"`: rarityData?.value;
 
   return `(function()
     local count = 0
