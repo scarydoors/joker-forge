@@ -231,6 +231,8 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
         options: [
           { value: "current", label: "Current Hand (Played/Discarded)" },
           { value: "specific", label: "Specific Hand" },
+          { value: "most", label: "Most Played" },
+          { value: "least", label: "Least Played" },
           { value: "random", label: "Random Hand" },
         ],
         default: "current",
