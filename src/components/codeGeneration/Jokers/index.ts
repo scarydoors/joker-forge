@@ -287,7 +287,8 @@ const generateSingleJokerCode = (
   const locVarsCode = generateLocVarsFunction(
     joker,
     passiveEffects,
-    calculateResult?.configVariables || []
+    calculateResult?.configVariables || [],
+    modPrefix
   );
   if (locVarsCode) {
     jokerCode += `,\n\n    ${locVarsCode}`;
@@ -441,6 +442,7 @@ const generateCalculateFunction = (
   joker: JokerData,
   modprefix: string
 ): CalculateFunctionResult => {
+  const jokerKey = joker.jokerKey;
   const rulesByTrigger: Record<string, Rule[]> = {};
   rules.forEach((rule) => {
     if (!rulesByTrigger[rule.trigger]) {
@@ -546,6 +548,7 @@ const generateCalculateFunction = (
           convertRandomGroupsForCodegen(randomRetriggerEffects),
           triggerType,
           modprefix,
+          jokerKey,
           rule.id,
           globalEffectCounts
         );
@@ -656,6 +659,7 @@ const generateCalculateFunction = (
             convertRandomGroupsForCodegen(randomNonRetriggerGroups),
             triggerType,
             modprefix,
+            jokerKey,
             rule.id,
             globalEffectCounts
           );
@@ -723,6 +727,7 @@ const generateCalculateFunction = (
               convertRandomGroupsForCodegen(randomNonRetriggerGroups),
               triggerType,
               modprefix,
+              jokerKey,
               rule.id,
               globalEffectCounts
             );
@@ -769,6 +774,7 @@ const generateCalculateFunction = (
                 [],
                 triggerType,
                 modprefix,
+                jokerKey,
                 rule.id,
                 globalEffectCounts
               );
@@ -872,6 +878,7 @@ const generateCalculateFunction = (
             convertRandomGroupsForCodegen(allGroups),
             triggerType,
             modprefix,
+            jokerKey,
             rule.id,
             globalEffectCounts
           );
@@ -952,6 +959,7 @@ const generateCalculateFunction = (
               convertRandomGroupsForCodegen(allGroups),
               triggerType,
               modprefix,
+              jokerKey,
               rule.id,
               globalEffectCounts
             );
@@ -1008,6 +1016,7 @@ const generateCalculateFunction = (
                 [],
                 triggerType,
                 modprefix,
+                jokerKey,
                 rule.id,
                 globalEffectCounts
               );
@@ -1077,8 +1086,9 @@ const generateCalculateFunction = (
             regularFixProbablityEffects,
             convertRandomGroupsForCodegen(randomFixProbablityEffects),
             triggerType,
-            rule.id,
             modprefix,
+            jokerKey,
+            rule.id,
             globalEffectCounts
           );
 
@@ -1148,8 +1158,9 @@ const generateCalculateFunction = (
             regularModProbablityEffects,
             convertRandomGroupsForCodegen(randomModProbablityEffects),
             triggerType,
-            rule.id,
             modprefix,
+            jokerKey,
+            rule.id,
             globalEffectCounts
           );
 
@@ -1208,6 +1219,7 @@ const generateCalculateFunction = (
           convertRandomGroupsForCodegen(rule.randomGroups || []),
           triggerType,
           modprefix,
+          jokerKey,
           rule.id,
           globalEffectCounts
         );
@@ -1248,6 +1260,7 @@ const generateCalculateFunction = (
             convertRandomGroupsForCodegen(rule.randomGroups || []),
             triggerType,
             modprefix,
+            jokerKey,
             rule.id,
             globalEffectCounts
           );
@@ -1279,6 +1292,7 @@ const generateCalculateFunction = (
               [],
               triggerType,
               modprefix,
+              jokerKey,
               rule.id,
               globalEffectCounts
             );
@@ -1322,7 +1336,8 @@ const generateCalculateFunction = (
 const generateLocVarsFunction = (
   joker: JokerData,
   passiveEffects: PassiveEffectResult[],
-  collectedConfigVariables: ConfigExtraVariable[]
+  collectedConfigVariables: ConfigExtraVariable[],
+  modPrefix?: string
 ): string | null => {
   const descriptionHasVariables = joker.description.includes("#");
   if (!descriptionHasVariables) {
@@ -1593,10 +1608,6 @@ const generateLocVarsFunction = (
 
     if (denominators.length === 1 && numerators.length === 1) {
       const oddsVar = "card.ability.extra.odds";
-      const probabilityIdentifier = `group_0_${randomGroups[0].id.substring(
-        0,
-        8
-      )}`;
 
       const nonProbabilityVars = finalVars.filter(
         (varName) =>
@@ -1607,7 +1618,7 @@ const generateLocVarsFunction = (
 
       locVarsReturn = `local new_numerator, new_denominator = SMODS.get_probability_vars(card, ${
         numerators[0]
-      }, ${oddsVar}, '${probabilityIdentifier}') --Please-work
+      }, ${oddsVar}, 'j_${modPrefix}_${joker.jokerKey}') --Please-work
         return {vars = {${nonProbabilityVars.join(", ")}${
         nonProbabilityVars.length > 0 ? `, ` : ``
       }new_numerator, new_denominator}}`;

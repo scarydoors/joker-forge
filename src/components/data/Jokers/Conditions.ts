@@ -1520,6 +1520,16 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
     applicableTriggers: ["change_probability"],
     params: [
       {
+        id: "mode",
+        type: "select",
+        label: "Mode",
+        options: [
+          {value:"vanilla",label:"Vanilla"},
+          {value:"custom",label:"Custom"},
+        ],
+        default: "vanilla",
+      },
+      {
         id: "property_type",
         type: "select",
         label: "Property Type",
@@ -1529,6 +1539,10 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
           {value:"enhancements",label:"Enhancements"},
         ],
         default: "jokers",
+        showWhen: {
+          parameter: "mode",
+          values: ["vanilla"]
+        }
       },
       {
         id: "specific_card",
@@ -1547,6 +1561,19 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
           }
         },
         default: "8ball",
+        showWhen: {
+          parameter: "mode",
+          values: ["vanilla"]
+        }
+      },
+      {
+        id: "card_key",
+        type: "text",
+        label: "Card Key (joker: j_modprefix_key, consumable: c_modprefix_key)",
+        showWhen: {
+          parameter: "mode",
+          values: ["custom"]
+        }
       },
     ],
     category: "Probability",

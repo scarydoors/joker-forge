@@ -129,6 +129,7 @@ export function generateEffectReturnStatement(
   randomGroups: RandomGroup[] = [],
   triggerType: string = "hand_played",
   modprefix: string,
+  jokerKey?: string,
   ruleId?: string,
   globalEffectCounts?: Map<string, number>
 ): ReturnStatementResult {
@@ -386,7 +387,7 @@ export function generateEffectReturnStatement(
                   `if pseudorandom('${probabilityIdentifier}') < ${group.chance_numerator} / ${oddsVar} then
                         ${groupContent}
                     end`:
-                  `if SMODS.pseudorandom_probability(card, '${probabilityIdentifier}', ${group.chance_numerator}, ${oddsVar}, '${probabilityIdentifier}') then
+                  `if SMODS.pseudorandom_probability(card, '${probabilityIdentifier}', ${group.chance_numerator}, ${oddsVar}, 'j_${modprefix}_${jokerKey}') then
                       ${groupContent}
                   end`;
       randomGroupStatements.push(groupStatement);
