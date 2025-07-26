@@ -14,25 +14,25 @@ export const generateCheckBlindRequirementsConditionCode = (
   let comparison = "";
   switch (operator) {
     case "equals":
-      comparison = `== ${decimal}`;
+      comparison = `== to_big(${decimal})`;
       break;
     case "not_equals":
-      comparison = `~= ${decimal}`;
+      comparison = `~= to_big(${decimal})`;
       break;
     case "greater_than":
-      comparison = `> ${decimal}`;
+      comparison = `> to_big(${decimal})`;
       break;
     case "less_than":
-      comparison = `< ${decimal}`;
+      comparison = `< to_big(${decimal})`;
       break;
     case "greater_equals":
-      comparison = `>= ${decimal}`;
+      comparison = `>= to_big(${decimal})`;
       break;
     case "less_equals":
-      comparison = `<= ${decimal}`;
+      comparison = `<= to_big(${decimal})`;
       break;
     default:
-      comparison = `>= ${decimal}`;
+      comparison = `>= to_big(${decimal})`;
   }
 
   return `G.GAME.chips / G.GAME.blind.chips ${comparison}`;
