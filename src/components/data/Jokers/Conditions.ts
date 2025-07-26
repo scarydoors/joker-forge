@@ -469,7 +469,6 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
       "card_held_in_hand",
       "card_held_in_hand_end_of_round",
       "card_destroyed",
-      "card_discarded",
     ],
     params: [
       {
@@ -514,7 +513,6 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
       "card_held_in_hand",
       "card_held_in_hand_end_of_round",
       "card_destroyed",
-      "card_discarded",
     ],
     params: [
       {

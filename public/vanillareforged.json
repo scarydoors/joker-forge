@@ -895,22 +895,29 @@
               ]
             }
           ],
-          "effects": [
-            {
-              "id": "4e16693e-c5ac-422b-a0d6-5c5c2cb121bf",
-              "type": "create_tarot_card",
-              "params": {
-                "tarot_card": "random",
-                "has_random_chance": "true",
-                "chance_numerator": 1,
-                "chance_denominator": 4
-              }
-            }
-          ],
+          "effects": [],
           "position": {
             "x": 1027,
             "y": 474
-          }
+          },
+          "randomGroups": [
+            {
+              "id": "c81c6d69-7cd7-47b5-b6ae-1fdd9d9c631b",
+              "chance_numerator": 1,
+              "chance_denominator": 4,
+              "effects": [
+                {
+                  "id": "a97f52cb-64f6-4f50-9b8d-026541b40056",
+                  "type": "create_consumable",
+                  "params": {
+                    "set": "Tarot",
+                    "specific_card": "random",
+                    "is_negative": "none"
+                  }
+                }
+              ]
+            }
+          ]
         }
       ]
     },
@@ -1210,21 +1217,25 @@
           "id": "f3681baa-566e-4e86-a7f0-cd8735787967",
           "trigger": "round_end",
           "conditionGroups": [],
-          "effects": [
-            {
-              "id": "75cda14a-c157-4089-b2fb-e1b071b35137",
-              "type": "destroy_self",
-              "params": {
-                "has_random_chance": "true",
-                "chance_numerator": 1,
-                "chance_denominator": 6
-              }
-            }
-          ],
+          "effects": [],
           "position": {
             "x": 967,
             "y": 337
-          }
+          },
+          "randomGroups": [
+            {
+              "id": "f283af5f-74ac-4ab4-a90d-b4d4ff129955",
+              "chance_numerator": 1,
+              "chance_denominator": 6,
+              "effects": [
+                {
+                  "id": "2e4b9ee4-c268-4c0e-88f7-6a3e25e8d6b9",
+                  "type": "destroy_self",
+                  "params": {}
+                }
+              ]
+            }
+          ]
         }
       ]
     },
@@ -1720,9 +1731,11 @@
           "effects": [
             {
               "id": "ee475499-40a6-4047-9bd3-0d6d746995e4",
-              "type": "create_tarot_card",
+              "type": "create_consumable",
               "params": {
-                "tarot_card": "random"
+                "set": "Tarot",
+                "specific_card": "random",
+                "is_negative": "none"
               }
             }
           ],
@@ -2646,9 +2659,11 @@
           "effects": [
             {
               "id": "de30d90f-c1ab-415a-8dd7-a94cfd5c7af3",
-              "type": "create_tarot_card",
+              "type": "create_consumable",
               "params": {
-                "tarot_card": "random"
+                "set": "Tarot",
+                "specific_card": "random",
+                "is_negative": "none"
               }
             }
           ],
@@ -2874,22 +2889,29 @@
           "id": "45c2a3ea-6054-4744-b4d4-08a247a2a679",
           "trigger": "booster_opened",
           "conditionGroups": [],
-          "effects": [
-            {
-              "id": "32d911ed-a1f8-4cce-adc3-dada3cc4be11",
-              "type": "create_tarot_card",
-              "params": {
-                "tarot_card": "random",
-                "has_random_chance": "true",
-                "chance_numerator": 1,
-                "chance_denominator": 2
-              }
-            }
-          ],
+          "effects": [],
           "position": {
             "x": 1027,
             "y": 474
-          }
+          },
+          "randomGroups": [
+            {
+              "id": "48e412eb-b63d-460e-a945-ee14ab31553b",
+              "chance_numerator": 1,
+              "chance_denominator": 2,
+              "effects": [
+                {
+                  "id": "8e558309-028d-4b4c-84cb-c3c5ee606b05",
+                  "type": "create_consumable",
+                  "params": {
+                    "set": "Tarot",
+                    "specific_card": "random",
+                    "is_negative": "none"
+                  }
+                }
+              ]
+            }
+          ]
         }
       ]
     },
@@ -3925,10 +3947,7 @@
                   "id": "60305ed2-ced3-4272-8126-386553f59a35",
                   "type": "apply_x_mult",
                   "params": {
-                    "value": 1.5,
-                    "has_random_chance": "true",
-                    "chance_numerator": 1,
-                    "chance_denominator": 2
+                    "value": 1.5
                   }
                 }
               ]
@@ -4627,9 +4646,11 @@
           "effects": [
             {
               "id": "415e581c-576a-4398-8a99-179d5fae2b56",
-              "type": "create_tarot_card",
+              "type": "create_consumable",
               "params": {
-                "tarot_card": "random"
+                "set": "Tarot",
+                "specific_card": "random",
+                "is_negative": "none"
               }
             }
           ],
@@ -7401,22 +7422,27 @@
           "id": "2f963fe2-2b46-4246-83a6-7e2a12f568ad",
           "trigger": "hand_played",
           "conditionGroups": [],
-          "effects": [
-            {
-              "id": "f50c99a3-cc78-4108-ab85-38be5c3951ca",
-              "type": "level_up_hand",
-              "params": {
-                "value": 1,
-                "has_random_chance": "true",
-                "chance_numerator": 1,
-                "chance_denominator": 4
-              }
-            }
-          ],
+          "effects": [],
           "position": {
-            "x": 1760,
-            "y": 273
-          }
+            "x": 500,
+            "y": 100
+          },
+          "randomGroups": [
+            {
+              "id": "0b3ae72f-93ee-4154-9101-458a36a9bc88",
+              "chance_numerator": 1,
+              "chance_denominator": 4,
+              "effects": [
+                {
+                  "id": "f50c99a3-cc78-4108-ab85-38be5c3951ca",
+                  "type": "level_up_hand",
+                  "params": {
+                    "value": 1
+                  }
+                }
+              ]
+            }
+          ]
         }
       ],
       "placeholderCreditIndex": 3
@@ -7637,21 +7663,25 @@
           "id": "d068b924-b0e8-4b0c-8108-44d542a97f82",
           "trigger": "round_end",
           "conditionGroups": [],
-          "effects": [
-            {
-              "id": "3047c20c-a386-4e0a-966b-99f3f67d5a1b",
-              "type": "destroy_self",
-              "params": {
-                "has_random_chance": "true",
-                "chance_numerator": 1,
-                "chance_denominator": 1000
-              }
-            }
-          ],
+          "effects": [],
           "position": {
             "x": 1827,
             "y": 152
-          }
+          },
+          "randomGroups": [
+            {
+              "id": "9acfd6c7-b3b4-485a-bcde-74a55ce72355",
+              "chance_numerator": 1,
+              "chance_denominator": 1000,
+              "effects": [
+                {
+                  "id": "2d2b9dbf-579f-472e-ab01-37e81b301b08",
+                  "type": "destroy_self",
+                  "params": {}
+                }
+              ]
+            }
+          ]
         }
       ],
       "placeholderCreditIndex": 4

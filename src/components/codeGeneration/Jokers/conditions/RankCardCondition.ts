@@ -96,27 +96,9 @@ end)()`;
   }
 
   const cardsToCheck =
-    scope === "scoring" ? "context.scoring_hand" : "context.full_hand";
+    scope === "scoring" && !(triggerType === "card_discarded") ? "context.scoring_hand" : "context.full_hand";
 
   switch (quantifier) {
-    case "at_least_one":
-      return `(function()
-    local rankFound = false
-    for i, c in ipairs(${cardsToCheck}) do
-        if ${getRanksCheckLogic(
-          ranks,
-          rankGroupType,
-          useVariable,
-          variableCode
-        )} then
-            rankFound = true
-            break
-        end
-    end
-    
-    return rankFound
-end)()`;
-
     case "all":
       return `(function()
     local allMatchRank = true
@@ -133,6 +115,24 @@ end)()`;
     end
     
     return allMatchRank and #${cardsToCheck} > 0
+end)()`;
+
+    case "none":
+      return `(function()
+    local rankFound = true
+    for i, c in ipairs(${cardsToCheck}) do
+        if ${getRanksCheckLogic(
+          ranks,
+          rankGroupType,
+          useVariable,
+          variableCode
+        )} then
+            rankFound = false
+            break
+        end
+    end
+    
+    return rankFound
 end)()`;
 
     case "exactly":

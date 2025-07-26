@@ -279,7 +279,7 @@ const generateSingleJokerCode = (
         return ${
           joker.rarity === 4 && joker.appears_in_shop === true
             ? "true"
-            : "false"
+            : "args.source ~= 'sho'"
         }
     end`;
   }
