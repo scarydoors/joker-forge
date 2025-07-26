@@ -61,6 +61,40 @@ export const generateLevelUpHandReturn = (
                     end
                 end
                 local target_hand = #available_hands > 0 and pseudorandom_element(available_hands, pseudoseed('level_up_hand')) or "High Card"`;
+  } else if (handSelection === "most") {
+    handDeterminationCode = `local temp_played = 0
+                            local temp_order = math.huge
+                            local target_hand
+                            for hand, value in pairs(G.GAME.hands) do
+                              if value.played > temp_played and value.visible then
+                                temp_played = value.played
+                                temp_order = value.order
+                                target_hand = hand
+                              else if value.played == temp_played and value.visible then
+                                if value.order < temp_order then
+                                  temp_order = value.order
+                                  target_hand = hand
+                                end
+                              end 
+                              end
+                            end`;
+  } else if (handSelection === "least") {
+    handDeterminationCode = `local temp_played = math.huge
+                            local temp_order = math.huge
+                            local target_hand
+                            for hand, value in pairs(G.GAME.hands) do
+                              if value.played < temp_played and value.visible then
+                                temp_played = value.played
+                                temp_order = value.order
+                                target_hand = hand
+                              else if value.played == temp_played and value.visible then
+                                if value.order < temp_order then
+                                  temp_order = value.order
+                                  target_hand = hand
+                                end
+                              end 
+                              end
+                            end`;
   } else {
     if (triggerType === "hand_discarded") {
       return {
