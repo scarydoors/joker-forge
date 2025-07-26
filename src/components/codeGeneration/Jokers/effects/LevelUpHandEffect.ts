@@ -68,6 +68,7 @@ export const generateLevelUpHandReturn = (
                             for hand, value in pairs(G.GAME.hands) do
                               if value.played > temp_played and value.visible then
                                 temp_played = value.played
+                                temp_order = value.order
                                 target_hand = hand
                               else if value.played == temp_played and value.visible then
                                 if value.order < temp_order then
@@ -84,6 +85,7 @@ export const generateLevelUpHandReturn = (
                             for hand, value in pairs(G.GAME.hands) do
                               if value.played < temp_played and value.visible then
                                 temp_played = value.played
+                                temp_order = value.order
                                 target_hand = hand
                               else if value.played == temp_played and value.visible then
                                 if value.order < temp_order then
