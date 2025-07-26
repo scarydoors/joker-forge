@@ -84,7 +84,7 @@ function Card:is_face(from_boss)
         const sourceIds = params.sourceRanks.map((rank) => getRankId(rank));
         hookCode += `
         local source_ids = {${sourceIds.join(", ")}}
-        for *, source*id in pairs(source_ids) do
+        for _, source_id in pairs(source_ids) do
             if card_id == source_id then return true end
         end`;
       }
@@ -123,7 +123,7 @@ function Card:get_id()
         const sourceIds = params.sourceRanks.map((rank) => getRankId(rank));
         hookCode += `
         local source_ids = {${sourceIds.join(", ")}}
-        for *, source*id in pairs(source_ids) do
+        for _, source_id in pairs(source_ids) do
             if original_id == source_id then return ${targetId} end
         end`;
       }
