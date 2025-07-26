@@ -96,7 +96,7 @@ end)()`;
   }
 
   const cardsToCheck =
-    scope === "scoring" ? "context.scoring_hand" : "context.full_hand";
+    scope === "scoring" && !(triggerType === "card_discarded") ? "context.scoring_hand" : "context.full_hand";
 
   switch (quantifier) {
     case "at_least_one":
