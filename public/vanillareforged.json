@@ -895,22 +895,29 @@
               ]
             }
           ],
-          "effects": [
-            {
-              "id": "4e16693e-c5ac-422b-a0d6-5c5c2cb121bf",
-              "type": "create_tarot_card",
-              "params": {
-                "tarot_card": "random",
-                "has_random_chance": "true",
-                "chance_numerator": 1,
-                "chance_denominator": 4
-              }
-            }
-          ],
+          "effects": [],
           "position": {
             "x": 1027,
             "y": 474
-          }
+          },
+          "randomGroups": [
+            {
+              "id": "c81c6d69-7cd7-47b5-b6ae-1fdd9d9c631b",
+              "chance_numerator": 1,
+              "chance_denominator": 4,
+              "effects": [
+                {
+                  "id": "a97f52cb-64f6-4f50-9b8d-026541b40056",
+                  "type": "create_consumable",
+                  "params": {
+                    "set": "Tarot",
+                    "specific_card": "random",
+                    "is_negative": "none"
+                  }
+                }
+              ]
+            }
+          ]
         }
       ]
     },
@@ -1720,9 +1727,11 @@
           "effects": [
             {
               "id": "ee475499-40a6-4047-9bd3-0d6d746995e4",
-              "type": "create_tarot_card",
+              "type": "create_consumable",
               "params": {
-                "tarot_card": "random"
+                "set": "Tarot",
+                "specific_card": "random",
+                "is_negative": "none"
               }
             }
           ],
@@ -2646,9 +2655,11 @@
           "effects": [
             {
               "id": "de30d90f-c1ab-415a-8dd7-a94cfd5c7af3",
-              "type": "create_tarot_card",
+              "type": "create_consumable",
               "params": {
-                "tarot_card": "random"
+                "set": "Tarot",
+                "specific_card": "random",
+                "is_negative": "none"
               }
             }
           ],
@@ -2874,22 +2885,29 @@
           "id": "45c2a3ea-6054-4744-b4d4-08a247a2a679",
           "trigger": "booster_opened",
           "conditionGroups": [],
-          "effects": [
-            {
-              "id": "32d911ed-a1f8-4cce-adc3-dada3cc4be11",
-              "type": "create_tarot_card",
-              "params": {
-                "tarot_card": "random",
-                "has_random_chance": "true",
-                "chance_numerator": 1,
-                "chance_denominator": 2
-              }
-            }
-          ],
+          "effects": [],
           "position": {
             "x": 1027,
             "y": 474
-          }
+          },
+          "randomGroups": [
+            {
+              "id": "48e412eb-b63d-460e-a945-ee14ab31553b",
+              "chance_numerator": 1,
+              "chance_denominator": 2,
+              "effects": [
+                {
+                  "id": "8e558309-028d-4b4c-84cb-c3c5ee606b05",
+                  "type": "create_consumable",
+                  "params": {
+                    "set": "Tarot",
+                    "specific_card": "random",
+                    "is_negative": "none"
+                  }
+                }
+              ]
+            }
+          ]
         }
       ]
     },
@@ -4627,9 +4645,11 @@
           "effects": [
             {
               "id": "415e581c-576a-4398-8a99-179d5fae2b56",
-              "type": "create_tarot_card",
+              "type": "create_consumable",
               "params": {
-                "tarot_card": "random"
+                "set": "Tarot",
+                "specific_card": "random",
+                "is_negative": "none"
               }
             }
           ],
