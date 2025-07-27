@@ -807,7 +807,7 @@ export const GAME_VARIABLE_CATEGORIES: GameVariableCategory[] = [
             description: "Current money divided by 5 (rounded down)",
             category: "money_thresholds",
             subcategory: "money_intervals",
-            code: "math.floor(G.GAME.dollars / 5)",
+            code: "math.floor(lenient_bignum(G.GAME.dollars / 5))",
           },
           {
             id: "money_per_10",
@@ -815,7 +815,7 @@ export const GAME_VARIABLE_CATEGORIES: GameVariableCategory[] = [
             description: "Current money divided by 10 (rounded down)",
             category: "money_thresholds",
             subcategory: "money_intervals",
-            code: "math.floor(G.GAME.dollars / 10)",
+            code: "math.floor(lenient_bignum(G.GAME.dollars / 10))",
           },
           {
             id: "money_per_15",
@@ -823,7 +823,7 @@ export const GAME_VARIABLE_CATEGORIES: GameVariableCategory[] = [
             description: "Current money divided by 15 (rounded down)",
             category: "money_thresholds",
             subcategory: "money_intervals",
-            code: "math.floor(G.GAME.dollars / 15)",
+            code: "math.floor(lenient_bignum(G.GAME.dollars / 15))",
           },
           {
             id: "money_per_20",
@@ -831,7 +831,7 @@ export const GAME_VARIABLE_CATEGORIES: GameVariableCategory[] = [
             description: "Current money divided by 20 (rounded down)",
             category: "money_thresholds",
             subcategory: "money_intervals",
-            code: "math.floor(G.GAME.dollars / 20)",
+            code: "math.floor(lenient_bignum(G.GAME.dollars / 20))",
           },
           {
             id: "money_per_25",
@@ -839,7 +839,7 @@ export const GAME_VARIABLE_CATEGORIES: GameVariableCategory[] = [
             description: "Current money divided by 25 (rounded down)",
             category: "money_thresholds",
             subcategory: "money_intervals",
-            code: "math.floor(G.GAME.dollars / 25)",
+            code: "math.floor(lenient_bignum(G.GAME.dollars / 25))",
           },
           {
             id: "money_per_30",
@@ -847,7 +847,7 @@ export const GAME_VARIABLE_CATEGORIES: GameVariableCategory[] = [
             description: "Current money divided by 30 (rounded down)",
             category: "money_thresholds",
             subcategory: "money_intervals",
-            code: "math.floor(G.GAME.dollars / 30)",
+            code: "math.floor(lenient_bignum(G.GAME.dollars / 30))",
           },
           {
             id: "money_per_40",
@@ -855,7 +855,7 @@ export const GAME_VARIABLE_CATEGORIES: GameVariableCategory[] = [
             description: "Current money divided by 40 (rounded down)",
             category: "money_thresholds",
             subcategory: "money_intervals",
-            code: "math.floor(G.GAME.dollars / 40)",
+            code: "math.floor(lenient_bignum(G.GAME.dollars / 40))",
           },
           {
             id: "money_per_50",
@@ -863,7 +863,7 @@ export const GAME_VARIABLE_CATEGORIES: GameVariableCategory[] = [
             description: "Current money divided by 50 (rounded down)",
             category: "money_thresholds",
             subcategory: "money_intervals",
-            code: "math.floor(G.GAME.dollars / 50)",
+            code: "math.floor(lenient_bignum(G.GAME.dollars / 50))",
           },
         ],
       },
