@@ -49,16 +49,29 @@ export const generatePassiveDisableBossBlind = (
   const customMessage = effect.customMessage;
 
   const addToDeck = `
+  if G.GAME.blind and G.GAME.blind.boss and not G.GAME.blind.disabled then
+      G.GAME.blind:disable()
+      play_sound('timpani')
+      SMODS.calculate_effect({ message = ${
+        customMessage ? `"${customMessage}"` : `localize('ph_boss_disabled')`
+      } }, card)
+  end
+  `; 
+  const calculateFunction = `
+  calculate = function(self, card, context)
     if G.GAME.blind and G.GAME.blind.boss and not G.GAME.blind.disabled then
         G.GAME.blind:disable()
         play_sound('timpani')
         SMODS.calculate_effect({ message = ${
           customMessage ? `"${customMessage}"` : `localize('ph_boss_disabled')`
         } }, card)
-    end`;
+    end
+  end
+  `;
 
   return {
     addToDeck,
+    calculateFunction,
     configVariables: [],
     locVars: [],
   };

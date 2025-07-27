@@ -1182,7 +1182,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
     id: "disable_boss_blind",
     label: "Disable Boss Blind",
     description: "Disable the current boss blind, removing its effect",
-    applicableTriggers: [...GENERIC_TRIGGERS],
+    applicableTriggers: [...GENERIC_TRIGGERS, "passive"],
     params: [],
     category: "Game Rules",
   },
