@@ -39,13 +39,13 @@ The plan here is to implement enough triggers, conditions, and effects, so as th
 - [x] **Card Destroyed** - When a card is destroyed
 - [x] **When shop is Entered** - When the shop is entered
 - [x] **When this Joker is Bought** - When specifically this joker is bought (different from add to deck)
+- [x] **When a Playing Card is Added** - When a playing card is added to your deck (Hologram)
 
 #### Not Implemented Yet
 
 - [ ] **Ante Start** - At the start of an ante
 - [ ] **Joker Added/Removed** - When a Joker is added/removed from your list (Joker Stencil)
 - [ ] **When a Card is Modified** - When any card is modified (enhanced, etc) (difficult)
-- [ ] **When a Playing Card is Added** - When a playing card is added to your deck (Hologram)
 ---
 
 ### Conditions
@@ -141,12 +141,12 @@ The plan here is to implement enough triggers, conditions, and effects, so as th
 - [x] **Allowing Debt** - Credit Card logic
 - [X] **Alter Blind Requirement** - I.E. 2X blind requirement, 0.5x blind requirement
 - [X] **Beat Current Blind** - Completes the current blind
+- [x] **Add/Subtract/Set Joker Slots** - Would be cool i guess lol
+- [x] **Add/Subtract/Set Consumable Slots** - also self-explanatory
+- [x] **Destroy Card in Hand** - Destroys a random or set (by index, rank, suit) card in hand
 
 #### Not Implemented Yet
 
-- [ ] **Destroy Card in Hand** - Destroys a random or set (by index, rank, suit) card in hand
-- [ ] **Add/Subtract/Set Joker Slots** - Would be cool i guess lol
-- [ ] **Add/Subtract/Set Consumable Slots** - also self-explanatory
 - [ ] **Apply Edition to Joker** - Apply an edition to a random/set Joker owned
 
 
