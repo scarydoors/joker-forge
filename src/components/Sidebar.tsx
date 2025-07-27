@@ -14,6 +14,7 @@ import {
   CakeIcon,
 } from "@heroicons/react/24/solid";
 import { JokerData } from "./JokerCard";
+import { ChatBubbleBottomCenterIcon, ChatBubbleLeftIcon } from "@heroicons/react/24/outline";
 
 interface SidebarProps {
   selectedSection?: string;
@@ -56,6 +57,11 @@ const Sidebar: React.FC<SidebarProps> = ({
       return;
     }
 
+    if (section === "discord") {
+      window.open("https://discord.gg/eRBByq9AZX", "_blank");
+      return;
+    }
+
     onSectionChange?.(section);
   };
 
@@ -90,6 +96,7 @@ const Sidebar: React.FC<SidebarProps> = ({
     { id: "docs", label: "Docs", icon: DocumentTextIcon },
     { id: "vanilla", label: "Vanilla Reforged", icon: FolderIcon },
     { id: "github", label: "GitHub Repository", icon: LinkIcon },
+    { id: "discord", label: "Discord Server", icon: ChatBubbleLeftIcon },
     { id: "acknowledgements", label: "Acknowledgements", icon: HeartIcon },
   ];
 
