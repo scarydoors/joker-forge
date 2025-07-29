@@ -112,7 +112,7 @@ export const DataRegistry = {
 
   getConsumables: (): Array<{ value: string; label: string; set: string }> => {
     const custom = registryState.consumables.map((consumable) => ({
-      value: `${registryState.modPrefix}_${
+      value: `c_${registryState.modPrefix}_${
         consumable.consumableKey ||
         consumable.name.toLowerCase().replace(/\s+/g, "_")
       }`,
