@@ -10,22 +10,22 @@ export const generatePlayerMoneyConditionCode = (
   let comparison = "";
   switch (operator) {
     case "equals":
-      comparison = `== ${value}`;
+      comparison = `== to_big(${value})`;
       break;
     case "greater_than":
-      comparison = `> ${value}`;
+      comparison = `> to_big(${value})`;
       break;
     case "less_than":
-      comparison = `< ${value}`;
+      comparison = `< to_big(${value})`;
       break;
     case "greater_equals":
-      comparison = `>= ${value}`;
+      comparison = `>= to_big(${value})`;
       break;
     case "less_equals":
-      comparison = `<= ${value}`;
+      comparison = `<= to_big(${value})`;
       break;
     default:
-      comparison = `>= ${value}`;
+      comparison = `>= to_big(${value})`;
   }
 
   return `G.GAME.dollars ${comparison}`;
