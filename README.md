@@ -10,7 +10,7 @@ It does this with a Trigger > Condition > Effect system. Most vanilla jokers fol
 
 ## Implementation Status Checklist
 
-The plan here is to implement enough triggers, conditions, and effects, so as that each vanilla joker in Balatro can be replicated within Joker Forge. 
+The plan here is to implement enough triggers, conditions, and effects, so as that each vanilla joker in Balatro can be replicated within Joker Forge.
 
 ### Triggers
 
