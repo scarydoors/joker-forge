@@ -13,13 +13,15 @@ export const generateCopyJokerReturn = (
   const edition = (effect.params?.edition as string) || "none";
   const customMessage = effect.customMessage;
   const ignoreSlotsParam = (effect.params?.ignore_slots as string) || "respect"
-  const ignoreSlots = ignoreSlotsParam === "ignore"
+  const sticker = (effect.params?.sticker as string) || "none"
 
   const scoringTriggers = ["hand_played", "card_scored"];
   const isScoring = scoringTriggers.includes(triggerType);
 
   const isNegative = edition === "e_negative";
   const hasEdition = edition !== "none";
+  const ignoreSlots = ignoreSlotsParam === "ignore"
+  const hasSticker = sticker !== "none";
 
   let jokerSelectionCode = "";
   let spaceCheckCode = "";
@@ -87,6 +89,9 @@ export const generateCopyJokerReturn = (
     ? `
                         copied_joker:set_edition("${edition}", true)`
     : "";
+  const stickerCode = hasSticker
+    ? `copied_joker:add_sticker('${sticker}', true)`
+    : "";
   const bufferCode = isNegative
     ? ""
     : `
@@ -102,6 +107,7 @@ export const generateCopyJokerReturn = (
                     G.E_MANAGER:add_event(Event({
                         func = function()
                             local copied_joker = copy_card(target_joker, nil, nil, nil, target_joker.edition and target_joker.edition.negative)${editionCode}
+                            ${stickerCode}
                             copied_joker:add_to_deck()
                             G.jokers:emplace(copied_joker)${bufferReset}
                             return true

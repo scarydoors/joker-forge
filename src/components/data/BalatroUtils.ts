@@ -502,6 +502,17 @@ export const EDITION_KEYS = EDITIONS.map((edition) => edition.key);
 export const EDITION_VALUES = EDITIONS.map((edition) => edition.value);
 export const EDITION_LABELS = EDITIONS.map((edition) => edition.label);
 
+// Editions
+export const STICKERS = [
+  { key: "eternal", value: "eternal", label: "Eternal" },
+  { key: "rental", value: "rental", label: "Rental" },
+  { key: "perishable", value: "perishable", label: "Perishable" },
+] as const;
+
+export const STICKER_KEYS = STICKERS.map((sticker) => sticker.key);
+export const STICKER_VALUES = STICKERS.map((sticker) => sticker.value);
+export const STICKER_LABELS = STICKERS.map((sticker) => sticker.label);
+
 // Seals
 export const SEALS = [
   { key: "Gold", value: "Gold", label: "Gold Seal ($3 when played)" },
