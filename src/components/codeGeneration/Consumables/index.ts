@@ -236,6 +236,35 @@ const generateSingleConsumableCode = (
   };
 };
 
+export const exportSingleConsumable = (consumable: ConsumableData): void => {
+  try {
+    const consumableWithKey = consumable.consumableKey
+      ? consumable
+      : { ...consumable, consumableKey: slugify(consumable.name) };
+
+    const result = generateSingleConsumableCode(
+      consumableWithKey,
+      "Consumable",
+      0,
+      "modprefix"
+    );
+    let jokerCode = result.code;
+
+    const blob = new Blob([jokerCode], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${consumableWithKey.consumableKey}.lua`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  } catch (error) {
+    console.error("Failed to export consumable:", error);
+    throw error;
+  }
+};
+
 const generateUseFunction = (rules: Rule[], modPrefix: string): string => {
   if (rules.length === 0) {
     return `use = function(self, card, area, copier)
