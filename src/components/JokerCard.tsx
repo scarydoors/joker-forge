@@ -83,6 +83,10 @@ export interface JokerData {
   force_eternal?: boolean;
   force_perishable?: boolean;
   force_rental?: boolean;
+  force_foil?: boolean;
+  force_holographic?: boolean;
+  force_polychrome?: boolean;
+  force_negative?: boolean;
   appears_in_shop?: boolean;
   rules?: Rule[];
   userVariables?: UserVariable[];

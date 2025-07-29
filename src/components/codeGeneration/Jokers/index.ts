@@ -400,6 +400,24 @@ const generateSetAbilityFunction = (joker: JokerData): string | null => {
     forcedStickers.push("card:add_sticker('rental', true)");
   }
 
+  const forcedEditions: string[] = [];
+
+  if (joker.force_foil) {
+    forcedEditions.push('card:set_edition("e_foil", true)');
+  }
+
+  if (joker.force_holographic) {
+    forcedEditions.push('card:set_edition("e_holo", true)');
+  }
+
+  if (joker.force_polychrome) {
+    forcedEditions.push('card:set_edition("e_polychrome", true)');
+  }
+
+  if (joker.force_negative) {
+    forcedEditions.push('card:set_edition("e_negative", true)');
+  }
+
   const variableInits: string[] = [];
 
   suitVariables.forEach((variable) => {
@@ -426,11 +444,11 @@ const generateSetAbilityFunction = (joker: JokerData): string | null => {
     );
   });
 
-  if (forcedStickers.length === 0 && variableInits.length === 0) {
+  if (forcedStickers.length === 0 && variableInits.length === 0 && forcedEditions.length === 0) {
     return null;
   }
 
-  const allCode = [...forcedStickers, ...variableInits];
+  const allCode = [...forcedStickers, ...variableInits, ...forcedEditions];
 
   return `set_ability = function(self, card, initial)
         ${allCode.join("\n        ")}
