@@ -12,6 +12,8 @@ export const generateCopyJokerReturn = (
   const specificIndex = effect.params?.specific_index as number;
   const edition = (effect.params?.edition as string) || "none";
   const customMessage = effect.customMessage;
+  const ignoreSlotsParam = (effect.params?.ignore_slots as string) || "respect"
+  const ignoreSlots = ignoreSlotsParam === "ignore"
 
   const scoringTriggers = ["hand_played", "card_scored"];
   const isScoring = scoringTriggers.includes(triggerType);
@@ -74,7 +76,7 @@ export const generateCopyJokerReturn = (
   }
 
   // Generate space check logic
-  if (isNegative) {
+  if (isNegative || ignoreSlots) {
     spaceCheckCode = `if target_joker then`;
   } else {
     spaceCheckCode = `if target_joker and #G.jokers.cards + G.GAME.joker_buffer < G.jokers.config.card_limit then`;
