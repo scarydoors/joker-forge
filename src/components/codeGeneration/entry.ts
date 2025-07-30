@@ -1,10 +1,14 @@
 import JSZip from "jszip";
-import { JokerData } from "../JokerCard";
-import { ConsumableData } from "../data/BalatroUtils";
-import { RarityData } from "../pages/RaritiesPage";
+import {
+  JokerData,
+  BoosterData,
+  RarityData,
+  ConsumableData,
+} from "../data/BalatroUtils";
 import { addAtlasToZip } from "./ImageProcessor";
 import { generateJokersCode, generateCustomRaritiesCode } from "./Jokers/index";
 import { generateConsumablesCode } from "./Consumables/index";
+import { generateBoostersCode } from "./boosters";
 import { ConsumableSetData } from "../data/BalatroUtils";
 import { modToJson } from "../JSONImportExport";
 
@@ -31,12 +35,14 @@ export const exportModCode = async (
   consumables: ConsumableData[],
   metadata: ModMetadata,
   customRarities: RarityData[] = [],
-  consumableSets: ConsumableSetData[] = []
+  consumableSets: ConsumableSetData[] = [],
+  boosters: BoosterData[] = []
 ): Promise<boolean> => {
   try {
     console.log("Generating mod code...");
     console.log("Jokers:", jokers);
     console.log("Consumables:", consumables);
+    console.log("Boosters:", boosters);
     console.log("Metadata:", metadata);
     console.log("Rarities:", customRarities);
     console.log("Consumable Sets:", consumableSets);
@@ -45,7 +51,8 @@ export const exportModCode = async (
     const mainLuaCode = generateMainLuaCode(
       jokers,
       consumables,
-      customRarities
+      customRarities,
+      boosters
     );
     zip.file(metadata.main_file, mainLuaCode);
 
@@ -54,7 +61,8 @@ export const exportModCode = async (
       jokers,
       customRarities,
       consumables,
-      consumableSets
+      consumableSets,
+      boosters
     );
     zip.file(ret.filename, ret.jsonString);
 
@@ -91,9 +99,14 @@ export const exportModCode = async (
       });
     }
 
+    if (boosters.length > 0) {
+      const { boostersCode } = generateBoostersCode(boosters, metadata.prefix);
+      zip.file("boosters.lua", boostersCode);
+    }
+
     zip.file(`${metadata.id}.json`, generateModJson(metadata));
 
-    await addAtlasToZip(zip, jokers, consumables);
+    await addAtlasToZip(zip, jokers, consumables, boosters);
 
     const content = await zip.generateAsync({ type: "blob" });
     const url = URL.createObjectURL(content);
@@ -115,7 +128,8 @@ export const exportModCode = async (
 const generateMainLuaCode = (
   jokers: JokerData[],
   consumables: ConsumableData[],
-  customRarities: RarityData[]
+  customRarities: RarityData[],
+  boosters: BoosterData[]
 ): string => {
   let output = "";
 
@@ -135,6 +149,18 @@ const generateMainLuaCode = (
     output += `SMODS.Atlas({
     key = "CustomConsumables", 
     path = "CustomConsumables.png", 
+    px = 71,
+    py = 95, 
+    atlas_table = "ASSET_ATLAS"
+}):register()
+
+`;
+  }
+
+  if (boosters.length > 0) {
+    output += `SMODS.Atlas({
+    key = "CustomBoosters", 
+    path = "CustomBoosters.png", 
     px = 71,
     py = 95, 
     atlas_table = "ASSET_ATLAS"
@@ -188,6 +214,16 @@ end
 end
 
 load_rarities_file()
+`;
+  }
+
+  if (boosters.length > 0) {
+    output += `local function load_boosters_file()
+    local mod_path = SMODS.current_mod.path
+    assert(SMODS.load_file("boosters.lua"))()
+end
+
+load_boosters_file()
 `;
   }
 

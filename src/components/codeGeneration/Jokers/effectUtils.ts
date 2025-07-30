@@ -1,5 +1,5 @@
 import type { Effect } from "../../ruleBuilder/types";
-import type { JokerData } from "../../JokerCard";
+import type { JokerData } from "../../data/BalatroUtils";
 import { coordinateVariableConflicts } from "./variableUtils";
 import { generateAddMultReturn } from "./effects/AddMultEffect";
 import { generateApplyXMultReturn } from "./effects/ApplyXMultEffect";
@@ -346,10 +346,10 @@ export function generateEffectReturnStatement(
       );
       const hasFixProbablityEffects = processedEffects.some(
         (effect) => effect.effectType === "fix_probability"
-      )
+      );
       const hasModProbablityEffects = processedEffects.some(
         (effect) => effect.effectType === "mod_probability"
-      )
+      );
 
       if (retriggerEffects.length > 0) {
         const retriggerStatements = retriggerEffects
@@ -381,17 +381,16 @@ export function generateEffectReturnStatement(
       if (effectCalls.length > 0) {
         groupContent += effectCalls.join("\n                        ");
       }
-      
-      
-      const groupStatement = hasFixProbablityEffects || hasModProbablityEffects ? // prevents stack overflow
-                  `if pseudorandom('${probabilityIdentifier}') < ${group.chance_numerator} / ${oddsVar} then
+
+      const groupStatement =
+        hasFixProbablityEffects || hasModProbablityEffects // prevents stack overflow
+          ? `if pseudorandom('${probabilityIdentifier}') < ${group.chance_numerator} / ${oddsVar} then
                         ${groupContent}
-                    end`:
-                  `if SMODS.pseudorandom_probability(card, '${probabilityIdentifier}', ${group.chance_numerator}, ${oddsVar}, 'j_${modprefix}_${jokerKey}') then
+                    end`
+          : `if SMODS.pseudorandom_probability(card, '${probabilityIdentifier}', ${group.chance_numerator}, ${oddsVar}, 'j_${modprefix}_${jokerKey}') then
                       ${groupContent}
                   end`;
       randomGroupStatements.push(groupStatement);
-
     });
 
     if (mainReturnStatement && randomGroupStatements.length > 0) {
@@ -530,17 +529,17 @@ const generateSingleEffect = (
     case "modify_blind_requirement":
       return generateModifyBlindRequirementReturn(effect, sameTypeCount);
     case "beat_current_blind":
-      return generateBeatCurrentBlindReturn(effect)
+      return generateBeatCurrentBlindReturn(effect);
     case "fix_probability":
-      return generateFixProbabilityReturn(effect, sameTypeCount)
+      return generateFixProbabilityReturn(effect, sameTypeCount);
     case "mod_probability":
-      return generateModProbabilityReturn(effect, sameTypeCount)
+      return generateModProbabilityReturn(effect, sameTypeCount);
     case "force_game_over":
-      return generateForceGameOverReturn(effect)
+      return generateForceGameOverReturn(effect);
     case "juice_up_joker":
-      return generateJuiceUpReturn(effect, sameTypeCount, "joker")
+      return generateJuiceUpReturn(effect, sameTypeCount, "joker");
     case "juice_up_card":
-      return generateJuiceUpReturn(effect, sameTypeCount, "card")
+      return generateJuiceUpReturn(effect, sameTypeCount, "card");
     default:
       return {
         statement: "",

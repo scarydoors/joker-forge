@@ -1,8 +1,11 @@
 import { ModMetadata } from "./pages/ModMetadataPage";
-import { JokerData } from "./JokerCard";
-import { ConsumableData } from "./data/BalatroUtils";
-import { RarityData } from "./pages/RaritiesPage";
-import { ConsumableSetData } from "./data/BalatroUtils";
+import {
+  JokerData,
+  ConsumableData,
+  ConsumableSetData,
+  BoosterData,
+} from "./data/BalatroUtils";
+import { RarityData } from "./data/BalatroUtils";
 
 export interface ExportedMod {
   metadata: ModMetadata;
@@ -10,6 +13,7 @@ export interface ExportedMod {
   consumables: ConsumableData[];
   customRarities: RarityData[];
   consumableSets: ConsumableSetData[];
+  boosters: BoosterData[];
   version: string;
   exportedAt: string;
 }
@@ -19,14 +23,16 @@ export const modToJson = (
   jokers: JokerData[],
   customRarities: RarityData[] = [],
   consumables: ConsumableData[] = [],
-  consumableSets: ConsumableSetData[] = []
-): {filename: string, jsonString: string} => {
+  consumableSets: ConsumableSetData[] = [],
+  boosters: BoosterData[] = []
+): { filename: string; jsonString: string } => {
   const exportData: ExportedMod = {
     metadata,
     jokers,
     consumables,
     customRarities,
     consumableSets,
+    boosters,
     version: "1.0.0",
     exportedAt: new Date().toISOString(),
   };
@@ -36,27 +42,27 @@ export const modToJson = (
     .toISOString()
     .slice(0, 10)}.jokerforge`;
 
-  return {filename, jsonString}
-}
+  return { filename, jsonString };
+};
 
 export const exportModAsJSON = (
   metadata: ModMetadata,
   jokers: JokerData[],
   customRarities: RarityData[] = [],
   consumables: ConsumableData[] = [],
-  consumableSets: ConsumableSetData[] = []
+  consumableSets: ConsumableSetData[] = [],
+  boosters: BoosterData[] = []
 ): void => {
-
   const ret = modToJson(
     metadata,
     jokers,
     customRarities,
     consumables,
-    consumableSets
-  )
+    consumableSets,
+    boosters
+  );
   const blob = new Blob([ret.jsonString], { type: "application/json" });
   const url = URL.createObjectURL(blob);
-
 
   const a = document.createElement("a");
   a.href = url;
@@ -73,6 +79,7 @@ export const importModFromJSON = (): Promise<{
   consumables: ConsumableData[];
   customRarities: RarityData[];
   consumableSets: ConsumableSetData[];
+  boosters: BoosterData[];
 } | null> => {
   return new Promise((resolve, reject) => {
     const input = document.createElement("input");
@@ -114,12 +121,17 @@ export const importModFromJSON = (): Promise<{
             throw new Error("Invalid consumable sets data");
           }
 
+          if (importData.boosters && !Array.isArray(importData.boosters)) {
+            throw new Error("Invalid boosters data");
+          }
+
           resolve({
             metadata: importData.metadata,
             jokers: importData.jokers,
             consumables: importData.consumables || [],
             customRarities: importData.customRarities || [],
             consumableSets: importData.consumableSets || [],
+            boosters: importData.boosters || [],
           });
         } catch (error) {
           console.error("Error parsing mod file:", error);

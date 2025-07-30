@@ -14,14 +14,7 @@ import Button from "../generic/Button";
 import InputField from "../generic/InputField";
 import Modal from "../generic/Modal";
 import { validateJokerName } from "../generic/validationUtils";
-
-export interface RarityData {
-  id: string;
-  key: string;
-  name: string;
-  badge_colour: string;
-  default_weight: number;
-}
+import { RarityData } from "../data/BalatroUtils";
 
 interface RaritiesPageProps {
   modName: string;

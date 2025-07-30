@@ -24,7 +24,7 @@ import type {
   RandomGroup,
   ConditionTypeDefinition,
 } from "./types";
-import { JokerData } from "../JokerCard";
+import { JokerData } from "../data/BalatroUtils";
 import RuleCard from "./RuleCard";
 import FloatingDock from "./FloatingDock";
 import BlockPalette from "./BlockPalette";
@@ -70,11 +70,11 @@ interface PanelState {
   isVisible: boolean;
   position: { x: number; y: number };
   size: { width: number; height: number };
-  positionSet: boolean; 
+  positionSet: boolean;
 }
 
 const RuleBuilder: React.FC<RuleBuilderProps> = ({
-  isOpen, 
+  isOpen,
   onClose,
   onSave,
   existingRules = [],
@@ -304,10 +304,11 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
         [panelId]: {
           ...panel,
           isVisible: !panel.isVisible,
-          position: panel.isVisible || panel.positionSet
-            ? panel.position
-            : findPosition(prev, panelId),
-            positionSet: panel.positionSet || !panel.isVisible,
+          position:
+            panel.isVisible || panel.positionSet
+              ? panel.position
+              : findPosition(prev, panelId),
+          positionSet: panel.positionSet || !panel.isVisible,
         },
       };
       return newState;
@@ -402,14 +403,20 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
       if (!panels.inspector.isVisible) {
         togglePanel("inspector");
       }
-      setInspectorIsOpen(false)
+      setInspectorIsOpen(false);
     } else if (isFirstSelection) {
       if (!panels.inspector.isVisible) {
         togglePanel("inspector");
       }
       setIsFirstSelection(false);
     }
-  }, [selectedItem, inspectorIsOpen, isFirstSelection, panels.inspector.isVisible, togglePanel]);
+  }, [
+    selectedItem,
+    inspectorIsOpen,
+    isFirstSelection,
+    panels.inspector.isVisible,
+    togglePanel,
+  ]);
 
   const updatePanelPosition = (
     panelId: string,
@@ -641,42 +648,42 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
     );
   };
 
-      const duplicateRule  = (ruleId: string) => {
-        const newRuleId = crypto.randomUUID();
-      setRules((prevRules) => {
-        const ruleToDuplicate = prevRules.find((r) => r.id === ruleId);
-        if (!ruleToDuplicate) {
-          return prevRules;
-        }
+  const duplicateRule = (ruleId: string) => {
+    const newRuleId = crypto.randomUUID();
+    setRules((prevRules) => {
+      const ruleToDuplicate = prevRules.find((r) => r.id === ruleId);
+      if (!ruleToDuplicate) {
+        return prevRules;
+      }
 
-        const newRule = {
-          ...ruleToDuplicate,
-          id: newRuleId,
-          position: {
-            x: (ruleToDuplicate.position?.x || 0) + 30,
-            y: (ruleToDuplicate.position?.y || 0) + 30,
-          },
-          conditionGroups: ruleToDuplicate.conditionGroups.map((group) => ({
-            ...group,
-            id: crypto.randomUUID(),
-            conditions: group.conditions.map((condition) => ({
-              ...condition,
-              id: crypto.randomUUID(),
-            })),
-          })),
-          effects: ruleToDuplicate.effects.map((effect) => ({
-            ...effect,
+      const newRule = {
+        ...ruleToDuplicate,
+        id: newRuleId,
+        position: {
+          x: (ruleToDuplicate.position?.x || 0) + 30,
+          y: (ruleToDuplicate.position?.y || 0) + 30,
+        },
+        conditionGroups: ruleToDuplicate.conditionGroups.map((group) => ({
+          ...group,
+          id: crypto.randomUUID(),
+          conditions: group.conditions.map((condition) => ({
+            ...condition,
             id: crypto.randomUUID(),
           })),
-          randomGroups: ruleToDuplicate.randomGroups.map((group) => ({
-            ...group,
-            id: crypto.randomUUID(),
-          })),
-        };
-        setSelectedItem({ type: "trigger", ruleId: newRuleId });
-        return [...prevRules, newRule];
-      });
-    };
+        })),
+        effects: ruleToDuplicate.effects.map((effect) => ({
+          ...effect,
+          id: crypto.randomUUID(),
+        })),
+        randomGroups: ruleToDuplicate.randomGroups.map((group) => ({
+          ...group,
+          id: crypto.randomUUID(),
+        })),
+      };
+      setSelectedItem({ type: "trigger", ruleId: newRuleId });
+      return [...prevRules, newRule];
+    });
+  };
 
   const addTrigger = (triggerId: string) => {
     const centerPos = getCenterPosition();
@@ -1432,7 +1439,11 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
             collisionDetection={closestCenter}
             onDragStart={handleDragStart}
             onDragEnd={handleDragEnd}
-            modifiers={activeId && activeId.startsWith('panel-') ? [] : [restrictToVerticalAxis]}
+            modifiers={
+              activeId && activeId.startsWith("panel-")
+                ? []
+                : [restrictToVerticalAxis]
+            }
           >
             <TransformWrapper
               ref={transformRef}

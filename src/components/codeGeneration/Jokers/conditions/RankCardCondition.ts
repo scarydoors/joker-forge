@@ -1,8 +1,7 @@
 import type { Rule } from "../../../ruleBuilder/types";
-import type { JokerData } from "../../../JokerCard";
 import { generateGameVariableCode } from "../gameVariableUtils";
 import { parseRankVariable } from "../variableUtils";
-import { getRankId } from "../../../data/BalatroUtils";
+import { getRankId, JokerData } from "../../../data/BalatroUtils";
 
 export const generateRankCardConditionCode = (
   rules: Rule[],
@@ -96,7 +95,9 @@ end)()`;
   }
 
   const cardsToCheck =
-    scope === "scoring" && !(triggerType === "card_discarded") ? "context.scoring_hand" : "context.full_hand";
+    scope === "scoring" && !(triggerType === "card_discarded")
+      ? "context.scoring_hand"
+      : "context.full_hand";
 
   switch (quantifier) {
     case "all":

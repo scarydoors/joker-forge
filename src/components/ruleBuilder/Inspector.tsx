@@ -9,7 +9,7 @@ import type {
   EffectParameter,
   ShowWhenCondition,
 } from "./types";
-import { JokerData } from "../JokerCard";
+import { JokerData } from "../data/BalatroUtils";
 import {
   addSuitVariablesToOptions,
   addRankVariablesToOptions,

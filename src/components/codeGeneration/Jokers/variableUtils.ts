@@ -1,5 +1,5 @@
 import type { Rule, Effect } from "../../ruleBuilder/types";
-import type { JokerData, UserVariable } from "../../JokerCard";
+import type { JokerData, UserVariable } from "../../data/BalatroUtils";
 import { parseGameVariable } from "./gameVariableUtils";
 import { getGameVariableById } from "../../data/Jokers/GameVars";
 import {

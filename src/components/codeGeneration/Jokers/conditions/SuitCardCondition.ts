@@ -1,5 +1,5 @@
 import type { Rule } from "../../../ruleBuilder/types";
-import type { JokerData } from "../../../JokerCard";
+import type { JokerData } from "../../../data/BalatroUtils";
 import { generateGameVariableCode } from "../gameVariableUtils";
 import { parseSuitVariable } from "../variableUtils";
 
@@ -86,7 +86,9 @@ end)()`;
   }
 
   const cardsToCheck =
-    scope === "scoring" && !(triggerType === "card_discarded") ? "context.scoring_hand" : "context.full_hand";
+    scope === "scoring" && !(triggerType === "card_discarded")
+      ? "context.scoring_hand"
+      : "context.full_hand";
 
   switch (quantifier) {
     case "at_least_one":

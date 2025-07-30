@@ -31,7 +31,7 @@ import {
   EyeSlashIcon,
   XMarkIcon,
 } from "@heroicons/react/16/solid";
-import { JokerData } from "../JokerCard";
+import { JokerData } from "../data/BalatroUtils";
 import { ConsumableData } from "../data/BalatroUtils";
 
 interface RuleCardProps {

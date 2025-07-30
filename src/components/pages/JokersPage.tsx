@@ -6,14 +6,13 @@ import {
   MagnifyingGlassIcon,
   ArrowsUpDownIcon,
 } from "@heroicons/react/24/outline";
-import JokerCard from "../JokerCard";
-import EditJokerInfo from "../EditJokerInfo";
+import JokerCard from "./jokers/JokerCard";
+import EditJokerInfo from "./jokers/EditJokerInfo";
 import RuleBuilder from "../ruleBuilder/RuleBuilder";
 import Button from "../generic/Button";
-import { JokerData } from "../JokerCard";
 import { exportSingleJoker } from "../codeGeneration/Jokers/index";
 import type { Rule } from "../ruleBuilder/types";
-import { type CustomRarity } from "../data/BalatroUtils";
+import { RarityData, JokerData } from "../data/BalatroUtils";
 
 interface JokersPageProps {
   modName: string;
@@ -21,7 +20,7 @@ interface JokersPageProps {
   setJokers: React.Dispatch<React.SetStateAction<JokerData[]>>;
   selectedJokerId: string | null;
   setSelectedJokerId: React.Dispatch<React.SetStateAction<string | null>>;
-  customRarities?: CustomRarity[];
+  customRarities?: RarityData[];
   modPrefix: string;
   showConfirmation: (options: {
     type?: "default" | "warning" | "danger" | "success";

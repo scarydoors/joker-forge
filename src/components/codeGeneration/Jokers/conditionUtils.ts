@@ -1,5 +1,5 @@
 import type { Rule, Condition, ConditionGroup } from "../../ruleBuilder/types";
-import type { JokerData } from "../../JokerCard";
+import type { JokerData } from "../../data/BalatroUtils";
 import { generatePokerHandConditionCode } from "./conditions/PokerHandCondition";
 import {
   generateSuitCardConditionCode,
@@ -161,13 +161,13 @@ const generateSingleConditionCode = (
 
     case "discarded_card_count":
       return generateDiscardedCardCountConditionCode([singleConditionRule]);
-    
+
     case "enhancement_count":
-      return generateEnhancementCountConditionCode([singleConditionRule])
+      return generateEnhancementCountConditionCode([singleConditionRule]);
 
     case "card_enhancement":
       return generateCardEnhancementConditionCode([singleConditionRule]);
-    
+
     case "seal_count":
       return generateSealCountConditionCode([singleConditionRule]);
 
@@ -215,7 +215,7 @@ const generateSingleConditionCode = (
 
     case "card_edition":
       return generateCardEditionConditionCode([singleConditionRule]);
-    
+
     case "edition_count":
       return generateEditionCountConditionCode([singleConditionRule]);
 
@@ -239,7 +239,7 @@ const generateSingleConditionCode = (
 
     case "poker_hand_been_played":
       return generatePokerHandBeenPlayedConditionCode();
-    
+
     case "cumulative_chips":
       return generateCumulativeChipsConditionCode([singleConditionRule]);
 
@@ -248,10 +248,10 @@ const generateSingleConditionCode = (
 
     case "lucky_card_triggered":
       return generateLuckyCardTriggeredConditionCode();
-    
+
     case "probability_identifier":
       return generateProbabilityIdentifierConditionCode([singleConditionRule]);
-    
+
     case "probability_part_compare":
       return generateProbabilityPartCompareConditionCode([singleConditionRule]);
 

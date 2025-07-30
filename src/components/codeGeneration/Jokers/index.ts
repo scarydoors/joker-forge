@@ -1,4 +1,4 @@
-import { JokerData } from "../../JokerCard";
+import { JokerData } from "../../data/BalatroUtils";
 import { generateTriggerContext } from "./triggerUtils";
 import { generateConditionChain } from "./conditionUtils";
 import {
@@ -25,8 +25,8 @@ import {
   getSuitByValue,
   getRankByValue,
 } from "../../data/BalatroUtils";
-import { slugify } from "../../EditJokerInfo";
-import { RarityData } from "../../pages/RaritiesPage";
+import { slugify } from "../../data/BalatroUtils";
+import { RarityData } from "../../data/BalatroUtils";
 interface CalculateFunctionResult {
   code: string;
   configVariables: ConfigExtraVariable[];

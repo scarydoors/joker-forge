@@ -19,7 +19,7 @@ import {
   CheckIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
-import { JokerData } from "../JokerCard";
+import { JokerData } from "../data/BalatroUtils";
 import { ModMetadata } from "./ModMetadataPage";
 
 interface OverviewPageProps {

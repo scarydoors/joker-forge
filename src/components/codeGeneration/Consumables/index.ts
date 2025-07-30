@@ -2,7 +2,7 @@ import { ConsumableData } from "../../data/BalatroUtils";
 import { ConsumableSetData } from "../../data/BalatroUtils";
 import { generateConditionChain } from "./conditionUtils";
 import { generateEffectReturnStatement } from "./effectUtils";
-import { slugify } from "../../EditConsumableInfo";
+import { slugify } from "../../data/BalatroUtils";
 import type { Rule } from "../../ruleBuilder/types";
 
 interface ConsumableGenerationOptions {
@@ -354,11 +354,9 @@ const generateLocVarsFunction = (consumable: ConsumableData): string | null => {
 const formatConsumableDescription = (consumable: ConsumableData): string => {
   const formatted = consumable.description.replace(/<br\s*\/?>/gi, "[s]");
 
-  const escaped = formatted.replace(/\n/g, "[s]") 
-  const lines = escaped
-    .split("[s]")
-    .map((line) => line.trim())
-    // .filter((line) => line.length > 0);
+  const escaped = formatted.replace(/\n/g, "[s]");
+  const lines = escaped.split("[s]").map((line) => line.trim());
+  // .filter((line) => line.length > 0);
 
   if (lines.length === 0) {
     lines.push(escaped.trim());
@@ -366,7 +364,13 @@ const formatConsumableDescription = (consumable: ConsumableData): string => {
 
   return `{
 ${lines
-  .map((line, i) => `        [${i + 1}] = '${line.replace(/\\/g, "\\\\").replace(/"/g,"\\\"").replace(/'/g, "\\'")}'`)
+  .map(
+    (line, i) =>
+      `        [${i + 1}] = '${line
+        .replace(/\\/g, "\\\\")
+        .replace(/"/g, '\\"')
+        .replace(/'/g, "\\'")}'`
+  )
   .join(",\n")}
     }`;
 };

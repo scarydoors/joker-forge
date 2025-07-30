@@ -13,17 +13,20 @@ import {
 } from "@heroicons/react/24/outline";
 import { motion } from "framer-motion";
 import { SketchPicker, ColorResult } from "react-color";
-import ConsumableCard from "../ConsumableCard";
-import EditConsumableInfo from "../EditConsumableInfo";
+import ConsumableCard from "./consumables/ConsumableCard";
+import EditConsumableInfo from "./consumables/EditConsumableInfo";
 import Button from "../generic/Button";
 import InputField from "../generic/InputField";
 import InputDropdown from "../generic/InputDropdown";
 import Modal from "../generic/Modal";
-import { ConsumableData } from "../data/BalatroUtils";
 import RuleBuilder from "../ruleBuilder/RuleBuilder";
 import type { Rule } from "../ruleBuilder/types";
 import { validateJokerName } from "../generic/validationUtils";
-import { ConsumableSetData } from "../data/BalatroUtils";
+import {
+  ConsumableSetData,
+  slugify,
+  ConsumableData,
+} from "../data/BalatroUtils";
 
 interface ConsumablesPageProps {
   modName: string;
@@ -700,16 +703,6 @@ const isPlaceholderConsumable = (imagePath: string): boolean => {
     imagePath.includes("/images/placeholderconsumables/") ||
     imagePath.includes("placeholder-consumable") ||
     imagePath.startsWith("data:image")
-  );
-};
-
-const slugify = (text: string): string => {
-  return (
-    text
-      .toLowerCase()
-      .replace(/[\s\W_]+/g, "")
-      .replace(/^[\d]/, "_$&") ||
-    `consumable_${Math.random().toString(36).substring(2, 8)}`
   );
 };
 

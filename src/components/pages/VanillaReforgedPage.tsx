@@ -20,7 +20,7 @@ import {
   CakeIcon,
 } from "@heroicons/react/24/outline";
 import { PuzzlePieceIcon } from "@heroicons/react/24/solid";
-import { JokerData } from "../JokerCard";
+import { JokerData } from "../data/BalatroUtils";
 import { ConsumableData } from "../data/BalatroUtils";
 import { formatBalatroText } from "../generic/balatroTextFormatter";
 import RuleBuilder from "../ruleBuilder/RuleBuilder";
