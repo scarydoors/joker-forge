@@ -27,6 +27,7 @@ import {
   slugify,
   ConsumableData,
 } from "../data/BalatroUtils";
+import { exportSingleConsumable } from "../codeGeneration/Consumables";
 
 interface ConsumablesPageProps {
   modName: string;
@@ -1062,6 +1063,14 @@ const ConsumablesPage: React.FC<ConsumablesPageProps> = ({
     }
   };
 
+  const handleExportConsumable = (consumable: ConsumableData) => {
+      try {
+        exportSingleConsumable(consumable);
+      } catch (error) {
+        console.error("Failed to export consumable:", error);
+      }
+    };
+
   const handleQuickUpdate = (
     consumable: ConsumableData,
     updates: Partial<ConsumableData>
@@ -1367,6 +1376,7 @@ const ConsumablesPage: React.FC<ConsumablesPageProps> = ({
                     onEditRules={() => handleEditRules(consumable)}
                     onDelete={() => handleDeleteConsumable(consumable.id)}
                     onDuplicate={() => handleDuplicateConsumable(consumable)}
+                    onExport={() => handleExportConsumable(consumable)}
                     onQuickUpdate={(updates) =>
                       handleQuickUpdate(consumable, updates)
                     }

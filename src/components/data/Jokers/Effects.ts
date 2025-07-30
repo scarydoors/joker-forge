@@ -27,6 +27,7 @@ import {
   TAGS,
   CUSTOM_CONSUMABLES,
   CONSUMABLE_SETS,
+  STICKERS,
 } from "../BalatroUtils";
 
 export const EFFECT_CATEGORIES: CategoryDefinition[] = [
@@ -809,6 +810,23 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
         label: "Edition for Copy",
         options: [{ value: "none", label: "No Edition" }, ...EDITIONS],
         default: "none",
+      },
+      {
+        id: "sticker",
+        type: "select",
+        label: "Sticker for Copy",
+        options: [{ value: "none", label: "No Sticker" }, ...STICKERS],
+        default: "none",
+      },
+      {
+        id: "ignore_slots",
+        type: "select",
+        label: "___ Joker Slots",
+        options: [
+          { value: "respect", label: "Respect" },
+          { value: "ignore", label: "Ignore" },
+        ],
+        default: "respect",
       },
     ],
     category: "Jokers",
