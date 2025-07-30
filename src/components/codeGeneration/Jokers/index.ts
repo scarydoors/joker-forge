@@ -214,7 +214,6 @@ const generateSingleJokerCode = (
   let nextPosition = currentPosition + 1;
 
   let jokerCode = `SMODS.Joker{ --${joker.name}
-    name = "${joker.name}",
     key = "${joker.jokerKey}",
     config = {
         extra = {`;
@@ -444,7 +443,11 @@ const generateSetAbilityFunction = (joker: JokerData): string | null => {
     );
   });
 
-  if (forcedStickers.length === 0 && variableInits.length === 0 && forcedEditions.length === 0) {
+  if (
+    forcedStickers.length === 0 &&
+    variableInits.length === 0 &&
+    forcedEditions.length === 0
+  ) {
     return null;
   }
 
