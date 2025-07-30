@@ -20,6 +20,20 @@ const ensureConsumableKeys = (
   }));
 };
 
+const convertRandomGroupsForCodegen = (
+  randomGroups: import("../../ruleBuilder/types").RandomGroup[]
+) => {
+  return randomGroups.map((group) => ({
+    ...group,
+    chance_numerator:
+      typeof group.chance_numerator === "string" ? 1 : group.chance_numerator,
+    chance_denominator:
+      typeof group.chance_denominator === "string"
+        ? 1
+        : group.chance_denominator,
+  }));
+};
+
 export const generateConsumablesCode = (
   consumables: ConsumableData[],
   options: ConsumableGenerationOptions = {}
@@ -31,7 +45,6 @@ export const generateConsumablesCode = (
   const consumablesCode: Record<string, string> = {};
   let currentPosition = 0;
 
-  // Generate consumable sets first if any exist
   if (consumableSets.length > 0) {
     const setsCode = generateConsumableSetsCode(
       consumableSets,
@@ -43,7 +56,6 @@ export const generateConsumablesCode = (
     }
   }
 
-  // Generate individual consumables
   consumablesWithKeys.forEach((consumable) => {
     const result = generateSingleConsumableCode(
       consumable,
@@ -70,12 +82,10 @@ const generateConsumableSetsCode = (
       setsCode += "\n\n";
     }
 
-    // Find all consumables that belong to this set
     const setConsumables = consumables.filter(
       (consumable) => consumable.set === set.key
     );
 
-    // Generate the cards array
     let cardsArray = "";
     if (setConsumables.length > 0) {
       const cardEntries = setConsumables.map((consumable) => {
@@ -97,7 +107,6 @@ ${cardEntries.join(",\n")}
     shader = '${set.shader}',`;
     }
 
-    // Ensure colors have # prefix
     const primaryColor = set.primary_colour.startsWith("#")
       ? set.primary_colour.substring(1)
       : set.primary_colour;
@@ -141,14 +150,18 @@ const generateSingleConsumableCode = (
   const activeRules =
     consumable.rules?.filter((rule) => rule.trigger !== "passive") || [];
 
-  // Collect config variables from all effects
   const configItems: string[] = [];
+
   activeRules.forEach((rule) => {
+    const regularEffects = rule.effects || [];
+    const randomGroups = convertRandomGroupsForCodegen(rule.randomGroups || []);
+
     const effectResult = generateEffectReturnStatement(
-      rule.effects || [],
-      [],
-      ""
+      regularEffects,
+      randomGroups,
+      modPrefix
     );
+
     if (effectResult.configVariables) {
       configItems.push(...effectResult.configVariables);
     }
@@ -208,7 +221,7 @@ const generateSingleConsumableCode = (
   consumableCode += `
     atlas = '${atlasKey}',`;
 
-  const locVarsCode = generateLocVarsFunction(consumable);
+  const locVarsCode = generateLocVarsFunction(consumable, modPrefix);
   if (locVarsCode) {
     consumableCode += `
     ${locVarsCode},`;
@@ -248,7 +261,7 @@ export const exportSingleConsumable = (consumable: ConsumableData): void => {
       0,
       "modprefix"
     );
-    let jokerCode = result.code;
+    const jokerCode = result.code;
 
     const blob = new Blob([jokerCode], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
@@ -284,9 +297,12 @@ const generateUseFunction = (rules: Rule[], modPrefix: string): string => {
         if ${conditionCode} then`;
     }
 
+    const regularEffects = rule.effects || [];
+    const randomGroups = convertRandomGroupsForCodegen(rule.randomGroups || []);
+
     const effectResult = generateEffectReturnStatement(
-      rule.effects || [],
-      [],
+      regularEffects,
+      randomGroups,
       modPrefix
     );
 
@@ -330,11 +346,15 @@ const generateCanUseFunction = (rules: Rule[], modPrefix: string): string => {
       ruleConditions.push(`(${conditionCode})`);
     }
 
+    const regularEffects = rule.effects || [];
+    const randomGroups = convertRandomGroupsForCodegen(rule.randomGroups || []);
+
     const effectResult = generateEffectReturnStatement(
-      rule.effects || [],
-      [],
+      regularEffects,
+      randomGroups,
       modPrefix
     );
+
     if (effectResult.customCanUse) {
       customCanUseConditions.push(`(${effectResult.customCanUse})`);
     }
@@ -355,7 +375,10 @@ const generateCanUseFunction = (rules: Rule[], modPrefix: string): string => {
     end`;
 };
 
-const generateLocVarsFunction = (consumable: ConsumableData): string | null => {
+const generateLocVarsFunction = (
+  consumable: ConsumableData,
+  modPrefix: string
+): string | null => {
   const descriptionHasVariables = consumable.description.includes("#");
   if (!descriptionHasVariables) {
     return null;
@@ -373,6 +396,45 @@ const generateLocVarsFunction = (consumable: ConsumableData): string | null => {
     return null;
   }
 
+  const activeRules =
+    consumable.rules?.filter((rule) => rule.trigger !== "passive") || [];
+  const hasRandomGroups = activeRules.some(
+    (rule) => rule.randomGroups && rule.randomGroups.length > 0
+  );
+
+  if (hasRandomGroups) {
+    const randomGroups = activeRules.flatMap((rule) => rule.randomGroups || []);
+    const denominators = [
+      ...new Set(randomGroups.map((group) => group.chance_denominator)),
+    ];
+
+    if (denominators.length === 1) {
+      return `loc_vars = function(self, info_queue, card)
+        local numerator, denominator = SMODS.get_probability_vars(card, 1, card.ability.extra.odds, 'c_${modPrefix}_${consumable.consumableKey}')
+        return {vars = {numerator, denominator}}
+    end`;
+    } else {
+      const variableMapping: string[] = [];
+      let currentIndex = 0;
+
+      denominators.forEach((index) => {
+        if (currentIndex >= maxVariableIndex) return;
+        if (index === 0) {
+          variableMapping.push("card.ability.extra.odds");
+        } else {
+          variableMapping.push(`card.ability.extra.odds${Number(index) + 1}`);
+        }
+        currentIndex++;
+      });
+
+      return `loc_vars = function(self, info_queue, card)
+        return {vars = {${variableMapping
+          .slice(0, maxVariableIndex)
+          .join(", ")}}}
+    end`;
+    }
+  }
+
   const variableMapping: string[] = [];
 
   return `loc_vars = function(self, info_queue, card)
@@ -385,7 +447,6 @@ const formatConsumableDescription = (consumable: ConsumableData): string => {
 
   const escaped = formatted.replace(/\n/g, "[s]");
   const lines = escaped.split("[s]").map((line) => line.trim());
-  // .filter((line) => line.length > 0);
 
   if (lines.length === 0) {
     lines.push(escaped.trim());

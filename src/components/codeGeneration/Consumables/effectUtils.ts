@@ -65,6 +65,7 @@ export function generateEffectReturnStatement(
   let primaryColour = "G.C.WHITE";
   const customCanUseConditions: string[] = [];
   const allConfigVariables: string[] = [];
+  const configVariableSet = new Set<string>();
 
   if (regularEffects.length > 0) {
     const effectReturns: EffectReturn[] = regularEffects
@@ -73,7 +74,12 @@ export function generateEffectReturnStatement(
 
     effectReturns.forEach((effectReturn) => {
       if (effectReturn.configVariables) {
-        allConfigVariables.push(...effectReturn.configVariables);
+        effectReturn.configVariables.forEach((configVar) => {
+          if (!configVariableSet.has(configVar)) {
+            configVariableSet.add(configVar);
+            allConfigVariables.push(configVar);
+          }
+        });
       }
       if (effectReturn.customCanUse) {
         customCanUseConditions.push(effectReturn.customCanUse);
@@ -104,14 +110,51 @@ export function generateEffectReturnStatement(
   }
 
   if (randomGroups.length > 0) {
-    randomGroups.forEach((group) => {
+    const denominators = [
+      ...new Set(randomGroups.map((group) => group.chance_denominator)),
+    ];
+    const denominatorToOddsVar: Record<number, string> = {};
+
+    if (denominators.length === 1) {
+      denominatorToOddsVar[denominators[0]] = "card.ability.extra.odds";
+      const oddsVar = "odds = " + denominators[0];
+      if (!configVariableSet.has(oddsVar)) {
+        configVariableSet.add(oddsVar);
+        allConfigVariables.push(oddsVar);
+      }
+    } else {
+      denominators.forEach((denom, index) => {
+        if (index === 0) {
+          denominatorToOddsVar[denom] = "card.ability.extra.odds";
+          const oddsVar = "odds = " + denom;
+          if (!configVariableSet.has(oddsVar)) {
+            configVariableSet.add(oddsVar);
+            allConfigVariables.push(oddsVar);
+          }
+        } else {
+          denominatorToOddsVar[denom] = `card.ability.extra.odds${index + 1}`;
+          const oddsVar = `odds${index + 1} = ${denom}`;
+          if (!configVariableSet.has(oddsVar)) {
+            configVariableSet.add(oddsVar);
+            allConfigVariables.push(oddsVar);
+          }
+        }
+      });
+    }
+
+    randomGroups.forEach((group, groupIndex) => {
       const effectReturns: EffectReturn[] = group.effects
         .map((effect) => generateSingleEffect(effect, modprefix))
         .filter((ret) => ret.statement || ret.message);
 
       effectReturns.forEach((effectReturn) => {
         if (effectReturn.configVariables) {
-          allConfigVariables.push(...effectReturn.configVariables);
+          effectReturn.configVariables.forEach((configVar) => {
+            if (!configVariableSet.has(configVar)) {
+              configVariableSet.add(configVar);
+              allConfigVariables.push(configVar);
+            }
+          });
         }
         if (effectReturn.customCanUse) {
           customCanUseConditions.push(effectReturn.customCanUse);
@@ -120,17 +163,40 @@ export function generateEffectReturnStatement(
 
       if (effectReturns.length === 0) return;
 
-      const probabilityCheck = `pseudorandom('${group.id}') < G.GAME.probabilities.normal / ${group.chance_denominator}`;
+      const oddsVar = denominatorToOddsVar[group.chance_denominator];
+      const probabilityIdentifier = `group_${groupIndex}_${group.id.substring(
+        0,
+        8
+      )}`;
 
       let groupContent = "";
+      let groupPreReturnCode = "";
+
       effectReturns.forEach((effect) => {
         if (effect.statement && effect.statement.trim()) {
-          groupContent += `
-                ${effect.statement}`;
+          const { cleanedStatement, preReturnCode } = extractPreReturnCode(
+            effect.statement
+          );
+
+          if (preReturnCode) {
+            groupPreReturnCode +=
+              (groupPreReturnCode ? "\n                " : "") + preReturnCode;
+          }
+
+          if (cleanedStatement.trim()) {
+            groupContent += `
+                ${cleanedStatement}`;
+          }
         }
       });
 
-      const groupStatement = `if ${probabilityCheck} then${groupContent}
+      let fullGroupContent = groupContent;
+      if (groupPreReturnCode) {
+        fullGroupContent = `
+                ${groupPreReturnCode}${groupContent}`;
+      }
+
+      const groupStatement = `if SMODS.pseudorandom_probability(card, '${probabilityIdentifier}', ${group.chance_numerator}, ${oddsVar}, 'c_${modprefix}') then${fullGroupContent}
             end`;
 
       combinedPreReturnCode +=
