@@ -22,7 +22,6 @@ import {
   RANKS,
   SEALS,
   getRarityDropdownOptions,
-  CUSTOM_CONSUMABLES,
   slugify,
 } from "../data/BalatroUtils";
 import BoosterCard from "./boosters/BoosterCard";
@@ -176,7 +175,6 @@ const CardRuleEditor: React.FC<CardRuleEditorProps> = ({
   type Suit = { value: string; label: string };
   type Rank = { value: string; label: string };
   type Seal = { key: string; label: string };
-  type Consumable = { value: string; label: string };
 
   const enhancementOptions = [
     { value: "", label: "Any Enhancement" },
@@ -218,14 +216,6 @@ const CardRuleEditor: React.FC<CardRuleEditorProps> = ({
   const rarityOptions = [
     { value: "", label: "Any Rarity" },
     ...getRarityDropdownOptions(),
-  ];
-
-  const consumableOptions = [
-    { value: "", label: "Any Consumable" },
-    ...CUSTOM_CONSUMABLES().map((consumable: Consumable) => ({
-      value: consumable.value,
-      label: consumable.label,
-    })),
   ];
 
   const specificTypeOptions = [
@@ -388,33 +378,27 @@ const CardRuleEditor: React.FC<CardRuleEditorProps> = ({
 
               {rule.specific_type && (
                 <div className="mb-3">
-                  {rule.specific_type === "consumable" ? (
-                    <InputDropdown
-                      label="Choose Specific Consumable"
-                      value={rule.specific_key || ""}
-                      onChange={(value) =>
-                        handleUpdateRule(index, {
-                          specific_key: value,
-                        })
-                      }
-                      options={consumableOptions}
-                      size="sm"
-                    />
-                  ) : (
-                    <InputField
-                      label={`Specific ${rule.specific_type} Key`}
-                      type="text"
-                      value={rule.specific_key || ""}
-                      onChange={(e) =>
-                        handleUpdateRule(index, {
-                          specific_key: e.target.value,
-                        })
-                      }
-                      placeholder="e.g. j_joker"
-                      size="sm"
-                      darkmode
-                    />
-                  )}
+                  <InputField
+                    label={`Specific ${
+                      rule.specific_type === "consumable"
+                        ? "Consumable"
+                        : "Joker"
+                    } Key`}
+                    type="text"
+                    value={rule.specific_key || ""}
+                    onChange={(e) =>
+                      handleUpdateRule(index, {
+                        specific_key: e.target.value,
+                      })
+                    }
+                    placeholder={
+                      rule.specific_type === "consumable"
+                        ? "e.g. c_fool"
+                        : "e.g. j_joker"
+                    }
+                    size="sm"
+                    darkmode
+                  />
                 </div>
               )}
 
