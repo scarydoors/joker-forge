@@ -45,6 +45,7 @@ import { generateProbabilityIdentifierConditionCode } from "./conditions/Probabi
 import { generateProbabilityPartCompareConditionCode } from "./conditions/ProbabilityPartCompareCondition";
 import { generateHandLevelConditionCode } from "./conditions/HandLevelCondition";
 import { generateCumulativeChipsConditionCode } from "./conditions/CumulativeChipsCondition";
+import { generateBlindNameConditionCode } from "./conditions/BlindNameCondition";
 
 export const generateConditionChain = (
   rule: Rule,
@@ -257,6 +258,9 @@ const generateSingleConditionCode = (
 
     case "card_index":
       return generateCardIndexConditionCode([singleConditionRule]);
+
+      case "blind_name":
+      return generateBlindNameConditionCode([singleConditionRule]);
 
     default:
       return null;

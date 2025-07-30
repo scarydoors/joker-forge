@@ -20,7 +20,8 @@ export const generateEditHandsReturn = (effect: Effect): EffectReturn => {
                 delay = 0.4,
                 func = function()
                     card_eval_status_text(used_card, 'extra', nil, nil, nil, {message = ${addMessage}, colour = G.C.GREEN})
-                    G.GAME.current_round.hands_left = G.GAME.current_round.hands_left + ${value}
+                    G.GAME.round_resets.hands = G.GAME.round_resets.hands + ${value}
+                    ease_hands_played(${value})
                     return true
                 end
             }))
@@ -39,7 +40,8 @@ export const generateEditHandsReturn = (effect: Effect): EffectReturn => {
                 delay = 0.4,
                 func = function()
                     card_eval_status_text(used_card, 'extra', nil, nil, nil, {message = ${subtractMessage}, colour = G.C.RED})
-                    G.GAME.current_round.hands_left = math.max(0, G.GAME.current_round.hands_left - ${value})
+                    G.GAME.round_resets.hands = G.GAME.round_resets.hands - ${value}
+                    ease_hands_played(-${value})
                     return true
                 end
             }))
@@ -53,12 +55,14 @@ export const generateEditHandsReturn = (effect: Effect): EffectReturn => {
         : `"Set to "..tostring(${value}).." Hands"`;
       handsCode = `
             __PRE_RETURN_CODE__
+            local mod = ${value} - G.GAME.round_resets.hands
             G.E_MANAGER:add_event(Event({
                 trigger = 'after',
                 delay = 0.4,
                 func = function()
                     card_eval_status_text(used_card, 'extra', nil, nil, nil, {message = ${setMessage}, colour = G.C.BLUE})
-                    G.GAME.current_round.hands_left = ${value}
+                    G.GAME.round_resets.hands = ${value}
+                    ease_hands_played(mod)
                     return true
                 end
             }))
@@ -77,7 +81,8 @@ export const generateEditHandsReturn = (effect: Effect): EffectReturn => {
                 delay = 0.4,
                 func = function()
                     card_eval_status_text(used_card, 'extra', nil, nil, nil, {message = ${defaultMessage}, colour = G.C.GREEN})
-                    G.GAME.current_round.hands_left = G.GAME.current_round.hands_left + ${value}
+                    G.GAME.round_resets.hands = G.GAME.round_resets.hands + ${value}
+                    ease_hands_played(${value})
                     return true
                 end
             }))
