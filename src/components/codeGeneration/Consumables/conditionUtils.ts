@@ -1,6 +1,9 @@
 import type { Rule, Condition, ConditionGroup } from "../../ruleBuilder/types";
 import { generatePlayerMoneyConditionCode } from "./conditions/PlayerMoneyCondition";
 import { generateCardsSelectedConditionCode } from "./conditions/CardsSelectedCondition";
+import { generateAnteLevelConditionCode } from "./conditions/AnteLevelCondition";
+import { generateHandSizeConditionCode } from "./conditions/HandSizeCondition";
+import { generateRemainingHandsConditionCode } from "./conditions/RemainingHandsCondition";
 
 export const generateConditionChain = (rule: Rule): string => {
   if (!rule.conditionGroups || rule.conditionGroups.length === 0) {
@@ -88,6 +91,15 @@ const generateSingleConditionCode = (
 
     case "cards_selected":
       return generateCardsSelectedConditionCode([singleConditionRule]);
+
+    case "ante_level":
+      return generateAnteLevelConditionCode([singleConditionRule]);
+
+    case "hand_size":
+      return generateHandSizeConditionCode([singleConditionRule]);
+
+    case "remaining_hands":
+      return generateRemainingHandsConditionCode([singleConditionRule]);
 
     default:
       return null;

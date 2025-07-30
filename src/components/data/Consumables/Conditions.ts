@@ -98,6 +98,96 @@ export const CONSUMABLE_CONDITION_TYPES: ConditionTypeDefinition[] = [
     ],
     category: "Player State",
   },
+  {
+    id: "ante_level",
+    label: "Ante Level",
+    description: "Check the current ante level",
+    applicableTriggers: ["consumable_used"],
+    params: [
+      {
+        id: "operator",
+        type: "select",
+        label: "Operator",
+        options: [
+          { value: "equals", label: "equals" },
+          { value: "not_equals", label: "not equals" },
+          { value: "greater_than", label: "greater than" },
+          { value: "less_than", label: "less than" },
+          { value: "greater_equals", label: "greater than or equal" },
+          { value: "less_equals", label: "less than or equal" },
+        ],
+        default: "greater_equals",
+      },
+      {
+        id: "value",
+        type: "number",
+        label: "Ante Level",
+        default: 1,
+        min: 1,
+      },
+    ],
+    category: "Game Context",
+  },
+  {
+    id: "hand_size",
+    label: "Hand Size",
+    description: "Check the current hand size",
+    applicableTriggers: ["consumable_used"],
+    params: [
+      {
+        id: "operator",
+        type: "select",
+        label: "Operator",
+        options: [
+          { value: "equals", label: "equals" },
+          { value: "not_equals", label: "not equals" },
+          { value: "greater_than", label: "greater than" },
+          { value: "less_than", label: "less than" },
+          { value: "greater_equals", label: "greater than or equal" },
+          { value: "less_equals", label: "less than or equal" },
+        ],
+        default: "equals",
+      },
+      {
+        id: "value",
+        type: "number",
+        label: "Hand Size",
+        default: 8,
+        min: 1,
+      },
+    ],
+    category: "Player State",
+  },
+  {
+    id: "remaining_hands",
+    label: "Remaining Hands",
+    description: "Check how many hands the player has left",
+    applicableTriggers: ["consumable_used"],
+    params: [
+      {
+        id: "operator",
+        type: "select",
+        label: "Operator",
+        options: [
+          { value: "equals", label: "equals" },
+          { value: "not_equals", label: "not equals" },
+          { value: "greater_than", label: "greater than" },
+          { value: "less_than", label: "less than" },
+          { value: "greater_equals", label: "greater than or equal" },
+          { value: "less_equals", label: "less than or equal" },
+        ],
+        default: "equals",
+      },
+      {
+        id: "value",
+        type: "number",
+        label: "Number of Hands",
+        default: 1,
+        min: 0,
+      },
+    ],
+    category: "Player State",
+  },
 ];
 
 export function getConsumableConditionsForTrigger(
