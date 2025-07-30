@@ -303,7 +303,7 @@ const CardRuleEditor: React.FC<CardRuleEditorProps> = ({
                 </div>
                 <button
                   onClick={() => handleRemoveRule(index)}
-                  className="text-balatro-red hover:text-red-400 p-1"
+                  className="text-balatro-red hover:text-red-400 p-1 cursor-pointer"
                 >
                   <XMarkIcon className="h-4 w-4" />
                 </button>
