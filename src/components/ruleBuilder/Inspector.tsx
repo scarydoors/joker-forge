@@ -95,6 +95,7 @@ interface ParameterFieldProps {
   onGameVariableApplied?: () => void;
   isEffect?: boolean;
   joker?: JokerData;
+  itemType?: "joker" | "consumable";
 }
 
 interface ChanceInputProps {
@@ -107,6 +108,7 @@ interface ChanceInputProps {
   onOpenGameVariablesPanel: () => void;
   selectedGameVariable?: GameVariable | null;
   onGameVariableApplied?: () => void;
+  itemType?: "joker" | "consumable";
 }
 
 const ChanceInput: React.FC<ChanceInputProps> = React.memo(
@@ -119,6 +121,7 @@ const ChanceInput: React.FC<ChanceInputProps> = React.memo(
     onOpenGameVariablesPanel,
     selectedGameVariable,
     onGameVariableApplied,
+    itemType,
   }) => {
     const [isVariableMode, setIsVariableMode] = React.useState(
       typeof value === "string" &&
@@ -222,19 +225,21 @@ const ChanceInput: React.FC<ChanceInputProps> = React.memo(
       <div className="flex flex-col gap-2 items-center">
         <div className="flex items-center gap-2">
           <span className="text-white-light text-sm">{label}</span>
-          <button
-            onClick={() =>
-              handleModeChange(isVariableMode ? "number" : "variable")
-            }
-            className={`p-1 rounded transition-colors cursor-pointer ${
-              isVariableMode
-                ? "bg-mint/20 text-mint"
-                : "bg-black-lighter text-white-darker hover:text-mint"
-            }`}
-            title="Toggle variable mode"
-          >
-            <VariableIcon className="h-3 w-3" />
-          </button>
+          {itemType === "joker" && (
+            <button
+              onClick={() =>
+                handleModeChange(isVariableMode ? "number" : "variable")
+              }
+              className={`p-1 rounded transition-colors cursor-pointer ${
+                isVariableMode
+                  ? "bg-mint/20 text-mint"
+                  : "bg-black-lighter text-white-darker hover:text-mint"
+              }`}
+              title="Toggle variable mode"
+            >
+              <VariableIcon className="h-3 w-3" />
+            </button>
+          )}
           <button
             onClick={onOpenGameVariablesPanel}
             className={`p-1 rounded transition-colors cursor-pointer ${
@@ -285,7 +290,7 @@ const ChanceInput: React.FC<ChanceInputProps> = React.memo(
               placeholder="Max"
             />
           </div>
-        ) : isVariableMode ? (
+        ) : isVariableMode && itemType === "joker" ? (
           <div className="space-y-2 w-full">
             {availableVariables.length > 0 ? (
               <InputDropdown
@@ -346,6 +351,7 @@ const ParameterField: React.FC<ParameterFieldProps> = ({
   onGameVariableApplied,
   isEffect = false,
   joker = null,
+  itemType,
 }) => {
   const [isVariableMode, setIsVariableMode] = React.useState(
     typeof value === "string" &&
@@ -615,19 +621,21 @@ const ParameterField: React.FC<ParameterFieldProps> = ({
             <span className="text-white-light text-sm">
               {String(param.label)}
             </span>
-            <button
-              onClick={() =>
-                handleModeChange(isVariableMode ? "number" : "variable")
-              }
-              className={`p-1 rounded transition-colors cursor-pointer ${
-                isVariableMode
-                  ? "bg-mint/20 text-mint"
-                  : "bg-black-lighter text-white-darker hover:text-mint"
-              }`}
-              title="Toggle variable mode"
-            >
-              <VariableIcon className="h-4 w-4" />
-            </button>
+            {itemType === "joker" && (
+              <button
+                onClick={() =>
+                  handleModeChange(isVariableMode ? "number" : "variable")
+                }
+                className={`p-1 rounded transition-colors cursor-pointer ${
+                  isVariableMode
+                    ? "bg-mint/20 text-mint"
+                    : "bg-black-lighter text-white-darker hover:text-mint"
+                }`}
+                title="Toggle variable mode"
+              >
+                <VariableIcon className="h-4 w-4" />
+              </button>
+            )}
             <button
               onClick={onOpenGameVariablesPanel}
               className={`p-1 rounded transition-colors cursor-pointer ${
@@ -743,7 +751,7 @@ const ParameterField: React.FC<ParameterFieldProps> = ({
                 />
               </div>
             </div>
-          ) : isVariableMode ? (
+          ) : isVariableMode && itemType === "joker" ? (
             <div className="space-y-2">
               {availableVariables && availableVariables.length > 0 ? (
                 <InputDropdown
@@ -1118,6 +1126,7 @@ const Inspector: React.FC<InspectorProps> = ({
                   onGameVariableApplied={onGameVariableApplied}
                   isEffect={false}
                   joker={joker}
+                  itemType={itemType}
                 />
               </div>
             ))}
@@ -1173,6 +1182,7 @@ const Inspector: React.FC<InspectorProps> = ({
                 onOpenGameVariablesPanel={onToggleGameVariablesPanel}
                 selectedGameVariable={selectedGameVariable}
                 onGameVariableApplied={onGameVariableApplied}
+                itemType={itemType}
               />
               <span className="text-white-light text-sm">in</span>
               <ChanceInput
@@ -1190,6 +1200,7 @@ const Inspector: React.FC<InspectorProps> = ({
                 onOpenGameVariablesPanel={onToggleGameVariablesPanel}
                 selectedGameVariable={selectedGameVariable}
                 onGameVariableApplied={onGameVariableApplied}
+                itemType={itemType}
               />
             </div>
           </div>
@@ -1328,6 +1339,7 @@ const Inspector: React.FC<InspectorProps> = ({
                   onGameVariableApplied={onGameVariableApplied}
                   isEffect={true}
                   joker={joker}
+                  itemType={itemType}
                 />
               </div>
             ))}

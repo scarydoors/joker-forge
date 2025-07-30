@@ -16,13 +16,15 @@ interface PanelState {
 interface FloatingDockProps {
   panels: Record<string, PanelState>;
   onTogglePanel: (panelId: string) => void;
+  itemType: "joker" | "consumable";
 }
 
 const FloatingDock: React.FC<FloatingDockProps> = ({
   panels,
   onTogglePanel,
+  itemType,
 }) => {
-  const dockItems = [
+  const allDockItems = [
     {
       id: "blockPalette",
       icon: SwatchIcon,
@@ -48,6 +50,13 @@ const FloatingDock: React.FC<FloatingDockProps> = ({
       shortcut: "P",
     },
   ];
+
+  const dockItems = allDockItems.filter((item) => {
+    if (item.id === "variables" && itemType === "consumable") {
+      return false;
+    }
+    return true;
+  });
 
   return (
     <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 z-50">
