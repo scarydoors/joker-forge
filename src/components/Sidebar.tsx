@@ -13,7 +13,7 @@ import {
   LinkIcon,
   CakeIcon,
   ChatBubbleLeftRightIcon,
-  CubeIcon,
+  GiftIcon,
 } from "@heroicons/react/24/solid";
 import { JokerData } from "./data/BalatroUtils";
 
@@ -89,7 +89,7 @@ const Sidebar: React.FC<SidebarProps> = ({
     { id: "metadata", label: "Mod Metadata", icon: DocumentTextIcon },
     { id: "jokers", label: "Jokers", icon: PuzzlePieceIcon },
     { id: "consumables", label: "Consumables", icon: CakeIcon },
-    { id: "boosters", label: "Booster Packs", icon: CubeIcon },
+    { id: "boosters", label: "Booster Packs", icon: GiftIcon },
     //{ id: "decks", label: "Decks", icon: RectangleStackIcon },
     //{ id: "editions", label: "Editions", icon: SparklesIcon },
   ];
