@@ -12,11 +12,13 @@ export const generateCreateJokerReturn = (
   const edition = (effect.params?.edition as string) || "none";
   const customMessage = effect.customMessage;
   const sticker = (effect.params?.sticker as string) || "none"
+  const ignoreSlotsParam = (effect.params?.ignore_slots as string) || "respect"
 
   const scoringTriggers = ["hand_played", "card_scored"];
   const isScoring = scoringTriggers.includes(triggerType);
   const isNegative = edition === "e_negative";
   const hasSticker = sticker !== "none";
+  const ignoreSlots = ignoreSlotsParam === "ignore"
 
   // Build SMODS.add_card parameters
   const cardParams = ["set = 'Joker'"];
@@ -45,13 +47,13 @@ export const generateCreateJokerReturn = (
 
   // Slot limit check (skip for negative edition)
   let slotLimitCode: string;
-  if (!isNegative) {
+  if (isNegative || ignoreSlots) {
+    slotLimitCode = "local created_joker = true";
+  } else {
     slotLimitCode = `local created_joker = false
     if #G.jokers.cards + G.GAME.joker_buffer < G.jokers.config.card_limit then
         created_joker = true
         G.GAME.joker_buffer = G.GAME.joker_buffer + 1`;
-  } else {
-    slotLimitCode = "local created_joker = true";
   }
 
   const cardCreationCode = `local joker_card = SMODS.add_card({ ${cardParams.join(
@@ -76,11 +78,11 @@ export const generateCreateJokerReturn = (
                               ${editionCode}
                               ${stickerCode}
                           end
-                          ${!isNegative ? "G.GAME.joker_buffer = 0" : ""}
+                          ${!(isNegative || ignoreSlots) ? "G.GAME.joker_buffer = 0" : ""}
                           return true
                       end
                   }))
-                  ${!isNegative ? "end" : ""}
+                  ${!(isNegative || ignoreSlots) ? "end" : ""}
                 __PRE_RETURN_CODE_END__`,
       message: customMessage
         ? `"${customMessage}"`
@@ -98,11 +100,11 @@ export const generateCreateJokerReturn = (
                         ${editionCode}
                         ${stickerCode}
                     end
-                    ${!isNegative ? "G.GAME.joker_buffer = 0" : ""}
+                    ${!(isNegative || ignoreSlots) ? "G.GAME.joker_buffer = 0" : ""}
                     return true
                 end
             }))
-            ${!isNegative ? "end" : ""}
+            ${!(isNegative || ignoreSlots) ? "end" : ""}
             if created_joker then
                 card_eval_status_text(context.blueprint_card or card, 'extra', nil, nil, nil, {message = ${
                   customMessage

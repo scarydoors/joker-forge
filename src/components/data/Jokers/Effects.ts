@@ -753,6 +753,16 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
         options: [{ value: "none", label: "No Sticker" }, ...STICKERS],
         default: "none",
       },
+      {
+        id: "ignore_slots",
+        type: "select",
+        label: "___ Joker Slots",
+        options: [
+          { value: "respect", label: "Respect" },
+          { value: "ignore", label: "Ignore" },
+        ],
+        default: "respect",
+      },
     ],
     category: "Jokers",
   },
