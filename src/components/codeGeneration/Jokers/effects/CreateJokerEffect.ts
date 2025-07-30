@@ -11,10 +11,12 @@ export const generateCreateJokerReturn = (
   const jokerKey = (effect.params?.joker_key as string) || "";
   const edition = (effect.params?.edition as string) || "none";
   const customMessage = effect.customMessage;
+  const sticker = (effect.params?.sticker as string) || "none"
 
   const scoringTriggers = ["hand_played", "card_scored"];
   const isScoring = scoringTriggers.includes(triggerType);
   const isNegative = edition === "e_negative";
+  const hasSticker = sticker !== "none";
 
   // Build SMODS.add_card parameters
   const cardParams = ["set = 'Joker'"];
@@ -55,10 +57,13 @@ export const generateCreateJokerReturn = (
   const cardCreationCode = `local joker_card = SMODS.add_card({ ${cardParams.join(
               ", "
             )} })`
-  const editionCode = edition !== "none" ? `
-              if joker_card then
-                  joker_card:set_edition("${edition}", true)
-              end` : ``;
+  const editionCode = edition !== "none"
+    ? `joker_card:set_edition("${edition}", true)`
+    : ``;
+
+  const stickerCode = hasSticker
+    ? `joker_card:add_sticker('${sticker}', true)`
+    : "";
 
   if (isScoring) {
     return {
@@ -66,7 +71,11 @@ export const generateCreateJokerReturn = (
                   ${slotLimitCode}
                   G.E_MANAGER:add_event(Event({
                       func = function()
-                          ${cardCreationCode}${editionCode}
+                          ${cardCreationCode}
+                          if joker_card then
+                              ${editionCode}
+                              ${stickerCode}
+                          end
                           ${!isNegative ? "G.GAME.joker_buffer = 0" : ""}
                           return true
                       end
@@ -84,7 +93,11 @@ export const generateCreateJokerReturn = (
             ${slotLimitCode}
             G.E_MANAGER:add_event(Event({
                 func = function()
-                    ${cardCreationCode}${editionCode}
+                    ${cardCreationCode}
+                    if joker_card then
+                        ${editionCode}
+                        ${stickerCode}
+                    end
                     ${!isNegative ? "G.GAME.joker_buffer = 0" : ""}
                     return true
                 end
