@@ -14,6 +14,7 @@ import {
   CakeIcon,
   ChatBubbleLeftRightIcon,
   GiftIcon,
+  StarIcon,
 } from "@heroicons/react/24/solid";
 import { JokerData } from "./data/BalatroUtils";
 
@@ -63,6 +64,11 @@ const Sidebar: React.FC<SidebarProps> = ({
       return;
     }
 
+    if (section === "support") {
+      window.open("https://ko-fi.com/jaydchw", "_blank");
+      return;
+    }
+
     onSectionChange?.(section);
   };
 
@@ -95,11 +101,12 @@ const Sidebar: React.FC<SidebarProps> = ({
   ];
 
   const resourceItems = [
+    { id: "support", label: "Support", icon: HeartIcon },
     { id: "docs", label: "Docs", icon: DocumentTextIcon },
     { id: "vanilla", label: "Vanilla Reforged", icon: FolderIcon },
     { id: "github", label: "GitHub Repository", icon: LinkIcon },
     { id: "discord", label: "Discord Server", icon: ChatBubbleLeftRightIcon },
-    { id: "acknowledgements", label: "Acknowledgements", icon: HeartIcon },
+    { id: "acknowledgements", label: "Acknowledgements", icon: StarIcon },
   ];
 
   const actionItems = [
