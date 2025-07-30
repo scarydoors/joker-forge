@@ -132,14 +132,3 @@ export const generateLevelUpHandReturn = (
     configVariables: configVariables.length > 0 ? configVariables : undefined
   }
 }
-
-      // return {
-      //   statement: `level_up = ${valueCode},
-      //           level_up_hand = ${handToLevelUp}`,
-      //   message: customMessage
-      //     ? `"${customMessage}"`
-      //     : `localize('k_level_up_ex')`,
-      //   colour: "G.C.RED",
-      //   configVariables:
-      //     configVariables.length > 0 ? configVariables : undefined,
-      // };
