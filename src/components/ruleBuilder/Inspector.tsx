@@ -139,8 +139,8 @@ const ChanceInput: React.FC<ChanceInputProps> = React.memo(
       }
     }, [value]);
 
-    const parseRangeValue = (rangeStr: string) => {
-      if (rangeStr.startsWith("RANGE:")) {
+    const parseRangeValue = (rangeStr: string | number | unknown) => {
+      if (typeof rangeStr === "string" && rangeStr.startsWith("RANGE:")) {
         const parts = rangeStr.replace("RANGE:", "").split("|");
         return {
           min: parseFloat(parts[0] || "1"),
@@ -150,9 +150,10 @@ const ChanceInput: React.FC<ChanceInputProps> = React.memo(
       return { min: 1, max: 5 };
     };
 
-    const rangeValues = isRangeMode
-      ? parseRangeValue(actualValue as string)
-      : { min: 1, max: 5 };
+    const rangeValues =
+      isRangeMode && typeof actualValue === "string"
+        ? parseRangeValue(actualValue)
+        : { min: 1, max: 5 };
 
     React.useEffect(() => {
       const isVar =
@@ -537,9 +538,10 @@ const ParameterField: React.FC<ParameterFieldProps> = ({
         return { min: 1, max: 5 };
       };
 
-      const rangeValues = isRangeMode
-        ? parseRangeValue(value as string)
-        : { min: 1, max: 5 };
+      const rangeValues =
+        isRangeMode && typeof value === "string"
+          ? parseRangeValue(value)
+          : { min: 1, max: 5 };
 
       const numericValue =
         !isGameVariable && !isRangeMode && typeof value === "number"
