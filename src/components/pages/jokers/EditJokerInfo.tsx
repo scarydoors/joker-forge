@@ -9,28 +9,36 @@ import {
   ExclamationTriangleIcon,
   InformationCircleIcon,
 } from "@heroicons/react/24/outline";
-import InputField from "./generic/InputField";
-import InputDropdown from "./generic/InputDropdown";
-import Checkbox from "./generic/Checkbox";
-import Button from "./generic/Button";
-import BalatroJokerCard from "./generic/BalatroJokerCard";
-import { ConsumableData } from "./data/BalatroUtils";
+import InputField from "../../generic/InputField";
+import InputDropdown from "../../generic/InputDropdown";
+import Checkbox from "../../generic/Checkbox";
+import Button from "../../generic/Button";
+import BalatroCard from "../../generic/BalatroCard";
+import { getAllVariables } from "../../codeGeneration/Jokers/variableUtils";
+import { JokerData, UserVariable } from "../../data/BalatroUtils";
 import {
   validateJokerName,
   validateDescription,
   ValidationResult,
-} from "./generic/validationUtils";
-import { ConsumableSetData } from "./data/BalatroUtils";
-import { applyAutoFormatting } from "./generic/balatroTextFormatter";
+} from "../../generic/validationUtils";
+import {
+  getRarityDropdownOptions,
+  getRarityByValue,
+  getRarityDisplayName,
+  getRarityBadgeColor,
+  RarityData,
+  slugify,
+} from "../../data/BalatroUtils";
+import { applyAutoFormatting } from "../../generic/balatroTextFormatter";
 
-interface EditConsumableInfoProps {
+interface EditJokerInfoProps {
   isOpen: boolean;
-  consumable: ConsumableData;
+  joker: JokerData;
   onClose: () => void;
-  onSave: (consumable: ConsumableData) => void;
-  onDelete: (consumableId: string) => void;
+  onSave: (joker: JokerData) => void;
+  onDelete: (jokerId: string) => void;
+  customRarities?: RarityData[];
   modPrefix: string;
-  availableSets: ConsumableSetData[];
   showConfirmation: (options: {
     type?: "default" | "warning" | "danger" | "success";
     title: string;
@@ -42,27 +50,16 @@ interface EditConsumableInfoProps {
   }) => void;
 }
 
-// eslint-disable-next-line react-refresh/only-export-components
-export const slugify = (text: string): string => {
-  return (
-    text
-      .toLowerCase()
-      .replace(/[\s\W_]+/g, "")
-      .replace(/^[\d]/, "_$&") ||
-    `consumable_${Math.random().toString(36).substring(2, 8)}`
-  );
-};
-
-const EditConsumableInfo: React.FC<EditConsumableInfoProps> = ({
+const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
   isOpen,
-  consumable,
+  joker,
   onClose,
   onSave,
   onDelete,
-  availableSets,
+  customRarities = [],
   showConfirmation,
 }) => {
-  const [formData, setFormData] = useState<ConsumableData>(consumable);
+  const [formData, setFormData] = useState<JokerData>(joker);
   const [activeTab, setActiveTab] = useState<"visual" | "description">(
     "visual"
   );
@@ -85,15 +82,7 @@ const EditConsumableInfo: React.FC<EditConsumableInfoProps> = ({
     description?: ValidationResult;
   }>({});
 
-  const setOptions = [
-    { value: "Tarot", label: "Tarot" },
-    { value: "Planet", label: "Planet" },
-    { value: "Spectral", label: "Spectral" },
-    ...availableSets.map((set) => ({
-      value: set.key,
-      label: set.name,
-    })),
-  ];
+  const rarityOptions = getRarityDropdownOptions(customRarities);
 
   const validateField = (field: string, value: string) => {
     let result: ValidationResult;
@@ -114,32 +103,10 @@ const EditConsumableInfo: React.FC<EditConsumableInfoProps> = ({
     }));
   };
 
-  const getCurrentSetName = (setKey: string): string => {
-    const customSet = availableSets.find((s) => s.key === setKey);
-    return customSet?.name || setKey;
-  };
-
-  const getCurrentSetColor = (setKey: string): string => {
-    const customSet = availableSets.find((s) => s.key === setKey);
-    return customSet
-      ? customSet.primary_colour.startsWith("#")
-        ? customSet.primary_colour
-        : `#${customSet.primary_colour}`
-      : setKey === "Tarot"
-      ? "#b26cbb"
-      : setKey === "Planet"
-      ? "#13afce"
-      : setKey === "Spectral"
-      ? "#4584fa"
-      : "#666666";
-  };
-
   useEffect(() => {
     const loadCredits = async () => {
       try {
-        const response = await fetch(
-          "/images/placeholderconsumables/credit.txt"
-        );
+        const response = await fetch("/images/placeholderjokers/credit.txt");
         const text = await response.text();
         console.log("Raw credit file content:", JSON.stringify(text));
 
@@ -191,20 +158,20 @@ const EditConsumableInfo: React.FC<EditConsumableInfoProps> = ({
   useEffect(() => {
     if (isOpen) {
       setFormData({
-        ...consumable,
-        unlocked: consumable.unlocked !== false,
-        discovered: consumable.discovered !== false,
-        hidden: consumable.hidden === true,
-        can_repeat_soul: consumable.can_repeat_soul === true,
-        consumableKey: consumable.consumableKey || slugify(consumable.name),
-        hasUserUploadedImage: consumable.hasUserUploadedImage || false,
+        ...joker,
+        blueprint_compat: joker.blueprint_compat !== false,
+        eternal_compat: joker.eternal_compat !== false,
+        unlocked: joker.unlocked !== false,
+        discovered: joker.discovered !== false,
+        jokerKey: joker.jokerKey || slugify(joker.name),
+        hasUserUploadedImage: joker.hasUserUploadedImage || false,
       });
       setPlaceholderError(false);
-      setLastDescription(consumable.description || "");
+      setLastDescription(joker.description || "");
       setLastFormattedText("");
       setValidationResults({});
     }
-  }, [isOpen, consumable]);
+  }, [isOpen, joker]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -277,6 +244,10 @@ const EditConsumableInfo: React.FC<EditConsumableInfoProps> = ({
     { tag: "{C:planet}", color: "bg-balatro-planet", name: "Planet" },
     { tag: "{C:spectral}", color: "bg-balatro-spectral", name: "Spectral" },
     { tag: "{C:enhanced}", color: "bg-balatro-enhanced-new", name: "Enhanced" },
+    { tag: "{C:common}", color: "bg-balatro-common", name: "Common" },
+    { tag: "{C:uncommon}", color: "bg-balatro-uncommon", name: "Uncommon" },
+    { tag: "{C:rare}", color: "bg-balatro-rare", name: "Rare" },
+    { tag: "{C:legendary}", color: "bg-balatro-legendary", name: "Legendary" },
     {
       tag: "{C:edition}",
       color: "bg-gradient-to-r from-purple-400 to-pink-400",
@@ -301,19 +272,9 @@ const EditConsumableInfo: React.FC<EditConsumableInfoProps> = ({
       name: "Attention BG",
     },
     {
-      tag: "{X:tarot,C:white}",
-      color: "bg-balatro-purple",
-      name: "Tarot BG",
-    },
-    {
-      tag: "{X:planet,C:white}",
-      color: "bg-balatro-planet",
-      name: "Planet BG",
-    },
-    {
-      tag: "{X:spectral,C:white}",
-      color: "bg-balatro-spectral",
-      name: "Spectral BG",
+      tag: "{X:legendary,C:white}",
+      color: "bg-balatro-legendary",
+      name: "Legendary BG",
     },
     {
       tag: "{X:edition,C:white}",
@@ -369,7 +330,7 @@ const EditConsumableInfo: React.FC<EditConsumableInfoProps> = ({
         value,
         lastFormattedText,
         autoFormatEnabled,
-        false
+        true
       );
       finalValue = result.formatted;
 
@@ -385,7 +346,7 @@ const EditConsumableInfo: React.FC<EditConsumableInfoProps> = ({
       setFormData({
         ...formData,
         [field]: value,
-        consumableKey: slugify(value),
+        jokerKey: slugify(value),
       });
     } else {
       setFormData({
@@ -411,11 +372,65 @@ const EditConsumableInfo: React.FC<EditConsumableInfoProps> = ({
     });
   };
 
-  const handleSetChange = (value: string) => {
-    setFormData({
+  const handleRarityChange = (value: string) => {
+    const parsedValue = parseInt(value, 10);
+    let newRarity: number | string;
+
+    // If it's a valid vanilla rarity number (1-4), use as number
+    if (!isNaN(parsedValue) && parsedValue >= 1 && parsedValue <= 4) {
+      newRarity = parsedValue;
+    } else {
+      // Otherwise it's a custom rarity, use as string
+      newRarity = value;
+    }
+
+    const previousRarity = formData.rarity;
+    const newFormData = {
       ...formData,
-      set: value,
-    });
+      rarity: newRarity,
+      cost:
+        formData.cost === getCostFromRarity(formData.rarity)
+          ? getCostFromRarity(newRarity)
+          : formData.cost,
+    };
+
+    const isVanillaLegendary = typeof newRarity === "number" && newRarity === 4;
+    const wasVanillaLegendary =
+      typeof previousRarity === "number" && previousRarity === 4;
+
+    if (previousRarity !== newRarity) {
+      if (isVanillaLegendary && !wasVanillaLegendary) {
+        newFormData.appears_in_shop = false;
+      } else if (wasVanillaLegendary && !isVanillaLegendary) {
+        newFormData.appears_in_shop = true;
+      }
+    }
+
+    setFormData(newFormData);
+  };
+
+  const getCostFromRarity = (rarity: number | string): number => {
+    if (typeof rarity === "string") {
+      return 5;
+    }
+
+    const rarityData = getRarityByValue(rarity, customRarities);
+    if (rarityData?.isCustom) {
+      return 5;
+    }
+
+    switch (rarity) {
+      case 1:
+        return 4;
+      case 2:
+        return 5;
+      case 3:
+        return 6;
+      case 4:
+        return 20;
+      default:
+        return 5;
+    }
   };
 
   const upscaleImage = (img: HTMLImageElement): string => {
@@ -470,16 +485,16 @@ const EditConsumableInfo: React.FC<EditConsumableInfoProps> = ({
     }
   };
 
-  const getImageCredit = (consumable: ConsumableData): string | null => {
-    if (consumable.hasUserUploadedImage) {
+  const getImageCredit = (joker: JokerData): string | null => {
+    if (joker.hasUserUploadedImage) {
       return null;
     }
 
     if (
-      consumable.placeholderCreditIndex &&
-      placeholderCredits[consumable.placeholderCreditIndex]
+      joker.placeholderCreditIndex &&
+      placeholderCredits[joker.placeholderCreditIndex]
     ) {
-      return placeholderCredits[consumable.placeholderCreditIndex];
+      return placeholderCredits[joker.placeholderCreditIndex];
     }
     return null;
   };
@@ -487,20 +502,37 @@ const EditConsumableInfo: React.FC<EditConsumableInfoProps> = ({
   const handleDelete = () => {
     showConfirmation({
       type: "danger",
-      title: "Delete Consumable",
+      title: "Delete Joker",
       description: `Are you sure you want to delete "${formData.name}"? This action cannot be undone.`,
       confirmText: "Delete Forever",
       cancelText: "Keep It",
       onConfirm: () => {
-        onDelete(consumable.id);
+        onDelete(joker.id);
         onClose();
       },
     });
   };
 
+  const allVariables = getAllVariables(formData);
+
+  const VariableDisplay = (variable: UserVariable) => {
+    if (variable.type === "suit") return variable.initialSuit || "Spades";
+    if (variable.type === "rank") return variable.initialRank || "Ace";
+    if (variable.type === "pokerhand")
+      return variable.initialPokerHand || "High Card";
+    return variable.initialValue?.toString() || "0";
+  };
+
+  const VariableValues = allVariables.map(VariableDisplay);
+
+  const insertVariable = (variableIndex: number) => {
+    const placeholder = `#${variableIndex}#`;
+    insertTagSmart(placeholder, false);
+  };
+
   const insertTagSmart = (tag: string, autoClose: boolean = true) => {
     const textArea = document.getElementById(
-      "consumable-description-edit"
+      "joker-description-edit"
     ) as HTMLTextAreaElement;
     if (!textArea) return;
 
@@ -712,7 +744,7 @@ const EditConsumableInfo: React.FC<EditConsumableInfoProps> = ({
                                     ? "/images/placeholderjokers/placeholder-joker.png"
                                     : "/images/placeholder-joker.png"
                                 }
-                                alt="Placeholder Consumable"
+                                alt="Placeholder Joker"
                                 className="w-full h-full object-cover"
                                 draggable="false"
                                 onError={() => {
@@ -805,9 +837,9 @@ const EditConsumableInfo: React.FC<EditConsumableInfoProps> = ({
                               onChange={(e) =>
                                 handleInputChange("name", e.target.value, false)
                               }
-                              placeholder="Enter consumable name"
+                              placeholder="Enter joker name"
                               separator={true}
-                              label="Consumable Name"
+                              label="Joker Name"
                               size="md"
                               error={
                                 getValidationMessage("name")?.type === "error"
@@ -817,17 +849,17 @@ const EditConsumableInfo: React.FC<EditConsumableInfoProps> = ({
                             />
                           </div>
                           <InputField
-                            value={formData.consumableKey || ""}
+                            value={formData.jokerKey || ""}
                             onChange={(e) =>
                               handleInputChange(
-                                "consumableKey",
+                                "jokerKey",
                                 e.target.value,
                                 false
                               )
                             }
-                            placeholder="Enter consumable key"
+                            placeholder="Enter joker key"
                             separator={true}
-                            label="Consumable Key (Code Name)"
+                            label="Joker Key (Code Name)"
                             size="md"
                           />
                           <p className="text-xs text-white-darker -mt-2">
@@ -837,14 +869,14 @@ const EditConsumableInfo: React.FC<EditConsumableInfoProps> = ({
 
                           <div className="grid grid-cols-2 gap-4">
                             <InputDropdown
-                              value={formData.set}
-                              onChange={handleSetChange}
-                              options={setOptions}
+                              value={formData.rarity.toString()}
+                              onChange={handleRarityChange}
+                              options={rarityOptions}
                               separator={true}
-                              label="Consumable Set"
+                              label="Rarity"
                             />
                             <InputField
-                              value={formData.cost?.toString() || "3"}
+                              value={formData.cost?.toString() || "4"}
                               onChange={(e) =>
                                 handleNumberChange(
                                   "cost",
@@ -862,9 +894,40 @@ const EditConsumableInfo: React.FC<EditConsumableInfoProps> = ({
                           <div>
                             <h4 className="text-white-light font-medium text-base mb-3 justify-center pt-2 flex tracking-wider items-center gap-2">
                               <BoltIcon className="h-5 w-5 text-mint" />
-                              Consumable Properties
+                              Joker Properties
                             </h4>
                             <div className="space-y-4 rounded-lg border border-black-lighter p-4 bg-black-darker/30">
+                              <div>
+                                <p className="text-xs font-medium tracking-widest text-white-darker mb-2">
+                                  Compatibility
+                                </p>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2">
+                                  <Checkbox
+                                    id="blueprint_compat_edit"
+                                    label="Blueprint Compatible"
+                                    checked={
+                                      formData.blueprint_compat !== false
+                                    }
+                                    onChange={(checked) =>
+                                      handleCheckboxChange(
+                                        "blueprint_compat",
+                                        checked
+                                      )
+                                    }
+                                  />
+                                  <Checkbox
+                                    id="eternal_compat_edit"
+                                    label="Eternal Compatible"
+                                    checked={formData.eternal_compat !== false}
+                                    onChange={(checked) =>
+                                      handleCheckboxChange(
+                                        "eternal_compat",
+                                        checked
+                                      )
+                                    }
+                                  />
+                                </div>
+                              </div>
                               <div>
                                 <p className="text-xs font-medium tracking-widest text-white-darker mb-2">
                                   Default State
@@ -889,6 +952,82 @@ const EditConsumableInfo: React.FC<EditConsumableInfoProps> = ({
                                       )
                                     }
                                   />
+                                </div>
+                              </div>
+                              <div>
+                                <p className="text-xs font-medium tracking-widest text-white-darker mb-2">
+                                  Forced Spawning
+                                </p>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2">
+                                  <Checkbox
+                                    id="force_eternal_edit"
+                                    label="Always Spawn Eternal"
+                                    checked={formData.force_eternal === true}
+                                    onChange={(checked) =>
+                                      handleCheckboxChange(
+                                        "force_eternal",
+                                        checked
+                                      )
+                                    }
+                                  />
+                                  <Checkbox
+                                    id="force_perishable_edit"
+                                    label="Always Spawn Perishable"
+                                    checked={formData.force_perishable === true}
+                                    onChange={(checked) =>
+                                      handleCheckboxChange(
+                                        "force_perishable",
+                                        checked
+                                      )
+                                    }
+                                  />
+                                  <Checkbox
+                                    id="force_rental_edit"
+                                    label="Always Spawn Rental"
+                                    checked={formData.force_rental === true}
+                                    onChange={(checked) =>
+                                      handleCheckboxChange(
+                                        "force_rental",
+                                        checked
+                                      )
+                                    }
+                                  />
+                                </div>
+                              </div>
+                              <div>
+                                <p className="text-xs font-medium tracking-widest text-white-darker mb-2">
+                                  Shop Availability
+                                </p>
+                                <div className="grid grid-cols-1 gap-y-2">
+                                  <Checkbox
+                                    id="appears_in_shop_edit"
+                                    label={
+                                      formData.rarity === 4
+                                        ? "Force Appear in Shop (Legendary)"
+                                        : "Appears in Shop"
+                                    }
+                                    checked={formData.appears_in_shop !== false}
+                                    onChange={(checked) =>
+                                      handleCheckboxChange(
+                                        "appears_in_shop",
+                                        checked
+                                      )
+                                    }
+                                    disabled={false}
+                                  />
+                                  {formData.rarity === 4 && (
+                                    <p className="text-xs text-white-darker mt-1">
+                                      Legendary jokers don't normally appear in
+                                      shops. Enable this to force shop
+                                      appearance.
+                                    </p>
+                                  )}
+                                  {formData.rarity !== 4 &&
+                                    formData.appears_in_shop === false && (
+                                      <p className="text-xs text-white-darker mt-1">
+                                        This joker will not appear in shops.
+                                      </p>
+                                    )}
                                 </div>
                               </div>
                             </div>
@@ -960,6 +1099,29 @@ const EditConsumableInfo: React.FC<EditConsumableInfoProps> = ({
                         </div>
                       </div>
 
+                      {allVariables.length > 0 && (
+                        <div>
+                          <p className="text-white-light text-sm mb-3 font-medium">
+                            Variables
+                          </p>
+                          <div className="flex flex-wrap gap-2">
+                            {allVariables.map((variable, index) => (
+                              <button
+                                key={variable.id}
+                                onClick={() => insertVariable(index + 1)}
+                                className="px-3 py-1 bg-mint/20 border border-mint/40 rounded-md text-mint text-xs font-medium hover:bg-mint/30 transition-colors"
+                                title={
+                                  variable.description ||
+                                  `Insert ${variable.name} variable`
+                                }
+                              >
+                                {variable.name} (#{index + 1}#)
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
                       <div>
                         <p className="text-white-light text-sm mb-3 font-medium">
                           Special Effects
@@ -1003,7 +1165,7 @@ const EditConsumableInfo: React.FC<EditConsumableInfoProps> = ({
 
                   <div className="w-full -mt-2">
                     <InputField
-                      id="consumable-description-edit"
+                      id="joker-description-edit"
                       value={formData.description}
                       onChange={(e) =>
                         handleInputChange("description", e.target.value)
@@ -1013,7 +1175,7 @@ const EditConsumableInfo: React.FC<EditConsumableInfoProps> = ({
                       height="140px"
                       separator={true}
                       label="Description Text"
-                      placeholder="Describe your consumable's effects using Balatro formatting..."
+                      placeholder="Describe your joker's effects using Balatro formatting..."
                     />
                     {(() => {
                       const validationMsg = getValidationMessage("description");
@@ -1040,15 +1202,15 @@ const EditConsumableInfo: React.FC<EditConsumableInfoProps> = ({
             <Button variant="secondary" onClick={onClose} className="flex-1">
               Cancel
             </Button>
-            <Button variant="primary" onClick={handleSave} className="flex-1">
+            <Button
+              variant="primary"
+              onClick={handleSave}
+              onTouchEnd={handleSave}
+              className="flex-1"
+            >
               Save Changes
             </Button>
-            <Button
-              onClick={handleDelete}
-              onTouchEnd={handleDelete}
-              variant="danger"
-              className="px-8"
-            >
+            <Button onClick={handleDelete} variant="danger" className="px-8">
               Delete
             </Button>
           </div>
@@ -1056,23 +1218,23 @@ const EditConsumableInfo: React.FC<EditConsumableInfoProps> = ({
 
         <div className="flex-shrink-0 relative my-auto pb-40">
           <div className="relative pl-24" style={{ zIndex: 1000 }}>
-            <BalatroJokerCard
-              joker={{
+            <BalatroCard
+              type="joker"
+              data={{
                 id: formData.id,
                 name: formData.name,
                 description: formData.description,
                 imagePreview: formData.imagePreview,
                 overlayImagePreview: formData.overlayImagePreview,
-                rarity: formData.set,
                 cost: formData.cost,
-                blueprint_compat: true,
-                eternal_compat: true,
-                unlocked: formData.unlocked,
-                discovered: formData.discovered,
+                rarity: formData.rarity,
+                locVars: {
+                  vars: VariableValues,
+                },
               }}
               size="lg"
-              rarityName={getCurrentSetName(formData.set)}
-              rarityColor={getCurrentSetColor(formData.set)}
+              rarityName={getRarityDisplayName(formData.rarity, customRarities)}
+              rarityColor={getRarityBadgeColor(formData.rarity, customRarities)}
             />
           </div>
         </div>
@@ -1081,4 +1243,4 @@ const EditConsumableInfo: React.FC<EditConsumableInfoProps> = ({
   );
 };
 
-export default EditConsumableInfo;
+export default EditJokerInfo;

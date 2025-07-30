@@ -10,10 +10,10 @@ import {
   EyeSlashIcon,
 } from "@heroicons/react/24/solid";
 
-import Tooltip from "./generic/Tooltip";
-import { formatBalatroText } from "./generic/balatroTextFormatter";
-import { validateJokerName } from "./generic/validationUtils";
-import { ConsumableData } from "./data/BalatroUtils";
+import Tooltip from "../../generic/Tooltip";
+import { formatBalatroText } from "../../generic/balatroTextFormatter";
+import { validateJokerName } from "../../generic/validationUtils";
+import { ConsumableData } from "../../data/BalatroUtils";
 
 interface ConsumableCardProps {
   consumable: ConsumableData;

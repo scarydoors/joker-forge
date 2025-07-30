@@ -18,88 +18,18 @@ import {
   CurrencyDollarIcon,
 } from "@heroicons/react/24/solid";
 
-import Tooltip from "./generic/Tooltip";
-import { formatBalatroText } from "./generic/balatroTextFormatter";
-import type { Rule } from "./ruleBuilder/types";
-import { validateJokerName } from "./generic/validationUtils";
+import Tooltip from "../../generic/Tooltip";
+import { formatBalatroText } from "../../generic/balatroTextFormatter";
+import { validateJokerName } from "../../generic/validationUtils";
 
 import {
   getRarityDisplayName,
   getRarityBadgeColor,
   getAllRarities,
-  type CustomRarity,
-} from "./data/BalatroUtils";
-
-export interface UserVariable {
-  id: string;
-  name: string;
-  type?: "number" | "suit" | "rank" | "pokerhand";
-  description?: string;
-  initialValue?: number;
-  initialSuit?: "Spades" | "Hearts" | "Diamonds" | "Clubs";
-  initialRank?:
-    | "2"
-    | "3"
-    | "4"
-    | "5"
-    | "6"
-    | "7"
-    | "8"
-    | "9"
-    | "10"
-    | "Jack"
-    | "Queen"
-    | "King"
-    | "Ace";
-  initialPokerHand?:
-    | "High Card"
-    | "Pair"
-    | "Two Pair"
-    | "Three of a Kind"
-    | "Straight"
-    | "Flush"
-    | "Full House"
-    | "Flush House"
-    | "Four of a Kind"
-    | "Five of a Kind"
-    | "Straight Flush"
-    | "Royal Flush"
-    | "Flush House"
-    | "Flush Five";
-}
-
-export interface JokerData {
-  id: string;
-  name: string;
-  description: string;
-  imagePreview: string;
-  overlayImagePreview?: string;
-  rarity: number | string;
-  cost?: number;
-  blueprint_compat?: boolean;
-  eternal_compat?: boolean;
-  unlocked?: boolean;
-  discovered?: boolean;
-  force_eternal?: boolean;
-  force_perishable?: boolean;
-  force_rental?: boolean;
-  appears_in_shop?: boolean;
-  rules?: Rule[];
-  userVariables?: UserVariable[];
-  placeholderCreditIndex?: number;
-  jokerKey?: string;
-  hasUserUploadedImage?: boolean;
-}
-
-const slugify = (text: string): string => {
-  return (
-    text
-      .toLowerCase()
-      .replace(/[\s\W_]+/g, "")
-      .replace(/^[\d]/, "_$&") ||
-    `joker_${Math.random().toString(36).substring(2, 8)}`
-  );
-};
+  RarityData,
+  type JokerData,
+  slugify,
+} from "../../data/BalatroUtils";
 
 interface JokerCardProps {
   joker: JokerData;
@@ -109,7 +39,7 @@ interface JokerCardProps {
   onDuplicate: () => void;
   onExport: () => void;
   onQuickUpdate: (updates: Partial<JokerData>) => void;
-  customRarities?: CustomRarity[];
+  customRarities?: RarityData[];
   modPrefix: string;
   showConfirmation: (options: {
     type?: "default" | "warning" | "danger" | "success";
