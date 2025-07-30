@@ -12,6 +12,7 @@ export const generateEditDiscardReturn = (
   sameTypeCount: number = 0
 ): EffectReturn => {
   const operation = effect.params?.operation || "add";
+  const duration = effect.params?.duration || "permanent";
   const effectValue = effect.params.value;
   const parsed = parseGameVariable(effectValue);
   const rangeParsed = parseRangeVariable(effectValue);
@@ -46,49 +47,66 @@ export const generateEditDiscardReturn = (
   const customMessage = effect.customMessage;
   let statement = "";
 
+  let editDiscardCode = "";
+
   switch (operation) {
     case "add": {
+      if (duration === "permanent") {
+        editDiscardCode = `
+        G.GAME.round_resets.discards = G.GAME.round_resets.discards + ${valueCode}
+        ease_discard(${valueCode})
+        `;
+      } else if (duration === "round") {
+        editDiscardCode = `G.GAME.current_round.discards_left = G.GAME.current_round.discards_left + ${valueCode}`;
+      }
       const addMessage = customMessage
         ? `"${customMessage}"`
         : `"+"..tostring(${valueCode}).." Discard"`;
       statement = `func = function()
                 card_eval_status_text(context.blueprint_card or card, 'extra', nil, nil, nil, {message = ${addMessage}, colour = G.C.ORANGE})
-                G.GAME.current_round.discards_left = G.GAME.current_round.discards_left + ${valueCode}
+                ${editDiscardCode}
                 return true
             end`;
       break;
     }
     case "subtract": {
+      if (duration === "permanent") {
+        editDiscardCode = `
+        G.GAME.round_resets.discards = G.GAME.round_resets.discards - ${valueCode}
+        ease_discard(-${valueCode})
+        `;
+      } else if (duration === "round") {
+        editDiscardCode = `G.GAME.current_round.discards_left = G.GAME.current_round.discards_left - ${valueCode}`;
+      }
       const subtractMessage = customMessage
         ? `"${customMessage}"`
         : `"-"..tostring(${valueCode}).." Discard"`;
       statement = `func = function()
                 card_eval_status_text(context.blueprint_card or card, 'extra', nil, nil, nil, {message = ${subtractMessage}, colour = G.C.RED})
-                G.GAME.current_round.discards_left = math.max(0, G.GAME.current_round.discards_left - ${valueCode})
+                ${editDiscardCode}
                 return true
             end`;
       break;
     }
     case "set": {
+      if (duration === "permanent") {
+        editDiscardCode = `
+        G.GAME.round_resets.discards = ${valueCode}
+        ease_discard(${valueCode} - G.GAME.current_round.discards_left)
+        `;
+      } else if (duration === "round") {
+        editDiscardCode = `G.GAME.current_round.discards_left = ${valueCode}`;
+      }
       const setMessage = customMessage
         ? `"${customMessage}"`
         : `"Set to "..tostring(${valueCode}).." Discards"`;
       statement = `func = function()
                 card_eval_status_text(context.blueprint_card or card, 'extra', nil, nil, nil, {message = ${setMessage}, colour = G.C.BLUE})
-                G.GAME.current_round.discards_left = ${valueCode}
+                ${editDiscardCode}
+                G.GAME.round_resets.hands = ${duration === "permanent" ? valueCode : "G.GAME.round_resets.hands"}
                 return true
             end`;
       break;
-    }
-    default: {
-      const defaultMessage = customMessage
-        ? `"${customMessage}"`
-        : `"+"..tostring(${valueCode}).." Discard"`;
-      statement = `func = function()
-                card_eval_status_text(context.blueprint_card or card, 'extra', nil, nil, nil, {message = ${defaultMessage}, colour = G.C.ORANGE})
-                G.GAME.current_round.discards_left = G.GAME.current_round.discards_left + ${valueCode}
-                return true
-            end`;
     }
   }
 

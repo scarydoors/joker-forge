@@ -276,6 +276,16 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
         default: "add",
       },
       {
+        id: "duration",
+        type: "select",
+        label: "Duration",
+        options: [
+          { value: "permanent", label: "Permanent" },
+          { value: "round", label: "This Round" },
+        ],
+        default: "permanent",
+      },
+      {
         id: "value",
         type: "number",
         label: "Amount",
@@ -301,6 +311,16 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
           { value: "set", label: "Set to" },
         ],
         default: "add",
+      },
+      {
+        id: "duration",
+        type: "select",
+        label: "Duration",
+        options: [
+          { value: "permanent", label: "Permanent" },
+          { value: "round", label: "This Round" },
+        ],
+        default: "permanent",
       },
       {
         id: "value",
