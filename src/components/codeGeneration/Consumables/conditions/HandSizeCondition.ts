@@ -1,33 +1,32 @@
 import type { Rule } from "../../../ruleBuilder/types";
+import { generateGameVariableCode } from "../gameVariableUtils";
 
-export const generateHandSizeConditionCode = (rules: Rule[]): string | null => {
-  const condition = rules[0].conditionGroups[0].conditions[0];
-  const operator = (condition.params?.operator as string) || "equals";
+export const generateHandSizeConditionCode = (rules: Rule[]): string => {
+  if (rules.length === 0) return "";
+
+  const rule = rules[0];
+  const condition = rule.conditionGroups?.[0]?.conditions?.[0];
+  if (!condition || condition.type !== "hand_size") return "";
+
+  const operator = condition.params?.operator || "greater_than";
   const value = condition.params?.value || 8;
 
-  let comparison = "";
-  switch (operator) {
-    case "equals":
-      comparison = `== ${value}`;
-      break;
-    case "not_equals":
-      comparison = `~= ${value}`;
-      break;
-    case "greater_than":
-      comparison = `> ${value}`;
-      break;
-    case "less_than":
-      comparison = `< ${value}`;
-      break;
-    case "greater_equals":
-      comparison = `>= ${value}`;
-      break;
-    case "less_equals":
-      comparison = `<= ${value}`;
-      break;
-    default:
-      comparison = `== ${value}`;
-  }
+  const valueCode = generateGameVariableCode(value);
 
-  return `G.hand.config.card_limit ${comparison}`;
+  switch (operator) {
+    case "greater_than":
+      return `G.hand.config.card_limit > ${valueCode}`;
+    case "greater_than_or_equal":
+      return `G.hand.config.card_limit >= ${valueCode}`;
+    case "less_than":
+      return `G.hand.config.card_limit < ${valueCode}`;
+    case "less_than_or_equal":
+      return `G.hand.config.card_limit <= ${valueCode}`;
+    case "equal":
+      return `G.hand.config.card_limit == ${valueCode}`;
+    case "not_equal":
+      return `G.hand.config.card_limit ~= ${valueCode}`;
+    default:
+      return `G.hand.config.card_limit > ${valueCode}`;
+  }
 };

@@ -1,11 +1,14 @@
 import type { Effect } from "../../../ruleBuilder/types";
 import type { EffectReturn } from "../effectUtils";
+import { generateGameVariableCode } from "../gameVariableUtils";
 
 export const generateEditDiscardsReturn = (effect: Effect): EffectReturn => {
   const operation = effect.params?.operation || "add";
   const duration = effect.params?.duration || "permanent";
   const value = effect.params?.value || 1;
   const customMessage = effect.customMessage;
+
+  const valueCode = generateGameVariableCode(value);
 
   let discardsCode = "";
   let editDiscardCode = "";
@@ -14,15 +17,15 @@ export const generateEditDiscardsReturn = (effect: Effect): EffectReturn => {
     case "add": {
       if (duration === "permanent") {
         editDiscardCode = `
-        G.GAME.round_resets.discards = G.GAME.round_resets.discards + ${value}
-        ease_discard(${value})
+        G.GAME.round_resets.discards = G.GAME.round_resets.discards + ${valueCode}
+        ease_discard(${valueCode})
         `;
       } else if (duration === "round") {
-        editDiscardCode = `G.GAME.current_round.discards_left = G.GAME.current_round.discards_left + ${value}`;
+        editDiscardCode = `G.GAME.current_round.discards_left = G.GAME.current_round.discards_left + ${valueCode}`;
       }
       const addMessage = customMessage
         ? `"${customMessage}"`
-        : `"+"..tostring(${value}).." Discard"`;
+        : `"+"..tostring(${valueCode}).." Discard"`;
       discardsCode = `
             __PRE_RETURN_CODE__
             G.E_MANAGER:add_event(Event({
@@ -41,15 +44,15 @@ export const generateEditDiscardsReturn = (effect: Effect): EffectReturn => {
     case "subtract": {
       if (duration === "permanent") {
         editDiscardCode = `
-        G.GAME.round_resets.discards = G.GAME.round_resets.discards - ${value}
-        ease_discard(-${value})
+        G.GAME.round_resets.discards = G.GAME.round_resets.discards - ${valueCode}
+        ease_discard(-${valueCode})
         `;
       } else if (duration === "round") {
-        editDiscardCode = `G.GAME.current_round.discards_left = G.GAME.current_round.discards_left - ${value}`;
+        editDiscardCode = `G.GAME.current_round.discards_left = G.GAME.current_round.discards_left - ${valueCode}`;
       }
       const subtractMessage = customMessage
         ? `"${customMessage}"`
-        : `"-"..tostring(${value}).." Discard"`;
+        : `"-"..tostring(${valueCode}).." Discard"`;
       discardsCode = `
             __PRE_RETURN_CODE__
             G.E_MANAGER:add_event(Event({
@@ -68,18 +71,18 @@ export const generateEditDiscardsReturn = (effect: Effect): EffectReturn => {
     case "set": {
       if (duration === "permanent") {
         editDiscardCode = `
-        G.GAME.round_resets.discards = ${value}
-        ease_discard(${value} - G.GAME.current_round.discards_left)
+        G.GAME.round_resets.discards = ${valueCode}
+        ease_discard(${valueCode} - G.GAME.current_round.discards_left)
         `;
       } else if (duration === "round") {
-        editDiscardCode = `G.GAME.current_round.discards_left = ${value}`;
+        editDiscardCode = `G.GAME.current_round.discards_left = ${valueCode}`;
       }
       const setMessage = customMessage
         ? `"${customMessage}"`
-        : `"Set to "..tostring(${value}).." Discards"`;
+        : `"Set to "..tostring(${valueCode}).." Discards"`;
       discardsCode = `
             __PRE_RETURN_CODE__
-            local mod = ${value} - G.GAME.round_resets.discards
+            local mod = ${valueCode} - G.GAME.round_resets.discards
             G.E_MANAGER:add_event(Event({
                 trigger = 'after',
                 delay = 0.4,
@@ -95,9 +98,14 @@ export const generateEditDiscardsReturn = (effect: Effect): EffectReturn => {
     }
   }
 
+  const configVariables =
+    typeof value === "string" && value.startsWith("GAMEVAR:")
+      ? []
+      : [`discards_value = ${value}`];
+
   return {
     statement: discardsCode,
     colour: "G.C.ORANGE",
-    configVariables: [`discards_value = ${value}`],
+    configVariables,
   };
 };

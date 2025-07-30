@@ -1,35 +1,32 @@
 import type { Rule } from "../../../ruleBuilder/types";
+import { generateGameVariableCode } from "../gameVariableUtils";
 
-export const generateAnteLevelConditionCode = (
-  rules: Rule[]
-): string | null => {
-  const condition = rules[0].conditionGroups[0].conditions[0];
-  const operator = (condition.params?.operator as string) || "greater_equals";
+export const generateAnteLevelConditionCode = (rules: Rule[]): string => {
+  if (rules.length === 0) return "";
+
+  const rule = rules[0];
+  const condition = rule.conditionGroups?.[0]?.conditions?.[0];
+  if (!condition || condition.type !== "ante_level") return "";
+
+  const operator = condition.params?.operator || "greater_than";
   const value = condition.params?.value || 1;
 
-  let comparison = "";
-  switch (operator) {
-    case "equals":
-      comparison = `== ${value}`;
-      break;
-    case "not_equals":
-      comparison = `~= ${value}`;
-      break;
-    case "greater_than":
-      comparison = `> ${value}`;
-      break;
-    case "less_than":
-      comparison = `< ${value}`;
-      break;
-    case "greater_equals":
-      comparison = `>= ${value}`;
-      break;
-    case "less_equals":
-      comparison = `<= ${value}`;
-      break;
-    default:
-      comparison = `>= ${value}`;
-  }
+  const valueCode = generateGameVariableCode(value);
 
-  return `G.GAME.round_resets.ante ${comparison}`;
+  switch (operator) {
+    case "greater_than":
+      return `G.GAME.round_resets.ante > ${valueCode}`;
+    case "greater_than_or_equal":
+      return `G.GAME.round_resets.ante >= ${valueCode}`;
+    case "less_than":
+      return `G.GAME.round_resets.ante < ${valueCode}`;
+    case "less_than_or_equal":
+      return `G.GAME.round_resets.ante <= ${valueCode}`;
+    case "equal":
+      return `G.GAME.round_resets.ante == ${valueCode}`;
+    case "not_equal":
+      return `G.GAME.round_resets.ante ~= ${valueCode}`;
+    default:
+      return `G.GAME.round_resets.ante > ${valueCode}`;
+  }
 };

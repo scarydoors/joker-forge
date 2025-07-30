@@ -1,11 +1,14 @@
 import type { Effect } from "../../../ruleBuilder/types";
 import type { EffectReturn } from "../effectUtils";
+import { generateGameVariableCode } from "../gameVariableUtils";
 
 export const generateEditHandsReturn = (effect: Effect): EffectReturn => {
   const operation = effect.params?.operation || "add";
-  const duration = effect.params?.duration || "permanent"
+  const duration = effect.params?.duration || "permanent";
   const value = effect.params?.value || 1;
   const customMessage = effect.customMessage;
+
+  const valueCode = generateGameVariableCode(value);
 
   let handsCode = "";
   let editHandCode = "";
@@ -14,15 +17,15 @@ export const generateEditHandsReturn = (effect: Effect): EffectReturn => {
     case "add": {
       if (duration === "permanent") {
         editHandCode = `
-        G.GAME.round_resets.hands = G.GAME.round_resets.hands + ${value}
-        ease_hands_played(${value})
+        G.GAME.round_resets.hands = G.GAME.round_resets.hands + ${valueCode}
+        ease_hands_played(${valueCode})
         `;
       } else if (duration === "round") {
-        editHandCode = `G.GAME.current_round.hands_left = G.GAME.current_round.hands_left + ${value}`;
+        editHandCode = `G.GAME.current_round.hands_left = G.GAME.current_round.hands_left + ${valueCode}`;
       }
       const addMessage = customMessage
         ? `"${customMessage}"`
-        : `"+"..tostring(${value}).." Hand"`;
+        : `"+"..tostring(${valueCode}).." Hand"`;
       handsCode = `
             __PRE_RETURN_CODE__
             G.E_MANAGER:add_event(Event({
@@ -41,15 +44,15 @@ export const generateEditHandsReturn = (effect: Effect): EffectReturn => {
     case "subtract": {
       if (duration === "permanent") {
         editHandCode = `
-        G.GAME.round_resets.hands = G.GAME.round_resets.hands - ${value}
-        ease_hands_played(-${value})
+        G.GAME.round_resets.hands = G.GAME.round_resets.hands - ${valueCode}
+        ease_hands_played(-${valueCode})
         `;
       } else if (duration === "round") {
-        editHandCode = `G.GAME.current_round.hands_left = G.GAME.current_round.hands_left - ${value}`;
+        editHandCode = `G.GAME.current_round.hands_left = G.GAME.current_round.hands_left - ${valueCode}`;
       }
       const subtractMessage = customMessage
         ? `"${customMessage}"`
-        : `"-"..tostring(${value}).." Hand"`;
+        : `"-"..tostring(${valueCode}).." Hand"`;
       handsCode = `
             __PRE_RETURN_CODE__
             G.E_MANAGER:add_event(Event({
@@ -68,18 +71,18 @@ export const generateEditHandsReturn = (effect: Effect): EffectReturn => {
     case "set": {
       if (duration === "permanent") {
         editHandCode = `
-        G.GAME.round_resets.hands = ${value}
-        ease_hands_played(${value} - G.GAME.current_round.hands_left)
+        G.GAME.round_resets.hands = ${valueCode}
+        ease_hands_played(${valueCode} - G.GAME.current_round.hands_left)
         `;
       } else if (duration === "round") {
-        editHandCode = `G.GAME.current_round.hands_left = ${value}`;
+        editHandCode = `G.GAME.current_round.hands_left = ${valueCode}`;
       }
       const setMessage = customMessage
         ? `"${customMessage}"`
-        : `"Set to "..tostring(${value}).." Hands"`;
+        : `"Set to "..tostring(${valueCode}).." Hands"`;
       handsCode = `
             __PRE_RETURN_CODE__
-            local mod = ${value} - G.GAME.round_resets.hands
+            local mod = ${valueCode} - G.GAME.round_resets.hands
             G.E_MANAGER:add_event(Event({
                 trigger = 'after',
                 delay = 0.4,
@@ -95,9 +98,14 @@ export const generateEditHandsReturn = (effect: Effect): EffectReturn => {
     }
   }
 
+  const configVariables =
+    typeof value === "string" && value.startsWith("GAMEVAR:")
+      ? []
+      : [`hands_value = ${value}`];
+
   return {
     statement: handsCode,
     colour: "G.C.GREEN",
-    configVariables: [`hands_value = ${value}`],
+    configVariables,
   };
 };

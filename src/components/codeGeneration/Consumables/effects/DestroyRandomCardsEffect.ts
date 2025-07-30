@@ -1,11 +1,14 @@
 import type { Effect } from "../../../ruleBuilder/types";
 import type { EffectReturn } from "../effectUtils";
+import { generateGameVariableCode } from "../gameVariableUtils";
 
 export const generateDestroyRandomCardsReturn = (
   effect: Effect
 ): EffectReturn => {
   const count = effect.params?.count || 1;
   const customMessage = effect.customMessage;
+
+  const countCode = generateGameVariableCode(count);
 
   const destroyCode = `
             local destroyed_cards = {}
@@ -20,7 +23,7 @@ export const generateDestroyRandomCardsReturn = (
 
             pseudoshuffle(temp_hand, 12345)
 
-            for i = 1, card.ability.extra.destroy_count do destroyed_cards[#destroyed_cards + 1] = temp_hand[i] end
+            for i = 1, ${countCode} do destroyed_cards[#destroyed_cards + 1] = temp_hand[i] end
 
             G.E_MANAGER:add_event(Event({
                 trigger = 'after',
@@ -35,10 +38,15 @@ export const generateDestroyRandomCardsReturn = (
 
             delay(0.5)`;
 
+  const configVariables =
+    typeof count === "string" && count.startsWith("GAMEVAR:")
+      ? []
+      : [`destroy_count = ${count}`];
+
   const result: EffectReturn = {
     statement: destroyCode,
     colour: "G.C.RED",
-    configVariables: [`destroy_count = ${count}`],
+    configVariables,
   };
 
   if (customMessage) {

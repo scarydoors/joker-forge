@@ -1,32 +1,32 @@
 import type { Rule } from "../../../ruleBuilder/types";
+import { generateGameVariableCode } from "../gameVariableUtils";
 
-export const generatePlayerMoneyConditionCode = (
-  rules: Rule[]
-): string | null => {
-  const condition = rules[0].conditionGroups[0].conditions[0];
-  const operator = (condition.params?.operator as string) || "greater_equals";
-  const value = condition.params?.value || 5;
+export const generatePlayerMoneyConditionCode = (rules: Rule[]): string => {
+  if (rules.length === 0) return "";
 
-  let comparison = "";
+  const rule = rules[0];
+  const condition = rule.conditionGroups?.[0]?.conditions?.[0];
+  if (!condition || condition.type !== "player_money") return "";
+
+  const operator = condition.params?.operator || "greater_than";
+  const value = condition.params?.value || 0;
+
+  const valueCode = generateGameVariableCode(value);
+
   switch (operator) {
-    case "equals":
-      comparison = `== to_big(${value})`;
-      break;
     case "greater_than":
-      comparison = `> to_big(${value})`;
-      break;
+      return `G.GAME.dollars > ${valueCode}`;
+    case "greater_than_or_equal":
+      return `G.GAME.dollars >= ${valueCode}`;
     case "less_than":
-      comparison = `< to_big(${value})`;
-      break;
-    case "greater_equals":
-      comparison = `>= to_big(${value})`;
-      break;
-    case "less_equals":
-      comparison = `<= to_big(${value})`;
-      break;
+      return `G.GAME.dollars < ${valueCode}`;
+    case "less_than_or_equal":
+      return `G.GAME.dollars <= ${valueCode}`;
+    case "equal":
+      return `G.GAME.dollars == ${valueCode}`;
+    case "not_equal":
+      return `G.GAME.dollars ~= ${valueCode}`;
     default:
-      comparison = `>= to_big(${value})`;
+      return `G.GAME.dollars > ${valueCode}`;
   }
-
-  return `G.GAME.dollars ${comparison}`;
 };

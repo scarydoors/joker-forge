@@ -1,5 +1,6 @@
 import type { Effect } from "../../../ruleBuilder/types";
 import type { EffectReturn } from "../effectUtils";
+import { generateGameVariableCode } from "../gameVariableUtils";
 
 export const generateCreateConsumableReturn = (
   effect: Effect
@@ -9,12 +10,14 @@ export const generateCreateConsumableReturn = (
   const count = effect.params?.count || 1;
   const customMessage = effect.customMessage;
 
+  const countCode = generateGameVariableCode(count);
+
   let createCode = "";
 
   if (set === "random") {
     createCode = `
             __PRE_RETURN_CODE__
-            for i = 1, math.min(card.ability.extra.consumable_count, G.consumeables.config.card_limit - #G.consumeables.cards) do
+            for i = 1, math.min(${countCode}, G.consumeables.config.card_limit - #G.consumeables.cards) do
                 G.E_MANAGER:add_event(Event({
                     trigger = 'after',
                     delay = 0.4,
@@ -35,7 +38,7 @@ export const generateCreateConsumableReturn = (
   } else if (specificCard === "random") {
     createCode = `
             __PRE_RETURN_CODE__
-            for i = 1, math.min(card.ability.extra.consumable_count, G.consumeables.config.card_limit - #G.consumeables.cards) do
+            for i = 1, math.min(${countCode}, G.consumeables.config.card_limit - #G.consumeables.cards) do
                 G.E_MANAGER:add_event(Event({
                     trigger = 'after',
                     delay = 0.4,
@@ -54,7 +57,7 @@ export const generateCreateConsumableReturn = (
   } else {
     createCode = `
             __PRE_RETURN_CODE__
-            for i = 1, math.min(card.ability.extra.consumable_count, G.consumeables.config.card_limit - #G.consumeables.cards) do
+            for i = 1, math.min(${countCode}, G.consumeables.config.card_limit - #G.consumeables.cards) do
                 G.E_MANAGER:add_event(Event({
                     trigger = 'after',
                     delay = 0.4,
@@ -72,10 +75,15 @@ export const generateCreateConsumableReturn = (
             __PRE_RETURN_CODE_END__`;
   }
 
+  const configVariables =
+    typeof count === "string" && count.startsWith("GAMEVAR:")
+      ? []
+      : [`consumable_count = ${count}`];
+
   const result: EffectReturn = {
     statement: createCode,
     colour: "G.C.SECONDARY_SET.Tarot",
-    configVariables: [`consumable_count = ${count}`],
+    configVariables,
   };
 
   if (customMessage) {

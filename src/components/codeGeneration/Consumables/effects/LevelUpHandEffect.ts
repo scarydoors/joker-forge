@@ -1,10 +1,13 @@
 import type { Effect } from "../../../ruleBuilder/types";
 import type { EffectReturn } from "../effectUtils";
+import { generateGameVariableCode } from "../gameVariableUtils";
 
 export const generateLevelUpHandReturn = (effect: Effect): EffectReturn => {
   const handType = effect.params?.hand_type || "Pair";
   const levels = effect.params?.levels || 1;
   const customMessage = effect.customMessage;
+
+  const levelsCode = generateGameVariableCode(levels);
 
   let levelUpCode = "";
 
@@ -44,10 +47,10 @@ export const generateLevelUpHandReturn = (effect: Effect): EffectReturn => {
                     return true
                 end
             }))
-            update_hand_text({ sound = 'button', volume = 0.7, pitch = 0.9, delay = 0 }, { level = '+${levels}' })
+            update_hand_text({ sound = 'button', volume = 0.7, pitch = 0.9, delay = 0 }, { level = '+'..tostring(${levelsCode}) })
             delay(1.3)
             for poker_hand_key, _ in pairs(G.GAME.hands) do
-                for i = 1, ${levels} do
+                for i = 1, ${levelsCode} do
                     level_up_hand(card, poker_hand_key, true)
                 end
             end
@@ -90,7 +93,7 @@ export const generateLevelUpHandReturn = (effect: Effect): EffectReturn => {
                     return true
                 end
             }))
-            update_hand_text({ sound = 'button', volume = 0.7, pitch = 0.9, delay = 0 }, { level = '+${levels}' })
+            update_hand_text({ sound = 'button', volume = 0.7, pitch = 0.9, delay = 0 }, { level = '+'..tostring(${levelsCode}) })
             delay(1.3)
             
             local hand_pool = {}
@@ -98,7 +101,7 @@ export const generateLevelUpHandReturn = (effect: Effect): EffectReturn => {
                 table.insert(hand_pool, hand_key)
             end
             local random_hand = pseudorandom_element(hand_pool, 'random_hand_levelup')
-            for i = 1, ${levels} do
+            for i = 1, ${levelsCode} do
                 level_up_hand(card, random_hand, true)
             end
             
@@ -148,9 +151,9 @@ export const generateLevelUpHandReturn = (effect: Effect): EffectReturn => {
                     return true
                 end
             }))
-            update_hand_text({ sound = 'button', volume = 0.7, pitch = 0.9, delay = 0 }, { level = '+${levels}' })
+            update_hand_text({ sound = 'button', volume = 0.7, pitch = 0.9, delay = 0 }, { level = '+'..tostring(${levelsCode}) })
             delay(1.3)
-            for i = 1, ${levels} do
+            for i = 1, ${levelsCode} do
                 level_up_hand(card, '${handType}', true)
             end
             update_hand_text({sound = 'button', volume = 0.7, pitch = 1.1, delay = 0}, 
@@ -162,13 +165,19 @@ export const generateLevelUpHandReturn = (effect: Effect): EffectReturn => {
             __PRE_RETURN_CODE_END__`;
   }
 
+  // Only add config variable if it's not a game variable and not "all" or "random"
+  const configVariables: string[] = [];
+  if (handType !== "random" && handType !== "all") {
+    configVariables.push(`hand_type = "${handType}"`);
+  }
+  if (!(typeof levels === "string" && levels.startsWith("GAMEVAR:"))) {
+    configVariables.push(`levels = ${levels}`);
+  }
+
   const result: EffectReturn = {
     statement: levelUpCode,
     colour: "G.C.SECONDARY_SET.Planet",
-    configVariables:
-      handType !== "random" && handType !== "all"
-        ? [`hand_type = "${handType}"`]
-        : undefined,
+    configVariables,
   };
 
   if (customMessage) {

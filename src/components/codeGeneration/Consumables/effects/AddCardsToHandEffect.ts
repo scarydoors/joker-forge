@@ -1,5 +1,6 @@
 import type { Effect } from "../../../ruleBuilder/types";
 import type { EffectReturn } from "../effectUtils";
+import { generateGameVariableCode } from "../gameVariableUtils";
 
 export const generateAddCardsToHandReturn = (effect: Effect): EffectReturn => {
   const enhancement = effect.params?.enhancement || "none";
@@ -10,6 +11,8 @@ export const generateAddCardsToHandReturn = (effect: Effect): EffectReturn => {
   const count = effect.params?.count || 1;
   const customMessage = effect.customMessage;
 
+  const countCode = generateGameVariableCode(count);
+
   let addCardsCode = `
             __PRE_RETURN_CODE__
             G.E_MANAGER:add_event(Event({
@@ -17,7 +20,7 @@ export const generateAddCardsToHandReturn = (effect: Effect): EffectReturn => {
                 delay = 0.7,
                 func = function()
                     local cards = {}
-                    for i = 1, card.ability.extra.add_cards_count do`;
+                    for i = 1, ${countCode} do`;
 
   // Handle rank selection
   if (rank === "Face Cards") {
@@ -137,10 +140,16 @@ export const generateAddCardsToHandReturn = (effect: Effect): EffectReturn => {
             delay(0.3)
             __PRE_RETURN_CODE_END__`;
 
+  // Only add config variable if it's not a game variable
+  const configVariables =
+    typeof count === "string" && count.startsWith("GAMEVAR:")
+      ? []
+      : [`add_cards_count = ${count}`];
+
   const result: EffectReturn = {
     statement: addCardsCode,
     colour: "G.C.SECONDARY_SET.Spectral",
-    configVariables: [`add_cards_count = ${count}`],
+    configVariables,
   };
 
   if (customMessage) {

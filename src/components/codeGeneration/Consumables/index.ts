@@ -3,6 +3,7 @@ import { ConsumableSetData } from "../../data/BalatroUtils";
 import { generateConditionChain } from "./conditionUtils";
 import { generateEffectReturnStatement } from "./effectUtils";
 import { slugify } from "../../data/BalatroUtils";
+import { extractGameVariablesFromRules } from "./gameVariableUtils";
 import type { Rule } from "../../ruleBuilder/types";
 
 interface ConsumableGenerationOptions {
@@ -152,6 +153,12 @@ const generateSingleConsumableCode = (
 
   const configItems: string[] = [];
 
+  // Extract game variables from rules and add them to config
+  const gameVariables = extractGameVariablesFromRules(activeRules);
+  gameVariables.forEach((gameVar) => {
+    configItems.push(`${gameVar.name} = ${gameVar.startsFrom}`);
+  });
+
   activeRules.forEach((rule) => {
     const regularEffects = rule.effects || [];
     const randomGroups = convertRandomGroupsForCodegen(rule.randomGroups || []);
@@ -221,7 +228,11 @@ const generateSingleConsumableCode = (
   consumableCode += `
     atlas = '${atlasKey}',`;
 
-  const locVarsCode = generateLocVarsFunction(consumable, modPrefix);
+  const locVarsCode = generateLocVarsFunction(
+    consumable,
+    gameVariables,
+    modPrefix
+  );
   if (locVarsCode) {
     consumableCode += `
     ${locVarsCode},`;
@@ -377,6 +388,12 @@ const generateCanUseFunction = (rules: Rule[], modPrefix: string): string => {
 
 const generateLocVarsFunction = (
   consumable: ConsumableData,
+  gameVariables: Array<{
+    name: string;
+    code: string;
+    startsFrom: number;
+    multiplier: number;
+  }>,
   modPrefix: string
 ): string | null => {
   const descriptionHasVariables = consumable.description.includes("#");
@@ -402,6 +419,75 @@ const generateLocVarsFunction = (
     (rule) => rule.randomGroups && rule.randomGroups.length > 0
   );
 
+  const wrapGameVariableCode = (code: string): string => {
+    if (code.includes("G.jokers.cards")) {
+      return code.replace(
+        "G.jokers.cards",
+        "(G.jokers and G.jokers.cards or {})"
+      );
+    }
+    if (code.includes("#G.jokers.cards")) {
+      return code.replace(
+        "#G.jokers.cards",
+        "(G.jokers and G.jokers.cards and #G.jokers.cards or 0)"
+      );
+    }
+    if (code.includes("#G.hand.cards")) {
+      return code.replace(
+        "#G.hand.cards",
+        "(G.hand and G.hand.cards and #G.hand.cards or 0)"
+      );
+    }
+    if (code.includes("#G.deck.cards")) {
+      return code.replace(
+        "#G.deck.cards",
+        "(G.deck and G.deck.cards and #G.deck.cards or 0)"
+      );
+    }
+    if (code.includes("#G.consumeables.cards")) {
+      return code.replace(
+        "#G.consumeables.cards",
+        "(G.consumeables and G.consumeables.cards and #G.consumeables.cards or 0)"
+      );
+    }
+    if (
+      code.includes("G.GAME") ||
+      code.includes("G.jokers") ||
+      code.includes("G.hand") ||
+      code.includes("G.deck") ||
+      code.includes("G.consumeables")
+    ) {
+      return `(${code} or 0)`;
+    }
+    return code;
+  };
+
+  const variableMapping: string[] = [];
+
+  // Add game variables
+  gameVariables.forEach((gameVar) => {
+    if (variableMapping.length >= maxVariableIndex) return;
+
+    let gameVarCode: string;
+    if (gameVar.multiplier === 1 && gameVar.startsFrom === 0) {
+      gameVarCode = wrapGameVariableCode(gameVar.code);
+    } else if (gameVar.startsFrom === 0) {
+      gameVarCode = `(${wrapGameVariableCode(gameVar.code)}) * ${
+        gameVar.multiplier
+      }`;
+    } else if (gameVar.multiplier === 1) {
+      gameVarCode = `card.ability.extra.${
+        gameVar.name
+      } + (${wrapGameVariableCode(gameVar.code)})`;
+    } else {
+      gameVarCode = `card.ability.extra.${
+        gameVar.name
+      } + (${wrapGameVariableCode(gameVar.code)}) * ${gameVar.multiplier}`;
+    }
+
+    variableMapping.push(gameVarCode);
+  });
+
   if (hasRandomGroups) {
     const randomGroups = activeRules.flatMap((rule) => rule.randomGroups || []);
     const denominators = [
@@ -410,35 +496,35 @@ const generateLocVarsFunction = (
 
     if (denominators.length === 1) {
       return `loc_vars = function(self, info_queue, card)
-        local numerator, denominator = SMODS.get_probability_vars(card, 1, card.ability.extra.odds, 'c_${modPrefix}_${consumable.consumableKey}')
-        return {vars = {numerator, denominator}}
+        local numerator, denominator = SMODS.get_probability_vars(card, 1, card.ability.extra.odds, 'c_${modPrefix}_${
+        consumable.consumableKey
+      }')
+        return {vars = {${variableMapping.join(", ")}${
+        variableMapping.length > 0 ? ", " : ""
+      }numerator, denominator}}
     end`;
     } else {
-      const variableMapping: string[] = [];
-      let currentIndex = 0;
-
+      const probabilityVars: string[] = [];
       denominators.forEach((index) => {
-        if (currentIndex >= maxVariableIndex) return;
-        if (index === 0) {
-          variableMapping.push("card.ability.extra.odds");
-        } else {
-          variableMapping.push(`card.ability.extra.odds${Number(index) + 1}`);
-        }
-        currentIndex++;
+        const varName =
+          index === 0
+            ? "card.ability.extra.odds"
+            : `card.ability.extra.odds${Number(index) + 1}`;
+        probabilityVars.push(varName);
       });
 
       return `loc_vars = function(self, info_queue, card)
-        return {vars = {${variableMapping
+        return {vars = {${[...variableMapping, ...probabilityVars]
           .slice(0, maxVariableIndex)
           .join(", ")}}}
     end`;
     }
   }
 
-  const variableMapping: string[] = [];
+  const finalVars = variableMapping.slice(0, maxVariableIndex);
 
   return `loc_vars = function(self, info_queue, card)
-        return {vars = {${variableMapping.join(", ")}}}
+        return {vars = {${finalVars.join(", ")}}}
     end`;
 };
 
