@@ -15,8 +15,21 @@ export const generateEditCardReturn = (
   let modificationCode = "";
 
   if (newRank !== "none" || newSuit !== "none") {
-    const suitParam = newSuit !== "none" ? `"${newSuit}"` : "nil";
-    const rankParam = newRank !== "none" ? `"${newRank}"` : "nil";
+    let suitParam = "nil";
+    let rankParam = "nil";
+
+    if (newSuit === "random") {
+      suitParam = "pseudorandom_element(SMODS.Suits, 'edit_card_suit').key";
+    } else if (newSuit !== "none") {
+      suitParam = `"${newSuit}"`;
+    }
+
+    if (newRank === "random") {
+      rankParam = "pseudorandom_element(SMODS.Ranks, 'edit_card_rank').key";
+    } else if (newRank !== "none") {
+      rankParam = `"${newRank}"`;
+    }
+
     modificationCode += `
                 assert(SMODS.change_base(context.other_card, ${suitParam}, ${rankParam}))`;
   }
@@ -24,6 +37,16 @@ export const generateEditCardReturn = (
   if (newEnhancement === "remove") {
     modificationCode += `
                 context.other_card:set_ability(G.P_CENTERS.c_base)`;
+  } else if (newEnhancement === "random") {
+    modificationCode += `
+                local enhancement_pool = {}
+                for _, enhancement in pairs(G.P_CENTER_POOLS.Enhanced) do
+                    if enhancement.key ~= 'm_stone' then
+                        enhancement_pool[#enhancement_pool + 1] = enhancement
+                    end
+                end
+                local random_enhancement = pseudorandom_element(enhancement_pool, 'edit_card_enhancement')
+                context.other_card:set_ability(random_enhancement)`;
   } else if (newEnhancement !== "none") {
     modificationCode += `
                 context.other_card:set_ability(G.P_CENTERS.${newEnhancement})`;
@@ -32,6 +55,12 @@ export const generateEditCardReturn = (
   if (newSeal === "remove") {
     modificationCode += `
                 context.other_card:set_seal(nil)`;
+  } else if (newSeal === "random") {
+    modificationCode += `
+                local random_seal = SMODS.poll_seal({mod = 10})
+                if random_seal then
+                    context.other_card:set_seal(random_seal, true)
+                end`;
   } else if (newSeal !== "none") {
     modificationCode += `
                 context.other_card:set_seal("${newSeal}", true)`;
@@ -40,6 +69,12 @@ export const generateEditCardReturn = (
   if (newEdition === "remove") {
     modificationCode += `
                 context.other_card:set_edition(nil)`;
+  } else if (newEdition === "random") {
+    modificationCode += `
+                local random_edition = poll_edition('edit_card_edition', nil, true, true)
+                if random_edition then
+                    context.other_card:set_edition(random_edition, true)
+                end`;
   } else if (newEdition !== "none") {
     modificationCode += `
                 context.other_card:set_edition("${newEdition}", true)`;

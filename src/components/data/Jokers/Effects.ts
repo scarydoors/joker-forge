@@ -507,6 +507,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
         label: "New Rank",
         options: [
           { value: "none", label: "Don't Change" },
+          { value: "random", label: "Random" },
           ...RANKS.map((rank) => ({ value: rank.label, label: rank.label })),
         ],
         default: "none",
@@ -515,7 +516,11 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
         id: "new_suit",
         type: "select",
         label: "New Suit",
-        options: [{ value: "none", label: "Don't Change" }, ...SUITS],
+        options: [
+          { value: "none", label: "Don't Change" },
+          { value: "random", label: "Random" },
+          ...SUITS,
+        ],
         default: "none",
       },
       {
@@ -525,6 +530,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
         options: [
           { value: "none", label: "Don't Change" },
           { value: "remove", label: "Remove Enhancement" },
+          { value: "random", label: "Random" },
           ...ENHANCEMENTS,
         ],
         default: "none",
@@ -536,6 +542,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
         options: [
           { value: "none", label: "Don't Change" },
           { value: "remove", label: "Remove Seal" },
+          { value: "random", label: "Random" },
           ...SEALS,
         ],
         default: "none",
@@ -547,6 +554,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
         options: [
           { value: "none", label: "Don't Change" },
           { value: "remove", label: "Remove Edition" },
+          { value: "random", label: "Random" },
           ...EDITIONS,
         ],
         default: "none",
@@ -1225,7 +1233,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
     id: "beat_current_blind",
     label: "Beat Current Blind",
     description: "Instantly beat the current boss blind",
-    applicableTriggers: ['after_hand_played'],
+    applicableTriggers: ["after_hand_played"],
     params: [],
     category: "Game Rules",
   },
@@ -1662,10 +1670,10 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
         type: "select",
         label: "Juice Up Mode",
         options: [
-          {value: "constant",label:"Constant"},
-          {value: "onetime",label:"One-time"},
+          { value: "constant", label: "Constant" },
+          { value: "onetime", label: "One-time" },
         ],
-        default: "constant"
+        default: "constant",
       },
       {
         id: "scale",
@@ -1688,20 +1696,17 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
     id: "juice_up_card",
     label: "Juice Up The Card",
     description: "Make the Card play a animation",
-    applicableTriggers: [
-      "card_scored",
-      "card_held_in_hand",
-    ],
+    applicableTriggers: ["card_scored", "card_held_in_hand"],
     params: [
       {
         id: "mode",
         type: "select",
         label: "Juice Up Mode",
         options: [
-          {value: "constant",label:"Constant"},
-          {value: "onetime",label:"One-time"},
+          { value: "constant", label: "Constant" },
+          { value: "onetime", label: "One-time" },
         ],
-        default: "constant"
+        default: "constant",
       },
       {
         id: "scale",
