@@ -309,46 +309,82 @@ const CardRuleEditor: React.FC<CardRuleEditorProps> = ({
                 </button>
               </div>
 
-              <div className="grid grid-cols-2 gap-3 mb-3">
-                <div>
-                  <label className="block text-white-light text-sm font-medium mb-2">
-                    Weight
-                  </label>
-                  <div className="flex items-center gap-3">
-                    <input
-                      type="range"
-                      min="0"
-                      max="2"
-                      step="0.1"
-                      value={rule.weight ?? 1}
-                      onChange={(e) =>
-                        handleUpdateRule(index, {
-                          weight: parseFloat(e.target.value),
-                        })
-                      }
-                      className="flex-1 h-2 bg-black-lighter rounded appearance-none cursor-pointer"
-                    />
-                    <span className="text-mint font-mono w-12 text-sm">
-                      {(rule.weight ?? 1).toFixed(1)}
-                    </span>
+              {boosterType === "playing_card" ? (
+                <div className="grid grid-cols-2 gap-3 mb-3">
+                  <div>
+                    <label className="block text-white-light text-sm font-medium mb-2">
+                      Weight
+                    </label>
+                    <div className="flex items-center gap-3">
+                      <input
+                        type="range"
+                        min="0"
+                        max="2"
+                        step="0.1"
+                        value={rule.weight ?? 1}
+                        onChange={(e) =>
+                          handleUpdateRule(index, {
+                            weight: parseFloat(e.target.value),
+                          })
+                        }
+                        className="flex-1 h-2 bg-black-lighter rounded appearance-none cursor-pointer"
+                      />
+                      <span className="text-mint font-mono w-12 text-sm">
+                        {(rule.weight ?? 1).toFixed(1)}
+                      </span>
+                    </div>
                   </div>
-                </div>
-
-                <div>
                   <InputDropdown
-                    label="Specific Type"
-                    value={rule.specific_type || ""}
+                    label="Suit"
+                    value={rule.suit || ""}
                     onChange={(value) =>
-                      handleUpdateRule(index, {
-                        specific_type: value as "consumable" | "joker" | null,
-                        specific_key: "",
-                      })
+                      handleUpdateRule(index, { suit: value })
                     }
-                    options={specificTypeOptions}
+                    options={suitOptions}
                     size="sm"
                   />
                 </div>
-              </div>
+              ) : (
+                <div className="grid grid-cols-2 gap-3 mb-3">
+                  <div>
+                    <label className="block text-white-light text-sm font-medium mb-2">
+                      Weight
+                    </label>
+                    <div className="flex items-center gap-3">
+                      <input
+                        type="range"
+                        min="0"
+                        max="2"
+                        step="0.1"
+                        value={rule.weight ?? 1}
+                        onChange={(e) =>
+                          handleUpdateRule(index, {
+                            weight: parseFloat(e.target.value),
+                          })
+                        }
+                        className="flex-1 h-2 bg-black-lighter rounded appearance-none cursor-pointer"
+                      />
+                      <span className="text-mint font-mono w-12 text-sm">
+                        {(rule.weight ?? 1).toFixed(1)}
+                      </span>
+                    </div>
+                  </div>
+                  <div>
+                    <InputDropdown
+                      label="Specific Type"
+                      value={rule.specific_type || ""}
+                      onChange={(value) =>
+                        handleUpdateRule(index, {
+                          specific_type: value as "consumable" | "joker" | null,
+                          specific_key: "",
+                        })
+                      }
+                      options={specificTypeOptions}
+                      size="sm"
+                    />
+                  </div>
+                </div>
+              )}
 
               {rule.specific_type && (
                 <div className="mb-3">
@@ -432,15 +468,6 @@ const CardRuleEditor: React.FC<CardRuleEditorProps> = ({
 
                   {boosterType === "playing_card" && (
                     <>
-                      <InputDropdown
-                        label="Suit"
-                        value={rule.suit || ""}
-                        onChange={(value) =>
-                          handleUpdateRule(index, { suit: value })
-                        }
-                        options={suitOptions}
-                        size="sm"
-                      />
                       <InputDropdown
                         label="Rank"
                         value={rule.rank || ""}
