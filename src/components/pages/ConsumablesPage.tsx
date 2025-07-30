@@ -77,7 +77,7 @@ const ConsumableSetCard: React.FC<ConsumableSetCardProps> = ({
   const [editingName, setEditingName] = useState(false);
   const [editingShopRate, setEditingShopRate] = useState(false);
   const [tempName, setTempName] = useState(set.name);
-  const [tempShopRate, setTempShopRate] = useState(set.shop_rate || 1);
+  const [tempShopRate, setTempShopRate] = useState(set.shop_rate ?? 1);
 
   const handleNameSave = () => {
     const validation = validateJokerName(tempName);
@@ -181,7 +181,7 @@ const ConsumableSetCard: React.FC<ConsumableSetCardProps> = ({
                 onKeyDown={(e) => {
                   if (e.key === "Enter") handleShopRateSave();
                   if (e.key === "Escape") {
-                    setTempShopRate(set.shop_rate || 1);
+                    setTempShopRate(set.shop_rate ?? 1);
                     setEditingShopRate(false);
                   }
                 }}
@@ -192,11 +192,11 @@ const ConsumableSetCard: React.FC<ConsumableSetCardProps> = ({
               <span
                 className="text-white-light text-sm cursor-pointer hover:text-mint transition-colors"
                 onClick={() => {
-                  setTempShopRate(set.shop_rate || 1);
+                  setTempShopRate(set.shop_rate ?? 1);
                   setEditingShopRate(true);
                 }}
               >
-                {set.shop_rate || 1}
+                {set.shop_rate ?? 1}
               </span>
             )}
           </div>
@@ -967,7 +967,7 @@ const ConsumablesPage: React.FC<ConsumablesPageProps> = ({
       shader: setFormData.shader,
       collection_rows: setFormData.collection_rows || [4, 5],
       default_card: setFormData.default_card,
-      shop_rate: setFormData.shop_rate || 1,
+      shop_rate: setFormData.shop_rate ?? 1,
       collection_name:
         setFormData.collection_name || `${setFormData.name} Cards`,
     };
