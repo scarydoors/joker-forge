@@ -2,85 +2,136 @@ import React, { useState, useEffect } from "react";
 import { PhotoIcon } from "@heroicons/react/24/outline";
 import { BalatroText } from "./balatroTextFormatter";
 
-interface JokerData {
+interface BaseCardData {
   id: string;
   name: string;
   description: string;
-  imagePreview: string;
+  imagePreview?: string;
   overlayImagePreview?: string;
-  rarity: number | string;
   cost?: number;
-  blueprint_compat?: boolean;
-  eternal_compat?: boolean;
-  unlocked?: boolean;
-  discovered?: boolean;
-  locVars?: {
-    colours?: string[]
-    vars?: (string | number)[];
-  } 
 }
 
-interface BalatroJokerCardProps {
-  joker: JokerData;
+interface JokerCardData extends BaseCardData {
+  rarity: number | string;
+  locVars?: {
+    vars: (string | number)[];
+  };
+}
+
+interface ConsumableCardData extends BaseCardData {
+  set: string;
+}
+
+interface BoosterCardData extends BaseCardData {
+  config: {
+    extra: number;
+    choose: number;
+  };
+  booster_type: string;
+}
+
+type CardData = JokerCardData | ConsumableCardData | BoosterCardData;
+
+interface BalatroCardProps {
+  type: "joker" | "consumable" | "booster";
+  data: CardData;
   onClick?: () => void;
   className?: string;
   size?: "sm" | "md" | "lg";
-  rarityName: string;
-  rarityColor: string;
+
+  // Type-specific props
+  rarityName?: string;
+  rarityColor?: string;
+  setName?: string;
+  setColor?: string;
 }
 
-const BalatroJokerCard: React.FC<BalatroJokerCardProps> = ({
-  joker,
+const BalatroCard: React.FC<BalatroCardProps> = ({
+  type,
+  data,
   onClick,
   className = "",
   size = "md",
   rarityName,
   rarityColor,
+  setName,
+  setColor,
 }) => {
   const [imageError, setImageError] = useState(false);
   const [placeholderError, setPlaceholderError] = useState(false);
 
   useEffect(() => {
     setImageError(false);
-  }, [joker.imagePreview]);
+  }, [data.imagePreview]);
 
   const darkenColor = (hexColor: string, amount: number = 0.3): string => {
-    // Remove # if present
     const hex = hexColor.replace("#", "");
-
-    // Parse RGB values
     const r = parseInt(hex.substr(0, 2), 16);
     const g = parseInt(hex.substr(2, 2), 16);
     const b = parseInt(hex.substr(4, 2), 16);
 
-    // Darken each component
     const newR = Math.max(0, Math.floor(r * (1 - amount)));
     const newG = Math.max(0, Math.floor(g * (1 - amount)));
     const newB = Math.max(0, Math.floor(b * (1 - amount)));
 
-    // Convert back to hex
     const toHex = (n: number) => n.toString(16).padStart(2, "0");
     return `#${toHex(newR)}${toHex(newG)}${toHex(newB)}`;
   };
 
-  const getRarityStyles = () => {
-    const vanillaStyles: Record<string, { bg: string; shadow: string }> = {
-      "#009dff": { bg: "bg-balatro-blueshadow", shadow: "bg-balatro-blue" },
-      "#4BC292": { bg: "bg-balatro-greenshadow", shadow: "bg-balatro-green" },
-      "#fe5f55": { bg: "bg-balatro-redshadow", shadow: "bg-balatro-red" },
-      "#b26cbb": { bg: "bg-balatro-purpleshadow", shadow: "bg-balatro-purple" },
-    };
+  const getBadgeStyles = () => {
+    if (type === "joker" && rarityColor) {
+      const vanillaStyles: Record<string, { bg: string; shadow: string }> = {
+        "#009dff": { bg: "bg-balatro-blueshadow", shadow: "bg-balatro-blue" },
+        "#4BC292": { bg: "bg-balatro-greenshadow", shadow: "bg-balatro-green" },
+        "#fe5f55": { bg: "bg-balatro-redshadow", shadow: "bg-balatro-red" },
+        "#b26cbb": {
+          bg: "bg-balatro-purpleshadow",
+          shadow: "bg-balatro-purple",
+        },
+      };
 
-    // If it's a vanilla rarity, use the predefined styles
-    if (vanillaStyles[rarityColor]) {
-      return vanillaStyles[rarityColor];
+      if (vanillaStyles[rarityColor]) {
+        return vanillaStyles[rarityColor];
+      }
+
+      const shadowColor = darkenColor(rarityColor, 0.4);
+      return {
+        bg: shadowColor,
+        shadow: rarityColor,
+      };
     }
 
-    // For custom rarities, generate a darkened shadow color
-    const shadowColor = darkenColor(rarityColor, 0.4);
+    if (type === "consumable" && setColor) {
+      const vanillaStyles: Record<string, { bg: string; shadow: string }> = {
+        "#b26cbb": {
+          bg: "bg-balatro-purpleshadow",
+          shadow: "bg-balatro-purple",
+        },
+        "#13afce": {
+          bg: "bg-balatro-planetshadow",
+          shadow: "bg-balatro-planet",
+        },
+        "#4584fa": {
+          bg: "bg-balatro-spectralshadow",
+          shadow: "bg-balatro-spectral",
+        },
+      };
+
+      if (vanillaStyles[setColor]) {
+        return vanillaStyles[setColor];
+      }
+
+      const shadowColor = darkenColor(setColor, 0.4);
+      return {
+        bg: shadowColor,
+        shadow: setColor,
+      };
+    }
+
+    // Default for boosters
     return {
-      bg: shadowColor,
-      shadow: rarityColor,
+      bg: "bg-balatro-greenshadow",
+      shadow: "bg-balatro-green",
     };
   };
 
@@ -100,11 +151,56 @@ const BalatroJokerCard: React.FC<BalatroJokerCardProps> = ({
   };
 
   const currentSize = sizeClasses[size];
-  const rarityStyles = getRarityStyles();
-  const isVanillaRarity = rarityStyles.bg.startsWith("bg-");
+  const badgeStyles = getBadgeStyles();
+  const isVanillaBadge = badgeStyles.bg.startsWith("bg-");
 
   const handleImageError = () => {
     setImageError(true);
+  };
+
+  const getPlaceholderImage = () => {
+    switch (type) {
+      case "joker":
+        return "/images/placeholder-joker.png";
+      case "consumable":
+        return "/images/placeholder-consumable.png";
+      case "booster":
+        return "/images/placeholder-booster.png";
+      default:
+        return "/images/placeholder-joker.png";
+    }
+  };
+
+  const getBadgeText = () => {
+    if (type === "joker") {
+      return rarityName || "Common";
+    }
+    if (type === "consumable") {
+      return setName || "Tarot";
+    }
+    if (type === "booster") {
+      const boosterData = data as BoosterCardData;
+      const typeLabel = boosterData.booster_type
+        .split("_")
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(" ");
+      return `${typeLabel} Pack`;
+    }
+    return "";
+  };
+
+  const getLocVars = (): { colours?: string[] } | undefined => {
+    if (type === "joker") {
+      const jokerData = data as JokerCardData;
+      if (jokerData.locVars && Array.isArray(jokerData.locVars.vars)) {
+        // Only include string values for colours
+        const colours = jokerData.locVars.vars.filter(
+          (v) => typeof v === "string"
+        ) as string[];
+        return colours.length > 0 ? { colours } : undefined;
+      }
+    }
+    return undefined;
   };
 
   return (
@@ -115,10 +211,10 @@ const BalatroJokerCard: React.FC<BalatroJokerCardProps> = ({
       onClick={onClick}
     >
       <div className="flex flex-col items-center">
-        {joker.cost !== undefined && (
+        {data.cost !== undefined && (
           <div className="bg-cost-bg border-4 border-cost-border rounded-t-2xl px-4 py-1 -mb-1 z-10 relative">
             <span className="text-cost-text font-bold text-shadow-cost text-2xl">
-              ${joker.cost}
+              ${data.cost}
             </span>
           </div>
         )}
@@ -127,22 +223,22 @@ const BalatroJokerCard: React.FC<BalatroJokerCardProps> = ({
           className={`${
             currentSize.image
           } mb-2 flex items-center justify-center overflow-hidden relative z-10 ${
-            joker.cost !== undefined ? "rounded-t-none" : ""
+            data.cost !== undefined ? "rounded-t-none" : ""
           } `}
         >
-          {!imageError && joker.imagePreview ? (
+          {!imageError && data.imagePreview ? (
             <div className="relative w-full h-full">
               <img
-                src={joker.imagePreview}
-                alt={joker.name}
+                src={data.imagePreview}
+                alt={data.name}
                 className="w-full h-full object-cover pixelated"
                 draggable="false"
                 onError={handleImageError}
               />
-              {joker.overlayImagePreview && (
+              {data.overlayImagePreview && (
                 <img
-                  src={joker.overlayImagePreview}
-                  alt={`${joker.name} overlay`}
+                  src={data.overlayImagePreview}
+                  alt={`${data.name} overlay`}
                   className="absolute inset-0 w-full h-full object-cover pixelated"
                   draggable="false"
                 />
@@ -150,8 +246,8 @@ const BalatroJokerCard: React.FC<BalatroJokerCardProps> = ({
             </div>
           ) : !placeholderError ? (
             <img
-              src="/images/placeholder-joker.png"
-              alt="Placeholder Joker"
+              src={getPlaceholderImage()}
+              alt={`Placeholder ${type}`}
               className="w-full h-full"
               draggable="false"
               onError={() => setPlaceholderError(true)}
@@ -172,7 +268,7 @@ const BalatroJokerCard: React.FC<BalatroJokerCardProps> = ({
               <div className="bg-balatro-lightgrey rounded-2xl p-1">
                 <div className="bg-balatro-black rounded-xl p-3">
                   <h3 className="text-2xl mb-2 text-center text-balatro-white text-shadow-pixel">
-                    {joker.name || "New Joker"}
+                    {data.name || `New ${type}`}
                   </h3>
 
                   <div className="relative mb-3">
@@ -181,10 +277,10 @@ const BalatroJokerCard: React.FC<BalatroJokerCardProps> = ({
                       <div className="text-base text-center leading-4 relative z-10">
                         <BalatroText
                           text={
-                            joker.description ||
-                            "A custom joker with unique effects."
+                            data.description ||
+                            `A custom ${type} with unique effects.`
                           }
-                          locVars={joker.locVars}
+                          locVars={getLocVars()}
                           noWrap={true}
                         />
                       </div>
@@ -192,16 +288,16 @@ const BalatroJokerCard: React.FC<BalatroJokerCardProps> = ({
                   </div>
 
                   <div className="relative mx-6 mt-3">
-                    {isVanillaRarity ? (
+                    {isVanillaBadge ? (
                       <>
                         <div
-                          className={`absolute inset-0 ${rarityStyles.bg} rounded-xl translate-y-1`}
+                          className={`absolute inset-0 ${badgeStyles.bg} rounded-xl translate-y-1`}
                         />
                         <div
-                          className={`${rarityStyles.shadow} rounded-xl text-center text-lg text-balatro-white py-1 relative`}
+                          className={`${badgeStyles.shadow} rounded-xl text-center text-lg text-balatro-white py-1 relative`}
                         >
                           <span className="relative text-shadow-pixel">
-                            {rarityName}
+                            {getBadgeText()}
                           </span>
                         </div>
                       </>
@@ -209,14 +305,14 @@ const BalatroJokerCard: React.FC<BalatroJokerCardProps> = ({
                       <>
                         <div
                           className="absolute inset-0 rounded-xl translate-y-1"
-                          style={{ backgroundColor: rarityStyles.bg }}
+                          style={{ backgroundColor: badgeStyles.bg }}
                         />
                         <div
                           className="rounded-xl text-center text-lg text-balatro-white py-1 relative"
-                          style={{ backgroundColor: rarityStyles.shadow }}
+                          style={{ backgroundColor: badgeStyles.shadow }}
                         >
                           <span className="relative text-shadow-pixel">
-                            {rarityName}
+                            {getBadgeText()}
                           </span>
                         </div>
                       </>
@@ -232,4 +328,4 @@ const BalatroJokerCard: React.FC<BalatroJokerCardProps> = ({
   );
 };
 
-export default BalatroJokerCard;
+export default BalatroCard;
