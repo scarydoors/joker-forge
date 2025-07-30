@@ -67,6 +67,10 @@ export interface JokerData {
   force_eternal?: boolean;
   force_perishable?: boolean;
   force_rental?: boolean;
+  force_foil?: boolean;
+  force_holographic?: boolean;
+  force_polychrome?: boolean;
+  force_negative?: boolean;
   appears_in_shop?: boolean;
   rules?: Rule[];
   userVariables?: UserVariable[];
@@ -229,7 +233,7 @@ export const DataRegistry = {
 
   getConsumables: (): Array<{ value: string; label: string; set: string }> => {
     const custom = registryState.consumables.map((consumable) => ({
-      value: `${registryState.modPrefix}_${
+      value: `c_${registryState.modPrefix}_${
         consumable.consumableKey ||
         consumable.name.toLowerCase().replace(/\s+/g, "_")
       }`,
@@ -699,6 +703,17 @@ export const EDITIONS = [
 export const EDITION_KEYS = EDITIONS.map((edition) => edition.key);
 export const EDITION_VALUES = EDITIONS.map((edition) => edition.value);
 export const EDITION_LABELS = EDITIONS.map((edition) => edition.label);
+
+// Editions
+export const STICKERS = [
+  { key: "eternal", value: "eternal", label: "Eternal" },
+  { key: "rental", value: "rental", label: "Rental" },
+  { key: "perishable", value: "perishable", label: "Perishable" },
+] as const;
+
+export const STICKER_KEYS = STICKERS.map((sticker) => sticker.key);
+export const STICKER_VALUES = STICKERS.map((sticker) => sticker.value);
+export const STICKER_LABELS = STICKERS.map((sticker) => sticker.label);
 
 // Seals
 export const SEALS = [

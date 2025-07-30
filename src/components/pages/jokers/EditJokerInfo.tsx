@@ -996,6 +996,57 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
                               </div>
                               <div>
                                 <p className="text-xs font-medium tracking-widest text-white-darker mb-2">
+                                  Forced Spawning Editions
+                                </p>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2">
+                                  <Checkbox
+                                    id="force_foil_edit"
+                                    label="Always Spawn Foil"
+                                    checked={formData.force_foil === true}
+                                    onChange={(checked) =>
+                                      handleCheckboxChange(
+                                        "force_foil",
+                                        checked
+                                      )
+                                    }
+                                  />
+                                  <Checkbox
+                                    id="force_holographic_edit"
+                                    label="Always Spawn Holographic"
+                                    checked={formData.force_holographic === true}
+                                    onChange={(checked) =>
+                                      handleCheckboxChange(
+                                        "force_holographic",
+                                        checked
+                                      )
+                                    }
+                                  />
+                                  <Checkbox
+                                    id="force_polychrome_edit"
+                                    label="Always Spawn Polychrome"
+                                    checked={formData.force_polychrome === true}
+                                    onChange={(checked) =>
+                                      handleCheckboxChange(
+                                        "force_polychrome",
+                                        checked
+                                      )
+                                    }
+                                  />
+                                  <Checkbox
+                                    id="force_negative_edit"
+                                    label="Always Spawn Negative"
+                                    checked={formData.force_negative === true}
+                                    onChange={(checked) =>
+                                      handleCheckboxChange(
+                                        "force_negative",
+                                        checked
+                                      )
+                                    }
+                                  />
+                                </div>
+                              </div>
+                              <div>
+                                <p className="text-xs font-medium tracking-widest text-white-darker mb-2">
                                   Shop Availability
                                 </p>
                                 <div className="grid grid-cols-1 gap-y-2">

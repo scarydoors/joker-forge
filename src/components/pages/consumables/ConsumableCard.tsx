@@ -8,6 +8,7 @@ import {
   LockClosedIcon,
   EyeIcon,
   EyeSlashIcon,
+  ArrowDownTrayIcon,
 } from "@heroicons/react/24/solid";
 
 import Tooltip from "../../generic/Tooltip";
@@ -21,6 +22,7 @@ interface ConsumableCardProps {
   onEditRules: () => void;
   onDelete: () => void;
   onDuplicate: () => void;
+  onExport: () => void;
   onQuickUpdate: (updates: Partial<ConsumableData>) => void;
   setName: string;
   setColor: string;
@@ -97,6 +99,7 @@ const ConsumableCard: React.FC<ConsumableCardProps> = ({
   onEditInfo,
   onEditRules,
   onDuplicate,
+  onExport,
   onQuickUpdate,
   setName,
   setColor,
@@ -479,6 +482,20 @@ const ConsumableCard: React.FC<ConsumableCardProps> = ({
                       </div>
                     )}
                   </div>
+                </div>
+              </div>
+            </Tooltip>
+            <div className="w-px bg-black-lighter py-3"></div>
+            
+            <Tooltip content="Export Consumable" show={hoveredButton === "export"}>
+              <div
+                className="flex flex-1 transition-colors cursor-pointer group"
+                onClick={onExport}
+                onMouseEnter={() => handleButtonHover("export")}
+                onMouseLeave={handleButtonLeave}
+              >
+                <div className="flex-1 flex items-center justify-center py-3 px-3">
+                  <ArrowDownTrayIcon className="h-6 w-6 text-white group-hover:text-mint-lighter transition-colors" />
                 </div>
               </div>
             </Tooltip>
