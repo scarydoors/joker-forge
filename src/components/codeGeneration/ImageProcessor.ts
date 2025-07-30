@@ -1,9 +1,9 @@
 import JSZip from "jszip";
-import { JokerData } from "../JokerCard";
+import { JokerData, BoosterData } from "../data/BalatroUtils";
 import { ConsumableData } from "../data/BalatroUtils";
 
 export const processImages = async (
-  items: (JokerData | ConsumableData)[],
+  items: (JokerData | ConsumableData | BoosterData)[],
   scale: number = 1
 ): Promise<{
   atlasDataUrl: string;
@@ -17,10 +17,16 @@ export const processImages = async (
       throw new Error("Failed to get canvas context");
     }
 
+    // Disable image smoothing for crisp pixel art
+    ctx.imageSmoothingEnabled = false;
+
     const itemsPerRow = 10;
 
     const totalPositions = items.reduce((total, item) => {
-      return total + (item.overlayImagePreview ? 2 : 1);
+      return (
+        total +
+        ("overlayImagePreview" in item && item.overlayImagePreview ? 2 : 1)
+      );
     }, 0);
 
     const rows = Math.ceil(totalPositions / itemsPerRow);
@@ -78,7 +84,7 @@ export const processImages = async (
         })
       );
 
-      if (item.overlayImagePreview) {
+      if ("overlayImagePreview" in item && item.overlayImagePreview) {
         promises.push(
           new Promise<void>((resolve) => {
             const img = new Image();
@@ -113,7 +119,9 @@ export const processImages = async (
             };
 
             img.src =
-              item.overlayImagePreview || "/images/placeholder-joker.png";
+              ("overlayImagePreview" in item
+                ? item.overlayImagePreview
+                : null) || "/images/placeholder-joker.png";
           })
         );
       }
@@ -150,7 +158,8 @@ export const dataURLToBlob = (dataUrl: string): Blob => {
 export const addAtlasToZip = async (
   zip: JSZip,
   jokers: JokerData[],
-  consumables: ConsumableData[]
+  consumables: ConsumableData[],
+  boosters: BoosterData[] = []
 ): Promise<Record<string, Record<number, { x: number; y: number }>>> => {
   try {
     const assetsFolder = zip.folder("assets");
@@ -188,6 +197,22 @@ export const addAtlasToZip = async (
       assets2xFolder!.file("CustomConsumables.png", consumableAtlas2xBlob);
 
       soulPositions["consumables"] = consumableAtlas1xResult.soulPositions;
+    }
+
+    if (boosters.length > 0) {
+      const boosterAtlas1xResult = await processImages(boosters, 1);
+      const boosterAtlas1xBlob = dataURLToBlob(
+        boosterAtlas1xResult.atlasDataUrl
+      );
+      assets1xFolder!.file("CustomBoosters.png", boosterAtlas1xBlob);
+
+      const boosterAtlas2xResult = await processImages(boosters, 2);
+      const boosterAtlas2xBlob = dataURLToBlob(
+        boosterAtlas2xResult.atlasDataUrl
+      );
+      assets2xFolder!.file("CustomBoosters.png", boosterAtlas2xBlob);
+
+      soulPositions["boosters"] = boosterAtlas1xResult.soulPositions;
     }
 
     return soulPositions;

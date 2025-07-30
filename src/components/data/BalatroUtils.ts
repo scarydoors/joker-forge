@@ -1,10 +1,81 @@
 import { Rule } from "../ruleBuilder/types";
 
+export const slugify = (text: string): string => {
+  return (
+    text
+      .toLowerCase()
+      .replace(/[\s\W_]+/g, "")
+      .replace(/^[\d]/, "_$&") ||
+    `booster_${Math.random().toString(36).substring(2, 8)}`
+  );
+};
+
 // =============================================================================
 // DATA REGISTRY INTERFACES
 // =============================================================================
 
-export interface CustomRarity {
+export interface UserVariable {
+  id: string;
+  name: string;
+  type?: "number" | "suit" | "rank" | "pokerhand";
+  description?: string;
+  initialValue?: number;
+  initialSuit?: "Spades" | "Hearts" | "Diamonds" | "Clubs";
+  initialRank?:
+    | "2"
+    | "3"
+    | "4"
+    | "5"
+    | "6"
+    | "7"
+    | "8"
+    | "9"
+    | "10"
+    | "Jack"
+    | "Queen"
+    | "King"
+    | "Ace";
+  initialPokerHand?:
+    | "High Card"
+    | "Pair"
+    | "Two Pair"
+    | "Three of a Kind"
+    | "Straight"
+    | "Flush"
+    | "Full House"
+    | "Flush House"
+    | "Four of a Kind"
+    | "Five of a Kind"
+    | "Straight Flush"
+    | "Royal Flush"
+    | "Flush House"
+    | "Flush Five";
+}
+
+export interface JokerData {
+  id: string;
+  name: string;
+  description: string;
+  imagePreview: string;
+  overlayImagePreview?: string;
+  rarity: number | string;
+  cost?: number;
+  blueprint_compat?: boolean;
+  eternal_compat?: boolean;
+  unlocked?: boolean;
+  discovered?: boolean;
+  force_eternal?: boolean;
+  force_perishable?: boolean;
+  force_rental?: boolean;
+  appears_in_shop?: boolean;
+  rules?: Rule[];
+  userVariables?: UserVariable[];
+  placeholderCreditIndex?: number;
+  jokerKey?: string;
+  hasUserUploadedImage?: boolean;
+}
+
+export interface RarityData {
   id: string;
   key: string;
   name: string;
@@ -43,14 +114,57 @@ export interface ConsumableSetData {
   collection_name?: string;
 }
 
+export type BoosterType = "joker" | "consumable" | "playing_card";
+
+export interface BoosterCardRule {
+  set?: string;
+  enhancement?: string;
+  edition?: string;
+  rarity?: string;
+  suit?: string;
+  rank?: string;
+  seal?: string;
+  weight?: number;
+  specific_key?: string;
+  specific_type?: "consumable" | "joker" | null;
+}
+
+export interface BoosterData {
+  id: string;
+  name: string;
+  description: string;
+  imagePreview: string;
+  cost: number;
+  weight: number;
+  draw_hand: boolean;
+  booster_type: BoosterType;
+  kind?: string;
+  group_key?: string;
+  atlas?: string;
+  pos?: { x: number; y: number };
+  config: {
+    extra: number;
+    choose: number;
+  };
+  card_rules: BoosterCardRule[];
+  background_colour?: string;
+  special_colour?: string;
+  discovered?: boolean;
+  hidden?: boolean;
+  placeholderCreditIndex?: number;
+  boosterKey?: string;
+  hasUserUploadedImage?: boolean;
+}
+
 // =============================================================================
 // DATA REGISTRY SYSTEM
 // =============================================================================
 
 interface RegistryState {
-  customRarities: CustomRarity[];
+  customRarities: RarityData[];
   consumableSets: ConsumableSetData[];
   consumables: ConsumableData[];
+  boosters: BoosterData[];
   modPrefix: string;
 }
 
@@ -58,6 +172,7 @@ let registryState: RegistryState = {
   customRarities: [],
   consumableSets: [],
   consumables: [],
+  boosters: [],
   modPrefix: "",
 };
 
@@ -76,15 +191,17 @@ const VANILLA_CONSUMABLE_SETS = [
 
 export const DataRegistry = {
   update: (
-    customRarities: CustomRarity[],
+    customRarities: RarityData[],
     consumableSets: ConsumableSetData[],
     consumables: ConsumableData[],
+    boosters: BoosterData[],
     modPrefix: string
   ) => {
     registryState = {
       customRarities,
       consumableSets,
       consumables,
+      boosters,
       modPrefix,
     };
   },
@@ -122,10 +239,104 @@ export const DataRegistry = {
     return [...custom];
   },
 
+  getBoosters: (): Array<{
+    value: string;
+    label: string;
+    type: BoosterType;
+  }> => {
+    const custom = registryState.boosters.map((booster) => ({
+      value: `${registryState.modPrefix}_${
+        booster.boosterKey || booster.name.toLowerCase().replace(/\s+/g, "_")
+      }`,
+      label: booster.name,
+      type: booster.booster_type,
+    }));
+    return [...custom];
+  },
+
   getState: () => ({ ...registryState }),
 };
 
-export const getModPrefix = () => {return registryState.modPrefix}
+export const getModPrefix = () => {
+  return registryState.modPrefix;
+};
+
+export const updateDataRegistry = (
+  customRarities: RarityData[],
+  consumableSets: ConsumableSetData[],
+  consumables: ConsumableData[],
+  boosters: BoosterData[],
+  modPrefix: string
+) => {
+  DataRegistry.update(
+    customRarities,
+    consumableSets,
+    consumables,
+    boosters,
+    modPrefix
+  );
+};
+
+// =============================================================================
+// BOOSTERS SECTION
+// =============================================================================
+
+export const CUSTOM_BOOSTERS = () => DataRegistry.getBoosters();
+export const CUSTOM_BOOSTER_VALUES = () =>
+  DataRegistry.getBoosters().map((b) => b.value);
+export const CUSTOM_BOOSTER_LABELS = () =>
+  DataRegistry.getBoosters().map((b) => b.label);
+
+export const getBoostersByType = (
+  boosterType: BoosterType,
+  customBoosters: BoosterData[] = registryState.boosters
+): BoosterData[] => {
+  return customBoosters.filter(
+    (booster) => booster.booster_type === boosterType
+  );
+};
+
+export const getBoosterDropdownOptions = (
+  customBoosters: BoosterData[] = registryState.boosters
+) => {
+  return customBoosters.map((booster) => ({
+    value: `${registryState.modPrefix}_${
+      booster.boosterKey || booster.name.toLowerCase().replace(/\s+/g, "_")
+    }`,
+    label: booster.name,
+  }));
+};
+
+export const getBoosterByKey = (
+  key: string,
+  customBoosters: BoosterData[] = registryState.boosters
+): BoosterData | undefined => {
+  const searchKey = key.startsWith(`${registryState.modPrefix}_`)
+    ? key.substring(`${registryState.modPrefix}_`.length)
+    : key;
+
+  return customBoosters.find(
+    (booster) =>
+      booster.boosterKey === searchKey ||
+      booster.name.toLowerCase().replace(/\s+/g, "_") === searchKey
+  );
+};
+
+export const isCustomBooster = (
+  key: string,
+  customBoosters: BoosterData[] = registryState.boosters,
+  modPrefix: string = registryState.modPrefix
+): boolean => {
+  return (
+    key.includes("_") &&
+    customBoosters.some(
+      (b) =>
+        `${modPrefix}_${
+          b.boosterKey || b.name.toLowerCase().replace(/\s+/g, "_")
+        }` === key
+    )
+  );
+};
 
 // =============================================================================
 // RARITIES SECTION
@@ -156,13 +367,13 @@ type CustomRarityOption = {
   label: string;
   key: string;
   isCustom: true;
-  customData: CustomRarity;
+  customData: RarityData;
 };
 
 type RarityOption = VanillaRarity | CustomRarityOption;
 
 export const getAllRarities = (
-  customRarities: CustomRarity[] = registryState.customRarities
+  customRarities: RarityData[] = registryState.customRarities
 ): RarityOption[] => {
   const vanillaRarities: VanillaRarity[] = VANILLA_RARITIES.map(
     (rarity, index) => ({
@@ -187,7 +398,7 @@ export const getAllRarities = (
 };
 export const getRarityByValue = (
   value: number | string,
-  customRarities: CustomRarity[] = registryState.customRarities
+  customRarities: RarityData[] = registryState.customRarities
 ): RarityOption | undefined => {
   const allRarities = getAllRarities(customRarities);
   return allRarities.find((rarity) => rarity.value === value);
@@ -195,7 +406,7 @@ export const getRarityByValue = (
 
 export const getRarityByKey = (
   key: string,
-  customRarities: CustomRarity[] = registryState.customRarities
+  customRarities: RarityData[] = registryState.customRarities
 ): RarityOption | undefined => {
   const allRarities = getAllRarities(customRarities);
   return allRarities.find((rarity) => rarity.key === key);
@@ -203,7 +414,7 @@ export const getRarityByKey = (
 
 export const getRarityDisplayName = (
   value: number | string,
-  customRarities: CustomRarity[] = registryState.customRarities
+  customRarities: RarityData[] = registryState.customRarities
 ): string => {
   const rarity = getRarityByValue(value, customRarities);
   return rarity?.label || "Unknown";
@@ -211,7 +422,7 @@ export const getRarityDisplayName = (
 
 export const getRarityBadgeColor = (
   value: number | string,
-  customRarities: CustomRarity[] = registryState.customRarities
+  customRarities: RarityData[] = registryState.customRarities
 ): string => {
   const rarity = getRarityByValue(value, customRarities);
 
@@ -232,7 +443,7 @@ export const getRarityBadgeColor = (
 
 export const getRarityStyles = (
   value: number | string,
-  customRarities: CustomRarity[] = registryState.customRarities
+  customRarities: RarityData[] = registryState.customRarities
 ) => {
   const color = getRarityBadgeColor(value, customRarities);
 
@@ -246,7 +457,7 @@ export const getRarityStyles = (
 
 export const isCustomRarity = (
   value: number | string,
-  customRarities: CustomRarity[] = registryState.customRarities,
+  customRarities: RarityData[] = registryState.customRarities,
   modPrefix: string = registryState.modPrefix
 ): boolean => {
   if (typeof value === "string") {
@@ -260,14 +471,14 @@ export const isCustomRarity = (
 
 export const getCustomRarityData = (
   value: number | string,
-  customRarities: CustomRarity[] = registryState.customRarities
-): CustomRarity | null => {
+  customRarities: RarityData[] = registryState.customRarities
+): RarityData | null => {
   const rarity = getRarityByValue(value, customRarities);
   return rarity?.isCustom ? rarity.customData : null;
 };
 
 export const getRarityDropdownOptions = (
-  customRarities: CustomRarity[] = registryState.customRarities
+  customRarities: RarityData[] = registryState.customRarities
 ) => {
   return getAllRarities(customRarities).map((rarity) => ({
     value: rarity.value.toString(),
@@ -382,19 +593,6 @@ export const getConsumableSetDropdownOptions = (
     value: set.value,
     label: set.label,
   }));
-};
-
-// =============================================================================
-// REGISTRY UPDATE FUNCTION
-// =============================================================================
-
-export const updateDataRegistry = (
-  customRarities: CustomRarity[],
-  consumableSets: ConsumableSetData[],
-  consumables: ConsumableData[],
-  modPrefix: string
-) => {
-  DataRegistry.update(customRarities, consumableSets, consumables, modPrefix);
 };
 
 //* ==== Centralized Balatro game data and utilities ====

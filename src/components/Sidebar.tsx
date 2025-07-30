@@ -12,9 +12,10 @@ import {
   CodeBracketIcon,
   LinkIcon,
   CakeIcon,
-  ChatBubbleLeftRightIcon
+  ChatBubbleLeftRightIcon,
+  CubeIcon,
 } from "@heroicons/react/24/solid";
-import { JokerData } from "./JokerCard";
+import { JokerData } from "./data/BalatroUtils";
 
 interface SidebarProps {
   selectedSection?: string;
@@ -88,6 +89,7 @@ const Sidebar: React.FC<SidebarProps> = ({
     { id: "metadata", label: "Mod Metadata", icon: DocumentTextIcon },
     { id: "jokers", label: "Jokers", icon: PuzzlePieceIcon },
     { id: "consumables", label: "Consumables", icon: CakeIcon },
+    { id: "boosters", label: "Booster Packs", icon: CubeIcon },
     //{ id: "decks", label: "Decks", icon: RectangleStackIcon },
     //{ id: "editions", label: "Editions", icon: SparklesIcon },
   ];
