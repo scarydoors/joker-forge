@@ -46,6 +46,7 @@ import { generateProbabilityPartCompareConditionCode } from "./conditions/Probab
 import { generateHandLevelConditionCode } from "./conditions/HandLevelCondition";
 import { generateCumulativeChipsConditionCode } from "./conditions/CumulativeChipsCondition";
 import { generateBlindNameConditionCode } from "./conditions/BlindNameCondition";
+import { generateFirstLastScoredConditionCode } from "./conditions/FirstLastScoredCondition";
 
 export const generateConditionChain = (
   rule: Rule,
@@ -259,8 +260,11 @@ const generateSingleConditionCode = (
     case "card_index":
       return generateCardIndexConditionCode([singleConditionRule]);
 
-      case "blind_name":
+    case "blind_name":
       return generateBlindNameConditionCode([singleConditionRule]);
+
+    case "first_last_scored":
+      return generateFirstLastScoredConditionCode([singleConditionRule], joker);
 
     default:
       return null;

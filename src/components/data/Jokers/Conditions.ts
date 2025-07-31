@@ -1,4 +1,7 @@
-import { ConditionParameterOption, ConditionTypeDefinition } from "../../ruleBuilder/types";
+import {
+  ConditionParameterOption,
+  ConditionTypeDefinition,
+} from "../../ruleBuilder/types";
 import {
   HandRaisedIcon,
   RectangleStackIcon,
@@ -58,29 +61,27 @@ export const GENERIC_TRIGGERS: string[] = [
 ];
 
 export const PROBABILITY_IDENTIFIERS: {
-  jokers: ConditionParameterOption[],
-  consumables: ConditionParameterOption[],
-  enhancements: ConditionParameterOption[],
+  jokers: ConditionParameterOption[];
+  consumables: ConditionParameterOption[];
+  enhancements: ConditionParameterOption[];
 } = {
   jokers: [
-    {value:"8ball",label:"8 Ball"},
-    {value:"gros_michel",label:"Gros Michel"},
-    {value:"business",label:"Business Card"},
-    {value:"space",label:"Space Joker"},
-    {value:"cavendish",label:"Cavendish"},
-    {value:"parking",label:"Reserved Parking"},
-    {value:"halu1",label:"Hallucination"},
-    {value:"bloodstone",label:"Bloodstone"},
+    { value: "8ball", label: "8 Ball" },
+    { value: "gros_michel", label: "Gros Michel" },
+    { value: "business", label: "Business Card" },
+    { value: "space", label: "Space Joker" },
+    { value: "cavendish", label: "Cavendish" },
+    { value: "parking", label: "Reserved Parking" },
+    { value: "halu1", label: "Hallucination" },
+    { value: "bloodstone", label: "Bloodstone" },
   ],
-  consumables: [
-    {value:"wheel_of_fortune",label:"Wheel of Fortune"},
-  ],
+  consumables: [{ value: "wheel_of_fortune", label: "Wheel of Fortune" }],
   enhancements: [
-    {value:"lucky_mult",label:"Lucky Card Mult"},
-    {value:"lucky_money",label:"Lucky Card Money"},
-    {value:"glass",label:"Glass Card"},
-  ]
-}
+    { value: "lucky_mult", label: "Lucky Card Mult" },
+    { value: "lucky_money", label: "Lucky Card Money" },
+    { value: "glass", label: "Glass Card" },
+  ],
+};
 
 export const CONDITION_CATEGORIES: CategoryDefinition[] = [
   {
@@ -674,7 +675,8 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
   {
     id: "enhancement_count",
     label: "Enhancement Count",
-    description: "Check how many cards with a specific enhancement are in the hand",
+    description:
+      "Check how many cards with a specific enhancement are in the hand",
     applicableTriggers: ["hand_played", "card_scored", "after_hand_played"],
     params: [
       {
@@ -782,11 +784,10 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
     params: [],
     category: "Hand",
   },
-    {
+  {
     id: "cumulative_chips",
     label: "Cumulative Chips",
-    description:
-      "Check the sum of chips in hand",
+    description: "Check the sum of chips in hand",
     applicableTriggers: ["hand_played", "card_scored", "after_hand_played"],
     params: [
       {
@@ -794,8 +795,8 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
         type: "select",
         label: "Hand Selection",
         options: [
-          {value: 'played', label: 'Played Hand'},
-          {value: 'held', label: 'Held in Hand'},
+          { value: "played", label: "Played Hand" },
+          { value: "held", label: "Held in Hand" },
         ],
       },
       {
@@ -803,8 +804,8 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
         type: "select",
         label: "Check",
         options: [
-          {value: 'base', label: 'Base Chips'},
-          {value: 'total', label: 'Total Chips'},
+          { value: "base", label: "Base Chips" },
+          { value: "total", label: "Total Chips" },
         ],
       },
       {
@@ -819,7 +820,6 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
         label: "Amount",
         default: 0,
       },
-
     ],
     category: "Hand",
   },
@@ -918,10 +918,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
         id: "rarity",
         type: "select",
         label: "Rarity",
-        options: () => [
-          { value: "any", label: "Any Rarity" },
-          ...RARITIES(),
-        ],
+        options: () => [{ value: "any", label: "Any Rarity" }, ...RARITIES()],
         default: "any",
       },
       {
@@ -933,6 +930,57 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
       },
     ],
     category: "Deck & Jokers",
+  },
+  {
+    id: "first_last_scored",
+    label: "First/Last Scored",
+    description:
+      "Check if this is the first or last card of a specific type to be scored",
+    applicableTriggers: ["card_scored"],
+    params: [
+      {
+        id: "position",
+        type: "select",
+        label: "Position",
+        options: [
+          { value: "first", label: "First" },
+          { value: "last", label: "Last" },
+        ],
+        default: "first",
+      },
+      {
+        id: "check_type",
+        type: "select",
+        label: "Check Type",
+        options: [
+          { value: "any", label: "Any Card" },
+          { value: "rank", label: "Specific Rank" },
+          { value: "suit", label: "Specific Suit" },
+        ],
+        default: "any",
+      },
+      {
+        id: "specific_rank",
+        type: "select",
+        label: "Rank",
+        options: [...RANKS, ...RANK_GROUPS],
+        showWhen: {
+          parameter: "check_type",
+          values: ["rank"],
+        },
+      },
+      {
+        id: "specific_suit",
+        type: "select",
+        label: "Suit",
+        options: [...SUITS],
+        showWhen: {
+          parameter: "check_type",
+          values: ["suit"],
+        },
+      },
+    ],
+    category: "Card",
   },
   {
     id: "specific_joker",
@@ -1202,7 +1250,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
     ],
     category: "Player Resources",
   },
-    {
+  {
     id: "hand_level",
     label: "Hand Level",
     description: "Check the level of a poker hand",
@@ -1275,8 +1323,8 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
         type: "select",
         label: "Mode",
         options: [
-          {value:"equals",label:"Equals"},
-          {value:"not_equals",label:"Not Equals"},
+          { value: "equals", label: "Equals" },
+          { value: "not_equals", label: "Not Equals" },
         ],
         default: "equals",
       },
@@ -1285,36 +1333,36 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
         type: "select",
         label: "Blind",
         options: [
-          {value:"Small Blind",label:"Small Blind"},
-          {value:"Big Blind",label:"Big Blind"},
-          {value:"The Hook",label:"The Hook"},
-          {value:"The Ox",label:"The Ox"},
-          {value:"The House",label:"The House"},
-          {value:"The Wall",label:"The Wall"},
-          {value:"The Wheel",label:"The Wheel"},
-          {value:"The Arm",label:"The Arm"},
-          {value:"The Club",label:"The Club"},
-          {value:"The Fish",label:"The Fish"},
-          {value:"The Psychic",label:"The Psychic"},
-          {value:"The Goad",label:"The Goad"},
-          {value:"The Water",label:"The Water"},
-          {value:"The Window",label:"The Window"},
-          {value:"The Manacle",label:"The Manacle"},
-          {value:"The Eye",label:"The Eye"},
-          {value:"The Mouth",label:"The Mouth"},
-          {value:"The Plant",label:"The Plant"},
-          {value:"The Serpent",label:"The Serpent"},
-          {value:"The Pillar",label:"The Pillar"},
-          {value:"The Needle",label:"The Needle"},
-          {value:"The Head",label:"The Head"},
-          {value:"The Tooth",label:"The Tooth"},
-          {value:"The Flint",label:"The Flint"},
-          {value:"The Mark",label:"The Mark"},
-          {value:"Amber Acorn",label:"Amber Acorn"},
-          {value:"Verdant Leaf",label:"Verdant Leaf"},
-          {value:"Violet Vessel",label:"Violet Vessel"},
-          {value:"Crimson Heart",label:"Crimson Heart"},
-          {value:"Cerulean Bell",label:"Cerulean Bell"},
+          { value: "Small Blind", label: "Small Blind" },
+          { value: "Big Blind", label: "Big Blind" },
+          { value: "The Hook", label: "The Hook" },
+          { value: "The Ox", label: "The Ox" },
+          { value: "The House", label: "The House" },
+          { value: "The Wall", label: "The Wall" },
+          { value: "The Wheel", label: "The Wheel" },
+          { value: "The Arm", label: "The Arm" },
+          { value: "The Club", label: "The Club" },
+          { value: "The Fish", label: "The Fish" },
+          { value: "The Psychic", label: "The Psychic" },
+          { value: "The Goad", label: "The Goad" },
+          { value: "The Water", label: "The Water" },
+          { value: "The Window", label: "The Window" },
+          { value: "The Manacle", label: "The Manacle" },
+          { value: "The Eye", label: "The Eye" },
+          { value: "The Mouth", label: "The Mouth" },
+          { value: "The Plant", label: "The Plant" },
+          { value: "The Serpent", label: "The Serpent" },
+          { value: "The Pillar", label: "The Pillar" },
+          { value: "The Needle", label: "The Needle" },
+          { value: "The Head", label: "The Head" },
+          { value: "The Tooth", label: "The Tooth" },
+          { value: "The Flint", label: "The Flint" },
+          { value: "The Mark", label: "The Mark" },
+          { value: "Amber Acorn", label: "Amber Acorn" },
+          { value: "Verdant Leaf", label: "Verdant Leaf" },
+          { value: "Violet Vessel", label: "Violet Vessel" },
+          { value: "Crimson Heart", label: "Crimson Heart" },
+          { value: "Cerulean Bell", label: "Cerulean Bell" },
         ],
         default: "Small Blind",
       },
@@ -1581,8 +1629,8 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
         type: "select",
         label: "Mode",
         options: [
-          {value:"vanilla",label:"Vanilla"},
-          {value:"custom",label:"Custom"},
+          { value: "vanilla", label: "Vanilla" },
+          { value: "custom", label: "Custom" },
         ],
         default: "vanilla",
       },
@@ -1591,15 +1639,15 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
         type: "select",
         label: "Property Type",
         options: [
-          {value:"jokers",label:"Jokers"},
-          {value:"consumables",label:"Consumables"},
-          {value:"enhancements",label:"Enhancements"},
+          { value: "jokers", label: "Jokers" },
+          { value: "consumables", label: "Consumables" },
+          { value: "enhancements", label: "Enhancements" },
         ],
         default: "jokers",
         showWhen: {
           parameter: "mode",
-          values: ["vanilla"]
-        }
+          values: ["vanilla"],
+        },
       },
       {
         id: "specific_card",
@@ -1607,7 +1655,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
         label: "Specific Card",
         options: (parentValues) => {
           switch (parentValues?.property_type) {
-            case "jokers": 
+            case "jokers":
               return [...PROBABILITY_IDENTIFIERS.jokers];
             case "consumables":
               return [...PROBABILITY_IDENTIFIERS.consumables];
@@ -1620,8 +1668,8 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
         default: "8ball",
         showWhen: {
           parameter: "mode",
-          values: ["vanilla"]
-        }
+          values: ["vanilla"],
+        },
       },
       {
         id: "card_key",
@@ -1629,8 +1677,8 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
         label: "Card Key (joker: j_modprefix_key, consumable: c_modprefix_key)",
         showWhen: {
           parameter: "mode",
-          values: ["custom"]
-        }
+          values: ["custom"],
+        },
       },
     ],
     category: "Probability",
@@ -1646,10 +1694,10 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
         type: "select",
         label: "Numerator or Denominator",
         options: [
-          {value: "numerator", label: "Numerator"},
-          {value: "denominator", label: "Denominator"}
+          { value: "numerator", label: "Numerator" },
+          { value: "denominator", label: "Denominator" },
         ],
-        default: "numerator"
+        default: "numerator",
       },
       {
         id: "operator",
