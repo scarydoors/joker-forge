@@ -16,6 +16,7 @@ import {
   ClockIcon,
   CurrencyDollarIcon,
   WrenchIcon,
+  SparklesIcon,
 } from "@heroicons/react/24/solid";
 
 import Tooltip from "../../generic/Tooltip";
@@ -212,6 +213,7 @@ const JokerCard: React.FC<JokerCardProps> = ({
 
   const blueprintCompat = joker.blueprint_compat !== false;
   const eternalCompat = joker.eternal_compat !== false;
+  const perishableCompat = joker.perishable_compat !== false;
   const isUnlocked = joker.unlocked !== false;
   const isDiscovered = joker.discovered !== false;
   const forceEternal = joker.force_eternal === true;
@@ -235,6 +237,13 @@ const JokerCard: React.FC<JokerCardProps> = ({
       variant: "disabled" as const,
       isEnabled: eternalCompat,
       onClick: () => onQuickUpdate({ eternal_compat: !eternalCompat }),
+    },
+    {
+      icon: <SparklesIcon className="w-full h-full" />,
+      tooltip: perishableCompat ? "Perishable Compatibility" : "Cannot be made Perishable",
+      variant: "disabled" as const,
+      isEnabled: perishableCompat,
+      onClick: () => onQuickUpdate({ perishable_compat: !perishableCompat }),
     },
     {
       icon: isUnlocked ? (
