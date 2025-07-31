@@ -1,15 +1,55 @@
 import type { Effect } from "../../../ruleBuilder/types";
-import type { PassiveEffectResult } from "../effectUtils";
+import type { PassiveEffectResult, ConfigExtraVariable } from "../effectUtils";
+import {
+  generateGameVariableCode,
+  parseGameVariable,
+  parseRangeVariable,
+} from "../gameVariableUtils";
 
 export const generateFreeRerollsReturn = (
   effect: Effect
 ): PassiveEffectResult => {
-  const rerollAmount = (effect.params?.reroll_amount as number) || 1;
+  const effectValue = effect.params?.reroll_amount;
+  const parsed = parseGameVariable(effectValue);
+  const rangeParsed = parseRangeVariable(effectValue);
+
+  let valueCode: string;
+  const configVariables: ConfigExtraVariable[] = [];
+
+  const variableName = "reroll_amount";
+
+  if (parsed.isGameVariable) {
+    valueCode = generateGameVariableCode(effectValue);
+  } else if (rangeParsed.isRangeVariable) {
+    const seedName = `${variableName}_${effect.id.substring(0, 8)}`;
+    valueCode = `pseudorandom('${seedName}', card.ability.extra.${variableName}_min, card.ability.extra.${variableName}_max)`;
+
+    configVariables.push(
+      { name: `${variableName}_min`, value: rangeParsed.min || 1 },
+      { name: `${variableName}_max`, value: rangeParsed.max || 5 }
+    );
+  } else if (typeof effectValue === "string") {
+    if (effectValue.endsWith("_value")) {
+      valueCode = effectValue;
+    } else {
+      valueCode = `card.ability.extra.${effectValue}`;
+    }
+  } else {
+    valueCode = `card.ability.extra.${variableName}`;
+
+    configVariables.push({
+      name: variableName,
+      value: Number(effectValue) || 1,
+    });
+  }
 
   return {
-    addToDeck: `SMODS.change_free_rerolls(${rerollAmount})`,
-    removeFromDeck: `SMODS.change_free_rerolls(-${rerollAmount})`,
-    configVariables: [],
+    addToDeck: `SMODS.change_free_rerolls(${valueCode})`,
+    removeFromDeck: `SMODS.change_free_rerolls(-(${valueCode}))`,
+    configVariables:
+      configVariables.length > 0
+        ? configVariables.map((cv) => cv.name + " = " + cv.value)
+        : [],
     locVars: [],
   };
 };
@@ -21,7 +61,40 @@ export const generateDiscountItemsReturn = (
   const discountType = (effect.params?.discount_type as string) || "planet";
   const discountMethod =
     (effect.params?.discount_method as string) || "make_free";
-  const discountAmount = (effect.params?.discount_amount as number) || 1;
+
+  const effectValue = effect.params?.discount_amount;
+  const parsed = parseGameVariable(effectValue);
+  const rangeParsed = parseRangeVariable(effectValue);
+
+  let valueCode: string;
+  const configVariables: ConfigExtraVariable[] = [];
+
+  const variableName = "discount_amount";
+
+  if (parsed.isGameVariable) {
+    valueCode = generateGameVariableCode(effectValue);
+  } else if (rangeParsed.isRangeVariable) {
+    const seedName = `${variableName}_${effect.id.substring(0, 8)}`;
+    valueCode = `pseudorandom('${seedName}', card.ability.extra.${variableName}_min, card.ability.extra.${variableName}_max)`;
+
+    configVariables.push(
+      { name: `${variableName}_min`, value: rangeParsed.min || 1 },
+      { name: `${variableName}_max`, value: rangeParsed.max || 5 }
+    );
+  } else if (typeof effectValue === "string") {
+    if (effectValue.endsWith("_value")) {
+      valueCode = effectValue;
+    } else {
+      valueCode = `card.ability.extra.${effectValue}`;
+    }
+  } else {
+    valueCode = `card.ability.extra.${variableName}`;
+
+    configVariables.push({
+      name: variableName,
+      value: Number(effectValue) || 1,
+    });
+  }
 
   return {
     addToDeck: `G.E_MANAGER:add_event(Event({
@@ -40,7 +113,10 @@ export const generateDiscountItemsReturn = (
         return true
     end
 }))`,
-    configVariables: [],
+    configVariables:
+      configVariables.length > 0
+        ? configVariables.map((cv) => cv.name + " = " + cv.value)
+        : [],
     locVars: [],
     needsHook: {
       hookType: "discount_items",
@@ -48,7 +124,7 @@ export const generateDiscountItemsReturn = (
       effectParams: {
         discountType,
         discountMethod,
-        discountAmount,
+        discountAmount: valueCode,
       },
     },
   };
@@ -60,7 +136,7 @@ export const generateDiscountItemsHook = (
     params: {
       discountType: string;
       discountMethod: string;
-      discountAmount: number;
+      discountAmount: string;
     };
   }>,
   modPrefix: string
@@ -113,19 +189,20 @@ function Card:set_cost()
         break;
     }
 
+    const fullJokerKey = `j_${modPrefix}_${jokerKey}`;
+    const discountAmountCode = params.discountAmount;
+
     switch (params.discountMethod) {
       case "make_free":
         costLogic = "self.cost = 0";
         break;
       case "flat_reduction":
-        costLogic = `self.cost = math.max(0, self.cost - ${params.discountAmount})`;
+        costLogic = `self.cost = math.max(0, self.cost - (${discountAmountCode}))`;
         break;
       case "percentage_reduction":
-        costLogic = `self.cost = math.max(0, math.floor(self.cost * (1 - ${params.discountAmount} / 100)))`;
+        costLogic = `self.cost = math.max(0, math.floor(self.cost * (1 - (${discountAmountCode}) / 100)))`;
         break;
     }
-
-    const fullJokerKey = `j_${modPrefix}_${jokerKey}`;
 
     hookCode += `
     
