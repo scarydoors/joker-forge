@@ -62,7 +62,7 @@ export interface JokerData {
   cost?: number;
   blueprint_compat?: boolean;
   eternal_compat?: boolean;
-  perishable_compat: boolean;
+  perishable_compat?: boolean;
   unlocked?: boolean;
   discovered?: boolean;
   force_eternal?: boolean;
