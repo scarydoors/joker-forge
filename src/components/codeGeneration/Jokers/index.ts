@@ -1722,14 +1722,22 @@ const generateHooks = (jokers: JokerData[], modPrefix: string): string => {
 
   if (hooksByType.discount_items) {
     allHooks += generateDiscountItemsHook(
-      hooksByType.discount_items as Array<{
-        jokerKey: string;
+      (
+        hooksByType.discount_items as Array<{
+          jokerKey: string;
+          params: {
+            discountType: string;
+            discountMethod: string;
+            discountAmount: number;
+          };
+        }>
+      ).map((item) => ({
+        ...item,
         params: {
-          discountType: string;
-          discountMethod: string;
-          discountAmount: number;
-        };
-      }>,
+          ...item.params,
+          discountAmount: String(item.params.discountAmount),
+        },
+      })),
       modPrefix
     );
   }
