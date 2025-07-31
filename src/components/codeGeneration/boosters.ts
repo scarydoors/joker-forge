@@ -49,7 +49,7 @@ const generateSingleBooster = (
 
   const groupName = booster.group_key
     ? `"${booster.group_key}"`
-    : `"${booster.name} Pack"`;
+    : `"${booster.name}"`;
   code += `        group_name = ${groupName}\n`;
   code += `    },\n`;
 
