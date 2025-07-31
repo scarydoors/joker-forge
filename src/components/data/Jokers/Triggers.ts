@@ -105,6 +105,13 @@ export const TRIGGERS: TriggerDefinition[] = [
     category: "Gameplay",
   },
   {
+    id: "before_hand_played",
+    label: "Before Hand Starts Scoring",
+    description:
+      "Triggers before a hand starts the scoring sequence or any jokers have been calculated. Perfect for scaling jokers or effects that should happen once per hand before everything else.",
+    category: "Gameplay",
+  },
+  {
     id: "round_end",
     label: "When the Round Ends",
     description:
@@ -217,6 +224,13 @@ export const TRIGGERS: TriggerDefinition[] = [
     label: "Change Probability",
     description:
       "Change Probability in any way",
+    category: "Special",
+  },
+  {
+    id: "probability_result",
+    label: "Probability Result",
+    description:
+      "Check if probability succeeds or fails (look at the probability category in conditions)",
     category: "Special",
   },
   {
