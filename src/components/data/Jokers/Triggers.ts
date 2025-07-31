@@ -227,6 +227,13 @@ export const TRIGGERS: TriggerDefinition[] = [
     category: "Special",
   },
   {
+    id: "probability_result",
+    label: "Probability Result",
+    description:
+      "Check if probability succeeds or fails (look at the probability category in conditions)",
+    category: "Special",
+  },
+  {
     id: "passive",
     label: "Passive (Always Active)",
     description:

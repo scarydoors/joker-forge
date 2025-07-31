@@ -251,6 +251,9 @@ const generateSingleJokerCode = (
     eternal_compat = ${
       joker.eternal_compat !== undefined ? joker.eternal_compat : true
     },
+    perishable_compat = ${
+      joker.perishable_compat !== undefined ? joker.perishable_compat : true
+    },
     unlocked = ${joker.unlocked !== undefined ? joker.unlocked : true},
     discovered = ${joker.discovered !== undefined ? joker.discovered : true},
     atlas = '${atlasKey}'`;

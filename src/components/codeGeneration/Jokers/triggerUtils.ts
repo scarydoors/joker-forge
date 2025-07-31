@@ -201,6 +201,12 @@ export const generateTriggerContext = (
         comment: "-- When playing cards are added to deck",
       };
 
+    case "probability_result":
+      return {
+        check: `context.pseudorandom_result ${isBlueprintCompatible ? '' : ' and not context.blueprint'}`,
+        comment: "-- When chance roll succeeds/failes",
+      };
+
     case "hand_played":
     default:
       return {

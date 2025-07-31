@@ -59,6 +59,7 @@ export const GENERIC_TRIGGERS: string[] = [
   "card_destroyed",
   "playing_card_added",
   "game_over",
+  "probability_result"
 ];
 
 export const PROBABILITY_IDENTIFIERS: {
@@ -1621,10 +1622,29 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
     category: "Deck & Jokers",
   },
   {
+    id: "probability_succeeded",
+    label: "Probability Succeeded",
+    description: "Check if the probability succeeded or failed",
+    applicableTriggers: ["probability_result"],
+    params: [
+      {
+        id: "status",
+        type: "select",
+        label: "Status",
+        options: [
+          { value: "succeeded", label: "Succeeded" },
+          { value: "failed", label: "Failed" },
+        ],
+        default: "succeeded",
+      },
+    ],
+    category: "Probability",
+  },
+  {
     id: "probability_identifier",
     label: "Detect Probability",
-    description: "Check what specific card rolled",
-    applicableTriggers: ["change_probability"],
+    description: "Check what card caused the probability roll",
+    applicableTriggers: ["change_probability", "probability_result"],
     params: [
       {
         id: "mode",
@@ -1689,7 +1709,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
     id: "probability_part_compare",
     label: "Probability Compare",
     description: "Compare the Numerator or the Denominator with a custom value",
-    applicableTriggers: ["change_probability"],
+    applicableTriggers: ["change_probability", "probability_result"],
     params: [
       {
         id: "part",

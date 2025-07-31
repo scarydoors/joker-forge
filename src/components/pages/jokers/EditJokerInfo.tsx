@@ -926,6 +926,17 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
                                       )
                                     }
                                   />
+                                  <Checkbox
+                                    id="perishable_compat_edit"
+                                    label="Perishable Compatibility"
+                                    checked={formData.perishable_compat !== false}
+                                    onChange={(checked) =>
+                                      handleCheckboxChange(
+                                        "perishable_compat",
+                                        checked
+                                      )
+                                    }
+                                  />
                                 </div>
                               </div>
                               <div>
