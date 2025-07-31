@@ -22,13 +22,11 @@ import { getConsumableConditionTypeById } from "../data/Consumables/Conditions";
 import { getConsumableEffectTypeById } from "../data/Consumables/Effects";
 
 import BlockComponent from "./BlockComponent";
-import { ChevronDownIcon, Bars3Icon} from "@heroicons/react/24/outline";
+import { ChevronDownIcon, Bars3Icon } from "@heroicons/react/24/outline";
 import {
   TrashIcon,
   PlusIcon,
-  PencilIcon,
   DocumentDuplicateIcon,
-  EyeSlashIcon,
   XMarkIcon,
 } from "@heroicons/react/16/solid";
 import { JokerData } from "../data/BalatroUtils";
@@ -273,7 +271,6 @@ const RuleCard: React.FC<RuleCardProps> = ({
     itemType === "joker" ? getTriggerById : getConsumableTriggerById;
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [isDisabled, setIsDisabled] = useState(false);
   const [groupOperators, setGroupOperators] = useState<Record<string, string>>(
     {}
   );
@@ -408,9 +405,7 @@ const RuleCard: React.FC<RuleCardProps> = ({
     );
   };
 
-  const handleEditName = () => console.log("Edit rule name");
   const handleDuplicateRule = () => onDuplicateRule(rule.id);
-  const handleToggleDisabled = () => setIsDisabled(!isDisabled);
 
   const handleConditionOperatorToggle = (
     groupId: string,
@@ -654,23 +649,6 @@ const RuleCard: React.FC<RuleCardProps> = ({
               </button>
             </motion.div>
             <motion.div
-              className="w-8 h-8 bg-black-darker rounded-lg flex items-center justify-center border-2 border-balatro-orange"
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-              transition={{ duration: 0.05 }}
-            >
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleEditName();
-                }}
-                className="w-full h-full flex items-center rounded justify-center transition-colors hover:bg-balatro-orange/20 cursor-pointer"
-                title="Edit Name"
-              >
-                <PencilIcon className="h-4 w-4 text-balatro-orange" />
-              </button>
-            </motion.div>
-            <motion.div
               className="w-8 h-8 bg-black-darker rounded-lg flex items-center justify-center border-2 border-balatro-blue"
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
@@ -685,23 +663,6 @@ const RuleCard: React.FC<RuleCardProps> = ({
                 title="Duplicate Rule"
               >
                 <DocumentDuplicateIcon className="h-4 w-4 text-balatro-blue" />
-              </button>
-            </motion.div>
-            <motion.div
-              className="w-8 h-8 bg-black-darker rounded-lg flex items-center justify-center border-2 border-balatro-grey"
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-              transition={{ duration: 0.05 }}
-            >
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleToggleDisabled();
-                }}
-                className="w-full h-full flex items-center rounded justify-center transition-colors hover:bg-balatro-grey/20 cursor-pointer"
-                title={isDisabled ? "Enable Rule" : "Disable Rule"}
-              >
-                <EyeSlashIcon className="h-4 w-4 text-balatro-grey" />
               </button>
             </motion.div>
             <motion.div
@@ -726,7 +687,7 @@ const RuleCard: React.FC<RuleCardProps> = ({
       </AnimatePresence>
 
       <motion.div
-        className={`w-80 relative ${isDisabled ? "opacity-50" : ""}`}
+        className={`w-80 relative`}
         variants={cardEntrance}
         initial="initial"
         animate="animate"
@@ -744,12 +705,10 @@ const RuleCard: React.FC<RuleCardProps> = ({
           <div
             className={`bg-black border-2 rounded-t-md px-8 py-2 pt-1 relative ${
               isRuleSelected ? "border-mint" : "border-black-light"
-            } ${isDisabled ? "opacity-70" : ""}`}
+            } `}
           >
             <span className="text-white-light text-sm tracking-widest">
-              {isDisabled
-                ? "Rule " + (ruleIndex + 1) + " (Disabled)"
-                : "Rule " + (ruleIndex + 1)}
+              Rule {ruleIndex}
             </span>
           </div>
         </motion.div>
@@ -758,7 +717,6 @@ const RuleCard: React.FC<RuleCardProps> = ({
           className={`
             bg-black-dark border-2 rounded-lg overflow-hidden -mt-2 relative
             ${isRuleSelected ? "border-mint" : "border-black-lighter"}
-            ${isDisabled ? "bg-balatro-grey/20" : ""}
           `}
           style={{ pointerEvents: "auto" }}
           variants={snapFadeUp}
@@ -824,24 +782,23 @@ const RuleCard: React.FC<RuleCardProps> = ({
                     </button>
                   </div>
                   <div onClick={(e) => e.stopPropagation()}>
-                    {rule.blueprintCompatible 
-                    ?
-                    <button
-                      onClick={() => onToggleBlueprintCompatibility(rule.id)}
-                      className="w-6 h-6 bg-black-darker rounded-lg flex items-center justify-center border-2 border-balatro-blue hover:bg-balatro-blue/20 transition-colors cursor-pointer"
-                      title="Blueprint Compatible"
-                    >
-                      <WrenchIcon className="h-3 w-3 text-balatro-blue" />
-                    </button>
-                    :
-                    <button
-                      onClick={() => onToggleBlueprintCompatibility(rule.id)}
-                      className="w-6 h-6 bg-black-darker rounded-lg flex items-center justify-center border-2 border-balatro-red hover:bg-balatro-red/20 transition-colors cursor-pointer"
-                      title="Not Compatible with Blueprint"
-                    >
-                      <WrenchIcon className="h-3 w-3 text-balatro-red" />
-                    </button>
-                    }
+                    {rule.blueprintCompatible ? (
+                      <button
+                        onClick={() => onToggleBlueprintCompatibility(rule.id)}
+                        className="w-6 h-6 bg-black-darker rounded-lg flex items-center justify-center border-2 border-balatro-blue hover:bg-balatro-blue/20 transition-colors cursor-pointer"
+                        title="Blueprint Compatible"
+                      >
+                        <WrenchIcon className="h-3 w-3 text-balatro-blue" />
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => onToggleBlueprintCompatibility(rule.id)}
+                        className="w-6 h-6 bg-black-darker rounded-lg flex items-center justify-center border-2 border-balatro-red hover:bg-balatro-red/20 transition-colors cursor-pointer"
+                        title="Not Compatible with Blueprint"
+                      >
+                        <WrenchIcon className="h-3 w-3 text-balatro-red" />
+                      </button>
+                    )}
                   </div>
                 </div>
               </motion.div>
