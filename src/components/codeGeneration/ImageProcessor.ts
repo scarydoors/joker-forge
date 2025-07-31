@@ -44,7 +44,9 @@ export const processImages = async (
 
       promises.push(
         new Promise<void>((resolve) => {
-          const imageSrc = item.imagePreview || "/images/placeholder-joker.png";
+          const imageSrc =
+            item.imagePreview ||
+            "/images/placeholderjokers/placeholder-joker-1.png";
           const img = new Image();
           img.onload = () => {
             const col = currentPosition % itemsPerRow;
@@ -69,11 +71,10 @@ export const processImages = async (
           };
 
           img.onerror = () => {
-            console.error(
-              `Error loading main image at index ${index}, using placeholder`
-            );
-            if (imageSrc !== "/images/placeholder-joker.png") {
-              img.src = "/images/placeholder-joker.png";
+            if (
+              imageSrc !== "/images/placeholderjokers/placeholder-joker-1.png"
+            ) {
+              img.src = "/images/placeholderjokers/placeholder-joker-1.png";
             } else {
               currentPosition++;
               resolve();
@@ -113,7 +114,6 @@ export const processImages = async (
             };
 
             img.onerror = () => {
-              console.error(`Error loading overlay image at index ${index}`);
               currentPosition++;
               resolve();
             };
@@ -121,7 +121,7 @@ export const processImages = async (
             img.src =
               ("overlayImagePreview" in item
                 ? item.overlayImagePreview
-                : null) || "/images/placeholder-joker.png";
+                : null) || "/images/placeholderjokers/placeholder-joker-1.png";
           })
         );
       }
