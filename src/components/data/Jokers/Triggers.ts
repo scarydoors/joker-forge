@@ -105,6 +105,13 @@ export const TRIGGERS: TriggerDefinition[] = [
     category: "Gameplay",
   },
   {
+    id: "before_hand_played",
+    label: "Before Hand Starts Scoring",
+    description:
+      "Triggers before a hand starts the scoring sequence or any jokers have been calculated. Perfect for scaling jokers or effects that should happen once per hand before everything else.",
+    category: "Gameplay",
+  },
+  {
     id: "round_end",
     label: "When the Round Ends",
     description:

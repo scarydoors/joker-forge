@@ -22,7 +22,7 @@ import { getConsumableConditionTypeById } from "../data/Consumables/Conditions";
 import { getConsumableEffectTypeById } from "../data/Consumables/Effects";
 
 import BlockComponent from "./BlockComponent";
-import { ChevronDownIcon, Bars3Icon } from "@heroicons/react/24/outline";
+import { ChevronDownIcon, Bars3Icon} from "@heroicons/react/24/outline";
 import {
   TrashIcon,
   PlusIcon,
@@ -33,6 +33,7 @@ import {
 } from "@heroicons/react/16/solid";
 import { JokerData } from "../data/BalatroUtils";
 import { ConsumableData } from "../data/BalatroUtils";
+import { WrenchIcon } from "@heroicons/react/24/solid";
 
 interface RuleCardProps {
   rule: Rule;
@@ -58,6 +59,7 @@ interface RuleCardProps {
   onDeleteEffect: (ruleId: string, effectId: string) => void;
   onAddConditionGroup: (ruleId: string) => void;
   onAddRandomGroup: (ruleId: string) => void;
+  onToggleBlueprintCompatibility: (ruleId: string) => void;
   onDeleteRandomGroup: (ruleId: string, randomGroupId: string) => void;
   onToggleGroupOperator?: (ruleId: string, groupId: string) => void;
   onUpdatePosition: (
@@ -254,6 +256,7 @@ const RuleCard: React.FC<RuleCardProps> = ({
   onDeleteConditionGroup,
   onDeleteEffect,
   onAddConditionGroup,
+  onToggleBlueprintCompatibility,
   onAddRandomGroup,
   onDeleteRandomGroup,
   onToggleGroupOperator,
@@ -814,11 +817,31 @@ const RuleCard: React.FC<RuleCardProps> = ({
                   <div onClick={(e) => e.stopPropagation()}>
                     <button
                       onClick={() => onAddRandomGroup(rule.id)}
-                      className="w-6 h-6 bg-black-darker rounded-lg flex items-center justify-center border-2 border-effect hover:bg-effect/20 transition-colors"
+                      className="w-6 h-6 bg-black-darker rounded-lg flex items-center justify-center border-2 border-effect hover:bg-effect/20 transition-colors cursor-pointer"
                       title="Add Random Group"
                     >
                       <PlusIcon className="h-3 w-3 text-effect" />
                     </button>
+                  </div>
+                  <div onClick={(e) => e.stopPropagation()}>
+                    {rule.blueprintCompatible 
+                    ?
+                    <button
+                      onClick={() => onToggleBlueprintCompatibility(rule.id)}
+                      className="w-6 h-6 bg-black-darker rounded-lg flex items-center justify-center border-2 border-balatro-blue hover:bg-balatro-blue/20 transition-colors cursor-pointer"
+                      title="Blueprint Compatible"
+                    >
+                      <WrenchIcon className="h-3 w-3 text-balatro-blue" />
+                    </button>
+                    :
+                    <button
+                      onClick={() => onToggleBlueprintCompatibility(rule.id)}
+                      className="w-6 h-6 bg-black-darker rounded-lg flex items-center justify-center border-2 border-balatro-red hover:bg-balatro-red/20 transition-colors cursor-pointer"
+                      title="Not Compatible with Blueprint"
+                    >
+                      <WrenchIcon className="h-3 w-3 text-balatro-red" />
+                    </button>
+                    }
                   </div>
                 </div>
               </motion.div>

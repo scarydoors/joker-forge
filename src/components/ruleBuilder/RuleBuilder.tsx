@@ -715,6 +715,7 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
     const newRule: Rule = {
       id: crypto.randomUUID(),
       trigger: triggerId,
+      blueprintCompatible: true,
       conditionGroups: [],
       effects: [],
       randomGroups: [],
@@ -891,6 +892,20 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
       ruleId: ruleId,
       randomGroupId: newGroup.id,
     });
+  };
+
+ const toggleBlueprintCompatibility = (ruleId: string) => {
+    setRules((prev) =>
+      prev.map((rule) => {
+        if (rule.id === ruleId) {
+          return {
+            ...rule,
+            blueprintCompatible: !rule.blueprintCompatible
+          };
+        }
+        return rule;
+      })
+    );
   };
 
   const deleteRandomGroup = (ruleId: string, randomGroupId: string) => {
@@ -1546,6 +1561,7 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
                             onDeleteEffect={deleteEffect}
                             onAddConditionGroup={addConditionGroup}
                             onAddRandomGroup={addRandomGroup}
+                            onToggleBlueprintCompatibility={toggleBlueprintCompatibility}
                             onDeleteRandomGroup={deleteRandomGroup}
                             onToggleGroupOperator={toggleGroupOperator}
                             onUpdatePosition={updateRulePosition}

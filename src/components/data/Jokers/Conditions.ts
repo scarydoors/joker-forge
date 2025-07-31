@@ -51,6 +51,7 @@ export const GENERIC_TRIGGERS: string[] = [
   "card_held_in_hand",
   "card_held_in_hand_end_of_round",
   "after_hand_played",
+  "before_hand_played",
   "card_sold",
   "card_bought",
   "selling_self",
@@ -119,7 +120,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
     id: "hand_type",
     label: "Hand Type",
     description: "Check the type of poker hand",
-    applicableTriggers: ["hand_played", "card_scored", "after_hand_played"],
+    applicableTriggers: ["hand_played", "card_scored", "after_hand_played", "before_hand_played"],
     params: [
       {
         id: "card_scope",
@@ -155,7 +156,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
     id: "card_count",
     label: "Card Count",
     description: "Check the number of cards in the played hand",
-    applicableTriggers: ["hand_played", "card_scored", "after_hand_played"],
+    applicableTriggers: ["hand_played", "card_scored", "after_hand_played", "before_hand_played"],
     params: [
       {
         id: "card_scope",
@@ -183,7 +184,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
     id: "suit_count",
     label: "Suit Count",
     description: "Check how many cards of a specific suit are in the hand",
-    applicableTriggers: ["hand_played", "card_scored", "after_hand_played"],
+    applicableTriggers: ["hand_played", "card_scored", "after_hand_played", "before_hand_played"],
     params: [
       {
         id: "card_scope",
@@ -251,7 +252,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
     id: "rank_count",
     label: "Rank Count",
     description: "Check how many cards of a specific rank are in the hand",
-    applicableTriggers: ["hand_played", "card_scored", "after_hand_played"],
+    applicableTriggers: ["hand_played", "card_scored", "after_hand_played", "before_hand_played"],
     params: [
       {
         id: "card_scope",
@@ -675,9 +676,8 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
   {
     id: "enhancement_count",
     label: "Enhancement Count",
-    description:
-      "Check how many cards with a specific enhancement are in the hand",
-    applicableTriggers: ["hand_played", "card_scored", "after_hand_played"],
+    applicableTriggers: ["hand_played", "card_scored", "after_hand_played", "before_hand_played"],
+    description: "Check how many cards with a specific enhancement are in the hand",
     params: [
       {
         id: "card_scope",
@@ -711,7 +711,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
     id: "edition_count",
     label: "Edition Count",
     description: "Check how many cards with a specific edition are in the hand",
-    applicableTriggers: ["hand_played", "card_scored", "after_hand_played"],
+    applicableTriggers: ["hand_played", "card_scored", "after_hand_played", "before_hand_played"],
     params: [
       {
         id: "card_scope",
@@ -745,7 +745,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
     id: "seal_count",
     label: "Seal Count",
     description: "Check how many cards with a specific seal are in the hand",
-    applicableTriggers: ["hand_played", "card_scored", "after_hand_played"],
+    applicableTriggers: ["hand_played", "card_scored", "after_hand_played", "before_hand_played"],
     params: [
       {
         id: "card_scope",
@@ -780,15 +780,15 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
     label: "Poker Hand Been Played",
     description:
       "Check if the current poker hand has already been played this round",
-    applicableTriggers: ["hand_played", "card_scored", "after_hand_played"],
+    applicableTriggers: ["hand_played", "card_scored", "after_hand_played", "before_hand_played"],
     params: [],
     category: "Hand",
   },
   {
     id: "cumulative_chips",
     label: "Cumulative Chips",
+    applicableTriggers: ["hand_played", "card_scored", "after_hand_played", "before_hand_played"],
     description: "Check the sum of chips in hand",
-    applicableTriggers: ["hand_played", "card_scored", "after_hand_played"],
     params: [
       {
         id: "hand",
@@ -1376,6 +1376,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
       "Check what percentage of the blind requirement the current base hand score represents (e.g., 110% means you've exceeded the blind by 10%, values over 100% check if you've exceeded the blind)",
     applicableTriggers: [
       "after_hand_played",
+      "before_hand_played",
       "hand_played",
       "card_scored",
       "round_end",
@@ -1453,6 +1454,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
       "card_scored",
       "card_discarded",
       "after_hand_played",
+      "before_hand_played"
     ],
     params: [],
     category: "Game State",

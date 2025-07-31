@@ -3,6 +3,7 @@ export interface Rule {
   position: { x: number; y: number };
   id: string;
   trigger: string;
+  blueprintCompatible: boolean;
   conditionGroups: ConditionGroup[];
   effects: Effect[];
   randomGroups: RandomGroup[];
