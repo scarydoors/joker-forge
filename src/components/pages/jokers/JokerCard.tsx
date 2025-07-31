@@ -3,7 +3,6 @@ import {
   PencilIcon,
   PuzzlePieceIcon,
   DocumentDuplicateIcon,
-  DocumentIcon,
   StarIcon,
   TrashIcon,
   ArrowDownTrayIcon,
@@ -16,6 +15,7 @@ import {
   NoSymbolIcon,
   ClockIcon,
   CurrencyDollarIcon,
+  WrenchIcon,
 } from "@heroicons/react/24/solid";
 
 import Tooltip from "../../generic/Tooltip";
@@ -221,7 +221,7 @@ const JokerCard: React.FC<JokerCardProps> = ({
 
   const propertyIcons = [
     {
-      icon: <DocumentIcon className="w-full h-full" />,
+      icon: <WrenchIcon className="w-full h-full" />,
       tooltip: blueprintCompat
         ? "Blueprint Compatible"
         : "Cannot be copied by Blueprint",
