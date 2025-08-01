@@ -13,7 +13,7 @@ export const generateTriggerContext = (
     rule.effects.some((effect) => effect.type === "retrigger_cards")
   );
 
-  const isBlueprintCompatible = rules.some((rule) => rule.blueprintCompatible);
+  const isBlueprintCompatible = rules.some((rule) => rule.blueprintCompatible ?? true);
 
   switch (triggerType) {
     case "card_scored":
