@@ -765,7 +765,7 @@ const RuleCard: React.FC<RuleCardProps> = ({
                     <div onClick={(e) => e.stopPropagation()}>
                       <button
                         onClick={() => onAddConditionGroup(rule.id)}
-                        className="w-6 h-6 bg-black-darker rounded-lg flex items-center justify-center border-2 border-mint hover:bg-mint/20 transition-colors"
+                        className="w-6 h-6 bg-black-darker rounded-lg flex items-center justify-center border-2 border-mint hover:bg-mint/20 transition-colors cursor-pointer"
                         title="Add Condition Group"
                       >
                         <PlusIcon className="h-3 w-3 text-mint" />
@@ -786,7 +786,7 @@ const RuleCard: React.FC<RuleCardProps> = ({
                       <button
                         onClick={() => onToggleBlueprintCompatibility(rule.id)}
                         className="w-6 h-6 bg-black-darker rounded-lg flex items-center justify-center border-2 border-balatro-blue hover:bg-balatro-blue/20 transition-colors cursor-pointer"
-                        title="Blueprint Compatible"
+                        title="Copied by Blueprint"
                       >
                         <WrenchIcon className="h-3 w-3 text-balatro-blue" />
                       </button>
@@ -794,7 +794,7 @@ const RuleCard: React.FC<RuleCardProps> = ({
                       <button
                         onClick={() => onToggleBlueprintCompatibility(rule.id)}
                         className="w-6 h-6 bg-black-darker rounded-lg flex items-center justify-center border-2 border-balatro-red hover:bg-balatro-red/20 transition-colors cursor-pointer"
-                        title="Not Compatible with Blueprint"
+                        title="Not Copied by Blueprint"
                       >
                         <WrenchIcon className="h-3 w-3 text-balatro-red" />
                       </button>
