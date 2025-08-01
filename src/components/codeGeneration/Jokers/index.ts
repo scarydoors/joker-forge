@@ -1616,6 +1616,7 @@ const generateLocVarsFunction = (
   const finalVars = variableMapping.slice(0, maxVariableIndex);
 
   let locVarsReturn: string;
+  let hasReturn = false;
 
   if (hasRandomGroups) {
     const nonPassiveRules =
@@ -1642,15 +1643,18 @@ const generateLocVarsFunction = (
 
       locVarsReturn = `local new_numerator, new_denominator = SMODS.get_probability_vars(card, ${
         numerators[0]
-      }, ${oddsVar}, 'j_${modPrefix}_${joker.jokerKey}') --Please-work
+      }, ${oddsVar}, 'j_${modPrefix}_${joker.jokerKey}') 
         return {vars = {${nonProbabilityVars.join(", ")}${
         nonProbabilityVars.length > 0 ? `, ` : ``
       }new_numerator, new_denominator}}`;
+      hasReturn = true;
     } else {
       locVarsReturn = `{vars = {${finalVars.join(", ")}}}`;
+      hasReturn = false;
     }
   } else {
     locVarsReturn = `{vars = {${finalVars.join(", ")}}}`;
+    hasReturn = false;
   }
 
   if (colorVariables.length > 0 && !hasRandomGroups) {
@@ -1658,14 +1662,11 @@ const generateLocVarsFunction = (
     locVarsReturn = `{vars = {${varsOnly}}, colours = {${colorVariables.join(
       ", "
     )}}}`;
+    hasReturn = false;
   }
 
   return `loc_vars = function(self, info_queue, card)
-        ${
-          locVarsReturn.includes("--Please-work")
-            ? locVarsReturn
-            : `return ${locVarsReturn}`
-        }
+        ${hasReturn ? locVarsReturn : `return ${locVarsReturn}`}
     end`;
 };
 
