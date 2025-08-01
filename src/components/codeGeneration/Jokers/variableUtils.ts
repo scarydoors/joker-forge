@@ -153,7 +153,43 @@ export const coordinateVariableConflicts = (
 const extractExplicitVariablesFromEffect = (effect: Effect): string[] => {
   const variables: string[] = [];
 
-  Object.entries(effect.params).forEach(([, value]) => {
+  // Parameter names that contain keys/identifiers, not variable names (this list is a bit butchered and not exhaustive)
+  const keyParameterNames = new Set([
+    "joker_key",
+    "consumable_key",
+    "card_key",
+    "target_joker",
+    "specific_joker",
+    "blind_name",
+    "tag_key",
+    "enhancement_type",
+    "edition_type",
+    "seal_type",
+    "suit_type",
+    "rank_type",
+    "poker_hand_type",
+  ]);
+
+  Object.entries(effect.params).forEach(([paramName, value]) => {
+    // Skip parameters that are known to contain keys/identifiers
+    if (keyParameterNames.has(paramName)) {
+      return;
+    }
+
+    // Skip parameters that look like they contain keys (start with common prefixes)
+    if (
+      typeof value === "string" &&
+      (value.startsWith("j_") || // joker keys
+        value.startsWith("c_") || // consumable keys
+        value.startsWith("m_") || // enhancement keys
+        value.startsWith("e_") || // edition keys
+        value.startsWith("b_") || // blind keys
+        value.startsWith("tag_") || // tag keys
+        value.startsWith("v_")) // voucher keys
+    ) {
+      return;
+    }
+
     if (typeof value === "string" && isUserDefinedVariable(value)) {
       variables.push(value);
     }
@@ -683,6 +719,7 @@ export const getVariableUsageDetails = (joker: JokerData): VariableUsage[] => {
 export const getAllVariables = (joker: JokerData): UserVariable[] => {
   const userVars = joker.userVariables || [];
   const autoVars: UserVariable[] = [];
+  const probabilityVars: UserVariable[] = []; // Separate array for numerator/denominator
 
   const nonPassiveRules =
     joker.rules?.filter((rule) => rule.trigger !== "passive") || [];
@@ -703,7 +740,7 @@ export const getAllVariables = (joker: JokerData): UserVariable[] => {
     ];
 
     if (numerators.length === 1) {
-      autoVars.push({
+      probabilityVars.push({
         id: "auto_numerator",
         name: "numerator",
         initialValue: Number(numerators[0]),
@@ -712,14 +749,14 @@ export const getAllVariables = (joker: JokerData): UserVariable[] => {
     } else {
       numerators.forEach((num, index) => {
         if (index === 0) {
-          autoVars.push({
+          probabilityVars.push({
             id: "auto_numerator",
             name: "numerator",
             initialValue: Number(num),
             description: `First chance numerator (e.g., ${num} in '${num} in X')`,
           });
         } else {
-          autoVars.push({
+          probabilityVars.push({
             id: `auto_numerator_${index + 1}`,
             name: `numerator${index + 1}`,
             initialValue: Number(num),
@@ -732,7 +769,7 @@ export const getAllVariables = (joker: JokerData): UserVariable[] => {
     }
 
     if (denominators.length === 1) {
-      autoVars.push({
+      probabilityVars.push({
         id: "auto_denominator",
         name: "denominator",
         initialValue: Number(denominators[0]),
@@ -741,14 +778,14 @@ export const getAllVariables = (joker: JokerData): UserVariable[] => {
     } else {
       denominators.forEach((denom, index) => {
         if (index === 0) {
-          autoVars.push({
+          probabilityVars.push({
             id: "auto_denominator",
             name: "denominator",
             initialValue: Number(denom),
             description: `First chance denominator (e.g., ${denom} in 'X in ${denom}')`,
           });
         } else {
-          autoVars.push({
+          probabilityVars.push({
             id: `auto_denominator_${index + 1}`,
             name: `denominator${index + 1}`,
             initialValue: Number(denom),
@@ -784,7 +821,13 @@ export const getAllVariables = (joker: JokerData): UserVariable[] => {
     }${gameVar.startsFrom !== 0 ? ` (starts from ${gameVar.startsFrom})` : ""}`,
   }));
 
-  return [...userVars, ...autoVars, ...otherAutoVars, ...gameVarAutoVars];
+  return [
+    ...userVars,
+    ...autoVars,
+    ...otherAutoVars,
+    ...gameVarAutoVars,
+    ...probabilityVars,
+  ];
 };
 
 const getOrdinalSuffix = (num: number): string => {
