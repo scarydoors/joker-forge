@@ -50,9 +50,7 @@ export const generateLevelUpHandReturn = (effect: Effect): EffectReturn => {
             update_hand_text({ sound = 'button', volume = 0.7, pitch = 0.9, delay = 0 }, { level = '+'..tostring(${levelsCode}) })
             delay(1.3)
             for poker_hand_key, _ in pairs(G.GAME.hands) do
-                for i = 1, ${levelsCode} do
-                    level_up_hand(card, poker_hand_key, true)
-                end
+                level_up_hand(card, poker_hand_key, true, ${levelsCode})
             end
             update_hand_text({ sound = 'button', volume = 0.7, pitch = 1.1, delay = 0 },
                 { mult = 0, chips = 0, handname = '', level = '' })
@@ -101,9 +99,7 @@ export const generateLevelUpHandReturn = (effect: Effect): EffectReturn => {
                 table.insert(hand_pool, hand_key)
             end
             local random_hand = pseudorandom_element(hand_pool, 'random_hand_levelup')
-            for i = 1, ${levelsCode} do
-                level_up_hand(card, random_hand, true)
-            end
+            level_up_hand(card, random_hand, true, ${levelsCode})
             
             update_hand_text({sound = 'button', volume = 0.7, pitch = 1.1, delay = 0}, 
                 {handname=localize(random_hand, 'poker_hands'), 
@@ -153,9 +149,7 @@ export const generateLevelUpHandReturn = (effect: Effect): EffectReturn => {
             }))
             update_hand_text({ sound = 'button', volume = 0.7, pitch = 0.9, delay = 0 }, { level = '+'..tostring(${levelsCode}) })
             delay(1.3)
-            for i = 1, ${levelsCode} do
-                level_up_hand(card, '${handType}', true)
-            end
+            level_up_hand(card, "${handType}", true, ${levelsCode})
             update_hand_text({sound = 'button', volume = 0.7, pitch = 1.1, delay = 0}, 
                 {handname=localize('${handType}', 'poker_hands'), 
                  chips = G.GAME.hands['${handType}'].chips, 
