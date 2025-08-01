@@ -782,7 +782,7 @@ const RuleCard: React.FC<RuleCardProps> = ({
                     </button>
                   </div>
                   <div onClick={(e) => e.stopPropagation()}>
-                    {rule.blueprintCompatible ? (
+                    {(rule.blueprintCompatible ?? true) ? (
                       <button
                         onClick={() => onToggleBlueprintCompatibility(rule.id)}
                         className="w-6 h-6 bg-black-darker rounded-lg flex items-center justify-center border-2 border-balatro-blue hover:bg-balatro-blue/20 transition-colors cursor-pointer"
