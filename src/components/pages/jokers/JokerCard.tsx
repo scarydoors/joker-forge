@@ -225,8 +225,8 @@ const JokerCard: React.FC<JokerCardProps> = ({
     {
       icon: <WrenchIcon className="w-full h-full" />,
       tooltip: blueprintCompat
-        ? "Blueprint Compatible"
-        : "Cannot be copied by Blueprint",
+        ? "Visually Blueprint Compatbile"
+        : "Visually Blueprint Incompatible",
       variant: "disabled" as const,
       isEnabled: blueprintCompat,
       onClick: () => onQuickUpdate({ blueprint_compat: !blueprintCompat }),

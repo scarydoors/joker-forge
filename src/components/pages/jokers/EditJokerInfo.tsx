@@ -903,19 +903,6 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
                                 </p>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2">
                                   <Checkbox
-                                    id="blueprint_compat_edit"
-                                    label="Blueprint Compatible"
-                                    checked={
-                                      formData.blueprint_compat !== false
-                                    }
-                                    onChange={(checked) =>
-                                      handleCheckboxChange(
-                                        "blueprint_compat",
-                                        checked
-                                      )
-                                    }
-                                  />
-                                  <Checkbox
                                     id="eternal_compat_edit"
                                     label="Eternal Compatible"
                                     checked={formData.eternal_compat !== false}
@@ -928,11 +915,24 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
                                   />
                                   <Checkbox
                                     id="perishable_compat_edit"
-                                    label="Perishable Compatibility"
+                                    label="Perishable Compatible"
                                     checked={formData.perishable_compat !== false}
                                     onChange={(checked) =>
                                       handleCheckboxChange(
                                         "perishable_compat",
+                                        checked
+                                      )
+                                    }
+                                  />
+                                  <Checkbox
+                                    id="blueprint_compat_edit"
+                                    label="Visually Blueprint Compatible"
+                                    checked={
+                                      formData.blueprint_compat !== false
+                                    }
+                                    onChange={(checked) =>
+                                      handleCheckboxChange(
+                                        "blueprint_compat",
                                         checked
                                       )
                                     }
