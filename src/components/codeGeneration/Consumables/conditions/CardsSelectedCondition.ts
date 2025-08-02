@@ -16,11 +16,11 @@ export const generateCardsSelectedConditionCode = (rules: Rule[]): string => {
   switch (operator) {
     case "greater_than":
       return `#G.hand.highlighted > ${valueCode}`;
-    case "greater_than_or_equal":
+    case "greater_equals":
       return `#G.hand.highlighted >= ${valueCode}`;
     case "less_than":
       return `#G.hand.highlighted < ${valueCode}`;
-    case "less_than_or_equal":
+    case "less_equals":
       return `#G.hand.highlighted <= ${valueCode}`;
     case "equal":
       return `#G.hand.highlighted == ${valueCode}`;

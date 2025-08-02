@@ -1075,7 +1075,7 @@ const generateCalculateFunction = (
     } else if (hasFixProbablityEffects || hasModProbablityEffects) {
       if (hasFixProbablityEffects) {
         calculateFunction += `
-        if context.fix_probability and ${isBlueprintCompatible ? '' : 'and not context.blueprint'} then
+        if context.fix_probability ${isBlueprintCompatible ? '' : 'and not context.blueprint'} then
         local numerator, denominator = context.numerator, context.denominator`;
 
         let hasAnyConditions = false;
@@ -1147,7 +1147,7 @@ const generateCalculateFunction = (
       }
       if (hasModProbablityEffects) {
         calculateFunction += `
-          if context.mod_probability and ${isBlueprintCompatible ? '' : 'and not context.blueprint'} then
+          if context.mod_probability ${isBlueprintCompatible ? '' : 'and not context.blueprint'} then
           local numerator, denominator = context.numerator, context.denominator`;
 
         let hasAnyConditions = false;
