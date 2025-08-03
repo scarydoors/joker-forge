@@ -22,7 +22,7 @@ export const generateCardsSelectedConditionCode = (rules: Rule[]): string => {
       return `#G.hand.highlighted < ${valueCode}`;
     case "less_equals":
       return `#G.hand.highlighted <= ${valueCode}`;
-    case "equal":
+    case "equals":
       return `#G.hand.highlighted == ${valueCode}`;
     case "not_equal":
       return `#G.hand.highlighted ~= ${valueCode}`;
