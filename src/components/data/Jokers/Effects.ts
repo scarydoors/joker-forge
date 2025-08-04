@@ -1419,6 +1419,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
         options: [
           { value: "add", label: "Add" },
           { value: "subtract", label: "Subtract" },
+          { value: "set", label: "Set to" },
         ],
         default: "add",
       },
@@ -1445,6 +1446,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
         options: [
           { value: "add", label: "Add" },
           { value: "subtract", label: "Subtract" },
+          { value: "set", label: "Set to" },
         ],
         default: "add",
       },

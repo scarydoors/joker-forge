@@ -69,7 +69,31 @@ export const generateEditVoucherSlotsReturn = (
             end`;
       break;
     }
-    // There is no 'set' operation because I couldn't find a way to get current voucher limit
+    case "set": {
+      const setMessage = customMessage
+        ? `"${customMessage}"`
+        : `"Voucher Slots set to "..tostring(${valueCode})`;
+      statement = `func = function()
+                local current_voucher_slots = G.GAME.modifiers.extra_vouchers or 0
+                local target_voucher_slots = ${valueCode}
+                local difference = target_voucher_slots - current_voucher_slots
+                card_eval_status_text(context.blueprint_card or card, 'extra', nil, nil, nil, {message = ${setMessage}, colour = G.C.BLUE})
+                SMODS.change_voucher_limit(difference)
+                return true
+            end`;
+      break;
+    }
+    default: {
+      const addMessage = customMessage
+        ? `"${customMessage}"`
+        : `"+"..tostring(${valueCode}).." Voucher Slots"`;
+      statement = `func = function()
+                card_eval_status_text(context.blueprint_card or card, 'extra', nil, nil, nil, {message = ${addMessage}, colour = G.C.DARK_EDITION})
+                SMODS.change_voucher_limit(${valueCode})
+                return true
+            end`;
+      break;
+    }
   }
 
   return {
