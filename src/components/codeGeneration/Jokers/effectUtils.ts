@@ -70,6 +70,9 @@ import { generateFixProbabilityReturn } from "./effects/FixProbabilityEffect";
 import { generateModProbabilityReturn } from "./effects/ModProbabilityEffect";
 import { generateForceGameOverReturn } from "./effects/ForceGameOverEffect";
 import { generateJuiceUpReturn } from "./effects/JuiceUpEffect";
+import { generateDrawCardsReturn } from "./effects/DrawCardsEffect";
+import { generateEditVoucherSlotsReturn, generatePassiveVoucherSlots } from "./effects/EditVoucherSlotsEffect";
+import { generateEditBoosterSlotsReturn, generatePassiveBoosterSlots } from "./effects/EditBoosterSlotsEffect";
 
 interface ExtendedEffect extends Effect {
   _isInRandomGroup?: boolean;
@@ -460,6 +463,8 @@ const generateSingleEffect = (
       return generateEditDiscardReturn(effect, sameTypeCount);
     case "edit_hand_size":
       return generateEditHandSizeReturn(effect, sameTypeCount);
+    case "draw_cards":
+      return generateDrawCardsReturn(effect, sameTypeCount)
     case "level_up_hand":
       return generateLevelUpHandReturn(triggerType, effect, sameTypeCount);
     case "add_card_to_deck":
@@ -524,6 +529,10 @@ const generateSingleEffect = (
       return generateEditConsumableSlotsReturn(effect, sameTypeCount);
     case "edit_joker_slots":
       return generateEditJokerSlotsReturn(effect, sameTypeCount);
+    case "edit_voucher_slots":
+      return generateEditVoucherSlotsReturn(effect, sameTypeCount);
+    case "edit_booster_slots":
+      return generateEditBoosterSlotsReturn(effect, sameTypeCount);
     case "create_consumable":
       return generateCreateConsumableReturn(effect, triggerType);
     case "modify_blind_requirement":
@@ -718,6 +727,14 @@ export const processPassiveEffects = (
           }
           case "edit_joker_slots": {
             passiveResult = generatePassiveJokerSlots(effect);
+            break;
+          }
+          case "edit_voucher_slots": {
+            passiveResult = generatePassiveVoucherSlots(effect);
+            break;
+          }
+          case "edit_booster_slots": {
+            passiveResult = generatePassiveBoosterSlots(effect);
             break;
           }
         }

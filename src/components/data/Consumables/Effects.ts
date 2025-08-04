@@ -255,6 +255,21 @@ export const CONSUMABLE_EFFECT_TYPES: EffectTypeDefinition[] = [
     category: "Hand Effects",
   },
   {
+    id: "draw_cards",
+    label: "Draw Cards to Hand",
+    description: "Draw cards from your deck to your hand",
+    applicableTriggers: ["consumable_used"],
+    params: [
+      {
+        id: "value",
+        type: "number",
+        label: "Amount",
+        default: 1,
+      },
+    ],
+    category: "Hand Effects",
+  },
+  {
     id: "edit_hands",
     label: "Edit Hands",
     description: "Add, subtract, or set the player's hands for this round",
