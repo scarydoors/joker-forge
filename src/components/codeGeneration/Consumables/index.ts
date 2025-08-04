@@ -153,7 +153,6 @@ const generateSingleConsumableCode = (
 
   const configItems: string[] = [];
 
-  // Extract game variables from rules and add them to config
   const gameVariables = extractGameVariablesFromRules(activeRules);
   gameVariables.forEach((gameVar) => {
     configItems.push(`${gameVar.name} = ${gameVar.startsFrom}`);
@@ -180,7 +179,7 @@ const generateSingleConsumableCode = (
   const col = currentPosition % consumablesPerRow;
   const row = Math.floor(currentPosition / consumablesPerRow);
 
-  const nextPosition = currentPosition + 1;
+  let nextPosition = currentPosition + 1;
 
   let consumableCode = `SMODS.Consumable {
     key = '${consumable.consumableKey}',
@@ -227,6 +226,19 @@ const generateSingleConsumableCode = (
 
   consumableCode += `
     atlas = '${atlasKey}',`;
+
+  if (consumable.overlayImagePreview) {
+    const soulCol = nextPosition % consumablesPerRow;
+    const soulRow = Math.floor(nextPosition / consumablesPerRow);
+
+    consumableCode += `
+    soul_pos = {
+        x = ${soulCol},
+        y = ${soulRow}
+    },`;
+
+    nextPosition++;
+  }
 
   const locVarsCode = generateLocVarsFunction(
     consumable,
@@ -464,7 +476,6 @@ const generateLocVarsFunction = (
 
   const variableMapping: string[] = [];
 
-  // Add game variables
   gameVariables.forEach((gameVar) => {
     if (variableMapping.length >= maxVariableIndex) return;
 
