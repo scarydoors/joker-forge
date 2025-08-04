@@ -359,9 +359,35 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
     category: "Game Rules",
   },
   {
+    id: "draw_cards",
+    label: "Draw Cards to Hand",
+    description: "Draw cards from your deck to your hand",
+    applicableTriggers: [
+      "hand_played",
+      "card_scored",
+      "card_destoyed",
+      "card_held_in_hand",
+      "after_hand_played",
+      "before_hand_played",
+      "consumable_used",
+      "card_discarded",
+      "hand_discarded",
+    ],
+    params: [
+      {
+        id: "value",
+        type: "number",
+        label: "Amount",
+        default: 1,
+      },
+    ],
+    category: "Game Rules",
+  },
+  {
     id: "edit_play_size",
     label: "Edit Play Size",
-    description: "Modify the Play size (number of cards you can select and Play)",
+    description:
+      "Modify the Play size (number of cards you can select and Play)",
     applicableTriggers: [...GENERIC_TRIGGERS, "passive"],
     params: [
       {
@@ -387,7 +413,8 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
   {
     id: "edit_discard_size",
     label: "Edit Discard Size",
-    description: "Modify the Discard size (number of cards you can select and Discard)",
+    description:
+      "Modify the Discard size (number of cards you can select and Discard)",
     applicableTriggers: [...GENERIC_TRIGGERS, "passive"],
     params: [
       {
@@ -1366,6 +1393,58 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
           { value: "add", label: "Add" },
           { value: "subtract", label: "Subtract" },
           { value: "set", label: "Set to" },
+        ],
+        default: "add",
+      },
+      {
+        id: "value",
+        type: "number",
+        label: "Amount",
+        default: 1,
+        min: 0,
+      },
+    ],
+    category: "Game Rules",
+  },
+  {
+    id: "edit_voucher_slots",
+    label: "Edit Voucher Slots",
+    description: "Modify the number of vouchers available in shop",
+    applicableTriggers: [...GENERIC_TRIGGERS, "passive"],
+    params: [
+      {
+        id: "operation",
+        type: "select",
+        label: "Operation",
+        options: [
+          { value: "add", label: "Add" },
+          { value: "subtract", label: "Subtract" },
+        ],
+        default: "add",
+      },
+      {
+        id: "value",
+        type: "number",
+        label: "Amount",
+        default: 1,
+        min: 0,
+      },
+    ],
+    category: "Game Rules",
+  },
+  {
+    id: "edit_booster_slots",
+    label: "Edit Booster Slots",
+    description: "Modify the number of booster packs available in shop",
+    applicableTriggers: [...GENERIC_TRIGGERS, "passive"],
+    params: [
+      {
+        id: "operation",
+        type: "select",
+        label: "Operation",
+        options: [
+          { value: "add", label: "Add" },
+          { value: "subtract", label: "Subtract" },
         ],
         default: "add",
       },

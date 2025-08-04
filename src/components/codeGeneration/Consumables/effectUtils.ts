@@ -22,6 +22,7 @@ import { generateEditionRandomJokerReturn } from "./effects/EditionRandomJokerEf
 import { generateCopySelectedCardsReturn } from "./effects/CopySelectedCardsEffect";
 import { generateConvertLeftToRightReturn } from "./effects/ConvertLeftToRightEffect";
 import { generateFoolEffectReturn } from "./effects/FoolEffect";
+import { generateDrawCardsReturn } from "./effects/DrawCardsEffect";
 import { generateEditPlaySizeReturn } from "./effects/EditPlaySizeEffect";
 import { generateEditDiscardSizeReturn } from "./effects/EditDiscardSizeEffect";
 
@@ -250,6 +251,9 @@ const generateSingleEffect = (
 
     case "edit_hand_size":
       return generateEditHandSizeReturn(effect);
+
+    case "draw_cards":
+      return generateDrawCardsReturn(effect);
 
     case "edit_hands":
       return generateEditHandsReturn(effect);
