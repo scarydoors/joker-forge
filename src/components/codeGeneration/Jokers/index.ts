@@ -286,12 +286,7 @@ const generateSingleJokerCode = (
     end`;
   }
 
-  const locVarsCode = generateLocVarsFunction(
-    joker,
-    passiveEffects,
-    calculateResult?.configVariables || [],
-    modPrefix
-  );
+  const locVarsCode = generateLocVarsFunction(joker, passiveEffects, modPrefix);
   if (locVarsCode) {
     jokerCode += `,\n\n    ${locVarsCode}`;
   }
@@ -519,12 +514,16 @@ const generateCalculateFunction = (
         ...(rule.randomGroups?.flatMap((g) => g.effects) || []),
       ].some((effect) => effect.type === "mod_probability")
     );
-  
-    const isBlueprintCompatible = rules.some((rule) => rule.blueprintCompatible ?? true);
+
+    const isBlueprintCompatible = rules.some(
+      (rule) => rule.blueprintCompatible ?? true
+    );
 
     if (hasDeleteEffects) {
       calculateFunction += `
-        if context.destroy_card and context.destroy_card.should_destroy ${isBlueprintCompatible ? '' : 'and not context.blueprint'} then
+        if context.destroy_card and context.destroy_card.should_destroy ${
+          isBlueprintCompatible ? "" : "and not context.blueprint"
+        } then
             return { remove = true }
         end`;
     }
@@ -533,8 +532,12 @@ const generateCalculateFunction = (
       const retriggerContextCheck =
         triggerType === "card_held_in_hand" ||
         triggerType === "card_held_in_hand_end_of_round"
-          ? `context.repetition and context.cardarea == G.hand and (next(context.card_effects[1]) or #context.card_effects > 1) ${isBlueprintCompatible ? '' : 'and not context.blueprint'}`
-          : `context.repetition and context.cardarea == G.play ${isBlueprintCompatible ? '' : 'and not context.blueprint'}`;
+          ? `context.repetition and context.cardarea == G.hand and (next(context.card_effects[1]) or #context.card_effects > 1) ${
+              isBlueprintCompatible ? "" : "and not context.blueprint"
+            }`
+          : `context.repetition and context.cardarea == G.play ${
+              isBlueprintCompatible ? "" : "and not context.blueprint"
+            }`;
 
       calculateFunction += `
         if ${retriggerContextCheck} then`;
@@ -623,10 +626,16 @@ const generateCalculateFunction = (
         const nonRetriggerContextCheck =
           triggerType === "card_held_in_hand" ||
           triggerType === "card_held_in_hand_end_of_round"
-            ? `context.individual and context.cardarea == G.hand and not context.end_of_round ${isBlueprintCompatible ? '' : 'and not context.blueprint'}`
+            ? `context.individual and context.cardarea == G.hand and not context.end_of_round ${
+                isBlueprintCompatible ? "" : "and not context.blueprint"
+              }`
             : triggerType === "card_discarded"
-            ? `context.discard ${isBlueprintCompatible ? '' : 'and not context.blueprint'}`
-            : `context.individual and context.cardarea == G.play ${isBlueprintCompatible ? '' : 'and not context.blueprint'}`;
+            ? `context.discard ${
+                isBlueprintCompatible ? "" : "and not context.blueprint"
+              }`
+            : `context.individual and context.cardarea == G.play ${
+                isBlueprintCompatible ? "" : "and not context.blueprint"
+              }`;
 
         calculateFunction += `
         if ${nonRetriggerContextCheck} then`;
@@ -834,10 +843,16 @@ const generateCalculateFunction = (
       const individualContextCheck =
         triggerType === "card_held_in_hand" ||
         triggerType === "card_held_in_hand_end_of_round"
-          ? `context.individual and context.cardarea == G.hand and not context.end_of_round ${isBlueprintCompatible ? '' : 'and not context.blueprint'}`
+          ? `context.individual and context.cardarea == G.hand and not context.end_of_round ${
+              isBlueprintCompatible ? "" : "and not context.blueprint"
+            }`
           : triggerType === "card_discarded"
-          ? `context.discard ${isBlueprintCompatible ? '' : 'and not context.blueprint'}`
-          : `context.individual and context.cardarea == G.play ${isBlueprintCompatible ? '' : 'and not context.blueprint'}`;
+          ? `context.discard ${
+              isBlueprintCompatible ? "" : "and not context.blueprint"
+            }`
+          : `context.individual and context.cardarea == G.play ${
+              isBlueprintCompatible ? "" : "and not context.blueprint"
+            }`;
 
       calculateFunction += `
         if ${individualContextCheck} then
@@ -1075,7 +1090,9 @@ const generateCalculateFunction = (
     } else if (hasFixProbablityEffects || hasModProbablityEffects) {
       if (hasFixProbablityEffects) {
         calculateFunction += `
-        if context.fix_probability ${isBlueprintCompatible ? '' : 'and not context.blueprint'} then
+        if context.fix_probability ${
+          isBlueprintCompatible ? "" : "and not context.blueprint"
+        } then
         local numerator, denominator = context.numerator, context.denominator`;
 
         let hasAnyConditions = false;
@@ -1147,7 +1164,9 @@ const generateCalculateFunction = (
       }
       if (hasModProbablityEffects) {
         calculateFunction += `
-          if context.mod_probability ${isBlueprintCompatible ? '' : 'and not context.blueprint'} then
+          if context.mod_probability ${
+            isBlueprintCompatible ? "" : "and not context.blueprint"
+          } then
           local numerator, denominator = context.numerator, context.denominator`;
 
         let hasAnyConditions = false;
@@ -1362,7 +1381,6 @@ const generateCalculateFunction = (
 const generateLocVarsFunction = (
   joker: JokerData,
   passiveEffects: PassiveEffectResult[],
-  collectedConfigVariables: ConfigExtraVariable[],
   modPrefix?: string
 ): string | null => {
   const descriptionHasVariables = joker.description.includes("#");
@@ -1594,12 +1612,6 @@ const generateLocVarsFunction = (
       currentIndex++;
     }
   }
-
-  collectedConfigVariables.forEach((configVar) => {
-    if (variableMapping.length < maxVariableIndex) {
-      variableMapping.push(`card.ability.extra.${configVar.name}`);
-    }
-  });
 
   passiveEffects.forEach((effect) => {
     if (effect.locVars) {
