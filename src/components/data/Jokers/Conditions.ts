@@ -29,6 +29,7 @@ import {
   CUSTOM_CONSUMABLES,
   CONSUMABLE_SETS,
   RARITIES,
+  VOUCHERS,
 } from "../BalatroUtils";
 
 export const GENERIC_TRIGGERS: string[] = [
@@ -1317,7 +1318,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
     id: "blind_name",
     label: "Blind Name",
     description: "Check the current blind",
-    applicableTriggers: ["blind_selected"],
+    applicableTriggers: [...GENERIC_TRIGGERS, "blind_selected"],
     params: [
       {
         id: "operation",
@@ -1403,6 +1404,22 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
         type: "number",
         label: "Percentage (%)",
         default: 25,
+      },
+    ],
+    category: "Game State",
+  },
+  {
+    id: "voucher_redeemed",
+    label: "Voucher Redeemed",
+    description: "Check if a specific Voucher was redeemed during the run",
+    applicableTriggers: [...GENERIC_TRIGGERS],
+    params: [
+      {
+        id: "voucher",
+        type: "select",
+        label: "Voucher",
+        options: [...VOUCHERS()],
+        default: "v_overstock_norm",
       },
     ],
     category: "Game State",

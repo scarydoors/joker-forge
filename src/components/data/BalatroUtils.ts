@@ -194,6 +194,42 @@ const VANILLA_CONSUMABLE_SETS = [
   { value: "Spectral", label: "Spectral", key: "spectral" },
 ];
 
+const VANILLA_VOUCHERS_DATA = [
+  { value: "v_overstock_norm", label: "Overstock" },
+  { value: "v_overstock_plus", label: "Overstock Plus" },
+  { value: "v_clearance_sale", label: "Clearance Sale" },
+  { value: "v_liquidation", label: "Liquidation" },
+  { value: "v_hone", label: "Hone" },
+  { value: "v_glow_up", label: "Glow Up" },
+  { value: "v_reroll_surplus", label: "Reroll Surplus" },
+  { value: "v_reroll_glut", label: "Reroll Glut" },
+  { value: "v_crystal_ball", label: "Crystal Ball" },
+  { value: "v_omen_globe", label: "Omen Globe" },
+  { value: "v_telescope", label: "Telescope" },
+  { value: "v_observatory", label: "Observatory" },
+  { value: "v_grabber", label: "Grabber" },
+  { value: "v_nacho_tong", label: "Nacho Tong" },
+  { value: "v_wasteful", label: "Wasteful" },
+  { value: "v_recyclomancy", label: "Recyclomancy" },
+  { value: "v_tarot_merchant", label: "Tarot Merchant" },
+  { value: "v_tarot_tycoon", label: "Tarot Tycoon" },
+  { value: "v_planet_merchant", label: "Planet Merchant" },
+  { value: "v_planet_tycoon", label: "Planet Tycoon" },
+  { value: "v_seed_money", label: "Seed Money" },
+  { value: "v_money_tree", label: "Money Tree" },
+  { value: "v_blank", label: "Blank" },
+  { value: "v_antimatter", label: "Antimatter" },
+  { value: "v_magic_trick", label: "Magic Trick" },
+  { value: "v_illusion", label: "Illusion" },
+  { value: "v_hieroglyph", label: "Hieroglyph" },
+  { value: "v_petroglyph", label: "Petroglyph" },
+  { value: "v_directors_cut", label: "Directors Cut" },
+  { value: "v_retcon", label: "Retcon" },
+  { value: "v_paint_brush", label: "Paint Brush" },
+  { value: "v_palette", label: "Palette" },
+];
+export const VOUCHERS = () => VANILLA_VOUCHERS_DATA; // integrate with data registry when custom vouchers are a thing
+
 export const DataRegistry = {
   update: (
     customRarities: RarityData[],

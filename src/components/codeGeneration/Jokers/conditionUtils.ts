@@ -48,6 +48,7 @@ import { generateCumulativeChipsConditionCode } from "./conditions/CumulativeChi
 import { generateBlindNameConditionCode } from "./conditions/BlindNameCondition";
 import { generateFirstLastScoredConditionCode } from "./conditions/FirstLastScoredCondition";
 import { generateProbabilitySucceededConditionCode } from "./conditions/ProbabilitySucceededCondition";
+import { generateVoucherRedeemedConditionCode } from "./conditions/VoucherRedeemedCondition";
 
 export const generateConditionChain = (
   rule: Rule,
@@ -267,8 +268,11 @@ const generateSingleConditionCode = (
     case "first_last_scored":
       return generateFirstLastScoredConditionCode([singleConditionRule], joker);
 
-      case "probability_succeeded":
+    case "probability_succeeded":
       return generateProbabilitySucceededConditionCode([singleConditionRule]);
+
+    case "voucher_redeemed":
+      return generateVoucherRedeemedConditionCode([singleConditionRule]);
 
     default:
       return null;
