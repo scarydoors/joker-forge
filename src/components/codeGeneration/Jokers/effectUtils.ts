@@ -70,6 +70,7 @@ import { generateFixProbabilityReturn } from "./effects/FixProbabilityEffect";
 import { generateModProbabilityReturn } from "./effects/ModProbabilityEffect";
 import { generateForceGameOverReturn } from "./effects/ForceGameOverEffect";
 import { generateJuiceUpReturn } from "./effects/JuiceUpEffect";
+import { generateEditPlaySizeReturn, generatePassivePlaySize } from "./effects/EditPlaySizeEffect";
 
 interface ExtendedEffect extends Effect {
   _isInRandomGroup?: boolean;
@@ -540,6 +541,8 @@ const generateSingleEffect = (
       return generateJuiceUpReturn(effect, sameTypeCount, "joker");
     case "juice_up_card":
       return generateJuiceUpReturn(effect, sameTypeCount, "card");
+    case "edit_play_size":
+      return generateEditPlaySizeReturn(effect, sameTypeCount);
     default:
       return {
         statement: "",
@@ -718,6 +721,10 @@ export const processPassiveEffects = (
           }
           case "edit_joker_slots": {
             passiveResult = generatePassiveJokerSlots(effect);
+            break;
+          }
+          case "edit_play_size": {
+            passiveResult = generatePassivePlaySize(effect);
             break;
           }
         }

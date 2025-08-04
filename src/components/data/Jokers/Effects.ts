@@ -359,6 +359,32 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
     category: "Game Rules",
   },
   {
+    id: "edit_play_size",
+    label: "Edit Play Size",
+    description: "Modify the Play size (number of cards you can select)",
+    applicableTriggers: [...GENERIC_TRIGGERS, "passive"],
+    params: [
+      {
+        id: "operation",
+        type: "select",
+        label: "Operation",
+        options: [
+          { value: "add", label: "Add" },
+          { value: "subtract", label: "Subtract" },
+          { value: "set", label: "Set to" },
+        ],
+        default: "add",
+      },
+      {
+        id: "value",
+        type: "number",
+        label: "Amount",
+        default: 1,
+      },
+    ],
+    category: "Game Rules",
+  },
+  {
     id: "modify_internal_variable",
     label: "Modify Internal Variable",
     description: "Change an internal variable value for this joker",
