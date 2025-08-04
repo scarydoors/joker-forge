@@ -136,6 +136,15 @@ export const generatePassiveVoucherSlots = (
       addToDeck = `SMODS.change_voucher_limit(-${valueCode})`;
       removeFromDeck = `SMODS.change_voucher_limit(${valueCode})`;
       break;
+    case "set":
+      addToDeck = `card.ability.extra.original_slot_size = G.GAME.modifiers.extra_vouchers or 0
+        local difference = ${valueCode} - G.GAME.modifiers.extra_vouchers
+        SMODS.change_discard_limit(difference)`;
+      removeFromDeck = `if card.ability.extra.original_slot_size then
+            local difference = card.ability.extra.original_slot_size - G.GAME.modifiers.extra_vouchers
+            SMODS.change_discard_limit(difference)
+        end`;
+      break;
     default:
       addToDeck = `SMODS.change_voucher_limit(${valueCode})`;
       removeFromDeck = `SMODS.change_voucher_limit(-${valueCode})`;
