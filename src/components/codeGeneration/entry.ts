@@ -30,6 +30,16 @@ export interface ModMetadata {
   dump_loc?: boolean;
 }
 
+const sortForExport = <T extends { id: string; name: string }>(
+  items: T[]
+): T[] => {
+  return [...items].sort((a, b) => {
+    const nameComparison = a.name.localeCompare(b.name);
+    if (nameComparison !== 0) return nameComparison;
+    return a.id.localeCompare(b.id);
+  });
+};
+
 export const exportModCode = async (
   jokers: JokerData[],
   consumables: ConsumableData[],
@@ -48,21 +58,25 @@ export const exportModCode = async (
     console.log("Consumable Sets:", consumableSets);
     const zip = new JSZip();
 
+    const sortedJokers = sortForExport(jokers);
+    const sortedConsumables = sortForExport(consumables);
+    const sortedBoosters = sortForExport(boosters);
+
     const mainLuaCode = generateMainLuaCode(
-      jokers,
-      consumables,
+      sortedJokers,
+      sortedConsumables,
       customRarities,
-      boosters
+      sortedBoosters
     );
     zip.file(metadata.main_file, mainLuaCode);
 
     const ret = modToJson(
       metadata,
-      jokers,
+      sortedJokers,
       customRarities,
-      consumables,
+      sortedConsumables,
       consumableSets,
-      boosters
+      sortedBoosters
     );
     zip.file(ret.filename, ret.jsonString);
 
@@ -73,9 +87,9 @@ export const exportModCode = async (
 
     console.log("mod metadata: ", metadata.prefix);
 
-    if (jokers.length > 0) {
+    if (sortedJokers.length > 0) {
       const { jokersCode } = generateJokersCode(
-        jokers,
+        sortedJokers,
         "CustomJokers",
         metadata.prefix
       );
@@ -86,8 +100,8 @@ export const exportModCode = async (
       });
     }
 
-    if (consumables.length > 0 || consumableSets.length > 0) {
-      const { consumablesCode } = generateConsumablesCode(consumables, {
+    if (sortedConsumables.length > 0 || consumableSets.length > 0) {
+      const { consumablesCode } = generateConsumablesCode(sortedConsumables, {
         modPrefix: metadata.prefix,
         atlasKey: "CustomConsumables",
         consumableSets: consumableSets,
@@ -99,14 +113,17 @@ export const exportModCode = async (
       });
     }
 
-    if (boosters.length > 0) {
-      const { boostersCode } = generateBoostersCode(boosters, metadata.prefix);
+    if (sortedBoosters.length > 0) {
+      const { boostersCode } = generateBoostersCode(
+        sortedBoosters,
+        metadata.prefix
+      );
       zip.file("boosters.lua", boostersCode);
     }
 
     zip.file(`${metadata.id}.json`, generateModJson(metadata));
 
-    await addAtlasToZip(zip, jokers, consumables, boosters);
+    await addAtlasToZip(zip, sortedJokers, sortedConsumables, sortedBoosters);
 
     const content = await zip.generateAsync({ type: "blob" });
     const url = URL.createObjectURL(content);
