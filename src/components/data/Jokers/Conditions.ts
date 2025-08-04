@@ -1317,7 +1317,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
     id: "blind_name",
     label: "Blind Name",
     description: "Check the current blind",
-    applicableTriggers: ["blind_selected"],
+    applicableTriggers: [...GENERIC_TRIGGERS, "blind_selected"],
     params: [
       {
         id: "operation",
