@@ -23,6 +23,8 @@ import { generateCopySelectedCardsReturn } from "./effects/CopySelectedCardsEffe
 import { generateConvertLeftToRightReturn } from "./effects/ConvertLeftToRightEffect";
 import { generateFoolEffectReturn } from "./effects/FoolEffect";
 import { generateDrawCardsReturn } from "./effects/DrawCardsEffect";
+import { generateEditPlaySizeReturn } from "./effects/EditPlaySizeEffect";
+import { generateEditDiscardSizeReturn } from "./effects/EditDiscardSizeEffect";
 
 export interface EffectReturn {
   statement: string;
@@ -294,6 +296,12 @@ const generateSingleEffect = (
 
     case "fool_effect":
       return generateFoolEffectReturn(effect);
+    
+    case "edit_play_size":
+      return generateEditPlaySizeReturn(effect);
+      
+    case "edit_discard_size":
+      return generateEditDiscardSizeReturn(effect);
 
     default:
       return {
