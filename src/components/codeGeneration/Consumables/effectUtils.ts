@@ -27,6 +27,7 @@ import { generateEditPlaySizeReturn } from "./effects/EditPlaySizeEffect";
 import { generateEditDiscardSizeReturn } from "./effects/EditDiscardSizeEffect";
 import { generateEditBoosterSlotsReturn } from "./effects/EditBoosterSlotsEffect";
 import { generateEditVoucherSlotsReturn } from "./effects/EditVoucherSlotsEffect";
+import { generateCreateTagReturn } from "./effects/CreateTagEffect";
 
 export interface EffectReturn {
   statement: string;
@@ -310,6 +311,9 @@ const generateSingleEffect = (
       
     case "edit_voucher_slots":
       return generateEditVoucherSlotsReturn(effect);
+
+    case "create_tag":
+      return generateCreateTagReturn(effect);
 
     default:
       return {

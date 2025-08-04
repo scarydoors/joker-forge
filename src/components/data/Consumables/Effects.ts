@@ -23,6 +23,7 @@ import {
   CUSTOM_CONSUMABLES,
   CONSUMABLE_SETS,
   RARITIES,
+  TAGS,
 } from "../BalatroUtils";
 
 export const CONSUMABLE_EFFECT_CATEGORIES: CategoryDefinition[] = [
@@ -805,6 +806,35 @@ export const CONSUMABLE_EFFECT_TYPES: EffectTypeDefinition[] = [
       "Create a copy of the last Tarot or Planet card that was used (like The Fool)",
     applicableTriggers: ["consumable_used"],
     params: [],
+    category: "Consumables",
+  },
+  {
+    id: "create_tag",
+    label: "Create Tag",
+    description: "Create a specific or random tag",
+    applicableTriggers: ["consumable_used"],
+    params: [
+      {
+        id: "tag_type",
+        type: "select",
+        label: "Tag Type",
+        options: [
+          { value: "random", label: "Random Tag" },
+          { value: "specific", label: "Specific Tag" },
+        ],
+        default: "random",
+      },
+      {
+        id: "specific_tag",
+        type: "select",
+        label: "Specific Tag",
+        options: [...TAGS],
+        showWhen: {
+          parameter: "tag_type",
+          values: ["specific"],
+        },
+      },
+    ],
     category: "Consumables",
   },
   {

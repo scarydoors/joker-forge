@@ -965,6 +965,33 @@ export const TAGS = [
   },
 ] as const;
 
+export const TAG_TYPES: Record<string, string> = {
+  uncommon: "tag_uncommon",
+  rare: "tag_rare",
+  negative: "tag_negative",
+  foil: "tag_foil",
+  holo: "tag_holo",
+  polychrome: "tag_polychrome",
+  investment: "tag_investment",
+  voucher: "tag_voucher",
+  boss: "tag_boss",
+  standard: "tag_standard",
+  charm: "tag_charm",
+  meteor: "tag_meteor",
+  buffoon: "tag_buffoon",
+  handy: "tag_handy",
+  garbage: "tag_garbage",
+  ethereal: "tag_ethereal",
+  coupon: "tag_coupon",
+  double: "tag_double",
+  juggle: "tag_juggle",
+  d_six: "tag_d_six",
+  top_up: "tag_top_up",
+  speed: "tag_speed",
+  orbital: "tag_orbital",
+  economy: "tag_economy",
+} as const;
+
 // Consumable Types
 export const CONSUMABLE_TYPES = [
   { value: "any", label: "Any Consumable" },
