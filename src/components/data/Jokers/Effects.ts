@@ -362,7 +362,17 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
     id: "draw_cards",
     label: "Draw Cards to Hand",
     description: "Draw cards from your deck to your hand",
-    applicableTriggers: ["hand_played", "card_scored", "card_destoyed", "card_held_in_hand", "after_hand_played", "before_hand_played", "consumable_used", "card_discarded", "hand_discarded"],
+    applicableTriggers: [
+      "hand_played",
+      "card_scored",
+      "card_destoyed",
+      "card_held_in_hand",
+      "after_hand_played",
+      "before_hand_played",
+      "consumable_used",
+      "card_discarded",
+      "hand_discarded",
+    ],
     params: [
       {
         id: "value",
@@ -376,7 +386,8 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
   {
     id: "edit_play_size",
     label: "Edit Play Size",
-    description: "Modify the Play size (number of cards you can select and Play)",
+    description:
+      "Modify the Play size (number of cards you can select and Play)",
     applicableTriggers: [...GENERIC_TRIGGERS, "passive"],
     params: [
       {
@@ -402,14 +413,10 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
   {
     id: "edit_discard_size",
     label: "Edit Discard Size",
-    description: "Modify the Discard size (number of cards you can select and Discard)",
+    description:
+      "Modify the Discard size (number of cards you can select and Discard)",
     applicableTriggers: [...GENERIC_TRIGGERS, "passive"],
     params: [
-      {
-        id: "operation",
-        type: "select",
-        label: "Operation",
-         params: [
       {
         id: "operation",
         type: "select",
@@ -428,8 +435,8 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
         default: 1,
       },
     ],
-        category: "Game Rules",
-      },
+    category: "Game Rules",
+  },
   {
     id: "modify_internal_variable",
     label: "Modify Internal Variable",
@@ -1425,7 +1432,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
     ],
     category: "Game Rules",
   },
-{
+  {
     id: "edit_booster_slots",
     label: "Edit Booster Slots",
     description: "Modify the number of booster packs available in shop",

@@ -71,10 +71,22 @@ import { generateModProbabilityReturn } from "./effects/ModProbabilityEffect";
 import { generateForceGameOverReturn } from "./effects/ForceGameOverEffect";
 import { generateJuiceUpReturn } from "./effects/JuiceUpEffect";
 import { generateDrawCardsReturn } from "./effects/DrawCardsEffect";
-import { generateEditVoucherSlotsReturn, generatePassiveVoucherSlots } from "./effects/EditVoucherSlotsEffect";
-import { generateEditBoosterSlotsReturn, generatePassiveBoosterSlots } from "./effects/EditBoosterSlotsEffect";
-import { generateEditPlaySizeReturn, generatePassivePlaySize } from "./effects/EditPlaySizeEffect";
-import { generateEditDiscardSizeReturn, generatePassiveDiscardSize } from "./effects/EditDiscardSizeEffect";
+import {
+  generateEditVoucherSlotsReturn,
+  generatePassiveVoucherSlots,
+} from "./effects/EditVoucherSlotsEffect";
+import {
+  generateEditBoosterSlotsReturn,
+  generatePassiveBoosterSlots,
+} from "./effects/EditBoosterSlotsEffect";
+import {
+  generateEditPlaySizeReturn,
+  generatePassivePlaySize,
+} from "./effects/EditPlaySizeEffect";
+import {
+  generateEditDiscardSizeReturn,
+  generatePassiveDiscardSize,
+} from "./effects/EditDiscardSizeEffect";
 
 interface ExtendedEffect extends Effect {
   _isInRandomGroup?: boolean;
@@ -466,7 +478,7 @@ const generateSingleEffect = (
     case "edit_hand_size":
       return generateEditHandSizeReturn(effect, sameTypeCount);
     case "draw_cards":
-      return generateDrawCardsReturn(effect, sameTypeCount)
+      return generateDrawCardsReturn(effect, sameTypeCount);
     case "level_up_hand":
       return generateLevelUpHandReturn(triggerType, effect, sameTypeCount);
     case "add_card_to_deck":
@@ -741,6 +753,7 @@ export const processPassiveEffects = (
           }
           case "edit_booster_slots": {
             passiveResult = generatePassiveBoosterSlots(effect);
+            break;
           }
           case "edit_play_size": {
             passiveResult = generatePassivePlaySize(effect);
