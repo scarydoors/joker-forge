@@ -7,6 +7,7 @@ import {
   SparklesIcon,
 } from "@heroicons/react/24/outline";
 import { CategoryDefinition } from "../Jokers/Triggers";
+import { VOUCHERS } from "../BalatroUtils";
 
 export const CONSUMABLE_GENERIC_TRIGGERS: string[] = [
   "consumable_used",
@@ -128,6 +129,22 @@ export const CONSUMABLE_CONDITION_TYPES: ConditionTypeDefinition[] = [
     ],
     category: "Game Context",
   },
+  {
+      id: "voucher_redeemed",
+      label: "Voucher Redeemed",
+      description: "Check if a specific Voucher was redeemed during the run",
+      applicableTriggers: ['consumable_used'],
+      params: [
+        {
+          id: "voucher",
+          type: "select",
+          label: "Voucher",
+          options: [...VOUCHERS()],
+          default: "v_overstock_norm",
+        },
+      ],
+      category: "Game Context",
+    },
   {
     id: "hand_size",
     label: "Hand Size",
