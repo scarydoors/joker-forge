@@ -7,6 +7,7 @@ import {
   UserGroupIcon,
   CursorArrowRaysIcon,
   HandRaisedIcon,
+  ShoppingBagIcon,
 } from "@heroicons/react/24/outline";
 import { CategoryDefinition } from "../Jokers/Triggers";
 import {
@@ -36,6 +37,10 @@ export const CONSUMABLE_EFFECT_CATEGORIES: CategoryDefinition[] = [
   {
     label: "Economy",
     icon: BanknotesIcon,
+  },
+  {
+    label: "Shop Effects",
+    icon: ShoppingBagIcon,
   },
   {
     label: "Hand Effects",
@@ -302,7 +307,7 @@ export const CONSUMABLE_EFFECT_TYPES: EffectTypeDefinition[] = [
     label: "Edit Discard Size",
     description: "Add, subtract, or set the player's discard size",
     applicableTriggers: ["consumable_used"],
-   params: [
+    params: [
       {
         id: "operation",
         type: "select",
@@ -324,6 +329,60 @@ export const CONSUMABLE_EFFECT_TYPES: EffectTypeDefinition[] = [
       },
     ],
     category: "Hand Effects",
+  },
+  {
+    id: "edit_voucher_slots",
+    label: "Edit Voucher Slots",
+    description: "Modify the number of vouchers available in shop",
+    applicableTriggers: ["consumable_used"],
+    params: [
+      {
+        id: "operation",
+        type: "select",
+        label: "Operation",
+        options: [
+          { value: "add", label: "Add" },
+          { value: "subtract", label: "Subtract" },
+          { value: "set", label: "Set to" },
+        ],
+        default: "add",
+      },
+      {
+        id: "value",
+        type: "number",
+        label: "Amount",
+        default: 1,
+        min: 0,
+      },
+    ],
+    category: "Shop Effects",
+  },
+  {
+    id: "edit_booster_slots",
+    label: "Edit Booster Slots",
+    description: "Modify the number of booster packs available in shop",
+    applicableTriggers: ["consumable_used"],
+    params: [
+      {
+        id: "operation",
+        type: "select",
+        label: "Operation",
+        options: [
+          { value: "add", label: "Add" },
+          { value: "subtract", label: "Subtract" },
+          { value: "set", label: "Set to" },
+        ],
+        default: "add",
+      },
+      {
+        id: "value",
+        type: "number",
+        label: "Amount",
+        default: 1,
+        min: 0,
+      },
+    ],
+    category: "Shop Effects",
   },
   {
     id: "edit_hands",
