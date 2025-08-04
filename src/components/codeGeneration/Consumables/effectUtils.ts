@@ -22,6 +22,7 @@ import { generateEditionRandomJokerReturn } from "./effects/EditionRandomJokerEf
 import { generateCopySelectedCardsReturn } from "./effects/CopySelectedCardsEffect";
 import { generateConvertLeftToRightReturn } from "./effects/ConvertLeftToRightEffect";
 import { generateFoolEffectReturn } from "./effects/FoolEffect";
+import { generateEditPlaySizeReturn } from "./effects/EditPlaySizeEffect";
 
 export interface EffectReturn {
   statement: string;
@@ -290,6 +291,9 @@ const generateSingleEffect = (
 
     case "fool_effect":
       return generateFoolEffectReturn(effect);
+    
+      case "edit_play_size":
+      return generateEditPlaySizeReturn(effect);
 
     default:
       return {

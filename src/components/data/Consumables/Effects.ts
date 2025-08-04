@@ -255,6 +255,34 @@ export const CONSUMABLE_EFFECT_TYPES: EffectTypeDefinition[] = [
     category: "Hand Effects",
   },
   {
+    id: "edit_play_size",
+    label: "Edit Play Size",
+    description: "Add, subtract, or set the player's play size",
+    applicableTriggers: ["consumable_used"],
+    params: [
+      {
+        id: "operation",
+        type: "select",
+        label: "Operation",
+        options: [
+          { value: "add", label: "Add" },
+          { value: "subtract", label: "Subtract" },
+          { value: "set", label: "Set" },
+        ],
+        default: "add",
+      },
+      {
+        id: "value",
+        type: "number",
+        label: "Amount",
+        default: 1,
+        min: 1,
+        max: 50,
+      },
+    ],
+    category: "Hand Effects",
+  },
+  {
     id: "edit_hands",
     label: "Edit Hands",
     description: "Add, subtract, or set the player's hands for this round",
