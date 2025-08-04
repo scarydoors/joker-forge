@@ -1464,6 +1464,9 @@ const generateLocVarsFunction = (
   };
 
   if (hasRandomGroups) {
+    const gameVarNames = new Set(
+      gameVariables.map((gv) => gv.name.replace(/\s+/g, "").toLowerCase())
+    );
     const remainingVars = allVariables.filter(
       (v) =>
         v.name !== "numerator" &&
@@ -1472,7 +1475,9 @@ const generateLocVarsFunction = (
         !v.name.startsWith("denominator") &&
         v.type !== "suit" &&
         v.type !== "rank" &&
-        v.type !== "pokerhand"
+        v.type !== "pokerhand" &&
+        !v.id.startsWith("auto_gamevar_") &&
+        !gameVarNames.has(v.name)
     );
     const remainingGameVars = gameVariables.filter(
       (gv) =>
@@ -1645,15 +1650,15 @@ const generateLocVarsFunction = (
       ...new Set(randomGroups.map((group) => group.chance_numerator)),
     ];
 
+    const nonProbabilityVars = finalVars.filter(
+      (varName) =>
+        !varName.includes("card.ability.extra.odds") &&
+        !varName.includes("card.ability.extra.numerator") &&
+        !varName.includes("card.ability.extra.denominator")
+    );
+
     if (denominators.length === 1 && numerators.length === 1) {
       const oddsVar = "card.ability.extra.odds";
-
-      const nonProbabilityVars = finalVars.filter(
-        (varName) =>
-          !varName.includes("card.ability.extra.odds") &&
-          !varName.includes("card.ability.extra.numerator") &&
-          !varName.includes("card.ability.extra.denominator")
-      );
 
       locVarsReturn = `local new_numerator, new_denominator = SMODS.get_probability_vars(card, ${
         numerators[0]
@@ -1661,6 +1666,32 @@ const generateLocVarsFunction = (
         return {vars = {${nonProbabilityVars.join(", ")}${
         nonProbabilityVars.length > 0 ? `, ` : ``
       }new_numerator, new_denominator}}`;
+      hasReturn = true;
+    } else if (denominators.length > 1) {
+      const probabilityCalls: string[] = [];
+      const probabilityVars: string[] = [];
+
+      denominators.forEach((_, index) => {
+        const oddsVar =
+          index === 0
+            ? "card.ability.extra.odds"
+            : `card.ability.extra.odds${index + 1}`;
+        const numerator = numerators[Math.min(index, numerators.length - 1)];
+        const varSuffix = index === 0 ? "" : (index + 1).toString();
+
+        probabilityCalls.push(
+          `local new_numerator${varSuffix}, new_denominator${varSuffix} = SMODS.get_probability_vars(card, ${numerator}, ${oddsVar}, 'j_${modPrefix}_${joker.jokerKey}')`
+        );
+        probabilityVars.push(
+          `new_numerator${varSuffix}`,
+          `new_denominator${varSuffix}`
+        );
+      });
+
+      const allReturnVars = [...nonProbabilityVars, ...probabilityVars];
+
+      locVarsReturn = `${probabilityCalls.join("\n        ")}
+        return {vars = {${allReturnVars.join(", ")}}}`;
       hasReturn = true;
     } else {
       locVarsReturn = `{vars = {${finalVars.join(", ")}}}`;

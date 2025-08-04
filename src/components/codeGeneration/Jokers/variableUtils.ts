@@ -719,7 +719,7 @@ export const getVariableUsageDetails = (joker: JokerData): VariableUsage[] => {
 export const getAllVariables = (joker: JokerData): UserVariable[] => {
   const userVars = joker.userVariables || [];
   const autoVars: UserVariable[] = [];
-  const probabilityVars: UserVariable[] = []; // Separate array for numerator/denominator
+  const probabilityVars: UserVariable[] = [];
 
   const nonPassiveRules =
     joker.rules?.filter((rule) => rule.trigger !== "passive") || [];
@@ -732,28 +732,77 @@ export const getAllVariables = (joker: JokerData): UserVariable[] => {
     const randomGroups = nonPassiveRules.flatMap(
       (rule) => rule.randomGroups || []
     );
-    const numerators = [
-      ...new Set(randomGroups.map((group) => group.chance_numerator)),
-    ];
     const denominators = [
       ...new Set(randomGroups.map((group) => group.chance_denominator)),
     ];
+    const numerators = [
+      ...new Set(randomGroups.map((group) => group.chance_numerator)),
+    ];
 
-    if (numerators.length === 1) {
+    if (denominators.length === 1 && numerators.length === 1) {
       probabilityVars.push({
         id: "auto_numerator",
         name: "numerator",
         initialValue: Number(numerators[0]),
         description: `Chance numerator (e.g., ${numerators[0]} in '${numerators[0]} in X')`,
       });
-    } else {
+      probabilityVars.push({
+        id: "auto_denominator",
+        name: "denominator",
+        initialValue: Number(denominators[0]),
+        description: `Chance denominator (e.g., ${denominators[0]} in 'X in ${denominators[0]}')`,
+      });
+    } else if (denominators.length > 1) {
+      denominators.forEach((denom, index) => {
+        const numerator = numerators[Math.min(index, numerators.length - 1)];
+
+        if (index === 0) {
+          probabilityVars.push({
+            id: "auto_numerator",
+            name: "numerator",
+            initialValue: Number(numerator),
+            description: `Chance numerator (e.g., ${numerator} in '${numerator} in X')`,
+          });
+        } else {
+          probabilityVars.push({
+            id: `auto_numerator_${index + 1}`,
+            name: `numerator${index + 1}`,
+            initialValue: Number(numerator),
+            description: `${index + 1}${getOrdinalSuffix(
+              index + 1
+            )} chance numerator (e.g., ${numerator} in '${numerator} in X')`,
+          });
+        }
+
+        if (index === 0) {
+          probabilityVars.push({
+            id: "auto_denominator",
+            name: "denominator",
+            initialValue: Number(denom),
+            description: `Chance denominator (e.g., ${denom} in 'X in ${denom}')`,
+          });
+        } else {
+          probabilityVars.push({
+            id: `auto_denominator_${index + 1}`,
+            name: `denominator${index + 1}`,
+            initialValue: Number(denom),
+            description: `${index + 1}${getOrdinalSuffix(
+              index + 1
+            )} chance denominator (e.g., ${denom} in 'X in ${denom}')`,
+          });
+        }
+      });
+    } else if (numerators.length > 1) {
       numerators.forEach((num, index) => {
+        const denominator =
+          denominators[Math.min(index, denominators.length - 1)];
+
         if (index === 0) {
           probabilityVars.push({
             id: "auto_numerator",
             name: "numerator",
             initialValue: Number(num),
-            description: `First chance numerator (e.g., ${num} in '${num} in X')`,
+            description: `Chance numerator (e.g., ${num} in '${num} in X')`,
           });
         } else {
           probabilityVars.push({
@@ -765,33 +814,22 @@ export const getAllVariables = (joker: JokerData): UserVariable[] => {
             )} chance numerator (e.g., ${num} in '${num} in X')`,
           });
         }
-      });
-    }
 
-    if (denominators.length === 1) {
-      probabilityVars.push({
-        id: "auto_denominator",
-        name: "denominator",
-        initialValue: Number(denominators[0]),
-        description: `Chance denominator (e.g., ${denominators[0]} in 'X in ${denominators[0]}')`,
-      });
-    } else {
-      denominators.forEach((denom, index) => {
         if (index === 0) {
           probabilityVars.push({
             id: "auto_denominator",
             name: "denominator",
-            initialValue: Number(denom),
-            description: `First chance denominator (e.g., ${denom} in 'X in ${denom}')`,
+            initialValue: Number(denominator),
+            description: `Chance denominator (e.g., ${denominator} in 'X in ${denominator}')`,
           });
         } else {
           probabilityVars.push({
             id: `auto_denominator_${index + 1}`,
             name: `denominator${index + 1}`,
-            initialValue: Number(denom),
+            initialValue: Number(denominator),
             description: `${index + 1}${getOrdinalSuffix(
               index + 1
-            )} chance denominator (e.g., ${denom} in 'X in ${denom}')`,
+            )} chance denominator (e.g., ${denominator} in 'X in ${denominator}')`,
           });
         }
       });
