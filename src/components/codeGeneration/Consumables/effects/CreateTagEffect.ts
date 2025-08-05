@@ -1,17 +1,13 @@
-import type { EffectReturn } from "../effectUtils";
-import type { Effect } from "../../../ruleBuilder/types";
+import { Effect } from "../../../ruleBuilder/types";
+import { EffectReturn } from "../effectUtils";
 import { TAG_TYPES } from "../../../data/BalatroUtils";
 
 export const generateCreateTagReturn = (
-  effect: Effect,
-  triggerType: string
+  effect: Effect
 ): EffectReturn => {
   const tagType = (effect.params?.tag_type as string) || "random";
   const specificTag = (effect.params?.specific_tag as string) || "double";
   const customMessage = effect.customMessage;
-
-  const scoringTriggers = ["hand_played", "card_scored"];
-  const isScoring = scoringTriggers.includes(triggerType);
 
   let tagCreationCode = "";
 
@@ -59,20 +55,10 @@ export const generateCreateTagReturn = (
             }))`;
   }
 
-  if (isScoring) {
-    return {
-      statement: `__PRE_RETURN_CODE__${tagCreationCode}
-                __PRE_RETURN_CODE_END__`,
-      message: customMessage ? `"${customMessage}"` : `"Created Tag!"`,
-      colour: "G.C.GREEN",
-    };
-  } else {
-    return {
-      statement: `func = function()${tagCreationCode}
-                    return true
-                end`,
-      message: customMessage ? `"${customMessage}"` : `"Created Tag!"`,
-      colour: "G.C.GREEN",
-    };
-  }
+  return {
+    statement: `__PRE_RETURN_CODE__${tagCreationCode}
+              __PRE_RETURN_CODE_END__`,
+    message: customMessage ? `"${customMessage}"` : `"Created Tag!"`,
+    colour: "G.C.GREEN",
+  };
 };

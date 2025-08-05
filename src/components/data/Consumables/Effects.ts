@@ -7,6 +7,7 @@ import {
   UserGroupIcon,
   CursorArrowRaysIcon,
   HandRaisedIcon,
+  ShoppingBagIcon,
 } from "@heroicons/react/24/outline";
 import { CategoryDefinition } from "../Jokers/Triggers";
 import {
@@ -22,6 +23,7 @@ import {
   CUSTOM_CONSUMABLES,
   CONSUMABLE_SETS,
   RARITIES,
+  TAGS,
 } from "../BalatroUtils";
 
 export const CONSUMABLE_EFFECT_CATEGORIES: CategoryDefinition[] = [
@@ -36,6 +38,10 @@ export const CONSUMABLE_EFFECT_CATEGORIES: CategoryDefinition[] = [
   {
     label: "Economy",
     icon: BanknotesIcon,
+  },
+  {
+    label: "Shop Effects",
+    icon: ShoppingBagIcon,
   },
   {
     label: "Hand Effects",
@@ -302,7 +308,7 @@ export const CONSUMABLE_EFFECT_TYPES: EffectTypeDefinition[] = [
     label: "Edit Discard Size",
     description: "Add, subtract, or set the player's discard size",
     applicableTriggers: ["consumable_used"],
-   params: [
+    params: [
       {
         id: "operation",
         type: "select",
@@ -324,6 +330,60 @@ export const CONSUMABLE_EFFECT_TYPES: EffectTypeDefinition[] = [
       },
     ],
     category: "Hand Effects",
+  },
+  {
+    id: "edit_voucher_slots",
+    label: "Edit Voucher Slots",
+    description: "Modify the number of vouchers available in shop",
+    applicableTriggers: ["consumable_used"],
+    params: [
+      {
+        id: "operation",
+        type: "select",
+        label: "Operation",
+        options: [
+          { value: "add", label: "Add" },
+          { value: "subtract", label: "Subtract" },
+          { value: "set", label: "Set to" },
+        ],
+        default: "add",
+      },
+      {
+        id: "value",
+        type: "number",
+        label: "Amount",
+        default: 1,
+        min: 0,
+      },
+    ],
+    category: "Shop Effects",
+  },
+  {
+    id: "edit_booster_slots",
+    label: "Edit Booster Slots",
+    description: "Modify the number of booster packs available in shop",
+    applicableTriggers: ["consumable_used"],
+    params: [
+      {
+        id: "operation",
+        type: "select",
+        label: "Operation",
+        options: [
+          { value: "add", label: "Add" },
+          { value: "subtract", label: "Subtract" },
+          { value: "set", label: "Set to" },
+        ],
+        default: "add",
+      },
+      {
+        id: "value",
+        type: "number",
+        label: "Amount",
+        default: 1,
+        min: 0,
+      },
+    ],
+    category: "Shop Effects",
   },
   {
     id: "edit_hands",
@@ -746,6 +806,35 @@ export const CONSUMABLE_EFFECT_TYPES: EffectTypeDefinition[] = [
       "Create a copy of the last Tarot or Planet card that was used (like The Fool)",
     applicableTriggers: ["consumable_used"],
     params: [],
+    category: "Consumables",
+  },
+  {
+    id: "create_tag",
+    label: "Create Tag",
+    description: "Create a specific or random tag",
+    applicableTriggers: ["consumable_used"],
+    params: [
+      {
+        id: "tag_type",
+        type: "select",
+        label: "Tag Type",
+        options: [
+          { value: "random", label: "Random Tag" },
+          { value: "specific", label: "Specific Tag" },
+        ],
+        default: "random",
+      },
+      {
+        id: "specific_tag",
+        type: "select",
+        label: "Specific Tag",
+        options: [...TAGS],
+        showWhen: {
+          parameter: "tag_type",
+          values: ["specific"],
+        },
+      },
+    ],
     category: "Consumables",
   },
   {

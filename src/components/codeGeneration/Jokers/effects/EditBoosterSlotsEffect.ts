@@ -69,7 +69,31 @@ export const generateEditBoosterSlotsReturn = (
             end`;
       break;
     }
-    // There is no 'set' operation because I couldn't find a way to get current booster limit
+    case "set": {
+      const setMessage = customMessage
+        ? `"${customMessage}"`
+        : `"Booster Slots set to "..tostring(${valueCode})`;
+      statement = `func = function()
+                local current_booster_slots = G.GAME.modifiers.extra_boosters
+                local target_booster_slots = ${valueCode}
+                local difference = target_booster_slots - current_booster_slots
+                card_eval_status_text(context.blueprint_card or card, 'extra', nil, nil, nil, {message = ${setMessage}, colour = G.C.BLUE})
+                SMODS.change_booster_limit(difference)
+                return true
+            end`;
+      break;
+    }
+    default: {
+      const addMessage = customMessage
+        ? `"${customMessage}"`
+        : `"+"..tostring(${valueCode}).." Booster Slots"`;
+      statement = `func = function()
+                card_eval_status_text(context.blueprint_card or card, 'extra', nil, nil, nil, {message = ${addMessage}, colour = G.C.DARK_EDITION})
+                SMODS.change_booster_limit(${valueCode})
+                return true
+            end`;
+      break;
+    }
   }
 
   return {
@@ -111,6 +135,15 @@ export const generatePassiveBoosterSlots = (
     case "subtract":
       addToDeck = `SMODS.change_booster_limit(-${valueCode})`;
       removeFromDeck = `SMODS.change_booster_limit(${valueCode})`;
+      break;
+    case "set":
+      addToDeck = `card.ability.extra.original_slot_size = G.GAME.modifiers.extra_boosters or 0
+        local difference = ${valueCode} - G.GAME.modifiers.extra_boosters
+        SMODS.change_discard_limit(difference)`;
+      removeFromDeck = `if card.ability.extra.original_slot_size then
+            local difference = card.ability.extra.original_slot_size - G.GAME.modifiers.extra_boosters
+            SMODS.change_discard_limit(difference)
+        end`;
       break;
     default:
       addToDeck = `SMODS.change_booster_limit(${valueCode})`;
