@@ -5,6 +5,7 @@ import { generateAnteLevelConditionCode } from "./conditions/AnteLevelCondition"
 import { generateHandSizeConditionCode } from "./conditions/HandSizeCondition";
 import { generateRemainingHandsConditionCode } from "./conditions/RemainingHandsCondition";
 import { generateVoucherRedeemedConditionCode } from "./conditions/VoucherRedeemedCondition";
+import { generateInBlindConditionCode } from "./conditions/InBlindCondition";
 
 export const generateConditionChain = (rule: Rule): string => {
   if (!rule.conditionGroups || rule.conditionGroups.length === 0) {
@@ -101,9 +102,12 @@ const generateSingleConditionCode = (
 
     case "remaining_hands":
       return generateRemainingHandsConditionCode([singleConditionRule]);
-    
+
     case "voucher_redeemed":
       return generateVoucherRedeemedConditionCode([singleConditionRule]);
+
+    case "in_blind":
+      return generateInBlindConditionCode([singleConditionRule]);
 
     default:
       return null;

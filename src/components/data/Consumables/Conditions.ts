@@ -130,21 +130,21 @@ export const CONSUMABLE_CONDITION_TYPES: ConditionTypeDefinition[] = [
     category: "Game Context",
   },
   {
-      id: "voucher_redeemed",
-      label: "Voucher Redeemed",
-      description: "Check if a specific Voucher was redeemed during the run",
-      applicableTriggers: ['consumable_used'],
-      params: [
-        {
-          id: "voucher",
-          type: "select",
-          label: "Voucher",
-          options: [...VOUCHERS()],
-          default: "v_overstock_norm",
-        },
-      ],
-      category: "Game Context",
-    },
+    id: "voucher_redeemed",
+    label: "Voucher Redeemed",
+    description: "Check if a specific Voucher was redeemed during the run",
+    applicableTriggers: ["consumable_used"],
+    params: [
+      {
+        id: "voucher",
+        type: "select",
+        label: "Voucher",
+        options: [...VOUCHERS()],
+        default: "v_overstock_norm",
+      },
+    ],
+    category: "Game Context",
+  },
   {
     id: "hand_size",
     label: "Hand Size",
@@ -204,6 +204,14 @@ export const CONSUMABLE_CONDITION_TYPES: ConditionTypeDefinition[] = [
       },
     ],
     category: "Player State",
+  },
+  {
+    id: "in_blind",
+    label: "In Blind",
+    description: "Check if the player is currently in a blind (gameplay)",
+    applicableTriggers: ["consumable_used"],
+    params: [],
+    category: "Game Context",
   },
 ];
 
