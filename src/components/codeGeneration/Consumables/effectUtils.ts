@@ -28,6 +28,7 @@ import { generateEditDiscardSizeReturn } from "./effects/EditDiscardSizeEffect";
 import { generateEditBoosterSlotsReturn } from "./effects/EditBoosterSlotsEffect";
 import { generateEditVoucherSlotsReturn } from "./effects/EditVoucherSlotsEffect";
 import { generateCreateTagReturn } from "./effects/CreateTagEffect";
+import { generatePermaBonusReturn } from "./effects/PermaBonusEffect";
 
 export interface EffectReturn {
   statement: string;
@@ -299,21 +300,24 @@ const generateSingleEffect = (
 
     case "fool_effect":
       return generateFoolEffectReturn(effect);
-    
+
     case "edit_play_size":
       return generateEditPlaySizeReturn(effect);
-      
+
     case "edit_discard_size":
       return generateEditDiscardSizeReturn(effect);
-      
+
     case "edit_booster_slots":
       return generateEditBoosterSlotsReturn(effect);
-      
+
     case "edit_voucher_slots":
       return generateEditVoucherSlotsReturn(effect);
 
     case "create_tag":
       return generateCreateTagReturn(effect);
+
+    case "perma_bonus":
+      return generatePermaBonusReturn(effect);
 
     default:
       return {

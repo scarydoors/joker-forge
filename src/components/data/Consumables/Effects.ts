@@ -230,6 +230,35 @@ export const CONSUMABLE_EFFECT_TYPES: EffectTypeDefinition[] = [
     params: [],
     category: "Selected Cards",
   },
+  {
+    id: "perma_bonus",
+    label: "Give Permanent Bonus",
+    description:
+      "Give selected cards a permanent bonus that persists throughout the run",
+    applicableTriggers: ["consumable_used"],
+    params: [
+      {
+        id: "bonus_type",
+        type: "select",
+        label: "Bonus Type",
+        options: [
+          { value: "perma_bonus", label: "Permanent Chips" },
+          { value: "perma_mult", label: "Permanent Mult" },
+          { value: "h_mult", label: "Held Mult" },
+          { value: "h_chips", label: "Held Chips" },
+        ],
+        default: "perma_bonus",
+      },
+      {
+        id: "value",
+        type: "number",
+        label: "Bonus Amount",
+        default: 10,
+        min: 1,
+      },
+    ],
+    category: "Selected Cards",
+  },
 
   // ===== HAND EFFECTS =====
   {
