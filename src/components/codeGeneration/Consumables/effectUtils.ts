@@ -29,6 +29,7 @@ import { generateEditBoosterSlotsReturn } from "./effects/EditBoosterSlotsEffect
 import { generateEditVoucherSlotsReturn } from "./effects/EditVoucherSlotsEffect";
 import { generateCreateTagReturn } from "./effects/CreateTagEffect";
 import { generatePermaBonusReturn } from "./effects/PermaBonusEffect";
+import { generateEditJokerSlotsReturn } from "./effects/EditJokerSlotsEffect";
 
 export interface EffectReturn {
   statement: string;
@@ -318,6 +319,9 @@ const generateSingleEffect = (
 
     case "perma_bonus":
       return generatePermaBonusReturn(effect);
+
+    case "edit_joker_slots":
+      return generateEditJokerSlotsReturn(effect);
 
     default:
       return {

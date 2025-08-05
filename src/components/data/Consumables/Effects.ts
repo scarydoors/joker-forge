@@ -545,6 +545,33 @@ export const CONSUMABLE_EFFECT_TYPES: EffectTypeDefinition[] = [
     category: "Card Modification",
   },
   {
+    id: "edit_joker_slots",
+    label: "Edit Joker Slots",
+    description: "Add or remove joker slots available in the game",
+    applicableTriggers: ["consumable_used"],
+    params: [
+      {
+        id: "operation",
+        type: "select",
+        label: "Operation",
+        options: [
+          { value: "add", label: "Add" },
+          { value: "subtract", label: "Subtract" },
+          { value: "set", label: "Set to" },
+        ],
+        default: "add",
+      },
+      {
+        id: "value",
+        type: "number",
+        label: "Amount",
+        default: 1,
+        min: 0,
+      },
+    ],
+    category: "Jokers",
+  },
+  {
     id: "add_cards_to_hand",
     label: "Add Cards to Hand",
     description: "Create and add new cards to hand with specified properties",
