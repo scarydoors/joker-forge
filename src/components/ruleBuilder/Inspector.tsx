@@ -364,6 +364,11 @@ const ParameterField: React.FC<ParameterFieldProps> = ({
   const [inputValue, setInputValue] = React.useState("");
   const [inputError, setInputError] = React.useState<string>("");
 
+  const [showStartsFromTooltip, setShowStartsFromTooltip] =
+    React.useState(false);
+  const [showMultiplierTooltip, setShowMultiplierTooltip] =
+    React.useState(false);
+
   React.useEffect(() => {
     if (param.type === "number" && typeof value === "number") {
       setInputValue(value.toString());
@@ -684,10 +689,23 @@ const ParameterField: React.FC<ParameterFieldProps> = ({
                   <XMarkIcon className="h-4 w-4" />
                 </button>
               </div>
-              <div>
-                <span className="text-white-light text-sm mb-2 block">
-                  Starts From
-                </span>
+              <div className="relative">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-white-light text-sm">Starts From</span>
+                  <div
+                    className="relative"
+                    onMouseEnter={() => setShowStartsFromTooltip(true)}
+                    onMouseLeave={() => setShowStartsFromTooltip(false)}
+                  >
+                    <InformationCircleIcon className="h-4 w-4 text-white-darker hover:text-white-light cursor-help transition-colors" />
+                    {showStartsFromTooltip && (
+                      <div className="absolute bottom-full left-1/2 transform -translate-x-1/4 mb-2 px-3 py-2 bg-black-darker border border-black-lighter rounded-lg text-sm text-white-light w-72 z-50 shadow-lg pointer-events-none">
+                        Value that the Game Variable starts from. (e.g. 1 for
+                        XMult)
+                      </div>
+                    )}
+                  </div>
+                </div>
                 <InputField
                   type="number"
                   value={gameVariableStartsFrom.toString()}
@@ -697,10 +715,23 @@ const ParameterField: React.FC<ParameterFieldProps> = ({
                   size="sm"
                 />
               </div>
-              <div>
-                <span className="text-white-light text-sm mb-2 block">
-                  Multiplier
-                </span>
+              <div className="relative">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-white-light text-sm">Multiplier</span>
+                  <div
+                    className="relative"
+                    onMouseEnter={() => setShowMultiplierTooltip(true)}
+                    onMouseLeave={() => setShowMultiplierTooltip(false)}
+                  >
+                    <InformationCircleIcon className="h-4 w-4 text-white-darker hover:text-white-light cursor-help transition-colors" />
+                    {showMultiplierTooltip && (
+                      <div className="absolute bottom-full left-1/2 transform -translate-x-1/4 mb-2 px-3 py-2 bg-black-darker border border-black-lighter rounded-lg text-sm text-white-light w-72 z-50 shadow-lg pointer-events-none">
+                        Factor that the Game Variable with multiply with /
+                        increment by. (e.g. 0.1 for XMult)
+                      </div>
+                    )}
+                  </div>
+                </div>
                 <InputField
                   type="number"
                   value={gameVariableMultiplier.toString()}
