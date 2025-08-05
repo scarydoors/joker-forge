@@ -197,7 +197,7 @@ const SortableEffect: React.FC<{
         parameterCount={parameterCount}
         isDraggable={true}
         dragHandleProps={listeners}
-        variant="default"
+        variant="palette"
       />
     </div>
   );
@@ -212,7 +212,7 @@ const RandomGroupContainer: React.FC<{
 }> = ({ group, children, isSelected, onSelect, onDelete }) => {
   return (
     <div
-      className={`border-2 border-dashed rounded-lg p-4 bg-mint/5 relative transition-all min-h-[120px] ${
+      className={`border-2 border-dashed rounded-lg p-4 bg-mint/5 relative transition-all min-h-[120px] w-full max-w-full ${
         isSelected ? "border-mint" : "border-mint/30"
       }`}
       onClick={(e) => {
@@ -781,27 +781,31 @@ const RuleCard: React.FC<RuleCardProps> = ({
                       <PlusIcon className="h-3 w-3 text-effect" />
                     </button>
                   </div>
-                  {itemType === "joker" && 
-                  <div onClick={(e) => e.stopPropagation()}>
-                    {(rule.blueprintCompatible ?? true) ? (
-                      <button
-                      onClick={() => onToggleBlueprintCompatibility(rule.id)}
-                      className="w-6 h-6 bg-black-darker rounded-lg flex items-center justify-center border-2 border-balatro-blue hover:bg-balatro-blue/20 transition-colors cursor-pointer"
-                      title="Copied by Blueprint"
-                      >
-                        <WrenchIcon className="h-3 w-3 text-balatro-blue" />
-                      </button>
-                    ) : (
-                      <button
-                      onClick={() => onToggleBlueprintCompatibility(rule.id)}
-                      className="w-6 h-6 bg-black-darker rounded-lg flex items-center justify-center border-2 border-balatro-red hover:bg-balatro-red/20 transition-colors cursor-pointer"
-                      title="Not Copied by Blueprint"
-                      >
-                        <WrenchIcon className="h-3 w-3 text-balatro-red" />
-                      </button>
-                    )}
-                  </div>
-                  }
+                  {itemType === "joker" && (
+                    <div onClick={(e) => e.stopPropagation()}>
+                      {rule.blueprintCompatible ?? true ? (
+                        <button
+                          onClick={() =>
+                            onToggleBlueprintCompatibility(rule.id)
+                          }
+                          className="w-6 h-6 bg-black-darker rounded-lg flex items-center justify-center border-2 border-balatro-blue hover:bg-balatro-blue/20 transition-colors cursor-pointer"
+                          title="Copied by Blueprint"
+                        >
+                          <WrenchIcon className="h-3 w-3 text-balatro-blue" />
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() =>
+                            onToggleBlueprintCompatibility(rule.id)
+                          }
+                          className="w-6 h-6 bg-black-darker rounded-lg flex items-center justify-center border-2 border-balatro-red hover:bg-balatro-red/20 transition-colors cursor-pointer"
+                          title="Not Copied by Blueprint"
+                        >
+                          <WrenchIcon className="h-3 w-3 text-balatro-red" />
+                        </button>
+                      )}
+                    </div>
+                  )}
                 </div>
               </motion.div>
             </div>
