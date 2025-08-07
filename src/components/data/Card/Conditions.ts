@@ -18,6 +18,7 @@ import {
   RARITIES,
   VOUCHERS,
 } from "../../data/BalatroUtils";
+import { GENERIC_TRIGGERS } from "./Triggers";
 
 export const CARD_GENERIC_TRIGGERS: string[] = ["card_scored", "card_held"];
 
@@ -45,7 +46,7 @@ export const CARD_CONDITION_TYPES: ConditionTypeDefinition[] = [
     id: "player_money",
     label: "Player Money",
     description: "Check the player's current money",
-    applicableTriggers: ["card_scored", "card_held"],
+    applicableTriggers: GENERIC_TRIGGERS,
     params: [
       {
         id: "operator",
@@ -68,7 +69,7 @@ export const CARD_CONDITION_TYPES: ConditionTypeDefinition[] = [
     id: "card_rank",
     label: "Card Rank",
     description: "Check the rank of the card",
-    applicableTriggers: ["card_scored", "card_held"],
+    applicableTriggers: GENERIC_TRIGGERS,
     params: [
       {
         id: "rank_type",
@@ -106,7 +107,7 @@ export const CARD_CONDITION_TYPES: ConditionTypeDefinition[] = [
     id: "card_suit",
     label: "Card Suit",
     description: "Check the suit of the card",
-    applicableTriggers: ["card_scored", "card_held"],
+    applicableTriggers: GENERIC_TRIGGERS,
     params: [
       {
         id: "suit_type",
@@ -144,7 +145,7 @@ export const CARD_CONDITION_TYPES: ConditionTypeDefinition[] = [
     id: "card_edition",
     label: "Card Edition",
     description: "Check if the card has a specific edition",
-    applicableTriggers: ["card_scored", "card_held"],
+    applicableTriggers: GENERIC_TRIGGERS,
     params: [
       {
         id: "edition",
@@ -163,7 +164,7 @@ export const CARD_CONDITION_TYPES: ConditionTypeDefinition[] = [
     id: "card_seal",
     label: "Card Seal",
     description: "Check if the card has a specific seal",
-    applicableTriggers: ["card_scored", "card_held"],
+    applicableTriggers: GENERIC_TRIGGERS,
     params: [
       {
         id: "seal",
@@ -179,7 +180,7 @@ export const CARD_CONDITION_TYPES: ConditionTypeDefinition[] = [
     label: "Card Index",
     description:
       "Check if the card is at a specific position in the scoring hand",
-    applicableTriggers: ["card_scored"],
+    applicableTriggers: GENERIC_TRIGGERS,
     params: [
       {
         id: "index_type",
@@ -210,7 +211,7 @@ export const CARD_CONDITION_TYPES: ConditionTypeDefinition[] = [
     id: "blind_type",
     label: "Blind Type",
     description: "Check the type of the current blind",
-    applicableTriggers: ["card_scored", "card_held"],
+    applicableTriggers: GENERIC_TRIGGERS,
     params: [
       {
         id: "blind_type",
@@ -229,7 +230,7 @@ export const CARD_CONDITION_TYPES: ConditionTypeDefinition[] = [
     id: "ante_level",
     label: "Ante Level",
     description: "Check the current ante level",
-    applicableTriggers: ["card_scored", "card_held"],
+    applicableTriggers: GENERIC_TRIGGERS,
     params: [
       {
         id: "operator",
@@ -251,7 +252,7 @@ export const CARD_CONDITION_TYPES: ConditionTypeDefinition[] = [
     id: "hand_size",
     label: "Hand Size",
     description: "Check the current hand size",
-    applicableTriggers: ["card_scored", "card_held"],
+    applicableTriggers: GENERIC_TRIGGERS,
     params: [
       {
         id: "operator",
@@ -272,7 +273,7 @@ export const CARD_CONDITION_TYPES: ConditionTypeDefinition[] = [
     id: "remaining_hands",
     label: "Remaining Hands",
     description: "Check how many hands the player has left",
-    applicableTriggers: ["card_scored", "card_held"],
+    applicableTriggers: GENERIC_TRIGGERS,
     params: [
       {
         id: "operator",
@@ -294,7 +295,7 @@ export const CARD_CONDITION_TYPES: ConditionTypeDefinition[] = [
     id: "remaining_discards",
     label: "Remaining Discards",
     description: "Check how many discards the player has left",
-    applicableTriggers: ["card_scored", "card_held"],
+    applicableTriggers: GENERIC_TRIGGERS,
     params: [
       {
         id: "operator",
@@ -316,7 +317,7 @@ export const CARD_CONDITION_TYPES: ConditionTypeDefinition[] = [
     id: "first_played_hand",
     label: "First Played Hand",
     description: "Check if this is the first hand played in the current round",
-    applicableTriggers: ["card_scored"],
+    applicableTriggers: GENERIC_TRIGGERS,
     params: [],
     category: "Game Context",
   },
@@ -324,7 +325,7 @@ export const CARD_CONDITION_TYPES: ConditionTypeDefinition[] = [
     id: "poker_hand",
     label: "Poker Hand Type",
     description: "Check the type of poker hand being played",
-    applicableTriggers: ["card_scored"],
+    applicableTriggers: GENERIC_TRIGGERS,
     params: [
       {
         id: "operator",
@@ -352,7 +353,7 @@ export const CARD_CONDITION_TYPES: ConditionTypeDefinition[] = [
     id: "hand_level",
     label: "Hand Level",
     description: "Check the level of a poker hand",
-    applicableTriggers: ["card_scored", "card_held"],
+    applicableTriggers: GENERIC_TRIGGERS,
     params: [
       {
         id: "operator",
@@ -395,7 +396,7 @@ export const CARD_CONDITION_TYPES: ConditionTypeDefinition[] = [
     id: "blind_requirements",
     label: "Blind Requirements",
     description: "Check what percentage of the blind requirement is met",
-    applicableTriggers: ["card_scored", "card_held"],
+    applicableTriggers: GENERIC_TRIGGERS,
     params: [
       {
         id: "operator",
@@ -417,7 +418,7 @@ export const CARD_CONDITION_TYPES: ConditionTypeDefinition[] = [
     id: "joker_count",
     label: "Joker Count",
     description: "Check how many jokers the player has",
-    applicableTriggers: ["card_scored", "card_held"],
+    applicableTriggers: GENERIC_TRIGGERS,
     params: [
       {
         id: "operator",
@@ -446,7 +447,7 @@ export const CARD_CONDITION_TYPES: ConditionTypeDefinition[] = [
     id: "specific_joker",
     label: "Specific Joker",
     description: "Check if a specific joker is in your collection",
-    applicableTriggers: ["card_scored", "card_held"],
+    applicableTriggers: GENERIC_TRIGGERS,
     params: [
       {
         id: "operator",
@@ -471,7 +472,7 @@ export const CARD_CONDITION_TYPES: ConditionTypeDefinition[] = [
     id: "deck_size",
     label: "Deck Size",
     description: "Check the size of the deck",
-    applicableTriggers: ["card_scored", "card_held"],
+    applicableTriggers: GENERIC_TRIGGERS,
     params: [
       {
         id: "size_type",
@@ -502,7 +503,7 @@ export const CARD_CONDITION_TYPES: ConditionTypeDefinition[] = [
     id: "voucher_redeemed",
     label: "Voucher Redeemed",
     description: "Check if a specific Voucher was redeemed during the run",
-    applicableTriggers: ["card_scored", "card_held"],
+    applicableTriggers: GENERIC_TRIGGERS,
     params: [
       {
         id: "voucher",
@@ -518,17 +519,9 @@ export const CARD_CONDITION_TYPES: ConditionTypeDefinition[] = [
     id: "triggered_boss_blind",
     label: "Boss Blind Triggered",
     description: "Check if the current boss blind's effect has been triggered",
-    applicableTriggers: ["card_scored", "card_held"],
+    applicableTriggers: GENERIC_TRIGGERS,
     params: [],
     category: "Game Context",
-  },
-  {
-    id: "lucky_card_triggered",
-    label: "Lucky Card Triggered",
-    description: "Check if this card's lucky effect was triggered when scored",
-    applicableTriggers: ["card_scored"],
-    params: [],
-    category: "Card",
   },
 ];
 

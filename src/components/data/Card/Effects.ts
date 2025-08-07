@@ -7,6 +7,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { CategoryDefinition } from "../Jokers/Triggers";
 import { RARITIES, STICKERS, POKER_HANDS } from "../BalatroUtils";
+import { GENERIC_TRIGGERS } from "./Triggers";
 
 export const CARD_EFFECT_CATEGORIES: CategoryDefinition[] = [
   {
@@ -32,7 +33,7 @@ export const CARD_EFFECT_TYPES: EffectTypeDefinition[] = [
     id: "add_mult",
     label: "Add Mult",
     description: "Add mult to the current scoring calculation",
-    applicableTriggers: ["card_scored", "card_held"],
+    applicableTriggers: GENERIC_TRIGGERS,
     params: [
       {
         id: "value",
@@ -48,7 +49,7 @@ export const CARD_EFFECT_TYPES: EffectTypeDefinition[] = [
     id: "add_chips",
     label: "Add Chips",
     description: "Add chips to the current scoring calculation",
-    applicableTriggers: ["card_scored", "card_held"],
+    applicableTriggers: GENERIC_TRIGGERS,
     params: [
       {
         id: "value",
@@ -64,7 +65,7 @@ export const CARD_EFFECT_TYPES: EffectTypeDefinition[] = [
     id: "add_x_mult",
     label: "Apply XMult",
     description: "Multiply mult by the specified amount",
-    applicableTriggers: ["card_scored", "card_held"],
+    applicableTriggers: GENERIC_TRIGGERS,
     params: [
       {
         id: "value",
@@ -80,7 +81,7 @@ export const CARD_EFFECT_TYPES: EffectTypeDefinition[] = [
     id: "add_x_chips",
     label: "Apply XChips",
     description: "Multiply chips by the specified amount",
-    applicableTriggers: ["card_scored", "card_held"],
+    applicableTriggers: GENERIC_TRIGGERS,
     params: [
       {
         id: "value",
@@ -96,7 +97,7 @@ export const CARD_EFFECT_TYPES: EffectTypeDefinition[] = [
     id: "edit_dollars",
     label: "Edit Dollars",
     description: "Modify the player's money",
-    applicableTriggers: ["card_scored", "card_held"],
+    applicableTriggers: GENERIC_TRIGGERS,
     params: [
       {
         id: "operation",
@@ -123,7 +124,7 @@ export const CARD_EFFECT_TYPES: EffectTypeDefinition[] = [
     id: "destroy_card",
     label: "Destroy Card",
     description: "Destroy this card",
-    applicableTriggers: ["card_scored", "card_held"],
+    applicableTriggers: GENERIC_TRIGGERS,
     params: [
       {
         id: "setGlassTrigger",
@@ -158,7 +159,7 @@ export const CARD_EFFECT_TYPES: EffectTypeDefinition[] = [
     id: "create_joker",
     label: "Create Joker",
     description: "Create a random or specific joker card",
-    applicableTriggers: ["card_scored", "card_held"],
+    applicableTriggers: GENERIC_TRIGGERS,
     params: [
       {
         id: "joker_type",
@@ -231,7 +232,7 @@ export const CARD_EFFECT_TYPES: EffectTypeDefinition[] = [
     id: "destroy_joker",
     label: "Destroy Joker",
     description: "Destroy an existing joker",
-    applicableTriggers: ["card_scored", "card_held"],
+    applicableTriggers: GENERIC_TRIGGERS,
     params: [
       {
         id: "selection_method",
@@ -275,7 +276,7 @@ export const CARD_EFFECT_TYPES: EffectTypeDefinition[] = [
     id: "copy_joker",
     label: "Copy Joker",
     description: "Copy an existing joker",
-    applicableTriggers: ["card_scored", "card_held"],
+    applicableTriggers: GENERIC_TRIGGERS,
     params: [
       {
         id: "selection_method",
@@ -332,7 +333,7 @@ export const CARD_EFFECT_TYPES: EffectTypeDefinition[] = [
     id: "level_up_hand",
     label: "Level Up Hand",
     description: "Increase the level of a poker hand",
-    applicableTriggers: ["card_scored", "card_held"],
+    applicableTriggers: GENERIC_TRIGGERS,
     params: [
       {
         id: "hand_selection",

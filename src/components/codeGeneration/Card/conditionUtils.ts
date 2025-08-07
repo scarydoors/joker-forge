@@ -19,7 +19,6 @@ import { generateSpecificJokerConditionCode } from "./conditions/SpecificJokerCo
 import { generateDeckSizeConditionCode } from "./conditions/DeckSizeCondition";
 import { generateVoucherRedeemedConditionCode } from "./conditions/VoucherRedeemedCondition";
 import { generateTriggeredBossBlindConditionCode } from "./conditions/TriggeredBossBlindCondition";
-import { generateLuckyCardTriggeredConditionCode } from "./conditions/LuckyCardTriggeredCondition";
 
 export const generateConditionChain = (rule: Rule): string => {
   if (!rule.conditionGroups || rule.conditionGroups.length === 0) {
@@ -161,9 +160,6 @@ const generateSingleConditionCode = (
 
     case "triggered_boss_blind":
       return generateTriggeredBossBlindConditionCode();
-
-    case "lucky_card_triggered":
-      return generateLuckyCardTriggeredConditionCode();
 
     default:
       return null;

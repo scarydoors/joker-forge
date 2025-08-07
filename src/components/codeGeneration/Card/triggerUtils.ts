@@ -17,11 +17,11 @@ const TRIGGER_DEFINITIONS: Record<string, TriggerDefinition> = {
     context: "hand context",
     description: "When this card is held in the player's hand",
   },
-  card_destroyed: {
-    condition:
-      "context.destroy_card and context.cardarea == G.play and context.destroy_card == card",
-    context: "destroy context",
-    description: "When this card is being destroyed",
+  card_discarded: {
+    condition: "context.discard",
+    context: "discard context",
+    description:
+      "Triggers whenever a card is discarded. Use conditions to check properties of the discarded card.",
   },
 };
 
