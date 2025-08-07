@@ -161,6 +161,28 @@ export interface BoosterData {
   hasUserUploadedImage?: boolean;
 }
 
+export interface EnhancementData {
+  id: string;
+  name: string;
+  description: string;
+  imagePreview: string;
+  enhancementKey: string;
+  atlas?: string;
+  pos?: { x: number; y: number };
+  any_suit?: boolean;
+  replace_base_card?: boolean;
+  no_rank?: boolean;
+  no_suit?: boolean;
+  always_scores?: boolean;
+  unlocked?: boolean;
+  discovered?: boolean;
+  no_collection?: boolean;
+  rules?: Rule[];
+  userVariables?: UserVariable[];
+  placeholderCreditIndex?: number;
+  hasUserUploadedImage?: boolean;
+}
+
 // =============================================================================
 // DATA REGISTRY SYSTEM
 // =============================================================================
@@ -170,6 +192,7 @@ interface RegistryState {
   consumableSets: ConsumableSetData[];
   consumables: ConsumableData[];
   boosters: BoosterData[];
+  enhancements: EnhancementData[];
   modPrefix: string;
 }
 
@@ -178,6 +201,7 @@ let registryState: RegistryState = {
   consumableSets: [],
   consumables: [],
   boosters: [],
+  enhancements: [],
   modPrefix: "",
 };
 
@@ -236,6 +260,7 @@ export const DataRegistry = {
     consumableSets: ConsumableSetData[],
     consumables: ConsumableData[],
     boosters: BoosterData[],
+    enhancements: EnhancementData[],
     modPrefix: string
   ) => {
     registryState = {
@@ -243,6 +268,7 @@ export const DataRegistry = {
       consumableSets,
       consumables,
       boosters,
+      enhancements,
       modPrefix,
     };
   },
@@ -295,6 +321,22 @@ export const DataRegistry = {
     return [...custom];
   },
 
+  getEnhancements: (): Array<{ key: string; value: string; label: string }> => {
+    const vanilla = VANILLA_ENHANCEMENTS.map((enhancement) => ({
+      key: enhancement.key,
+      value: enhancement.value,
+      label: enhancement.label,
+    }));
+
+    const custom = registryState.enhancements.map((enhancement) => ({
+      key: `m_${registryState.modPrefix}_${enhancement.enhancementKey}`,
+      value: `m_${registryState.modPrefix}_${enhancement.enhancementKey}`,
+      label: enhancement.name,
+    }));
+
+    return [...vanilla, ...custom];
+  },
+
   getState: () => ({ ...registryState }),
 };
 
@@ -307,6 +349,7 @@ export const updateDataRegistry = (
   consumableSets: ConsumableSetData[],
   consumables: ConsumableData[],
   boosters: BoosterData[],
+  enhancements: EnhancementData[],
   modPrefix: string
 ) => {
   DataRegistry.update(
@@ -314,8 +357,57 @@ export const updateDataRegistry = (
     consumableSets,
     consumables,
     boosters,
+    enhancements,
     modPrefix
   );
+};
+
+// =============================================================================
+// ENHANCEMENTS SECTION
+// =============================================================================
+
+const VANILLA_ENHANCEMENTS = [
+  { key: "m_gold", value: "m_gold", label: "Gold" },
+  { key: "m_steel", value: "m_steel", label: "Steel" },
+  { key: "m_glass", value: "m_glass", label: "Glass" },
+  { key: "m_wild", value: "m_wild", label: "Wild" },
+  { key: "m_mult", value: "m_mult", label: "Mult" },
+  { key: "m_lucky", value: "m_lucky", label: "Lucky" },
+  { key: "m_stone", value: "m_stone", label: "Stone" },
+  { key: "m_bonus", value: "m_bonus", label: "Bonus" },
+] as const;
+
+export const ENHANCEMENTS = () => DataRegistry.getEnhancements();
+export const ENHANCEMENT_KEYS = () =>
+  DataRegistry.getEnhancements().map((e) => e.key);
+export const ENHANCEMENT_VALUES = () =>
+  DataRegistry.getEnhancements().map((e) => e.value);
+export const ENHANCEMENT_LABELS = () =>
+  DataRegistry.getEnhancements().map((e) => e.label);
+
+export const isCustomEnhancement = (
+  value: string,
+  customEnhancements: EnhancementData[] = registryState.enhancements,
+  modPrefix: string = registryState.modPrefix
+): boolean => {
+  return (
+    value.includes("_") &&
+    customEnhancements.some(
+      (e) => `m_${modPrefix}_${e.enhancementKey}` === value
+    )
+  );
+};
+
+export const getEnhancementByValue = (
+  value: string
+): { key: string; value: string; label: string } | undefined => {
+  return ENHANCEMENTS().find((enhancement) => enhancement.value === value);
+};
+
+export const getEnhancementByKey = (
+  key: string
+): { key: string; value: string; label: string } | undefined => {
+  return ENHANCEMENTS().find((enhancement) => enhancement.key === key);
 };
 
 // =============================================================================
@@ -703,28 +795,6 @@ export const POKER_HANDS = [
 export const POKER_HAND_VALUES = POKER_HANDS.map((hand) => hand.value);
 export const POKER_HAND_LABELS = POKER_HANDS.map((hand) => hand.label);
 
-// Enhancements
-export const ENHANCEMENTS = [
-  { key: "m_gold", value: "m_gold", label: "Gold" },
-  { key: "m_steel", value: "m_steel", label: "Steel" },
-  { key: "m_glass", value: "m_glass", label: "Glass" },
-  { key: "m_wild", value: "m_wild", label: "Wild" },
-  { key: "m_mult", value: "m_mult", label: "Mult" },
-  { key: "m_lucky", value: "m_lucky", label: "Lucky" },
-  { key: "m_stone", value: "m_stone", label: "Stone" },
-  { key: "m_bonus", value: "m_bonus", label: "Bonus" },
-] as const;
-
-export const ENHANCEMENT_KEYS = ENHANCEMENTS.map(
-  (enhancement) => enhancement.key
-);
-export const ENHANCEMENT_VALUES = ENHANCEMENTS.map(
-  (enhancement) => enhancement.value
-);
-export const ENHANCEMENT_LABELS = ENHANCEMENTS.map(
-  (enhancement) => enhancement.label
-);
-
 // Editions
 export const EDITIONS = [
   { key: "e_foil", value: "e_foil", label: "Foil (+50 Chips)" },
@@ -1055,12 +1125,6 @@ export const getRankById = (id: number) => {
 export const getSuitByValue = (value: string) => {
   return SUITS.find((suit) => suit.value === value);
 };
-
-// Get enhancement data by key
-export const getEnhancementByKey = (key: string) => {
-  return ENHANCEMENTS.find((enhancement) => enhancement.key === key);
-};
-
 // Get edition data by key
 export const getEditionByKey = (key: string) => {
   return EDITIONS.find((edition) => edition.key === key);
