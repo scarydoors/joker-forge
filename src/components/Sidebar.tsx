@@ -46,7 +46,7 @@ const Sidebar: React.FC<SidebarProps> = ({
     !selectedSection;
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
 
-  const version: string = "v0.3.5";
+  const version: string = "v0.4.0";
 
   const handleSectionClick = (section: string) => {
     if (section === "github") {
@@ -96,6 +96,7 @@ const Sidebar: React.FC<SidebarProps> = ({
     { id: "jokers", label: "Jokers", icon: PuzzlePieceIcon },
     { id: "consumables", label: "Consumables", icon: CakeIcon },
     { id: "boosters", label: "Booster Packs", icon: GiftIcon },
+    { id: "enhancements", label: "Enhancements", icon: StarIcon },
     //{ id: "decks", label: "Decks", icon: RectangleStackIcon },
     //{ id: "editions", label: "Editions", icon: SparklesIcon },
   ];
