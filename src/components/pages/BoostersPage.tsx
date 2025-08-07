@@ -179,7 +179,7 @@ const CardRuleEditor: React.FC<CardRuleEditorProps> = ({
   const enhancementOptions = [
     { value: "", label: "Any Enhancement" },
     { value: "none", label: "No Enhancement" },
-    ...ENHANCEMENTS.map((enh: Enhancement) => ({
+    ...ENHANCEMENTS().map((enh: Enhancement) => ({
       value: enh.key,
       label: enh.label,
     })),
