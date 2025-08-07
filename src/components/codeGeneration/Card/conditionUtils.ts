@@ -2,6 +2,24 @@ import type { Rule, Condition, ConditionGroup } from "../../ruleBuilder/types";
 import { generatePlayerMoneyConditionCode } from "./conditions/PlayerMoneyCondition";
 import { generateCardRankConditionCode } from "./conditions/CardRankCondition";
 import { generateCardSuitConditionCode } from "./conditions/CardSuitCondition";
+import { generateCardEditionConditionCode } from "./conditions/CardEditionCondition";
+import { generateCardSealConditionCode } from "./conditions/CardSealCondition";
+import { generateCardIndexConditionCode } from "./conditions/CardIndexCondition";
+import { generateBlindTypeConditionCode } from "./conditions/BlindTypeCondition";
+import { generateAnteLevelConditionCode } from "./conditions/AnteLevelCondition";
+import { generateHandSizeConditionCode } from "./conditions/HandSizeCondition";
+import { generateRemainingHandsConditionCode } from "./conditions/RemainingHandsCondition";
+import { generateRemainingDiscardsConditionCode } from "./conditions/RemainingDiscardsCondition";
+import { generateFirstPlayedHandConditionCode } from "./conditions/FirstPlayedHandCondition";
+import { generatePokerHandConditionCode } from "./conditions/PokerHandCondition";
+import { generateHandLevelConditionCode } from "./conditions/HandLevelCondition";
+import { generateBlindRequirementsConditionCode } from "./conditions/BlindRequirementsCondition";
+import { generateJokerCountConditionCode } from "./conditions/JokerCountCondition";
+import { generateSpecificJokerConditionCode } from "./conditions/SpecificJokerCondition";
+import { generateDeckSizeConditionCode } from "./conditions/DeckSizeCondition";
+import { generateVoucherRedeemedConditionCode } from "./conditions/VoucherRedeemedCondition";
+import { generateTriggeredBossBlindConditionCode } from "./conditions/TriggeredBossBlindCondition";
+import { generateLuckyCardTriggeredConditionCode } from "./conditions/LuckyCardTriggeredCondition";
 
 export const generateConditionChain = (rule: Rule): string => {
   if (!rule.conditionGroups || rule.conditionGroups.length === 0) {
@@ -92,6 +110,60 @@ const generateSingleConditionCode = (
 
     case "card_suit":
       return generateCardSuitConditionCode([singleConditionRule]);
+
+    case "card_edition":
+      return generateCardEditionConditionCode([singleConditionRule]);
+
+    case "card_seal":
+      return generateCardSealConditionCode([singleConditionRule]);
+
+    case "card_index":
+      return generateCardIndexConditionCode([singleConditionRule]);
+
+    case "blind_type":
+      return generateBlindTypeConditionCode([singleConditionRule]);
+
+    case "ante_level":
+      return generateAnteLevelConditionCode([singleConditionRule]);
+
+    case "hand_size":
+      return generateHandSizeConditionCode([singleConditionRule]);
+
+    case "remaining_hands":
+      return generateRemainingHandsConditionCode([singleConditionRule]);
+
+    case "remaining_discards":
+      return generateRemainingDiscardsConditionCode([singleConditionRule]);
+
+    case "first_played_hand":
+      return generateFirstPlayedHandConditionCode();
+
+    case "poker_hand":
+      return generatePokerHandConditionCode([singleConditionRule]);
+
+    case "hand_level":
+      return generateHandLevelConditionCode([singleConditionRule]);
+
+    case "blind_requirements":
+      return generateBlindRequirementsConditionCode([singleConditionRule]);
+
+    case "joker_count":
+      return generateJokerCountConditionCode([singleConditionRule]);
+
+    case "specific_joker":
+      return generateSpecificJokerConditionCode([singleConditionRule]);
+
+    case "deck_size":
+      return generateDeckSizeConditionCode([singleConditionRule]);
+
+    case "voucher_redeemed":
+      return generateVoucherRedeemedConditionCode([singleConditionRule]);
+
+    case "triggered_boss_blind":
+      return generateTriggeredBossBlindConditionCode();
+
+    case "lucky_card_triggered":
+      return generateLuckyCardTriggeredConditionCode();
 
     default:
       return null;
