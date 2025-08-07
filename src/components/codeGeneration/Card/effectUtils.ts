@@ -9,6 +9,7 @@ import { generateRetriggerReturn } from "./effects/RetriggerEffect";
 import { generateCreateJokerReturn } from "./effects/CreateJokerEffect";
 import { generateDestroyJokerReturn } from "./effects/DestroyJokerEffect";
 import { generateCopyJokerReturn } from "./effects/CopyJokerEffect";
+import { generateLevelUpHandReturn } from "./effects/LevelUpHandEffect";
 
 export interface EffectReturn {
   statement: string;
@@ -65,6 +66,9 @@ const generateSingleEffect = (effect: Effect): EffectReturn => {
 
     case "copy_joker":
       return generateCopyJokerReturn(effect);
+
+    case "level_up_hand":
+      return generateLevelUpHandReturn(effect);
 
     default:
       return {

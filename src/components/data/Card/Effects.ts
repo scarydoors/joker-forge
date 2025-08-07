@@ -6,7 +6,7 @@ import {
   UserGroupIcon,
 } from "@heroicons/react/24/outline";
 import { CategoryDefinition } from "../Jokers/Triggers";
-import { RARITIES, STICKERS } from "../BalatroUtils";
+import { RARITIES, STICKERS, POKER_HANDS } from "../BalatroUtils";
 
 export const CARD_EFFECT_CATEGORIES: CategoryDefinition[] = [
   {
@@ -327,6 +327,45 @@ export const CARD_EFFECT_TYPES: EffectTypeDefinition[] = [
       },
     ],
     category: "Jokers",
+  },
+  {
+    id: "level_up_hand",
+    label: "Level Up Hand",
+    description: "Increase the level of a poker hand",
+    applicableTriggers: ["card_scored", "card_held"],
+    params: [
+      {
+        id: "hand_selection",
+        type: "select",
+        label: "Hand Selection",
+        options: [
+          { value: "current", label: "Current Hand (Scored)" },
+          { value: "specific", label: "Specific Hand" },
+          { value: "most", label: "Most Played" },
+          { value: "least", label: "Least Played" },
+          { value: "random", label: "Random Hand" },
+        ],
+        default: "current",
+      },
+      {
+        id: "specific_hand",
+        type: "select",
+        label: "Specific Hand",
+        options: [...POKER_HANDS],
+        showWhen: {
+          parameter: "hand_selection",
+          values: ["specific"],
+        },
+      },
+      {
+        id: "value",
+        type: "number",
+        label: "Levels",
+        default: 1,
+        min: 1,
+      },
+    ],
+    category: "Scoring",
   },
 ];
 
