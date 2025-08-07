@@ -24,7 +24,6 @@ import type {
   RandomGroup,
   ConditionTypeDefinition,
 } from "./types";
-import { JokerData } from "../data/BalatroUtils";
 import RuleCard from "./RuleCard";
 import FloatingDock from "./FloatingDock";
 import BlockPalette from "./BlockPalette";
@@ -42,10 +41,16 @@ import { GameVariable } from "../data/Jokers/GameVars";
 import { motion } from "framer-motion";
 import { getConsumableConditionTypeById } from "../data/Consumables/Conditions";
 import { getConsumableEffectTypeById } from "../data/Consumables/Effects";
-import { ConsumableData } from "../data/BalatroUtils";
+import {
+  JokerData,
+  ConsumableData,
+  EnhancementData,
+} from "../data/BalatroUtils";
+import { getCardConditionTypeById } from "../data/Card/Conditions";
+import { getCardEffectTypeById } from "../data/Card/Effects";
 
-type ItemData = JokerData | ConsumableData;
-type ItemType = "joker" | "consumable";
+type ItemData = JokerData | ConsumableData | EnhancementData;
+type ItemType = "joker" | "consumable" | "card";
 
 interface RuleBuilderProps {
   isOpen: boolean;
@@ -91,9 +96,15 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
   const getConditionType =
     itemType === "joker"
       ? getConditionTypeById
-      : getConsumableConditionTypeById;
+      : itemType === "consumable"
+      ? getConsumableConditionTypeById
+      : getCardConditionTypeById;
   const getEffectType =
-    itemType === "joker" ? getEffectTypeById : getConsumableEffectTypeById;
+    itemType === "joker"
+      ? getEffectTypeById
+      : itemType === "consumable"
+      ? getConsumableEffectTypeById
+      : getCardEffectTypeById;
 
   const [rules, setRules] = useState<Rule[]>([]);
   const [selectedItem, setSelectedItem] = useState<SelectedItem>(null);
@@ -131,6 +142,7 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
       },
     };
 
+    // Only add variables panel for jokers
     if (itemType === "joker") {
       return {
         ...basePanels,
@@ -146,6 +158,7 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
 
     return basePanels;
   });
+
   const [isInitialLoadComplete, setIsInitialLoadComplete] = useState(false);
   const [showNoRulesMessage, setShowNoRulesMessage] = useState(false);
 
@@ -195,7 +208,10 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
   const togglePanel = useCallback(
     (panelId: string) => {
       // Don't allow toggling variables panel for consumables
-      if (panelId === "variables" && itemType === "consumable") {
+      if (
+        panelId === "variables" &&
+        (itemType === "consumable" || itemType === "card")
+      ) {
         return;
       }
 
@@ -894,13 +910,13 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
     });
   };
 
- const toggleBlueprintCompatibility = (ruleId: string) => {
+  const toggleBlueprintCompatibility = (ruleId: string) => {
     setRules((prev) =>
       prev.map((rule) => {
         if (rule.id === ruleId) {
           return {
             ...rule,
-            blueprintCompatible: !rule.blueprintCompatible
+            blueprintCompatible: !rule.blueprintCompatible,
           };
         }
         return rule;
@@ -1561,7 +1577,9 @@ const RuleBuilder: React.FC<RuleBuilderProps> = ({
                             onDeleteEffect={deleteEffect}
                             onAddConditionGroup={addConditionGroup}
                             onAddRandomGroup={addRandomGroup}
-                            onToggleBlueprintCompatibility={toggleBlueprintCompatibility}
+                            onToggleBlueprintCompatibility={
+                              toggleBlueprintCompatibility
+                            }
                             onDeleteRandomGroup={deleteRandomGroup}
                             onToggleGroupOperator={toggleGroupOperator}
                             onUpdatePosition={updateRulePosition}

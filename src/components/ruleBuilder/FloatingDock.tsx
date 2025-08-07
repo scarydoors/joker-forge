@@ -16,7 +16,7 @@ interface PanelState {
 interface FloatingDockProps {
   panels: Record<string, PanelState>;
   onTogglePanel: (panelId: string) => void;
-  itemType: "joker" | "consumable";
+  itemType: "joker" | "consumable" | "card";
 }
 
 const FloatingDock: React.FC<FloatingDockProps> = ({

@@ -29,9 +29,16 @@ import {
   DocumentDuplicateIcon,
   XMarkIcon,
 } from "@heroicons/react/16/solid";
-import { JokerData } from "../data/BalatroUtils";
-import { ConsumableData } from "../data/BalatroUtils";
+import {
+  JokerData,
+  ConsumableData,
+  EnhancementData,
+} from "../data/BalatroUtils";
 import { WrenchIcon } from "@heroicons/react/24/solid";
+
+import { getCardTriggerById } from "../data/Card/Triggers";
+import { getCardConditionTypeById } from "../data/Card/Conditions";
+import { getCardEffectTypeById } from "../data/Card/Effects";
 
 interface RuleCardProps {
   rule: Rule;
@@ -65,8 +72,8 @@ interface RuleCardProps {
     position: { x: number; y: number }
   ) => void;
   isRuleSelected: boolean;
-  item: JokerData | ConsumableData;
-  itemType: "joker" | "consumable";
+  item: JokerData | ConsumableData | EnhancementData;
+  itemType: "joker" | "consumable" | "card";
   generateConditionTitle: (condition: Condition) => string;
   generateEffectTitle: (effect: Effect) => string;
   getParameterCount: (params: Record<string, unknown>) => number;
@@ -88,7 +95,7 @@ const SortableCondition: React.FC<{
   onDelete: () => void;
   parameterCount: number;
   dynamicTitle: string;
-  itemType: "joker" | "consumable";
+  itemType: "joker" | "consumable" | "card";
 }> = ({
   condition,
   isSelected,
@@ -102,7 +109,9 @@ const SortableCondition: React.FC<{
   const getConditionType =
     itemType === "joker"
       ? getConditionTypeById
-      : getConsumableConditionTypeById;
+      : itemType === "consumable"
+      ? getConsumableConditionTypeById
+      : getCardConditionTypeById;
   const conditionType = getConditionType(condition.type);
 
   const { attributes, listeners, setNodeRef, transform, transition } =
@@ -152,7 +161,7 @@ const SortableEffect: React.FC<{
   parameterCount: number;
   dynamicTitle: string;
   randomGroupId?: string;
-  itemType: "joker" | "consumable";
+  itemType: "joker" | "consumable" | "card";
 }> = ({
   effect,
   isSelected,
@@ -163,7 +172,11 @@ const SortableEffect: React.FC<{
   itemType,
 }) => {
   const getEffectType =
-    itemType === "joker" ? getEffectTypeById : getConsumableEffectTypeById;
+    itemType === "joker"
+      ? getEffectTypeById
+      : itemType === "consumable"
+      ? getConsumableEffectTypeById
+      : getCardEffectTypeById;
   const effectType = getEffectType(effect.type);
 
   const { attributes, listeners, setNodeRef, transform, transition } =
@@ -268,7 +281,11 @@ const RuleCard: React.FC<RuleCardProps> = ({
   onRuleDoubleClick,
 }) => {
   const getTrigger =
-    itemType === "joker" ? getTriggerById : getConsumableTriggerById;
+    itemType === "joker"
+      ? getTriggerById
+      : itemType === "consumable"
+      ? getConsumableTriggerById
+      : getCardTriggerById;
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [groupOperators, setGroupOperators] = useState<Record<string, string>>(

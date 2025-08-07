@@ -48,6 +48,10 @@ import { GameVariable, getGameVariableById } from "../data/Jokers/GameVars";
 import { CubeIcon } from "@heroicons/react/24/outline";
 import { SelectedItem } from "./types";
 
+import { getCardTriggerById } from "../data/Card/Triggers";
+import { getCardConditionTypeById } from "../data/Card/Conditions";
+import { getCardEffectTypeById } from "../data/Card/Effects";
+
 interface InspectorProps {
   position: { x: number; y: number };
   joker: JokerData;
@@ -79,7 +83,7 @@ interface InspectorProps {
   selectedGameVariable: GameVariable | null;
   onGameVariableApplied: () => void;
   selectedItem: SelectedItem;
-  itemType: "joker" | "consumable";
+  itemType: "joker" | "consumable" | "card";
 }
 
 interface ParameterFieldProps {
@@ -95,7 +99,7 @@ interface ParameterFieldProps {
   onGameVariableApplied?: () => void;
   isEffect?: boolean;
   joker?: JokerData;
-  itemType?: "joker" | "consumable";
+  itemType?: "joker" | "consumable" | "card";
 }
 
 interface ChanceInputProps {
@@ -108,7 +112,7 @@ interface ChanceInputProps {
   onOpenGameVariablesPanel: () => void;
   selectedGameVariable?: GameVariable | null;
   onGameVariableApplied?: () => void;
-  itemType?: "joker" | "consumable";
+  itemType?: "joker" | "consumable" | "card";
 }
 
 const ChanceInput: React.FC<ChanceInputProps> = React.memo(
@@ -897,13 +901,25 @@ const Inspector: React.FC<InspectorProps> = ({
       };
 
   const getTrigger =
-    itemType === "joker" ? getTriggerById : getConsumableTriggerById;
+    itemType === "joker"
+      ? getTriggerById
+      : itemType === "consumable"
+      ? getConsumableTriggerById
+      : getCardTriggerById;
+
   const getConditionType =
     itemType === "joker"
       ? getConditionTypeById
-      : getConsumableConditionTypeById;
+      : itemType === "consumable"
+      ? getConsumableConditionTypeById
+      : getCardConditionTypeById;
+
   const getEffectType =
-    itemType === "joker" ? getEffectTypeById : getConsumableEffectTypeById;
+    itemType === "joker"
+      ? getEffectTypeById
+      : itemType === "consumable"
+      ? getConsumableEffectTypeById
+      : getCardEffectTypeById;
 
   const availableVariables = getAllVariables(joker).map(
     (variable: { name: string }) => ({
