@@ -6,6 +6,9 @@ import { generateAddXChipsReturn } from "./effects/AddXChipsEffect";
 import { generateAddXMultReturn } from "./effects/AddXMultEffect";
 import { generateDestroyCardReturn } from "./effects/DestroyCardEffect";
 import { generateRetriggerReturn } from "./effects/RetriggerEffect";
+import { generateCreateJokerReturn } from "./effects/CreateJokerEffect";
+import { generateDestroyJokerReturn } from "./effects/DestroyJokerEffect";
+import { generateCopyJokerReturn } from "./effects/CopyJokerEffect";
 
 export interface EffectReturn {
   statement: string;
@@ -53,6 +56,15 @@ const generateSingleEffect = (effect: Effect): EffectReturn => {
 
     case "retrigger_card":
       return generateRetriggerReturn(effect);
+
+    case "create_joker":
+      return generateCreateJokerReturn(effect);
+
+    case "destroy_joker":
+      return generateDestroyJokerReturn(effect);
+
+    case "copy_joker":
+      return generateCopyJokerReturn(effect);
 
     default:
       return {

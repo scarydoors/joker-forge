@@ -3,8 +3,10 @@ import {
   SparklesIcon,
   BanknotesIcon,
   ChartBarIcon,
+  UserGroupIcon,
 } from "@heroicons/react/24/outline";
 import { CategoryDefinition } from "../Jokers/Triggers";
+import { RARITIES, STICKERS } from "../BalatroUtils";
 
 export const CARD_EFFECT_CATEGORIES: CategoryDefinition[] = [
   {
@@ -18,6 +20,10 @@ export const CARD_EFFECT_CATEGORIES: CategoryDefinition[] = [
   {
     label: "Special",
     icon: SparklesIcon,
+  },
+  {
+    label: "Jokers",
+    icon: UserGroupIcon,
   },
 ];
 
@@ -147,6 +153,180 @@ export const CARD_EFFECT_TYPES: EffectTypeDefinition[] = [
       },
     ],
     category: "Scoring",
+  },
+  {
+    id: "create_joker",
+    label: "Create Joker",
+    description: "Create a random or specific joker card",
+    applicableTriggers: ["card_scored", "card_held"],
+    params: [
+      {
+        id: "joker_type",
+        type: "select",
+        label: "Joker Type",
+        options: [
+          { value: "random", label: "Random Joker" },
+          { value: "specific", label: "Specific Joker" },
+        ],
+        default: "random",
+      },
+      {
+        id: "rarity",
+        type: "select",
+        label: "Rarity",
+        options: () => [
+          { value: "random", label: "Any Rarity" },
+          ...RARITIES(),
+        ],
+        default: "random",
+        showWhen: {
+          parameter: "joker_type",
+          values: ["random"],
+        },
+      },
+      {
+        id: "joker_key",
+        type: "text",
+        label: "Joker Key (e.g., j_joker, j_greedy_joker)",
+        default: "j_joker",
+        showWhen: {
+          parameter: "joker_type",
+          values: ["specific"],
+        },
+      },
+      {
+        id: "edition",
+        type: "select",
+        label: "Edition",
+        options: [
+          { value: "none", label: "No Edition" },
+          { value: "e_foil", label: "Foil" },
+          { value: "e_holo", label: "Holographic" },
+          { value: "e_polychrome", label: "Polychrome" },
+          { value: "e_negative", label: "Negative" },
+        ],
+        default: "none",
+      },
+      {
+        id: "sticker",
+        type: "select",
+        label: "Sticker",
+        options: [{ value: "none", label: "No Sticker" }, ...STICKERS],
+        default: "none",
+      },
+      {
+        id: "ignore_slots",
+        type: "select",
+        label: "___ Joker Slots",
+        options: [
+          { value: "respect", label: "Respect" },
+          { value: "ignore", label: "Ignore" },
+        ],
+        default: "respect",
+      },
+    ],
+    category: "Jokers",
+  },
+  {
+    id: "destroy_joker",
+    label: "Destroy Joker",
+    description: "Destroy an existing joker",
+    applicableTriggers: ["card_scored", "card_held"],
+    params: [
+      {
+        id: "selection_method",
+        type: "select",
+        label: "Selection Method",
+        options: [
+          { value: "random", label: "Random Joker" },
+          { value: "specific", label: "Specific Joker" },
+          { value: "position", label: "By Position" },
+        ],
+        default: "random",
+      },
+      {
+        id: "joker_key",
+        type: "text",
+        label: "Joker Key (e.g., j_joker, j_greedy_joker)",
+        default: "j_joker",
+        showWhen: {
+          parameter: "selection_method",
+          values: ["specific"],
+        },
+      },
+      {
+        id: "position",
+        type: "select",
+        label: "Position",
+        options: [
+          { value: "first", label: "First Joker" },
+          { value: "last", label: "Last Joker" },
+        ],
+        default: "first",
+        showWhen: {
+          parameter: "selection_method",
+          values: ["position"],
+        },
+      },
+    ],
+    category: "Jokers",
+  },
+  {
+    id: "copy_joker",
+    label: "Copy Joker",
+    description: "Copy an existing joker",
+    applicableTriggers: ["card_scored", "card_held"],
+    params: [
+      {
+        id: "selection_method",
+        type: "select",
+        label: "Selection Method",
+        options: [
+          { value: "random", label: "Random Joker" },
+          { value: "specific", label: "Specific Joker" },
+          { value: "position", label: "By Position" },
+        ],
+        default: "random",
+      },
+      {
+        id: "joker_key",
+        type: "text",
+        label: "Joker Key (e.g., j_joker, j_greedy_joker)",
+        default: "j_joker",
+        showWhen: {
+          parameter: "selection_method",
+          values: ["specific"],
+        },
+      },
+      {
+        id: "position",
+        type: "select",
+        label: "Position",
+        options: [
+          { value: "first", label: "First Joker" },
+          { value: "last", label: "Last Joker" },
+        ],
+        default: "first",
+        showWhen: {
+          parameter: "selection_method",
+          values: ["position"],
+        },
+      },
+      {
+        id: "edition",
+        type: "select",
+        label: "Edition for Copy",
+        options: [
+          { value: "none", label: "No Edition" },
+          { value: "e_foil", label: "Foil" },
+          { value: "e_holo", label: "Holographic" },
+          { value: "e_polychrome", label: "Polychrome" },
+          { value: "e_negative", label: "Negative" },
+        ],
+        default: "none",
+      },
+    ],
+    category: "Jokers",
   },
 ];
 
