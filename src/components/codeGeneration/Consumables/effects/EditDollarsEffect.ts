@@ -4,7 +4,7 @@ import { generateGameVariableCode } from "../gameVariableUtils";
 
 export const generateEditDollarsReturn = (effect: Effect): EffectReturn => {
   const operation = effect.params?.operation || "add";
-  const value = effect.params?.value || 5;
+  const value = effect.params?.value;
   const customMessage = effect.customMessage;
 
   const valueCode = generateGameVariableCode(value);

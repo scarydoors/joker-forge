@@ -5,7 +5,7 @@ import { generateGameVariableCode } from "../gameVariableUtils";
 export const generateEditHandsReturn = (effect: Effect): EffectReturn => {
   const operation = effect.params?.operation || "add";
   const duration = effect.params?.duration || "permanent";
-  const value = effect.params?.value || 1;
+  const value = effect.params?.value;
   const customMessage = effect.customMessage;
 
   const valueCode = generateGameVariableCode(value);

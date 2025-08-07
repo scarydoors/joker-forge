@@ -7,7 +7,7 @@ export const generateEditCardsInHandReturn = (effect: Effect): EffectReturn => {
   const edition = effect.params?.edition || "none";
   const suit = effect.params?.suit || "none";
   const rank = effect.params?.rank || "none";
-  const amount = effect.params?.amount || 1;
+  const amount = effect.params?.amount;
   const customMessage = effect.customMessage;
 
   // Check if any modifications are actually being made

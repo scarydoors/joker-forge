@@ -40,7 +40,7 @@ export const generateEditDiscardReturn = (
 
     configVariables.push({
       name: variableName,
-      value: Number(effectValue) || 1,
+      value: Number(effectValue),
     });
   }
 
@@ -103,7 +103,11 @@ export const generateEditDiscardReturn = (
       statement = `func = function()
                 card_eval_status_text(context.blueprint_card or card, 'extra', nil, nil, nil, {message = ${setMessage}, colour = G.C.BLUE})
                 ${editDiscardCode}
-                G.GAME.round_resets.hands = ${duration === "permanent" ? valueCode : "G.GAME.round_resets.hands"}
+                G.GAME.round_resets.hands = ${
+                  duration === "permanent"
+                    ? valueCode
+                    : "G.GAME.round_resets.hands"
+                }
                 return true
             end`;
       break;

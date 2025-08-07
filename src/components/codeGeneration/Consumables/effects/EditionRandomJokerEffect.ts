@@ -4,7 +4,7 @@ import type { EffectReturn } from "../effectUtils";
 export const generateEditionRandomJokerReturn = (
   effect: Effect
 ): EffectReturn => {
-  const amount = effect.params?.amount || 1;
+  const amount = effect.params?.amount;
   const edition = effect.params?.edition || "e_foil";
   const targetType = effect.params?.target_type || "editionless";
   const customMessage = effect.customMessage;

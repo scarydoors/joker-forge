@@ -42,7 +42,7 @@ export const generateEditDiscardSizeReturn = (
 
     configVariables.push({
       name: variableName,
-      value: Number(effectValue) || 1,
+      value: Number(effectValue),
     });
   } else {
     valueCode = "";
