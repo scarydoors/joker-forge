@@ -31,6 +31,7 @@ import VanillaRemadePage from "./components/pages/VanillaReforgedPage";
 import AcknowledgementsPage from "./components/pages/AcknowledgementsPage";
 import NotFoundPage from "./components/pages/NotFoundPage";
 import BoostersPage from "./components/pages/BoostersPage";
+import EnhancementsPage from "./components/pages/EnhancementsPage";
 
 // Data and Utils
 import {
@@ -40,6 +41,7 @@ import {
   ConsumableSetData,
   BoosterData,
   updateDataRegistry,
+  EnhancementData,
 } from "./components/data/BalatroUtils";
 import { exportModCode } from "./components/codeGeneration/entry";
 import {
@@ -78,6 +80,7 @@ interface AutoSaveData {
   customRarities: RarityData[];
   consumableSets: ConsumableSetData[];
   boosters: BoosterData[];
+  enhancements: EnhancementData[];
   timestamp: number;
 }
 
@@ -155,10 +158,16 @@ function AppContent() {
 
   const [modMetadata, setModMetadata] =
     useState<ModMetadata>(DEFAULT_MOD_METADATA);
+
   const [jokers, setJokers] = useState<JokerData[]>([]);
   const [consumables, setConsumables] = useState<ConsumableData[]>([]);
   const [customRarities, setCustomRarities] = useState<RarityData[]>([]);
   const [consumableSets, setConsumableSets] = useState<ConsumableSetData[]>([]);
+  const [enhancements, setEnhancements] = useState<EnhancementData[]>([]);
+  const [selectedEnhancementId, setSelectedEnhancementId] = useState<
+    string | null
+  >(null);
+
   const [selectedJokerId, setSelectedJokerId] = useState<string | null>(null);
   const [selectedConsumableId, setSelectedConsumableId] = useState<
     string | null
@@ -199,6 +208,7 @@ function AppContent() {
     customRarities: RarityData[];
     consumableSets: ConsumableSetData[];
     boosters: BoosterData[];
+    enhancements: EnhancementData[];
   } | null>(null);
 
   // Show confirmation function
@@ -256,7 +266,8 @@ function AppContent() {
       consumableData: ConsumableData[],
       raritiesData: RarityData[],
       setsData: ConsumableSetData[],
-      boosterData: BoosterData[]
+      boosterData: BoosterData[],
+      enhancementsData: EnhancementData[]
     ) => {
       try {
         const data: AutoSaveData = {
@@ -266,6 +277,7 @@ function AppContent() {
           customRarities: raritiesData,
           consumableSets: setsData,
           boosters: boosterData,
+          enhancements: enhancementsData,
           timestamp: Date.now(),
         };
         localStorage.setItem(AUTO_SAVE_KEY, JSON.stringify(data));
@@ -283,6 +295,7 @@ function AppContent() {
       consumableSets,
       consumables,
       boosters,
+      enhancements,
       modMetadata.prefix || ""
     );
   }, [
@@ -290,6 +303,7 @@ function AppContent() {
     consumableSets,
     consumables,
     boosters,
+    enhancements,
     modMetadata.prefix,
   ]);
 
@@ -300,6 +314,7 @@ function AppContent() {
     customRarities: RarityData[];
     consumableSets: ConsumableSetData[];
     boosters: BoosterData[];
+    enhancements: EnhancementData[];
   } | null => {
     try {
       const savedData = localStorage.getItem(AUTO_SAVE_KEY);
@@ -321,6 +336,7 @@ function AppContent() {
         customRarities: data.customRarities || [],
         consumableSets: data.consumableSets || [],
         boosters: data.boosters || [],
+        enhancements: data.enhancements || [],
       };
     } catch (error) {
       console.warn("Failed to load auto-save:", error);
@@ -365,7 +381,8 @@ function AppContent() {
       consumableData: ConsumableData[],
       raritiesData: RarityData[],
       setsData: ConsumableSetData[],
-      boosterData: BoosterData[]
+      boosterData: BoosterData[],
+      enhancementsData: EnhancementData[]
     ) => {
       if (!prevDataRef.current) return true;
 
@@ -378,7 +395,9 @@ function AppContent() {
         JSON.stringify(prevData.customRarities) !==
           JSON.stringify(raritiesData) ||
         JSON.stringify(prevData.consumableSets) !== JSON.stringify(setsData) ||
-        JSON.stringify(prevData.boosters) !== JSON.stringify(boosterData)
+        JSON.stringify(prevData.boosters) !== JSON.stringify(boosterData) ||
+        JSON.stringify(prevData.enhancements) !==
+          JSON.stringify(enhancementsData)
       );
     },
     []
@@ -391,14 +410,16 @@ function AppContent() {
       consumableData: ConsumableData[],
       raritiesData: RarityData[],
       setsData: ConsumableSetData[],
-      boosterData: BoosterData[]
+      boosterData: BoosterData[],
+      enhancementsData: EnhancementData[]
     ) => {
       if (
         jokerData.length > 0 ||
         consumableData.length > 0 ||
         raritiesData.length > 0 ||
         setsData.length > 0 ||
-        boosterData.length > 0
+        boosterData.length > 0 ||
+        enhancementsData.length > 0
       )
         return true;
 
@@ -433,7 +454,8 @@ function AppContent() {
       consumableData: ConsumableData[],
       raritiesData: RarityData[],
       setsData: ConsumableSetData[],
-      boosterData: BoosterData[]
+      boosterData: BoosterData[],
+      enhancementsData: EnhancementData[]
     ) => {
       if (saveTimeoutRef.current) {
         clearTimeout(saveTimeoutRef.current);
@@ -446,7 +468,8 @@ function AppContent() {
           consumableData,
           raritiesData,
           setsData,
-          boosterData
+          boosterData,
+          enhancementsData
         );
       }, 500);
     },
@@ -475,7 +498,8 @@ function AppContent() {
         consumables,
         customRarities,
         consumableSets,
-        boosters
+        boosters,
+        enhancements
       )
     )
       return;
@@ -487,7 +511,8 @@ function AppContent() {
         consumables,
         customRarities,
         consumableSets,
-        boosters
+        boosters,
+        enhancements
       )
     )
       return;
@@ -499,6 +524,7 @@ function AppContent() {
       customRarities,
       consumableSets,
       boosters,
+      enhancements,
     };
 
     setAutoSaveStatus("saving");
@@ -509,7 +535,8 @@ function AppContent() {
       consumables,
       customRarities,
       consumableSets,
-      boosters
+      boosters,
+      enhancements
     );
 
     if (statusTimeoutRef.current) {
@@ -542,10 +569,10 @@ function AppContent() {
     customRarities,
     consumableSets,
     boosters,
+    enhancements,
     hasLoadedInitialData,
     debouncedSave,
     hasDataChanged,
-
     isDataDifferentFromDefaults,
   ]);
 
@@ -572,9 +599,11 @@ function AppContent() {
       setCustomRarities(savedData.customRarities);
       setConsumableSets(savedData.consumableSets);
       setBoosters(savedData.boosters);
+      setEnhancements(savedData.enhancements);
       setSelectedJokerId(null);
       setSelectedConsumableId(null);
       setSelectedBoosterId(null);
+      setSelectedEnhancementId(null);
       prevDataRef.current = {
         modMetadata: savedData.modMetadata,
         jokers: savedData.jokers,
@@ -582,6 +611,7 @@ function AppContent() {
         customRarities: savedData.customRarities,
         consumableSets: savedData.consumableSets,
         boosters: savedData.boosters,
+        enhancements: savedData.enhancements,
       };
       showAlert(
         "success",
@@ -649,7 +679,8 @@ function AppContent() {
         modMetadata,
         customRarities,
         consumableSets,
-        boosters
+        boosters,
+        enhancements
       );
       setShowExportSuccessModal(true);
     } catch (error) {
@@ -672,7 +703,8 @@ function AppContent() {
         customRarities,
         consumables,
         consumableSets,
-        boosters
+        boosters,
+        enhancements
       );
       showAlert(
         "success",
@@ -699,8 +731,11 @@ function AppContent() {
         setCustomRarities(importedData.customRarities);
         setConsumableSets(importedData.consumableSets);
         setBoosters(importedData.boosters);
+        setEnhancements(importedData.enhancements || []);
         setSelectedJokerId(null);
         setSelectedConsumableId(null);
+        setSelectedBoosterId(null);
+        setSelectedEnhancementId(null);
         prevDataRef.current = {
           modMetadata: importedData.metadata,
           jokers: importedData.jokers,
@@ -708,6 +743,7 @@ function AppContent() {
           customRarities: importedData.customRarities,
           consumableSets: importedData.consumableSets,
           boosters: importedData.boosters,
+          enhancements: importedData.enhancements || [],
         };
         showAlert(
           "success",
@@ -846,6 +882,20 @@ function AppContent() {
                 modPrefix={modMetadata.prefix || ""}
                 showConfirmation={showConfirmation}
                 consumableSets={consumableSets}
+              />
+            }
+          />
+          <Route
+            path="/enhancements"
+            element={
+              <EnhancementsPage
+                modName={modMetadata.name}
+                enhancements={enhancements}
+                setEnhancements={setEnhancements}
+                selectedEnhancementId={selectedEnhancementId}
+                setSelectedEnhancementId={setSelectedEnhancementId}
+                modPrefix={modMetadata.prefix || ""}
+                showConfirmation={showConfirmation}
               />
             }
           />
