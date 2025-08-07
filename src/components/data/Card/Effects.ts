@@ -116,7 +116,7 @@ export const CARD_EFFECT_TYPES: EffectTypeDefinition[] = [
   {
     id: "destroy_card",
     label: "Destroy Card",
-    description: "Remove this card from play with a chance",
+    description: "Destroy this card",
     applicableTriggers: ["card_scored", "card_held"],
     params: [
       {
