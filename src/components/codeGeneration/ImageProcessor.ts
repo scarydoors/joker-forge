@@ -17,7 +17,6 @@ export const processImages = async (
       throw new Error("Failed to get canvas context");
     }
 
-    // Disable image smoothing for crisp pixel art
     ctx.imageSmoothingEnabled = false;
 
     const itemsPerRow = 10;
@@ -141,6 +140,93 @@ export const processImages = async (
   }
 };
 
+// THIS FUNCTION IS FUCKING STUPID AND SHOULD NOT EXIST BUT IT DOES BECUASE BROWSER SUPPORT IS FUCKING STUPID
+export const processModIcon = async (
+  iconDataUrl: string,
+  scale: number = 1
+): Promise<string> => {
+  try {
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
+
+    if (!ctx) {
+      throw new Error("Failed to get canvas context");
+    }
+
+    canvas.width = 34 * scale;
+    canvas.height = 34 * scale;
+
+    canvas.style.imageRendering = "pixelated";
+    canvas.style.imageRendering = "-moz-crisp-edges";
+    canvas.style.imageRendering = "crisp-edges";
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => {
+        if (scale === 1) {
+          // No scaling needed, direct draw
+          ctx.imageSmoothingEnabled = false;
+          ctx.drawImage(img, 0, 0, 34, 34);
+        } else {
+          // Create a temporary 1x canvas first
+          const tempCanvas = document.createElement("canvas");
+          const tempCtx = tempCanvas.getContext("2d");
+
+          if (!tempCtx) {
+            reject(new Error("Failed to get temp canvas context"));
+            return;
+          }
+
+          tempCanvas.width = 34;
+          tempCanvas.height = 34;
+          tempCtx.imageSmoothingEnabled = false;
+
+          // Draw to 1x first
+          tempCtx.drawImage(img, 0, 0, 34, 34);
+
+          // Now scale up using putImageData for pixel-perfect scaling
+          const imageData = tempCtx.getImageData(0, 0, 34, 34);
+          const scaledImageData = ctx.createImageData(34 * scale, 34 * scale);
+
+          for (let y = 0; y < 34; y++) {
+            for (let x = 0; x < 34; x++) {
+              const sourceIndex = (y * 34 + x) * 4;
+              const r = imageData.data[sourceIndex];
+              const g = imageData.data[sourceIndex + 1];
+              const b = imageData.data[sourceIndex + 2];
+              const a = imageData.data[sourceIndex + 3];
+
+              // Scale this pixel up
+              for (let sy = 0; sy < scale; sy++) {
+                for (let sx = 0; sx < scale; sx++) {
+                  const targetIndex =
+                    ((y * scale + sy) * (34 * scale) + (x * scale + sx)) * 4;
+                  scaledImageData.data[targetIndex] = r;
+                  scaledImageData.data[targetIndex + 1] = g;
+                  scaledImageData.data[targetIndex + 2] = b;
+                  scaledImageData.data[targetIndex + 3] = a;
+                }
+              }
+            }
+          }
+
+          ctx.putImageData(scaledImageData, 0, 0);
+        }
+
+        resolve(canvas.toDataURL("image/png"));
+      };
+
+      img.onerror = () => reject(new Error("Failed to load mod icon"));
+      img.src = iconDataUrl;
+    });
+  } catch (error) {
+    console.error("Error processing mod icon:", error);
+    throw error;
+  }
+};
+
 export const dataURLToBlob = (dataUrl: string): Blob => {
   const arr = dataUrl.split(",");
   const mime = arr[0].match(/:(.*?);/)?.[1] || "image/png";
@@ -160,7 +246,8 @@ export const addAtlasToZip = async (
   jokers: JokerData[],
   consumables: ConsumableData[],
   boosters: BoosterData[] = [],
-  enhancements: EnhancementData[] = []
+  enhancements: EnhancementData[] = [],
+  modIconData?: string
 ): Promise<Record<string, Record<number, { x: number; y: number }>>> => {
   try {
     const assetsFolder = zip.folder("assets");
@@ -171,6 +258,16 @@ export const addAtlasToZip = async (
       string,
       Record<number, { x: number; y: number }>
     > = {};
+
+    if (modIconData) {
+      const modIcon1xResult = await processModIcon(modIconData, 1);
+      const modIcon1xBlob = dataURLToBlob(modIcon1xResult);
+      assets1xFolder!.file("ModIcon.png", modIcon1xBlob);
+
+      const modIcon2xResult = await processModIcon(modIconData, 2);
+      const modIcon2xBlob = dataURLToBlob(modIcon2xResult);
+      assets2xFolder!.file("ModIcon.png", modIcon2xBlob);
+    }
 
     if (jokers.length > 0) {
       const jokerAtlas1xResult = await processImages(jokers, 1);

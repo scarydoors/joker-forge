@@ -13,24 +13,7 @@ import { generateBoostersCode } from "./boosters";
 import { ConsumableSetData } from "../data/BalatroUtils";
 import { modToJson } from "../JSONImportExport";
 import { generateEnhancementsCode } from "./Card/index";
-
-export interface ModMetadata {
-  id: string;
-  name: string;
-  author: string[];
-  description: string;
-  prefix: string;
-  main_file: string;
-  version: string;
-  priority: number;
-  badge_colour: string;
-  badge_text_colour: string;
-  display_name: string;
-  dependencies: string[];
-  conflicts: string[];
-  provides: string[];
-  dump_loc?: boolean;
-}
+import { ModMetadata } from "../pages/ModMetadataPage";
 
 const sortForExport = <T extends { id: string; name: string }>(
   items: T[]
@@ -68,12 +51,15 @@ export const exportModCode = async (
     const sortedBoosters = sortForExport(boosters);
     const sortedEnhancements = sortForExport(enhancements);
 
+    const hasModIcon = !!(metadata.hasUserUploadedIcon || metadata.iconImage);
+
     const mainLuaCode = generateMainLuaCode(
       sortedJokers,
       sortedConsumables,
       customRarities,
       sortedBoosters,
-      sortedEnhancements
+      sortedEnhancements,
+      hasModIcon
     );
     zip.file(metadata.main_file, mainLuaCode);
 
@@ -146,12 +132,31 @@ export const exportModCode = async (
 
     zip.file(`${metadata.id}.json`, generateModJson(metadata));
 
+    let modIconData: string | undefined;
+    if (metadata.hasUserUploadedIcon && metadata.iconImage) {
+      modIconData = metadata.iconImage;
+    } else if (!metadata.hasUserUploadedIcon) {
+      try {
+        const response = await fetch("/images/modicon.png");
+        const blob = await response.blob();
+        modIconData = await new Promise<string>((resolve) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result as string);
+          reader.readAsDataURL(blob);
+        });
+      } catch {
+        console.log("Default mod icon not available");
+        modIconData = undefined;
+      }
+    }
+
     await addAtlasToZip(
       zip,
       sortedJokers,
       sortedConsumables,
       sortedBoosters,
-      sortedEnhancements
+      sortedEnhancements,
+      modIconData
     );
 
     const content = await zip.generateAsync({ type: "blob" });
@@ -176,9 +181,22 @@ const generateMainLuaCode = (
   consumables: ConsumableData[],
   customRarities: RarityData[],
   boosters: BoosterData[],
-  enhancements: EnhancementData[]
+  enhancements: EnhancementData[],
+  hasModIcon: boolean
 ): string => {
   let output = "";
+
+  if (hasModIcon) {
+    output += `SMODS.Atlas({
+    key = "modicon", 
+    path = "ModIcon.png", 
+    px = 34,
+    py = 34,
+    atlas_table = "ASSET_ATLAS"
+}):register()
+
+`;
+  }
 
   if (jokers.length > 0) {
     output += `SMODS.Atlas({

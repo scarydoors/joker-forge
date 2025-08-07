@@ -8,8 +8,10 @@ import {
   ShieldCheckIcon,
   CubeIcon,
   PaintBrushIcon,
+  PhotoIcon,
 } from "@heroicons/react/24/outline";
 import InputField from "../generic/InputField";
+import Button from "../generic/Button";
 
 export interface ModMetadata {
   id: string;
@@ -27,6 +29,8 @@ export interface ModMetadata {
   conflicts: string[];
   provides: string[];
   dump_loc?: boolean;
+  iconImage?: string;
+  hasUserUploadedIcon?: boolean;
 }
 
 interface ModMetadataValidation {
@@ -51,6 +55,8 @@ export const DEFAULT_MOD_METADATA: ModMetadata = {
   dependencies: ["Steamodded (>=1.0.0~BETA-0711a)"],
   conflicts: [],
   provides: [],
+  iconImage: "/images/modicon.png",
+  hasUserUploadedIcon: false,
 };
 
 const validateModMetadata = (metadata: ModMetadata): ModMetadataValidation => {
@@ -309,6 +315,32 @@ const ModMetadataPage: React.FC<ModMetadataPageProps> = ({
     updateMetadata({ provides: parseDependenciesString(value) });
   };
 
+  const processModIconImage = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
+
+      if (!ctx) {
+        reject(new Error("Failed to get canvas context"));
+        return;
+      }
+
+      img.onload = () => {
+        canvas.width = 32;
+        canvas.height = 32;
+
+        ctx.imageSmoothingEnabled = false;
+        ctx.drawImage(img, 0, 0, 32, 32);
+
+        resolve(canvas.toDataURL("image/png"));
+      };
+
+      img.onerror = () => reject(new Error("Failed to load image"));
+      img.src = URL.createObjectURL(file);
+    });
+  };
+
   const isValidHexColor = (color: string) =>
     /^[0-9A-Fa-f]{6}([0-9A-Fa-f]{2})?$/.test(color);
 
@@ -509,13 +541,10 @@ const ModMetadataPage: React.FC<ModMetadataPageProps> = ({
             </div>
           </div>
 
-          <div className="border border-black-lighter rounded-lg p-4">
-            <h4 className="text-white-light font-medium text-sm mb-3 tracking-wider">
-              BADGE PREVIEW
-            </h4>
+          <div className=" p-4">
             <div className="flex justify-center">
               <div
-                className="px-3 py-1 rounded text-xs font-bold border"
+                className="px-3 py-1 rounded text-2xl font-bold border"
                 style={{
                   backgroundColor: isValidHexColor(metadata.badge_colour || "")
                     ? `#${metadata.badge_colour}`
@@ -533,6 +562,68 @@ const ModMetadataPage: React.FC<ModMetadataPageProps> = ({
                   "MOD"}
               </div>
             </div>
+          </div>
+        </div>
+
+        <div className="border-t border-black-lighter pt-6 mt-6">
+          <h4 className="text-white-light font-medium text-sm mb-4 tracking-wider flex items-center gap-2">
+            <PhotoIcon className="h-4 w-4 text-mint" />
+            MOD ICON (34x34px)
+          </h4>
+          <div className="flex flex-col items-center">
+            <div className="w-34 h-34 rounded-lg flex flex-col items-center justify-center relative">
+              {metadata.iconImage ? (
+                <img
+                  src={metadata.iconImage}
+                  alt="Mod Icon"
+                  className="w-24 h-24 object-contain rounded"
+                  style={{ imageRendering: "pixelated" }}
+                />
+              ) : (
+                <>
+                  <PhotoIcon className="h-8 w-8 text-white-darker mb-2" />
+                  <span className="text-white-darker text-xs text-center">
+                    No icon uploaded
+                    <br />
+                    34x34 recommended
+                  </span>
+                </>
+              )}
+              <input
+                type="file"
+                accept="image/*"
+                onChange={async (e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    try {
+                      const processedImage = await processModIconImage(file);
+                      updateMetadata({
+                        iconImage: processedImage,
+                        hasUserUploadedIcon: true,
+                      });
+                    } catch (error) {
+                      console.error("Failed to process mod icon:", error);
+                    }
+                  }
+                  e.target.value = "";
+                }}
+                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+              />
+            </div>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => {
+                const fileInput = document.querySelector(
+                  'input[type="file"]'
+                ) as HTMLInputElement | null;
+                if (fileInput) {
+                  fileInput.click();
+                }
+              }}
+            >
+              Change Icon
+            </Button>
           </div>
         </div>
 
