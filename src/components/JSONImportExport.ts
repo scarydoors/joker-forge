@@ -4,6 +4,7 @@ import {
   ConsumableData,
   ConsumableSetData,
   BoosterData,
+  EnhancementData,
 } from "./data/BalatroUtils";
 import { RarityData } from "./data/BalatroUtils";
 
@@ -14,6 +15,7 @@ export interface ExportedMod {
   customRarities: RarityData[];
   consumableSets: ConsumableSetData[];
   boosters: BoosterData[];
+  enhancements: EnhancementData[];
   version: string;
   exportedAt: string;
 }
@@ -24,7 +26,8 @@ export const modToJson = (
   customRarities: RarityData[] = [],
   consumables: ConsumableData[] = [],
   consumableSets: ConsumableSetData[] = [],
-  boosters: BoosterData[] = []
+  boosters: BoosterData[] = [],
+  enhancements: EnhancementData[] = []
 ): { filename: string; jsonString: string } => {
   const exportData: ExportedMod = {
     metadata,
@@ -33,6 +36,7 @@ export const modToJson = (
     customRarities,
     consumableSets,
     boosters,
+    enhancements,
     version: "1.0.0",
     exportedAt: new Date().toISOString(),
   };
@@ -51,7 +55,8 @@ export const exportModAsJSON = (
   customRarities: RarityData[] = [],
   consumables: ConsumableData[] = [],
   consumableSets: ConsumableSetData[] = [],
-  boosters: BoosterData[] = []
+  boosters: BoosterData[] = [],
+  enhancements: EnhancementData[] = []
 ): void => {
   const ret = modToJson(
     metadata,
@@ -59,7 +64,8 @@ export const exportModAsJSON = (
     customRarities,
     consumables,
     consumableSets,
-    boosters
+    boosters,
+    enhancements
   );
   const blob = new Blob([ret.jsonString], { type: "application/json" });
   const url = URL.createObjectURL(blob);
@@ -80,6 +86,7 @@ export const importModFromJSON = (): Promise<{
   customRarities: RarityData[];
   consumableSets: ConsumableSetData[];
   boosters: BoosterData[];
+  enhancements: EnhancementData[];
 } | null> => {
   return new Promise((resolve, reject) => {
     const input = document.createElement("input");
@@ -125,6 +132,13 @@ export const importModFromJSON = (): Promise<{
             throw new Error("Invalid boosters data");
           }
 
+          if (
+            importData.enhancements &&
+            !Array.isArray(importData.enhancements)
+          ) {
+            throw new Error("Invalid enhancements data");
+          }
+
           resolve({
             metadata: importData.metadata,
             jokers: importData.jokers,
@@ -132,6 +146,7 @@ export const importModFromJSON = (): Promise<{
             customRarities: importData.customRarities || [],
             consumableSets: importData.consumableSets || [],
             boosters: importData.boosters || [],
+            enhancements: importData.enhancements || [],
           });
         } catch (error) {
           console.error("Error parsing mod file:", error);
