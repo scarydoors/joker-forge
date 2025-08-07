@@ -1,9 +1,9 @@
 import JSZip from "jszip";
-import { JokerData, BoosterData } from "../data/BalatroUtils";
+import { JokerData, BoosterData, EnhancementData } from "../data/BalatroUtils";
 import { ConsumableData } from "../data/BalatroUtils";
 
 export const processImages = async (
-  items: (JokerData | ConsumableData | BoosterData)[],
+  items: (JokerData | ConsumableData | BoosterData | EnhancementData)[],
   scale: number = 1
 ): Promise<{
   atlasDataUrl: string;
@@ -159,7 +159,8 @@ export const addAtlasToZip = async (
   zip: JSZip,
   jokers: JokerData[],
   consumables: ConsumableData[],
-  boosters: BoosterData[] = []
+  boosters: BoosterData[] = [],
+  enhancements: EnhancementData[] = []
 ): Promise<Record<string, Record<number, { x: number; y: number }>>> => {
   try {
     const assetsFolder = zip.folder("assets");
@@ -213,6 +214,22 @@ export const addAtlasToZip = async (
       assets2xFolder!.file("CustomBoosters.png", boosterAtlas2xBlob);
 
       soulPositions["boosters"] = boosterAtlas1xResult.soulPositions;
+    }
+
+    if (enhancements.length > 0) {
+      const enhancementAtlas1xResult = await processImages(enhancements, 1);
+      const enhancementAtlas1xBlob = dataURLToBlob(
+        enhancementAtlas1xResult.atlasDataUrl
+      );
+      assets1xFolder!.file("CustomEnhancements.png", enhancementAtlas1xBlob);
+
+      const enhancementAtlas2xResult = await processImages(enhancements, 2);
+      const enhancementAtlas2xBlob = dataURLToBlob(
+        enhancementAtlas2xResult.atlasDataUrl
+      );
+      assets2xFolder!.file("CustomEnhancements.png", enhancementAtlas2xBlob);
+
+      soulPositions["enhancements"] = enhancementAtlas1xResult.soulPositions;
     }
 
     return soulPositions;

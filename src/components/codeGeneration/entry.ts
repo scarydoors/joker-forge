@@ -4,6 +4,7 @@ import {
   BoosterData,
   RarityData,
   ConsumableData,
+  EnhancementData,
 } from "../data/BalatroUtils";
 import { addAtlasToZip } from "./ImageProcessor";
 import { generateJokersCode, generateCustomRaritiesCode } from "./Jokers/index";
@@ -11,6 +12,7 @@ import { generateConsumablesCode } from "./Consumables/index";
 import { generateBoostersCode } from "./boosters";
 import { ConsumableSetData } from "../data/BalatroUtils";
 import { modToJson } from "../JSONImportExport";
+import { generateEnhancementsCode } from "./Card/index";
 
 export interface ModMetadata {
   id: string;
@@ -46,7 +48,8 @@ export const exportModCode = async (
   metadata: ModMetadata,
   customRarities: RarityData[] = [],
   consumableSets: ConsumableSetData[] = [],
-  boosters: BoosterData[] = []
+  boosters: BoosterData[] = [],
+  enhancements: EnhancementData[] = []
 ): Promise<boolean> => {
   try {
     console.log("Generating mod code...");
@@ -56,17 +59,21 @@ export const exportModCode = async (
     console.log("Metadata:", metadata);
     console.log("Rarities:", customRarities);
     console.log("Consumable Sets:", consumableSets);
+    console.log("Enhancements:", enhancements);
+
     const zip = new JSZip();
 
     const sortedJokers = sortForExport(jokers);
     const sortedConsumables = sortForExport(consumables);
     const sortedBoosters = sortForExport(boosters);
+    const sortedEnhancements = sortForExport(enhancements);
 
     const mainLuaCode = generateMainLuaCode(
       sortedJokers,
       sortedConsumables,
       customRarities,
-      sortedBoosters
+      sortedBoosters,
+      sortedEnhancements
     );
     zip.file(metadata.main_file, mainLuaCode);
 
@@ -76,7 +83,8 @@ export const exportModCode = async (
       customRarities,
       sortedConsumables,
       consumableSets,
-      sortedBoosters
+      sortedBoosters,
+      sortedEnhancements
     );
     zip.file(ret.filename, ret.jsonString);
 
@@ -121,9 +129,30 @@ export const exportModCode = async (
       zip.file("boosters.lua", boostersCode);
     }
 
+    if (sortedEnhancements.length > 0) {
+      const { enhancementsCode } = generateEnhancementsCode(
+        sortedEnhancements,
+        {
+          modPrefix: metadata.prefix,
+          atlasKey: "CustomEnhancements",
+        }
+      );
+
+      const enhancementsFolder = zip.folder("enhancements");
+      Object.entries(enhancementsCode).forEach(([filename, code]) => {
+        enhancementsFolder!.file(filename, code);
+      });
+    }
+
     zip.file(`${metadata.id}.json`, generateModJson(metadata));
 
-    await addAtlasToZip(zip, sortedJokers, sortedConsumables, sortedBoosters);
+    await addAtlasToZip(
+      zip,
+      sortedJokers,
+      sortedConsumables,
+      sortedBoosters,
+      sortedEnhancements
+    );
 
     const content = await zip.generateAsync({ type: "blob" });
     const url = URL.createObjectURL(content);
@@ -146,7 +175,8 @@ const generateMainLuaCode = (
   jokers: JokerData[],
   consumables: ConsumableData[],
   customRarities: RarityData[],
-  boosters: BoosterData[]
+  boosters: BoosterData[],
+  enhancements: EnhancementData[]
 ): string => {
   let output = "";
 
@@ -178,6 +208,18 @@ const generateMainLuaCode = (
     output += `SMODS.Atlas({
     key = "CustomBoosters", 
     path = "CustomBoosters.png", 
+    px = 71,
+    py = 95, 
+    atlas_table = "ASSET_ATLAS"
+}):register()
+
+`;
+  }
+
+  if (enhancements.length > 0) {
+    output += `SMODS.Atlas({
+    key = "CustomEnhancements", 
+    path = "CustomEnhancements.png", 
     px = 71,
     py = 95, 
     atlas_table = "ASSET_ATLAS"
@@ -244,6 +286,22 @@ load_boosters_file()
 `;
   }
 
+  if (enhancements.length > 0) {
+    output += `local function load_enhancements_folder()
+    local mod_path = SMODS.current_mod.path
+    local enhancements_path = mod_path .. "/enhancements"
+    local files = NFS.getDirectoryItemsInfo(enhancements_path)
+    for i = 1, #files do
+        local file_name = files[i].name
+        if file_name:sub(-4) == ".lua" then
+            assert(SMODS.load_file("enhancements/" .. file_name))()
+        end
+    end
+end
+
+`;
+  }
+
   if (jokers.length > 0) {
     output += `load_jokers_folder()
 `;
@@ -251,6 +309,11 @@ load_boosters_file()
 
   if (consumables.length > 0) {
     output += `load_consumables_folder()
+`;
+  }
+
+  if (enhancements.length > 0) {
+    output += `load_enhancements_folder()
 `;
   }
 

@@ -405,13 +405,13 @@ const isReservedKeyword = (str: string): boolean => {
 const isBuiltInValue = (str: string): boolean => {
   const suitValues = new Set(SUIT_VALUES);
   const rankValues = new Set([...RANK_VALUES, ...RANK_LABELS]);
-  const enhancementValues = new Set(ENHANCEMENT_VALUES);
+  const enhancementValues = new Set(ENHANCEMENT_VALUES());
   const editionValues = new Set(EDITION_VALUES);
   const sealValues = new Set(SEAL_VALUES);
 
   type SuitType = (typeof SUIT_VALUES)[number];
   type RankType = (typeof RANK_VALUES)[number] | (typeof RANK_LABELS)[number];
-  type EnhancementType = (typeof ENHANCEMENT_VALUES)[number];
+  type EnhancementType = string;
   type EditionType = (typeof EDITION_VALUES)[number];
   type SealType = (typeof SEAL_VALUES)[number];
 
