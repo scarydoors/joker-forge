@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { PhotoIcon } from "@heroicons/react/24/outline";
 import { BalatroText } from "./balatroTextFormatter";
+import Tooltip from "./Tooltip";
 
 interface BaseCardData {
   id: string;
@@ -30,10 +31,14 @@ interface BoosterCardData extends BaseCardData {
   booster_type: string;
 }
 
-type CardData = JokerCardData | ConsumableCardData | BoosterCardData;
+type CardData =
+  | JokerCardData
+  | ConsumableCardData
+  | BoosterCardData
+  | BaseCardData;
 
 interface BalatroCardProps {
-  type: "joker" | "consumable" | "booster";
+  type: "joker" | "consumable" | "booster" | "card";
   data: CardData;
   onClick?: () => void;
   className?: string;
@@ -44,6 +49,10 @@ interface BalatroCardProps {
   rarityColor?: string;
   setName?: string;
   setColor?: string;
+
+  enhancement?: string;
+  seal?: string;
+  edition?: string;
 }
 
 const BalatroCard: React.FC<BalatroCardProps> = ({
@@ -56,9 +65,51 @@ const BalatroCard: React.FC<BalatroCardProps> = ({
   rarityColor,
   setName,
   setColor,
+  enhancement,
+  seal,
+  edition,
 }) => {
   const [imageError, setImageError] = useState(false);
   const [placeholderError, setPlaceholderError] = useState(false);
+  const [selectedAce, setSelectedAce] = useState("HC_A_hearts");
+  const [hoveredButton, setHoveredButton] = useState<string | null>(null);
+
+  const aceOptions = [
+    // High Contrast row
+    [
+      {
+        key: "HC_A_hearts",
+        name: "♥",
+        color: "text-red-500",
+      },
+      {
+        key: "HC_A_diamonds",
+        name: "♦",
+        color: "text-yellow-400",
+      },
+      { key: "HC_A_clubs", name: "♣", color: "text-blue-500" },
+      { key: "HC_A_spades", name: "♠", color: "text-white-lighter" },
+    ],
+    // Low Contrast row
+    [
+      { key: "LC_A_hearts", name: "♥", color: "text-red-400" },
+      {
+        key: "LC_A_diamonds",
+        name: "♦",
+        color: "text-orange-500",
+      },
+      {
+        key: "LC_A_clubs",
+        name: "♣",
+        color: "text-gray-600",
+      },
+      {
+        key: "LC_A_spades",
+        name: "♠",
+        color: "text-white-dark",
+      },
+    ],
+  ];
 
   useEffect(() => {
     setImageError(false);
@@ -79,6 +130,13 @@ const BalatroCard: React.FC<BalatroCardProps> = ({
   };
 
   const getBadgeStyles = () => {
+    if (enhancement || seal || edition) {
+      return {
+        bg: "bg-black-darker",
+        shadow: "bg-black-lighter",
+      };
+    }
+
     if (type === "joker" && rarityColor) {
       const vanillaStyles: Record<string, { bg: string; shadow: string }> = {
         "#009dff": { bg: "bg-balatro-blueshadow", shadow: "bg-balatro-blue" },
@@ -128,7 +186,7 @@ const BalatroCard: React.FC<BalatroCardProps> = ({
       };
     }
 
-    // Default for boosters
+    // Default for boosters and cards
     return {
       bg: "bg-balatro-greenshadow",
       shadow: "bg-balatro-green",
@@ -166,12 +224,25 @@ const BalatroCard: React.FC<BalatroCardProps> = ({
         return "/images/placeholder-consumable.png";
       case "booster":
         return "/images/placeholder-booster.png";
+      case "card":
+        return "/images/placeholder-enhancement.png";
       default:
         return "/images/placeholder-joker.png";
     }
   };
 
   const getBadgeText = () => {
+    // Priority order: enhancement, seal, edition, then type-specific badges
+    if (enhancement) {
+      return enhancement;
+    }
+    if (seal) {
+      return seal;
+    }
+    if (edition) {
+      return edition;
+    }
+
     if (type === "joker") {
       return rarityName || "Common";
     }
@@ -185,6 +256,9 @@ const BalatroCard: React.FC<BalatroCardProps> = ({
         .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
         .join(" ");
       return `${typeLabel} Pack`;
+    }
+    if (type === "card") {
+      return data.name || "New Card";
     }
     return "";
   };
@@ -203,6 +277,17 @@ const BalatroCard: React.FC<BalatroCardProps> = ({
     return undefined;
   };
 
+  const handleAceSelect = (aceKey: string) => {
+    setSelectedAce(aceKey);
+  };
+
+  const getTooltipText = (aceKey: string) => {
+    const parts = aceKey.split("_");
+    const contrast = parts[0] === "HC" ? "High Contrast" : "Low Contrast";
+    const suit = parts[2].charAt(0).toUpperCase() + parts[2].slice(1);
+    return `${contrast} Ace of ${suit}`;
+  };
+
   return (
     <div
       className={`select-none font-game relative ${className} ${
@@ -216,6 +301,48 @@ const BalatroCard: React.FC<BalatroCardProps> = ({
             <span className="text-cost-text font-bold text-shadow-cost text-2xl">
               ${data.cost}
             </span>
+          </div>
+        )}
+
+        {type === "card" && (
+          <div className="mb-3 space-y-2">
+            {aceOptions.map((row, rowIndex) => (
+              <div key={rowIndex} className="flex gap-2 justify-center">
+                {row.map((ace) => (
+                  <Tooltip
+                    key={ace.key}
+                    content={getTooltipText(ace.key)}
+                    show={hoveredButton === ace.key}
+                    position="top"
+                  >
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        handleAceSelect(ace.key);
+                      }}
+                      onMouseEnter={() => setHoveredButton(ace.key)}
+                      onMouseLeave={() => setHoveredButton(null)}
+                      className={`w-10 h-10 rounded border-2 flex items-center justify-center text-2xl font-bold transition-all duration-200 ${
+                        selectedAce === ace.key
+                          ? `bg-mint border-mint-light text-black-darker shadow-lg transform scale-110`
+                          : `bg-black-dark border-black-lighter text-white-light hover:bg-black-darker hover:border-white-darker hover:scale-105 hover:shadow-md`
+                      }`}
+                    >
+                      <span
+                        className={
+                          selectedAce === ace.key
+                            ? "text-black-darker"
+                            : ace.color
+                        }
+                      >
+                        {ace.name}
+                      </span>
+                    </button>
+                  </Tooltip>
+                ))}
+              </div>
+            ))}
           </div>
         )}
 
@@ -243,18 +370,44 @@ const BalatroCard: React.FC<BalatroCardProps> = ({
                   draggable="false"
                 />
               )}
+              {type === "card" && (
+                <img
+                  src={`/images/aces/${selectedAce}.png`}
+                  alt=""
+                  className="absolute inset-0 w-full h-full object-cover pixelated pointer-events-none"
+                  draggable="false"
+                />
+              )}
             </div>
           ) : !placeholderError ? (
-            <img
-              src={getPlaceholderImage()}
-              alt={`Placeholder ${type}`}
-              className="w-full h-full"
-              draggable="false"
-              onError={() => setPlaceholderError(true)}
-            />
+            <div className="relative w-full h-full">
+              <img
+                src={getPlaceholderImage()}
+                alt={`Placeholder ${type}`}
+                className="w-full h-full"
+                draggable="false"
+                onError={() => setPlaceholderError(true)}
+              />
+              {type === "card" && (
+                <img
+                  src={`/images/aces/${selectedAce}.png`}
+                  alt=""
+                  className="absolute inset-0 w-full h-full object-cover pixelated pointer-events-none"
+                  draggable="false"
+                />
+              )}
+            </div>
           ) : (
-            <div className="w-full h-full bg-balatro-black flex items-center justify-center">
+            <div className="w-full h-full bg-balatro-black flex items-center justify-center relative">
               <PhotoIcon className="h-16 w-16 text-white-darker" />
+              {type === "card" && (
+                <img
+                  src={`/images/aces/${selectedAce}.png`}
+                  alt=""
+                  className="absolute inset-0 w-full h-full object-cover pixelated pointer-events-none"
+                  draggable="false"
+                />
+              )}
             </div>
           )}
         </div>
@@ -267,9 +420,11 @@ const BalatroCard: React.FC<BalatroCardProps> = ({
             <div className="relative">
               <div className="bg-balatro-lightgrey rounded-2xl p-1">
                 <div className="bg-balatro-black rounded-xl p-3">
-                  <h3 className="text-2xl mb-2 text-center text-balatro-white text-shadow-pixel">
-                    {data.name || `New ${type}`}
-                  </h3>
+                  {type !== "card" && (
+                    <h3 className="text-2xl mb-2 text-center text-balatro-white text-shadow-pixel">
+                      {data.name || `New ${type}`}
+                    </h3>
+                  )}
 
                   <div className="relative mb-3">
                     <div className="absolute inset-0 bg-balatro-whiteshadow rounded-xl translate-y-1" />
@@ -288,7 +443,22 @@ const BalatroCard: React.FC<BalatroCardProps> = ({
                   </div>
 
                   <div className="relative mx-6 mt-3">
-                    {isVanillaBadge ? (
+                    {type === "card" ? (
+                      <>
+                        <div
+                          className="absolute inset-0 rounded-xl translate-y-1"
+                          style={{ backgroundColor: "#474C8F" }}
+                        />
+                        <div
+                          className="rounded-xl text-center text-lg text-balatro-white py-1 relative"
+                          style={{ backgroundColor: "#757CDC" }}
+                        >
+                          <span className="relative text-shadow-pixel">
+                            {getBadgeText()}
+                          </span>
+                        </div>
+                      </>
+                    ) : isVanillaBadge ? (
                       <>
                         <div
                           className={`absolute inset-0 ${badgeStyles.bg} rounded-xl translate-y-1`}
