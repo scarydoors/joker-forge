@@ -383,15 +383,26 @@ const generateCanUseFunction = (rules: Rule[], modPrefix: string): string => {
     }
   });
 
-  const allConditions = [...ruleConditions, ...customCanUseConditions];
-
-  if (allConditions.length === 0) {
+  if (ruleConditions.length === 0 && customCanUseConditions.length === 0) {
     return `can_use = function(self, card)
         return true
     end`;
   }
 
-  const combinedCondition = allConditions.join(" and ");
+  let combinedCondition = "";
+
+  if (ruleConditions.length > 0) {
+    combinedCondition = ruleConditions.join(" or ");
+  }
+
+  if (customCanUseConditions.length > 0) {
+    const customCondition = customCanUseConditions.join(" and ");
+    if (combinedCondition) {
+      combinedCondition = `(${combinedCondition}) and (${customCondition})`;
+    } else {
+      combinedCondition = customCondition;
+    }
+  }
 
   return `can_use = function(self, card)
         return ${combinedCondition}
