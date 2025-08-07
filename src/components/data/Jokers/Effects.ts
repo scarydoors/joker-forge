@@ -494,10 +494,10 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
         id: "enhancement",
         type: "select",
         label: "Enhancement",
-        options: [
+        options: () => [
           { value: "none", label: "None" },
           { value: "random", label: "Random" },
-          ...ENHANCEMENTS,
+          ...ENHANCEMENTS(),
         ],
         default: "none",
       },
@@ -626,11 +626,11 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
         id: "new_enhancement",
         type: "select",
         label: "New Enhancement",
-        options: [
+        options: () => [
           { value: "none", label: "Don't Change" },
           { value: "remove", label: "Remove Enhancement" },
           { value: "random", label: "Random" },
-          ...ENHANCEMENTS,
+          ...ENHANCEMENTS(),
         ],
         default: "none",
       },
@@ -685,10 +685,10 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
         id: "enhancement",
         type: "select",
         label: "Enhancement",
-        options: [
+        options: () => [
           { value: "none", label: "None" },
           { value: "random", label: "Random" },
-          ...ENHANCEMENTS,
+          ...ENHANCEMENTS(),
         ],
         default: "none",
       },

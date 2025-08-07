@@ -60,7 +60,7 @@ export const GENERIC_TRIGGERS: string[] = [
   "card_destroyed",
   "playing_card_added",
   "game_over",
-  "probability_result"
+  "probability_result",
 ];
 
 export const PROBABILITY_IDENTIFIERS: {
@@ -122,7 +122,12 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
     id: "hand_type",
     label: "Hand Type",
     description: "Check the type of poker hand",
-    applicableTriggers: ["hand_played", "card_scored", "after_hand_played", "before_hand_played"],
+    applicableTriggers: [
+      "hand_played",
+      "card_scored",
+      "after_hand_played",
+      "before_hand_played",
+    ],
     params: [
       {
         id: "card_scope",
@@ -158,7 +163,12 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
     id: "card_count",
     label: "Card Count",
     description: "Check the number of cards in the played hand",
-    applicableTriggers: ["hand_played", "card_scored", "after_hand_played", "before_hand_played"],
+    applicableTriggers: [
+      "hand_played",
+      "card_scored",
+      "after_hand_played",
+      "before_hand_played",
+    ],
     params: [
       {
         id: "card_scope",
@@ -186,7 +196,12 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
     id: "suit_count",
     label: "Suit Count",
     description: "Check how many cards of a specific suit are in the hand",
-    applicableTriggers: ["hand_played", "card_scored", "after_hand_played", "before_hand_played"],
+    applicableTriggers: [
+      "hand_played",
+      "card_scored",
+      "after_hand_played",
+      "before_hand_played",
+    ],
     params: [
       {
         id: "card_scope",
@@ -254,7 +269,12 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
     id: "rank_count",
     label: "Rank Count",
     description: "Check how many cards of a specific rank are in the hand",
-    applicableTriggers: ["hand_played", "card_scored", "after_hand_played", "before_hand_played"],
+    applicableTriggers: [
+      "hand_played",
+      "card_scored",
+      "after_hand_played",
+      "before_hand_played",
+    ],
     params: [
       {
         id: "card_scope",
@@ -567,7 +587,10 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
         id: "enhancement",
         type: "select",
         label: "Enhancement Type",
-        options: [{ value: "any", label: "Any Enhancement" }, ...ENHANCEMENTS],
+        options: () => [
+          { value: "any", label: "Any Enhancement" },
+          ...ENHANCEMENTS(),
+        ],
       },
     ],
     category: "Card",
@@ -678,8 +701,14 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
   {
     id: "enhancement_count",
     label: "Enhancement Count",
-    applicableTriggers: ["hand_played", "card_scored", "after_hand_played", "before_hand_played"],
-    description: "Check how many cards with a specific enhancement are in the hand",
+    applicableTriggers: [
+      "hand_played",
+      "card_scored",
+      "after_hand_played",
+      "before_hand_played",
+    ],
+    description:
+      "Check how many cards with a specific enhancement are in the hand",
     params: [
       {
         id: "card_scope",
@@ -692,7 +721,10 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
         id: "enhancement",
         type: "select",
         label: "Enhancement Type",
-        options: [{ value: "any", label: "Any Enhancement" }, ...ENHANCEMENTS],
+        options: () => [
+          { value: "any", label: "Any Enhancement" },
+          ...ENHANCEMENTS(),
+        ],
       },
       {
         id: "operator",
@@ -713,7 +745,12 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
     id: "edition_count",
     label: "Edition Count",
     description: "Check how many cards with a specific edition are in the hand",
-    applicableTriggers: ["hand_played", "card_scored", "after_hand_played", "before_hand_played"],
+    applicableTriggers: [
+      "hand_played",
+      "card_scored",
+      "after_hand_played",
+      "before_hand_played",
+    ],
     params: [
       {
         id: "card_scope",
@@ -747,7 +784,12 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
     id: "seal_count",
     label: "Seal Count",
     description: "Check how many cards with a specific seal are in the hand",
-    applicableTriggers: ["hand_played", "card_scored", "after_hand_played", "before_hand_played"],
+    applicableTriggers: [
+      "hand_played",
+      "card_scored",
+      "after_hand_played",
+      "before_hand_played",
+    ],
     params: [
       {
         id: "card_scope",
@@ -782,14 +824,24 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
     label: "Poker Hand Been Played",
     description:
       "Check if the current poker hand has already been played this round",
-    applicableTriggers: ["hand_played", "card_scored", "after_hand_played", "before_hand_played"],
+    applicableTriggers: [
+      "hand_played",
+      "card_scored",
+      "after_hand_played",
+      "before_hand_played",
+    ],
     params: [],
     category: "Hand",
   },
   {
     id: "cumulative_chips",
     label: "Cumulative Chips",
-    applicableTriggers: ["hand_played", "card_scored", "after_hand_played", "before_hand_played"],
+    applicableTriggers: [
+      "hand_played",
+      "card_scored",
+      "after_hand_played",
+      "before_hand_played",
+    ],
     description: "Check the sum of chips in hand",
     params: [
       {
@@ -1472,7 +1524,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
       "card_scored",
       "card_discarded",
       "after_hand_played",
-      "before_hand_played"
+      "before_hand_played",
     ],
     params: [],
     category: "Game State",
@@ -1585,10 +1637,10 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
         id: "enhancement",
         type: "select",
         label: "Enhancement",
-        options: [
+        options: () => [
           { value: "any", label: "Any Enhancement" },
           { value: "none", label: "No Enhancement" },
-          ...ENHANCEMENTS,
+          ...ENHANCEMENTS(),
         ],
         showWhen: {
           parameter: "property_type",

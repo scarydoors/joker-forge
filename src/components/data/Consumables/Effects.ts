@@ -74,9 +74,9 @@ export const CONSUMABLE_EFFECT_TYPES: EffectTypeDefinition[] = [
         id: "enhancement",
         type: "select",
         label: "Enhancement Type",
-        options: [
+        options: () => [
           { value: "none", label: "No Change" },
-          ...ENHANCEMENTS,
+          ...ENHANCEMENTS(),
           { value: "random", label: "Random Enhancement" },
         ],
         default: "none",
@@ -185,9 +185,9 @@ export const CONSUMABLE_EFFECT_TYPES: EffectTypeDefinition[] = [
         id: "enhancement",
         type: "select",
         label: "Enhancement Type",
-        options: [
+        options: () => [
           { value: "none", label: "Keep Original Enhancement" },
-          ...ENHANCEMENTS,
+          ...ENHANCEMENTS(),
           { value: "random", label: "Random Enhancement" },
         ],
         default: "none",
@@ -608,9 +608,9 @@ export const CONSUMABLE_EFFECT_TYPES: EffectTypeDefinition[] = [
         id: "enhancement",
         type: "select",
         label: "Enhancement Type",
-        options: [
+        options: () => [
           { value: "none", label: "No Enhancement" },
-          ...ENHANCEMENTS,
+          ...ENHANCEMENTS(),
           { value: "random", label: "Random Enhancement" },
         ],
         default: "none",
@@ -912,9 +912,9 @@ export const CONSUMABLE_EFFECT_TYPES: EffectTypeDefinition[] = [
         id: "enhancement",
         type: "select",
         label: "Enhancement Type",
-        options: [
+        options: () => [
           { value: "none", label: "No Change" },
-          ...ENHANCEMENTS,
+          ...ENHANCEMENTS(),
           { value: "random", label: "Random Enhancement" },
         ],
         default: "none",
