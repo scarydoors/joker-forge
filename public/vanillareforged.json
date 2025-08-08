@@ -11865,6 +11865,46 @@
       "no_suit": false,
       "always_scores": false,
       "hasUserUploadedImage": true
+    },
+    {
+      "id": "42b05112-b5cd-4deb-a5d9-b6bcb664ea0a",
+      "name": "Gold Card",
+      "description": "{C:money}$3{} if this card is held in hand[s] at end of round",
+      "imagePreview": "data:image/png;base64,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",
+      "enhancementKey": "goldcard",
+      "unlocked": true,
+      "discovered": true,
+      "rules": [
+        {
+          "id": "d2716536-714f-4ed1-830a-23763a8a4ad2",
+          "trigger": "card_held_in_hand_end_of_round",
+          "blueprintCompatible": true,
+          "conditionGroups": [],
+          "effects": [
+            {
+              "id": "5ffff504-33b3-46f3-8a0e-b8b1bf913463",
+              "type": "edit_dollars",
+              "params": {
+                "operation": "add",
+                "value": 3
+              }
+            }
+          ],
+          "randomGroups": [],
+          "position": {
+            "x": 1035.5,
+            "y": 474
+          }
+        }
+      ],
+      "placeholderCreditIndex": 2,
+      "no_collection": false,
+      "any_suit": false,
+      "replace_base_card": false,
+      "no_rank": false,
+      "no_suit": false,
+      "always_scores": false,
+      "hasUserUploadedImage": true
     }
   ],
   "version": "1.0.0",
