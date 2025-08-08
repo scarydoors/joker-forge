@@ -13,7 +13,7 @@ const TRIGGER_DEFINITIONS: Record<string, TriggerDefinition> = {
     description: "When this card is part of a scoring hand",
   },
   card_held: {
-    condition: "context.cardarea == G.hand and context.individual",
+    condition: "context.cardarea == G.hand and context.other_card == card",
     context: "hand context",
     description: "When this card is held in the player's hand",
   },
