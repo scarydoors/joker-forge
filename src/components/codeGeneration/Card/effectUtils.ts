@@ -10,6 +10,9 @@ import { generateCreateJokerReturn } from "./effects/CreateJokerEffect";
 import { generateDestroyJokerReturn } from "./effects/DestroyJokerEffect";
 import { generateCopyJokerReturn } from "./effects/CopyJokerEffect";
 import { generateLevelUpHandReturn } from "./effects/LevelUpHandEffect";
+import { generateCreateConsumableReturn } from "./effects/CreateConsumableEffect";
+import { generateCopyConsumableReturn } from "./effects/CopyConsumableEffect";
+import { generateDestroyConsumableReturn } from "./effects/DestroyConsumableEffect";
 
 export interface ConfigExtraVariable {
   name: string;
@@ -77,6 +80,15 @@ const generateSingleEffect = (
 
     case "level_up_hand":
       return generateLevelUpHandReturn(effect);
+
+    case "create_consumable":
+      return generateCreateConsumableReturn(effect, trigger || "");
+
+    case "copy_consumable":
+      return generateCopyConsumableReturn(effect, trigger || "");
+
+    case "destroy_consumable":
+      return generateDestroyConsumableReturn(effect, trigger || "");
 
     default:
       return {
