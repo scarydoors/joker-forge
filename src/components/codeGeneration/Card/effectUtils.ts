@@ -165,9 +165,36 @@ export function generateEffectReturnStatement(
     });
 
     if (combinedPreReturnCode && effectCalls.length > 0) {
-      combinedPreReturnCode +=
-        "\n            " + effectCalls.join("\n            ");
-      mainReturnStatement = "";
+      const isDiscardTrigger = trigger === "card_discarded";
+
+      if (isDiscardTrigger) {
+        const allCleanedStatements = effectReturns
+          .map((effect) => {
+            const { cleanedStatement } = extractPreReturnCode(effect.statement);
+            return cleanedStatement && cleanedStatement.trim()
+              ? cleanedStatement.trim()
+              : null;
+          })
+          .filter(Boolean);
+
+        if (allCleanedStatements.length === effectReturns.length) {
+          mainReturnStatement = buildEnhancementEffectCode(
+            effectReturns.map((effect) => ({
+              ...effect,
+              statement: extractPreReturnCode(effect.statement)
+                .cleanedStatement,
+            }))
+          );
+        } else {
+          combinedPreReturnCode +=
+            "\n            " + effectCalls.join("\n            ");
+          mainReturnStatement = "";
+        }
+      } else {
+        combinedPreReturnCode +=
+          "\n            " + effectCalls.join("\n            ");
+        mainReturnStatement = "";
+      }
     } else if (effectCalls.length > 0) {
       const pureStatementEffects = effectReturns.filter((effect) => {
         const { cleanedStatement } = extractPreReturnCode(effect.statement);
