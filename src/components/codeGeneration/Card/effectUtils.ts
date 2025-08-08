@@ -11,6 +11,12 @@ import { generateDestroyJokerReturn } from "./effects/DestroyJokerEffect";
 import { generateCopyJokerReturn } from "./effects/CopyJokerEffect";
 import { generateLevelUpHandReturn } from "./effects/LevelUpHandEffect";
 
+export interface ConfigExtraVariable {
+  name: string;
+  value: number;
+}
+
+
 export interface EffectReturn {
   statement: string;
   message?: string;

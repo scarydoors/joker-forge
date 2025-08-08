@@ -4,12 +4,7 @@ import {
   parseGameVariable,
   parseRangeVariable,
 } from "../../Jokers/gameVariableUtils";
-import type { EffectReturn } from "../effectUtils";
-
-interface ConfigExtraVariable {
-  name: string;
-  value: number;
-}
+import type { EffectReturn, ConfigExtraVariable } from "../effectUtils";
 
 export const generateAddMultReturn = (
   effect: Effect,
