@@ -17,7 +17,7 @@ import {
   PLANET_CARDS,
   SPECTRAL_CARDS,
 } from "../BalatroUtils";
-import { GENERIC_TRIGGERS } from "./Triggers";
+import { GENERIC_TRIGGERS, SCORING_TRIGGERS } from "./Triggers";
 
 export const CARD_EFFECT_CATEGORIES: CategoryDefinition[] = [
   {
@@ -47,7 +47,7 @@ export const CARD_EFFECT_TYPES: EffectTypeDefinition[] = [
     id: "add_mult",
     label: "Add Mult",
     description: "Add mult to the current scoring calculation",
-    applicableTriggers: GENERIC_TRIGGERS,
+    applicableTriggers: SCORING_TRIGGERS,
     params: [
       {
         id: "value",
@@ -63,7 +63,7 @@ export const CARD_EFFECT_TYPES: EffectTypeDefinition[] = [
     id: "add_chips",
     label: "Add Chips",
     description: "Add chips to the current scoring calculation",
-    applicableTriggers: GENERIC_TRIGGERS,
+    applicableTriggers: SCORING_TRIGGERS,
     params: [
       {
         id: "value",
@@ -79,7 +79,7 @@ export const CARD_EFFECT_TYPES: EffectTypeDefinition[] = [
     id: "add_x_mult",
     label: "Apply XMult",
     description: "Multiply mult by the specified amount",
-    applicableTriggers: GENERIC_TRIGGERS,
+    applicableTriggers: SCORING_TRIGGERS,
     params: [
       {
         id: "value",
@@ -95,7 +95,7 @@ export const CARD_EFFECT_TYPES: EffectTypeDefinition[] = [
     id: "add_x_chips",
     label: "Apply XChips",
     description: "Multiply chips by the specified amount",
-    applicableTriggers: GENERIC_TRIGGERS,
+    applicableTriggers: SCORING_TRIGGERS,
     params: [
       {
         id: "value",
@@ -157,7 +157,7 @@ export const CARD_EFFECT_TYPES: EffectTypeDefinition[] = [
     id: "retrigger_card",
     label: "Retrigger Card",
     description: "Trigger this card's effect additional times",
-    applicableTriggers: ["card_scored", "card_held"],
+    applicableTriggers: SCORING_TRIGGERS,
     params: [
       {
         id: "value",

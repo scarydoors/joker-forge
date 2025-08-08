@@ -13,6 +13,8 @@ export const GENERIC_TRIGGERS = [
   "card_held_in_hand_end_of_round",
 ];
 
+export const SCORING_TRIGGERS = ["card_scored", "card_held"];
+
 export const CARD_TRIGGER_CATEGORIES: CategoryDefinition[] = [
   {
     label: "Card",
