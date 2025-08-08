@@ -15,7 +15,7 @@ export const generateRetriggerReturn = (
   effect: Effect,
   sameTypeCount: number = 0
 ): EffectReturn => {
-  const effectValue = effect.params?.times || 1;
+  const effectValue = effect.params?.value || 1;
   const parsed = parseGameVariable(effectValue);
   const rangeParsed = parseRangeVariable(effectValue);
 
@@ -56,14 +56,14 @@ export const generateRetriggerReturn = (
 
   let statement: string;
 
-  // Only do assignment if valueCode is different from the config variable
-  if (valueCode === `card.ability.extra.${variableName}`) {
-    // Static value, just set the flag
-    statement = `__PRE_RETURN_CODE__card.should_retrigger = true__PRE_RETURN_CODE_END__`;
-  } else {
-    // Dynamic value, do assignment
+  if (typeof effectValue === "number" && effectValue !== 1) {
+    statement = `__PRE_RETURN_CODE__card.should_retrigger = true
+            card.ability.extra.${variableName} = ${effectValue}__PRE_RETURN_CODE_END__`;
+  } else if (valueCode !== `card.ability.extra.${variableName}`) {
     statement = `__PRE_RETURN_CODE__card.should_retrigger = true
             card.ability.extra.${variableName} = ${valueCode}__PRE_RETURN_CODE_END__`;
+  } else {
+    statement = `__PRE_RETURN_CODE__card.should_retrigger = true__PRE_RETURN_CODE_END__`;
   }
 
   const result: EffectReturn = {

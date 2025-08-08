@@ -146,7 +146,7 @@ export const CARD_EFFECT_TYPES: EffectTypeDefinition[] = [
     applicableTriggers: ["card_scored", "card_held"],
     params: [
       {
-        id: "retriggers",
+        id: "value",
         type: "number",
         label: "Number of Retriggers",
         default: 1,
