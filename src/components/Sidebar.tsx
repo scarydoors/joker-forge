@@ -46,7 +46,7 @@ const Sidebar: React.FC<SidebarProps> = ({
     !selectedSection;
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
 
-  const version: string = "v0.4.2";
+  const version: string = "v0.4.3";
 
   const handleSectionClick = (section: string) => {
     if (section === "github") {
