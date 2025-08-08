@@ -910,6 +910,8 @@ function AppContent() {
                     setJokers([...jokers, item as JokerData]);
                   } else if (type === "consumable") {
                     setConsumables([...consumables, item as ConsumableData]);
+                  } else if (type === "booster") {
+                    setBoosters([...boosters, item as BoosterData]);
                   }
                 }}
                 onNavigateToJokers={() => {
@@ -917,6 +919,9 @@ function AppContent() {
                 }}
                 onNavigateToConsumables={() => {
                   navigate("/consumables");
+                }}
+                onNavigateToBoosters={() => {
+                  navigate("/boosters");
                 }}
               />
             }

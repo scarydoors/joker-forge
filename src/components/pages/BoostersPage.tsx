@@ -138,7 +138,7 @@ const EditBoosterRulesModal: React.FC<EditBoosterRulesModalProps> = ({
   );
 };
 
-const CardRuleEditor: React.FC<CardRuleEditorProps> = ({
+export const CardRuleEditor: React.FC<CardRuleEditorProps> = ({
   cardRules,
   onCardRulesChange,
   boosterType,
@@ -1015,3 +1015,4 @@ const BoostersPage: React.FC<BoostersPageProps> = ({
 };
 
 export default BoostersPage;
+export { EditBoosterRulesModal };
