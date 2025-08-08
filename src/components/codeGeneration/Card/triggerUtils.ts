@@ -17,6 +17,13 @@ const TRIGGER_DEFINITIONS: Record<string, TriggerDefinition> = {
     context: "hand context",
     description: "When this card is held in the player's hand",
   },
+  card_held_in_hand_end_of_round: {
+    condition:
+      "context.end_of_round and context.cardarea == G.hand and context.other_card == card",
+    context: "end of round context",
+    description:
+      "When this card is held in hand at the end of the round (main evaluation only)",
+  },
   card_discarded: {
     condition: "context.discard",
     context: "discard context",
