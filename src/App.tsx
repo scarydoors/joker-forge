@@ -912,6 +912,8 @@ function AppContent() {
                     setConsumables([...consumables, item as ConsumableData]);
                   } else if (type === "booster") {
                     setBoosters([...boosters, item as BoosterData]);
+                  } else if (type === "enhancement") {
+                    setEnhancements([...enhancements, item as EnhancementData]);
                   }
                 }}
                 onNavigateToJokers={() => {
@@ -922,6 +924,9 @@ function AppContent() {
                 }}
                 onNavigateToBoosters={() => {
                   navigate("/boosters");
+                }}
+                onNavigateToEnhancements={() => {
+                  navigate("/enhancements");
                 }}
               />
             }

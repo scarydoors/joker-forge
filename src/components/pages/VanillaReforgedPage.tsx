@@ -31,6 +31,7 @@ import {
   JokerData,
   ConsumableData,
   BoosterData,
+  EnhancementData,
   ConsumableSetData,
 } from "../data/BalatroUtils";
 import { formatBalatroText } from "../generic/balatroTextFormatter";
@@ -41,20 +42,21 @@ import { EditBoosterRulesModal } from "./BoostersPage";
 
 interface VanillaReforgedPageProps {
   onDuplicateToProject?: (
-    item: JokerData | ConsumableData | BoosterData,
-    type: "joker" | "consumable" | "booster"
+    item: JokerData | ConsumableData | BoosterData | EnhancementData,
+    type: "joker" | "consumable" | "booster" | "enhancement"
   ) => void;
   onNavigateToJokers?: () => void;
   onNavigateToConsumables?: () => void;
   onNavigateToBoosters?: () => void;
+  onNavigateToEnhancements?: () => void;
 }
 
 type SortOption = {
   value: string;
   label: string;
   sortFn: (
-    a: JokerData | ConsumableData | BoosterData,
-    b: JokerData | ConsumableData | BoosterData
+    a: JokerData | ConsumableData | BoosterData | EnhancementData,
+    b: JokerData | ConsumableData | BoosterData | EnhancementData
   ) => number;
 };
 
@@ -64,6 +66,9 @@ const useAsyncDataLoader = () => {
     ConsumableData[]
   >([]);
   const [vanillaBoosters, setVanillaBoosters] = useState<BoosterData[]>([]);
+  const [vanillaEnhancements, setVanillaEnhancements] = useState<
+    EnhancementData[]
+  >([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -87,6 +92,7 @@ const useAsyncDataLoader = () => {
             setVanillaJokers(data.jokers || []);
             setVanillaConsumables(data.consumables || []);
             setVanillaBoosters(data.boosters || []);
+            setVanillaEnhancements(data.enhancements || []);
             setLoading(false);
           });
         }
@@ -97,6 +103,7 @@ const useAsyncDataLoader = () => {
           setVanillaJokers([]);
           setVanillaConsumables([]);
           setVanillaBoosters([]);
+          setVanillaEnhancements([]);
           setLoading(false);
         }
       }
@@ -110,12 +117,21 @@ const useAsyncDataLoader = () => {
     };
   }, []);
 
-  return { vanillaJokers, vanillaConsumables, vanillaBoosters, loading, error };
+  return {
+    vanillaJokers,
+    vanillaConsumables,
+    vanillaBoosters,
+    vanillaEnhancements,
+    loading,
+    error,
+  };
 };
 
 const FloatingTabDock: React.FC<{
-  activeTab: "jokers" | "consumables" | "boosters";
-  onTabChange: (tab: "jokers" | "consumables" | "boosters") => void;
+  activeTab: "jokers" | "consumables" | "boosters" | "enhancements";
+  onTabChange: (
+    tab: "jokers" | "consumables" | "boosters" | "enhancements"
+  ) => void;
 }> = ({ activeTab, onTabChange }) => {
   const tabs = [
     {
@@ -132,6 +148,11 @@ const FloatingTabDock: React.FC<{
       id: "boosters" as const,
       icon: GiftIcon,
       label: "Boosters",
+    },
+    {
+      id: "enhancements" as const,
+      icon: SparklesIconSolid,
+      label: "Enhancements",
     },
   ];
 
@@ -181,11 +202,17 @@ const VanillaReforgedPage: React.FC<VanillaReforgedPageProps> = ({
   onNavigateToJokers,
   onNavigateToConsumables,
   onNavigateToBoosters,
+  onNavigateToEnhancements,
 }) => {
-  const { vanillaJokers, vanillaConsumables, vanillaBoosters, loading } =
-    useAsyncDataLoader();
+  const {
+    vanillaJokers,
+    vanillaConsumables,
+    vanillaBoosters,
+    vanillaEnhancements,
+    loading,
+  } = useAsyncDataLoader();
   const [activeTab, setActiveTab] = useState<
-    "jokers" | "consumables" | "boosters"
+    "jokers" | "consumables" | "boosters" | "enhancements"
   >("jokers");
   const [searchTerm, setSearchTerm] = useState("");
   const [rarityFilter, setRarityFilter] = useState<number | null>(null);
@@ -197,7 +224,7 @@ const VanillaReforgedPage: React.FC<VanillaReforgedPageProps> = ({
   const [showRuleBuilder, setShowRuleBuilder] = useState(false);
   const [showBoosterRulesModal, setShowBoosterRulesModal] = useState(false);
   const [currentItemForRules, setCurrentItemForRules] = useState<
-    JokerData | ConsumableData | BoosterData | null
+    JokerData | ConsumableData | BoosterData | EnhancementData | null
   >(null);
   const [sortMenuPosition, setSortMenuPosition] = useState({
     top: 0,
@@ -260,12 +287,14 @@ const VanillaReforgedPage: React.FC<VanillaReforgedPageProps> = ({
       {
         value: "cost-asc",
         label: "Cost (Low to High)",
-        sortFn: (a, b) => (a.cost || 0) - (b.cost || 0),
+        sortFn: (a, b) =>
+          ((a as JokerData).cost || 0) - ((b as JokerData).cost || 0),
       },
       {
         value: "cost-desc",
         label: "Cost (High to Low)",
-        sortFn: (a, b) => (b.cost || 0) - (a.cost || 0),
+        sortFn: (a, b) =>
+          ((b as JokerData).cost || 0) - ((a as JokerData).cost || 0),
       },
       {
         value: "rules-desc",
@@ -312,12 +341,14 @@ const VanillaReforgedPage: React.FC<VanillaReforgedPageProps> = ({
       {
         value: "cost-asc",
         label: "Cost (Low to High)",
-        sortFn: (a, b) => (a.cost || 0) - (b.cost || 0),
+        sortFn: (a, b) =>
+          ((a as ConsumableData).cost || 0) - ((b as ConsumableData).cost || 0),
       },
       {
         value: "cost-desc",
         label: "Cost (High to Low)",
-        sortFn: (a, b) => (b.cost || 0) - (a.cost || 0),
+        sortFn: (a, b) =>
+          ((b as ConsumableData).cost || 0) - ((a as ConsumableData).cost || 0),
       },
       {
         value: "rules-desc",
@@ -368,12 +399,14 @@ const VanillaReforgedPage: React.FC<VanillaReforgedPageProps> = ({
       {
         value: "cost-asc",
         label: "Cost (Low to High)",
-        sortFn: (a, b) => (a.cost || 0) - (b.cost || 0),
+        sortFn: (a, b) =>
+          ((a as BoosterData).cost || 0) - ((b as BoosterData).cost || 0),
       },
       {
         value: "cost-desc",
         label: "Cost (High to Low)",
-        sortFn: (a, b) => (b.cost || 0) - (a.cost || 0),
+        sortFn: (a, b) =>
+          ((b as BoosterData).cost || 0) - ((a as BoosterData).cost || 0),
       },
       {
         value: "rules-desc",
@@ -392,6 +425,36 @@ const VanillaReforgedPage: React.FC<VanillaReforgedPageProps> = ({
           const bRules = (b as BoosterData).card_rules?.length || 0;
           return aRules - bRules;
         },
+      },
+    ],
+    []
+  );
+
+  const enhancementSortOptions: SortOption[] = useMemo(
+    () => [
+      {
+        value: "name-asc",
+        label: "Name (A-Z)",
+        sortFn: (a, b) => a.name.localeCompare(b.name),
+      },
+      {
+        value: "name-desc",
+        label: "Name (Z-A)",
+        sortFn: (a, b) => b.name.localeCompare(a.name),
+      },
+      {
+        value: "rules-desc",
+        label: "Rules (Most to Least)",
+        sortFn: (a, b) =>
+          ((b as EnhancementData).rules?.length || 0) -
+          ((a as EnhancementData).rules?.length || 0),
+      },
+      {
+        value: "rules-asc",
+        label: "Rules (Least to Most)",
+        sortFn: (a, b) =>
+          ((a as EnhancementData).rules?.length || 0) -
+          ((b as EnhancementData).rules?.length || 0),
       },
     ],
     []
@@ -453,6 +516,8 @@ const VanillaReforgedPage: React.FC<VanillaReforgedPageProps> = ({
         return vanillaConsumables;
       case "boosters":
         return vanillaBoosters;
+      case "enhancements":
+        return vanillaEnhancements;
       default:
         return [];
     }
@@ -466,6 +531,8 @@ const VanillaReforgedPage: React.FC<VanillaReforgedPageProps> = ({
         return consumableSortOptions;
       case "boosters":
         return boosterSortOptions;
+      case "enhancements":
+        return enhancementSortOptions;
       default:
         return jokerSortOptions;
     }
@@ -592,7 +659,7 @@ const VanillaReforgedPage: React.FC<VanillaReforgedPageProps> = ({
   );
 
   const handleDuplicateItem = (
-    item: JokerData | ConsumableData | BoosterData
+    item: JokerData | ConsumableData | BoosterData | EnhancementData
   ) => {
     if (onDuplicateToProject) {
       const duplicatedItem = {
@@ -610,18 +677,23 @@ const VanillaReforgedPage: React.FC<VanillaReforgedPageProps> = ({
       } else if (activeTab === "boosters") {
         onDuplicateToProject(duplicatedItem, "booster");
         if (onNavigateToBoosters) onNavigateToBoosters();
+      } else if (activeTab === "enhancements") {
+        onDuplicateToProject(duplicatedItem, "enhancement");
+        if (onNavigateToEnhancements) onNavigateToEnhancements();
       }
     }
   };
 
-  const handleViewRules = (item: JokerData | ConsumableData | BoosterData) => {
+  const handleViewRules = (
+    item: JokerData | ConsumableData | BoosterData | EnhancementData
+  ) => {
     if (activeTab === "boosters") {
       setCurrentItemForRules(item);
       setShowBoosterRulesModal(true);
       return;
     }
 
-    const rules = (item as JokerData | ConsumableData).rules;
+    const rules = (item as JokerData | ConsumableData | EnhancementData).rules;
     if (rules && rules.length === 1) {
       rules[0].position = { x: 500, y: 100 };
     }
@@ -745,6 +817,8 @@ const VanillaReforgedPage: React.FC<VanillaReforgedPageProps> = ({
         return "consumable";
       case "boosters":
         return "booster";
+      case "enhancements":
+        return "enhancement";
       default:
         return "item";
     }
@@ -871,20 +945,22 @@ const VanillaReforgedPage: React.FC<VanillaReforgedPageProps> = ({
                 </button>
               </div>
 
-              <div className="relative">
-                <button
-                  ref={filtersButtonRef}
-                  onClick={handleFiltersToggle}
-                  className={`flex items-center gap-2 px-4 py-4 border-2 rounded-lg transition-colors cursor-pointer ${
-                    showFilters
-                      ? "bg-mint-dark text-black-darker border-mint"
-                      : "bg-black-dark text-white-light border-black-lighter hover:border-mint"
-                  }`}
-                >
-                  <FunnelIcon className="h-4 w-4" />
-                  <span>Filters</span>
-                </button>
-              </div>
+              {activeTab !== "enhancements" && (
+                <div className="relative">
+                  <button
+                    ref={filtersButtonRef}
+                    onClick={handleFiltersToggle}
+                    className={`flex items-center gap-2 px-4 py-4 border-2 rounded-lg transition-colors cursor-pointer ${
+                      showFilters
+                        ? "bg-mint-dark text-black-darker border-mint"
+                        : "bg-black-dark text-white-light border-black-lighter hover:border-mint"
+                    }`}
+                  >
+                    <FunnelIcon className="h-4 w-4" />
+                    <span>Filters</span>
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -906,7 +982,9 @@ const VanillaReforgedPage: React.FC<VanillaReforgedPageProps> = ({
                     ? "Jokers"
                     : activeTab === "consumables"
                     ? "Consumables"
-                    : "Boosters"}
+                    : activeTab === "boosters"
+                    ? "Boosters"
+                    : "Enhancements"}
                 </h3>
                 <p className="text-white-darker text-sm leading-relaxed">
                   Fetching the complete vanilla {activeTab} collection...
@@ -929,7 +1007,9 @@ const VanillaReforgedPage: React.FC<VanillaReforgedPageProps> = ({
                     ? "Jokers"
                     : activeTab === "consumables"
                     ? "Consumables"
-                    : "Boosters"}{" "}
+                    : activeTab === "boosters"
+                    ? "Boosters"
+                    : "Enhancements"}{" "}
                   Found
                 </h3>
                 <p className="text-white-darker text-sm mb-6 leading-relaxed">
@@ -966,7 +1046,9 @@ const VanillaReforgedPage: React.FC<VanillaReforgedPageProps> = ({
                     ? "Jokers"
                     : activeTab === "consumables"
                     ? "Consumables"
-                    : "Boosters"}{" "}
+                    : activeTab === "boosters"
+                    ? "Boosters"
+                    : "Enhancements"}{" "}
                   Available
                 </h3>
                 <p className="text-white-darker text-sm mb-6 leading-relaxed">
@@ -1011,9 +1093,15 @@ const VanillaReforgedPage: React.FC<VanillaReforgedPageProps> = ({
                       onDuplicate={() => handleDuplicateItem(item)}
                       onViewRules={() => handleViewRules(item)}
                     />
-                  ) : (
+                  ) : activeTab === "boosters" ? (
                     <VanillaBoosterCard
                       booster={item as BoosterData}
+                      onDuplicate={() => handleDuplicateItem(item)}
+                      onViewRules={() => handleViewRules(item)}
+                    />
+                  ) : (
+                    <VanillaEnhancementCard
+                      enhancement={item as EnhancementData}
                       onDuplicate={() => handleDuplicateItem(item)}
                       onViewRules={() => handleViewRules(item)}
                     />
@@ -1032,11 +1120,27 @@ const VanillaReforgedPage: React.FC<VanillaReforgedPageProps> = ({
             onClose={handleCloseRuleBuilder}
             onSave={() => {}}
             existingRules={
-              (currentItemForRules as JokerData | ConsumableData).rules || []
+              (
+                currentItemForRules as
+                  | JokerData
+                  | ConsumableData
+                  | EnhancementData
+              ).rules || []
             }
-            item={currentItemForRules as JokerData | ConsumableData}
+            item={
+              currentItemForRules as
+                | JokerData
+                | ConsumableData
+                | EnhancementData
+            }
             onUpdateItem={() => {}}
-            itemType={activeTab === "jokers" ? "joker" : "consumable"}
+            itemType={
+              activeTab === "jokers"
+                ? "joker"
+                : activeTab === "consumables"
+                ? "consumable"
+                : "card"
+            }
           />
         )}
 
@@ -1176,6 +1280,12 @@ interface VanillaConsumableCardProps {
 
 interface VanillaBoosterCardProps {
   booster: BoosterData;
+  onDuplicate: () => void;
+  onViewRules: () => void;
+}
+
+interface VanillaEnhancementCardProps {
+  enhancement: EnhancementData;
   onDuplicate: () => void;
   onViewRules: () => void;
 }
@@ -1929,6 +2039,227 @@ const VanillaBoosterCard: React.FC<VanillaBoosterCardProps> = ({
                 <div className="flex-1 flex items-center justify-center py-3 px-3">
                   <div className="relative">
                     <Cog6ToothIcon className="h-6 w-6 text-white group-hover:text-mint-lighter transition-colors" />
+                    {rulesCount > 0 && (
+                      <div className="absolute -top-2 -right-2 bg-mint text-black text-xs font-bold rounded-full w-4 h-4 flex items-center justify-center shadow-sm">
+                        {rulesCount}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </Tooltip>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const VanillaEnhancementCard: React.FC<VanillaEnhancementCardProps> = ({
+  enhancement,
+  onDuplicate,
+  onViewRules,
+}) => {
+  const [imageLoadError, setImageLoadError] = useState(false);
+  const [hoveredButton, setHoveredButton] = useState<string | null>(null);
+  const [tooltipDelayTimeout, setTooltipDelayTimeout] =
+    useState<NodeJS.Timeout | null>(null);
+
+  const rulesCount = enhancement.rules?.length || 0;
+  const isUnlocked = enhancement.unlocked !== false;
+  const isDiscovered = enhancement.discovered !== false;
+  const noCollection = enhancement.no_collection === true;
+  const anySuit = enhancement.any_suit === true;
+  const replaceBaseCard = enhancement.replace_base_card === true;
+  const noRank = enhancement.no_rank === true;
+  const noSuit = enhancement.no_suit === true;
+  const alwaysScores = enhancement.always_scores === true;
+
+  const propertyIcons = [
+    {
+      icon: isUnlocked ? (
+        <LockOpenIcon className="w-full h-full" />
+      ) : (
+        <LockClosedIcon className="w-full h-full" />
+      ),
+      tooltip: isUnlocked ? "Unlocked by Default" : "Locked by Default",
+      variant: "warning" as const,
+      isEnabled: isUnlocked,
+    },
+    {
+      icon: isDiscovered ? (
+        <EyeIcon className="w-full h-full" />
+      ) : (
+        <EyeSlashIcon className="w-full h-full" />
+      ),
+      tooltip: isDiscovered ? "Visible in Collection" : "Hidden in Collection",
+      variant: "info" as const,
+      isEnabled: isDiscovered,
+    },
+    {
+      icon: <ExclamationCircleIcon className="w-full h-full" />,
+      tooltip: noCollection ? "Hidden from Collection" : "Shows in Collection",
+      variant: "special" as const,
+      isEnabled: noCollection,
+    },
+    {
+      icon: <PlayIcon className="w-full h-full" />,
+      tooltip: anySuit ? "Works with Any Suit" : "Suit-Specific",
+      variant: "success" as const,
+      isEnabled: anySuit,
+    },
+    {
+      icon: <Cog6ToothIcon className="w-full h-full" />,
+      tooltip: replaceBaseCard ? "Replaces Base Card" : "Normal Card",
+      variant: "info" as const,
+      isEnabled: replaceBaseCard,
+    },
+    {
+      icon: <UserGroupIcon className="w-full h-full" />,
+      tooltip: noRank ? "No Rank" : "Has Rank",
+      variant: "disabled" as const,
+      isEnabled: noRank,
+    },
+    {
+      icon: <RectangleStackIcon className="w-full h-full" />,
+      tooltip: noSuit ? "No Suit" : "Has Suit",
+      variant: "disabled" as const,
+      isEnabled: noSuit,
+    },
+    {
+      icon: <SparklesIconSolid className="w-full h-full" />,
+      tooltip: alwaysScores ? "Always Scores" : "Normal Scoring",
+      variant: "special" as const,
+      isEnabled: alwaysScores,
+    },
+  ];
+
+  const handleButtonHover = (buttonType: string) => {
+    if (tooltipDelayTimeout) {
+      clearTimeout(tooltipDelayTimeout);
+    }
+    const timeout = setTimeout(() => {
+      setHoveredButton(buttonType);
+    }, 500);
+    setTooltipDelayTimeout(timeout);
+  };
+
+  const handleButtonLeave = () => {
+    if (tooltipDelayTimeout) {
+      clearTimeout(tooltipDelayTimeout);
+      setTooltipDelayTimeout(null);
+    }
+    setHoveredButton(null);
+  };
+
+  return (
+    <div className="flex gap-4 relative">
+      <div className="relative flex flex-col items-center">
+        <div className="w-42 z-10 relative">
+          <div className="relative">
+            {enhancement.imagePreview && !imageLoadError ? (
+              <div className="relative w-full h-full">
+                <img
+                  src={enhancement.imagePreview}
+                  alt={enhancement.name}
+                  className="w-full h-full object-contain"
+                  draggable="false"
+                  onError={() => setImageLoadError(true)}
+                />
+                <img
+                  src="/images/aces/HC_A_hearts.png"
+                  alt=""
+                  className="absolute inset-0 w-full h-full object-contain pointer-events-none"
+                  draggable="false"
+                />
+              </div>
+            ) : (
+              <div className="relative w-full h-full">
+                <img
+                  src="/images/placeholder-enhancement.png"
+                  alt="Default Enhancement"
+                  className="w-full h-full object-contain"
+                  draggable="false"
+                />
+                <img
+                  src="/images/aces/HC_A_clubs.png"
+                  alt=""
+                  className="absolute inset-0 w-full h-full object-contain pointer-events-none"
+                  draggable="false"
+                />
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="relative z-30">
+          <div className="px-4 py-1 -mt-6 rounded-md border-2 text-sm tracking-wide font-medium bg-black border-balatro-enhanced text-balatro-enhanced">
+            Enhancement
+          </div>
+        </div>
+      </div>
+
+      <div className="my-auto border-l-2 pl-4 border-black-light relative flex-1 min-h-fit">
+        <div className="flex flex-col h-full">
+          <div className="flex-1">
+            <div className="mb-3 h-7 flex items-start overflow-hidden">
+              <h3
+                className="text-white-lighter text-xl tracking-wide leading-tight line-clamp-1"
+                style={{ lineHeight: "1.75rem" }}
+              >
+                {enhancement.name}
+              </h3>
+            </div>
+
+            <div className="mb-4 h-12 flex items-start overflow-hidden">
+              <div
+                className="text-white-darker text-sm leading-relaxed w-full line-clamp-3"
+                dangerouslySetInnerHTML={{
+                  __html: formatBalatroText(enhancement.description),
+                }}
+              />
+            </div>
+
+            <div className="flex items-center justify-between mb-4 px-2 h-8 flex-wrap">
+              {propertyIcons.map((iconConfig, index) => (
+                <PropertyIcon
+                  key={index}
+                  icon={iconConfig.icon}
+                  tooltip={iconConfig.tooltip}
+                  variant={iconConfig.variant}
+                  isEnabled={iconConfig.isEnabled}
+                />
+              ))}
+            </div>
+          </div>
+
+          <div className="flex items-center px-12 justify-between overflow-hidden">
+            <Tooltip
+              content="Duplicate to Project"
+              show={hoveredButton === "duplicate"}
+            >
+              <div
+                className="flex flex-1 transition-colors cursor-pointer group"
+                onClick={onDuplicate}
+                onMouseEnter={() => handleButtonHover("duplicate")}
+                onMouseLeave={handleButtonLeave}
+              >
+                <div className="flex-1 flex items-center justify-center py-3 px-3">
+                  <DocumentDuplicateIcon className="h-6 w-6 text-white group-hover:text-mint-lighter transition-colors" />
+                </div>
+              </div>
+            </Tooltip>
+            <div className="w-px bg-black-lighter py-3"></div>
+            <Tooltip content="View Rules" show={hoveredButton === "rules"}>
+              <div
+                className="flex flex-1 transition-colors cursor-pointer group"
+                onClick={onViewRules}
+                onMouseEnter={() => handleButtonHover("rules")}
+                onMouseLeave={handleButtonLeave}
+              >
+                <div className="flex-1 flex items-center justify-center py-3 px-3">
+                  <div className="relative">
+                    <PuzzlePieceIcon className="h-6 w-6 text-white group-hover:text-mint-lighter transition-colors" />
                     {rulesCount > 0 && (
                       <div className="absolute -top-2 -right-2 bg-mint text-black text-xs font-bold rounded-full w-4 h-4 flex items-center justify-center shadow-sm">
                         {rulesCount}
