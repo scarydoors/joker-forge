@@ -16,7 +16,6 @@ export interface ConfigExtraVariable {
   value: number;
 }
 
-
 export interface EffectReturn {
   statement: string;
   message?: string;
@@ -123,7 +122,8 @@ export function generateEffectReturnStatement(
       }
     });
 
-    const processedEffects: EffectReturn[] = [];
+    const effectCalls: string[] = [];
+
     effectReturns.forEach((effect) => {
       const { cleanedStatement, preReturnCode } = extractPreReturnCode(
         effect.statement
@@ -134,15 +134,55 @@ export function generateEffectReturnStatement(
           (combinedPreReturnCode ? "\n            " : "") + preReturnCode;
       }
 
-      processedEffects.push({
-        ...effect,
-        statement: cleanedStatement,
-      });
+      // If the effect has a cleaned statement, use SMODS.calculate_effect
+      if (cleanedStatement && cleanedStatement.trim()) {
+        const effectObj = `{${cleanedStatement.trim()}}`;
+        effectCalls.push(`SMODS.calculate_effect(${effectObj}, card)`);
+      }
+
+      // If the effect has a message, add a card_eval_status_text call
+      if (effect.message) {
+        effectCalls.push(
+          `card_eval_status_text(context.blueprint_card or card, 'extra', nil, nil, nil, {message = ${
+            effect.message
+          }, colour = ${effect.colour || "G.C.WHITE"}})`
+        );
+      }
     });
 
-    if (processedEffects.length > 0) {
-      mainReturnStatement = buildEnhancementEffectCode(processedEffects);
-      primaryColour = processedEffects[0]?.colour ?? "G.C.WHITE";
+    // If we have both pre-return code and effect calls, combine them
+    if (combinedPreReturnCode && effectCalls.length > 0) {
+      combinedPreReturnCode +=
+        "\n            " + effectCalls.join("\n            ");
+      mainReturnStatement = ""; // No separate return statement needed
+    } else if (effectCalls.length > 0) {
+      // No pre-return code, so we can use the traditional return approach
+      const pureStatementEffects = effectReturns.filter((effect) => {
+        const { cleanedStatement } = extractPreReturnCode(effect.statement);
+        return (
+          cleanedStatement &&
+          cleanedStatement.trim() &&
+          !extractPreReturnCode(effect.statement).preReturnCode
+        );
+      });
+
+      if (pureStatementEffects.length === effectReturns.length) {
+        // All effects are pure statements, use traditional return
+        mainReturnStatement = buildEnhancementEffectCode(
+          pureStatementEffects.map((effect) => ({
+            ...effect,
+            statement: extractPreReturnCode(effect.statement).cleanedStatement,
+          }))
+        );
+      } else {
+        // Mixed effects, use SMODS.calculate_effect approach
+        combinedPreReturnCode = effectCalls.join("\n            ");
+        mainReturnStatement = "";
+      }
+    }
+
+    if (effectReturns.length > 0) {
+      primaryColour = effectReturns[0]?.colour ?? "G.C.WHITE";
     }
   }
 
@@ -208,34 +248,44 @@ export function generateEffectReturnStatement(
 
       let groupContent = "";
       let groupPreReturnCode = "";
+      const groupEffectCalls: string[] = [];
 
       effectReturns.forEach((effect) => {
-        if (effect.statement && effect.statement.trim()) {
-          const { cleanedStatement, preReturnCode } = extractPreReturnCode(
-            effect.statement
+        const { cleanedStatement, preReturnCode } = extractPreReturnCode(
+          effect.statement
+        );
+
+        if (preReturnCode) {
+          groupPreReturnCode +=
+            (groupPreReturnCode ? "\n                " : "") + preReturnCode;
+        }
+
+        if (cleanedStatement && cleanedStatement.trim()) {
+          const effectObj = `{${cleanedStatement.trim()}}`;
+          groupEffectCalls.push(`SMODS.calculate_effect(${effectObj}, card)`);
+        }
+
+        if (effect.message) {
+          groupEffectCalls.push(
+            `card_eval_status_text(context.blueprint_card or card, 'extra', nil, nil, nil, {message = ${
+              effect.message
+            }, colour = ${effect.colour || "G.C.WHITE"}})`
           );
-
-          if (preReturnCode) {
-            groupPreReturnCode +=
-              (groupPreReturnCode ? "\n                " : "") + preReturnCode;
-          }
-
-          if (cleanedStatement.trim()) {
-            groupContent += `
-                return ${buildEnhancementEffectCode([
-                  { ...effect, statement: cleanedStatement },
-                ])}`;
-          }
         }
       });
 
-      let fullGroupContent = groupContent;
       if (groupPreReturnCode) {
-        fullGroupContent = `
-                ${groupPreReturnCode}${groupContent}`;
+        groupContent += groupPreReturnCode;
+        if (groupEffectCalls.length > 0) {
+          groupContent +=
+            "\n                " + groupEffectCalls.join("\n                ");
+        }
+      } else if (groupEffectCalls.length > 0) {
+        groupContent = groupEffectCalls.join("\n                ");
       }
 
-      const groupStatement = `if SMODS.pseudorandom_probability(card, '${probabilityIdentifier}', ${group.chance_numerator}, ${oddsVar}, 'm_${modprefix}') then${fullGroupContent}
+      const groupStatement = `if SMODS.pseudorandom_probability(card, '${probabilityIdentifier}', ${group.chance_numerator}, ${oddsVar}, 'm_${modprefix}') then
+                ${groupContent}
             end`;
 
       combinedPreReturnCode +=

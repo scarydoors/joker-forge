@@ -77,6 +77,11 @@ const generateSingleEnhancementCode = (
     );
   };
 
+  // Only allow base config conversion for specific triggers
+  const allowsBaseConfigConversion = (trigger: string): boolean => {
+    return trigger === "card_scored" || trigger === "card_held";
+  };
+
   const isSimpleEffect = (effect: Effect): boolean => {
     const allowedTypes = ["add_mult", "add_chips", "edit_dollars"];
     if (!allowedTypes.includes(effect.type)) {
@@ -122,7 +127,12 @@ const generateSingleEnhancementCode = (
 
   const unconditionalEffects: UnconditionalEffect[] = [];
   activeRules.forEach((rule) => {
-    if (isUnconditionalRule(rule) && rule.effects) {
+    // Only convert to base config for triggers that support it
+    if (
+      isUnconditionalRule(rule) &&
+      allowsBaseConfigConversion(rule.trigger) &&
+      rule.effects
+    ) {
       rule.effects.forEach((effect) => {
         if (isSimpleEffect(effect)) {
           unconditionalEffects.push({
@@ -202,10 +212,16 @@ const generateSingleEnhancementCode = (
   const conditionalRules = activeRules
     .map((rule) => {
       const conditionalEffects = rule.effects?.filter(
-        (effect) => !isSimpleEffect(effect) || !isUnconditionalRule(rule)
+        (effect) =>
+          !isSimpleEffect(effect) ||
+          !isUnconditionalRule(rule) ||
+          !allowsBaseConfigConversion(rule.trigger)
       );
 
-      if (!isUnconditionalRule(rule)) {
+      if (
+        !isUnconditionalRule(rule) ||
+        !allowsBaseConfigConversion(rule.trigger)
+      ) {
         return rule;
       }
 
@@ -229,6 +245,7 @@ const generateSingleEnhancementCode = (
       (rule): rule is Rule =>
         rule !== null &&
         (!isUnconditionalRule(rule) ||
+          !allowsBaseConfigConversion(rule.trigger) ||
           (rule.effects && rule.effects.length > 0) ||
           (rule.randomGroups && rule.randomGroups.length > 0))
     );
