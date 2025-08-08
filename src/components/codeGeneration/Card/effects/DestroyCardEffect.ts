@@ -1,9 +1,26 @@
 import type { Effect } from "../../../ruleBuilder/types";
 import type { EffectReturn } from "../effectUtils";
 
-export const generateDestroyCardReturn = (effect: Effect): EffectReturn => {
+export const generateDestroyCardReturn = (
+  effect: Effect,
+  trigger?: string
+): EffectReturn => {
   const customMessage = effect.customMessage;
   const setGlassTrigger = effect.params?.setGlassTrigger === "true";
+
+  if (trigger === "card_discarded") {
+    const result: EffectReturn = {
+      statement: `remove = true`,
+      colour: "G.C.RED",
+      configVariables: undefined,
+    };
+
+    if (customMessage) {
+      result.message = `"${customMessage}"`;
+    }
+
+    return result;
+  }
 
   let statement: string;
 

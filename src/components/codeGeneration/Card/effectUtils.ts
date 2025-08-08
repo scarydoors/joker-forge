@@ -40,7 +40,10 @@ export interface RandomGroup {
   effects: Effect[];
 }
 
-const generateSingleEffect = (effect: Effect): EffectReturn => {
+const generateSingleEffect = (
+  effect: Effect,
+  trigger?: string
+): EffectReturn => {
   switch (effect.type) {
     case "add_mult":
       return generateAddMultReturn(effect);
@@ -58,7 +61,7 @@ const generateSingleEffect = (effect: Effect): EffectReturn => {
       return generateEditDollarsReturn(effect);
 
     case "destroy_card":
-      return generateDestroyCardReturn(effect);
+      return generateDestroyCardReturn(effect, trigger);
 
     case "retrigger_card":
       return generateRetriggerReturn(effect);
@@ -86,7 +89,8 @@ const generateSingleEffect = (effect: Effect): EffectReturn => {
 export function generateEffectReturnStatement(
   regularEffects: Effect[] = [],
   randomGroups: RandomGroup[] = [],
-  modprefix: string
+  modprefix: string,
+  trigger?: string
 ): ReturnStatementResult {
   if (regularEffects.length === 0 && randomGroups.length === 0) {
     return {
@@ -105,7 +109,7 @@ export function generateEffectReturnStatement(
 
   if (regularEffects.length > 0) {
     const effectReturns: EffectReturn[] = regularEffects
-      .map((effect) => generateSingleEffect(effect))
+      .map((effect) => generateSingleEffect(effect, trigger))
       .filter((ret) => ret.statement || ret.message);
 
     effectReturns.forEach((effectReturn) => {
@@ -134,13 +138,11 @@ export function generateEffectReturnStatement(
           (combinedPreReturnCode ? "\n            " : "") + preReturnCode;
       }
 
-      // If the effect has a cleaned statement, use SMODS.calculate_effect
       if (cleanedStatement && cleanedStatement.trim()) {
         const effectObj = `{${cleanedStatement.trim()}}`;
         effectCalls.push(`SMODS.calculate_effect(${effectObj}, card)`);
       }
 
-      // If the effect has a message, add a card_eval_status_text call
       if (effect.message) {
         effectCalls.push(
           `card_eval_status_text(context.blueprint_card or card, 'extra', nil, nil, nil, {message = ${
@@ -150,13 +152,11 @@ export function generateEffectReturnStatement(
       }
     });
 
-    // If we have both pre-return code and effect calls, combine them
     if (combinedPreReturnCode && effectCalls.length > 0) {
       combinedPreReturnCode +=
         "\n            " + effectCalls.join("\n            ");
-      mainReturnStatement = ""; // No separate return statement needed
+      mainReturnStatement = "";
     } else if (effectCalls.length > 0) {
-      // No pre-return code, so we can use the traditional return approach
       const pureStatementEffects = effectReturns.filter((effect) => {
         const { cleanedStatement } = extractPreReturnCode(effect.statement);
         return (
@@ -167,7 +167,6 @@ export function generateEffectReturnStatement(
       });
 
       if (pureStatementEffects.length === effectReturns.length) {
-        // All effects are pure statements, use traditional return
         mainReturnStatement = buildEnhancementEffectCode(
           pureStatementEffects.map((effect) => ({
             ...effect,
@@ -175,7 +174,6 @@ export function generateEffectReturnStatement(
           }))
         );
       } else {
-        // Mixed effects, use SMODS.calculate_effect approach
         combinedPreReturnCode = effectCalls.join("\n            ");
         mainReturnStatement = "";
       }
@@ -221,7 +219,7 @@ export function generateEffectReturnStatement(
 
     randomGroups.forEach((group, groupIndex) => {
       const effectReturns: EffectReturn[] = group.effects
-        .map((effect) => generateSingleEffect(effect))
+        .map((effect) => generateSingleEffect(effect, trigger))
         .filter((ret) => ret.statement || ret.message);
 
       effectReturns.forEach((effectReturn) => {

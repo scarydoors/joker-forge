@@ -59,6 +59,15 @@ const generateSingleEnhancementCode = (
       )
   );
 
+  const hasNonDiscardDestroyEffect = activeRules.some(
+    (rule) =>
+      rule.trigger !== "card_discarded" &&
+      (rule.effects?.some((effect) => effect.type === "destroy_card") ||
+        rule.randomGroups?.some((group) =>
+          group.effects.some((effect) => effect.type === "destroy_card")
+        ))
+  );
+
   const hasRetriggerEffect = activeRules.some(
     (rule) =>
       rule.effects?.some((effect) => effect.type === "retrigger_card") ||
@@ -77,7 +86,6 @@ const generateSingleEnhancementCode = (
     );
   };
 
-  // Only allow base config conversion for specific triggers
   const allowsBaseConfigConversion = (trigger: string): boolean => {
     return trigger === "card_scored" || trigger === "card_held";
   };
@@ -127,7 +135,6 @@ const generateSingleEnhancementCode = (
 
   const unconditionalEffects: UnconditionalEffect[] = [];
   activeRules.forEach((rule) => {
-    // Only convert to base config for triggers that support it
     if (
       isUnconditionalRule(rule) &&
       allowsBaseConfigConversion(rule.trigger) &&
@@ -272,7 +279,8 @@ const generateSingleEnhancementCode = (
     const effectResult = generateEffectReturnStatement(
       regularEffects,
       randomGroups,
-      modPrefix
+      modPrefix,
+      rule.trigger
     );
 
     if (effectResult.configVariables) {
@@ -392,7 +400,7 @@ const generateSingleEnhancementCode = (
   const calculateCode = generateCalculateFunction(
     conditionalRules,
     modPrefix,
-    hasDestroyCardEffect,
+    hasNonDiscardDestroyEffect,
     hasRetriggerEffect
   );
   if (calculateCode) {
@@ -464,16 +472,20 @@ export const exportSingleEnhancement = (enhancement: EnhancementData): void => {
 const generateCalculateFunction = (
   rules: Rule[],
   modPrefix: string,
-  hasDestroyCardEffect: boolean = false,
+  hasNonDiscardDestroyEffect: boolean = false,
   hasRetriggerEffect: boolean = false
 ): string => {
-  if (rules.length === 0 && !hasDestroyCardEffect && !hasRetriggerEffect) {
+  if (
+    rules.length === 0 &&
+    !hasNonDiscardDestroyEffect &&
+    !hasRetriggerEffect
+  ) {
     return "";
   }
 
   let calculateFunction = `calculate = function(self, card, context)`;
 
-  if (hasDestroyCardEffect) {
+  if (hasNonDiscardDestroyEffect) {
     calculateFunction += `
         if context.destroy_card and context.cardarea == G.play and context.destroy_card == card and card.should_destroy then
             return { remove = true }
@@ -503,10 +515,15 @@ const generateCalculateFunction = (
         group.effects.some((effect) => effect.type === "retrigger_card")
       );
 
+    const isDiscardTrigger = rule.trigger === "card_discarded";
+
     let ruleCode = "";
 
     if (triggerCondition) {
-      if (ruleHasDestroyCardEffects || ruleHasRetriggerEffects) {
+      if (
+        (ruleHasDestroyCardEffects || ruleHasRetriggerEffects) &&
+        !isDiscardTrigger
+      ) {
         ruleCode += `
         if ${triggerCondition} then`;
 
@@ -550,11 +567,14 @@ const generateCalculateFunction = (
     const effectResult = generateEffectReturnStatement(
       regularEffects,
       randomGroups,
-      modPrefix
+      modPrefix,
+      rule.trigger
     );
 
     const indentLevel =
-      (ruleHasDestroyCardEffects || ruleHasRetriggerEffects) && conditionCode
+      (ruleHasDestroyCardEffects || ruleHasRetriggerEffects) &&
+      !isDiscardTrigger &&
+      conditionCode
         ? "                "
         : "            ";
 
@@ -571,6 +591,7 @@ ${indentLevel}return ${effectResult.statement}`;
     if (triggerCondition) {
       if (
         (ruleHasDestroyCardEffects || ruleHasRetriggerEffects) &&
+        !isDiscardTrigger &&
         conditionCode
       ) {
         ruleCode += `
