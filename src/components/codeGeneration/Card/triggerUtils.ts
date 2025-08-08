@@ -25,7 +25,7 @@ const TRIGGER_DEFINITIONS: Record<string, TriggerDefinition> = {
       "When this card is held in hand at the end of the round (main evaluation only)",
   },
   card_discarded: {
-    condition: "context.discard",
+    condition: "context.discard and context.other_card == card",
     context: "discard context",
     description:
       "Triggers whenever a card is discarded. Use conditions to check properties of the discarded card.",
