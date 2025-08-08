@@ -1,6 +1,11 @@
 import type { Rule, Effect } from "../../ruleBuilder/types";
-import type { JokerData, UserVariable } from "../../data/BalatroUtils";
-import { parseGameVariable } from "./gameVariableUtils";
+import type {
+  JokerData,
+  ConsumableData,
+  EnhancementData,
+  UserVariable,
+} from "../../data/BalatroUtils";
+import { parseGameVariable } from "../Consumables/gameVariableUtils";
 import { getGameVariableById } from "../../data/Jokers/GameVars";
 import {
   SUIT_VALUES,
@@ -153,7 +158,6 @@ export const coordinateVariableConflicts = (
 const extractExplicitVariablesFromEffect = (effect: Effect): string[] => {
   const variables: string[] = [];
 
-  // Parameter names that contain keys/identifiers, not variable names (this list is a bit butchered and not exhaustive)
   const keyParameterNames = new Set([
     "joker_key",
     "consumable_key",
@@ -171,21 +175,19 @@ const extractExplicitVariablesFromEffect = (effect: Effect): string[] => {
   ]);
 
   Object.entries(effect.params).forEach(([paramName, value]) => {
-    // Skip parameters that are known to contain keys/identifiers
     if (keyParameterNames.has(paramName)) {
       return;
     }
 
-    // Skip parameters that look like they contain keys (start with common prefixes)
     if (
       typeof value === "string" &&
-      (value.startsWith("j_") || // joker keys
-        value.startsWith("c_") || // consumable keys
-        value.startsWith("m_") || // enhancement keys
-        value.startsWith("e_") || // edition keys
-        value.startsWith("b_") || // blind keys
-        value.startsWith("tag_") || // tag keys
-        value.startsWith("v_")) // voucher keys
+      (value.startsWith("j_") ||
+        value.startsWith("c_") ||
+        value.startsWith("m_") ||
+        value.startsWith("e_") ||
+        value.startsWith("b_") ||
+        value.startsWith("tag_") ||
+        value.startsWith("v_"))
     ) {
       return;
     }
@@ -243,20 +245,24 @@ export const extractGameVariablesFromRules = (
   return Array.from(gameVariableMap.values());
 };
 
-export const getSuitVariables = (joker: JokerData): UserVariable[] => {
-  return (joker.userVariables || []).filter((v) => v.type === "suit");
+export const getSuitVariables = (
+  item: JokerData | EnhancementData
+): UserVariable[] => {
+  return (item.userVariables || []).filter((v) => v.type === "suit");
 };
 
-export const getRankVariables = (joker: JokerData): UserVariable[] => {
-  return (joker.userVariables || []).filter((v) => v.type === "rank");
+export const getRankVariables = (
+  item: JokerData | EnhancementData
+): UserVariable[] => {
+  return (item.userVariables || []).filter((v) => v.type === "rank");
 };
 
 export const parseSuitVariable = (
   value: unknown,
-  joker?: JokerData
+  item?: JokerData | EnhancementData
 ): SuitVariableInfo => {
-  if (typeof value === "string" && joker?.userVariables) {
-    const suitVariable = joker.userVariables.find(
+  if (typeof value === "string" && item?.userVariables) {
+    const suitVariable = item.userVariables.find(
       (v) => v.name === value && v.type === "suit"
     );
 
@@ -276,10 +282,10 @@ export const parseSuitVariable = (
 
 export const parseRankVariable = (
   value: unknown,
-  joker?: JokerData
+  item?: JokerData | EnhancementData
 ): RankVariableInfo => {
-  if (typeof value === "string" && joker?.userVariables) {
-    const rankVariable = joker.userVariables.find(
+  if (typeof value === "string" && item?.userVariables) {
+    const rankVariable = item.userVariables.find(
       (v) => v.name === value && v.type === "rank"
     );
 
@@ -299,9 +305,9 @@ export const parseRankVariable = (
 
 export const addSuitVariablesToOptions = (
   baseOptions: Array<{ value: string; label: string }>,
-  joker: JokerData
+  item: JokerData | EnhancementData
 ): Array<{ value: string; label: string }> => {
-  const suitVariables = getSuitVariables(joker);
+  const suitVariables = getSuitVariables(item);
   const variableOptions = suitVariables.map((variable) => ({
     value: variable.name,
     label: `${variable.name} (suit variable)`,
@@ -312,9 +318,9 @@ export const addSuitVariablesToOptions = (
 
 export const addRankVariablesToOptions = (
   baseOptions: Array<{ value: string; label: string }>,
-  joker: JokerData
+  item: JokerData | EnhancementData
 ): Array<{ value: string; label: string }> => {
-  const rankVariables = getRankVariables(joker);
+  const rankVariables = getRankVariables(item);
   const variableOptions = rankVariables.map((variable) => ({
     value: variable.name,
     label: `${variable.name} (rank variable)`,
@@ -331,16 +337,18 @@ const isUserDefinedVariable = (str: string): boolean => {
   );
 };
 
-export const getPokerHandVariables = (joker: JokerData): UserVariable[] => {
-  return (joker.userVariables || []).filter((v) => v.type === "pokerhand");
+export const getPokerHandVariables = (
+  item: JokerData | EnhancementData
+): UserVariable[] => {
+  return (item.userVariables || []).filter((v) => v.type === "pokerhand");
 };
 
 export const parsePokerHandVariable = (
   value: unknown,
-  joker?: JokerData
+  item?: JokerData | EnhancementData
 ): PokerHandVariableInfo => {
-  if (typeof value === "string" && joker?.userVariables) {
-    const pokerHandVariable = joker.userVariables.find(
+  if (typeof value === "string" && item?.userVariables) {
+    const pokerHandVariable = item.userVariables.find(
       (v) => v.name === value && v.type === "pokerhand"
     );
 
@@ -360,9 +368,9 @@ export const parsePokerHandVariable = (
 
 export const addPokerHandVariablesToOptions = (
   baseOptions: Array<{ value: string; label: string }>,
-  joker: JokerData
+  item: JokerData | EnhancementData
 ): Array<{ value: string; label: string }> => {
-  const pokerHandVariables = getPokerHandVariables(joker);
+  const pokerHandVariables = getPokerHandVariables(item);
   const variableOptions = pokerHandVariables.map((variable) => ({
     value: variable.name,
     label: `${variable.name} (poker hand variable)`,
@@ -575,12 +583,14 @@ export const generateVariableConfig = (variables: VariableInfo[]): string => {
   return configItems.join(",\n            ");
 };
 
-export const getVariableNamesFromJoker = (joker: JokerData): string[] => {
-  if (!joker.rules) return [];
+export const getVariableNamesFromItem = (
+  item: JokerData | ConsumableData | EnhancementData
+): string[] => {
+  if (!item.rules) return [];
 
   const variableNames = new Set<string>();
 
-  joker.rules.forEach((rule) => {
+  item.rules.forEach((rule) => {
     (rule.effects || []).forEach((effect) => {
       if (effect.type === "modify_internal_variable") {
         const varName = (effect.params.variable_name as string) || "var1";
@@ -620,13 +630,15 @@ export const getVariableNamesFromJoker = (joker: JokerData): string[] => {
   return Array.from(variableNames).sort();
 };
 
-export const getVariableUsageDetails = (joker: JokerData): VariableUsage[] => {
-  if (!joker.rules) return [];
+export const getVariableUsageDetails = (
+  item: JokerData | ConsumableData | EnhancementData
+): VariableUsage[] => {
+  if (!item.rules) return [];
 
   const usageDetails: VariableUsage[] = [];
   const usageCount = new Map<string, number>();
 
-  joker.rules.forEach((rule, ruleIndex) => {
+  item.rules.forEach((rule, ruleIndex) => {
     (rule.effects || []).forEach((effect) => {
       if (effect.type === "modify_internal_variable") {
         const varName = (effect.params.variable_name as string) || "var1";
@@ -716,13 +728,20 @@ export const getVariableUsageDetails = (joker: JokerData): VariableUsage[] => {
   return usageDetails;
 };
 
-export const getAllVariables = (joker: JokerData): UserVariable[] => {
-  const userVars = joker.userVariables || [];
+export const getAllVariables = (
+  item: JokerData | ConsumableData | EnhancementData
+): UserVariable[] => {
+  // For jokers and enhancements, get user variables if they exist
+  const userVars = (item as JokerData | EnhancementData).userVariables || [];
   const autoVars: UserVariable[] = [];
   const probabilityVars: UserVariable[] = [];
 
+  if (!item.rules) {
+    return userVars;
+  }
+
   const nonPassiveRules =
-    joker.rules?.filter((rule) => rule.trigger !== "passive") || [];
+    item.rules.filter((rule) => rule.trigger !== "passive") || [];
 
   const hasRandomGroups = nonPassiveRules.some(
     (rule) => rule.randomGroups && rule.randomGroups.length > 0
@@ -836,11 +855,17 @@ export const getAllVariables = (joker: JokerData): UserVariable[] => {
     }
   }
 
-  const explicitVariableNames = getVariableNamesFromJoker(joker)
-    .filter((name) => !userVars.some((uv) => uv.name === name))
-    .filter(
-      (name) => !name.startsWith("denominator") && !name.startsWith("numerator")
-    );
+  // For jokers, extract explicit variables (consumables/enhancements don't have these complex variables)
+  let explicitVariableNames: string[] = [];
+  if ("jokerKey" in item) {
+    // Check if it's a joker
+    explicitVariableNames = getVariableNamesFromItem(item)
+      .filter((name) => !userVars.some((uv) => uv.name === name))
+      .filter(
+        (name) =>
+          !name.startsWith("denominator") && !name.startsWith("numerator")
+      );
+  }
 
   const otherAutoVars = explicitVariableNames.map((name) => ({
     id: `auto_${name}`,
@@ -849,7 +874,7 @@ export const getAllVariables = (joker: JokerData): UserVariable[] => {
     description: getDefaultVariableDescription(name),
   }));
 
-  const gameVariables = extractGameVariablesFromRules(joker.rules || []);
+  const gameVariables = extractGameVariablesFromRules(item.rules || []);
   const gameVarAutoVars = gameVariables.map((gameVar) => ({
     id: `auto_gamevar_${gameVar.id}`,
     name: gameVar.name.replace(/\s+/g, "").toLowerCase(),
