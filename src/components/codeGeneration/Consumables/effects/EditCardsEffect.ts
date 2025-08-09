@@ -9,7 +9,6 @@ export const generateEditCardsReturn = (effect: Effect): EffectReturn => {
   const rank = effect.params?.rank || "none";
   const customMessage = effect.customMessage;
 
-  // Check if any modifications are actually being made
   const hasModifications = [enhancement, seal, edition, suit, rank].some(
     (param) => param !== "none"
   );
@@ -47,9 +46,20 @@ export const generateEditCardsReturn = (effect: Effect): EffectReturn => {
             end
             delay(0.2)`;
 
-  // Apply enhancement if specified
   if (enhancement !== "none") {
-    if (enhancement === "random") {
+    if (enhancement === "remove") {
+      editCardsCode += `
+            for i = 1, #G.hand.highlighted do
+                G.E_MANAGER:add_event(Event({
+                    trigger = 'after',
+                    delay = 0.1,
+                    func = function()
+                        G.hand.highlighted[i]:set_ability(G.P_CENTERS.c_base)
+                        return true
+                    end
+                }))
+            end`;
+    } else if (enhancement === "random") {
       editCardsCode += `
             for i = 1, #G.hand.highlighted do
                 G.E_MANAGER:add_event(Event({
@@ -83,9 +93,20 @@ export const generateEditCardsReturn = (effect: Effect): EffectReturn => {
     }
   }
 
-  // Apply seal if specified
   if (seal !== "none") {
-    if (seal === "random") {
+    if (seal === "remove") {
+      editCardsCode += `
+            for i = 1, #G.hand.highlighted do
+                G.E_MANAGER:add_event(Event({
+                    trigger = 'after',
+                    delay = 0.1,
+                    func = function()
+                        G.hand.highlighted[i]:set_seal(nil, nil, true)
+                        return true
+                    end
+                }))
+            end`;
+    } else if (seal === "random") {
       editCardsCode += `
             for i = 1, #G.hand.highlighted do
                 G.E_MANAGER:add_event(Event({
@@ -114,7 +135,6 @@ export const generateEditCardsReturn = (effect: Effect): EffectReturn => {
     }
   }
 
-  // Apply edition if specified
   if (edition !== "none") {
     const editionMap: Record<string, string> = {
       e_foil: "foil",
@@ -123,7 +143,19 @@ export const generateEditCardsReturn = (effect: Effect): EffectReturn => {
       e_negative: "negative",
     };
 
-    if (edition === "random") {
+    if (edition === "remove") {
+      editCardsCode += `
+            for i = 1, #G.hand.highlighted do
+                G.E_MANAGER:add_event(Event({
+                    trigger = 'after',
+                    delay = 0.1,
+                    func = function()
+                        G.hand.highlighted[i]:set_edition(nil, true)
+                        return true
+                    end
+                }))
+            end`;
+    } else if (edition === "random") {
       editCardsCode += `
             for i = 1, #G.hand.highlighted do
                 G.E_MANAGER:add_event(Event({
@@ -154,7 +186,6 @@ export const generateEditCardsReturn = (effect: Effect): EffectReturn => {
     }
   }
 
-  // Apply suit change if specified
   if (suit !== "none") {
     if (suit === "random") {
       editCardsCode += `
@@ -184,7 +215,6 @@ export const generateEditCardsReturn = (effect: Effect): EffectReturn => {
     }
   }
 
-  // Apply rank change if specified
   if (rank !== "none") {
     if (rank === "random") {
       editCardsCode += `
@@ -214,7 +244,6 @@ export const generateEditCardsReturn = (effect: Effect): EffectReturn => {
     }
   }
 
-  // Finish the animation sequence
   editCardsCode += `
             for i = 1, #G.hand.highlighted do
                 local percent = 0.85 + (i - 0.999) / (#G.hand.highlighted - 0.998) * 0.3
