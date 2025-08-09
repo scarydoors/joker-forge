@@ -1,3 +1,4 @@
+import { unlockOptions } from "../codeGeneration/Jokers/unlockUtils";
 import { Rule } from "../ruleBuilder/types";
 
 export const slugify = (text: string): string => {
@@ -73,6 +74,11 @@ export interface JokerData {
   force_polychrome?: boolean;
   force_negative?: boolean;
   appears_in_shop?: boolean;
+  unlockTrigger?: keyof typeof unlockOptions;
+  unlockProperties?: Array<{category: string, property: string}>;
+  unlockOperator?: string;
+  unlockCount?: number;
+  unlockDescription: string;
   rules?: Rule[];
   userVariables?: UserVariable[];
   placeholderCreditIndex?: number;

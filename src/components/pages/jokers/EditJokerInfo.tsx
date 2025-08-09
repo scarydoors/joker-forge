@@ -1,10 +1,13 @@
-import React, { useState, useRef, useEffect, useCallback } from "react";
+import React, { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import {
   PhotoIcon,
   SparklesIcon,
   BoltIcon,
   DocumentTextIcon,
   PuzzlePieceIcon,
+  PlusIcon,
+  Cog6ToothIcon,
+  TrashIcon,
 } from "@heroicons/react/24/outline";
 import InputField from "../../generic/InputField";
 import InputDropdown from "../../generic/InputDropdown";
@@ -28,6 +31,8 @@ import {
   slugify,
 } from "../../data/BalatroUtils";
 import { applyAutoFormatting } from "../../generic/balatroTextFormatter";
+import { BuildingStorefrontIcon, LockOpenIcon } from "@heroicons/react/24/solid";
+import { unlockOptions, unlockTriggerOptions } from "../../codeGeneration/Jokers/unlockUtils";
 
 interface EditJokerInfoProps {
   isOpen: boolean;
@@ -48,6 +53,13 @@ interface EditJokerInfoProps {
   }) => void;
 }
 
+interface PropertyRuleProps {
+  formData: JokerData
+  index: number
+}
+
+type UnlockTrigger = keyof typeof unlockOptions;
+
 const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
   isOpen,
   joker,
@@ -58,7 +70,7 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
   showConfirmation,
 }) => {
   const [formData, setFormData] = useState<JokerData>(joker);
-  const [activeTab, setActiveTab] = useState<"visual" | "description">(
+  const [activeTab, setActiveTab] = useState<"visual" | "description" | "settings">(
     "visual"
   );
   const [placeholderError, setPlaceholderError] = useState(false);
@@ -81,6 +93,62 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
   }>({});
 
   const rarityOptions = getRarityDropdownOptions(customRarities);
+
+  const unlockOperatorOptions = [
+    { value: "equals", label: "equals" },
+    { value: "greater_than", label: "greater than" },
+    { value: "less_than", label: "less than" },
+    { value: "greater_equals", label: "greater than or equal" },
+    { value: "less_equals", label: "less than or equal" }
+  ]
+
+  const PropertyRule: React.FC<PropertyRuleProps> = ({ formData, index }) => {
+    const propertyCategoryOptions = useMemo(() => {
+      if (!formData.unlockTrigger) return [];
+      return unlockOptions[formData.unlockTrigger]?.categories ?? [];
+
+    }, [formData.unlockTrigger]);
+
+    const selectedPropertyCategory = formData.unlockProperties?.[index]?.category;
+    const propertyOptions = useMemo(() => {
+      if (!formData.unlockTrigger) return []
+      const category = unlockOptions[formData.unlockTrigger]?.categories?.find(c => c.value === selectedPropertyCategory);
+
+      return category?.options ?? [];
+    }, [formData.unlockTrigger, selectedPropertyCategory]);
+
+    return (
+      <div key={index} className="grid grid-cols-19 gap-4">
+        <div className="col-span-9">
+          <InputDropdown
+            value={formData.unlockProperties?.[index].category || ""}
+            onChange={(value) => handleUnlockPropertyCategory(value, index)}
+            options={propertyCategoryOptions || []}
+            separator={true}
+            label="Category"
+          />
+        </div>
+        <div className="col-span-9">
+        <InputDropdown
+          value={formData.unlockProperties?.[index].property || ""}
+          onChange={(value) => handleUnlockProperty(value, index)}
+          options={propertyOptions || []}
+          separator={true}
+          label="Property"
+          className="col-span-5"
+        />
+        </div>
+        <div className="w-11 h-11 bg-black-dark border-2 border-balatro-red rounded-lg p-1 hover:bg-balatro-redshadow cursor-pointer transition-colors flex items-center justify-center z-10 self-end place-self-center">
+          <button
+            onClick={() => handleDeleteProperty(index)}
+            className="w-full h-full flex items-center cursor-pointer justify-center"
+          >
+            <TrashIcon className="h-5 w-5 text-balatro-red" />
+          </button>
+        </div>
+      </div>
+    )
+  }
 
   const validateField = (field: string, value: string) => {
     let result: ValidationResult;
@@ -300,10 +368,22 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
   };
 
   const handleCheckboxChange = (field: string, checked: boolean) => {
+    if (field === "unlocked") {
     setFormData({
       ...formData,
-      [field]: checked,
-    });
+      unlockTrigger: undefined,
+      unlockOperator: "",
+      unlockCount: 1,
+      unlockDescription: "",
+      unlockProperties: [],
+      [field]: checked
+    })
+    } else {
+      setFormData({
+        ...formData,
+        [field]: checked,
+      });
+    }
   };
 
   const handleRarityChange = (value: string) => {
@@ -364,6 +444,62 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
         return 5;
     }
   };
+
+  const addPropertyHidden = 
+  (formData.unlockTrigger === "career_stat" && formData.unlockProperties?.length) || 
+  !formData.unlockTrigger ||
+  formData.unlockTrigger === "chip_score"
+
+  const handleAddProperty = () => {
+    const newProperty: { category: string, property: string } = {
+      category: "",
+      property: ""
+    };
+    setFormData(prevFormData => ({
+      ...prevFormData,
+      unlockProperties: [...prevFormData.unlockProperties ?? [], newProperty]
+    }));
+  }
+
+  const handleDeleteProperty = (index: number) => {
+    const updatedProperties = formData.unlockProperties?.filter((_, i) => i !== index)
+    setFormData(prevFormData => ({
+      ...prevFormData,
+      unlockProperties: updatedProperties
+    }))
+  }
+
+  const handleUnlockTrigger = (value: string) => {
+    setFormData({
+      ...formData,
+      unlockTrigger: value as UnlockTrigger,
+      unlockProperties: [],
+    })
+  }
+
+  const handleUnlockPropertyCategory = (value: string, index: number) => {
+    setFormData({
+      ...formData,
+      unlockProperties: formData.unlockProperties?.map((propertyRule, i) =>
+        i === index ? { ...propertyRule, category: value } : propertyRule
+      )
+    })
+  }
+  const handleUnlockProperty = (value: string, index: number) => {
+    setFormData({
+      ...formData,
+      unlockProperties: formData.unlockProperties?.map((propertyRule, i) =>
+        i === index ? { ...propertyRule, property: value } : propertyRule
+      )
+    })
+  }
+
+  const handleUnlockOperator = (value: string) => {
+    setFormData({
+      ...formData,
+      unlockOperator: value
+    })
+  }
 
   const upscaleImage = (img: HTMLImageElement): string => {
     const canvas = document.createElement("canvas");
@@ -540,9 +676,11 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
   const tabs = [
     { id: "visual", label: "Visual & Properties", icon: PhotoIcon },
     { id: "description", label: "Description", icon: DocumentTextIcon },
+    { id: "settings", label: "Advanced Settings", icon: Cog6ToothIcon }
   ];
 
   const handleKeyDown = (
+    field: string,
     e: React.KeyboardEvent<HTMLTextAreaElement | HTMLInputElement>
   ) => {
     if (e.ctrlKey || e.metaKey) {
@@ -563,9 +701,12 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
       const value = textarea.value;
       const newValue = value.substring(0, start) + "[s]" + value.substring(end);
 
-      setLastDescription(value);
-      setLastFormattedText(value);
-      handleInputChange("description", newValue, false);
+      if (field === "description") {  
+        setLastDescription(value);
+        setLastFormattedText(value);
+      }
+
+      handleInputChange(field, newValue, false);
 
       setTimeout(() => {
         textarea.setSelectionRange(start + 3, start + 3);
@@ -1014,7 +1155,7 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
                   onChange={(value, shouldAutoFormat) =>
                     handleInputChange("description", value, shouldAutoFormat)
                   }
-                  onKeyDown={handleKeyDown}
+                  onKeyDown={(e) => handleKeyDown("description", e)}
                   item={formData}
                   itemType="joker"
                   textAreaId="joker-description-edit"
@@ -1026,6 +1167,102 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
                   placeholder="Describe your joker's effects using Balatro formatting..."
                   onInsertTag={insertTagSmart}
                 />
+              )}
+
+              {/* in the future we can add shop appearence (in_pool) rules to this tab */}
+              {activeTab === "settings" && (
+                <div className="p-6 space-y-6">
+                  <PuzzlePieceIcon className="absolute top-4 right-8 h-32 w-32 text-black-lighter/20 -rotate-12 pointer-events-none" />
+                  <div className="space-y-6">
+                    <h4 className="text-white-light font-medium text-base mb-4 flex items-center gap-2">
+                      <LockOpenIcon className="h-5 w-5 text-mint" />
+                      Unlock Requirements
+                    </h4>
+                    {!formData.unlocked && (
+                      <>
+                        <div className="flex gap-6">
+                          <div className="flex-1 space-y-4">
+                            <div className="grid grid-cols-4 gap-4">
+                              <div className="col-span-2">
+                                <InputDropdown
+                                  value={formData.unlockTrigger || ""}
+                                  onChange={handleUnlockTrigger}
+                                  options={unlockTriggerOptions}
+                                  separator={true}
+                                  label="Trigger"
+                                  
+                                />
+                              </div>
+                              <InputDropdown
+                                value={formData.unlockOperator || ""}
+                                onChange={handleUnlockOperator}
+                                options={unlockOperatorOptions}
+                                separator={true}
+                                label="Operator"
+                              />
+                              <InputField
+                                value={formData.unlockCount?.toString() || "1"}
+                                onChange={(e) =>
+                                  handleNumberChange(
+                                    "unlockCount",
+                                    parseInt(e.target.value)
+                                  )
+                                }
+                                placeholder="Amount"
+                                separator={true}
+                                min={0}
+                                type="number"
+                                label="Amount"
+                              />
+                              <div className={addPropertyHidden ? "hidden" : "col-span-full"}>
+                                <Button
+                                  variant="secondary"
+                                  size="sm"
+                                  onClick={handleAddProperty}
+                                  icon={<PlusIcon className="h-4 w-4" />}
+                                  className="w-full"
+                                >
+                                  Add Property
+                                </Button>
+                              </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 gap-y-8">
+                              {formData.unlockProperties?.map((_property, index) => (
+                                formData.unlockTrigger !== "chip_score" && <PropertyRule formData={formData} index={index} />
+                              ))}
+                            </div>
+                            {/* not sure if adding formatting tools is needed, makes it really bloated */}
+                            <InputField
+                              id={"joker-unlock-edit"}
+                              value={formData.unlockDescription || ""}
+                              onChange={(e) => handleInputChange("unlockDescription", e.target.value)}
+                              onKeyDown={(e) => handleKeyDown("unlockDescription", e)}
+                              multiline={true}
+                              height="140px"
+                              separator={true}
+                              label="Unlock Text"
+                              placeholder={"Play a 5 hand card that contains only Gold Cards"}
+                            />
+                          </div>
+                        </div>
+                      </>
+                    )}
+                    {formData.unlocked && (
+                      <p className="text-xs text-white-darker -mt-2">
+                        Joker is Unlocked by Default
+                      </p>
+
+                    )}
+                    <h4 className="text-white-light font-medium text-base mb-4 flex items-center gap-2">
+                      <BuildingStorefrontIcon className="h-5 w-5 text-mint" />
+                      Shop Appearance
+                    </h4>
+                    <p className="text-xs text-white-darker -mt-2">
+                      Coming Soon?
+                    </p>
+                  </div>
+                </div>
               )}
             </div>
           </div>
@@ -1055,7 +1292,7 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
               data={{
                 id: formData.id,
                 name: formData.name,
-                description: formData.description,
+                description: activeTab === "settings" ? formData.unlockDescription : formData.description,
                 imagePreview: formData.imagePreview,
                 overlayImagePreview: formData.overlayImagePreview,
                 cost: formData.cost,

@@ -27,6 +27,7 @@ import {
 } from "../../data/BalatroUtils";
 import { slugify } from "../../data/BalatroUtils";
 import { RarityData } from "../../data/BalatroUtils";
+import { generateUnlockFunction } from "./unlockUtils";
 interface CalculateFunctionResult {
   code: string;
   configVariables: ConfigExtraVariable[];
@@ -228,7 +229,8 @@ const generateSingleJokerCode = (
     },
     loc_txt = {
         ['name'] = '${joker.name}',
-        ['text'] = ${formatJokerDescription(joker)}
+        ['text'] = ${formatJokerDescription(joker.description)},
+        ['unlock'] = ${formatJokerDescription(joker.unlockDescription)}
     },
     pos = {
         x = ${col},
@@ -330,6 +332,9 @@ const generateSingleJokerCode = (
     jokerCode += `,\n\n    ${calculateFunction}`;
   });
 
+  if (joker.unlockTrigger) {
+    jokerCode += `${generateUnlockFunction(joker)}`
+  }
   jokerCode += `\n}`;
 
   return {
@@ -1715,8 +1720,8 @@ const generateLocVarsFunction = (
     end`;
 };
 
-const formatJokerDescription = (joker: JokerData): string => {
-  const formatted = joker.description.replace(/<br\s*\/?>/gi, "[s]");
+const formatJokerDescription = (description: string) => {
+  const formatted = description.replace(/<br\s*\/?>/gi, "[s]");
 
   const escaped = formatted.replace(/\n/g, "[s]");
   const lines = escaped.split("[s]").map((line) => line.trim());
