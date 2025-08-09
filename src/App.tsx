@@ -45,6 +45,7 @@ import {
 import Alert from "./components/generic/Alert";
 import ConfirmationPopup from "./components/generic/ConfirmationPopup";
 import ExportModal from "./components/generic/ExportModal";
+import DonationNotification from "./components/generic/DonationNotification";
 import Button from "./components/generic/Button";
 
 interface AlertState {
@@ -79,6 +80,8 @@ interface AutoSaveData {
 }
 
 const AUTO_SAVE_KEY = "joker-forge-autosave";
+const DONATION_DISMISSED_KEY = "joker-forge-donation-dismissed";
+const DONATION_SHOW_DELAY = 1000 * 60 * 5; // 5 minutes
 
 const FloatingTabDock: React.FC<{
   activeTab: "jokers" | "rarities";
@@ -191,10 +194,13 @@ function AppContent() {
   const [jokersRaritiesTab, setJokersRaritiesTab] = useState<
     "jokers" | "rarities"
   >("jokers");
+  const [showDonationNotification, setShowDonationNotification] =
+    useState(false);
 
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const statusTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const clearStatusTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const donationTimerRef = useRef<NodeJS.Timeout | null>(null);
   const prevDataRef = useRef<{
     modMetadata: ModMetadata;
     jokers: JokerData[];
@@ -205,7 +211,6 @@ function AppContent() {
     enhancements: EnhancementData[];
   } | null>(null);
 
-  // Show confirmation function
   const showConfirmation = useCallback(
     (options: {
       type?: "default" | "warning" | "danger" | "success";
@@ -234,18 +239,15 @@ function AppContent() {
     []
   );
 
-  // Hide confirmation function
   const hideConfirmation = useCallback(() => {
     setConfirmation((prev) => ({ ...prev, isVisible: false }));
   }, []);
 
-  // Handle confirmation confirm
   const handleConfirm = () => {
     confirmation.onConfirm();
     hideConfirmation();
   };
 
-  // Handle confirmation cancel
   const handleCancel = () => {
     if (confirmation.onCancel) {
       confirmation.onCancel();
@@ -300,6 +302,55 @@ function AppContent() {
     enhancements,
     modMetadata.prefix,
   ]);
+
+  useEffect(() => {
+    const checkDonationDismissal = () => {
+      const stored = localStorage.getItem(DONATION_DISMISSED_KEY);
+      if (!stored) return false;
+
+      try {
+        const dismissData = JSON.parse(stored);
+        const oneWeekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000; // 7 days in milliseconds
+
+        return dismissData.timestamp > oneWeekAgo; // Still dismissed if less than 7 days
+      } catch {
+        localStorage.removeItem(DONATION_DISMISSED_KEY);
+        return false;
+      }
+    };
+
+    const isDonationDismissed = checkDonationDismissal();
+
+    if (!isDonationDismissed) {
+      donationTimerRef.current = setTimeout(() => {
+        setShowDonationNotification(true);
+      }, DONATION_SHOW_DELAY);
+    }
+
+    return () => {
+      if (donationTimerRef.current) {
+        clearTimeout(donationTimerRef.current);
+      }
+    };
+  }, []);
+
+  const handleDonationClose = () => {
+    setShowDonationNotification(false);
+  };
+
+  const handleDonationDonate = () => {
+    window.open("https://ko-fi.com/jaydchw", "_blank");
+    setShowDonationNotification(false);
+  };
+
+  const handleDonationDismissTemporarily = () => {
+    const dismissData = {
+      dismissed: true,
+      timestamp: Date.now(),
+    };
+    localStorage.setItem(DONATION_DISMISSED_KEY, JSON.stringify(dismissData));
+    setShowDonationNotification(false);
+  };
 
   const loadFromLocalStorage = useCallback((): {
     modMetadata: ModMetadata;
@@ -580,6 +631,9 @@ function AppContent() {
       }
       if (clearStatusTimeoutRef.current) {
         clearTimeout(clearStatusTimeoutRef.current);
+      }
+      if (donationTimerRef.current) {
+        clearTimeout(donationTimerRef.current);
       }
     };
   }, []);
@@ -936,6 +990,13 @@ function AppContent() {
           onTabChange={setJokersRaritiesTab}
         />
       )}
+
+      <DonationNotification
+        isVisible={showDonationNotification}
+        onClose={handleDonationClose}
+        onDonate={handleDonationDonate}
+        onDismissTemporarily={handleDonationDismissTemporarily}
+      />
 
       <AnimatePresence>
         {autoSaveStatus !== "idle" && (
