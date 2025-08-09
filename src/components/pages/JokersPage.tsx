@@ -300,6 +300,7 @@ const JokersPage: React.FC<JokersPageProps> = ({
       id: crypto.randomUUID(),
       name: "New Joker",
       description: "A {C:blue}custom{} joker with {C:red}unique{} effects.",
+      unlockDescription: "Unlocked by default.",
       imagePreview: placeholderResult.imageData,
       overlayImagePreview: "",
       rarity: 1,
