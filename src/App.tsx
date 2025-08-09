@@ -46,7 +46,7 @@ import Alert from "./components/generic/Alert";
 import ConfirmationPopup from "./components/generic/ConfirmationPopup";
 import ExportModal from "./components/generic/ExportModal";
 import DonationNotification from "./components/generic/DonationNotification";
-import Button from "./components/generic/Button";
+import RestoreProgressModal from "./components/generic/RestoreProgressModal";
 
 interface AlertState {
   isVisible: boolean;
@@ -310,9 +310,9 @@ function AppContent() {
 
       try {
         const dismissData = JSON.parse(stored);
-        const oneWeekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000; // 7 days in milliseconds
+        const oneWeekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
 
-        return dismissData.timestamp > oneWeekAgo; // Still dismissed if less than 7 days
+        return dismissData.timestamp > oneWeekAgo;
       } catch {
         localStorage.removeItem(DONATION_DISMISSED_KEY);
         return false;
@@ -1024,44 +1024,12 @@ function AppContent() {
         )}
       </AnimatePresence>
 
-      {showRestoreModal && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-black-dark border-2 border-black-lighter rounded-xl p-6 max-w-md mx-4">
-            <h3 className="text-white-light text-lg font-medium tracking-widest mb-4">
-              Restore Auto-Saved Project?
-            </h3>
-            <p className="text-white-dark tracking-wide text-sm mb-6">
-              We found an auto-saved version of your project from{" "}
-              {(() => {
-                const metadata = getAutoSaveMetadata();
-                if (!metadata) return "recently";
-                if (metadata.daysOld < 1) return "today";
-                if (metadata.daysOld < 2) return "yesterday";
-                return `${Math.floor(metadata.daysOld)} days ago`;
-              })()}{" "}
-              Would you like to restore it?
-            </p>
-            <div className="flex gap-4">
-              <Button
-                color="primary"
-                variant="primary"
-                onClick={handleRestoreAutoSave}
-                className="w-full"
-              >
-                Restore
-              </Button>
-              <Button
-                color="secondary"
-                variant="secondary"
-                className="w-full"
-                onClick={handleDiscardAutoSave}
-              >
-                Start Fresh
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
+      <RestoreProgressModal
+        isVisible={showRestoreModal}
+        onRestore={handleRestoreAutoSave}
+        onDiscard={handleDiscardAutoSave}
+        getAutoSaveMetadata={getAutoSaveMetadata}
+      />
 
       <ExportModal
         isOpen={showExportModal}
