@@ -42,7 +42,7 @@ const Alert: React.FC<AlertProps> = ({
     switch (type) {
       case "success":
         return {
-          bg: "bg-mint/10",
+          bg: "bg-black-dark",
           border: "border-mint/40",
           icon: <CheckCircleIcon className="h-6 w-6 text-mint" />,
           titleColor: "text-mint",
@@ -50,7 +50,7 @@ const Alert: React.FC<AlertProps> = ({
         };
       case "warning":
         return {
-          bg: "bg-balatro-orange/10",
+          bg: "bg-black-dark",
           border: "border-balatro-orange/40",
           icon: (
             <ExclamationTriangleIcon className="h-6 w-6 text-balatro-orange" />
@@ -60,7 +60,7 @@ const Alert: React.FC<AlertProps> = ({
         };
       case "error":
         return {
-          bg: "bg-balatro-red/10",
+          bg: "bg-black-dark",
           border: "border-balatro-red/40",
           icon: <XCircleIcon className="h-6 w-6 text-balatro-red" />,
           titleColor: "text-balatro-red",
@@ -68,7 +68,7 @@ const Alert: React.FC<AlertProps> = ({
         };
       default:
         return {
-          bg: "bg-mint/20",
+          bg: "bg-black-dark",
           border: "border-mint/40",
           icon: <CheckCircleIcon className="h-6 w-6 text-mint" />,
           titleColor: "text-mint",
@@ -96,7 +96,7 @@ const Alert: React.FC<AlertProps> = ({
           <div
             className={`
               ${typeStyles.bg} ${typeStyles.border}
-              backdrop-blur-md border-2 rounded-xl shadow-2xl
+              border-2 rounded-xl shadow-2xl
               p-4 min-w-80 max-w-md
             `}
           >
