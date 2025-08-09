@@ -719,6 +719,25 @@ function AppContent() {
       return;
     }
 
+    const invalidJokers = jokers.filter((j) => !j.name || !j.id);
+    const invalidConsumables = consumables.filter((c) => !c.name || !c.id);
+    const invalidBoosters = boosters.filter((b) => !b.name || !b.id);
+    const invalidEnhancements = enhancements.filter((e) => !e.name || !e.id);
+
+    if (
+      invalidJokers.length > 0 ||
+      invalidConsumables.length > 0 ||
+      invalidBoosters.length > 0 ||
+      invalidEnhancements.length > 0
+    ) {
+      showAlert(
+        "error",
+        "Export Failed",
+        `Some items are missing required fields (name/id). Please check all items before exporting.`
+      );
+      return;
+    }
+
     setExportLoading(true);
     try {
       await exportModCode(
@@ -733,11 +752,19 @@ function AppContent() {
       setShowExportModal(true);
     } catch (error) {
       console.error("Export failed:", error);
-      showAlert(
-        "error",
-        "Export Failed",
-        "Failed to export mod files. Please try again."
-      );
+
+      let errorMessage = "Failed to export mod files. Please try again.";
+      if (error instanceof Error) {
+        if (error.message.includes("Missing required metadata")) {
+          errorMessage =
+            "Missing required metadata fields. Please check your mod information.";
+        } else if (error.message.includes("Cannot read properties")) {
+          errorMessage =
+            "Some mod items have missing or invalid data. Please check all fields are filled correctly.";
+        }
+      }
+
+      showAlert("error", "Export Failed", errorMessage);
     } finally {
       setExportLoading(false);
     }

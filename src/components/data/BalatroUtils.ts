@@ -75,7 +75,7 @@ export interface JokerData {
   force_negative?: boolean;
   appears_in_shop?: boolean;
   unlockTrigger?: keyof typeof unlockOptions;
-  unlockProperties?: Array<{category: string, property: string}>;
+  unlockProperties?: Array<{ category: string; property: string }>;
   unlockOperator?: string;
   unlockCount?: number;
   unlockDescription: string;
@@ -304,9 +304,11 @@ export const DataRegistry = {
     const custom = registryState.consumables.map((consumable) => ({
       value: `c_${registryState.modPrefix}_${
         consumable.consumableKey ||
-        consumable.name.toLowerCase().replace(/\s+/g, "_")
+        (consumable.name
+          ? consumable.name.toLowerCase().replace(/\s+/g, "_")
+          : "unnamed_consumable")
       }`,
-      label: consumable.name,
+      label: consumable.name || "Unnamed Consumable",
       set: consumable.set,
     }));
     return [...custom];
@@ -319,9 +321,12 @@ export const DataRegistry = {
   }> => {
     const custom = registryState.boosters.map((booster) => ({
       value: `${registryState.modPrefix}_${
-        booster.boosterKey || booster.name.toLowerCase().replace(/\s+/g, "_")
+        booster.boosterKey ||
+        (booster.name
+          ? booster.name.toLowerCase().replace(/\s+/g, "_")
+          : "unnamed_booster")
       }`,
-      label: booster.name,
+      label: booster.name || "Unnamed Booster",
       type: booster.booster_type,
     }));
     return [...custom];
@@ -337,7 +342,7 @@ export const DataRegistry = {
     const custom = registryState.enhancements.map((enhancement) => ({
       key: `m_${registryState.modPrefix}_${enhancement.enhancementKey}`,
       value: `m_${registryState.modPrefix}_${enhancement.enhancementKey}`,
-      label: enhancement.name,
+      label: enhancement.name || "Unnamed Enhancement",
     }));
 
     return [...vanilla, ...custom];
@@ -440,9 +445,12 @@ export const getBoosterDropdownOptions = (
 ) => {
   return customBoosters.map((booster) => ({
     value: `${registryState.modPrefix}_${
-      booster.boosterKey || booster.name.toLowerCase().replace(/\s+/g, "_")
+      booster.boosterKey ||
+      (booster.name
+        ? booster.name.toLowerCase().replace(/\s+/g, "_")
+        : "unnamed_booster")
     }`,
-    label: booster.name,
+    label: booster.name || "Unnamed Booster",
   }));
 };
 
@@ -457,7 +465,8 @@ export const getBoosterByKey = (
   return customBoosters.find(
     (booster) =>
       booster.boosterKey === searchKey ||
-      booster.name.toLowerCase().replace(/\s+/g, "_") === searchKey
+      (booster.name &&
+        booster.name.toLowerCase().replace(/\s+/g, "_") === searchKey)
   );
 };
 
@@ -471,7 +480,8 @@ export const isCustomBooster = (
     customBoosters.some(
       (b) =>
         `${modPrefix}_${
-          b.boosterKey || b.name.toLowerCase().replace(/\s+/g, "_")
+          b.boosterKey ||
+          (b.name ? b.name.toLowerCase().replace(/\s+/g, "_") : "unnamed")
         }` === key
     )
   );

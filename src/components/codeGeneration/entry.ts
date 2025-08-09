@@ -19,9 +19,14 @@ const sortForExport = <T extends { id: string; name: string }>(
   items: T[]
 ): T[] => {
   return [...items].sort((a, b) => {
-    const nameComparison = a.name.localeCompare(b.name);
+    const nameA = a.name || "";
+    const nameB = b.name || "";
+    const idA = a.id || "";
+    const idB = b.id || "";
+
+    const nameComparison = nameA.localeCompare(nameB);
     if (nameComparison !== 0) return nameComparison;
-    return a.id.localeCompare(b.id);
+    return idA.localeCompare(idB);
   });
 };
 
@@ -36,20 +41,33 @@ export const exportModCode = async (
 ): Promise<boolean> => {
   try {
     console.log("Generating mod code...");
-    console.log("Jokers:", jokers);
-    console.log("Consumables:", consumables);
-    console.log("Boosters:", boosters);
-    console.log("Metadata:", metadata);
-    console.log("Rarities:", customRarities);
-    console.log("Consumable Sets:", consumableSets);
-    console.log("Enhancements:", enhancements);
+
+    // Validate metadata before proceeding
+    if (
+      !metadata.id ||
+      !metadata.name ||
+      !metadata.author ||
+      metadata.author.length === 0
+    ) {
+      throw new Error("Missing required metadata fields");
+    }
+
+    // Filter out items with missing required fields
+    const validJokers = jokers.filter((j) => j.id && j.name);
+    const validConsumables = consumables.filter((c) => c.id && c.name);
+    const validBoosters = boosters.filter((b) => b.id && b.name);
+    const validEnhancements = enhancements.filter((e) => e.id && e.name);
+
+    console.log(
+      `Filtered items - Jokers: ${validJokers.length}, Consumables: ${validConsumables.length}, Boosters: ${validBoosters.length}, Enhancements: ${validEnhancements.length}`
+    );
 
     const zip = new JSZip();
 
-    const sortedJokers = sortForExport(jokers);
-    const sortedConsumables = sortForExport(consumables);
-    const sortedBoosters = sortForExport(boosters);
-    const sortedEnhancements = sortForExport(enhancements);
+    const sortedJokers = sortForExport(validJokers);
+    const sortedConsumables = sortForExport(validConsumables);
+    const sortedBoosters = sortForExport(validBoosters);
+    const sortedEnhancements = sortForExport(validEnhancements);
 
     const hasModIcon = !!(metadata.hasUserUploadedIcon || metadata.iconImage);
 
@@ -172,7 +190,7 @@ export const exportModCode = async (
     return true;
   } catch (error) {
     console.error("Failed to generate mod:", error);
-    return false;
+    throw error;
   }
 };
 
