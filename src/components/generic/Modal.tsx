@@ -44,6 +44,12 @@ const Modal: React.FC<ModalProps> = ({
     }
   };
 
+  const handleBackdropClick = (e: React.MouseEvent) => {
+    if (e.target === e.currentTarget) {
+      onClose();
+    }
+  };
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -52,7 +58,8 @@ const Modal: React.FC<ModalProps> = ({
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.2 }}
-          className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[9999] p-4 font-lexend"
+          className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-[9999] p-4 font-lexend"
+          onClick={handleBackdropClick}
         >
           <motion.div
             initial={{ scale: 0.9, opacity: 0, y: 20 }}
@@ -63,13 +70,18 @@ const Modal: React.FC<ModalProps> = ({
               stiffness: 300,
               damping: 30,
             }}
-            className={`bg-black-dark border-2 border-black-lighter rounded-xl shadow-2xl ${maxWidth} w-full`}
+            className={`bg-black-dark border-2 border-black-lighter rounded-xl shadow-2xl ${maxWidth} w-full overflow-hidden`}
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="p-6">
-              <div className="flex items-start justify-between mb-6">
+            {/* Header */}
+            <div className="px-6 py-5 border-b bg-black-darker border-black-lighter/50">
+              <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  {icon && <div className="flex-shrink-0">{icon}</div>}
+                  {icon && (
+                    <div className="flex-shrink-0 p-2 bg-black-darker rounded-lg">
+                      {icon}
+                    </div>
+                  )}
                   <h2 className="text-xl text-white-light font-medium tracking-wide">
                     {title}
                   </h2>
@@ -77,18 +89,22 @@ const Modal: React.FC<ModalProps> = ({
                 {showCloseButton && (
                   <button
                     onClick={onClose}
-                    className="text-white-darker hover:text-white-light transition-colors p-1 cursor-pointer"
+                    className="p-2 text-white-darker hover:text-white-light hover:bg-black-lighter rounded-lg transition-colors cursor-pointer"
                   >
                     <XMarkIcon className="h-5 w-5" />
                   </button>
                 )}
               </div>
+            </div>
 
-              <div className="mb-6 text-white-light leading-relaxed">
-                {children}
-              </div>
+            {/* Body */}
+            <div className="px-6 py-5">
+              <div className="text-white-light leading-relaxed">{children}</div>
+            </div>
 
-              {buttons.length > 0 && (
+            {/* Footer */}
+            {buttons.length > 0 && (
+              <div className="px-6 py-4 border-t border-black-lighter/50 bg-black-darker/30">
                 <div className="flex gap-3 justify-end">
                   {buttons.map((button, index) => (
                     <button
@@ -103,8 +119,8 @@ const Modal: React.FC<ModalProps> = ({
                     </button>
                   ))}
                 </div>
-              )}
-            </div>
+              </div>
+            )}
           </motion.div>
         </motion.div>
       )}

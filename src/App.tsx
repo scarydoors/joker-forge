@@ -7,13 +7,7 @@ import {
   useNavigate,
 } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import {
-  PuzzlePieceIcon,
-  SwatchIcon,
-  CheckCircleIcon,
-  FolderIcon,
-  ExclamationCircleIcon,
-} from "@heroicons/react/24/outline";
+import { PuzzlePieceIcon, SwatchIcon } from "@heroicons/react/24/outline";
 
 // Pages
 import Sidebar from "./components/Sidebar";
@@ -50,7 +44,7 @@ import {
 } from "./components/JSONImportExport";
 import Alert from "./components/generic/Alert";
 import ConfirmationPopup from "./components/generic/ConfirmationPopup";
-import Modal from "./components/generic/Modal";
+import ExportModal from "./components/generic/ExportModal";
 import Button from "./components/generic/Button";
 
 interface AlertState {
@@ -193,7 +187,7 @@ function AppContent() {
   >("idle");
   const [showRestoreModal, setShowRestoreModal] = useState(false);
   const [hasLoadedInitialData, setHasLoadedInitialData] = useState(false);
-  const [showExportSuccessModal, setShowExportSuccessModal] = useState(false);
+  const [showExportModal, setShowExportModal] = useState(false);
   const [jokersRaritiesTab, setJokersRaritiesTab] = useState<
     "jokers" | "rarities"
   >("jokers");
@@ -682,7 +676,7 @@ function AppContent() {
         boosters,
         enhancements
       );
-      setShowExportSuccessModal(true);
+      setShowExportModal(true);
     } catch (error) {
       console.error("Export failed:", error);
       showAlert(
@@ -1008,71 +1002,10 @@ function AppContent() {
         </div>
       )}
 
-      <Modal
-        isOpen={showExportSuccessModal}
-        onClose={() => setShowExportSuccessModal(false)}
-        title="Mod Exported Successfully!"
-        icon={<CheckCircleIcon className="h-6 w-6 text-mint" />}
-        maxWidth="max-w-2xl"
-        buttons={[
-          {
-            label: "Okay!",
-            onClick: () => setShowExportSuccessModal(false),
-            variant: "primary",
-          },
-        ]}
-      >
-        <div className="space-y-4">
-          <div className="flex items-start gap-3 p-4 bg-mint/10 border border-mint/30 rounded-lg">
-            <FolderIcon className="h-5 w-5 text-mint flex-shrink-0 mt-0.5" />
-            <div>
-              <h4 className="text-mint font-medium mb-2">
-                Installation Instructions
-              </h4>
-              <p className="text-sm text-white-light leading-relaxed">
-                To use your custom mod, place the exported folder in:
-              </p>
-              <code className="bg-black-dark px-2 py-1 rounded text-mint-lighter font-mono">
-                %appdata%\Roaming\Balatro\Mods
-              </code>
-              <p className="text-sm text-white-dark mt-2">
-                Make sure you have{" "}
-                <a
-                  href="https://github.com/Steamodded/smods"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-mint-light hover:text-mint-lighter hover:underline"
-                >
-                  SMODS (Steamodded)
-                </a>{" "}
-                installed as well.
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-start gap-3 p-4 bg-balatro-orange/10 border border-balatro-orange/30 rounded-lg">
-            <ExclamationCircleIcon className="h-5 w-5 text-balatro-orange flex-shrink-0 mt-0.5" />
-            <div>
-              <h4 className="text-balatro-orange font-medium mb-2">
-                Found a Bug or Have Suggestions?
-              </h4>
-              <p className="text-sm text-white-light leading-relaxed">
-                If you encounter any issues with the generated code or have
-                ideas for improvements, please{" "}
-                <a
-                  href="https://github.com/Jayd-H/joker-forge/issues"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-balatro-orange hover:text-orange-300 hover:underline font-medium"
-                >
-                  open an issue on GitHub
-                </a>
-                . Your feedback helps make Joker Forge better!
-              </p>
-            </div>
-          </div>
-        </div>
-      </Modal>
+      <ExportModal
+        isOpen={showExportModal}
+        onClose={() => setShowExportModal(false)}
+      />
 
       <Alert
         isVisible={alert.isVisible}
