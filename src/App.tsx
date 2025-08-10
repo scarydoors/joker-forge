@@ -41,6 +41,7 @@ import { exportModCode } from "./components/codeGeneration/entry";
 import {
   exportModAsJSON,
   importModFromJSON,
+  normalizeImportedModData,
 } from "./components/JSONImportExport";
 import Alert from "./components/generic/Alert";
 import ConfirmationPopup from "./components/generic/ConfirmationPopup";
@@ -638,34 +639,58 @@ function AppContent() {
     };
   }, []);
 
+  // this is bad but i am tired
   const handleRestoreAutoSave = () => {
     const savedData = loadFromLocalStorage();
     if (savedData) {
-      setModMetadata(savedData.modMetadata);
-      setJokers(savedData.jokers);
-      setConsumables(savedData.consumables);
-      setCustomRarities(savedData.customRarities);
-      setConsumableSets(savedData.consumableSets);
-      setBoosters(savedData.boosters);
-      setEnhancements(savedData.enhancements);
-      setSelectedJokerId(null);
-      setSelectedConsumableId(null);
-      setSelectedBoosterId(null);
-      setSelectedEnhancementId(null);
-      prevDataRef.current = {
-        modMetadata: savedData.modMetadata,
-        jokers: savedData.jokers,
-        consumables: savedData.consumables,
-        customRarities: savedData.customRarities,
-        consumableSets: savedData.consumableSets,
-        boosters: savedData.boosters,
-        enhancements: savedData.enhancements,
-      };
-      showAlert(
-        "success",
-        "Project Restored",
-        "Your auto-saved project has been restored successfully!"
-      );
+      try {
+        const normalizedData = normalizeImportedModData({
+          metadata: savedData.modMetadata,
+          jokers: savedData.jokers,
+          consumables: savedData.consumables,
+          customRarities: savedData.customRarities,
+          consumableSets: savedData.consumableSets,
+          boosters: savedData.boosters,
+          enhancements: savedData.enhancements,
+        });
+
+        setModMetadata(normalizedData.metadata);
+        setJokers(normalizedData.jokers);
+        setConsumables(normalizedData.consumables);
+        setCustomRarities(normalizedData.customRarities);
+        setConsumableSets(normalizedData.consumableSets);
+        setBoosters(normalizedData.boosters);
+        setEnhancements(normalizedData.enhancements);
+
+        setSelectedJokerId(null);
+        setSelectedConsumableId(null);
+        setSelectedBoosterId(null);
+        setSelectedEnhancementId(null);
+
+        prevDataRef.current = {
+          modMetadata: normalizedData.metadata,
+          jokers: normalizedData.jokers,
+          consumables: normalizedData.consumables,
+          customRarities: normalizedData.customRarities,
+          consumableSets: normalizedData.consumableSets,
+          boosters: normalizedData.boosters,
+          enhancements: normalizedData.enhancements,
+        };
+
+        showAlert(
+          "success",
+          "Project Restored",
+          "Your auto-saved project has been restored successfully!"
+        );
+      } catch (error) {
+        console.error("Failed to restore autosave due to invalid data:", error);
+        showAlert(
+          "error",
+          "Restore Failed",
+          "The auto-saved data is corrupted and could not be restored. Starting a fresh project."
+        );
+        clearAutoSave();
+      }
     }
     setShowRestoreModal(false);
   };

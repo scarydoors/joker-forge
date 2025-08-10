@@ -8,6 +8,7 @@ import {
 } from "./data/BalatroUtils";
 import { RarityData } from "./data/BalatroUtils";
 
+// some of this is pretty bad
 export interface ExportedMod {
   metadata: ModMetadata;
   jokers: JokerData[];
@@ -19,6 +20,54 @@ export interface ExportedMod {
   version: string;
   exportedAt: string;
 }
+interface ImportableModData {
+  metadata: ModMetadata;
+  jokers: JokerData[];
+  consumables?: ConsumableData[];
+  customRarities?: RarityData[];
+  consumableSets?: ConsumableSetData[];
+  boosters?: BoosterData[];
+  enhancements?: EnhancementData[];
+}
+
+export const normalizeImportedModData = (data: ImportableModData) => {
+  if (!data.metadata) {
+    throw new Error("Invalid mod data - missing metadata");
+  }
+
+  if (!data.jokers || !Array.isArray(data.jokers)) {
+    throw new Error("Invalid mod data - missing or invalid jokers data");
+  }
+
+  const normalizedJokers = data.jokers.map(normalizeJokerData);
+  const normalizedConsumables = (data.consumables || []).map(
+    normalizeConsumableData
+  );
+  const normalizedRarities = (data.customRarities || []).map(
+    normalizeRarityData
+  );
+  const normalizedConsumableSets = (data.consumableSets || []).map(
+    normalizeConsumableSetData
+  );
+  const normalizedBoosters = (data.boosters || []).map(normalizeBoosterData);
+  const normalizedEnhancements = (data.enhancements || []).map(
+    normalizeEnhancementData
+  );
+
+  console.log(
+    `Successfully processed mod data with ${normalizedJokers.length} jokers, ${normalizedConsumables.length} consumables, ${normalizedBoosters.length} boosters, ${normalizedEnhancements.length} enhancements`
+  );
+
+  return {
+    metadata: data.metadata,
+    jokers: normalizedJokers,
+    consumables: normalizedConsumables,
+    customRarities: normalizedRarities,
+    consumableSets: normalizedConsumableSets,
+    boosters: normalizedBoosters,
+    enhancements: normalizedEnhancements,
+  };
+};
 
 const normalizeJokerData = (joker: Partial<JokerData>): JokerData => {
   return {
