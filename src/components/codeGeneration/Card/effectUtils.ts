@@ -99,14 +99,8 @@ const generateSingleEffect = (
     case "balance":
       return generateBalanceReturn(effect);
 
-    case "permanent_bonus":
-      return generatePermaBonusReturn(effect);
-
     case "draw_cards":
       return generateDrawCardsReturn(effect);
-
-    case "juice_up":
-      return generateJuiceUpReturn(effect);
 
     default:
       return {
