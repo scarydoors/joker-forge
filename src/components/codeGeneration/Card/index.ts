@@ -336,11 +336,6 @@ const generateSingleEnhancementCode = (
     atlas = '${atlasKey}',`;
   }
 
-  if (enhancement.pos) {
-    enhancementCode += `
-    pos = { x = ${enhancement.pos.x}, y = ${enhancement.pos.y} },`;
-  }
-
   if (enhancement.any_suit !== undefined) {
     enhancementCode += `
     any_suit = ${enhancement.any_suit},`;
