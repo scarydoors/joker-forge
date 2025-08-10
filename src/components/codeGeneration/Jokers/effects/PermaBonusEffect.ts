@@ -18,13 +18,13 @@ export const generatePermaBonusReturn = (
   let valueCode: string;
   const configVariables: ConfigExtraVariable[] = [];
 
-  const variableName =
-    sameTypeCount === 0 ? "perma_bonus" : `perma_bonus${sameTypeCount + 1}`;
+  const uniqueId = effect.id.substring(0, 8);
+  const variableName = `pb_${bonusType.replace("perma_", "")}_${uniqueId}`;
 
   if (parsed.isGameVariable) {
     valueCode = generateGameVariableCode(effectValue);
   } else if (rangeParsed.isRangeVariable) {
-    const seedName = `${variableName}_${effect.id.substring(0, 8)}`;
+    const seedName = `${variableName}_seed`;
     valueCode = `pseudorandom('${seedName}', card.ability.extra.${variableName}_min, card.ability.extra.${variableName}_max)`;
 
     configVariables.push(
@@ -51,15 +51,29 @@ export const generatePermaBonusReturn = (
   const preReturnCode = `context.other_card.ability.${bonusType} = context.other_card.ability.${bonusType} or 0
                 context.other_card.ability.${bonusType} = context.other_card.ability.${bonusType} + ${valueCode}`;
 
+  let color = "G.C.CHIPS";
+  if (bonusType.includes("mult")) {
+    color = "G.C.MULT";
+  } else if (bonusType.includes("dollars")) {
+    color = "G.C.MONEY";
+  }
+
+  let statement = "";
+
+  if (sameTypeCount === 0) {
+    const messageText = customMessage
+      ? `"${customMessage}"`
+      : "localize('k_upgrade_ex')";
+    statement = `__PRE_RETURN_CODE__${preReturnCode}__PRE_RETURN_CODE_END__extra = { message = ${messageText}, colour = ${color} }, card = card`;
+  } else {
+    statement = `__PRE_RETURN_CODE__${preReturnCode}__PRE_RETURN_CODE_END__`;
+  }
+
   const result: EffectReturn = {
-    statement: `__PRE_RETURN_CODE__${preReturnCode}__PRE_RETURN_CODE_END__extra = { message = localize('k_upgrade_ex'), colour = G.C.CHIPS }, card = card`,
-    colour: "G.C.CHIPS",
+    statement,
+    colour: color,
     configVariables: configVariables.length > 0 ? configVariables : undefined,
   };
-
-  if (customMessage) {
-    result.message = `"${customMessage}"`;
-  }
 
   return result;
 };
