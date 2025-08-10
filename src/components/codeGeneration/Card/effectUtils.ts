@@ -13,6 +13,9 @@ import { generateLevelUpHandReturn } from "./effects/LevelUpHandEffect";
 import { generateCreateConsumableReturn } from "./effects/CreateConsumableEffect";
 import { generateCopyConsumableReturn } from "./effects/CopyConsumableEffect";
 import { generateDestroyConsumableReturn } from "./effects/DestroyConsumableEffect";
+import { generateShowMessageReturn } from "./effects/ShowMessageEffect";
+import { generateBalanceReturn } from "./effects/BalanceEffect";
+import { generateDrawCardsReturn } from "./effects/DrawCardsEffect";
 
 export interface ConfigExtraVariable {
   name: string;
@@ -89,6 +92,21 @@ const generateSingleEffect = (
 
     case "destroy_consumable":
       return generateDestroyConsumableReturn(effect, trigger || "");
+
+    case "show_message":
+      return generateShowMessageReturn(effect);
+
+    case "balance":
+      return generateBalanceReturn(effect);
+
+    case "permanent_bonus":
+      return generatePermaBonusReturn(effect);
+
+    case "draw_cards":
+      return generateDrawCardsReturn(effect);
+
+    case "juice_up":
+      return generateJuiceUpReturn(effect);
 
     default:
       return {

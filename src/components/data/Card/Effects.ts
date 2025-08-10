@@ -727,6 +727,63 @@ export const CARD_EFFECT_TYPES: EffectTypeDefinition[] = [
     ],
     category: "Consumables",
   },
+  {
+    id: "show_message",
+    label: "Show Message",
+    description: "Display a custom message with specified color",
+    applicableTriggers: GENERIC_TRIGGERS,
+    params: [
+      {
+        id: "colour",
+        type: "select",
+        label: "Message Color",
+        options: [
+          { value: "G.C.WHITE", label: "White" },
+          { value: "G.C.RED", label: "Red" },
+          { value: "G.C.GREEN", label: "Green" },
+          { value: "G.C.BLUE", label: "Blue" },
+          { value: "G.C.YELLOW", label: "Yellow" },
+          { value: "G.C.PURPLE", label: "Purple" },
+          { value: "G.C.ORANGE", label: "Orange" },
+          { value: "G.C.BLACK", label: "Black" },
+          { value: "G.C.CHIPS", label: "Chips (Blue)" },
+          { value: "G.C.MULT", label: "Mult (Red)" },
+          { value: "G.C.MONEY", label: "Money (Yellow)" },
+        ],
+        default: "G.C.WHITE",
+      },
+    ],
+    category: "Special",
+  },
+  {
+    id: "balance",
+    label: "Balance Chips and Mult",
+    description: "Balance chips and mult values (Plasma Deck effect)",
+    applicableTriggers: SCORING_TRIGGERS,
+    params: [],
+    category: "Special",
+  },
+  {
+    id: "draw_cards",
+    label: "Draw Cards to Hand",
+    description: "Draw cards from your deck to your hand",
+    applicableTriggers: [
+      "card_scored",
+      "card_discarded",
+      "card_held",
+      "card_held_in_hand_end_of_round",
+    ],
+    params: [
+      {
+        id: "value",
+        type: "number",
+        label: "Amount",
+        default: 1,
+        min: 1,
+      },
+    ],
+    category: "Special",
+  },
 ];
 
 export function getCardEffectsForTrigger(
