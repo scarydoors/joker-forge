@@ -48,7 +48,7 @@ export const generateAddDollarsReturn = (
   const customMessage = effect.customMessage;
 
   const result: EffectReturn = {
-    statement: `dollars = ${valueCode}`,
+    statement: `dollars = lenient_bignum(${valueCode})`,
     colour: "",
     configVariables: configVariables.length > 0 ? configVariables : undefined,
   };

@@ -61,7 +61,7 @@ export const generateLevelUpHandReturn = (
       handDeterminationCode = `
                 local available_hands = {}
                 for hand, value in pairs(G.GAME.hands) do
-                  if value.visible and value.level >= 1 then
+                  if value.visible and value.level >= to_big(1) then
                     table.insert(available_hands, hand)
                   end
                 end
