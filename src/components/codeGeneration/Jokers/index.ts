@@ -133,7 +133,7 @@ const generateSingleJokerCode = (
     joker.rules?.filter((rule) => rule.trigger !== "passive") || [];
 
   let calculateResult: CalculateFunctionResult | null = null;
-  if (nonPassiveRules.length > 0) {
+  if (nonPassiveRules.length > 0 || passiveEffects.length > 0) {
     calculateResult = generateCalculateFunction(
       nonPassiveRules,
       joker,
@@ -312,10 +312,6 @@ const generateSingleJokerCode = (
     .map((effect) => effect.removeFromDeck)
     .join("\n        ");
 
-  const calculateFunctions = passiveEffects
-    .filter((effect) => effect.calculateFunction)
-    .map((effect) => effect.calculateFunction);
-
   if (addToDeckCode) {
     jokerCode += `,\n\n    add_to_deck = function(self, card, from_debuff)
         ${addToDeckCode}
@@ -327,10 +323,6 @@ const generateSingleJokerCode = (
         ${removeFromDeckCode}
     end`;
   }
-
-  calculateFunctions.forEach((calculateFunction) => {
-    jokerCode += `,\n\n    ${calculateFunction}`;
-  });
 
   if (joker.unlockTrigger) {
     jokerCode += `${generateUnlockFunction(joker)}`
@@ -1373,6 +1365,13 @@ const generateCalculateFunction = (
         end`;
     }
   });
+
+  processPassiveEffects(joker)
+    .filter((effect) => effect.calculateFunction)
+    .forEach((effect) => {
+      calculateFunction += `\n        ${effect.calculateFunction}`
+    });
+
 
   calculateFunction += `
     end`;
