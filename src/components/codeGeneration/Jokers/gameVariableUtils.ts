@@ -18,6 +18,10 @@ export interface ParsedRangeVariable {
 export interface ConfigVariablesReturn {
   valueCode: string;
   configVariables: ConfigExtraVariable[];
+  isXVariable: {
+    isGameVariable: boolean,
+    isRangeVariable: boolean
+  }
 }
 
 export const parseGameVariable = (value: unknown): ParsedGameVariable => {
@@ -131,6 +135,10 @@ export const generateConfigVariables = (
 
   return {
     valueCode,
-    configVariables
+    configVariables,
+    isXVariable: {
+      isGameVariable: parsed.isGameVariable,
+      isRangeVariable: rangeParsed.isRangeVariable
+    }
   }
 }
