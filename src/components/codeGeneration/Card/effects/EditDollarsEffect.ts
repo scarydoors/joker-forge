@@ -58,7 +58,7 @@ export const generateEditDollarsReturn = (
   switch (operation) {
     case "add": {
       result = {
-        statement: `dollars = ${valueCode}`,
+        statement: `dollars = lenient_bignum(${valueCode})`,
         colour: "G.C.MONEY",
         configVariables:
           configVariables.length > 0
@@ -74,7 +74,7 @@ export const generateEditDollarsReturn = (
 
     case "subtract": {
       result = {
-        statement: `dollars = -${valueCode}`,
+        statement: `dollars = -lenient_bignum(${valueCode})`,
         colour: "G.C.MONEY",
         configVariables:
           configVariables.length > 0
@@ -113,7 +113,7 @@ export const generateEditDollarsReturn = (
 
     default: {
       result = {
-        statement: `dollars = ${valueCode}`,
+        statement: `dollars = lenient_bignum(${valueCode})`,
         colour: "G.C.MONEY",
         configVariables:
           configVariables.length > 0
