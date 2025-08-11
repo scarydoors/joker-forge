@@ -89,6 +89,7 @@ export const generatePassiveConsideredAs = (
   const targetReturn = generateTargetReturn();
 
   // Generate the calculate function
+  // May need to be changed later because of the passive rework. (what i mean is removing the `calculate = function(self, card, context)`)
   const calculateFunction = `calculate = function(self, card, context)
         if context.check_enhancement then
             if ${sourceCheck} then

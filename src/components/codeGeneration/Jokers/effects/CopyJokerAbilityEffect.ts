@@ -41,13 +41,12 @@ export const generatePassiveCopyJokerAbility = (
       break;
   }
 
-  const calculateFunction = `calculate = function(self, card, context)
+  const calculateFunction = `
         local target_joker = nil
         
         ${targetJokerLogic}
         
-        return SMODS.blueprint_effect(card, target_joker, context)
-    end`;
+        return SMODS.blueprint_effect(card, target_joker, context)`;
 
   return {
     calculateFunction,
