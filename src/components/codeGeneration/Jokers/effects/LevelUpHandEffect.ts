@@ -1,9 +1,7 @@
 import type { EffectReturn, ConfigExtraVariable } from "../effectUtils";
 import type { Effect } from "../../../ruleBuilder/types";
 import {
-  generateGameVariableCode,
-  parseGameVariable,
-  parseRangeVariable,
+  generateConfigVariables
 } from "../gameVariableUtils";
 
 export const generateLevelUpHandReturn = (
@@ -13,36 +11,20 @@ export const generateLevelUpHandReturn = (
 ): EffectReturn => {
   const customMessage = effect?.customMessage;
   let valueCode: string;
-  const configVariables: ConfigExtraVariable[] = [];
+  let configVariables: ConfigExtraVariable[] = [];
 
   if (effect) {
-    const effectValue = effect.params.value;
-    const parsed = parseGameVariable(effectValue);
-    const rangeParsed = parseRangeVariable(effectValue);
-
     const variableName =
       sameTypeCount === 0 ? "levels" : `levels${sameTypeCount + 1}`;
 
-    if (parsed.isGameVariable) {
-      valueCode = generateGameVariableCode(effectValue);
-    } else if (rangeParsed.isRangeVariable) {
-      const seedName = `${variableName}_${effect.id.substring(0, 8)}`;
-      valueCode = `pseudorandom('${seedName}', card.ability.extra.${variableName}_min, card.ability.extra.${variableName}_max)`;
+    let ret = generateConfigVariables(
+      effect.params?.value,
+      effect.id,
+      variableName
+    )
 
-      configVariables.push(
-        { name: `${variableName}_min`, value: rangeParsed.min || 1 },
-        { name: `${variableName}_max`, value: rangeParsed.max || 5 }
-      );
-    } else if (typeof effectValue === "string") {
-      valueCode = `card.ability.extra.${effectValue}`;
-    } else {
-      valueCode = `card.ability.extra.${variableName}`;
-
-      configVariables.push({
-        name: variableName,
-        value: Number(effectValue) || 1,
-      });
-    }
+    valueCode = ret.valueCode
+    configVariables = ret.configVariables
   } else {
     valueCode = "card.ability.extra.levels";
   }

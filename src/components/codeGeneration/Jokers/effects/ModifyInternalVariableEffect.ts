@@ -18,7 +18,7 @@ export const generateModifyInternalVariableReturn = (
 
   let valueCode: string;
 
-  if (parsed.isGameVariable) {
+  if (parsed.isGameVariable) { /// change to generateConfigVariables maybe, i dunno, i dont see it necessary
     valueCode = generateGameVariableCode(effectValue);
   } else if (rangeParsed.isRangeVariable) {
     const seedName = `${variableName}_${effect.id.substring(0, 8)}`;
