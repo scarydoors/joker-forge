@@ -33,7 +33,7 @@ import { generateCardEditionConditionCode } from "./conditions/CardEditionCondit
 import { generateEditionCountConditionCode } from "./conditions/EditionCountCondition";
 import { generateSpecificJokerConditionCode } from "./conditions/SpecificJokerCondition";
 import { generateGenericCompareConditionCode } from "./conditions/GenericCompareCondition";
-import { generateConsumableHeldConditionCode } from "./conditions/ConsumableHeldCondition";
+import { generateConsumableCountConditionCode } from "./conditions/ConsumableCountCondition";
 import { generateCheckBlindRequirementsConditionCode } from "./conditions/BlindRequirementsCondition";
 import { generateGlassCardDestroyedConditionCode } from "./conditions/GlassCardDestroyedCondition";
 import { generateConsumableTypeConditionCode } from "./conditions/ConsumableTypeCondition";
@@ -229,8 +229,8 @@ const generateSingleConditionCode = (
     case "generic_compare":
       return generateGenericCompareConditionCode([singleConditionRule]);
 
-    case "consumable_held":
-      return generateConsumableHeldConditionCode([singleConditionRule]);
+    case "consumable_count":
+      return generateConsumableCountConditionCode([singleConditionRule]);
 
     case "check_blind_requirements":
       return generateCheckBlindRequirementsConditionCode([singleConditionRule]);

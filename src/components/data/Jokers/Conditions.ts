@@ -1089,9 +1089,9 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
     category: "Special",
   },
   {
-    id: "consumable_held",
-    label: "Consumable Held",
-    description: "Check if a specific type of consumable is held",
+    id: "consumable_count",
+    label: "Consumable Count",
+    description: "Check how many of a consumable a player has",
     applicableTriggers: [...GENERIC_TRIGGERS, "change_probability"],
     params: [
       {
@@ -1192,6 +1192,19 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
           ];
         },
         default: "any",
+      },
+      {
+        id: "operator",
+        type: "select",
+        label: "Operator",
+        options: [...COMPARISON_OPERATORS],
+      },
+      {
+        id: "value",
+        type: "number",
+        label: "Number of Consumables",
+        min: 0,
+        default: 1,
       },
     ],
     category: "Player Resources",
