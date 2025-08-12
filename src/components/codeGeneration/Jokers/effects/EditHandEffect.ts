@@ -1,10 +1,8 @@
-import type { EffectReturn, ConfigExtraVariable } from "../effectUtils";
+import type { EffectReturn } from "../effectUtils";
 import type { Effect } from "../../../ruleBuilder/types";
 import type { PassiveEffectResult } from "../effectUtils";
 import {
-  generateGameVariableCode,
-  parseGameVariable,
-  parseRangeVariable,
+  generateConfigVariables
 } from "../gameVariableUtils";
 
 export const generateEditHandReturn = (
@@ -13,36 +11,15 @@ export const generateEditHandReturn = (
 ): EffectReturn => {
   const operation = effect.params?.operation || "add";
   const duration = effect.params?.duration || "permanent";
-  const effectValue = effect.params.value;
-  const parsed = parseGameVariable(effectValue);
-  const rangeParsed = parseRangeVariable(effectValue);
-
-  let valueCode: string;
-  const configVariables: ConfigExtraVariable[] = [];
 
   const variableName =
     sameTypeCount === 0 ? "hands" : `hands${sameTypeCount + 1}`;
 
-  if (parsed.isGameVariable) {
-    valueCode = generateGameVariableCode(effectValue);
-  } else if (rangeParsed.isRangeVariable) {
-    const seedName = `${variableName}_${effect.id.substring(0, 8)}`;
-    valueCode = `pseudorandom('${seedName}', card.ability.extra.${variableName}_min, card.ability.extra.${variableName}_max)`;
-
-    configVariables.push(
-      { name: `${variableName}_min`, value: rangeParsed.min || 1 },
-      { name: `${variableName}_max`, value: rangeParsed.max || 5 }
-    );
-  } else if (typeof effectValue === "string") {
-    valueCode = `card.ability.extra.${effectValue}`;
-  } else {
-    valueCode = `card.ability.extra.${variableName}`;
-
-    configVariables.push({
-      name: variableName,
-      value: Number(effectValue) || 1,
-    });
-  }
+  const { valueCode, configVariables } = generateConfigVariables(
+    effect.params?.value,
+    effect.id,
+    variableName
+  )
 
   const customMessage = effect.customMessage;
   let statement = "";
@@ -118,29 +95,14 @@ export const generateEditHandReturn = (
 
 export const generatePassiveHand = (effect: Effect): PassiveEffectResult => {
   const operation = effect.params?.operation || "add";
-  const effectValue = effect.params.value;
-  const parsed = parseGameVariable(effectValue);
-  const rangeParsed = parseRangeVariable(effectValue);
 
-  let valueCode: string;
-  let configVariables: string[] = [];
-
-  if (parsed.isGameVariable) {
-    valueCode = generateGameVariableCode(effectValue);
-  } else if (rangeParsed.isRangeVariable) {
-    const variableName = "hand_change";
-    valueCode = `pseudorandom('hand_change', card.ability.extra.${variableName}_min, card.ability.extra.${variableName}_max)`;
-    configVariables = [
-      `${variableName}_min = ${rangeParsed.min}`,
-      `${variableName}_max = ${rangeParsed.max}`,
-    ];
-  } else if (typeof effectValue === "string") {
-    valueCode = `card.ability.extra.${effectValue}`;
-  } else {
-    const variableName = "hand_change";
-    valueCode = `card.ability.extra.${variableName}`;
-    configVariables = [`${variableName} = ${effectValue}`];
-  }
+  const variableName = "hand_change";
+  
+  const { valueCode, configVariables, isXVariable } = generateConfigVariables(
+    effect.params?.value,
+    effect.id,
+    variableName
+  )
 
   let addToDeck = "";
   let removeFromDeck = "";
@@ -169,8 +131,11 @@ export const generatePassiveHand = (effect: Effect): PassiveEffectResult => {
   return {
     addToDeck,
     removeFromDeck,
-    configVariables,
+    configVariables: 
+      configVariables.length > 0 ?
+      configVariables.map((cv)=> `${cv.name} = ${cv.value}`)
+      : [],
     locVars:
-      parsed.isGameVariable || rangeParsed.isRangeVariable ? [] : [valueCode],
+      isXVariable.isGameVariable || isXVariable.isRangeVariable ? [] : [valueCode],
   };
 };

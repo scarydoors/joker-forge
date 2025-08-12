@@ -1,9 +1,7 @@
-import type { EffectReturn, ConfigExtraVariable } from "../effectUtils";
+import type { EffectReturn } from "../effectUtils";
 import type { Effect } from "../../../ruleBuilder/types";
 import {
-  generateGameVariableCode,
-  parseGameVariable,
-  parseRangeVariable,
+  generateConfigVariables
 } from "../gameVariableUtils";
 
 export const generateSetSellValueReturn = (
@@ -13,40 +11,15 @@ export const generateSetSellValueReturn = (
 ): EffectReturn => {
   const target = (effect.params?.target as string) || "self";
   const operation = (effect.params?.operation as string) || "add";
-  const effectValue = effect.params.value;
-  const parsed = parseGameVariable(effectValue);
-  const rangeParsed = parseRangeVariable(effectValue);
-
-  let valueCode: string;
-  const configVariables: ConfigExtraVariable[] = [];
 
   const variableName =
     sameTypeCount === 0 ? "sell_value" : `sell_value${sameTypeCount + 1}`;
 
-  if (parsed.isGameVariable) {
-    valueCode = generateGameVariableCode(effectValue);
-  } else if (rangeParsed.isRangeVariable) {
-    const seedName = `${variableName}_${effect.id.substring(0, 8)}`;
-    valueCode = `pseudorandom('${seedName}', card.ability.extra.${variableName}_min, card.ability.extra.${variableName}_max)`;
-
-    configVariables.push(
-      { name: `${variableName}_min`, value: rangeParsed.min || 1 },
-      { name: `${variableName}_max`, value: rangeParsed.max || 5 }
-    );
-  } else if (typeof effectValue === "string") {
-    if (effectValue.endsWith("_value")) {
-      valueCode = effectValue;
-    } else {
-      valueCode = `card.ability.extra.${effectValue}`;
-    }
-  } else {
-    valueCode = `card.ability.extra.${variableName}`;
-
-    configVariables.push({
-      name: variableName,
-      value: Number(effectValue) || 1,
-    });
-  }
+  const { valueCode, configVariables } = generateConfigVariables(
+    effect.params?.value,
+    effect.id,
+    variableName
+  )
 
   const customMessage = effect.customMessage;
 

@@ -1,9 +1,7 @@
 import type { EffectReturn, ConfigExtraVariable } from "../effectUtils";
 import type { Effect } from "../../../ruleBuilder/types";
 import {
-  generateGameVariableCode,
-  parseGameVariable,
-  parseRangeVariable,
+  generateConfigVariables
 } from "../gameVariableUtils";
 
 export const generateJuiceUpReturn = (
@@ -13,66 +11,33 @@ export const generateJuiceUpReturn = (
 ): EffectReturn => {
   const mode = effect.params?.mode || "onetime";
 
-  const effectScale = effect.params.scale;
-  const scaleParsed = parseGameVariable(effectScale);
-  const scaleRangeParsed = parseRangeVariable(effectScale);
-
   const configVariables: ConfigExtraVariable[] = [];
-  let scaleValueCode: string;
 
   const scaleVariableName =
     sameTypeCount === 0 ? "scale" : `scale${sameTypeCount + 1}`;
+  const scaleRet = generateConfigVariables(
+    effect.params.scale,
+    effect.id,
+    scaleVariableName
+  )
 
-  if (scaleParsed.isGameVariable) {
-    scaleValueCode = generateGameVariableCode(effectScale);
-  } else if (scaleRangeParsed.isRangeVariable) {
-    const seedName = `${scaleVariableName}_${effect.id.substring(0, 8)}`;
-    scaleValueCode = `pseudorandom('${seedName}', card.ability.extra.${scaleVariableName}_min, card.ability.extra.${scaleVariableName}_max)`;
-
-    configVariables.push(
-      { name: `${scaleVariableName}_min`, value: scaleRangeParsed.min || 1 },
-      { name: `${scaleVariableName}_max`, value: scaleRangeParsed.max || 5 }
-    );
-  } else if (typeof effectScale === "string") {
-    scaleValueCode = `card.ability.extra.${effectScale}`;
-  } else {
-    scaleValueCode = `card.ability.extra.${scaleVariableName}`;
-
-    configVariables.push({
-      name: scaleVariableName,
-      value: Number(effectScale) || 1,
-    });
-  }
-
-
-  let rotationValueCode: string;
-  const effectRotation = effect.params.rotation;
-  const rotationParsed = parseGameVariable(effectRotation);
-  const rotationRangeParsed = parseRangeVariable(effectRotation);
+  scaleRet.configVariables.forEach((cv) => {
+    configVariables.push(cv)
+  })
+  const scaleValueCode = scaleRet.valueCode
 
   const rotationVariableName =
     sameTypeCount === 0 ? "rotation" : `rotation${sameTypeCount + 1}`;
+  const rotationRet = generateConfigVariables(
+    effect.params.rotation,
+    effect.id,
+    rotationVariableName
+  )
 
-  if (rotationParsed.isGameVariable) {
-    rotationValueCode = generateGameVariableCode(effectRotation);
-  } else if (rotationRangeParsed.isRangeVariable) {
-    const seedName = `${scaleVariableName}_${effect.id.substring(0, 8)}`;
-    rotationValueCode = `pseudorandom('${seedName}', card.ability.extra.${rotationVariableName}_min, card.ability.extra.${rotationVariableName}_max)`;
-
-    configVariables.push(
-      { name: `${rotationVariableName}_min`, value: rotationRangeParsed.min || 1 },
-      { name: `${rotationVariableName}_max`, value: rotationRangeParsed.max || 5 }
-    );
-  } else if (typeof effectRotation === "string") {
-    rotationValueCode = `card.ability.extra.${effectRotation}`;
-  } else {
-    rotationValueCode = `card.ability.extra.${rotationVariableName}`;
-
-    configVariables.push({
-      name: rotationVariableName,
-      value: Number(effectRotation) ?? 1,
-    });
-  }
+  rotationRet.configVariables.forEach((cv) => {
+    configVariables.push(cv)
+  })
+  const rotationValueCode = rotationRet.valueCode
 
   let cardType: string;
   if (effectType == "card") {

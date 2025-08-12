@@ -46,7 +46,10 @@ export const generatePassiveCopyJokerAbility = (
         
         ${targetJokerLogic}
         
-        return SMODS.blueprint_effect(card, target_joker, context)`;
+        local ret = SMODS.blueprint_effect(card, target_joker, context)
+        if ret then
+            SMODS.calculate_effect(ret, card)
+        end`;
 
   return {
     calculateFunction,

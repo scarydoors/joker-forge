@@ -1,4 +1,5 @@
 import { getGameVariableById } from "../../data/Jokers/GameVars";
+import { ConfigExtraVariable } from "./effectUtils";
 
 export interface ParsedGameVariable {
   isGameVariable: boolean;
@@ -12,6 +13,15 @@ export interface ParsedRangeVariable {
   isRangeVariable: boolean;
   min?: number;
   max?: number;
+}
+
+export interface ConfigVariablesReturn {
+  valueCode: string;
+  configVariables: ConfigExtraVariable[];
+  isXVariable: {
+    isGameVariable: boolean,
+    isRangeVariable: boolean
+  }
 }
 
 export const parseGameVariable = (value: unknown): ParsedGameVariable => {
@@ -85,3 +95,50 @@ export const generateGameVariableCode = (
 
   return typeof value === "number" ? value.toString() : "0";
 };
+
+export const generateConfigVariables = ( 
+  effectValue: unknown,
+  effectId: string,
+  variableName: string
+): ConfigVariablesReturn => {
+  effectValue = effectValue ?? 1
+  const parsed = parseGameVariable(effectValue);
+  const rangeParsed = parseRangeVariable(effectValue);
+
+  let valueCode: string;
+  const configVariables: ConfigExtraVariable[] = [];
+
+  if (parsed.isGameVariable) {
+    valueCode = generateGameVariableCode(effectValue);
+  } else if (rangeParsed.isRangeVariable) {
+    const seedName = `${variableName}_${effectId.substring(0, 8)}`;
+    valueCode = `pseudorandom('${seedName}', card.ability.extra.${variableName}_min, card.ability.extra.${variableName}_max)`;
+
+    configVariables.push(
+      { name: `${variableName}_min`, value: rangeParsed.min ?? 1 },
+      { name: `${variableName}_max`, value: rangeParsed.max ?? 5 }
+    );
+  } else if (typeof effectValue === "string") {
+    if (effectValue.endsWith("_value")) {
+      valueCode = effectValue;
+    } else {
+      valueCode = `card.ability.extra.${effectValue}`;
+    }
+  } else {
+    valueCode = `card.ability.extra.${variableName}`;
+
+    configVariables.push({
+      name: variableName,
+      value: Number(effectValue ?? 1),
+    });
+  }
+
+  return {
+    valueCode,
+    configVariables,
+    isXVariable: {
+      isGameVariable: parsed.isGameVariable,
+      isRangeVariable: rangeParsed.isRangeVariable
+    }
+  }
+}
