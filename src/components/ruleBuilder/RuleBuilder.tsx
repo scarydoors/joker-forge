@@ -45,11 +45,12 @@ import {
   JokerData,
   ConsumableData,
   EnhancementData,
+  SealData,
 } from "../data/BalatroUtils";
 import { getCardConditionTypeById } from "../data/Card/Conditions";
 import { getCardEffectTypeById } from "../data/Card/Effects";
 
-type ItemData = JokerData | ConsumableData | EnhancementData;
+type ItemData = JokerData | ConsumableData | EnhancementData | SealData;
 type ItemType = "joker" | "consumable" | "card";
 
 interface RuleBuilderProps {
