@@ -112,6 +112,12 @@ export const TRIGGERS: TriggerDefinition[] = [
     category: "Gameplay",
   },
   {
+    id: "joker_evaluated",
+    label: "When Another Joker is Evaluated",
+    description: "Triggers when another joker you own is evaluated (triggered after scoring).",
+    category: "Gameplay"
+  },
+  {
     id: "round_end",
     label: "When the Round Ends",
     description:

@@ -8170,22 +8170,38 @@
       "discovered": true,
       "rules": [
         {
-          "id": "1a5a556b-c374-45eb-8098-1f490e265f57",
-          "trigger": "hand_played",
-          "conditionGroups": [],
+          "id": "d4b4aa20-d45f-4cb1-a243-221d31ca1a24",
+          "trigger": "joker_evaluated",
+          "blueprintCompatible": true,
+          "conditionGroups": [
+            {
+              "id": "51798f58-1c05-4199-a9da-42764683c508",
+              "operator": "and",
+              "conditions": [
+                {
+                  "id": "4e66637b-6561-4860-93db-607f92675591",
+                  "type": "joker_rarity",
+                  "negate": false,
+                  "params": {
+                    "rarity": "uncommon"
+                  }
+                }
+              ]
+            }
+          ],
           "effects": [
             {
-              "id": "f906e034-7076-48dd-9220-61bd0666e70e",
+              "id": "58684842-baa7-4522-b3f0-b47e2cdcec4c",
               "type": "apply_x_mult",
               "params": {
-                "value": "GAMEVAR:uncommon_jokers|1.5|1"
+                "value": 1.5
               }
             }
           ],
           "randomGroups": [],
           "position": {
-            "x": 1027,
-            "y": 474
+            "x": 800,
+            "y": 295.5
           }
         }
       ],

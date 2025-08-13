@@ -70,7 +70,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
     id: "add_chips",
     label: "Add Chips",
     description: "Add a flat amount of chips to the hand score",
-    applicableTriggers: ["hand_played", "card_scored", "card_held_in_hand"],
+    applicableTriggers: ["hand_played", "card_scored", "card_held_in_hand", "joker_evaluated"],
     params: [
       {
         id: "value",
@@ -86,7 +86,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
     id: "apply_x_chips",
     label: "Apply xChips",
     description: "Multiply the chips by this value",
-    applicableTriggers: ["hand_played", "card_scored", "card_held_in_hand"],
+    applicableTriggers: ["hand_played", "card_scored", "card_held_in_hand", "joker_evaluated"],
     params: [
       {
         id: "value",
@@ -101,7 +101,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
     id: "apply_exp_chips",
     label: "Apply ^Chips (Exponential)",
     description: "Apply exponential chips (echips) - REQUIRES TALISMAN MOD",
-    applicableTriggers: ["hand_played", "card_scored", "card_held_in_hand"],
+    applicableTriggers: ["hand_played", "card_scored", "card_held_in_hand", "joker_evaluated"],
     params: [
       {
         id: "value",
@@ -116,7 +116,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
     id: "add_mult",
     label: "Add Mult",
     description: "Add a flat amount of mult to the hand score",
-    applicableTriggers: ["hand_played", "card_scored", "card_held_in_hand"],
+    applicableTriggers: ["hand_played", "card_scored", "card_held_in_hand", "joker_evaluated"],
     params: [
       {
         id: "value",
@@ -132,7 +132,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
     id: "apply_x_mult",
     label: "Apply xMult",
     description: "Multiply the score by this value",
-    applicableTriggers: ["hand_played", "card_scored", "card_held_in_hand"],
+    applicableTriggers: ["hand_played", "card_scored", "card_held_in_hand", "joker_evaluated"],
     params: [
       {
         id: "value",
@@ -147,7 +147,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
     id: "apply_exp_mult",
     label: "Apply ^Mult (Exponential)",
     description: "Apply exponential mult (emult) - REQUIRES TALISMAN MOD",
-    applicableTriggers: ["hand_played", "card_scored", "card_held_in_hand"],
+    applicableTriggers: ["hand_played", "card_scored", "card_held_in_hand", "joker_evaluated"],
     params: [
       {
         id: "value",
