@@ -1,12 +1,11 @@
 import type { Effect } from "../../../ruleBuilder/types";
-import {
-  generateConfigVariables
-} from "../../Jokers/gameVariableUtils";
+import { generateConfigVariables } from "../../Jokers/gameVariableUtils";
 import type { EffectReturn } from "../effectUtils";
 
 export const generateRetriggerReturn = (
   effect: Effect,
-  sameTypeCount: number = 0
+  sameTypeCount: number = 0,
+  itemType: "enhancement" | "seal" = "enhancement"
 ): EffectReturn => {
   const effectValue = effect.params?.value ?? 1;
   const variableName =
@@ -17,19 +16,22 @@ export const generateRetriggerReturn = (
   const { valueCode, configVariables } = generateConfigVariables(
     effectValue,
     effect.id,
-    variableName
-  )
+    variableName,
+    itemType
+  );
 
+  const abilityPath =
+    itemType === "seal" ? "card.ability.seal.extra" : "card.ability.extra";
   const customMessage = effect.customMessage;
 
   let statement: string;
 
   if (typeof effectValue === "number" && effectValue !== 1) {
     statement = `__PRE_RETURN_CODE__card.should_retrigger = true
-            card.ability.extra.${variableName} = ${effectValue}__PRE_RETURN_CODE_END__`;
-  } else if (valueCode !== `card.ability.extra.${variableName}`) {
+            ${abilityPath}.${variableName} = ${effectValue}__PRE_RETURN_CODE_END__`;
+  } else if (valueCode !== `${abilityPath}.${variableName}`) {
     statement = `__PRE_RETURN_CODE__card.should_retrigger = true
-            card.ability.extra.${variableName} = ${valueCode}__PRE_RETURN_CODE_END__`;
+            ${abilityPath}.${variableName} = ${valueCode}__PRE_RETURN_CODE_END__`;
   } else {
     statement = `__PRE_RETURN_CODE__card.should_retrigger = true__PRE_RETURN_CODE_END__`;
   }

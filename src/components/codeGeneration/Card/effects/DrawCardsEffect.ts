@@ -1,12 +1,11 @@
 import type { Effect } from "../../../ruleBuilder/types";
-import {
-  generateConfigVariables
-} from "../../Jokers/gameVariableUtils";
+import { generateConfigVariables } from "../../Jokers/gameVariableUtils";
 import type { EffectReturn } from "../effectUtils";
 
 export const generateDrawCardsReturn = (
   effect: Effect,
-  sameTypeCount: number = 0
+  sameTypeCount: number = 0,
+  itemType: "enhancement" | "seal" = "enhancement"
 ): EffectReturn => {
   const variableName =
     sameTypeCount === 0 ? "card_draw" : `card_draw${sameTypeCount + 1}`;
@@ -14,8 +13,9 @@ export const generateDrawCardsReturn = (
   const { valueCode, configVariables } = generateConfigVariables(
     effect.params?.value,
     effect.id,
-    variableName
-  )
+    variableName,
+    itemType
+  );
 
   const customMessage = effect.customMessage;
 

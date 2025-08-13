@@ -48,29 +48,30 @@ export interface RandomGroup {
 
 const generateSingleEffect = (
   effect: Effect,
-  trigger?: string
+  trigger?: string,
+  itemType: "enhancement" | "seal" = "enhancement"
 ): EffectReturn => {
   switch (effect.type) {
     case "add_mult":
-      return generateAddMultReturn(effect);
+      return generateAddMultReturn(effect, 0, itemType);
 
     case "add_chips":
-      return generateAddChipsReturn(effect);
+      return generateAddChipsReturn(effect, 0, itemType);
 
     case "add_x_chips":
-      return generateAddXChipsReturn(effect);
+      return generateAddXChipsReturn(effect, 0, itemType);
 
     case "add_x_mult":
-      return generateAddXMultReturn(effect);
+      return generateAddXMultReturn(effect, 0, itemType);
 
     case "edit_dollars":
-      return generateEditDollarsReturn(effect);
+      return generateEditDollarsReturn(effect, 0, itemType);
 
     case "destroy_card":
       return generateDestroyCardReturn(effect, trigger);
 
     case "retrigger_card":
-      return generateRetriggerReturn(effect);
+      return generateRetriggerReturn(effect, 0, itemType);
 
     case "create_joker":
       return generateCreateJokerReturn(effect);
@@ -114,7 +115,8 @@ export function generateEffectReturnStatement(
   regularEffects: Effect[] = [],
   randomGroups: RandomGroup[] = [],
   modprefix: string,
-  trigger?: string
+  trigger?: string,
+  itemType: "enhancement" | "seal" = "enhancement"
 ): ReturnStatementResult {
   if (regularEffects.length === 0 && randomGroups.length === 0) {
     return {
@@ -133,7 +135,7 @@ export function generateEffectReturnStatement(
 
   if (regularEffects.length > 0) {
     const effectReturns: EffectReturn[] = regularEffects
-      .map((effect) => generateSingleEffect(effect, trigger))
+      .map((effect) => generateSingleEffect(effect, trigger, itemType))
       .filter((ret) => ret.statement || ret.message);
 
     effectReturns.forEach((effectReturn) => {
@@ -240,9 +242,11 @@ export function generateEffectReturnStatement(
       ...new Set(randomGroups.map((group) => group.chance_denominator)),
     ];
     const denominatorToOddsVar: Record<number, string> = {};
+    const abilityPath =
+      itemType === "seal" ? "card.ability.seal.extra" : "card.ability.extra";
 
     if (denominators.length === 1) {
-      denominatorToOddsVar[denominators[0]] = "card.ability.extra.odds";
+      denominatorToOddsVar[denominators[0]] = `${abilityPath}.odds`;
       const oddsVar = "odds = " + denominators[0];
       if (!configVariableSet.has(oddsVar)) {
         configVariableSet.add(oddsVar);
@@ -251,14 +255,14 @@ export function generateEffectReturnStatement(
     } else {
       denominators.forEach((denom, index) => {
         if (index === 0) {
-          denominatorToOddsVar[denom] = "card.ability.extra.odds";
+          denominatorToOddsVar[denom] = `${abilityPath}.odds`;
           const oddsVar = "odds = " + denom;
           if (!configVariableSet.has(oddsVar)) {
             configVariableSet.add(oddsVar);
             allConfigVariables.push(oddsVar);
           }
         } else {
-          denominatorToOddsVar[denom] = `card.ability.extra.odds${index + 1}`;
+          denominatorToOddsVar[denom] = `${abilityPath}.odds${index + 1}`;
           const oddsVar = `odds${index + 1} = ${denom}`;
           if (!configVariableSet.has(oddsVar)) {
             configVariableSet.add(oddsVar);
@@ -270,7 +274,7 @@ export function generateEffectReturnStatement(
 
     randomGroups.forEach((group, groupIndex) => {
       const effectReturns: EffectReturn[] = group.effects
-        .map((effect) => generateSingleEffect(effect, trigger))
+        .map((effect) => generateSingleEffect(effect, trigger, itemType))
         .filter((ret) => ret.statement || ret.message);
 
       effectReturns.forEach((effectReturn) => {

@@ -1,21 +1,21 @@
 import type { Effect } from "../../../ruleBuilder/types";
-import {
-  generateConfigVariables,
-} from "../../Jokers/gameVariableUtils";
+import { generateConfigVariables } from "../../Jokers/gameVariableUtils";
 import type { EffectReturn } from "../effectUtils";
 
 export const generateAddMultReturn = (
   effect: Effect,
-  sameTypeCount: number = 0
+  sameTypeCount: number = 0,
+  itemType: "enhancement" | "seal" = "enhancement"
 ): EffectReturn => {
   const variableName =
     sameTypeCount === 0 ? "mult" : `mult${sameTypeCount + 1}`;
 
   const { valueCode, configVariables } = generateConfigVariables(
-      effect.params?.value,
-      effect.id,
-      variableName
-    )
+    effect.params?.value,
+    effect.id,
+    variableName,
+    itemType
+  );
 
   const customMessage = effect.customMessage;
 

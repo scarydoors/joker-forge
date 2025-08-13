@@ -1,12 +1,11 @@
 import type { Effect } from "../../../ruleBuilder/types";
-import {
-  generateConfigVariables,
-} from "../../Jokers/gameVariableUtils";
+import { generateConfigVariables } from "../../Jokers/gameVariableUtils";
 import type { EffectReturn } from "../effectUtils";
 
 export const generateLevelUpHandReturn = (
   effect: Effect,
-  sameTypeCount: number = 0
+  sameTypeCount: number = 0,
+  itemType: "enhancement" | "seal" = "enhancement"
 ): EffectReturn => {
   const customMessage = effect?.customMessage;
 
@@ -16,8 +15,9 @@ export const generateLevelUpHandReturn = (
   const { valueCode, configVariables } = generateConfigVariables(
     effect.params?.value,
     effect.id,
-    variableName
-  )
+    variableName,
+    itemType
+  );
 
   const targetHandVar =
     sameTypeCount === 0 ? `target_hand` : `target_hand${sameTypeCount + 1}`;
