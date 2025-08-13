@@ -636,7 +636,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
         id: "seal",
         type: "select",
         label: "Seal Type",
-        options: [{ value: "any", label: "Any Seal" }, ...SEALS],
+        options: [{ value: "any", label: "Any Seal" }, ...SEALS()],
       },
     ],
     category: "Card",
@@ -802,7 +802,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
         id: "seal",
         type: "select",
         label: "Seal Type",
-        options: [{ value: "any", label: "Any Seal" }, ...SEALS],
+        options: [{ value: "any", label: "Any Seal" }, ...SEALS()],
       },
       {
         id: "operator",
@@ -1667,7 +1667,7 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
         options: [
           { value: "any", label: "Any Seal" },
           { value: "none", label: "No Seal" },
-          ...SEALS,
+          ...SEALS(),
         ],
         showWhen: {
           parameter: "property_type",

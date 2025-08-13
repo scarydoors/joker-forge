@@ -89,8 +89,8 @@ export const CONSUMABLE_EFFECT_TYPES: EffectTypeDefinition[] = [
         options: [
           { value: "none", label: "No Change" },
           { value: "remove", label: "Remove Seal" },
-          ...SEALS.map((seal) => ({ value: seal.value, label: seal.label })),
           { value: "random", label: "Random Seal" },
+          ...SEALS(),
         ],
         default: "none",
       },
@@ -201,8 +201,8 @@ export const CONSUMABLE_EFFECT_TYPES: EffectTypeDefinition[] = [
         label: "Seal Type",
         options: [
           { value: "none", label: "Keep Original Seal" },
-          ...SEALS.map((seal) => ({ value: seal.value, label: seal.label })),
           { value: "random", label: "Random Seal" },
+          ...SEALS(),
         ],
         default: "none",
       },
@@ -624,8 +624,8 @@ export const CONSUMABLE_EFFECT_TYPES: EffectTypeDefinition[] = [
         label: "Seal Type",
         options: [
           { value: "none", label: "No Seal" },
-          ...SEALS.map((seal) => ({ value: seal.value, label: seal.label })),
           { value: "random", label: "Random Seal" },
+          ...SEALS(),
         ],
         default: "none",
       },
@@ -928,8 +928,8 @@ export const CONSUMABLE_EFFECT_TYPES: EffectTypeDefinition[] = [
         label: "Seal Type",
         options: [
           { value: "none", label: "No Change" },
-          ...SEALS.map((seal) => ({ value: seal.value, label: seal.label })),
           { value: "random", label: "Random Seal" },
+          ...SEALS(),
         ],
         default: "none",
       },

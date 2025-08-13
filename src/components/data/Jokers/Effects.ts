@@ -508,7 +508,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
         options: [
           { value: "none", label: "None" },
           { value: "random", label: "Random" },
-          ...SEALS,
+          ...SEALS(),
         ],
         default: "none",
       },
@@ -642,7 +642,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
           { value: "none", label: "Don't Change" },
           { value: "remove", label: "Remove Seal" },
           { value: "random", label: "Random" },
-          ...SEALS,
+          ...SEALS(),
         ],
         default: "none",
       },
@@ -699,7 +699,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
         options: [
           { value: "none", label: "None" },
           { value: "random", label: "Random" },
-          ...SEALS,
+          ...SEALS(),
         ],
         default: "none",
       },

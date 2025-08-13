@@ -170,7 +170,7 @@ export const CARD_CONDITION_TYPES: ConditionTypeDefinition[] = [
         id: "seal",
         type: "select",
         label: "Seal Type",
-        options: [{ value: "any", label: "Any Seal" }, ...SEALS],
+        options: [{ value: "any", label: "Any Seal" }, ...SEALS()],
       },
     ],
     category: "Card",
