@@ -49,6 +49,9 @@ import { generateBlindNameConditionCode } from "./conditions/BlindNameCondition"
 import { generateFirstLastScoredConditionCode } from "./conditions/FirstLastScoredCondition";
 import { generateProbabilitySucceededConditionCode } from "./conditions/ProbabilitySucceededCondition";
 import { generateVoucherRedeemedConditionCode } from "./conditions/VoucherRedeemedCondition";
+import { generateJokerRarityConditionCode } from "./conditions/JokerRarityCondition";
+import { generateJokerStickerConditionCode, generateThisJokerStickerConditionCode } from "./conditions/JokerStickerCondition";
+import { generateJokerPositionConditionCode, generateThisJokerPositionConditionCode } from "./conditions/JokerPositionCondition";
 
 export const generateConditionChain = (
   rule: Rule,
@@ -273,6 +276,19 @@ const generateSingleConditionCode = (
 
     case "voucher_redeemed":
       return generateVoucherRedeemedConditionCode([singleConditionRule]);
+
+    case "joker_rarity":
+      return generateJokerRarityConditionCode([singleConditionRule]);
+
+    case "joker_index":
+      return generateJokerPositionConditionCode([singleConditionRule]);
+    case "this_joker_index":
+      return generateThisJokerPositionConditionCode([singleConditionRule]);
+
+    case "joker_sticker":
+      return generateJokerStickerConditionCode([singleConditionRule]);
+    case "this_joker_sticker":
+      return generateThisJokerStickerConditionCode([singleConditionRule])
 
     default:
       return null;

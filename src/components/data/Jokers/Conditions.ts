@@ -30,6 +30,7 @@ import {
   CONSUMABLE_SETS,
   RARITIES,
   VOUCHERS,
+  STICKERS,
 } from "../BalatroUtils";
 
 export const GENERIC_TRIGGERS: string[] = [
@@ -53,6 +54,7 @@ export const GENERIC_TRIGGERS: string[] = [
   "card_held_in_hand_end_of_round",
   "after_hand_played",
   "before_hand_played",
+  "joker_evaluated",
   "card_sold",
   "card_bought",
   "selling_self",
@@ -93,6 +95,10 @@ export const CONDITION_CATEGORIES: CategoryDefinition[] = [
   },
   {
     label: "Card",
+    icon: RectangleStackIcon,
+  },
+  {
+    label: "Joker",
     icon: RectangleStackIcon,
   },
   {
@@ -1817,6 +1823,114 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
       },
     ],
     category: "Probability",
+  },
+  {
+    id: "joker_rarity",
+    label: "Joker Rarity",
+    description: "Check the rarity of the evaluated joker",
+    applicableTriggers: ["joker_evaluated"],
+    params: [
+      {
+        id: "rarity",
+        type: "select",
+        label: "Rarity",
+        options: () => [...RARITIES()],
+        default: "common",
+      },
+    ],
+    category: "Joker",
+  },
+  {
+    id: "joker_index",
+    label: "Joker Position",
+    description: "Check the position of the evaluated joker",
+    applicableTriggers: ["joker_evaluated"],
+    params: [
+      {
+        id: "position",
+        type: "select",
+        label: "Position",
+        options: [
+          { value: "first", label: "First Joker" },
+          { value: "last", label: "Last Joker" },
+          { value: "specific", label: "Specific Index" },
+        ],
+        default: "first",
+      },
+      {
+        id: "specific_index",
+        type: "number",
+        label: "Joker Index (1-5)",
+        default: 1,
+        showWhen: {
+          parameter: "position",
+          values: ["specific"],
+        },
+      },
+    ],
+    category: "Joker",
+  },
+  {
+    id: "this_joker_index",
+    label: "This Joker Position",
+    description: "Check the position of this joker",
+    applicableTriggers: [...GENERIC_TRIGGERS],
+    params: [
+      {
+        id: "position",
+        type: "select",
+        label: "Position",
+        options: [
+          { value: "first", label: "First Joker" },
+          { value: "last", label: "Last Joker" },
+          { value: "specific", label: "Specific Index" },
+        ],
+        default: "first",
+      },
+      {
+        id: "specific_index",
+        type: "number",
+        label: "Joker Index (1-5)",
+        default: 1,
+        showWhen: {
+          parameter: "position",
+          values: ["specific"],
+        },
+      },
+    ],
+    category: "Deck & Jokers",
+  },
+  {
+    id: "joker_sticker",
+    label: "Joker Sticker",
+    description: "Check the stickers of the evaluated joker",
+    applicableTriggers: ["joker_evaluated"],
+    params: [
+      {
+        id: "sticker",
+        type: "select",
+        label: "Sticker",
+        options: [...STICKERS.map(({ value, label }) => ({ value, label }))],
+        default: "eternal",
+      },
+    ],
+    category: "Joker",
+  },
+  {
+    id: "this_joker_sticker",
+    label: "This Joker Sticker",
+    description: "Check the stickers of this joker",
+    applicableTriggers: [...GENERIC_TRIGGERS],
+    params: [
+      {
+        id: "sticker",
+        type: "select",
+        label: "Sticker",
+        options: [...STICKERS.map(({ value, label }) => ({ value, label }))],
+        default: "eternal",
+      },
+    ],
+    category: "Deck & Jokers",
   },
 ];
 
