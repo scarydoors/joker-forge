@@ -1,4 +1,4 @@
-import { EnhancementData, slugify } from "../../data/BalatroUtils";
+import { EnhancementData, SealData, slugify } from "../../data/BalatroUtils";
 import { generateConditionChain } from "./conditionUtils";
 import { generateEffectReturnStatement } from "./effectUtils";
 import { generateTriggerCondition } from "./triggerUtils";
@@ -10,10 +10,376 @@ interface EnhancementGenerationOptions {
   atlasKey?: string;
 }
 
+interface SealGenerationOptions {
+  modPrefix?: string;
+  atlasKey?: string;
+}
+
 interface UnconditionalEffect {
   trigger: string;
   effect: Effect;
 }
+
+const hasRetriggerEffects = (rules: Rule[]): boolean => {
+  return rules.some(
+    (rule) =>
+      rule.effects?.some((effect) => effect.type === "retrigger_card") ||
+      rule.randomGroups?.some((group) =>
+        group.effects.some((effect) => effect.type === "retrigger_card")
+      )
+  );
+};
+
+const hasDestroyCardEffects = (rules: Rule[]): boolean => {
+  return rules.some(
+    (rule) =>
+      rule.effects?.some((effect) => effect.type === "destroy_card") ||
+      rule.randomGroups?.some((group) =>
+        group.effects.some((effect) => effect.type === "destroy_card")
+      )
+  );
+};
+
+const hasNonDiscardDestroyEffects = (rules: Rule[]): boolean => {
+  return rules.some(
+    (rule) =>
+      rule.trigger !== "card_discarded" &&
+      (rule.effects?.some((effect) => effect.type === "destroy_card") ||
+        rule.randomGroups?.some((group) =>
+          group.effects.some((effect) => effect.type === "destroy_card")
+        ))
+  );
+};
+
+const generateCalculateFunction = (
+  rules: Rule[],
+  modPrefix: string,
+  hasNonDiscardDestroy: boolean,
+  hasRetrigger: boolean,
+  itemType: "enhancement" | "seal"
+): string => {
+  if (rules.length === 0 && !hasNonDiscardDestroy && !hasRetrigger) {
+    return "";
+  }
+
+  const abilityPath =
+    itemType === "seal" ? "card.ability.seal.extra" : "card.ability.extra";
+
+  let calculateFunction = `calculate = function(self, card, context)`;
+
+  if (hasNonDiscardDestroy) {
+    if (itemType === "enhancement") {
+      calculateFunction += `
+        if context.destroy_card and context.cardarea == G.play and context.destroy_card == card and card.should_destroy then
+            return { remove = true }
+        end`;
+    } else {
+      calculateFunction += `
+        if context.destroy_card and context.cardarea == G.play and context.destroy_card == card and card.should_destroy then
+            G.E_MANAGER:add_event(Event({
+                func = function()
+                    card:start_dissolve()
+                    return true
+                end
+            }))
+            card_eval_status_text(context.blueprint_card or card, 'extra', nil, nil, nil, {message = "Card Destroyed!", colour = G.C.RED})
+            return
+        end`;
+    }
+  }
+
+  if (hasRetrigger) {
+    calculateFunction += `
+        if context.repetition and card.should_retrigger then
+            return { repetitions = ${abilityPath}.retrigger_times }
+        end`;
+  }
+
+  rules.forEach((rule) => {
+    const triggerCondition = generateTriggerCondition(rule.trigger);
+    const conditionCode = generateConditionChain(rule);
+
+    const ruleHasDestroyCardEffects =
+      rule.effects?.some((effect) => effect.type === "destroy_card") ||
+      rule.randomGroups?.some((group) =>
+        group.effects.some((effect) => effect.type === "destroy_card")
+      );
+
+    const ruleHasRetriggerEffects =
+      rule.effects?.some((effect) => effect.type === "retrigger_card") ||
+      rule.randomGroups?.some((group) =>
+        group.effects.some((effect) => effect.type === "retrigger_card")
+      );
+
+    const isDiscardTrigger = rule.trigger === "card_discarded";
+
+    let ruleCode = "";
+
+    if (triggerCondition) {
+      if (
+        (ruleHasDestroyCardEffects || ruleHasRetriggerEffects) &&
+        !isDiscardTrigger
+      ) {
+        ruleCode += `
+        if ${triggerCondition} then`;
+
+        if (ruleHasDestroyCardEffects) {
+          ruleCode += `
+            card.should_destroy = false`;
+        }
+
+        if (ruleHasRetriggerEffects) {
+          ruleCode += `
+            card.should_retrigger = false`;
+        }
+
+        if (conditionCode) {
+          ruleCode += `
+            if ${conditionCode} then`;
+        }
+      } else {
+        ruleCode += `
+        if ${triggerCondition}`;
+
+        if (conditionCode) {
+          ruleCode += ` and ${conditionCode}`;
+        }
+
+        ruleCode += ` then`;
+      }
+    }
+
+    const regularEffects = rule.effects || [];
+    const randomGroups = (rule.randomGroups || []).map((group) => ({
+      ...group,
+      chance_numerator:
+        typeof group.chance_numerator === "string" ? 1 : group.chance_numerator,
+      chance_denominator:
+        typeof group.chance_denominator === "string"
+          ? 1
+          : group.chance_denominator,
+    }));
+
+    const effectResult = generateEffectReturnStatement(
+      regularEffects,
+      randomGroups,
+      modPrefix,
+      rule.trigger,
+      itemType
+    );
+
+    const indentLevel =
+      (ruleHasDestroyCardEffects || ruleHasRetriggerEffects) &&
+      !isDiscardTrigger &&
+      conditionCode
+        ? "                "
+        : "            ";
+
+    if (effectResult.preReturnCode) {
+      ruleCode += `
+${indentLevel}${effectResult.preReturnCode}`;
+    }
+
+    if (effectResult.statement) {
+      ruleCode += `
+${indentLevel}return ${effectResult.statement}`;
+    }
+
+    if (triggerCondition) {
+      if (
+        (ruleHasDestroyCardEffects || ruleHasRetriggerEffects) &&
+        !isDiscardTrigger &&
+        conditionCode
+      ) {
+        ruleCode += `
+            end`;
+      }
+      ruleCode += `
+        end`;
+    }
+
+    calculateFunction += ruleCode;
+  });
+
+  calculateFunction += `
+    end`;
+
+  return calculateFunction;
+};
+
+const generateLocVarsFunction = (
+  item: EnhancementData | SealData,
+  gameVariables: Array<{
+    name: string;
+    code: string;
+    startsFrom: number;
+    multiplier: number;
+  }>,
+  modPrefix: string,
+  itemType: "enhancement" | "seal",
+  unconditionalEffects: UnconditionalEffect[] = []
+): string | null => {
+  const descriptionHasVariables = item.description.includes("#");
+  if (!descriptionHasVariables) {
+    return null;
+  }
+
+  const variablePlaceholders = item.description.match(/#(\d+)#/g) || [];
+  const maxVariableIndex = Math.max(
+    ...variablePlaceholders.map((placeholder) =>
+      parseInt(placeholder.replace(/#/g, ""))
+    ),
+    0
+  );
+
+  if (maxVariableIndex === 0) {
+    return null;
+  }
+
+  const activeRules = item.rules || [];
+  const hasRandomGroups = activeRules.some(
+    (rule) => rule.randomGroups && rule.randomGroups.length > 0
+  );
+
+  const abilityPath =
+    itemType === "seal" ? "card.ability.seal.extra" : "card.ability.extra";
+
+  const wrapGameVariableCode = (code: string): string => {
+    if (code.includes("G.jokers.cards")) {
+      return code.replace(
+        "G.jokers.cards",
+        "(G.jokers and G.jokers.cards or {})"
+      );
+    }
+    if (code.includes("#G.jokers.cards")) {
+      return code.replace(
+        "#G.jokers.cards",
+        "(G.jokers and G.jokers.cards and #G.jokers.cards or 0)"
+      );
+    }
+    if (code.includes("#G.hand.cards")) {
+      return code.replace(
+        "#G.hand.cards",
+        "(G.hand and G.hand.cards and #G.hand.cards or 0)"
+      );
+    }
+    if (code.includes("#G.deck.cards")) {
+      return code.replace(
+        "#G.deck.cards",
+        "(G.deck and G.deck.cards and #G.deck.cards or 0)"
+      );
+    }
+    if (code.includes("#G.consumeables.cards")) {
+      return code.replace(
+        "#G.consumeables.cards",
+        "(G.consumeables and G.consumeables.cards and #G.consumeables.cards or 0)"
+      );
+    }
+    if (
+      code.includes("G.GAME") ||
+      code.includes("G.jokers") ||
+      code.includes("G.hand") ||
+      code.includes("G.deck") ||
+      code.includes("G.consumeables")
+    ) {
+      return `(${code} or 0)`;
+    }
+    return code;
+  };
+
+  const variableMapping: string[] = [];
+
+  if (itemType === "enhancement") {
+    const getDefaultEffectValue = (effectType: string): number => {
+      switch (effectType) {
+        case "add_mult":
+          return 4;
+        case "add_chips":
+          return 30;
+        case "edit_dollars":
+          return 1;
+        default:
+          return 0;
+      }
+    };
+
+    unconditionalEffects.forEach((unconditionalEffect) => {
+      if (variableMapping.length >= maxVariableIndex) return;
+
+      const value =
+        (unconditionalEffect.effect.params?.value as number) ||
+        getDefaultEffectValue(unconditionalEffect.effect.type);
+      variableMapping.push(value.toString());
+    });
+  }
+
+  gameVariables.forEach((gameVar) => {
+    if (variableMapping.length >= maxVariableIndex) return;
+
+    let gameVarCode: string;
+    if (gameVar.multiplier === 1 && gameVar.startsFrom === 0) {
+      gameVarCode = wrapGameVariableCode(gameVar.code);
+    } else if (gameVar.startsFrom === 0) {
+      gameVarCode = `(${wrapGameVariableCode(gameVar.code)}) * ${
+        gameVar.multiplier
+      }`;
+    } else if (gameVar.multiplier === 1) {
+      gameVarCode = `${abilityPath}.${gameVar.name} + (${wrapGameVariableCode(
+        gameVar.code
+      )})`;
+    } else {
+      gameVarCode = `${abilityPath}.${gameVar.name} + (${wrapGameVariableCode(
+        gameVar.code
+      )}) * ${gameVar.multiplier}`;
+    }
+
+    variableMapping.push(gameVarCode);
+  });
+
+  if (hasRandomGroups) {
+    const randomGroups = activeRules.flatMap((rule) => rule.randomGroups || []);
+    const denominators = [
+      ...new Set(randomGroups.map((group) => group.chance_denominator)),
+    ];
+
+    if (denominators.length === 1) {
+      const keyPrefix =
+        itemType === "enhancement" ? `m_${modPrefix}` : modPrefix;
+      const itemKey =
+        itemType === "enhancement"
+          ? (item as EnhancementData).enhancementKey
+          : (item as SealData).sealKey;
+
+      return `loc_vars = function(self, info_queue, card)
+        local numerator, denominator = SMODS.get_probability_vars(card, 1, ${abilityPath}.odds, '${keyPrefix}_${itemKey}')
+        return {vars = {${variableMapping.join(", ")}${
+        variableMapping.length > 0 ? ", " : ""
+      }numerator, denominator}}
+    end`;
+    } else {
+      const probabilityVars: string[] = [];
+      denominators.forEach((index) => {
+        const varName =
+          index === 0
+            ? `${abilityPath}.odds`
+            : `${abilityPath}.odds${Number(index) + 1}`;
+        probabilityVars.push(varName);
+      });
+
+      return `loc_vars = function(self, info_queue, card)
+        return {vars = {${[...variableMapping, ...probabilityVars]
+          .slice(0, maxVariableIndex)
+          .join(", ")}}}
+    end`;
+    }
+  }
+
+  const finalVars = variableMapping.slice(0, maxVariableIndex);
+
+  return `loc_vars = function(self, info_queue, card)
+        return {vars = {${finalVars.join(", ")}}}
+    end`;
+};
 
 export const generateEnhancementsCode = (
   enhancements: EnhancementData[],
@@ -43,6 +409,34 @@ export const generateEnhancementsCode = (
   return { enhancementsCode };
 };
 
+export const generateSealsCode = (
+  seals: SealData[],
+  options: SealGenerationOptions = {}
+): { sealsCode: Record<string, string> } => {
+  const { modPrefix = "", atlasKey = "CustomSeals" } = options;
+
+  const sealsWithKeys = seals.map((seal) => ({
+    ...seal,
+    sealKey: seal.sealKey || slugify(seal.name),
+  }));
+
+  const sealsCode: Record<string, string> = {};
+  let currentPosition = 0;
+
+  sealsWithKeys.forEach((seal) => {
+    const result = generateSingleSealCode(
+      seal,
+      atlasKey,
+      currentPosition,
+      modPrefix
+    );
+    sealsCode[`${seal.sealKey}.lua`] = result.code;
+    currentPosition = result.nextPosition;
+  });
+
+  return { sealsCode };
+};
+
 const generateSingleEnhancementCode = (
   enhancement: EnhancementData,
   atlasKey: string,
@@ -51,30 +445,8 @@ const generateSingleEnhancementCode = (
 ): { code: string; nextPosition: number } => {
   const activeRules = enhancement.rules || [];
 
-  const hasDestroyCardEffect = activeRules.some(
-    (rule) =>
-      rule.effects?.some((effect) => effect.type === "destroy_card") ||
-      rule.randomGroups?.some((group) =>
-        group.effects.some((effect) => effect.type === "destroy_card")
-      )
-  );
-
-  const hasNonDiscardDestroyEffect = activeRules.some(
-    (rule) =>
-      rule.trigger !== "card_discarded" &&
-      (rule.effects?.some((effect) => effect.type === "destroy_card") ||
-        rule.randomGroups?.some((group) =>
-          group.effects.some((effect) => effect.type === "destroy_card")
-        ))
-  );
-
-  const hasRetriggerEffect = activeRules.some(
-    (rule) =>
-      rule.effects?.some((effect) => effect.type === "retrigger_card") ||
-      rule.randomGroups?.some((group) =>
-        group.effects.some((effect) => effect.type === "retrigger_card")
-      )
-  );
+  const hasNonDiscardDestroy = hasNonDiscardDestroyEffects(activeRules);
+  const hasRetrigger = hasRetriggerEffects(activeRules);
 
   const isUnconditionalRule = (rule: Rule): boolean => {
     return (
@@ -280,7 +652,8 @@ const generateSingleEnhancementCode = (
       regularEffects,
       randomGroups,
       modPrefix,
-      rule.trigger
+      rule.trigger,
+      "enhancement"
     );
 
     if (effectResult.configVariables) {
@@ -341,7 +714,7 @@ const generateSingleEnhancementCode = (
     any_suit = ${enhancement.any_suit},`;
   }
 
-  if (hasDestroyCardEffect) {
+  if (hasDestroyCardEffects(activeRules)) {
     enhancementCode += `
     shatters = true,`;
   }
@@ -385,6 +758,7 @@ const generateSingleEnhancementCode = (
     enhancement,
     gameVariables,
     modPrefix,
+    "enhancement",
     unconditionalEffects
   );
   if (locVarsCode) {
@@ -395,8 +769,9 @@ const generateSingleEnhancementCode = (
   const calculateCode = generateCalculateFunction(
     conditionalRules,
     modPrefix,
-    hasNonDiscardDestroyEffect,
-    hasRetriggerEffect
+    hasNonDiscardDestroy,
+    hasRetrigger,
+    "enhancement"
   );
   if (calculateCode) {
     enhancementCode += `
@@ -407,30 +782,140 @@ const generateSingleEnhancementCode = (
   enhancementCode += `
 }`;
 
-  function formatEnhancementDescription(enhancement: EnhancementData): string {
-    const formatted = enhancement.description.replace(/<br\s*\/?>/gi, "[s]");
-    const escaped = formatted.replace(/\n/g, "[s]");
-    const lines = escaped.split("[s]").map((line) => line.trim());
-
-    if (lines.length === 0) {
-      lines.push(escaped.trim());
-    }
-
-    return `{
-${lines
-  .map(
-    (line, i) =>
-      `        [${i + 1}] = '${line
-        .replace(/\\/g, "\\\\")
-        .replace(/"/g, '\\"')
-        .replace(/'/g, "\\'")}'`
-  )
-  .join(",\n")}
-    }`;
-  }
-
   return {
     code: enhancementCode,
+    nextPosition,
+  };
+};
+
+const generateSingleSealCode = (
+  seal: SealData,
+  atlasKey: string,
+  currentPosition: number,
+  modPrefix: string
+): { code: string; nextPosition: number } => {
+  const activeRules = seal.rules || [];
+
+  const hasNonDiscardDestroy = hasNonDiscardDestroyEffects(activeRules);
+  const hasRetrigger = hasRetriggerEffects(activeRules);
+
+  const configItems: string[] = [];
+
+  const gameVariables = extractGameVariablesFromRules(activeRules);
+  gameVariables.forEach((gameVar) => {
+    configItems.push(`${gameVar.name} = ${gameVar.startsFrom}`);
+  });
+
+  activeRules.forEach((rule) => {
+    const regularEffects = rule.effects || [];
+    const randomGroups = (rule.randomGroups || []).map((group) => ({
+      ...group,
+      chance_numerator:
+        typeof group.chance_numerator === "string" ? 1 : group.chance_numerator,
+      chance_denominator:
+        typeof group.chance_denominator === "string"
+          ? 1
+          : group.chance_denominator,
+    }));
+
+    const effectResult = generateEffectReturnStatement(
+      regularEffects,
+      randomGroups,
+      modPrefix,
+      rule.trigger,
+      "seal"
+    );
+
+    if (effectResult.configVariables) {
+      configItems.push(...effectResult.configVariables);
+    }
+  });
+
+  const sealsPerRow = 10;
+  const col = currentPosition % sealsPerRow;
+  const row = Math.floor(currentPosition / sealsPerRow);
+
+  const nextPosition = currentPosition + 1;
+
+  let sealCode = `SMODS.Seal {
+    key = '${seal.sealKey}',
+    pos = { x = ${col}, y = ${row} },`;
+
+  const hasExtraConfig = configItems.length > 0;
+
+  if (hasExtraConfig) {
+    sealCode += `
+    config = {
+        extra = {
+            ${configItems.join(",\n            ")}
+        }
+    },`;
+  }
+
+  if (seal.badge_colour && seal.badge_colour !== "#FFFFFF") {
+    sealCode += `
+    badge_colour = HEX('${seal.badge_colour.replace("#", "")}'),`;
+  }
+
+  sealCode += `
+   loc_txt = {
+        name = '${seal.name}',
+        label = '${seal.name}',
+        text = ${formatSealDescription(seal)}
+    },`;
+
+  if (seal.atlas) {
+    sealCode += `
+    atlas = '${seal.atlas}',`;
+  } else {
+    sealCode += `
+    atlas = '${atlasKey}',`;
+  }
+
+  if (seal.unlocked !== undefined) {
+    sealCode += `
+    unlocked = ${seal.unlocked},`;
+  }
+
+  if (seal.discovered !== undefined) {
+    sealCode += `
+    discovered = ${seal.discovered},`;
+  }
+
+  if (seal.no_collection !== undefined) {
+    sealCode += `
+    no_collection = ${seal.no_collection},`;
+  }
+
+  const locVarsCode = generateLocVarsFunction(
+    seal,
+    gameVariables,
+    modPrefix,
+    "seal"
+  );
+  if (locVarsCode) {
+    sealCode += `
+    ${locVarsCode},`;
+  }
+
+  const calculateCode = generateCalculateFunction(
+    activeRules,
+    modPrefix,
+    hasNonDiscardDestroy,
+    hasRetrigger,
+    "seal"
+  );
+  if (calculateCode) {
+    sealCode += `
+    ${calculateCode},`;
+  }
+
+  sealCode = sealCode.replace(/,$/, "");
+  sealCode += `
+}`;
+
+  return {
+    code: sealCode,
     nextPosition,
   };
 };
@@ -464,306 +949,70 @@ export const exportSingleEnhancement = (enhancement: EnhancementData): void => {
   }
 };
 
-const generateCalculateFunction = (
-  rules: Rule[],
-  modPrefix: string,
-  hasNonDiscardDestroyEffect: boolean = false,
-  hasRetriggerEffect: boolean = false
-): string => {
-  if (
-    rules.length === 0 &&
-    !hasNonDiscardDestroyEffect &&
-    !hasRetriggerEffect
-  ) {
-    return "";
+export const exportSingleSeal = (seal: SealData): void => {
+  try {
+    const sealWithKey = seal.sealKey
+      ? seal
+      : { ...seal, sealKey: slugify(seal.name) };
+
+    const result = generateSingleSealCode(sealWithKey, "Seal", 0, "modprefix");
+    const sealCode = result.code;
+
+    const blob = new Blob([sealCode], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${sealWithKey.sealKey}.lua`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  } catch (error) {
+    console.error("Failed to export seal:", error);
+    throw error;
   }
-
-  let calculateFunction = `calculate = function(self, card, context)`;
-
-  if (hasNonDiscardDestroyEffect) {
-    calculateFunction += `
-        if context.destroy_card and context.cardarea == G.play and context.destroy_card == card and card.should_destroy then
-            return { remove = true }
-        end`;
-  }
-
-  if (hasRetriggerEffect) {
-    calculateFunction += `
-        if context.repetition and card.should_retrigger then
-            return { repetitions = card.ability.extra.retrigger_times }
-        end`;
-  }
-
-  rules.forEach((rule) => {
-    const triggerCondition = generateTriggerCondition(rule.trigger);
-    const conditionCode = generateConditionChain(rule);
-
-    const ruleHasDestroyCardEffects =
-      rule.effects?.some((effect) => effect.type === "destroy_card") ||
-      rule.randomGroups?.some((group) =>
-        group.effects.some((effect) => effect.type === "destroy_card")
-      );
-
-    const ruleHasRetriggerEffects =
-      rule.effects?.some((effect) => effect.type === "retrigger_card") ||
-      rule.randomGroups?.some((group) =>
-        group.effects.some((effect) => effect.type === "retrigger_card")
-      );
-
-    const isDiscardTrigger = rule.trigger === "card_discarded";
-
-    let ruleCode = "";
-
-    if (triggerCondition) {
-      if (
-        (ruleHasDestroyCardEffects || ruleHasRetriggerEffects) &&
-        !isDiscardTrigger
-      ) {
-        ruleCode += `
-        if ${triggerCondition} then`;
-
-        if (ruleHasDestroyCardEffects) {
-          ruleCode += `
-            card.should_destroy = false`;
-        }
-
-        if (ruleHasRetriggerEffects) {
-          ruleCode += `
-            card.should_retrigger = false`;
-        }
-
-        if (conditionCode) {
-          ruleCode += `
-            if ${conditionCode} then`;
-        }
-      } else {
-        ruleCode += `
-        if ${triggerCondition}`;
-
-        if (conditionCode) {
-          ruleCode += ` and ${conditionCode}`;
-        }
-
-        ruleCode += ` then`;
-      }
-    }
-
-    const regularEffects = rule.effects || [];
-    const randomGroups = (rule.randomGroups || []).map((group) => ({
-      ...group,
-      chance_numerator:
-        typeof group.chance_numerator === "string" ? 1 : group.chance_numerator,
-      chance_denominator:
-        typeof group.chance_denominator === "string"
-          ? 1
-          : group.chance_denominator,
-    }));
-
-    const effectResult = generateEffectReturnStatement(
-      regularEffects,
-      randomGroups,
-      modPrefix,
-      rule.trigger
-    );
-
-    const indentLevel =
-      (ruleHasDestroyCardEffects || ruleHasRetriggerEffects) &&
-      !isDiscardTrigger &&
-      conditionCode
-        ? "                "
-        : "            ";
-
-    if (effectResult.preReturnCode) {
-      ruleCode += `
-${indentLevel}${effectResult.preReturnCode}`;
-    }
-
-    if (effectResult.statement) {
-      ruleCode += `
-${indentLevel}return ${effectResult.statement}`;
-    }
-
-    if (triggerCondition) {
-      if (
-        (ruleHasDestroyCardEffects || ruleHasRetriggerEffects) &&
-        !isDiscardTrigger &&
-        conditionCode
-      ) {
-        ruleCode += `
-            end`;
-      }
-      ruleCode += `
-        end`;
-    }
-
-    calculateFunction += ruleCode;
-  });
-
-  calculateFunction += `
-    end`;
-
-  return calculateFunction;
 };
 
-const generateLocVarsFunction = (
-  enhancement: EnhancementData,
-  gameVariables: Array<{
-    name: string;
-    code: string;
-    startsFrom: number;
-    multiplier: number;
-  }>,
-  modPrefix: string,
-  unconditionalEffects: UnconditionalEffect[]
-): string | null => {
-  const descriptionHasVariables = enhancement.description.includes("#");
-  if (!descriptionHasVariables) {
-    return null;
+function formatEnhancementDescription(enhancement: EnhancementData): string {
+  const formatted = enhancement.description.replace(/<br\s*\/?>/gi, "[s]");
+  const escaped = formatted.replace(/\n/g, "[s]");
+  const lines = escaped.split("[s]").map((line) => line.trim());
+
+  if (lines.length === 0) {
+    lines.push(escaped.trim());
   }
 
-  const variablePlaceholders = enhancement.description.match(/#(\d+)#/g) || [];
-  const maxVariableIndex = Math.max(
-    ...variablePlaceholders.map((placeholder) =>
-      parseInt(placeholder.replace(/#/g, ""))
-    ),
-    0
-  );
+  return `{
+${lines
+  .map(
+    (line, i) =>
+      `        [${i + 1}] = '${line
+        .replace(/\\/g, "\\\\")
+        .replace(/"/g, '\\"')
+        .replace(/'/g, "\\'")}'`
+  )
+  .join(",\n")}
+    }`;
+}
 
-  if (maxVariableIndex === 0) {
-    return null;
+function formatSealDescription(seal: SealData): string {
+  const formatted = seal.description.replace(/<br\s*\/?>/gi, "[s]");
+  const escaped = formatted.replace(/\n/g, "[s]");
+  const lines = escaped.split("[s]").map((line) => line.trim());
+
+  if (lines.length === 0) {
+    lines.push(escaped.trim());
   }
 
-  const activeRules = enhancement.rules || [];
-  const hasRandomGroups = activeRules.some(
-    (rule) => rule.randomGroups && rule.randomGroups.length > 0
-  );
-
-  const wrapGameVariableCode = (code: string): string => {
-    if (code.includes("G.jokers.cards")) {
-      return code.replace(
-        "G.jokers.cards",
-        "(G.jokers and G.jokers.cards or {})"
-      );
-    }
-    if (code.includes("#G.jokers.cards")) {
-      return code.replace(
-        "#G.jokers.cards",
-        "(G.jokers and G.jokers.cards and #G.jokers.cards or 0)"
-      );
-    }
-    if (code.includes("#G.hand.cards")) {
-      return code.replace(
-        "#G.hand.cards",
-        "(G.hand and G.hand.cards and #G.hand.cards or 0)"
-      );
-    }
-    if (code.includes("#G.deck.cards")) {
-      return code.replace(
-        "#G.deck.cards",
-        "(G.deck and G.deck.cards and #G.deck.cards or 0)"
-      );
-    }
-    if (code.includes("#G.consumeables.cards")) {
-      return code.replace(
-        "#G.consumeables.cards",
-        "(G.consumeables and G.consumeables.cards and #G.consumeables.cards or 0)"
-      );
-    }
-    if (
-      code.includes("G.GAME") ||
-      code.includes("G.jokers") ||
-      code.includes("G.hand") ||
-      code.includes("G.deck") ||
-      code.includes("G.consumeables")
-    ) {
-      return `(${code} or 0)`;
-    }
-    return code;
-  };
-
-  const variableMapping: string[] = [];
-
-  const getDefaultEffectValue = (effectType: string): number => {
-    switch (effectType) {
-      case "add_mult":
-        return 4;
-      case "add_chips":
-        return 30;
-      case "edit_dollars":
-        return 1;
-      default:
-        return 0;
-    }
-  };
-
-  unconditionalEffects.forEach((unconditionalEffect) => {
-    if (variableMapping.length >= maxVariableIndex) return;
-
-    const value =
-      (unconditionalEffect.effect.params?.value as number) ||
-      getDefaultEffectValue(unconditionalEffect.effect.type);
-    variableMapping.push(value.toString());
-  });
-
-  gameVariables.forEach((gameVar) => {
-    if (variableMapping.length >= maxVariableIndex) return;
-
-    let gameVarCode: string;
-    if (gameVar.multiplier === 1 && gameVar.startsFrom === 0) {
-      gameVarCode = wrapGameVariableCode(gameVar.code);
-    } else if (gameVar.startsFrom === 0) {
-      gameVarCode = `(${wrapGameVariableCode(gameVar.code)}) * ${
-        gameVar.multiplier
-      }`;
-    } else if (gameVar.multiplier === 1) {
-      gameVarCode = `card.ability.extra.${
-        gameVar.name
-      } + (${wrapGameVariableCode(gameVar.code)})`;
-    } else {
-      gameVarCode = `card.ability.extra.${
-        gameVar.name
-      } + (${wrapGameVariableCode(gameVar.code)}) * ${gameVar.multiplier}`;
-    }
-
-    variableMapping.push(gameVarCode);
-  });
-
-  if (hasRandomGroups) {
-    const randomGroups = activeRules.flatMap((rule) => rule.randomGroups || []);
-    const denominators = [
-      ...new Set(randomGroups.map((group) => group.chance_denominator)),
-    ];
-
-    if (denominators.length === 1) {
-      return `loc_vars = function(self, info_queue, card)
-        local numerator, denominator = SMODS.get_probability_vars(card, 1, card.ability.extra.odds, 'm_${modPrefix}_${
-        enhancement.enhancementKey
-      }')
-        return {vars = {${variableMapping.join(", ")}${
-        variableMapping.length > 0 ? ", " : ""
-      }numerator, denominator}}
-    end`;
-    } else {
-      const probabilityVars: string[] = [];
-      denominators.forEach((index) => {
-        const varName =
-          index === 0
-            ? "card.ability.extra.odds"
-            : `card.ability.extra.odds${Number(index) + 1}`;
-        probabilityVars.push(varName);
-      });
-
-      return `loc_vars = function(self, info_queue, card)
-        return {vars = {${[...variableMapping, ...probabilityVars]
-          .slice(0, maxVariableIndex)
-          .join(", ")}}}
-    end`;
-    }
-  }
-
-  const finalVars = variableMapping.slice(0, maxVariableIndex);
-
-  return `loc_vars = function(self, info_queue, card)
-        return {vars = {${finalVars.join(", ")}}}
-    end`;
-};
+  return `{
+${lines
+  .map(
+    (line, i) =>
+      `        [${i + 1}] = '${line
+        .replace(/\\/g, "\\\\")
+        .replace(/"/g, '\\"')
+        .replace(/'/g, "\\'")}'`
+  )
+  .join(",\n")}
+    }`;
+}
