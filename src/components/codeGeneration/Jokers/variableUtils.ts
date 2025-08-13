@@ -4,6 +4,7 @@ import type {
   ConsumableData,
   EnhancementData,
   UserVariable,
+  SealData,
 } from "../../data/BalatroUtils";
 import { parseGameVariable } from "../Consumables/gameVariableUtils";
 import { getGameVariableById } from "../../data/Jokers/GameVars";
@@ -415,13 +416,13 @@ const isBuiltInValue = (str: string): boolean => {
   const rankValues = new Set([...RANK_VALUES, ...RANK_LABELS]);
   const enhancementValues = new Set(ENHANCEMENT_VALUES());
   const editionValues = new Set(EDITION_VALUES);
-  const sealValues = new Set(SEAL_VALUES);
+  const sealValues = new Set(SEAL_VALUES());
 
   type SuitType = (typeof SUIT_VALUES)[number];
   type RankType = (typeof RANK_VALUES)[number] | (typeof RANK_LABELS)[number];
   type EnhancementType = string;
   type EditionType = (typeof EDITION_VALUES)[number];
-  type SealType = (typeof SEAL_VALUES)[number];
+  type SealType = string;
 
   if (
     suitValues.has(str as SuitType) ||
@@ -729,7 +730,7 @@ export const getVariableUsageDetails = (
 };
 
 export const getAllVariables = (
-  item: JokerData | ConsumableData | EnhancementData
+  item: JokerData | ConsumableData | EnhancementData | SealData
 ): UserVariable[] => {
   // For jokers and enhancements, get user variables if they exist
   const userVars = (item as JokerData | EnhancementData).userVariables || [];
