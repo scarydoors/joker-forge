@@ -210,7 +210,7 @@ export const CardRuleEditor: React.FC<CardRuleEditorProps> = ({
   const sealOptions = [
     { value: "", label: "Any Seal" },
     { value: "none", label: "No Seal" },
-    ...SEALS.map((seal: Seal) => ({ value: seal.key, label: seal.label })),
+    ...SEALS().map((seal: Seal) => ({ value: seal.key, label: seal.label })),
   ];
 
   const rarityOptions = [
