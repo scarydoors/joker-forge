@@ -5,6 +5,7 @@ import {
   RarityData,
   ConsumableData,
   EnhancementData,
+  SealData,
 } from "../data/BalatroUtils";
 import { addAtlasToZip } from "./ImageProcessor";
 import { generateJokersCode, generateCustomRaritiesCode } from "./Jokers/index";
@@ -12,7 +13,7 @@ import { generateConsumablesCode } from "./Consumables/index";
 import { generateBoostersCode } from "./boosters";
 import { ConsumableSetData } from "../data/BalatroUtils";
 import { modToJson } from "../JSONImportExport";
-import { generateEnhancementsCode } from "./Card/index";
+import { generateEnhancementsCode, generateSealsCode } from "./Card/index";
 import { ModMetadata } from "../pages/ModMetadataPage";
 
 const sortForExport = <T extends { id: string; name: string }>(
@@ -37,7 +38,8 @@ export const exportModCode = async (
   customRarities: RarityData[] = [],
   consumableSets: ConsumableSetData[] = [],
   boosters: BoosterData[] = [],
-  enhancements: EnhancementData[] = []
+  enhancements: EnhancementData[] = [],
+  seals: SealData[] = []
 ): Promise<boolean> => {
   try {
     console.log("Generating mod code...");
@@ -57,9 +59,10 @@ export const exportModCode = async (
     const validConsumables = consumables.filter((c) => c.id && c.name);
     const validBoosters = boosters.filter((b) => b.id && b.name);
     const validEnhancements = enhancements.filter((e) => e.id && e.name);
+    const validSeals = seals.filter((s) => s.id && s.name);
 
     console.log(
-      `Filtered items - Jokers: ${validJokers.length}, Consumables: ${validConsumables.length}, Boosters: ${validBoosters.length}, Enhancements: ${validEnhancements.length}`
+      `Filtered items - Jokers: ${validJokers.length}, Consumables: ${validConsumables.length}, Boosters: ${validBoosters.length}, Enhancements: ${validEnhancements.length}, Seals: ${validSeals.length}`
     );
 
     const zip = new JSZip();
@@ -68,6 +71,7 @@ export const exportModCode = async (
     const sortedConsumables = sortForExport(validConsumables);
     const sortedBoosters = sortForExport(validBoosters);
     const sortedEnhancements = sortForExport(validEnhancements);
+    const sortedSeals = sortForExport(validSeals);
 
     const hasModIcon = !!(metadata.hasUserUploadedIcon || metadata.iconImage);
 
@@ -77,6 +81,7 @@ export const exportModCode = async (
       customRarities,
       sortedBoosters,
       sortedEnhancements,
+      sortedSeals,
       hasModIcon
     );
     zip.file(metadata.main_file, mainLuaCode);
@@ -88,7 +93,8 @@ export const exportModCode = async (
       sortedConsumables,
       consumableSets,
       sortedBoosters,
-      sortedEnhancements
+      sortedEnhancements,
+      sortedSeals
     );
     zip.file(ret.filename, ret.jsonString);
 
@@ -148,6 +154,18 @@ export const exportModCode = async (
       });
     }
 
+    if (sortedSeals.length > 0) {
+      const { sealsCode } = generateSealsCode(sortedSeals, {
+        modPrefix: metadata.prefix,
+        atlasKey: "CustomSeals",
+      });
+
+      const sealsFolder = zip.folder("seals");
+      Object.entries(sealsCode).forEach(([filename, code]) => {
+        sealsFolder!.file(filename, code);
+      });
+    }
+
     zip.file(`${metadata.id}.json`, generateModJson(metadata));
 
     let modIconData: string | undefined;
@@ -174,6 +192,7 @@ export const exportModCode = async (
       sortedConsumables,
       sortedBoosters,
       sortedEnhancements,
+      sortedSeals,
       modIconData
     );
 
@@ -200,6 +219,7 @@ const generateMainLuaCode = (
   customRarities: RarityData[],
   boosters: BoosterData[],
   enhancements: EnhancementData[],
+  seals: SealData[],
   hasModIcon: boolean
 ): string => {
   let output = "";
@@ -264,6 +284,18 @@ const generateMainLuaCode = (
 `;
   }
 
+  if (seals.length > 0) {
+    output += `SMODS.Atlas({
+    key = "CustomSeals", 
+    path = "CustomSeals.png", 
+    px = 71,
+    py = 95, 
+    atlas_table = "ASSET_ATLAS"
+}):register()
+
+`;
+  }
+
   output += `local NFS = require("nativefs")
 to_big = to_big or function(a) return a end
 lenient_bignum = lenient_bignum or function(a) return a end
@@ -302,6 +334,38 @@ end
 `;
   }
 
+  if (enhancements.length > 0) {
+    output += `local function load_enhancements_folder()
+    local mod_path = SMODS.current_mod.path
+    local enhancements_path = mod_path .. "/enhancements"
+    local files = NFS.getDirectoryItemsInfo(enhancements_path)
+    for i = 1, #files do
+        local file_name = files[i].name
+        if file_name:sub(-4) == ".lua" then
+            assert(SMODS.load_file("enhancements/" .. file_name))()
+        end
+    end
+end
+
+`;
+  }
+
+  if (seals.length > 0) {
+    output += `local function load_seals_folder()
+    local mod_path = SMODS.current_mod.path
+    local seals_path = mod_path .. "/seals"
+    local files = NFS.getDirectoryItemsInfo(seals_path)
+    for i = 1, #files do
+        local file_name = files[i].name
+        if file_name:sub(-4) == ".lua" then
+            assert(SMODS.load_file("seals/" .. file_name))()
+        end
+    end
+end
+
+`;
+  }
+
   if (customRarities.length > 0) {
     output += `local function load_rarities_file()
     local mod_path = SMODS.current_mod.path
@@ -322,22 +386,6 @@ load_boosters_file()
 `;
   }
 
-  if (enhancements.length > 0) {
-    output += `local function load_enhancements_folder()
-    local mod_path = SMODS.current_mod.path
-    local enhancements_path = mod_path .. "/enhancements"
-    local files = NFS.getDirectoryItemsInfo(enhancements_path)
-    for i = 1, #files do
-        local file_name = files[i].name
-        if file_name:sub(-4) == ".lua" then
-            assert(SMODS.load_file("enhancements/" .. file_name))()
-        end
-    end
-end
-
-`;
-  }
-
   if (jokers.length > 0) {
     output += `load_jokers_folder()
 `;
@@ -350,6 +398,11 @@ end
 
   if (enhancements.length > 0) {
     output += `load_enhancements_folder()
+`;
+  }
+
+  if (seals.length > 0) {
+    output += `load_seals_folder()
 `;
   }
 

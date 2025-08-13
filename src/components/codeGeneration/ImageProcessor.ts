@@ -1,9 +1,20 @@
 import JSZip from "jszip";
-import { JokerData, BoosterData, EnhancementData } from "../data/BalatroUtils";
-import { ConsumableData } from "../data/BalatroUtils";
+import {
+  JokerData,
+  BoosterData,
+  EnhancementData,
+  ConsumableData,
+  SealData,
+} from "../data/BalatroUtils";
 
 export const processImages = async (
-  items: (JokerData | ConsumableData | BoosterData | EnhancementData)[],
+  items: (
+    | JokerData
+    | ConsumableData
+    | BoosterData
+    | EnhancementData
+    | SealData
+  )[],
   scale: number = 1
 ): Promise<{
   atlasDataUrl: string;
@@ -247,6 +258,7 @@ export const addAtlasToZip = async (
   consumables: ConsumableData[],
   boosters: BoosterData[] = [],
   enhancements: EnhancementData[] = [],
+  seals: SealData[] = [],
   modIconData?: string
 ): Promise<Record<string, Record<number, { x: number; y: number }>>> => {
   try {
@@ -327,6 +339,18 @@ export const addAtlasToZip = async (
       assets2xFolder!.file("CustomEnhancements.png", enhancementAtlas2xBlob);
 
       soulPositions["enhancements"] = enhancementAtlas1xResult.soulPositions;
+    }
+
+    if (seals.length > 0) {
+      const sealAtlas1xResult = await processImages(seals, 1);
+      const sealAtlas1xBlob = dataURLToBlob(sealAtlas1xResult.atlasDataUrl);
+      assets1xFolder!.file("CustomSeals.png", sealAtlas1xBlob);
+
+      const sealAtlas2xResult = await processImages(seals, 2);
+      const sealAtlas2xBlob = dataURLToBlob(sealAtlas2xResult.atlasDataUrl);
+      assets2xFolder!.file("CustomSeals.png", sealAtlas2xBlob);
+
+      soulPositions["seals"] = sealAtlas1xResult.soulPositions;
     }
 
     return soulPositions;
