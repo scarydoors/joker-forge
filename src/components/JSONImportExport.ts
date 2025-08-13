@@ -5,6 +5,7 @@ import {
   ConsumableSetData,
   BoosterData,
   EnhancementData,
+  SealData,
 } from "./data/BalatroUtils";
 import { RarityData } from "./data/BalatroUtils";
 
@@ -17,6 +18,7 @@ export interface ExportedMod {
   consumableSets: ConsumableSetData[];
   boosters: BoosterData[];
   enhancements: EnhancementData[];
+  seals: SealData[];
   version: string;
   exportedAt: string;
 }
@@ -28,6 +30,7 @@ interface ImportableModData {
   consumableSets?: ConsumableSetData[];
   boosters?: BoosterData[];
   enhancements?: EnhancementData[];
+  seals?: SealData[];
 }
 
 export const normalizeImportedModData = (data: ImportableModData) => {
@@ -53,9 +56,10 @@ export const normalizeImportedModData = (data: ImportableModData) => {
   const normalizedEnhancements = (data.enhancements || []).map(
     normalizeEnhancementData
   );
+  const normalizedSeals = (data.seals || []).map(normalizeSealData);
 
   console.log(
-    `Successfully processed mod data with ${normalizedJokers.length} jokers, ${normalizedConsumables.length} consumables, ${normalizedBoosters.length} boosters, ${normalizedEnhancements.length} enhancements`
+    `Successfully processed mod data with ${normalizedJokers.length} jokers, ${normalizedConsumables.length} consumables, ${normalizedBoosters.length} boosters, ${normalizedEnhancements.length} enhancements, ${normalizedSeals.length} seals`
   );
 
   return {
@@ -66,6 +70,7 @@ export const normalizeImportedModData = (data: ImportableModData) => {
     consumableSets: normalizedConsumableSets,
     boosters: normalizedBoosters,
     enhancements: normalizedEnhancements,
+    seals: normalizedSeals,
   };
 };
 
@@ -178,6 +183,26 @@ const normalizeEnhancementData = (
   };
 };
 
+const normalizeSealData = (seal: SealData): SealData => {
+  return {
+    id: seal.id || "",
+    name: seal.name || "",
+    description: seal.description || "",
+    imagePreview: seal.imagePreview || "",
+    sealKey: seal.sealKey || "",
+    atlas: seal.atlas,
+    pos: seal.pos || { x: 0, y: 0 },
+    badge_colour: seal.badge_colour || "#FFFFFF",
+    unlocked: seal.unlocked,
+    discovered: seal.discovered,
+    no_collection: seal.no_collection,
+    rules: seal.rules || [],
+    userVariables: seal.userVariables || [],
+    placeholderCreditIndex: seal.placeholderCreditIndex,
+    hasUserUploadedImage: seal.hasUserUploadedImage || false,
+  };
+};
+
 const normalizeRarityData = (rarity: RarityData): RarityData => {
   return {
     id: rarity.id || "",
@@ -212,7 +237,8 @@ export const modToJson = (
   consumables: ConsumableData[] = [],
   consumableSets: ConsumableSetData[] = [],
   boosters: BoosterData[] = [],
-  enhancements: EnhancementData[] = []
+  enhancements: EnhancementData[] = [],
+  seals: SealData[] = []
 ): { filename: string; jsonString: string } => {
   const exportData: ExportedMod = {
     metadata,
@@ -222,6 +248,7 @@ export const modToJson = (
     consumableSets,
     boosters,
     enhancements,
+    seals,
     version: "1.0.0",
     exportedAt: new Date().toISOString(),
   };
@@ -241,7 +268,8 @@ export const exportModAsJSON = (
   consumables: ConsumableData[] = [],
   consumableSets: ConsumableSetData[] = [],
   boosters: BoosterData[] = [],
-  enhancements: EnhancementData[] = []
+  enhancements: EnhancementData[] = [],
+  seals: SealData[] = []
 ): void => {
   const ret = modToJson(
     metadata,
@@ -250,7 +278,8 @@ export const exportModAsJSON = (
     consumables,
     consumableSets,
     boosters,
-    enhancements
+    enhancements,
+    seals
   );
   const blob = new Blob([ret.jsonString], { type: "application/json" });
   const url = URL.createObjectURL(blob);
@@ -272,6 +301,7 @@ export const importModFromJSON = (): Promise<{
   consumableSets: ConsumableSetData[];
   boosters: BoosterData[];
   enhancements: EnhancementData[];
+  seals: SealData[];
 } | null> => {
   return new Promise((resolve, reject) => {
     const input = document.createElement("input");
@@ -317,9 +347,12 @@ export const importModFromJSON = (): Promise<{
           const normalizedEnhancements = (importData.enhancements || []).map(
             normalizeEnhancementData
           );
+          const normalizedSeals = (importData.seals || []).map(
+            normalizeSealData
+          );
 
           console.log(
-            `Successfully imported mod with ${normalizedJokers.length} jokers, ${normalizedConsumables.length} consumables, ${normalizedBoosters.length} boosters, ${normalizedEnhancements.length} enhancements`
+            `Successfully imported mod with ${normalizedJokers.length} jokers, ${normalizedConsumables.length} consumables, ${normalizedBoosters.length} boosters, ${normalizedEnhancements.length} enhancements, ${normalizedSeals.length} seals`
           );
 
           resolve({
@@ -330,6 +363,7 @@ export const importModFromJSON = (): Promise<{
             consumableSets: normalizedConsumableSets,
             boosters: normalizedBoosters,
             enhancements: normalizedEnhancements,
+            seals: normalizedSeals,
           });
         } catch (error) {
           console.error("Error parsing mod file:", error);

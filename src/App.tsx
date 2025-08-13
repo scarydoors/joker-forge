@@ -26,6 +26,7 @@ import AcknowledgementsPage from "./components/pages/AcknowledgementsPage";
 import NotFoundPage from "./components/pages/NotFoundPage";
 import BoostersPage from "./components/pages/BoostersPage";
 import EnhancementsPage from "./components/pages/EnhancementsPage";
+import SealsPage from "./components/pages/SealsPage";
 
 // Data and Utils
 import {
@@ -36,6 +37,7 @@ import {
   BoosterData,
   updateDataRegistry,
   EnhancementData,
+  SealData,
 } from "./components/data/BalatroUtils";
 import { exportModCode } from "./components/codeGeneration/entry";
 import {
@@ -77,6 +79,7 @@ interface AutoSaveData {
   consumableSets: ConsumableSetData[];
   boosters: BoosterData[];
   enhancements: EnhancementData[];
+  seals: SealData[];
   timestamp: number;
 }
 
@@ -165,6 +168,8 @@ function AppContent() {
   const [selectedEnhancementId, setSelectedEnhancementId] = useState<
     string | null
   >(null);
+  const [seals, setSeals] = useState<SealData[]>([]);
+  const [selectedSealId, setSelectedSealId] = useState<string | null>(null);
 
   const [selectedJokerId, setSelectedJokerId] = useState<string | null>(null);
   const [selectedConsumableId, setSelectedConsumableId] = useState<
@@ -210,6 +215,7 @@ function AppContent() {
     consumableSets: ConsumableSetData[];
     boosters: BoosterData[];
     enhancements: EnhancementData[];
+    seals: SealData[];
   } | null>(null);
 
   const showConfirmation = useCallback(
@@ -264,7 +270,8 @@ function AppContent() {
       raritiesData: RarityData[],
       setsData: ConsumableSetData[],
       boosterData: BoosterData[],
-      enhancementsData: EnhancementData[]
+      enhancementsData: EnhancementData[],
+      sealsData: SealData[]
     ) => {
       try {
         const data: AutoSaveData = {
@@ -275,6 +282,7 @@ function AppContent() {
           consumableSets: setsData,
           boosters: boosterData,
           enhancements: enhancementsData,
+          seals: sealsData,
           timestamp: Date.now(),
         };
         localStorage.setItem(AUTO_SAVE_KEY, JSON.stringify(data));
@@ -293,6 +301,7 @@ function AppContent() {
       consumables,
       boosters,
       enhancements,
+      seals,
       modMetadata.prefix || ""
     );
   }, [
@@ -301,6 +310,7 @@ function AppContent() {
     consumables,
     boosters,
     enhancements,
+    seals,
     modMetadata.prefix,
   ]);
 
@@ -361,6 +371,7 @@ function AppContent() {
     consumableSets: ConsumableSetData[];
     boosters: BoosterData[];
     enhancements: EnhancementData[];
+    seals: SealData[];
   } | null => {
     try {
       const savedData = localStorage.getItem(AUTO_SAVE_KEY);
@@ -383,6 +394,7 @@ function AppContent() {
         consumableSets: data.consumableSets || [],
         boosters: data.boosters || [],
         enhancements: data.enhancements || [],
+        seals: data.seals || [],
       };
     } catch (error) {
       console.warn("Failed to load auto-save:", error);
@@ -428,7 +440,8 @@ function AppContent() {
       raritiesData: RarityData[],
       setsData: ConsumableSetData[],
       boosterData: BoosterData[],
-      enhancementsData: EnhancementData[]
+      enhancementsData: EnhancementData[],
+      sealsData: SealData[]
     ) => {
       if (!prevDataRef.current) return true;
 
@@ -443,7 +456,8 @@ function AppContent() {
         JSON.stringify(prevData.consumableSets) !== JSON.stringify(setsData) ||
         JSON.stringify(prevData.boosters) !== JSON.stringify(boosterData) ||
         JSON.stringify(prevData.enhancements) !==
-          JSON.stringify(enhancementsData)
+          JSON.stringify(enhancementsData) ||
+        JSON.stringify(prevData.seals) !== JSON.stringify(sealsData)
       );
     },
     []
@@ -457,7 +471,8 @@ function AppContent() {
       raritiesData: RarityData[],
       setsData: ConsumableSetData[],
       boosterData: BoosterData[],
-      enhancementsData: EnhancementData[]
+      enhancementsData: EnhancementData[],
+      sealsData: SealData[]
     ) => {
       if (
         jokerData.length > 0 ||
@@ -465,7 +480,8 @@ function AppContent() {
         raritiesData.length > 0 ||
         setsData.length > 0 ||
         boosterData.length > 0 ||
-        enhancementsData.length > 0
+        enhancementsData.length > 0 ||
+        sealsData.length > 0
       )
         return true;
 
@@ -501,7 +517,8 @@ function AppContent() {
       raritiesData: RarityData[],
       setsData: ConsumableSetData[],
       boosterData: BoosterData[],
-      enhancementsData: EnhancementData[]
+      enhancementsData: EnhancementData[],
+      sealsData: SealData[]
     ) => {
       if (saveTimeoutRef.current) {
         clearTimeout(saveTimeoutRef.current);
@@ -515,7 +532,8 @@ function AppContent() {
           raritiesData,
           setsData,
           boosterData,
-          enhancementsData
+          enhancementsData,
+          sealsData
         );
       }, 500);
     },
@@ -545,7 +563,8 @@ function AppContent() {
         customRarities,
         consumableSets,
         boosters,
-        enhancements
+        enhancements,
+        seals
       )
     )
       return;
@@ -558,7 +577,8 @@ function AppContent() {
         customRarities,
         consumableSets,
         boosters,
-        enhancements
+        enhancements,
+        seals
       )
     )
       return;
@@ -571,6 +591,7 @@ function AppContent() {
       consumableSets,
       boosters,
       enhancements,
+      seals,
     };
 
     setAutoSaveStatus("saving");
@@ -582,7 +603,8 @@ function AppContent() {
       customRarities,
       consumableSets,
       boosters,
-      enhancements
+      enhancements,
+      seals
     );
 
     if (statusTimeoutRef.current) {
@@ -616,6 +638,7 @@ function AppContent() {
     consumableSets,
     boosters,
     enhancements,
+    seals,
     hasLoadedInitialData,
     debouncedSave,
     hasDataChanged,
@@ -652,6 +675,7 @@ function AppContent() {
           consumableSets: savedData.consumableSets,
           boosters: savedData.boosters,
           enhancements: savedData.enhancements,
+          seals: savedData.seals,
         });
 
         setModMetadata(normalizedData.metadata);
@@ -661,11 +685,13 @@ function AppContent() {
         setConsumableSets(normalizedData.consumableSets);
         setBoosters(normalizedData.boosters);
         setEnhancements(normalizedData.enhancements);
+        setSeals(normalizedData.seals);
 
         setSelectedJokerId(null);
         setSelectedConsumableId(null);
         setSelectedBoosterId(null);
         setSelectedEnhancementId(null);
+        setSelectedSealId(null);
 
         prevDataRef.current = {
           modMetadata: normalizedData.metadata,
@@ -675,6 +701,7 @@ function AppContent() {
           consumableSets: normalizedData.consumableSets,
           boosters: normalizedData.boosters,
           enhancements: normalizedData.enhancements,
+          seals: normalizedData.seals,
         };
 
         showAlert(
@@ -748,12 +775,14 @@ function AppContent() {
     const invalidConsumables = consumables.filter((c) => !c.name || !c.id);
     const invalidBoosters = boosters.filter((b) => !b.name || !b.id);
     const invalidEnhancements = enhancements.filter((e) => !e.name || !e.id);
+    const invalidSeals = seals.filter((s) => !s.name || !s.id);
 
     if (
       invalidJokers.length > 0 ||
       invalidConsumables.length > 0 ||
       invalidBoosters.length > 0 ||
-      invalidEnhancements.length > 0
+      invalidEnhancements.length > 0 ||
+      invalidSeals.length > 0
     ) {
       showAlert(
         "error",
@@ -772,7 +801,8 @@ function AppContent() {
         customRarities,
         consumableSets,
         boosters,
-        enhancements
+        enhancements,
+        seals
       );
       setShowExportModal(true);
     } catch (error) {
@@ -804,7 +834,8 @@ function AppContent() {
         consumables,
         consumableSets,
         boosters,
-        enhancements
+        enhancements,
+        seals
       );
       showAlert(
         "success",
@@ -832,10 +863,12 @@ function AppContent() {
         setConsumableSets(importedData.consumableSets);
         setBoosters(importedData.boosters);
         setEnhancements(importedData.enhancements || []);
+        setSeals(importedData.seals || []);
         setSelectedJokerId(null);
         setSelectedConsumableId(null);
         setSelectedBoosterId(null);
         setSelectedEnhancementId(null);
+        setSelectedSealId(null);
         prevDataRef.current = {
           modMetadata: importedData.metadata,
           jokers: importedData.jokers,
@@ -844,6 +877,7 @@ function AppContent() {
           consumableSets: importedData.consumableSets,
           boosters: importedData.boosters,
           enhancements: importedData.enhancements || [],
+          seals: importedData.seals || [],
         };
         showAlert(
           "success",
@@ -999,6 +1033,20 @@ function AppContent() {
               />
             }
           />
+          <Route
+            path="/seals"
+            element={
+              <SealsPage
+                modName={modMetadata.name}
+                seals={seals}
+                setSeals={setSeals}
+                selectedSealId={selectedSealId}
+                setSelectedSealId={setSelectedSealId}
+                modPrefix={modMetadata.prefix || ""}
+                showConfirmation={showConfirmation}
+              />
+            }
+          />
           <Route path="/decks" element={<DecksPage />} />
           <Route path="/editions" element={<EditionsPage />} />
           <Route
@@ -1014,6 +1062,8 @@ function AppContent() {
                     setBoosters([...boosters, item as BoosterData]);
                   } else if (type === "enhancement") {
                     setEnhancements([...enhancements, item as EnhancementData]);
+                    //  } else if (type === "seal") {
+                    //  setSeals([...seals, item as SealData]);
                   }
                 }}
                 onNavigateToJokers={() => {
@@ -1028,6 +1078,9 @@ function AppContent() {
                 onNavigateToEnhancements={() => {
                   navigate("/enhancements");
                 }}
+                //  onNavigateToSeals={() => {
+                //    navigate("/seals");
+                //  }}
               />
             }
           />
