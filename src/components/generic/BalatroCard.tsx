@@ -44,7 +44,6 @@ interface BalatroCardProps {
   className?: string;
   size?: "sm" | "md" | "lg";
 
-  // Type-specific props
   rarityName?: string;
   rarityColor?: string;
   setName?: string;
@@ -53,6 +52,9 @@ interface BalatroCardProps {
   enhancement?: string;
   seal?: string;
   edition?: string;
+
+  isSeal?: boolean;
+  sealBadgeColor?: string;
 }
 
 const BalatroCard: React.FC<BalatroCardProps> = ({
@@ -68,6 +70,8 @@ const BalatroCard: React.FC<BalatroCardProps> = ({
   enhancement,
   seal,
   edition,
+  isSeal = false,
+  sealBadgeColor,
 }) => {
   const [imageError, setImageError] = useState(false);
   const [placeholderError, setPlaceholderError] = useState(false);
@@ -75,7 +79,6 @@ const BalatroCard: React.FC<BalatroCardProps> = ({
   const [hoveredButton, setHoveredButton] = useState<string | null>(null);
 
   const aceOptions = [
-    // High Contrast row
     [
       {
         key: "HC_A_hearts",
@@ -90,7 +93,6 @@ const BalatroCard: React.FC<BalatroCardProps> = ({
       { key: "HC_A_clubs", name: "♣", color: "text-blue-500" },
       { key: "HC_A_spades", name: "♠", color: "text-white-lighter" },
     ],
-    // Low Contrast row
     [
       { key: "LC_A_hearts", name: "♥", color: "text-red-400" },
       {
@@ -130,6 +132,14 @@ const BalatroCard: React.FC<BalatroCardProps> = ({
   };
 
   const getBadgeStyles = () => {
+    if (isSeal && sealBadgeColor) {
+      const shadowColor = darkenColor(sealBadgeColor, 0.4);
+      return {
+        bg: shadowColor,
+        shadow: sealBadgeColor,
+      };
+    }
+
     if (enhancement || seal || edition) {
       return {
         bg: "bg-black-darker",
@@ -186,7 +196,6 @@ const BalatroCard: React.FC<BalatroCardProps> = ({
       };
     }
 
-    // Default for boosters and cards
     return {
       bg: "bg-balatro-greenshadow",
       shadow: "bg-balatro-green",
@@ -232,7 +241,6 @@ const BalatroCard: React.FC<BalatroCardProps> = ({
   };
 
   const getBadgeText = () => {
-    // Priority order: enhancement, seal, edition, then type-specific badges
     if (enhancement) {
       return enhancement;
     }
@@ -267,7 +275,6 @@ const BalatroCard: React.FC<BalatroCardProps> = ({
     if (type === "joker") {
       const jokerData = data as JokerCardData;
       if (jokerData.locVars && Array.isArray(jokerData.locVars.vars)) {
-        // Only include string values for colours
         const colours = jokerData.locVars.vars.filter(
           (v) => typeof v === "string"
         ) as string[];
@@ -286,6 +293,139 @@ const BalatroCard: React.FC<BalatroCardProps> = ({
     const contrast = parts[0] === "HC" ? "High Contrast" : "Low Contrast";
     const suit = parts[2].charAt(0).toUpperCase() + parts[2].slice(1);
     return `${contrast} Ace of ${suit}`;
+  };
+
+  const getBadgeTextColor = () => {
+    if (isSeal && sealBadgeColor) {
+      const hex = sealBadgeColor.replace("#", "");
+      const r = parseInt(hex.substr(0, 2), 16);
+      const g = parseInt(hex.substr(2, 2), 16);
+      const b = parseInt(hex.substr(4, 2), 16);
+
+      const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+      return brightness > 140 ? "#000000" : "#FFFFFF";
+    }
+    return "#FFFFFF";
+  };
+
+  const renderCardImage = () => {
+    if (type === "card" && isSeal) {
+      return (
+        <div className="relative w-full h-full">
+          <img
+            src="/images/back.png"
+            alt="Card back"
+            className="absolute inset-0 w-full h-full object-cover pixelated"
+            draggable="false"
+          />
+
+          <img
+            src={`/images/aces/${selectedAce}.png`}
+            alt=""
+            className="absolute inset-0 w-full h-full object-cover pixelated pointer-events-none"
+            draggable="false"
+          />
+
+          {!imageError && data.imagePreview && (
+            <img
+              src={data.imagePreview}
+              alt={data.name}
+              className="absolute inset-0 w-full h-full object-cover pixelated"
+              draggable="false"
+              onError={handleImageError}
+            />
+          )}
+
+          {data.overlayImagePreview && (
+            <img
+              src={data.overlayImagePreview}
+              alt={`${data.name} overlay`}
+              className="absolute inset-0 w-full h-full object-cover pixelated"
+              draggable="false"
+            />
+          )}
+        </div>
+      );
+    } else if (type === "card") {
+      return (
+        <div className="relative w-full h-full">
+          {!imageError && data.imagePreview ? (
+            <>
+              <img
+                src={data.imagePreview}
+                alt={data.name}
+                className="w-full h-full object-cover pixelated"
+                draggable="false"
+                onError={handleImageError}
+              />
+              {data.overlayImagePreview && (
+                <img
+                  src={data.overlayImagePreview}
+                  alt={`${data.name} overlay`}
+                  className="absolute inset-0 w-full h-full object-cover pixelated"
+                  draggable="false"
+                />
+              )}
+            </>
+          ) : !placeholderError ? (
+            <img
+              src={getPlaceholderImage()}
+              alt={`Placeholder ${type}`}
+              className="w-full h-full"
+              draggable="false"
+              onError={() => setPlaceholderError(true)}
+            />
+          ) : (
+            <div className="w-full h-full bg-balatro-black flex items-center justify-center">
+              <PhotoIcon className="h-16 w-16 text-white-darker" />
+            </div>
+          )}
+
+          <img
+            src={`/images/aces/${selectedAce}.png`}
+            alt=""
+            className="absolute inset-0 w-full h-full object-cover pixelated pointer-events-none"
+            draggable="false"
+          />
+        </div>
+      );
+    } else {
+      return (
+        <div className="relative w-full h-full">
+          {!imageError && data.imagePreview ? (
+            <div className="relative w-full h-full">
+              <img
+                src={data.imagePreview}
+                alt={data.name}
+                className="w-full h-full object-cover pixelated"
+                draggable="false"
+                onError={handleImageError}
+              />
+              {data.overlayImagePreview && (
+                <img
+                  src={data.overlayImagePreview}
+                  alt={`${data.name} overlay`}
+                  className="absolute inset-0 w-full h-full object-cover pixelated"
+                  draggable="false"
+                />
+              )}
+            </div>
+          ) : !placeholderError ? (
+            <img
+              src={getPlaceholderImage()}
+              alt={`Placeholder ${type}`}
+              className="w-full h-full"
+              draggable="false"
+              onError={() => setPlaceholderError(true)}
+            />
+          ) : (
+            <div className="w-full h-full bg-balatro-black flex items-center justify-center">
+              <PhotoIcon className="h-16 w-16 text-white-darker" />
+            </div>
+          )}
+        </div>
+      );
+    }
   };
 
   return (
@@ -353,63 +493,7 @@ const BalatroCard: React.FC<BalatroCardProps> = ({
             data.cost !== undefined ? "rounded-t-none" : ""
           } `}
         >
-          {!imageError && data.imagePreview ? (
-            <div className="relative w-full h-full">
-              <img
-                src={data.imagePreview}
-                alt={data.name}
-                className="w-full h-full object-cover pixelated"
-                draggable="false"
-                onError={handleImageError}
-              />
-              {data.overlayImagePreview && (
-                <img
-                  src={data.overlayImagePreview}
-                  alt={`${data.name} overlay`}
-                  className="absolute inset-0 w-full h-full object-cover pixelated"
-                  draggable="false"
-                />
-              )}
-              {type === "card" && (
-                <img
-                  src={`/images/aces/${selectedAce}.png`}
-                  alt=""
-                  className="absolute inset-0 w-full h-full object-cover pixelated pointer-events-none"
-                  draggable="false"
-                />
-              )}
-            </div>
-          ) : !placeholderError ? (
-            <div className="relative w-full h-full">
-              <img
-                src={getPlaceholderImage()}
-                alt={`Placeholder ${type}`}
-                className="w-full h-full"
-                draggable="false"
-                onError={() => setPlaceholderError(true)}
-              />
-              {type === "card" && (
-                <img
-                  src={`/images/aces/${selectedAce}.png`}
-                  alt=""
-                  className="absolute inset-0 w-full h-full object-cover pixelated pointer-events-none"
-                  draggable="false"
-                />
-              )}
-            </div>
-          ) : (
-            <div className="w-full h-full bg-balatro-black flex items-center justify-center relative">
-              <PhotoIcon className="h-16 w-16 text-white-darker" />
-              {type === "card" && (
-                <img
-                  src={`/images/aces/${selectedAce}.png`}
-                  alt=""
-                  className="absolute inset-0 w-full h-full object-cover pixelated pointer-events-none"
-                  draggable="false"
-                />
-              )}
-            </div>
-          )}
+          {renderCardImage()}
         </div>
 
         <div
@@ -443,7 +527,25 @@ const BalatroCard: React.FC<BalatroCardProps> = ({
                   </div>
 
                   <div className="relative mx-6 mt-3">
-                    {type === "card" ? (
+                    {isSeal && sealBadgeColor ? (
+                      <>
+                        <div
+                          className="absolute inset-0 rounded-xl translate-y-1"
+                          style={{ backgroundColor: badgeStyles.bg }}
+                        />
+                        <div
+                          className="rounded-xl text-center text-lg py-1 relative"
+                          style={{ backgroundColor: badgeStyles.shadow }}
+                        >
+                          <span
+                            className="relative text-shadow-pixel"
+                            style={{ color: getBadgeTextColor() }}
+                          >
+                            {getBadgeText()}
+                          </span>
+                        </div>
+                      </>
+                    ) : type === "card" ? (
                       <>
                         <div
                           className="absolute inset-0 rounded-xl translate-y-1"
