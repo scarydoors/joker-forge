@@ -15,6 +15,9 @@ import {
   ChatBubbleLeftRightIcon,
   GiftIcon,
   StarIcon,
+  CpuChipIcon,
+  ChevronDownIcon,
+  EllipsisHorizontalIcon,
 } from "@heroicons/react/24/solid";
 import { JokerData } from "./data/BalatroUtils";
 
@@ -45,8 +48,9 @@ const Sidebar: React.FC<SidebarProps> = ({
     selectedSection === "" ||
     !selectedSection;
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
-  const version: string = "v0.4.5";
+  const version: string = "v0.5.0";
 
   const handleSectionClick = (section: string) => {
     if (section === "github") {
@@ -97,14 +101,16 @@ const Sidebar: React.FC<SidebarProps> = ({
     { id: "consumables", label: "Consumables", icon: CakeIcon },
     { id: "boosters", label: "Booster Packs", icon: GiftIcon },
     { id: "enhancements", label: "Enhancements", icon: StarIcon },
-    //{ id: "decks", label: "Decks", icon: RectangleStackIcon },
-    //{ id: "editions", label: "Editions", icon: SparklesIcon },
+    { id: "seals", label: "Seals", icon: CpuChipIcon },
   ];
 
-  const resourceItems = [
+  const visibleResourceItems = [
     { id: "support", label: "Support", icon: HeartIcon },
-    { id: "docs", label: "Docs", icon: DocumentTextIcon },
     { id: "vanilla", label: "Vanilla Reforged", icon: FolderIcon },
+  ];
+
+  const dropdownResourceItems = [
+    { id: "docs", label: "Docs", icon: DocumentTextIcon },
     { id: "github", label: "GitHub Repository", icon: LinkIcon },
     { id: "discord", label: "Discord Server", icon: ChatBubbleLeftRightIcon },
     { id: "acknowledgements", label: "Acknowledgements", icon: StarIcon },
@@ -218,7 +224,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                 Resources
               </motion.div>
               <div className="space-y-1">
-                {resourceItems.map((item, index) => {
+                {visibleResourceItems.map((item, index) => {
                   const Icon = item.icon;
                   const isActive = selectedSection === item.id;
 
@@ -242,6 +248,67 @@ const Sidebar: React.FC<SidebarProps> = ({
                     </motion.button>
                   );
                 })}
+
+                <motion.div
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.35 }}
+                  className="relative"
+                >
+                  <button
+                    onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                    className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors cursor-pointer text-white-dark hover:text-white-light hover:bg-black-light"
+                  >
+                    <EllipsisHorizontalIcon className="h-4 w-4 flex-shrink-0" />
+                    <span className="text-sm tracking-wide">More</span>
+                    <motion.div
+                      animate={{ rotate: isDropdownOpen ? 180 : 0 }}
+                      transition={{ duration: 0.2 }}
+                      className="ml-auto"
+                    >
+                      <ChevronDownIcon className="h-4 w-4" />
+                    </motion.div>
+                  </button>
+
+                  <AnimatePresence>
+                    {isDropdownOpen && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: "auto" }}
+                        exit={{ opacity: 0, height: 0 }}
+                        transition={{ duration: 0.2 }}
+                        className="overflow-hidden"
+                      >
+                        <div className="pl-4 pt-1 space-y-1">
+                          {dropdownResourceItems.map((item, index) => {
+                            const Icon = item.icon;
+                            const isActive = selectedSection === item.id;
+
+                            return (
+                              <motion.button
+                                key={item.id}
+                                initial={{ opacity: 0, x: -10 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ delay: 0.05 * index }}
+                                onClick={() => handleSectionClick(item.id)}
+                                className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors cursor-pointer ${
+                                  isActive
+                                    ? "bg-mint-light text-black-dark font-medium"
+                                    : "text-white-darker hover:text-white-light hover:bg-black-light"
+                                }`}
+                              >
+                                <Icon className="h-4 w-4 flex-shrink-0" />
+                                <span className="text-sm tracking-wide">
+                                  {item.label}
+                                </span>
+                              </motion.button>
+                            );
+                          })}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </motion.div>
               </div>
             </div>
           </nav>
@@ -370,7 +437,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 
           <div className="mt-6">
             <div className="space-y-1">
-              {resourceItems.map((item, index) => {
+              {visibleResourceItems.map((item, index) => {
                 const Icon = item.icon;
                 const isActive = selectedSection === item.id;
                 const isHovered = hoveredItem === item.id;
@@ -417,6 +484,85 @@ const Sidebar: React.FC<SidebarProps> = ({
                   </div>
                 );
               })}
+
+              <div className="relative">
+                <motion.button
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.3 }}
+                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                  onMouseEnter={() => setHoveredItem("more")}
+                  onMouseLeave={() => setHoveredItem(null)}
+                  className="w-full flex items-center justify-center px-3 py-3 rounded-lg transition-colors cursor-pointer text-white-dark hover:text-white-light hover:bg-black-light"
+                >
+                  <EllipsisHorizontalIcon className="h-4 w-4" />
+                </motion.button>
+
+                <AnimatePresence>
+                  {hoveredItem === "more" && (
+                    <motion.div
+                      initial={{ opacity: 0, x: -10, scale: 0.9 }}
+                      animate={{ opacity: 1, x: 0, scale: 1 }}
+                      exit={{ opacity: 0, x: -10, scale: 0.9 }}
+                      transition={{
+                        type: "spring",
+                        stiffness: 500,
+                        damping: 30,
+                      }}
+                      className="absolute left-full top-1/2 transform -translate-y-1/2 ml-2 z-50"
+                    >
+                      <div className="bg-black-dark border border-black-lighter rounded-lg px-3 py-2 shadow-lg">
+                        <span className="text-sm text-white-light tracking-wide whitespace-nowrap">
+                          More Resources
+                        </span>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
+                <AnimatePresence>
+                  {isDropdownOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.9, x: -10 }}
+                      animate={{ opacity: 1, scale: 1, x: 0 }}
+                      exit={{ opacity: 0, scale: 0.9, x: -10 }}
+                      transition={{
+                        type: "spring",
+                        stiffness: 500,
+                        damping: 30,
+                      }}
+                      className="absolute left-full top-0 ml-2 z-50"
+                    >
+                      <div className="bg-black-dark border border-black-lighter rounded-lg shadow-lg overflow-hidden">
+                        {dropdownResourceItems.map((item) => {
+                          const Icon = item.icon;
+                          const isActive = selectedSection === item.id;
+
+                          return (
+                            <button
+                              key={item.id}
+                              onClick={() => {
+                                handleSectionClick(item.id);
+                                setIsDropdownOpen(false);
+                              }}
+                              className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-colors cursor-pointer whitespace-nowrap ${
+                                isActive
+                                  ? "bg-mint-light text-black-dark font-medium"
+                                  : "text-white-light hover:bg-black-light hover:text-white-lighter"
+                              }`}
+                            >
+                              <Icon className="h-4 w-4 flex-shrink-0" />
+                              <span className="text-sm tracking-wide">
+                                {item.label}
+                              </span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
             </div>
           </div>
         </nav>
