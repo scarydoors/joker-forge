@@ -189,6 +189,24 @@ export interface EnhancementData {
   hasUserUploadedImage?: boolean;
 }
 
+export interface SealData {
+  id: string;
+  name: string;
+  description: string;
+  imagePreview: string;
+  sealKey: string;
+  atlas?: string;
+  pos?: { x: number; y: number };
+  badge_colour?: string;
+  unlocked?: boolean;
+  discovered?: boolean;
+  no_collection?: boolean;
+  rules?: Rule[];
+  userVariables?: UserVariable[];
+  placeholderCreditIndex?: number;
+  hasUserUploadedImage?: boolean;
+}
+
 // =============================================================================
 // DATA REGISTRY SYSTEM
 // =============================================================================
@@ -199,6 +217,7 @@ interface RegistryState {
   consumables: ConsumableData[];
   boosters: BoosterData[];
   enhancements: EnhancementData[];
+  seals: SealData[];
   modPrefix: string;
 }
 
@@ -208,6 +227,7 @@ let registryState: RegistryState = {
   consumables: [],
   boosters: [],
   enhancements: [],
+  seals: [],
   modPrefix: "",
 };
 
@@ -267,6 +287,7 @@ export const DataRegistry = {
     consumables: ConsumableData[],
     boosters: BoosterData[],
     enhancements: EnhancementData[],
+    seals: SealData[] = [],
     modPrefix: string
   ) => {
     registryState = {
@@ -275,6 +296,7 @@ export const DataRegistry = {
       consumables,
       boosters,
       enhancements,
+      seals,
       modPrefix,
     };
   },
@@ -348,6 +370,22 @@ export const DataRegistry = {
     return [...vanilla, ...custom];
   },
 
+  getSeals: (): Array<{ key: string; value: string; label: string }> => {
+    const vanilla = VANILLA_SEALS.map((seal) => ({
+      key: seal.key,
+      value: seal.value,
+      label: seal.label,
+    }));
+
+    const custom = registryState.seals.map((seal) => ({
+      key: `${registryState.modPrefix}_${seal.sealKey}`,
+      value: `${registryState.modPrefix}_${seal.sealKey}`,
+      label: seal.name || "Unnamed Seal",
+    }));
+
+    return [...vanilla, ...custom];
+  },
+
   getState: () => ({ ...registryState }),
 };
 
@@ -361,6 +399,7 @@ export const updateDataRegistry = (
   consumables: ConsumableData[],
   boosters: BoosterData[],
   enhancements: EnhancementData[],
+  seals: SealData[],
   modPrefix: string
 ) => {
   DataRegistry.update(
@@ -369,8 +408,48 @@ export const updateDataRegistry = (
     consumables,
     boosters,
     enhancements,
+    seals,
     modPrefix
   );
+};
+
+// =============================================================================
+// SEALS SECTION
+// =============================================================================
+
+const VANILLA_SEALS = [
+  { key: "Gold", value: "Gold", label: "Gold" },
+  { key: "Red", value: "Red", label: "Red" },
+  { key: "Blue", value: "Blue", label: "Blue" },
+  { key: "Purple", value: "Purple", label: "Purple" },
+] as const;
+
+export const SEALS_DATA = () => DataRegistry.getSeals();
+export const SEAL_KEYS = () => DataRegistry.getSeals().map((s) => s.key);
+export const SEAL_VALUES = () => DataRegistry.getSeals().map((s) => s.value);
+export const SEAL_LABELS = () => DataRegistry.getSeals().map((s) => s.label);
+
+export const isCustomSeal = (
+  value: string,
+  customSeals: SealData[] = registryState.seals,
+  modPrefix: string = registryState.modPrefix
+): boolean => {
+  return (
+    value.includes("_") &&
+    customSeals.some((s) => `${modPrefix}_${s.sealKey}` === value)
+  );
+};
+
+export const getSealByValue = (
+  value: string
+): { key: string; value: string; label: string } | undefined => {
+  return SEALS_DATA().find((seal) => seal.value === value);
+};
+
+export const getSealByKey = (
+  key: string
+): { key: string; value: string; label: string } | undefined => {
+  return SEALS_DATA().find((seal) => seal.key === key);
 };
 
 // =============================================================================
@@ -850,10 +929,6 @@ export const SEALS = [
   },
 ] as const;
 
-export const SEAL_KEYS = SEALS.map((seal) => seal.key);
-export const SEAL_VALUES = SEALS.map((seal) => seal.value);
-export const SEAL_LABELS = SEALS.map((seal) => seal.label);
-
 // Tarot Cards
 export const TAROT_CARDS = [
   { key: "c_fool", value: "c_fool", label: "The Fool" },
@@ -1144,11 +1219,6 @@ export const getSuitByValue = (value: string) => {
 // Get edition data by key
 export const getEditionByKey = (key: string) => {
   return EDITIONS.find((edition) => edition.key === key);
-};
-
-// Get seal data by key
-export const getSealByKey = (key: string) => {
-  return SEALS.find((seal) => seal.key === key);
 };
 
 // Get tarot card data by key
