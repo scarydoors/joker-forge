@@ -19,9 +19,9 @@ export interface ConfigVariablesReturn {
   valueCode: string;
   configVariables: ConfigExtraVariable[];
   isXVariable: {
-    isGameVariable: boolean,
-    isRangeVariable: boolean
-  }
+    isGameVariable: boolean;
+    isRangeVariable: boolean;
+  };
 }
 
 export const parseGameVariable = (value: unknown): ParsedGameVariable => {
@@ -64,9 +64,7 @@ export const parseRangeVariable = (value: unknown): ParsedRangeVariable => {
   };
 };
 
-export const generateGameVariableCode = (
-  value: unknown,
-): string => {
+export const generateGameVariableCode = (value: unknown): string => {
   const parsed = parseGameVariable(value);
 
   if (
@@ -96,14 +94,18 @@ export const generateGameVariableCode = (
   return typeof value === "number" ? value.toString() : "0";
 };
 
-export const generateConfigVariables = ( 
+export const generateConfigVariables = (
   effectValue: unknown,
   effectId: string,
-  variableName: string
+  variableName: string,
+  itemType: "enhancement" | "seal" = "enhancement"
 ): ConfigVariablesReturn => {
-  effectValue = effectValue ?? 1
+  effectValue = effectValue ?? 1;
   const parsed = parseGameVariable(effectValue);
   const rangeParsed = parseRangeVariable(effectValue);
+
+  const abilityPath =
+    itemType === "seal" ? "card.ability.seal.extra" : "card.ability.extra";
 
   let valueCode: string;
   const configVariables: ConfigExtraVariable[] = [];
@@ -112,7 +114,7 @@ export const generateConfigVariables = (
     valueCode = generateGameVariableCode(effectValue);
   } else if (rangeParsed.isRangeVariable) {
     const seedName = `${variableName}_${effectId.substring(0, 8)}`;
-    valueCode = `pseudorandom('${seedName}', card.ability.extra.${variableName}_min, card.ability.extra.${variableName}_max)`;
+    valueCode = `pseudorandom('${seedName}', ${abilityPath}.${variableName}_min, ${abilityPath}.${variableName}_max)`;
 
     configVariables.push(
       { name: `${variableName}_min`, value: rangeParsed.min ?? 1 },
@@ -122,10 +124,10 @@ export const generateConfigVariables = (
     if (effectValue.endsWith("_value")) {
       valueCode = effectValue;
     } else {
-      valueCode = `card.ability.extra.${effectValue}`;
+      valueCode = `${abilityPath}.${effectValue}`;
     }
   } else {
-    valueCode = `card.ability.extra.${variableName}`;
+    valueCode = `${abilityPath}.${variableName}`;
 
     configVariables.push({
       name: variableName,
@@ -138,7 +140,7 @@ export const generateConfigVariables = (
     configVariables,
     isXVariable: {
       isGameVariable: parsed.isGameVariable,
-      isRangeVariable: rangeParsed.isRangeVariable
-    }
-  }
-}
+      isRangeVariable: rangeParsed.isRangeVariable,
+    },
+  };
+};
