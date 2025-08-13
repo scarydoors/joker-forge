@@ -172,7 +172,7 @@ const EditSealInfo: React.FC<EditSealInfoProps> = ({
         unlocked: seal.unlocked !== false,
         discovered: seal.discovered !== false,
         no_collection: seal.no_collection === true,
-        badge_colour: seal.badge_colour || "#FFFFFF",
+        badge_colour: seal.badge_colour || "#000000",
         sealKey: seal.sealKey || slugify(seal.name),
         hasUserUploadedImage: seal.hasUserUploadedImage || false,
       });
@@ -713,7 +713,7 @@ const EditSealInfo: React.FC<EditSealInfoProps> = ({
                           <div className="flex items-center gap-4 mb-4">
                             <input
                               type="color"
-                              value={formData.badge_colour || "#FFFFFF"}
+                              value={formData.badge_colour || "#000000"}
                               onChange={(e) =>
                                 handleInputChange(
                                   "badge_colour",
@@ -724,7 +724,7 @@ const EditSealInfo: React.FC<EditSealInfoProps> = ({
                               className="w-16 h-16 rounded-lg border-2 border-black-lighter bg-black-dark cursor-pointer"
                             />
                             <InputField
-                              value={formData.badge_colour || "#FFFFFF"}
+                              value={formData.badge_colour || "#000000"}
                               onChange={(e) =>
                                 handleInputChange(
                                   "badge_colour",
@@ -732,7 +732,7 @@ const EditSealInfo: React.FC<EditSealInfoProps> = ({
                                   false
                                 )
                               }
-                              placeholder="#FFFFFF"
+                              placeholder="#000000"
                               size="md"
                               className="flex-1"
                             />
@@ -765,10 +765,7 @@ const EditSealInfo: React.FC<EditSealInfoProps> = ({
                             </div>
                           </div>
 
-                          <div className="mt-6 p-4 rounded-lg bg-black-darker border border-black-lighter">
-                            <p className="text-sm font-medium text-white-light mb-2">
-                              Preview
-                            </p>
+                          <div className="mt-10">
                             <div className="flex items-center justify-center">
                               <div className="relative">
                                 <div
@@ -776,32 +773,17 @@ const EditSealInfo: React.FC<EditSealInfoProps> = ({
                                   style={{
                                     backgroundColor: formData.badge_colour
                                       ? `${formData.badge_colour}80`
-                                      : "#FFFFFF80",
+                                      : "#000000",
                                   }}
                                 />
                                 <div
                                   className="rounded-xl text-center text-lg text-white py-2 px-4 relative font-bold"
                                   style={{
                                     backgroundColor:
-                                      formData.badge_colour || "#FFFFFF",
+                                      formData.badge_colour || "#000000",
                                   }}
                                 >
-                                  <span
-                                    className="relative"
-                                    style={{
-                                      color:
-                                        formData.badge_colour &&
-                                        parseInt(
-                                          formData.badge_colour.replace(
-                                            "#",
-                                            ""
-                                          ),
-                                          16
-                                        ) > 0x888888
-                                          ? "#000000"
-                                          : "#FFFFFF",
-                                    }}
-                                  >
+                                  <span className="relative text-[#fff]">
                                     {formData.name || "Seal Name"}
                                   </span>
                                 </div>

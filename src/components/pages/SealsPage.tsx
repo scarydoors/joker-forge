@@ -244,7 +244,7 @@ const SealsPage: React.FC<SealsPageProps> = ({
       description: "A {C:blue}custom{} seal with {C:red}unique{} effects.",
       imagePreview: placeholderResult.imageData,
       sealKey: slugify("New Seal"),
-      badge_colour: "#FFFFFF",
+      badge_colour: "#000000",
       unlocked: true,
       discovered: true,
       rules: [],
