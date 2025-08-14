@@ -1061,8 +1061,8 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
       {
         id: "joker_key",
         type: "text",
-        label: "Joker Key (e.g., j_joker, j_greedy_joker, or just joker)",
-        default: "j_joker",
+        label: "Joker Key (e.g., joker, greedy_joker)",
+        default: "joker",
       },
     ],
     category: "Deck & Jokers",
@@ -1823,6 +1823,21 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
       },
     ],
     category: "Probability",
+  },
+  {
+    id: "joker_specific",
+    label: "Specific Joker",
+    description: "Check the key of the evaluated joker",
+    applicableTriggers: ["joker_evaluated"],
+    params: [
+      {
+        id: "joker_key",
+        type: "text",
+        label: "Joker Key ( [modprefix]_joker )",
+        default: "joker",
+      },
+    ],
+    category: "Joker",
   },
   {
     id: "joker_rarity",

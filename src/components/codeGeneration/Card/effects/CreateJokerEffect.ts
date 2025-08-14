@@ -18,8 +18,12 @@ export const generateCreateJokerReturn = (effect: Effect): EffectReturn => {
 
   const cardParams = ["set = 'Joker'"];
 
-  if (jokerType === "specific" && jokerKey) {
-    cardParams.push(`key = '${jokerKey}'`);
+  const normalizedJokerKey = jokerKey.startsWith("j_") 
+  ? jokerKey 
+  : `j_${jokerKey}`
+
+  if (jokerType === "specific" && normalizedJokerKey) {
+    cardParams.push(`key = '${normalizedJokerKey}'`);
   } else if (rarity !== "random") {
     const rarityMap: Record<string, string> = {
       common: "Common",

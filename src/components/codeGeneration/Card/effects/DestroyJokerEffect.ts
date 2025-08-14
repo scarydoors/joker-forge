@@ -8,13 +8,17 @@ export const generateDestroyJokerReturn = (effect: Effect): EffectReturn => {
   const position = (effect.params?.position as string) || "first";
   const customMessage = effect.customMessage;
 
+  const normalizedJokerKey = jokerKey.startsWith("j_") 
+  ? jokerKey 
+  : `j_${jokerKey}`
+
   let jokerSelectionCode = "";
 
-  if (selectionMethod === "specific" && jokerKey) {
+  if (selectionMethod === "specific" && normalizedJokerKey) {
     jokerSelectionCode = `
                 local target_joker = nil
                 for i, joker in ipairs(G.jokers.cards) do
-                    if joker.config.center.key == "${jokerKey}" and not joker.ability.eternal and not joker.getting_sliced then
+                    if joker.config.center.key == "${normalizedJokerKey}" and not joker.ability.eternal and not joker.getting_sliced then
                         target_joker = joker
                         break
                     end
