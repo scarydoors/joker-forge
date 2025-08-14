@@ -11,11 +11,15 @@ export const generateCreateJokerReturn = (
   const edition = (effect.params?.edition as string) || "none";
   const customMessage = effect.customMessage;
 
+  const normalizedJokerKey = jokerKey.startsWith("j_") 
+  ? jokerKey 
+  : `j_${jokerKey}`
+
   // Build SMODS.add_card parameters
   const cardParams = ["set = 'Joker'"];
 
   if (jokerType === "specific") {
-    cardParams.push(`key = '${jokerKey}'`);
+    cardParams.push(`key = '${normalizedJokerKey}'`);
   } else if (rarity !== "random") {
     const rarityMap: Record<string, string> = {
       common: "Common",

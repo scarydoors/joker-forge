@@ -27,12 +27,16 @@ export const generateCopyJokerReturn = (
   let spaceCheckCode = "";
   let copyCode = "";
 
+  const normalizedJokerKey = jokerKey.startsWith("j_") 
+  ? jokerKey 
+  : `j_${jokerKey}`
+
   // Generate joker selection logic
-  if (selectionMethod === "specific" && jokerKey) {
+  if (selectionMethod === "specific" && normalizedJokerKey) {
     jokerSelectionCode = `
                 local target_joker = nil
                 for i, joker in ipairs(G.jokers.cards) do
-                    if joker.config.center.key == "${jokerKey}" then
+                    if joker.config.center.key == "${normalizedJokerKey}" then
                         target_joker = joker
                         break
                     end

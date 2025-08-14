@@ -20,11 +20,15 @@ export const generateCreateJokerReturn = (
   const hasSticker = sticker !== "none";
   const ignoreSlots = ignoreSlotsParam === "ignore"
 
+  const normalizedJokerKey = jokerKey.startsWith("j_") 
+  ? jokerKey 
+  : `j_${jokerKey}`
+
   // Build SMODS.add_card parameters
   const cardParams = ["set = 'Joker'"];
 
-  if (jokerType === "specific" && jokerKey) {
-    cardParams.push(`key = '${jokerKey}'`);
+  if (jokerType === "specific" && normalizedJokerKey) {
+    cardParams.push(`key = '${normalizedJokerKey}'`);
   } else if (rarity !== "random") {
     const rarityMap: Record<string, string> = {
       common: "Common",

@@ -809,7 +809,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
     id: "create_joker",
     label: "Create Joker",
     description:
-      "Create a random or specific joker card. For creating jokers from your own mod, it is j_[modprefix]_[joker_name]. You can find your mod prefix in the mod metadata page.",
+      "Create a random or specific joker card. For creating jokers from your own mod, it is [modprefix]_[joker_name]. You can find your mod prefix in the mod metadata page.",
     applicableTriggers: [...GENERIC_TRIGGERS],
     params: [
       {
@@ -839,8 +839,8 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
       {
         id: "joker_key",
         type: "text",
-        label: "Joker Key (e.g., j_joker, j_greedy_joker)",
-        default: "j_joker",
+        label: "Joker Key ( [modprefix]_joker )",
+        default: "joker",
         showWhen: {
           parameter: "joker_type",
           values: ["specific"],

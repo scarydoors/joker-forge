@@ -1061,8 +1061,8 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
       {
         id: "joker_key",
         type: "text",
-        label: "Joker Key (e.g., j_joker, j_greedy_joker, or just joker)",
-        default: "j_joker",
+        label: "Joker Key (e.g., joker, greedy_joker)",
+        default: "joker",
       },
     ],
     category: "Deck & Jokers",
