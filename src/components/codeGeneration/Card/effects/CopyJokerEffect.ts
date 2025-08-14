@@ -9,16 +9,20 @@ export const generateCopyJokerReturn = (effect: Effect): EffectReturn => {
   const edition = (effect.params?.edition as string) || "none";
   const customMessage = effect.customMessage;
 
+  const normalizedJokerKey = jokerKey.startsWith("j_") 
+  ? jokerKey 
+  : `j_${jokerKey}`
+
   const isNegative = edition === "e_negative";
   const hasEdition = edition !== "none";
 
   let jokerSelectionCode = "";
 
-  if (selectionMethod === "specific" && jokerKey) {
+  if (selectionMethod === "specific" && normalizedJokerKey) {
     jokerSelectionCode = `
                 local target_joker = nil
                 for i, joker in ipairs(G.jokers.cards) do
-                    if joker.config.center.key == "${jokerKey}" then
+                    if joker.config.center.key == "${normalizedJokerKey}" then
                         target_joker = joker
                         break
                     end

@@ -18,14 +18,18 @@ export const generateDestroyJokerReturn = (
   const scoringTriggers = ["hand_played", "card_scored"];
   const isScoring = scoringTriggers.includes(triggerType);
 
+  const normalizedJokerKey = jokerKey.startsWith("j_") 
+  ? jokerKey 
+  : `j_${jokerKey}`
+
   let jokerSelectionCode = "";
   let destroyCode = "";
 
-  if (selectionMethod === "specific" && jokerKey) {
+  if (selectionMethod === "specific" && normalizedJokerKey) {
     jokerSelectionCode = `
                 local target_joker = nil
                 for i, joker in ipairs(G.jokers.cards) do
-                    if joker.config.center.key == "${jokerKey}" and not joker.ability.eternal and not joker.getting_sliced then
+                    if joker.config.center.key == "${normalizedJokerKey}" and not joker.ability.eternal and not joker.getting_sliced then
                         target_joker = joker
                         break
                     end
