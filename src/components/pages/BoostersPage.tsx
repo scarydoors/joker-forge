@@ -99,17 +99,70 @@ const EditBoosterRulesModal: React.FC<EditBoosterRulesModalProps> = ({
 
   if (!isOpen) return null;
 
+  const getBoosterTypeColor = () => {
+    switch (boosterType) {
+      case "joker":
+        return "text-balatro-purple";
+      case "consumable":
+        return "text-mint";
+      case "playing_card":
+        return "text-balatro-blue";
+      default:
+        return "text-balatro-gold-new";
+    }
+  };
+
+  const getBoosterTypeLabel = () => {
+    switch (boosterType) {
+      case "joker":
+        return "Joker";
+      case "consumable":
+        return "Consumable";
+      case "playing_card":
+        return "Playing Card";
+      default:
+        return "Unknown";
+    }
+  };
+
+  const handleAddRule = () => {
+    const newRule: BoosterCardRule = {
+      weight: 1,
+      ...(boosterType === "consumable" && { set: "Tarot" }),
+    };
+    setLocalRules([...localRules, newRule]);
+  };
+
   return (
     <div className="fixed inset-0 flex bg-black-darker/80 backdrop-blur-sm items-center justify-center z-50 font-lexend">
       <div
         ref={modalRef}
         className="bg-black-dark border-2 border-black-lighter rounded-lg w-[80vh] max-h-[80vh] flex flex-col relative overflow-hidden"
       >
-        <div className="p-6 border-b border-black-lighter">
+        <div className="p-6 pb-4">
           <h3 className="text-white-light text-lg font-medium flex items-center gap-2">
             <Cog6ToothIcon className="h-5 w-5 text-mint" />
             Pack Rules Configuration
           </h3>
+        </div>
+
+        <div className="px-6 pb-4 border-b border-black-lighter">
+          <div className="flex items-center justify-between">
+            <h4 className="text-white-light font-medium">
+              <span className={getBoosterTypeColor()}>
+                {getBoosterTypeLabel()}
+              </span>{" "}
+              Pack Rules
+            </h4>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={handleAddRule}
+              icon={<PlusIcon className="h-4 w-4" />}
+            >
+              Add Rule
+            </Button>
+          </div>
         </div>
 
         <div className="flex-1 overflow-y-auto p-6">
@@ -144,14 +197,6 @@ export const CardRuleEditor: React.FC<CardRuleEditorProps> = ({
   boosterType,
   consumableSets,
 }) => {
-  const handleAddRule = () => {
-    const newRule: BoosterCardRule = {
-      weight: 1,
-      ...(boosterType === "consumable" && { set: "Tarot" }),
-    };
-    onCardRulesChange([...cardRules, newRule]);
-  };
-
   const handleUpdateRule = (
     index: number,
     updates: Partial<BoosterCardRule>
@@ -241,36 +286,8 @@ export const CardRuleEditor: React.FC<CardRuleEditorProps> = ({
     }
   };
 
-  const getBoosterTypeLabel = () => {
-    switch (boosterType) {
-      case "joker":
-        return "Joker";
-      case "consumable":
-        return "Consumable";
-      case "playing_card":
-        return "Playing Card";
-      default:
-        return "Unknown";
-    }
-  };
-
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h4 className="text-white-light font-medium">
-          <span className={getBoosterTypeColor()}>{getBoosterTypeLabel()}</span>{" "}
-          Pack Rules
-        </h4>
-        <Button
-          variant="secondary"
-          size="sm"
-          onClick={handleAddRule}
-          icon={<PlusIcon className="h-4 w-4" />}
-        >
-          Add Rule
-        </Button>
-      </div>
-
+    <div className="space-y-3">
       {cardRules.length === 0 ? (
         <div className="text-center py-8 border border-black-lighter rounded-lg">
           <div className="text-white-darker text-sm">
@@ -279,224 +296,218 @@ export const CardRuleEditor: React.FC<CardRuleEditorProps> = ({
           </div>
         </div>
       ) : (
-        <div className="space-y-3">
-          {cardRules.map((rule, index) => (
-            <div
-              key={index}
-              className="bg-black-darker border border-black-lighter rounded-lg p-4"
-            >
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-2">
-                  <span className={`font-medium ${getBoosterTypeColor()}`}>
-                    Rule #{index + 1}
-                  </span>
-                </div>
-                <button
-                  onClick={() => handleRemoveRule(index)}
-                  className="text-balatro-red hover:text-red-400 p-1 cursor-pointer"
-                >
-                  <XMarkIcon className="h-4 w-4" />
-                </button>
+        cardRules.map((rule, index) => (
+          <div
+            key={index}
+            className="bg-black-darker border border-black-lighter rounded-lg p-4"
+          >
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <span className={`font-medium ${getBoosterTypeColor()}`}>
+                  Rule #{index + 1}
+                </span>
               </div>
+              <button
+                onClick={() => handleRemoveRule(index)}
+                className="text-balatro-red hover:text-red-400 p-1 cursor-pointer"
+              >
+                <XMarkIcon className="h-4 w-4" />
+              </button>
+            </div>
 
-              {boosterType === "playing_card" ? (
-                <div className="grid grid-cols-2 gap-3 mb-3">
-                  <div>
-                    <label className="block text-white-light text-sm font-medium mb-2">
-                      Weight
-                    </label>
-                    <div className="flex items-center gap-3">
-                      <input
-                        type="range"
-                        min="0"
-                        max="2"
-                        step="0.1"
-                        value={rule.weight ?? 1}
-                        onChange={(e) =>
-                          handleUpdateRule(index, {
-                            weight: parseFloat(e.target.value),
-                          })
-                        }
-                        className="flex-1 h-2 bg-black-lighter rounded appearance-none cursor-pointer"
-                      />
-                      <span className="text-mint font-mono w-12 text-sm">
-                        {(rule.weight ?? 1).toFixed(1)}
-                      </span>
-                    </div>
-                  </div>
-                  <InputDropdown
-                    label="Suit"
-                    value={rule.suit || ""}
-                    onChange={(value) =>
-                      handleUpdateRule(index, { suit: value })
-                    }
-                    options={suitOptions}
-                    size="sm"
-                  />
-                </div>
-              ) : (
-                <div className="grid grid-cols-2 gap-3 mb-3">
-                  <div>
-                    <label className="block text-white-light text-sm font-medium mb-2">
-                      Weight
-                    </label>
-                    <div className="flex items-center gap-3">
-                      <input
-                        type="range"
-                        min="0"
-                        max="2"
-                        step="0.1"
-                        value={rule.weight ?? 1}
-                        onChange={(e) =>
-                          handleUpdateRule(index, {
-                            weight: parseFloat(e.target.value),
-                          })
-                        }
-                        className="flex-1 h-2 bg-black-lighter rounded appearance-none cursor-pointer"
-                      />
-                      <span className="text-mint font-mono w-12 text-sm">
-                        {(rule.weight ?? 1).toFixed(1)}
-                      </span>
-                    </div>
-                  </div>
-                  <div>
-                    <InputDropdown
-                      label="Specific Type"
-                      value={rule.specific_type || ""}
-                      onChange={(value) =>
+            {boosterType === "playing_card" ? (
+              <div className="grid grid-cols-2 gap-3 mb-3">
+                <div>
+                  <label className="block text-white-light text-sm font-medium mb-2">
+                    Weight
+                  </label>
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="range"
+                      min="0"
+                      max="2"
+                      step="0.1"
+                      value={rule.weight ?? 1}
+                      onChange={(e) =>
                         handleUpdateRule(index, {
-                          specific_type: value as "consumable" | "joker" | null,
-                          specific_key: "",
+                          weight: parseFloat(e.target.value),
                         })
                       }
-                      options={specificTypeOptions}
-                      size="sm"
+                      className="flex-1 h-2 bg-black-lighter rounded appearance-none cursor-pointer"
                     />
+                    <span className="text-mint font-mono w-12 text-sm">
+                      {(rule.weight ?? 1).toFixed(1)}
+                    </span>
                   </div>
                 </div>
-              )}
-
-              {rule.specific_type && (
-                <div className="mb-3">
-                  <InputField
-                    label={`Specific ${
-                      rule.specific_type === "consumable"
-                        ? "Consumable"
-                        : "Joker"
-                    } Key`}
-                    type="text"
-                    value={rule.specific_key || ""}
-                    onChange={(e) =>
+                <InputDropdown
+                  label="Suit"
+                  value={rule.suit || ""}
+                  onChange={(value) => handleUpdateRule(index, { suit: value })}
+                  options={suitOptions}
+                  size="sm"
+                />
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 gap-3 mb-3">
+                <div>
+                  <label className="block text-white-light text-sm font-medium mb-2">
+                    Weight
+                  </label>
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="range"
+                      min="0"
+                      max="2"
+                      step="0.1"
+                      value={rule.weight ?? 1}
+                      onChange={(e) =>
+                        handleUpdateRule(index, {
+                          weight: parseFloat(e.target.value),
+                        })
+                      }
+                      className="flex-1 h-2 bg-black-lighter rounded appearance-none cursor-pointer"
+                    />
+                    <span className="text-mint font-mono w-12 text-sm">
+                      {(rule.weight ?? 1).toFixed(1)}
+                    </span>
+                  </div>
+                </div>
+                <div>
+                  <InputDropdown
+                    label="Specific Type"
+                    value={rule.specific_type || ""}
+                    onChange={(value) =>
                       handleUpdateRule(index, {
-                        specific_key: e.target.value,
+                        specific_type: value as "consumable" | "joker" | null,
+                        specific_key: "",
                       })
                     }
-                    placeholder={
-                      rule.specific_type === "consumable"
-                        ? "e.g. c_fool"
-                        : "e.g. j_joker"
-                    }
+                    options={specificTypeOptions}
                     size="sm"
-                    darkmode
                   />
                 </div>
-              )}
+              </div>
+            )}
 
-              {!rule.specific_type && (
-                <div className="grid grid-cols-2 gap-3">
-                  {boosterType === "consumable" && (
-                    <>
-                      <InputDropdown
-                        label="Set"
-                        value={rule.set || "Tarot"}
-                        onChange={(value) =>
-                          handleUpdateRule(index, { set: value })
-                        }
-                        options={getConsumableSetOptions()}
-                        size="sm"
-                      />
-                      <InputDropdown
-                        label="Edition"
-                        value={rule.edition || ""}
-                        onChange={(value) =>
-                          handleUpdateRule(index, { edition: value })
-                        }
-                        options={editionOptionsConsumable}
-                        size="sm"
-                      />
-                    </>
-                  )}
+            {rule.specific_type && (
+              <div className="mb-3">
+                <InputField
+                  label={`Specific ${
+                    rule.specific_type === "consumable" ? "Consumable" : "Joker"
+                  } Key`}
+                  type="text"
+                  value={rule.specific_key || ""}
+                  onChange={(e) =>
+                    handleUpdateRule(index, {
+                      specific_key: e.target.value,
+                    })
+                  }
+                  placeholder={
+                    rule.specific_type === "consumable"
+                      ? "e.g. c_fool"
+                      : "e.g. j_joker"
+                  }
+                  size="sm"
+                  darkmode
+                />
+              </div>
+            )}
 
-                  {boosterType === "joker" && (
-                    <>
-                      <InputDropdown
-                        label="Rarity"
-                        value={rule.rarity || ""}
-                        onChange={(value) =>
-                          handleUpdateRule(index, { rarity: value })
-                        }
-                        options={rarityOptions}
-                        size="sm"
-                      />
-                      <InputDropdown
-                        label="Edition"
-                        value={rule.edition || ""}
-                        onChange={(value) =>
-                          handleUpdateRule(index, { edition: value })
-                        }
-                        options={editionOptions}
-                        size="sm"
-                      />
-                    </>
-                  )}
+            {!rule.specific_type && (
+              <div className="grid grid-cols-2 gap-3">
+                {boosterType === "consumable" && (
+                  <>
+                    <InputDropdown
+                      label="Set"
+                      value={rule.set || "Tarot"}
+                      onChange={(value) =>
+                        handleUpdateRule(index, { set: value })
+                      }
+                      options={getConsumableSetOptions()}
+                      size="sm"
+                    />
+                    <InputDropdown
+                      label="Edition"
+                      value={rule.edition || ""}
+                      onChange={(value) =>
+                        handleUpdateRule(index, { edition: value })
+                      }
+                      options={editionOptionsConsumable}
+                      size="sm"
+                    />
+                  </>
+                )}
 
-                  {boosterType === "playing_card" && (
-                    <>
-                      <InputDropdown
-                        label="Rank"
-                        value={rule.rank || ""}
-                        onChange={(value) =>
-                          handleUpdateRule(index, { rank: value })
-                        }
-                        options={rankOptions}
-                        size="sm"
-                      />
-                      <InputDropdown
-                        label="Enhancement"
-                        value={rule.enhancement || ""}
-                        onChange={(value) =>
-                          handleUpdateRule(index, {
-                            enhancement: value,
-                          })
-                        }
-                        options={enhancementOptions}
-                        size="sm"
-                      />
-                      <InputDropdown
-                        label="Edition"
-                        value={rule.edition || ""}
-                        onChange={(value) =>
-                          handleUpdateRule(index, { edition: value })
-                        }
-                        options={editionOptions}
-                        size="sm"
-                      />
-                      <InputDropdown
-                        label="Seal"
-                        value={rule.seal || ""}
-                        onChange={(value) =>
-                          handleUpdateRule(index, { seal: value })
-                        }
-                        options={sealOptions}
-                        size="sm"
-                      />
-                    </>
-                  )}
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
+                {boosterType === "joker" && (
+                  <>
+                    <InputDropdown
+                      label="Rarity"
+                      value={rule.rarity || ""}
+                      onChange={(value) =>
+                        handleUpdateRule(index, { rarity: value })
+                      }
+                      options={rarityOptions}
+                      size="sm"
+                    />
+                    <InputDropdown
+                      label="Edition"
+                      value={rule.edition || ""}
+                      onChange={(value) =>
+                        handleUpdateRule(index, { edition: value })
+                      }
+                      options={editionOptions}
+                      size="sm"
+                    />
+                  </>
+                )}
+
+                {boosterType === "playing_card" && (
+                  <>
+                    <InputDropdown
+                      label="Rank"
+                      value={rule.rank || ""}
+                      onChange={(value) =>
+                        handleUpdateRule(index, { rank: value })
+                      }
+                      options={rankOptions}
+                      size="sm"
+                    />
+                    <InputDropdown
+                      label="Enhancement"
+                      value={rule.enhancement || ""}
+                      onChange={(value) =>
+                        handleUpdateRule(index, {
+                          enhancement: value,
+                        })
+                      }
+                      options={enhancementOptions}
+                      size="sm"
+                    />
+                    <InputDropdown
+                      label="Edition"
+                      value={rule.edition || ""}
+                      onChange={(value) =>
+                        handleUpdateRule(index, { edition: value })
+                      }
+                      options={editionOptions}
+                      size="sm"
+                    />
+                    <InputDropdown
+                      label="Seal"
+                      value={rule.seal || ""}
+                      onChange={(value) =>
+                        handleUpdateRule(index, { seal: value })
+                      }
+                      options={sealOptions}
+                      size="sm"
+                    />
+                  </>
+                )}
+              </div>
+            )}
+          </div>
+        ))
       )}
     </div>
   );
