@@ -167,6 +167,12 @@ export const generateTriggerContext = (
         comment: "-- When this specific joker is bought",
       };
 
+    case "joker_evaluated":
+      return {
+        check: `context.other_joker ${isBlueprintCompatible ? '' : ' and not context.blueprint'}`,
+        comment: "-- When another joker is triggered",
+      };
+
     case "game_over":
       return {
         check:
