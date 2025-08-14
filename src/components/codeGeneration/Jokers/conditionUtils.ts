@@ -52,6 +52,7 @@ import { generateVoucherRedeemedConditionCode } from "./conditions/VoucherRedeem
 import { generateJokerRarityConditionCode } from "./conditions/JokerRarityCondition";
 import { generateJokerStickerConditionCode, generateThisJokerStickerConditionCode } from "./conditions/JokerStickerCondition";
 import { generateJokerPositionConditionCode, generateThisJokerPositionConditionCode } from "./conditions/JokerPositionCondition";
+import { generateJokerKeyConditionCode } from "./conditions/JokerKeyCondition";
 
 export const generateConditionChain = (
   rule: Rule,
@@ -276,6 +277,9 @@ const generateSingleConditionCode = (
 
     case "voucher_redeemed":
       return generateVoucherRedeemedConditionCode([singleConditionRule]);
+
+    case "joker_specific":
+      return generateJokerKeyConditionCode([singleConditionRule]);
 
     case "joker_rarity":
       return generateJokerRarityConditionCode([singleConditionRule]);

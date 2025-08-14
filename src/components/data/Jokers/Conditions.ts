@@ -1825,6 +1825,21 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
     category: "Probability",
   },
   {
+    id: "joker_specific",
+    label: "Specific Joker",
+    description: "Check the key of the evaluated joker",
+    applicableTriggers: ["joker_evaluated"],
+    params: [
+      {
+        id: "joker_key",
+        type: "text",
+        label: "Joker Key ( [modprefix]_joker )",
+        default: "joker",
+      },
+    ],
+    category: "Joker",
+  },
+  {
     id: "joker_rarity",
     label: "Joker Rarity",
     description: "Check the rarity of the evaluated joker",
