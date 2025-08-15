@@ -7,7 +7,15 @@ import {
   useNavigate,
 } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { PuzzlePieceIcon, SwatchIcon } from "@heroicons/react/24/outline";
+import {
+  PuzzlePieceIcon,
+  SwatchIcon,
+  CpuChipIcon,
+  CakeIcon,
+  StarIcon,
+  DocumentTextIcon,
+  GiftIcon,
+} from "@heroicons/react/24/outline";
 
 // Pages
 import Sidebar from "./components/Sidebar";
@@ -21,7 +29,13 @@ import RaritiesPage from "./components/pages/RaritiesPage";
 import ConsumablesPage from "./components/pages/ConsumablesPage";
 import DecksPage from "./components/pages/DecksPage";
 import EditionsPage from "./components/pages/EditionsPage";
-import VanillaRemadePage from "./components/pages/VanillaReforgedPage";
+
+import JokersVanillaReforgedPage from "./components/pages/vanillareforged/JokersVanillaReforgedPage";
+import ConsumablesVanillaReforgedPage from "./components/pages/vanillareforged/ConsumablesVanillaReforgedPage";
+import BoostersVanillaReforgedPage from "./components/pages/vanillareforged/BoostersVanillaReforgedPage";
+import EnhancementsVanillaReforgedPage from "./components/pages/vanillareforged/EnhancementsVanillaReforgedPage";
+import SealsVanillaReforgedPage from "./components/pages/vanillareforged/SealsVanillaReforgedPage";
+
 import AcknowledgementsPage from "./components/pages/AcknowledgementsPage";
 import NotFoundPage from "./components/pages/NotFoundPage";
 import BoostersPage from "./components/pages/BoostersPage";
@@ -88,10 +102,25 @@ const DONATION_DISMISSED_KEY = "joker-forge-donation-dismissed";
 const DONATION_SHOW_DELAY = 1000 * 60 * 5; // 5 minutes
 
 const FloatingTabDock: React.FC<{
-  activeTab: "jokers" | "rarities";
-  onTabChange: (tab: "jokers" | "rarities") => void;
-}> = ({ activeTab, onTabChange }) => {
-  const tabs = [
+  activeTab:
+    | "jokers"
+    | "rarities"
+    | "consumables"
+    | "boosters"
+    | "enhancements"
+    | "seals";
+  onTabChange: (
+    tab:
+      | "jokers"
+      | "rarities"
+      | "consumables"
+      | "boosters"
+      | "enhancements"
+      | "seals"
+  ) => void;
+  isVanillaMode: boolean;
+}> = ({ activeTab, onTabChange, isVanillaMode }) => {
+  const regularTabs = [
     {
       id: "jokers" as const,
       icon: PuzzlePieceIcon,
@@ -103,6 +132,36 @@ const FloatingTabDock: React.FC<{
       label: "Rarities",
     },
   ];
+
+  const vanillaTabs = [
+    {
+      id: "jokers" as const,
+      icon: DocumentTextIcon,
+      label: "Jokers",
+    },
+    {
+      id: "consumables" as const,
+      icon: CakeIcon,
+      label: "Consumables",
+    },
+    {
+      id: "boosters" as const,
+      icon: GiftIcon,
+      label: "Boosters",
+    },
+    {
+      id: "enhancements" as const,
+      icon: StarIcon,
+      label: "Enhancements",
+    },
+    {
+      id: "seals" as const,
+      icon: CpuChipIcon,
+      label: "Seals",
+    },
+  ];
+
+  const tabs = isVanillaMode ? vanillaTabs : regularTabs;
 
   return (
     <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-40">
@@ -245,6 +304,47 @@ function AppContent() {
     },
     []
   );
+
+  const getVanillaActiveTab = ():
+    | "jokers"
+    | "consumables"
+    | "boosters"
+    | "enhancements"
+    | "seals" => {
+    const path = location.pathname;
+    if (path.includes("/vanilla/consumables")) return "consumables";
+    if (path.includes("/vanilla/boosters")) return "boosters";
+    if (path.includes("/vanilla/enhancements")) return "enhancements";
+    if (path.includes("/vanilla/seals")) return "seals";
+    return "jokers";
+  };
+
+  const isVanillaMode = location.pathname.startsWith("/vanilla");
+
+  const handleTabChange = (
+    tab:
+      | "jokers"
+      | "rarities"
+      | "consumables"
+      | "boosters"
+      | "enhancements"
+      | "seals"
+  ) => {
+    if (isVanillaMode) {
+      navigate(`/vanilla/${tab}`);
+    } else {
+      setJokersRaritiesTab(tab as "jokers" | "rarities");
+    }
+  };
+
+  const getActiveTab = () => {
+    if (isVanillaMode) {
+      return getVanillaActiveTab();
+    }
+    return jokersRaritiesTab;
+  };
+
+  const showFloatingDock = currentSection === "jokers" || isVanillaMode;
 
   const hideConfirmation = useCallback(() => {
     setConfirmation((prev) => ({ ...prev, isVisible: false }));
@@ -895,8 +995,6 @@ function AppContent() {
     }
   };
 
-  const showFloatingDock = currentSection === "jokers";
-
   return (
     <div className="h-screen bg-black-darker flex overflow-hidden">
       <Sidebar
@@ -1050,40 +1148,84 @@ function AppContent() {
           <Route path="/decks" element={<DecksPage />} />
           <Route path="/editions" element={<EditionsPage />} />
           <Route
-            path="/vanilla"
+            path="/vanilla/jokers"
             element={
-              <VanillaRemadePage
-                onDuplicateToProject={(item, type) => {
-                  if (type === "joker") {
-                    setJokers([...jokers, item as JokerData]);
-                  } else if (type === "consumable") {
-                    setConsumables([...consumables, item as ConsumableData]);
-                  } else if (type === "booster") {
-                    setBoosters([...boosters, item as BoosterData]);
-                  } else if (type === "enhancement") {
-                    setEnhancements([...enhancements, item as EnhancementData]);
-                    //  } else if (type === "seal") {
-                    //  setSeals([...seals, item as SealData]);
-                  }
+              <JokersVanillaReforgedPage
+                onDuplicateToProject={(item) => {
+                  setJokers([...jokers, item as JokerData]);
                 }}
                 onNavigateToJokers={() => {
                   navigate("/jokers");
                 }}
+              />
+            }
+          />
+          <Route
+            path="/vanilla/consumables"
+            element={
+              <ConsumablesVanillaReforgedPage
+                onDuplicateToProject={(item) => {
+                  setConsumables([...consumables, item as ConsumableData]);
+                }}
                 onNavigateToConsumables={() => {
                   navigate("/consumables");
+                }}
+              />
+            }
+          />
+          <Route
+            path="/vanilla/boosters"
+            element={
+              <BoostersVanillaReforgedPage
+                onDuplicateToProject={(item) => {
+                  setBoosters([...boosters, item as BoosterData]);
                 }}
                 onNavigateToBoosters={() => {
                   navigate("/boosters");
                 }}
-                onNavigateToEnhancements={() => {
-                  navigate("/enhancements");
-                }}
-                //  onNavigateToSeals={() => {
-                //    navigate("/seals");
-                //  }}
               />
             }
           />
+          <Route
+            path="/vanilla/enhancements"
+            element={
+              <EnhancementsVanillaReforgedPage
+                onDuplicateToProject={(item) => {
+                  setEnhancements([...enhancements, item as EnhancementData]);
+                }}
+                onNavigateToEnhancements={() => {
+                  navigate("/enhancements");
+                }}
+              />
+            }
+          />
+          <Route
+            path="/vanilla/seals"
+            element={
+              <SealsVanillaReforgedPage
+                onDuplicateToProject={(item) => {
+                  setSeals([...seals, item as SealData]);
+                }}
+                onNavigateToSeals={() => {
+                  navigate("/seals");
+                }}
+              />
+            }
+          />
+          <Route
+            path="/vanilla"
+            element={
+              <JokersVanillaReforgedPage
+                onDuplicateToProject={(item) => {
+                  setJokers([...jokers, item as JokerData]);
+                }}
+                onNavigateToJokers={() => {
+                  navigate("/jokers");
+                }}
+              />
+            }
+          />
+
           <Route path="/acknowledgements" element={<AcknowledgementsPage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
@@ -1091,8 +1233,9 @@ function AppContent() {
 
       {showFloatingDock && (
         <FloatingTabDock
-          activeTab={jokersRaritiesTab}
-          onTabChange={setJokersRaritiesTab}
+          activeTab={getActiveTab()}
+          onTabChange={handleTabChange}
+          isVanillaMode={isVanillaMode}
         />
       )}
 

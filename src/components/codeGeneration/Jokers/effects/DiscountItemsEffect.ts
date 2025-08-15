@@ -1,8 +1,6 @@
 import type { Effect } from "../../../ruleBuilder/types";
 import type { PassiveEffectResult } from "../effectUtils";
-import {
-  generateConfigVariables
-} from "../gameVariableUtils";
+import { generateConfigVariables } from "../gameVariableUtils";
 
 export const generateFreeRerollsReturn = (
   effect: Effect
@@ -13,7 +11,7 @@ export const generateFreeRerollsReturn = (
     effect.params?.value,
     effect.id,
     variableName
-  )
+  );
 
   return {
     addToDeck: `SMODS.change_free_rerolls(${valueCode})`,
@@ -40,7 +38,7 @@ export const generateDiscountItemsReturn = (
     effect.params?.value,
     effect.id,
     variableName
-  )
+  );
 
   return {
     addToDeck: `G.E_MANAGER:add_event(Event({
