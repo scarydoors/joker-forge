@@ -16,7 +16,6 @@ import {
   TAROT_CARDS,
   VOUCHERS,
 } from "../BalatroUtils";
-import { GENERIC_TRIGGERS } from "../Card/Triggers";
 
 export const CONSUMABLE_GENERIC_TRIGGERS: string[] = [
   "consumable_used",
