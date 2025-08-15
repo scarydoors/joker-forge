@@ -2,7 +2,9 @@
   "metadata": {
     "id": "vanillaremade",
     "name": "VanillaRemade",
-    "author": ["Jayd"],
+    "author": [
+      "Jayd"
+    ],
     "description": "All vanilla jokers, remade with JokerForge.",
     "prefix": "vanillar",
     "main_file": "main.lua",
@@ -11,7 +13,9 @@
     "badge_colour": "666665",
     "badge_text_colour": "FFFFFF",
     "display_name": "VanillaRemade",
-    "dependencies": ["Steamodded (>=1.0.0~BETA-0404a)"],
+    "dependencies": [
+      "Steamodded (>=1.0.0~BETA-0404a)"
+    ],
     "conflicts": [],
     "provides": []
   },
@@ -27,6 +31,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "7dc16486-c07c-4f8d-a889-c2eea5a1c25f",
@@ -46,7 +54,10 @@
             "y": 474
           }
         }
-      ]
+      ],
+      "userVariables": [],
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "ffd4895e-b693-4070-b73e-d578d1b56b04",
@@ -59,6 +70,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "a850da17-1054-40eb-b0a6-7b2816c4c2de",
@@ -94,7 +109,10 @@
             "y": 474
           }
         }
-      ]
+      ],
+      "userVariables": [],
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "cdbdc8cb-237a-4909-adf0-29ef2642d1b8",
@@ -107,6 +125,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "a850da17-1054-40eb-b0a6-7b2816c4c2de",
@@ -142,7 +164,10 @@
             "y": 474
           }
         }
-      ]
+      ],
+      "userVariables": [],
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "be56ffdd-9d93-4ac4-8773-b7bbfac15ceb",
@@ -155,6 +180,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "a850da17-1054-40eb-b0a6-7b2816c4c2de",
@@ -190,7 +219,10 @@
             "y": 474
           }
         }
-      ]
+      ],
+      "userVariables": [],
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "6ff25995-9d0a-400f-becd-b37d84f7210e",
@@ -203,6 +235,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "a850da17-1054-40eb-b0a6-7b2816c4c2de",
@@ -238,7 +274,10 @@
             "y": 474
           }
         }
-      ]
+      ],
+      "userVariables": [],
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "ad45e4b5-2205-442f-9c80-f5262bf2fbd0",
@@ -251,6 +290,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "551b65b6-db45-413d-9f36-1f92671dc465",
@@ -287,7 +330,10 @@
             "y": 474
           }
         }
-      ]
+      ],
+      "userVariables": [],
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "b40ca91e-5b4e-4b76-bb72-b3445536b862",
@@ -300,6 +346,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "cda75ce6-b6d5-48ad-a2e4-999da0963d80",
@@ -336,7 +386,10 @@
             "y": 474
           }
         }
-      ]
+      ],
+      "userVariables": [],
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "47d57765-5431-4362-be47-8520c7e2dab0",
@@ -349,6 +402,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "cda75ce6-b6d5-48ad-a2e4-999da0963d80",
@@ -385,7 +442,10 @@
             "y": 474
           }
         }
-      ]
+      ],
+      "userVariables": [],
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "44071192-690e-431b-abab-b089802c475a",
@@ -398,6 +458,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "cda75ce6-b6d5-48ad-a2e4-999da0963d80",
@@ -434,7 +498,10 @@
             "y": 474
           }
         }
-      ]
+      ],
+      "userVariables": [],
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "f37d06ec-4317-489d-b50c-780f9974a429",
@@ -447,6 +514,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "cda75ce6-b6d5-48ad-a2e4-999da0963d80",
@@ -483,7 +554,10 @@
             "y": 474
           }
         }
-      ]
+      ],
+      "userVariables": [],
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "6f874151-96cd-4ba4-9d64-4faa19361ff0",
@@ -496,6 +570,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "cda75ce6-b6d5-48ad-a2e4-999da0963d80",
@@ -532,7 +610,10 @@
             "y": 474
           }
         }
-      ]
+      ],
+      "userVariables": [],
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "9078f164-2a5c-4ac0-9e95-f9cb98b795b1",
@@ -545,6 +626,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "cda75ce6-b6d5-48ad-a2e4-999da0963d80",
@@ -581,7 +666,10 @@
             "y": 474
           }
         }
-      ]
+      ],
+      "userVariables": [],
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "f6457077-ec2d-47a1-a888-6dc3f84a8f42",
@@ -594,6 +682,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "cda75ce6-b6d5-48ad-a2e4-999da0963d80",
@@ -630,7 +722,10 @@
             "y": 474
           }
         }
-      ]
+      ],
+      "userVariables": [],
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "51413b4a-0a62-475b-8162-5f44b3881bbe",
@@ -643,6 +738,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "cda75ce6-b6d5-48ad-a2e4-999da0963d80",
@@ -679,7 +778,10 @@
             "y": 474
           }
         }
-      ]
+      ],
+      "userVariables": [],
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "7f95934f-dcda-40ad-8df7-a7d6b4a051ee",
@@ -692,6 +794,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "cda75ce6-b6d5-48ad-a2e4-999da0963d80",
@@ -728,7 +834,10 @@
             "y": 474
           }
         }
-      ]
+      ],
+      "userVariables": [],
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "42157c29-db73-47e2-b1a2-4b65826d1f7f",
@@ -741,6 +850,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "bb72ac9e-dd99-4bb8-9c92-a8d9ce21601f",
@@ -777,7 +890,10 @@
             "y": 474
           }
         }
-      ]
+      ],
+      "userVariables": [],
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "02c56011-ba4c-4772-8f7c-236be78a85ae",
@@ -790,6 +906,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "b60c6cce-522b-4faf-8dbf-f5d7fb7a4e8f",
@@ -825,7 +945,10 @@
             "y": 474
           }
         }
-      ]
+      ],
+      "userVariables": [],
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "b9e58406-7ea4-412c-bfb8-2dd0f56ea49b",
@@ -838,6 +961,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "f9ba2089-1fce-4af9-9731-afd23708d272",
@@ -861,7 +988,10 @@
             "y": 474
           }
         }
-      ]
+      ],
+      "userVariables": [],
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "a98401eb-aa5d-44c7-95ad-d2d6f8660754",
@@ -874,6 +1004,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "0714cff2-1f21-4066-806b-0441f5da4697",
@@ -919,7 +1053,10 @@
             }
           ]
         }
-      ]
+      ],
+      "userVariables": [],
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "8a3deea8-b4a7-4e9f-8f76-acd673453c02",
@@ -932,6 +1069,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "7006f695-7f1e-4d04-ad72-50ce84bf38b1",
@@ -967,7 +1108,10 @@
             "y": 474
           }
         }
-      ]
+      ],
+      "userVariables": [],
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "ccd98672-a09d-4048-b9d9-32f5a7baca60",
@@ -980,6 +1124,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "6a944edc-a1ef-4849-a5dc-4919693e94b3",
@@ -1055,7 +1203,10 @@
             "y": 215
           }
         }
-      ]
+      ],
+      "userVariables": [],
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "b9eb9724-a779-4876-b109-b97b3da7bdab",
@@ -1068,6 +1219,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "7bc66535-ce98-4b9f-9efe-046eb630668d",
@@ -1103,7 +1258,10 @@
             "y": 474
           }
         }
-      ]
+      ],
+      "userVariables": [],
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "dca82e65-6e68-4649-a4c0-1e7fd7abb366",
@@ -1116,6 +1274,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "fde0653d-fb0f-4d13-9e8b-81d3fca5e3ce",
@@ -1181,7 +1343,10 @@
             "y": 260
           }
         }
-      ]
+      ],
+      "userVariables": [],
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "41811808-db40-4407-bb58-ef0be811731c",
@@ -1194,6 +1359,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "49514611-79d0-434f-bdca-4807711d1a15",
@@ -1237,7 +1406,10 @@
             }
           ]
         }
-      ]
+      ],
+      "userVariables": [],
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "fa848698-48f1-48b1-834d-20c0c550dd63",
@@ -1250,6 +1422,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "1eaefb13-0dcf-4a3f-a78d-4674bf274a06",
@@ -1287,7 +1463,10 @@
             "y": 230
           }
         }
-      ]
+      ],
+      "userVariables": [],
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "6ce39378-1be8-4335-a793-c1f051926a2e",
@@ -1300,6 +1479,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "561c752a-9cfb-49ac-9914-7071ff751f3c",
@@ -1335,7 +1518,10 @@
             "y": 428
           }
         }
-      ]
+      ],
+      "userVariables": [],
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "8e9d3cca-12a6-4344-9340-25e9ee332588",
@@ -1348,6 +1534,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "3903bd06-9919-4b55-9c8f-89c158f32523",
@@ -1390,7 +1580,10 @@
             "y": 424
           }
         }
-      ]
+      ],
+      "userVariables": [],
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "6430095c-935a-4281-b207-2e4d5ebac6cc",
@@ -1403,6 +1596,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "430aad96-7e7f-4748-9e09-d76604c2a606",
@@ -1447,7 +1644,10 @@
             }
           ]
         }
-      ]
+      ],
+      "userVariables": [],
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "d4474e05-7033-411a-8766-f15e19bd42e1",
@@ -1460,6 +1660,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "7d63c0c7-9e1e-47d4-9b52-7c0556ebe986",
@@ -1555,7 +1759,9 @@
           "name": "multvar",
           "initialValue": 0
         }
-      ]
+      ],
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "26d7ff65-5ecd-4eed-b496-3f06b55975ec",
@@ -1568,6 +1774,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "7eb847fe-0707-48ba-816b-974c5a0c6b22",
@@ -1596,7 +1806,10 @@
             "y": 411
           }
         }
-      ]
+      ],
+      "userVariables": [],
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "b79289fc-ea64-4e49-9472-7a2c4be5095b",
@@ -1609,6 +1822,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "a61a816f-9c07-462f-b212-1cc78d469241",
@@ -1681,7 +1898,9 @@
           "name": "chipsvar",
           "initialValue": 0
         }
-      ]
+      ],
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "bf5c6491-6256-4da7-b8be-4a7769eaa1ed",
@@ -1694,6 +1913,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "09a31736-a967-4869-9ee9-ddd304952074",
@@ -1744,7 +1967,10 @@
             "y": 474
           }
         }
-      ]
+      ],
+      "userVariables": [],
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "151d9f16-9a95-4a70-ba7a-0b55b604f077",
@@ -1757,6 +1983,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "258e9987-1631-48b2-a4a6-9cab291be651",
@@ -1805,7 +2035,9 @@
           "name": "multvar",
           "initialValue": 0
         }
-      ]
+      ],
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "8cf7e4c2-ee91-4b1b-8deb-1d2dda4e40c6",
@@ -1818,6 +2050,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "33e91f8d-f559-4804-acad-b41b8c2dc6be",
@@ -1888,7 +2124,9 @@
           "name": "chipsvar",
           "initialValue": 0
         }
-      ]
+      ],
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "2c0ba27b-beb5-4791-b209-71efcbbdb592",
@@ -1901,6 +2139,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "d6171d5b-e8e3-4284-b37a-ac72e0afe946",
@@ -1937,7 +2179,10 @@
             "y": 474
           }
         }
-      ]
+      ],
+      "userVariables": [],
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "d87ccb8b-47ad-4e8e-9619-66ecc18b82ee",
@@ -1950,6 +2195,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "ac6b8f74-0644-4314-bf18-e5febc6763f3",
@@ -2024,7 +2273,9 @@
           "name": "xmultvar",
           "initialValue": 1
         }
-      ]
+      ],
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "9b86131b-eb0f-4046-8eff-3d4078afc5ae",
@@ -2038,6 +2289,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "41a031f8-2b8c-4c2c-9c68-b5a71c348773",
@@ -2059,7 +2314,10 @@
           }
         }
       ],
-      "placeholderCreditIndex": 2
+      "userVariables": [],
+      "placeholderCreditIndex": 2,
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "6aef206a-9793-4d36-9833-d1bc5a4bcde3",
@@ -2073,6 +2331,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "95748218-9d1a-4b89-8d8a-c43903a5aa79",
@@ -2095,7 +2357,10 @@
           }
         }
       ],
-      "placeholderCreditIndex": 6
+      "userVariables": [],
+      "placeholderCreditIndex": 6,
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "f3d675e8-a5c2-42aa-aeef-0685e6bcabad",
@@ -2109,6 +2374,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "1c2690c8-11b0-4cc2-80f2-66d5eb3fb33b",
@@ -2151,14 +2420,16 @@
           }
         }
       ],
-      "placeholderCreditIndex": 6,
       "userVariables": [
         {
           "id": "a0bd1ce9-6701-4081-8309-40f6d32f2eff",
           "name": "multvar",
           "initialValue": 0
         }
-      ]
+      ],
+      "placeholderCreditIndex": 6,
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "16c48fac-5ddf-4106-a32f-ddf08c34e398",
@@ -2172,6 +2443,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "291ae834-2ebb-4146-b5a9-702fdd4768a7",
@@ -2193,7 +2468,10 @@
           }
         }
       ],
-      "placeholderCreditIndex": 2
+      "userVariables": [],
+      "placeholderCreditIndex": 2,
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "629a1325-d62e-4e8d-a1a9-3856aa64336d",
@@ -2207,6 +2485,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "744387c3-a625-46b9-8510-b2bb3d09633e",
@@ -2287,14 +2569,16 @@
           }
         }
       ],
-      "placeholderCreditIndex": 6,
       "userVariables": [
         {
           "id": "adac53a0-71b9-46ec-8d69-28b1237c0630",
           "name": "discardedbool",
           "initialValue": 0
         }
-      ]
+      ],
+      "placeholderCreditIndex": 6,
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "b21bd704-3be3-4313-9fa9-b301c4cd0702",
@@ -2308,6 +2592,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "c47fac28-5adc-422e-b42d-a5374723e79d",
@@ -2412,14 +2700,16 @@
           }
         }
       ],
-      "placeholderCreditIndex": 6,
       "userVariables": [
         {
           "id": "d97ee6bc-4c03-411e-916a-119f60e968a4",
           "name": "facecard",
           "initialValue": 0
         }
-      ]
+      ],
+      "placeholderCreditIndex": 6,
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "3a48abb0-c625-4375-9736-405d61e52bbe",
@@ -2433,6 +2723,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "72dcfb80-df1f-4c37-ab17-a902d5207293",
@@ -2454,7 +2748,10 @@
           }
         }
       ],
-      "placeholderCreditIndex": 7
+      "userVariables": [],
+      "placeholderCreditIndex": 7,
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "eb19022e-c565-4318-a1a7-5ef95f50b0de",
@@ -2468,6 +2765,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "be55b071-6ed9-4329-8a51-42890abef1b7",
@@ -2531,14 +2832,16 @@
           }
         }
       ],
-      "placeholderCreditIndex": 2,
       "userVariables": [
         {
           "id": "ed8655c6-def9-433b-b3d8-d1476187065d",
           "name": "xmultvar",
           "initialValue": 1
         }
-      ]
+      ],
+      "placeholderCreditIndex": 2,
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "0b4df44c-7e4a-421c-bb12-2e6fe46690ab",
@@ -2552,6 +2855,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "97bb2241-4eea-490a-a102-3374587d99ae",
@@ -2615,14 +2922,16 @@
           }
         }
       ],
-      "placeholderCreditIndex": 4,
       "userVariables": [
         {
           "id": "2ad13f41-16ed-4ba1-8c9b-2e9f1a0052d3",
           "name": "rounds",
           "initialValue": 0
         }
-      ]
+      ],
+      "placeholderCreditIndex": 4,
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "e8651f86-5d6d-4a43-8585-df846609a351",
@@ -2635,6 +2944,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "5e8059fa-537f-4b44-bc98-661667429ee2",
@@ -2672,7 +2985,10 @@
             "y": 474
           }
         }
-      ]
+      ],
+      "userVariables": [],
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "45bddde3-d823-4272-8ce4-c01e4ad0ff3f",
@@ -2685,6 +3001,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "29b72f50-0a04-418b-a446-da1444843240",
@@ -2732,7 +3052,9 @@
           "name": "moneyvar",
           "initialValue": 1
         }
-      ]
+      ],
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "08a28cf4-901c-44cf-bdcb-b2a60bb22235",
@@ -2745,6 +3067,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "636046e0-fb2e-479e-a7bf-e7c8a60ba896",
@@ -2784,7 +3110,10 @@
             "y": 474
           }
         }
-      ]
+      ],
+      "userVariables": [],
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "c2732396-3e55-4be1-a3a3-3138fcfcd1d2",
@@ -2797,6 +3126,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "73a75cdc-f711-421d-bbb6-dab3a9f7cf6c",
@@ -2835,6 +3168,7 @@
           }
         }
       ],
+      "userVariables": [],
       "jokerKey": "photograph",
       "hasUserUploadedImage": false
     },
@@ -2849,6 +3183,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "45c2a3ea-6054-4744-b4d4-08a247a2a679",
@@ -2878,7 +3216,10 @@
             }
           ]
         }
-      ]
+      ],
+      "userVariables": [],
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "3a93ed97-d090-4adb-8707-d6017b2f5f0c",
@@ -2891,6 +3232,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "6283f7e5-ab12-434a-87db-2c814100ba96",
@@ -2911,7 +3256,10 @@
             "y": 474
           }
         }
-      ]
+      ],
+      "userVariables": [],
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "f73fd956-c473-4025-97cd-30b06d921351",
@@ -2924,6 +3272,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "2cf2538a-9911-45b0-9257-49207a57a293",
@@ -2975,7 +3327,9 @@
           "name": "NEEDS FLOAT FUNCTIONALITY",
           "initialValue": 0
         }
-      ]
+      ],
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "a6c6187d-a0be-499a-bc38-fc855c919321",
@@ -2988,6 +3342,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "0c278ab0-702c-47a9-b64d-3cc8dc8e5a8c",
@@ -3020,7 +3378,10 @@
             "y": 149
           }
         }
-      ]
+      ],
+      "userVariables": [],
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "5aaf4ab5-93b9-44e6-8c14-b0ab2e106fd7",
@@ -3033,6 +3394,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "b5794193-3961-445a-a572-99e4216abd5b",
@@ -3072,7 +3437,10 @@
             "y": 363
           }
         }
-      ]
+      ],
+      "userVariables": [],
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "d8649fe7-e312-443f-8e11-6378f4deb86a",
@@ -3085,6 +3453,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "a3f3c8aa-ff64-44ae-bb1f-24edac9ee416",
@@ -3165,7 +3537,9 @@
           "name": "handsizevar",
           "initialValue": 5
         }
-      ]
+      ],
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "ba50079a-a9a2-42c7-a6ea-21c7663e7a89",
@@ -3178,6 +3552,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "30498aa0-34b8-4dee-b8ad-a7db5cc34656",
@@ -3198,7 +3576,10 @@
             "y": 474
           }
         }
-      ]
+      ],
+      "userVariables": [],
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "b7952840-f034-4258-ab60-030d49e6caec",
@@ -3211,6 +3592,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "8dc99f47-2d9b-4586-ad09-a65584b18f4b",
@@ -3279,7 +3664,9 @@
           "name": "multvar",
           "initialValue": 20
         }
-      ]
+      ],
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "dea76814-4c74-440f-afb4-a71652f5f957",
@@ -3292,6 +3679,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "2f9c9a4a-cc67-4161-b61d-df4f0cbb463b",
@@ -3355,7 +3746,9 @@
           "name": "multvar",
           "initialValue": 0
         }
-      ]
+      ],
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "b0cdad1b-ce6a-4aa6-a679-22e0e4a0a26f",
@@ -3368,6 +3761,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "c6249cd3-a85c-4956-b568-73910b90d793",
@@ -3444,7 +3841,9 @@
           "name": "handsleft",
           "initialValue": 10
         }
-      ]
+      ],
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "cb41edb8-36cb-40a1-b6af-5a2a198f9255",
@@ -3457,6 +3856,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "b89b217b-91cc-42c6-8400-ea1da31509e9",
@@ -3492,7 +3895,10 @@
             "y": 474
           }
         }
-      ]
+      ],
+      "userVariables": [],
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "10a663cb-a029-455c-8c28-4f7a780f2d00",
@@ -3505,6 +3911,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "c5ac6fe1-3d91-424f-a179-dc7d9b6da3e3",
@@ -3540,7 +3950,10 @@
             "y": 474
           }
         }
-      ]
+      ],
+      "userVariables": [],
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "093db1f3-70fe-4da2-89a9-e12ae2e9cba4",
@@ -3553,6 +3966,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "0a8ccfae-f7f0-4c1d-adaa-494937b1c14f",
@@ -3588,7 +4005,10 @@
             "y": 474
           }
         }
-      ]
+      ],
+      "userVariables": [],
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "fb3c94ed-bbc6-4648-95f6-f09d5c902489",
@@ -3601,6 +4021,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "84b3de0d-3f11-4875-82f4-25faf1d1be16",
@@ -3636,7 +4060,10 @@
             "y": 474
           }
         }
-      ]
+      ],
+      "userVariables": [],
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "054ea577-f2be-43aa-8625-639805826c99",
@@ -3649,6 +4076,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "3c4ad714-1b07-4d67-9c70-4d3e58e2f4d3",
@@ -3677,7 +4108,10 @@
             "y": 474
           }
         }
-      ]
+      ],
+      "userVariables": [],
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "488017a5-008b-469a-bac2-86bd2a4720e5",
@@ -3690,6 +4124,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "8b658888-ceff-420d-b2bb-3974844b4c37",
@@ -3736,7 +4174,9 @@
           "name": "xmultvar",
           "initialValue": 0
         }
-      ]
+      ],
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "c58fb375-4f2e-4e1a-b793-f968c58b25ae",
@@ -3749,6 +4189,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "dde1896c-3da3-4181-b5d4-f0803c3ec931",
@@ -3786,6 +4230,7 @@
           }
         }
       ],
+      "userVariables": [],
       "jokerKey": "hangingchad",
       "hasUserUploadedImage": false
     },
@@ -3800,6 +4245,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "65016abd-41dd-4224-bd2d-fd200bffb17a",
@@ -3836,7 +4285,10 @@
             "y": 474
           }
         }
-      ]
+      ],
+      "userVariables": [],
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "b81e0f80-204d-4c37-a5e5-bdea9430c9f5",
@@ -3849,6 +4301,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "6d2cfacd-5d21-4ccf-ad3a-13d2568e3b55",
@@ -3893,6 +4349,7 @@
           ]
         }
       ],
+      "userVariables": [],
       "jokerKey": "bloodstone",
       "hasUserUploadedImage": false
     },
@@ -3907,6 +4364,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "e5099f14-852d-4841-8ef9-3a06a3c44cda",
@@ -3942,7 +4403,10 @@
             "y": 474
           }
         }
-      ]
+      ],
+      "userVariables": [],
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "ab5bd5f7-6220-48e3-8571-1a57653478ad",
@@ -3955,6 +4419,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "e5faa679-82c4-4432-b383-721a6fc82419",
@@ -3990,7 +4458,10 @@
             "y": 474
           }
         }
-      ]
+      ],
+      "userVariables": [],
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "73e7d12c-6908-49f6-b545-2411489c152e",
@@ -4003,6 +4474,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "556b04da-1f75-49fe-9cec-8e70e937af37",
@@ -4077,7 +4552,10 @@
             "y": 324
           }
         }
-      ]
+      ],
+      "userVariables": [],
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "ea21665d-484c-4b2c-9285-cdd7ea6ecb37",
@@ -4090,6 +4568,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "2521cae6-4775-44be-b813-c12f3505a344",
@@ -4172,7 +4654,10 @@
             "y": 141
           }
         }
-      ]
+      ],
+      "userVariables": [],
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "ff13d28e-5468-4508-93b7-528f522fef7b",
@@ -4185,6 +4670,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "aea6f87d-c769-43c1-bb36-dcf78ddf6ca8",
@@ -4267,7 +4756,9 @@
           "name": "xmultvar",
           "initialValue": 1
         }
-      ]
+      ],
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "d900e798-b02c-457a-a966-9b53c2fd96c8",
@@ -4280,6 +4771,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "c1419309-ac52-4981-b926-df025abed602",
@@ -4316,7 +4811,10 @@
             "y": 474
           }
         }
-      ]
+      ],
+      "userVariables": [],
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "9a309f2b-0e05-4b8a-bc90-2f8ca15b0854",
@@ -4329,6 +4827,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "c1419309-ac52-4981-b926-df025abed602",
@@ -4365,7 +4867,10 @@
             "y": 474
           }
         }
-      ]
+      ],
+      "userVariables": [],
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "48d4dcb1-9c62-4498-8dc0-a373bab21ec3",
@@ -4378,6 +4883,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "c1419309-ac52-4981-b926-df025abed602",
@@ -4414,7 +4923,10 @@
             "y": 474
           }
         }
-      ]
+      ],
+      "userVariables": [],
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "9567e3a7-eb5b-4002-85ef-1bd76a218af6",
@@ -4427,6 +4939,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "c1419309-ac52-4981-b926-df025abed602",
@@ -4463,7 +4979,10 @@
             "y": 474
           }
         }
-      ]
+      ],
+      "userVariables": [],
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "e147a1ec-dbd5-4a74-9431-a0d4b6a0d529",
@@ -4476,6 +4995,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "c1419309-ac52-4981-b926-df025abed602",
@@ -4512,7 +5035,10 @@
             "y": 474
           }
         }
-      ]
+      ],
+      "userVariables": [],
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "2c1073dc-9b56-44bb-ba43-869709492564",
@@ -4525,6 +5051,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "3beb5418-7e72-4be0-88f5-e5282bd4743d",
@@ -4563,7 +5093,10 @@
             "y": 477
           }
         }
-      ]
+      ],
+      "userVariables": [],
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "418feee9-4d33-40f8-b86d-a8c00cdefcb7",
@@ -4576,6 +5109,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "458d1e6e-9057-4260-a599-c2733c686a85",
@@ -4597,7 +5134,10 @@
             "y": 474
           }
         }
-      ]
+      ],
+      "userVariables": [],
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "7e66840a-4af8-470b-a06e-80e0976ec958",
@@ -4610,6 +5150,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "98eeab14-bbd9-40f0-8690-4f9f2119cfb2",
@@ -4655,7 +5199,10 @@
             "y": 474
           }
         }
-      ]
+      ],
+      "userVariables": [],
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "6e2f0d85-fda8-45c3-99b7-397954021540",
@@ -4668,6 +5215,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "049e0e86-ac7d-401e-a757-fd939bec4ddd",
@@ -4765,7 +5316,9 @@
           "name": "xmultvar",
           "initialValue": 1
         }
-      ]
+      ],
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "3b3ce2c7-b923-4b27-bbf3-4f5b331465d7",
@@ -4779,6 +5332,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "c44bd342-05af-4e6d-8f14-b1c883032e49",
@@ -4819,7 +5376,10 @@
           }
         }
       ],
-      "placeholderCreditIndex": 9
+      "userVariables": [],
+      "placeholderCreditIndex": 9,
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "ed83014e-cf69-4808-8945-5fb7f9e11b63",
@@ -4833,6 +5393,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "f876aef6-3919-4289-ae45-a7ff07fcb431",
@@ -4854,7 +5418,10 @@
           }
         }
       ],
-      "placeholderCreditIndex": 4
+      "userVariables": [],
+      "placeholderCreditIndex": 4,
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "7ce1e703-3a98-48da-acbb-170f0064fc83",
@@ -4868,6 +5435,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "111d7320-1d83-47aa-bf19-0f83b5497790",
@@ -4936,14 +5507,16 @@
           }
         }
       ],
-      "placeholderCreditIndex": 3,
       "userVariables": [
         {
           "id": "df8aaecc-85fd-4baa-8dcd-f7bf11a9cd81",
           "name": "xmultvar",
           "initialValue": 1
         }
-      ]
+      ],
+      "placeholderCreditIndex": 3,
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "cf399425-1d71-4541-a61f-9100239c5312",
@@ -4957,6 +5530,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "40008daa-0af0-4399-93e7-6e8fdcc180fb",
@@ -4979,7 +5556,10 @@
           }
         }
       ],
-      "placeholderCreditIndex": 8
+      "userVariables": [],
+      "placeholderCreditIndex": 8,
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "36ab8325-b4eb-456e-b066-511fef862ce7",
@@ -4993,6 +5573,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "d8ac4884-e85e-4f37-9441-db1577d71ac8",
@@ -5015,7 +5599,10 @@
           }
         }
       ],
-      "placeholderCreditIndex": 1
+      "userVariables": [],
+      "placeholderCreditIndex": 1,
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "63d4fcc1-42c7-4c76-90a0-b7d33a616977",
@@ -5029,6 +5616,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "ed3194c5-8b12-4523-9cf9-e9352d832818",
@@ -5051,7 +5642,10 @@
           }
         }
       ],
-      "placeholderCreditIndex": 3
+      "userVariables": [],
+      "placeholderCreditIndex": 3,
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "75bb52d8-bdaa-4352-80fb-62c91179c051",
@@ -5065,6 +5659,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "28fb12ad-d63b-4d53-8be6-e6b82cbbb720",
@@ -5087,7 +5685,10 @@
           }
         }
       ],
-      "placeholderCreditIndex": 6
+      "userVariables": [],
+      "placeholderCreditIndex": 6,
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "ea25b930-8aca-4b0a-903c-cfdae32fbb34",
@@ -5101,6 +5702,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "1217ba49-35ed-4aa3-8a20-31dd9d831dd0",
@@ -5122,7 +5727,10 @@
           }
         }
       ],
-      "placeholderCreditIndex": 9
+      "userVariables": [],
+      "placeholderCreditIndex": 9,
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "8c71b219-aa41-4c2a-a5e2-59c884050942",
@@ -5136,6 +5744,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "4b392e8c-ff2c-4d8f-b83c-c8a70e747769",
@@ -5194,7 +5806,6 @@
           }
         }
       ],
-      "placeholderCreditIndex": 6,
       "userVariables": [
         {
           "id": "ab441916-9660-4e67-9448-48715f690295",
@@ -5202,7 +5813,10 @@
           "type": "rank",
           "initialRank": "Ace"
         }
-      ]
+      ],
+      "placeholderCreditIndex": 6,
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "95f2a45a-f179-49ba-8dd2-f9c99882c1c7",
@@ -5216,6 +5830,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "151bf0be-3e5a-43f2-9580-67bd8c997889",
@@ -5273,7 +5891,6 @@
           }
         }
       ],
-      "placeholderCreditIndex": 6,
       "userVariables": [
         {
           "id": "b1c14736-e4ae-47a4-a8e3-e9e08f96c863",
@@ -5281,7 +5898,10 @@
           "type": "suit",
           "initialSuit": "Spades"
         }
-      ]
+      ],
+      "placeholderCreditIndex": 6,
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "72d2b4d4-1c9d-4097-a0d6-eb54841dec7b",
@@ -5295,6 +5915,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "06dfe201-9d5d-45b3-b09a-fb2693eda173",
@@ -5373,7 +5997,6 @@
           }
         }
       ],
-      "placeholderCreditIndex": 9,
       "userVariables": [
         {
           "id": "4080c6f7-5223-461c-ad93-83e61f8ee0d9",
@@ -5387,7 +6010,10 @@
           "type": "number",
           "initialValue": 0
         }
-      ]
+      ],
+      "placeholderCreditIndex": 9,
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "dd329675-4033-4599-b31b-fcd8cef7aa5c",
@@ -5401,6 +6027,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "669c0406-5936-41dc-bf10-f1df72a702a8",
@@ -5473,7 +6103,6 @@
           }
         }
       ],
-      "placeholderCreditIndex": 7,
       "userVariables": [
         {
           "id": "4c55eacd-a0d8-4b2c-8ef1-ae86f494f9af",
@@ -5487,7 +6116,10 @@
           "type": "rank",
           "initialRank": "Ace"
         }
-      ]
+      ],
+      "placeholderCreditIndex": 7,
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "c27017e2-06aa-4ee1-b06c-d4840772c74f",
@@ -5501,6 +6133,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "154a4e97-61b9-44cc-912f-9ea3a8de261b",
@@ -5522,7 +6158,10 @@
           }
         }
       ],
-      "placeholderCreditIndex": 8
+      "userVariables": [],
+      "placeholderCreditIndex": 8,
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "b11a419c-0350-4f48-bd0f-9b77259e5c7f",
@@ -5536,6 +6175,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "c96ecc41-f57c-452d-bf85-767bad41391a",
@@ -5559,7 +6202,10 @@
           }
         }
       ],
-      "placeholderCreditIndex": 3
+      "userVariables": [],
+      "placeholderCreditIndex": 3,
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "2f8e455c-4562-4705-8c04-21b46f4701fd",
@@ -5573,6 +6219,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "0bf6e942-71e6-4818-ad85-3fb0bb9ca08e",
@@ -5596,7 +6246,10 @@
           }
         }
       ],
-      "placeholderCreditIndex": 18
+      "userVariables": [],
+      "placeholderCreditIndex": 18,
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "5ac1c790-53e1-4a24-9f83-448289baee35",
@@ -5610,6 +6263,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "fc4b6567-f84c-4041-b661-c161f493315e",
@@ -5646,7 +6303,10 @@
           }
         }
       ],
-      "placeholderCreditIndex": 3
+      "userVariables": [],
+      "placeholderCreditIndex": 3,
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "46b024ec-63f7-4049-810f-26c58380ca8a",
@@ -5660,6 +6320,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "86321ba3-a571-47e8-9979-24a442825e7f",
@@ -5719,7 +6383,10 @@
           }
         }
       ],
-      "placeholderCreditIndex": 2
+      "userVariables": [],
+      "placeholderCreditIndex": 2,
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "1c3972c1-3559-4244-be1a-a445456f7e0f",
@@ -5733,6 +6400,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "37724fd0-bf00-47c4-b8c5-9a889e8c1ea4",
@@ -5792,7 +6463,6 @@
           }
         }
       ],
-      "placeholderCreditIndex": 1,
       "userVariables": [
         {
           "id": "134f91ff-b531-4b55-b457-dcfe09350494",
@@ -5800,7 +6470,10 @@
           "type": "pokerhand",
           "initialPokerHand": "High Card"
         }
-      ]
+      ],
+      "placeholderCreditIndex": 1,
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "51cc39aa-00ab-4678-8713-7f0e45ec49db",
@@ -5814,6 +6487,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "267b05b0-1b16-4229-8092-b8914552f3cc",
@@ -5836,7 +6513,10 @@
           }
         }
       ],
-      "placeholderCreditIndex": 9
+      "userVariables": [],
+      "placeholderCreditIndex": 9,
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "829b5162-60d7-46eb-b792-b68fcf5cc89a",
@@ -5850,6 +6530,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "acd4cfad-c011-4085-a118-4d5c34fd0df7",
@@ -5872,7 +6556,10 @@
           }
         }
       ],
-      "placeholderCreditIndex": 1
+      "userVariables": [],
+      "placeholderCreditIndex": 1,
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "fe731495-ee3b-42de-b1bb-adad4f4e3f35",
@@ -5886,6 +6573,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "52c73195-9e99-4782-93d7-43b7e99ed078",
@@ -5908,7 +6599,10 @@
           }
         }
       ],
-      "placeholderCreditIndex": 4
+      "userVariables": [],
+      "placeholderCreditIndex": 4,
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "7f03e661-d0a6-4b4b-a3db-1aefd828968f",
@@ -5922,6 +6616,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "8acefb0f-3005-4689-b5d2-cd74440010da",
@@ -5967,7 +6665,6 @@
           }
         }
       ],
-      "placeholderCreditIndex": 7,
       "userVariables": [
         {
           "id": "0530f6d4-c9e6-43ad-b180-9934542e62b0",
@@ -5975,7 +6672,10 @@
           "type": "number",
           "initialValue": 0
         }
-      ]
+      ],
+      "placeholderCreditIndex": 7,
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "79725231-4ede-438b-9fb4-a416c6e5e062",
@@ -5989,6 +6689,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "32ffb496-8a8a-4143-91dd-8c2473bc5fdd",
@@ -6014,7 +6718,10 @@
           }
         }
       ],
-      "placeholderCreditIndex": 15
+      "userVariables": [],
+      "placeholderCreditIndex": 15,
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "3a82ee24-eaf0-4aaf-9924-0a6155b06943",
@@ -6028,6 +6735,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "818e6dba-4c55-44a4-adee-e41cc0cf3cc6",
@@ -6070,7 +6781,10 @@
           }
         }
       ],
-      "placeholderCreditIndex": 8
+      "userVariables": [],
+      "placeholderCreditIndex": 8,
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "77cf3e3f-042f-4c2b-9fc8-6ed29f13ebbe",
@@ -6084,6 +6798,11 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "appears_in_shop": false,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "cb557336-2622-4e06-9385-48eb5bf7a71d",
@@ -6142,7 +6861,6 @@
           }
         }
       ],
-      "placeholderCreditIndex": 6,
       "userVariables": [
         {
           "id": "d0c92d20-3f38-47df-bf2b-31441dddaa21",
@@ -6151,7 +6869,9 @@
           "initialValue": 1
         }
       ],
-      "appears_in_shop": false
+      "placeholderCreditIndex": 6,
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "746333d2-4bc1-4a77-a718-c7be95f0b458",
@@ -6165,6 +6885,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "9486c119-07b2-42db-85a5-9c3b3a2b8400",
@@ -6220,7 +6944,6 @@
           }
         }
       ],
-      "placeholderCreditIndex": 17,
       "userVariables": [
         {
           "id": "c2fbe6b5-add1-438b-893e-a97d1138084e",
@@ -6228,7 +6951,10 @@
           "type": "number",
           "initialValue": 1
         }
-      ]
+      ],
+      "placeholderCreditIndex": 17,
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "cef48c82-5344-486f-9a42-9fdceab28876",
@@ -6241,6 +6967,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "6a7f8f7b-8cc0-4786-a7a6-093dbbc1bc2e",
@@ -6260,7 +6990,10 @@
             "y": 474
           }
         }
-      ]
+      ],
+      "userVariables": [],
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "7ffb67a1-f80a-4096-8df4-0f684d21f810",
@@ -6274,6 +7007,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "77cd9470-541a-4c1e-8d63-3e49bfb6ffe1",
@@ -6332,7 +7069,6 @@
           }
         }
       ],
-      "placeholderCreditIndex": 18,
       "userVariables": [
         {
           "id": "601f0da0-89ea-4e7a-8392-ad7e32e6fc4c",
@@ -6340,7 +7076,10 @@
           "type": "number",
           "initialValue": 1
         }
-      ]
+      ],
+      "placeholderCreditIndex": 18,
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "944a6394-8adb-482c-b4c7-726095bbb4be",
@@ -6354,6 +7093,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "ece9f094-0a72-4dea-bd67-72481a2ef47d",
@@ -6388,7 +7131,10 @@
           }
         }
       ],
-      "placeholderCreditIndex": 5
+      "userVariables": [],
+      "placeholderCreditIndex": 5,
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "659c70d8-d164-48f5-853b-11f23ccfdc27",
@@ -6402,6 +7148,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "94e8ce55-b3da-4275-bfb5-a9c7428a675e",
@@ -6437,7 +7187,10 @@
           }
         }
       ],
-      "placeholderCreditIndex": 10
+      "userVariables": [],
+      "placeholderCreditIndex": 10,
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "9f2e7ae3-3775-4bf0-9ad4-13391f475a24",
@@ -6451,6 +7204,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "6bd89a08-ce8d-4ae4-b54f-44c3be10791b",
@@ -6474,7 +7231,10 @@
           }
         }
       ],
-      "placeholderCreditIndex": 7
+      "userVariables": [],
+      "placeholderCreditIndex": 7,
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "5aae07a1-b347-414d-9e5c-58235af2fc5b",
@@ -6488,6 +7248,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "434b8322-9ff5-4a97-b1fb-d40322594bdc",
@@ -6507,7 +7271,10 @@
           }
         }
       ],
-      "placeholderCreditIndex": 9
+      "userVariables": [],
+      "placeholderCreditIndex": 9,
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "1dab108c-b760-4081-825a-29095be2269c",
@@ -6521,6 +7288,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "53f168c1-c869-4116-9a87-f7c50f096a1c",
@@ -6576,7 +7347,6 @@
           }
         }
       ],
-      "placeholderCreditIndex": 4,
       "userVariables": [
         {
           "id": "dfe2f46d-2f74-41a3-9720-14f321dfb64c",
@@ -6584,7 +7354,10 @@
           "type": "number",
           "initialValue": 1
         }
-      ]
+      ],
+      "placeholderCreditIndex": 4,
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "57d3beaa-ead0-4bb5-b5f7-76b64dea1533",
@@ -6598,6 +7371,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "0826634d-a53f-4770-ae17-f2d42c66cc1f",
@@ -6636,7 +7413,10 @@
           }
         }
       ],
-      "placeholderCreditIndex": 5
+      "userVariables": [],
+      "placeholderCreditIndex": 5,
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "458a311d-3c23-4b84-b785-21414458e8f0",
@@ -6650,6 +7430,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "dbecce95-4aa4-41e8-a538-714872fdc14e",
@@ -6691,7 +7475,10 @@
           }
         }
       ],
-      "placeholderCreditIndex": 2
+      "userVariables": [],
+      "placeholderCreditIndex": 2,
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "2be81c98-fbec-48cd-90f8-f38ef7602ca6",
@@ -6705,6 +7492,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "ba789454-8f41-478a-aa97-15a945997ca3",
@@ -6747,7 +7538,6 @@
           }
         }
       ],
-      "placeholderCreditIndex": 11,
       "userVariables": [
         {
           "id": "6842df2c-06f0-4cb0-8ee5-8fa5a050a1ea",
@@ -6755,7 +7545,10 @@
           "type": "number",
           "initialValue": 1
         }
-      ]
+      ],
+      "placeholderCreditIndex": 11,
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "517f0abf-05d7-4762-9bc5-b3f380a9fca1",
@@ -6769,6 +7562,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "3d532ced-5076-463c-8c48-7f26765dc088",
@@ -6790,7 +7587,10 @@
           }
         }
       ],
-      "placeholderCreditIndex": 1
+      "userVariables": [],
+      "placeholderCreditIndex": 1,
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "c6213391-5214-4b5e-aa80-6116473a4b0d",
@@ -6804,6 +7604,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "be1d59b7-135a-412c-885c-4f0dbaea6449",
@@ -6825,7 +7629,10 @@
           }
         }
       ],
-      "placeholderCreditIndex": 16
+      "userVariables": [],
+      "placeholderCreditIndex": 16,
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "b023b6a6-1c50-4bd2-9de2-15bd7c11f93a",
@@ -6839,6 +7646,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "4bcba1b1-8baa-4029-b86c-f6a2decc796c",
@@ -6858,7 +7669,10 @@
           }
         }
       ],
-      "placeholderCreditIndex": 8
+      "userVariables": [],
+      "placeholderCreditIndex": 8,
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "a8f555ab-7200-49f6-9e44-e815ebbb72f0",
@@ -6872,6 +7686,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "38a80aa6-f828-4125-bd5f-34721085402c",
@@ -6891,7 +7709,10 @@
           }
         }
       ],
-      "placeholderCreditIndex": 3
+      "userVariables": [],
+      "placeholderCreditIndex": 3,
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "fb6d74bb-e974-4183-9f61-f738b6dabf78",
@@ -6904,6 +7725,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "89e2c876-8ddf-4c17-bc65-030d287d81e7",
@@ -6993,7 +7818,9 @@
           "name": "trigger",
           "initialValue": 1
         }
-      ]
+      ],
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "c0dc8ea2-5feb-4c04-a367-f478d82848cf",
@@ -7006,6 +7833,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "888ce5d8-bb41-4c22-b0dd-4835671c4f4b",
@@ -7025,7 +7856,10 @@
             "y": 474
           }
         }
-      ]
+      ],
+      "userVariables": [],
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "6dfbe29a-01ad-4a59-b863-3665e66d3705",
@@ -7038,6 +7872,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "63bd82d4-2c20-4a1c-a683-4b4f0e6e9685",
@@ -7082,7 +7920,10 @@
             }
           ]
         }
-      ]
+      ],
+      "userVariables": [],
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "12fc507a-b308-4985-bf4c-2adf932da3a6",
@@ -7095,6 +7936,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "eec240fb-3d8c-4d7b-8d15-678b70163101",
@@ -7114,7 +7959,10 @@
             "y": 474
           }
         }
-      ]
+      ],
+      "userVariables": [],
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "12739d9e-4d62-41fb-b41a-bcebfda1b1f7",
@@ -7128,6 +7976,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "2d1498c0-ecd6-4b67-b105-8532c7a18b88",
@@ -7160,7 +8012,10 @@
             "y": 474
           }
         }
-      ]
+      ],
+      "userVariables": [],
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "f0ddc579-8d1d-4591-96a6-249d5e0ce495",
@@ -7174,6 +8029,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "227c5bf8-38ff-4a82-bfbb-9bd98919a813",
@@ -7254,7 +8113,9 @@
           "name": "xmultvar",
           "initialValue": 1
         }
-      ]
+      ],
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "4b691bbe-0e78-4651-925f-1e467e2fe7c3",
@@ -7268,6 +8129,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "7b87897d-78af-4369-b12d-4de36ed4bc85",
@@ -7334,14 +8199,16 @@
           }
         }
       ],
-      "placeholderCreditIndex": 2,
       "userVariables": [
         {
           "id": "14f9c106-53a5-4fb3-a122-eb1b61032d50",
           "name": "Remaining",
           "initialValue": 5
         }
-      ]
+      ],
+      "placeholderCreditIndex": 2,
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "8ce1c101-567c-46f8-b0a2-61011224bb84",
@@ -7355,6 +8222,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "2f963fe2-2b46-4246-83a6-7e2a12f568ad",
@@ -7383,7 +8254,10 @@
           ]
         }
       ],
-      "placeholderCreditIndex": 3
+      "userVariables": [],
+      "placeholderCreditIndex": 3,
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "ab62831f-d231-4085-a952-c42946139b05",
@@ -7397,6 +8271,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "7bed3524-8e0f-4fca-b936-0d08a724b281",
@@ -7470,14 +8348,16 @@
           }
         }
       ],
-      "placeholderCreditIndex": 6,
       "userVariables": [
         {
           "id": "47073d05-d4bd-4271-9b11-ada677141959",
           "name": "chips",
           "initialValue": 100
         }
-      ]
+      ],
+      "placeholderCreditIndex": 6,
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "ebcfe4fd-2a88-4054-9cc6-a7b04d4b27dd",
@@ -7491,6 +8371,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "5fc3af6e-dbfb-4f90-8af8-fc22ea372592",
@@ -7557,14 +8441,16 @@
           }
         }
       ],
-      "placeholderCreditIndex": 3,
       "userVariables": [
         {
           "id": "2ef07cf9-ef29-4f6e-bf6a-ef916f85ca08",
           "name": "Mult",
           "initialValue": 0
         }
-      ]
+      ],
+      "placeholderCreditIndex": 3,
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "4bbcf42b-e2ca-4bbb-8ed3-4fec7894491f",
@@ -7578,6 +8464,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "5e8b7d9b-a28d-4ab4-874a-268bad916a7d",
@@ -7622,7 +8512,10 @@
           ]
         }
       ],
-      "placeholderCreditIndex": 4
+      "userVariables": [],
+      "placeholderCreditIndex": 4,
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "31c43b4f-1694-4ad0-9416-7eafb697cb5a",
@@ -7636,6 +8529,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "84d6884a-01a6-4f95-875a-e27212677767",
@@ -7657,7 +8554,10 @@
           }
         }
       ],
-      "placeholderCreditIndex": 4
+      "userVariables": [],
+      "placeholderCreditIndex": 4,
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "d6ece168-e798-4803-8f69-b11b4ced1fc6",
@@ -7671,6 +8571,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "1bbb9b40-b751-4fcc-81b4-fd6a7e8e322d",
@@ -7724,7 +8628,10 @@
           }
         }
       ],
-      "placeholderCreditIndex": 3
+      "userVariables": [],
+      "placeholderCreditIndex": 3,
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "b44c10b5-8a1d-4a45-992a-097ec9323c29",
@@ -7738,6 +8645,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "a5e868e1-1f3f-40e9-acee-037d5d821fc0",
@@ -7794,14 +8705,16 @@
           }
         }
       ],
-      "placeholderCreditIndex": 7,
       "userVariables": [
         {
           "id": "942a6758-f291-4380-a9b9-12b98c5627d1",
           "name": "chips",
           "initialValue": 0
         }
-      ]
+      ],
+      "placeholderCreditIndex": 7,
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "1dee3c01-cfe7-489a-aed4-f8957b03885f",
@@ -7815,6 +8728,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "d3b8ec28-86fa-4f57-a0fc-08c835dd7527",
@@ -7836,7 +8753,10 @@
           }
         }
       ],
-      "placeholderCreditIndex": 2
+      "userVariables": [],
+      "placeholderCreditIndex": 2,
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "185b5ed1-2168-4283-8b82-035c2eb25b2e",
@@ -7850,6 +8770,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "02398598-7d79-44e5-9d2a-cfb4764782b2",
@@ -7871,7 +8795,10 @@
           }
         }
       ],
-      "placeholderCreditIndex": 7
+      "userVariables": [],
+      "placeholderCreditIndex": 7,
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "801dbb58-176e-4e56-bcd9-f0896bb58007",
@@ -7885,6 +8812,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "ce35d829-f2ba-47f9-9376-84823e610f2d",
@@ -7906,6 +8837,7 @@
           }
         }
       ],
+      "userVariables": [],
       "placeholderCreditIndex": 2,
       "jokerKey": "bluejoker",
       "hasUserUploadedImage": false
@@ -7922,6 +8854,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "deaaac87-acfb-46bd-9808-0775f8af36ab",
@@ -7943,7 +8879,10 @@
           }
         }
       ],
-      "placeholderCreditIndex": 7
+      "userVariables": [],
+      "placeholderCreditIndex": 7,
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "bdf532c4-812a-440c-9220-b12d9b1c5117",
@@ -7957,6 +8896,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "6a089125-5c60-4ef2-8338-61f06e474523",
@@ -7978,7 +8921,10 @@
           }
         }
       ],
-      "placeholderCreditIndex": 3
+      "userVariables": [],
+      "placeholderCreditIndex": 3,
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "ef32b0d8-005d-4213-b1ca-9d0585f36724",
@@ -7992,6 +8938,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "8427a55f-87ec-4d90-b46a-469cbd54be77",
@@ -8013,7 +8963,10 @@
           }
         }
       ],
-      "placeholderCreditIndex": 7
+      "userVariables": [],
+      "placeholderCreditIndex": 7,
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "41cf1690-9443-47c1-a959-69a9c9af5e16",
@@ -8027,6 +8980,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "8c8c3083-1d21-42a4-8f12-59faaa62470c",
@@ -8048,7 +9005,10 @@
           }
         }
       ],
-      "placeholderCreditIndex": 6
+      "userVariables": [],
+      "placeholderCreditIndex": 6,
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "1f8c49df-39b1-448a-ae60-acc79ee79620",
@@ -8062,6 +9022,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "7fd4a21c-46ac-47ce-96bf-4d34b0f4396f",
@@ -8083,7 +9047,10 @@
           }
         }
       ],
-      "placeholderCreditIndex": 3
+      "userVariables": [],
+      "placeholderCreditIndex": 3,
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "ee086c90-a7ad-47e6-8437-5d176b859b5b",
@@ -8097,6 +9064,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "8bae12c2-a351-4ca3-93ed-b0773a075afa",
@@ -8119,7 +9090,10 @@
           }
         }
       ],
-      "placeholderCreditIndex": 4
+      "userVariables": [],
+      "placeholderCreditIndex": 4,
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "3f80b463-5910-4ebc-8c0a-cdd2f018678f",
@@ -8133,6 +9107,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "8cf83101-3db1-492b-8dab-cddbe9bf0ef1",
@@ -8154,7 +9132,10 @@
           }
         }
       ],
-      "placeholderCreditIndex": 1
+      "userVariables": [],
+      "placeholderCreditIndex": 1,
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "64b14568-9c4b-4e3b-b560-3b58fdf5267a",
@@ -8168,6 +9149,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "d4b4aa20-d45f-4cb1-a243-221d31ca1a24",
@@ -8205,6 +9190,7 @@
           }
         }
       ],
+      "userVariables": [],
       "placeholderCreditIndex": 1,
       "jokerKey": "baseballcard",
       "hasUserUploadedImage": false
@@ -8221,6 +9207,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "d0632816-8350-4cde-815c-76baa33bf715",
@@ -8242,7 +9232,10 @@
           }
         }
       ],
-      "placeholderCreditIndex": 8
+      "userVariables": [],
+      "placeholderCreditIndex": 8,
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "4851c874-a08b-420e-bfb2-5d534338d502",
@@ -8256,6 +9249,11 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "appears_in_shop": false,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "bca2a1ec-c608-4d3e-90a3-89e5b304825d",
@@ -8275,8 +9273,10 @@
           }
         }
       ],
+      "userVariables": [],
       "placeholderCreditIndex": 4,
-      "appears_in_shop": false
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     },
     {
       "id": "94efe7e0-2089-4097-a9d4-9a3a3be65473",
@@ -8290,6 +9290,10 @@
       "eternal_compat": true,
       "unlocked": true,
       "discovered": true,
+      "unlockProperties": [],
+      "unlockOperator": "",
+      "unlockCount": 1,
+      "unlockDescription": "",
       "rules": [
         {
           "id": "2a929faf-b768-4149-b402-84408f1dd45e",
@@ -8309,7 +9313,10 @@
           }
         }
       ],
-      "placeholderCreditIndex": 1
+      "userVariables": [],
+      "placeholderCreditIndex": 1,
+      "jokerKey": "",
+      "hasUserUploadedImage": false
     }
   ],
   "consumables": [
@@ -8324,6 +9331,7 @@
       "unlocked": true,
       "discovered": true,
       "hidden": false,
+      "can_repeat_soul": false,
       "rules": [
         {
           "id": "4144a459-af6b-41ff-93bc-7edf1c850ee7",
@@ -8376,7 +9384,6 @@
       ],
       "placeholderCreditIndex": 1,
       "consumableKey": "themagician",
-      "can_repeat_soul": false,
       "hasUserUploadedImage": true
     },
     {
@@ -8390,6 +9397,7 @@
       "unlocked": true,
       "discovered": true,
       "hidden": false,
+      "can_repeat_soul": false,
       "rules": [
         {
           "id": "6fb78e24-2083-4e52-b627-8799f854d14b",
@@ -8415,7 +9423,6 @@
       ],
       "placeholderCreditIndex": 1,
       "consumableKey": "thehighpriestess",
-      "can_repeat_soul": false,
       "hasUserUploadedImage": true
     },
     {
@@ -8429,6 +9436,7 @@
       "unlocked": true,
       "discovered": true,
       "hidden": false,
+      "can_repeat_soul": false,
       "rules": [
         {
           "id": "2706ffa9-d802-4336-87f2-f8670ecaa6ea",
@@ -8482,7 +9490,6 @@
       ],
       "placeholderCreditIndex": 14,
       "consumableKey": "theempress",
-      "can_repeat_soul": false,
       "hasUserUploadedImage": true
     },
     {
@@ -8496,6 +9503,7 @@
       "unlocked": true,
       "discovered": true,
       "hidden": false,
+      "can_repeat_soul": false,
       "rules": [
         {
           "id": "96656250-e6ec-4810-97cc-33f2d2f43ad0",
@@ -8521,7 +9529,6 @@
       ],
       "placeholderCreditIndex": 14,
       "consumableKey": "theemperor",
-      "can_repeat_soul": false,
       "hasUserUploadedImage": true
     },
     {
@@ -8535,6 +9542,7 @@
       "unlocked": true,
       "discovered": true,
       "hidden": false,
+      "can_repeat_soul": false,
       "rules": [
         {
           "id": "8555239b-ca48-47a3-9426-dad12ba5059d",
@@ -8587,7 +9595,6 @@
       ],
       "placeholderCreditIndex": 11,
       "consumableKey": "thehierophant",
-      "can_repeat_soul": false,
       "hasUserUploadedImage": true
     },
     {
@@ -8601,6 +9608,7 @@
       "unlocked": true,
       "discovered": true,
       "hidden": false,
+      "can_repeat_soul": false,
       "rules": [
         {
           "id": "6a01205f-eac8-4b84-bf9b-a2c44b71d7e7",
@@ -8644,7 +9652,6 @@
       ],
       "placeholderCreditIndex": 10,
       "consumableKey": "thelovers",
-      "can_repeat_soul": false,
       "hasUserUploadedImage": true
     },
     {
@@ -8658,6 +9665,7 @@
       "unlocked": true,
       "discovered": true,
       "hidden": false,
+      "can_repeat_soul": false,
       "rules": [
         {
           "id": "4407f614-79dd-4220-9b70-4099eb2c24ee",
@@ -8701,7 +9709,6 @@
       ],
       "placeholderCreditIndex": 12,
       "consumableKey": "thechariot",
-      "can_repeat_soul": false,
       "hasUserUploadedImage": true
     },
     {
@@ -8715,6 +9722,7 @@
       "unlocked": true,
       "discovered": true,
       "hidden": false,
+      "can_repeat_soul": false,
       "rules": [
         {
           "id": "6cc7e255-6712-4b1d-8f56-8c439b42c4d8",
@@ -8758,7 +9766,6 @@
       ],
       "placeholderCreditIndex": 7,
       "consumableKey": "justice",
-      "can_repeat_soul": false,
       "hasUserUploadedImage": true
     },
     {
@@ -8772,6 +9779,7 @@
       "unlocked": true,
       "discovered": true,
       "hidden": false,
+      "can_repeat_soul": false,
       "rules": [
         {
           "id": "7bbfc831-918c-49cc-bdd7-1c81c02d5981",
@@ -8795,7 +9803,6 @@
       ],
       "placeholderCreditIndex": 8,
       "consumableKey": "thehermit",
-      "can_repeat_soul": false,
       "hasUserUploadedImage": true
     },
     {
@@ -8809,6 +9816,7 @@
       "unlocked": true,
       "discovered": true,
       "hidden": false,
+      "can_repeat_soul": false,
       "rules": [
         {
           "id": "e675261e-3c74-44cb-8ada-85c952d954fc",
@@ -8832,7 +9840,6 @@
       ],
       "placeholderCreditIndex": 14,
       "consumableKey": "temperance",
-      "can_repeat_soul": false,
       "hasUserUploadedImage": true
     },
     {
@@ -8846,6 +9853,7 @@
       "unlocked": true,
       "discovered": true,
       "hidden": false,
+      "can_repeat_soul": false,
       "rules": [
         {
           "id": "ba22181e-7839-45e0-9a6a-fa9680e7afca",
@@ -8889,7 +9897,6 @@
       ],
       "placeholderCreditIndex": 3,
       "consumableKey": "thedevil",
-      "can_repeat_soul": false,
       "hasUserUploadedImage": true
     },
     {
@@ -8903,6 +9910,7 @@
       "unlocked": true,
       "discovered": true,
       "hidden": false,
+      "can_repeat_soul": false,
       "rules": [
         {
           "id": "370e2ab3-8b66-4312-9f3d-a2a7fe0565d0",
@@ -8946,7 +9954,6 @@
       ],
       "placeholderCreditIndex": 15,
       "consumableKey": "thetower",
-      "can_repeat_soul": false,
       "hasUserUploadedImage": true
     },
     {
@@ -8960,6 +9967,7 @@
       "unlocked": true,
       "discovered": true,
       "hidden": false,
+      "can_repeat_soul": false,
       "rules": [
         {
           "id": "4b79ac74-eaf3-4bce-8edc-6d00d2eb763d",
@@ -9006,7 +10014,6 @@
       ],
       "placeholderCreditIndex": 5,
       "consumableKey": "thehangedman",
-      "can_repeat_soul": false,
       "hasUserUploadedImage": true
     },
     {
@@ -9020,6 +10027,7 @@
       "unlocked": true,
       "discovered": true,
       "hidden": false,
+      "can_repeat_soul": false,
       "rules": [
         {
           "id": "c35fcfc5-7769-44c6-8e12-ff1876f43bac",
@@ -9072,7 +10080,6 @@
       ],
       "placeholderCreditIndex": 9,
       "consumableKey": "thestar",
-      "can_repeat_soul": false,
       "hasUserUploadedImage": true
     },
     {
@@ -9086,6 +10093,7 @@
       "unlocked": true,
       "discovered": true,
       "hidden": false,
+      "can_repeat_soul": false,
       "rules": [
         {
           "id": "d4c2c6c6-e076-467a-8b2c-80d8a3bfcd18",
@@ -9138,7 +10146,6 @@
       ],
       "placeholderCreditIndex": 13,
       "consumableKey": "themoon",
-      "can_repeat_soul": false,
       "hasUserUploadedImage": true
     },
     {
@@ -9152,6 +10159,7 @@
       "unlocked": true,
       "discovered": true,
       "hidden": false,
+      "can_repeat_soul": false,
       "rules": [
         {
           "id": "d4c2c6c6-e076-467a-8b2c-80d8a3bfcd18",
@@ -9204,7 +10212,6 @@
       ],
       "placeholderCreditIndex": 5,
       "consumableKey": "thesun",
-      "can_repeat_soul": false,
       "hasUserUploadedImage": true
     },
     {
@@ -9218,6 +10225,7 @@
       "unlocked": true,
       "discovered": true,
       "hidden": false,
+      "can_repeat_soul": false,
       "rules": [
         {
           "id": "241a5e93-1938-43c0-987d-86f8d977b847",
@@ -9244,7 +10252,6 @@
       ],
       "placeholderCreditIndex": 6,
       "consumableKey": "judgement",
-      "can_repeat_soul": false,
       "hasUserUploadedImage": true
     },
     {
@@ -9258,6 +10265,7 @@
       "unlocked": true,
       "discovered": true,
       "hidden": false,
+      "can_repeat_soul": false,
       "rules": [
         {
           "id": "d4c2c6c6-e076-467a-8b2c-80d8a3bfcd18",
@@ -9310,7 +10318,6 @@
       ],
       "placeholderCreditIndex": 8,
       "consumableKey": "theworld",
-      "can_repeat_soul": false,
       "hasUserUploadedImage": true
     },
     {
@@ -9324,6 +10331,7 @@
       "unlocked": true,
       "discovered": true,
       "hidden": false,
+      "can_repeat_soul": false,
       "rules": [
         {
           "id": "4f14d273-6e0c-4af7-a681-f13c3a81c4eb",
@@ -9348,7 +10356,6 @@
       ],
       "placeholderCreditIndex": 11,
       "consumableKey": "mercury",
-      "can_repeat_soul": false,
       "hasUserUploadedImage": true
     },
     {
@@ -9362,6 +10369,7 @@
       "unlocked": true,
       "discovered": true,
       "hidden": false,
+      "can_repeat_soul": false,
       "rules": [
         {
           "id": "4f14d273-6e0c-4af7-a681-f13c3a81c4eb",
@@ -9386,7 +10394,6 @@
       ],
       "placeholderCreditIndex": 5,
       "consumableKey": "venus",
-      "can_repeat_soul": false,
       "hasUserUploadedImage": true
     },
     {
@@ -9400,6 +10407,7 @@
       "unlocked": true,
       "discovered": true,
       "hidden": false,
+      "can_repeat_soul": false,
       "rules": [
         {
           "id": "4f14d273-6e0c-4af7-a681-f13c3a81c4eb",
@@ -9424,7 +10432,6 @@
       ],
       "placeholderCreditIndex": 3,
       "consumableKey": "earth",
-      "can_repeat_soul": false,
       "hasUserUploadedImage": true
     },
     {
@@ -9438,6 +10445,7 @@
       "unlocked": true,
       "discovered": true,
       "hidden": false,
+      "can_repeat_soul": false,
       "rules": [
         {
           "id": "4f14d273-6e0c-4af7-a681-f13c3a81c4eb",
@@ -9462,7 +10470,6 @@
       ],
       "placeholderCreditIndex": 14,
       "consumableKey": "mars",
-      "can_repeat_soul": false,
       "hasUserUploadedImage": true
     },
     {
@@ -9476,6 +10483,7 @@
       "unlocked": true,
       "discovered": true,
       "hidden": false,
+      "can_repeat_soul": false,
       "rules": [
         {
           "id": "4f14d273-6e0c-4af7-a681-f13c3a81c4eb",
@@ -9500,7 +10508,6 @@
       ],
       "placeholderCreditIndex": 6,
       "consumableKey": "jupiter",
-      "can_repeat_soul": false,
       "hasUserUploadedImage": true
     },
     {
@@ -9514,6 +10521,7 @@
       "unlocked": true,
       "discovered": true,
       "hidden": false,
+      "can_repeat_soul": false,
       "rules": [
         {
           "id": "4f14d273-6e0c-4af7-a681-f13c3a81c4eb",
@@ -9538,7 +10546,6 @@
       ],
       "placeholderCreditIndex": 15,
       "consumableKey": "saturn",
-      "can_repeat_soul": false,
       "hasUserUploadedImage": true
     },
     {
@@ -9552,6 +10559,7 @@
       "unlocked": true,
       "discovered": true,
       "hidden": false,
+      "can_repeat_soul": false,
       "rules": [
         {
           "id": "4f14d273-6e0c-4af7-a681-f13c3a81c4eb",
@@ -9576,7 +10584,6 @@
       ],
       "placeholderCreditIndex": 12,
       "consumableKey": "uranus",
-      "can_repeat_soul": false,
       "hasUserUploadedImage": true
     },
     {
@@ -9590,6 +10597,7 @@
       "unlocked": true,
       "discovered": true,
       "hidden": false,
+      "can_repeat_soul": false,
       "rules": [
         {
           "id": "4f14d273-6e0c-4af7-a681-f13c3a81c4eb",
@@ -9614,7 +10622,6 @@
       ],
       "placeholderCreditIndex": 8,
       "consumableKey": "neptune",
-      "can_repeat_soul": false,
       "hasUserUploadedImage": true
     },
     {
@@ -9628,6 +10635,7 @@
       "unlocked": true,
       "discovered": true,
       "hidden": false,
+      "can_repeat_soul": false,
       "rules": [
         {
           "id": "4f14d273-6e0c-4af7-a681-f13c3a81c4eb",
@@ -9652,7 +10660,6 @@
       ],
       "placeholderCreditIndex": 12,
       "consumableKey": "pluto",
-      "can_repeat_soul": false,
       "hasUserUploadedImage": true
     },
     {
@@ -9666,6 +10673,7 @@
       "unlocked": true,
       "discovered": true,
       "hidden": false,
+      "can_repeat_soul": false,
       "rules": [
         {
           "id": "4f14d273-6e0c-4af7-a681-f13c3a81c4eb",
@@ -9690,7 +10698,6 @@
       ],
       "placeholderCreditIndex": 15,
       "consumableKey": "planetx",
-      "can_repeat_soul": false,
       "hasUserUploadedImage": true
     },
     {
@@ -9704,6 +10711,7 @@
       "unlocked": true,
       "discovered": true,
       "hidden": false,
+      "can_repeat_soul": false,
       "rules": [
         {
           "id": "4f14d273-6e0c-4af7-a681-f13c3a81c4eb",
@@ -9728,7 +10736,6 @@
       ],
       "placeholderCreditIndex": 14,
       "consumableKey": "ceres",
-      "can_repeat_soul": false,
       "hasUserUploadedImage": true
     },
     {
@@ -9742,6 +10749,7 @@
       "unlocked": true,
       "discovered": true,
       "hidden": false,
+      "can_repeat_soul": false,
       "rules": [
         {
           "id": "4f14d273-6e0c-4af7-a681-f13c3a81c4eb",
@@ -9766,7 +10774,6 @@
       ],
       "placeholderCreditIndex": 11,
       "consumableKey": "eris",
-      "can_repeat_soul": false,
       "hasUserUploadedImage": true
     },
     {
@@ -9780,6 +10787,7 @@
       "unlocked": true,
       "discovered": true,
       "hidden": false,
+      "can_repeat_soul": false,
       "rules": [
         {
           "id": "53a3bb24-fccb-4ff9-83b9-9485812f4a07",
@@ -9823,7 +10831,6 @@
       ],
       "placeholderCreditIndex": 8,
       "consumableKey": "talisman",
-      "can_repeat_soul": false,
       "hasUserUploadedImage": true
     },
     {
@@ -9837,6 +10844,7 @@
       "unlocked": true,
       "discovered": true,
       "hidden": false,
+      "can_repeat_soul": false,
       "rules": [
         {
           "id": "53a3bb24-fccb-4ff9-83b9-9485812f4a07",
@@ -9880,7 +10888,6 @@
       ],
       "placeholderCreditIndex": 6,
       "consumableKey": "trance",
-      "can_repeat_soul": false,
       "hasUserUploadedImage": true
     },
     {
@@ -9894,6 +10901,7 @@
       "unlocked": true,
       "discovered": true,
       "hidden": false,
+      "can_repeat_soul": false,
       "rules": [
         {
           "id": "53a3bb24-fccb-4ff9-83b9-9485812f4a07",
@@ -9937,7 +10945,6 @@
       ],
       "placeholderCreditIndex": 3,
       "consumableKey": "medium",
-      "can_repeat_soul": false,
       "hasUserUploadedImage": true
     },
     {
@@ -9951,6 +10958,7 @@
       "unlocked": true,
       "discovered": true,
       "hidden": false,
+      "can_repeat_soul": false,
       "rules": [
         {
           "id": "53a3bb24-fccb-4ff9-83b9-9485812f4a07",
@@ -9994,7 +11002,6 @@
       ],
       "placeholderCreditIndex": 5,
       "consumableKey": "dejavu",
-      "can_repeat_soul": false,
       "hasUserUploadedImage": true
     },
     {
@@ -10008,6 +11015,7 @@
       "unlocked": true,
       "discovered": true,
       "hidden": false,
+      "can_repeat_soul": false,
       "rules": [
         {
           "id": "e3b090ce-41b4-43f2-8a1a-e8b110dc1ce9",
@@ -10031,7 +11039,6 @@
       ],
       "placeholderCreditIndex": 11,
       "consumableKey": "sigil",
-      "can_repeat_soul": false,
       "hasUserUploadedImage": true
     },
     {
@@ -10045,6 +11052,7 @@
       "unlocked": true,
       "discovered": true,
       "hidden": false,
+      "can_repeat_soul": false,
       "rules": [
         {
           "id": "1620ec86-97da-43df-aaee-92b5ce471af5",
@@ -10076,7 +11084,6 @@
       ],
       "placeholderCreditIndex": 4,
       "consumableKey": "ouija",
-      "can_repeat_soul": false,
       "hasUserUploadedImage": true
     },
     {
@@ -10090,6 +11097,7 @@
       "unlocked": true,
       "discovered": true,
       "hidden": false,
+      "can_repeat_soul": false,
       "rules": [
         {
           "id": "0ead8fa3-aaf8-4982-b046-4079bffe0777",
@@ -10121,7 +11129,6 @@
       ],
       "placeholderCreditIndex": 14,
       "consumableKey": "immolate",
-      "can_repeat_soul": false,
       "hasUserUploadedImage": true
     },
     {
@@ -10135,6 +11142,7 @@
       "unlocked": true,
       "discovered": true,
       "hidden": false,
+      "can_repeat_soul": false,
       "rules": [
         {
           "id": "1e55de25-bd0f-423f-893f-b129949c1288",
@@ -10184,7 +11192,6 @@
       ],
       "placeholderCreditIndex": 9,
       "consumableKey": "strength",
-      "can_repeat_soul": false,
       "hasUserUploadedImage": true
     },
     {
@@ -10198,6 +11205,7 @@
       "unlocked": true,
       "discovered": true,
       "hidden": false,
+      "can_repeat_soul": false,
       "rules": [
         {
           "id": "19736af2-ad9e-4b37-b212-f48c5cab09f8",
@@ -10233,7 +11241,6 @@
       ],
       "placeholderCreditIndex": 15,
       "consumableKey": "familiar",
-      "can_repeat_soul": false,
       "hasUserUploadedImage": true
     },
     {
@@ -10247,6 +11254,7 @@
       "unlocked": true,
       "discovered": true,
       "hidden": false,
+      "can_repeat_soul": false,
       "rules": [
         {
           "id": "19736af2-ad9e-4b37-b212-f48c5cab09f8",
@@ -10282,7 +11290,6 @@
       ],
       "placeholderCreditIndex": 10,
       "consumableKey": "grim",
-      "can_repeat_soul": false,
       "hasUserUploadedImage": true
     },
     {
@@ -10296,6 +11303,7 @@
       "unlocked": true,
       "discovered": true,
       "hidden": false,
+      "can_repeat_soul": false,
       "rules": [
         {
           "id": "19736af2-ad9e-4b37-b212-f48c5cab09f8",
@@ -10331,7 +11339,6 @@
       ],
       "placeholderCreditIndex": 14,
       "consumableKey": "incantation",
-      "can_repeat_soul": false,
       "hasUserUploadedImage": true
     },
     {
@@ -10345,6 +11352,7 @@
       "unlocked": true,
       "discovered": true,
       "hidden": false,
+      "can_repeat_soul": false,
       "rules": [
         {
           "id": "01ef99d0-355c-4cee-8688-4d29c28208f2",
@@ -10371,7 +11379,6 @@
       ],
       "placeholderCreditIndex": 15,
       "consumableKey": "thesoul",
-      "can_repeat_soul": false,
       "hasUserUploadedImage": true
     },
     {
@@ -10385,6 +11392,7 @@
       "unlocked": true,
       "discovered": true,
       "hidden": false,
+      "can_repeat_soul": false,
       "rules": [
         {
           "id": "e1ec0c2b-9a6d-45fa-941e-be82731f70a8",
@@ -10419,7 +11427,6 @@
       ],
       "placeholderCreditIndex": 11,
       "consumableKey": "wraith",
-      "can_repeat_soul": false,
       "hasUserUploadedImage": true
     },
     {
@@ -10433,6 +11440,7 @@
       "unlocked": true,
       "discovered": true,
       "hidden": false,
+      "can_repeat_soul": false,
       "rules": [
         {
           "id": "96179bbe-7060-4d2b-8b4f-d5c1cba1a56a",
@@ -10464,7 +11472,6 @@
       ],
       "placeholderCreditIndex": 7,
       "consumableKey": "ankh",
-      "can_repeat_soul": false,
       "hasUserUploadedImage": true
     },
     {
@@ -10478,6 +11485,7 @@
       "unlocked": true,
       "discovered": true,
       "hidden": false,
+      "can_repeat_soul": false,
       "rules": [
         {
           "id": "d625a745-e422-44bb-9304-53ed372714a4",
@@ -10511,7 +11519,6 @@
       ],
       "placeholderCreditIndex": 15,
       "consumableKey": "ectoplasm",
-      "can_repeat_soul": false,
       "hasUserUploadedImage": true
     },
     {
@@ -10525,6 +11532,7 @@
       "unlocked": true,
       "discovered": true,
       "hidden": false,
+      "can_repeat_soul": false,
       "rules": [
         {
           "id": "5b8c4dd0-dd8b-4be8-91bd-a1df7cf5f57e",
@@ -10557,7 +11565,6 @@
       ],
       "placeholderCreditIndex": 1,
       "consumableKey": "hex",
-      "can_repeat_soul": false,
       "hasUserUploadedImage": true
     },
     {
@@ -10571,6 +11578,7 @@
       "unlocked": true,
       "discovered": true,
       "hidden": false,
+      "can_repeat_soul": false,
       "rules": [
         {
           "id": "d8e0ac83-f6c5-44e5-8759-bc88289fa5f4",
@@ -10613,7 +11621,6 @@
       ],
       "placeholderCreditIndex": 20,
       "consumableKey": "cryptid",
-      "can_repeat_soul": false,
       "hasUserUploadedImage": true
     },
     {
@@ -10627,6 +11634,7 @@
       "unlocked": true,
       "discovered": true,
       "hidden": false,
+      "can_repeat_soul": false,
       "rules": [
         {
           "id": "5bd3771e-fcc2-4c66-ac79-5b6feb28b5f8",
@@ -10664,7 +11672,6 @@
       ],
       "placeholderCreditIndex": 17,
       "consumableKey": "death",
-      "can_repeat_soul": false,
       "hasUserUploadedImage": true
     },
     {
@@ -10678,6 +11685,7 @@
       "unlocked": true,
       "discovered": true,
       "hidden": false,
+      "can_repeat_soul": false,
       "rules": [
         {
           "id": "186bdff7-7cff-4309-9592-9a5e4d9f920b",
@@ -10721,7 +11729,6 @@
       ],
       "placeholderCreditIndex": 8,
       "consumableKey": "aura",
-      "can_repeat_soul": false,
       "hasUserUploadedImage": true
     },
     {
@@ -10735,6 +11742,7 @@
       "unlocked": true,
       "discovered": true,
       "hidden": false,
+      "can_repeat_soul": false,
       "rules": [
         {
           "id": "8e531554-7bf1-42dc-9ff8-61c49d123bb3",
@@ -10767,7 +11775,6 @@
       ],
       "placeholderCreditIndex": 9,
       "consumableKey": "thewheeloffortune",
-      "can_repeat_soul": false,
       "hasUserUploadedImage": true
     },
     {
@@ -10781,6 +11788,7 @@
       "unlocked": true,
       "discovered": true,
       "hidden": false,
+      "can_repeat_soul": false,
       "rules": [
         {
           "id": "0cc16e8f-461a-476d-9b6c-70821f284bbf",
@@ -10805,7 +11813,6 @@
       ],
       "placeholderCreditIndex": 1,
       "consumableKey": "blackhole",
-      "can_repeat_soul": false,
       "hasUserUploadedImage": true
     },
     {
@@ -10819,6 +11826,7 @@
       "unlocked": true,
       "discovered": true,
       "hidden": false,
+      "can_repeat_soul": false,
       "rules": [
         {
           "id": "1ffbf32b-58d7-425e-a016-79c18fb537ad",
@@ -10840,7 +11848,6 @@
       ],
       "placeholderCreditIndex": 6,
       "consumableKey": "thefool",
-      "can_repeat_soul": false,
       "hasUserUploadedImage": true
     }
   ],
@@ -10856,6 +11863,10 @@
       "weight": 1,
       "draw_hand": false,
       "booster_type": "joker",
+      "pos": {
+        "x": 0,
+        "y": 0
+      },
       "config": {
         "extra": 2,
         "choose": 1
@@ -10875,6 +11886,10 @@
       "weight": 1,
       "draw_hand": false,
       "booster_type": "joker",
+      "pos": {
+        "x": 0,
+        "y": 0
+      },
       "config": {
         "extra": 2,
         "choose": 1
@@ -10894,6 +11909,10 @@
       "weight": 1,
       "draw_hand": false,
       "booster_type": "joker",
+      "pos": {
+        "x": 0,
+        "y": 0
+      },
       "config": {
         "extra": 4,
         "choose": 1
@@ -10913,6 +11932,10 @@
       "weight": 0.25,
       "draw_hand": false,
       "booster_type": "joker",
+      "pos": {
+        "x": 0,
+        "y": 0
+      },
       "config": {
         "extra": 4,
         "choose": 2
@@ -10932,6 +11955,10 @@
       "weight": 1,
       "draw_hand": true,
       "booster_type": "consumable",
+      "pos": {
+        "x": 0,
+        "y": 0
+      },
       "config": {
         "extra": 3,
         "choose": 1
@@ -10959,6 +11986,10 @@
       "weight": 1,
       "draw_hand": true,
       "booster_type": "consumable",
+      "pos": {
+        "x": 0,
+        "y": 0
+      },
       "config": {
         "extra": 3,
         "choose": 1
@@ -10986,6 +12017,10 @@
       "weight": 1,
       "draw_hand": true,
       "booster_type": "consumable",
+      "pos": {
+        "x": 0,
+        "y": 0
+      },
       "config": {
         "extra": 3,
         "choose": 1
@@ -11013,6 +12048,10 @@
       "weight": 1,
       "draw_hand": true,
       "booster_type": "consumable",
+      "pos": {
+        "x": 0,
+        "y": 0
+      },
       "config": {
         "extra": 3,
         "choose": 1
@@ -11040,6 +12079,10 @@
       "weight": 1,
       "draw_hand": true,
       "booster_type": "consumable",
+      "pos": {
+        "x": 0,
+        "y": 0
+      },
       "config": {
         "extra": 5,
         "choose": 1
@@ -11067,6 +12110,10 @@
       "weight": 1,
       "draw_hand": true,
       "booster_type": "consumable",
+      "pos": {
+        "x": 0,
+        "y": 0
+      },
       "config": {
         "extra": 5,
         "choose": 1
@@ -11094,6 +12141,10 @@
       "weight": 0.25,
       "draw_hand": true,
       "booster_type": "consumable",
+      "pos": {
+        "x": 0,
+        "y": 0
+      },
       "config": {
         "extra": 5,
         "choose": 2
@@ -11121,6 +12172,10 @@
       "weight": 0.25,
       "draw_hand": true,
       "booster_type": "consumable",
+      "pos": {
+        "x": 0,
+        "y": 0
+      },
       "config": {
         "extra": 5,
         "choose": 2
@@ -11148,6 +12203,10 @@
       "weight": 1,
       "draw_hand": false,
       "booster_type": "consumable",
+      "pos": {
+        "x": 0,
+        "y": 0
+      },
       "config": {
         "extra": 3,
         "choose": 1
@@ -11173,6 +12232,10 @@
       "weight": 1,
       "draw_hand": false,
       "booster_type": "consumable",
+      "pos": {
+        "x": 0,
+        "y": 0
+      },
       "config": {
         "extra": 3,
         "choose": 1
@@ -11198,6 +12261,10 @@
       "weight": 1,
       "draw_hand": false,
       "booster_type": "consumable",
+      "pos": {
+        "x": 0,
+        "y": 0
+      },
       "config": {
         "extra": 3,
         "choose": 1
@@ -11223,6 +12290,10 @@
       "weight": 1,
       "draw_hand": false,
       "booster_type": "consumable",
+      "pos": {
+        "x": 0,
+        "y": 0
+      },
       "config": {
         "extra": 3,
         "choose": 1
@@ -11248,6 +12319,10 @@
       "weight": 1,
       "draw_hand": false,
       "booster_type": "consumable",
+      "pos": {
+        "x": 0,
+        "y": 0
+      },
       "config": {
         "extra": 5,
         "choose": 1
@@ -11273,6 +12348,10 @@
       "weight": 1,
       "draw_hand": false,
       "booster_type": "consumable",
+      "pos": {
+        "x": 0,
+        "y": 0
+      },
       "config": {
         "extra": 5,
         "choose": 1
@@ -11298,6 +12377,10 @@
       "weight": 0.25,
       "draw_hand": false,
       "booster_type": "consumable",
+      "pos": {
+        "x": 0,
+        "y": 0
+      },
       "config": {
         "extra": 5,
         "choose": 2
@@ -11323,6 +12406,10 @@
       "weight": 0.25,
       "draw_hand": false,
       "booster_type": "consumable",
+      "pos": {
+        "x": 0,
+        "y": 0
+      },
       "config": {
         "extra": 5,
         "choose": 2
@@ -11348,6 +12435,10 @@
       "weight": 1,
       "draw_hand": true,
       "booster_type": "consumable",
+      "pos": {
+        "x": 0,
+        "y": 0
+      },
       "config": {
         "extra": 2,
         "choose": 1
@@ -11373,6 +12464,10 @@
       "weight": 1,
       "draw_hand": true,
       "booster_type": "consumable",
+      "pos": {
+        "x": 0,
+        "y": 0
+      },
       "config": {
         "extra": 2,
         "choose": 1
@@ -11398,6 +12493,10 @@
       "weight": 1,
       "draw_hand": true,
       "booster_type": "consumable",
+      "pos": {
+        "x": 0,
+        "y": 0
+      },
       "config": {
         "extra": 4,
         "choose": 1
@@ -11423,6 +12522,10 @@
       "weight": 0.25,
       "draw_hand": true,
       "booster_type": "consumable",
+      "pos": {
+        "x": 0,
+        "y": 0
+      },
       "config": {
         "extra": 4,
         "choose": 2
@@ -11448,6 +12551,10 @@
       "weight": 1,
       "draw_hand": false,
       "booster_type": "playing_card",
+      "pos": {
+        "x": 0,
+        "y": 0
+      },
       "config": {
         "extra": 3,
         "choose": 1
@@ -11467,6 +12574,10 @@
       "weight": 1,
       "draw_hand": false,
       "booster_type": "playing_card",
+      "pos": {
+        "x": 0,
+        "y": 0
+      },
       "config": {
         "extra": 3,
         "choose": 1
@@ -11486,6 +12597,10 @@
       "weight": 1,
       "draw_hand": false,
       "booster_type": "playing_card",
+      "pos": {
+        "x": 0,
+        "y": 0
+      },
       "config": {
         "extra": 3,
         "choose": 1
@@ -11505,6 +12620,10 @@
       "weight": 1,
       "draw_hand": false,
       "booster_type": "playing_card",
+      "pos": {
+        "x": 0,
+        "y": 0
+      },
       "config": {
         "extra": 3,
         "choose": 1
@@ -11524,6 +12643,10 @@
       "weight": 1,
       "draw_hand": false,
       "booster_type": "playing_card",
+      "pos": {
+        "x": 0,
+        "y": 0
+      },
       "config": {
         "extra": 5,
         "choose": 1
@@ -11543,6 +12666,10 @@
       "weight": 1,
       "draw_hand": false,
       "booster_type": "playing_card",
+      "pos": {
+        "x": 0,
+        "y": 0
+      },
       "config": {
         "extra": 5,
         "choose": 1
@@ -11562,6 +12689,10 @@
       "weight": 0.25,
       "draw_hand": false,
       "booster_type": "playing_card",
+      "pos": {
+        "x": 0,
+        "y": 0
+      },
       "config": {
         "extra": 5,
         "choose": 2
@@ -11581,6 +12712,10 @@
       "weight": 0.25,
       "draw_hand": false,
       "booster_type": "playing_card",
+      "pos": {
+        "x": 0,
+        "y": 0
+      },
       "config": {
         "extra": 5,
         "choose": 2
@@ -11599,8 +12734,18 @@
       "description": "{C:blue}+30{} Chips",
       "imagePreview": "data:image/png;base64,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",
       "enhancementKey": "bonuscard",
+      "pos": {
+        "x": 0,
+        "y": 0
+      },
+      "any_suit": false,
+      "replace_base_card": false,
+      "no_rank": false,
+      "no_suit": false,
+      "always_scores": false,
       "unlocked": true,
       "discovered": true,
+      "no_collection": false,
       "rules": [
         {
           "id": "24836e44-b2db-4e25-89a8-257f39c9bd80",
@@ -11623,13 +12768,8 @@
           }
         }
       ],
+      "userVariables": [],
       "placeholderCreditIndex": 1,
-      "no_collection": false,
-      "any_suit": false,
-      "replace_base_card": false,
-      "no_rank": false,
-      "no_suit": false,
-      "always_scores": false,
       "hasUserUploadedImage": true
     },
     {
@@ -11638,8 +12778,18 @@
       "description": "{C:red}+4{} Mult",
       "imagePreview": "data:image/png;base64,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",
       "enhancementKey": "multcard",
+      "pos": {
+        "x": 0,
+        "y": 0
+      },
+      "any_suit": false,
+      "replace_base_card": false,
+      "no_rank": false,
+      "no_suit": false,
+      "always_scores": false,
       "unlocked": true,
       "discovered": true,
+      "no_collection": false,
       "rules": [
         {
           "id": "18b7e32b-9256-47bb-a7e1-ea302c5ff783",
@@ -11662,13 +12812,8 @@
           }
         }
       ],
+      "userVariables": [],
       "placeholderCreditIndex": 4,
-      "no_collection": false,
-      "any_suit": false,
-      "replace_base_card": false,
-      "no_rank": false,
-      "no_suit": false,
-      "always_scores": false,
       "hasUserUploadedImage": true
     },
     {
@@ -11677,16 +12822,21 @@
       "description": "\tIs considered to be every suit simultaneously",
       "imagePreview": "data:image/png;base64,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",
       "enhancementKey": "wildcard",
-      "unlocked": true,
-      "discovered": true,
-      "rules": [],
-      "placeholderCreditIndex": 4,
-      "no_collection": false,
+      "pos": {
+        "x": 0,
+        "y": 0
+      },
       "any_suit": true,
       "replace_base_card": false,
       "no_rank": false,
       "no_suit": false,
       "always_scores": false,
+      "unlocked": true,
+      "discovered": true,
+      "no_collection": false,
+      "rules": [],
+      "userVariables": [],
+      "placeholderCreditIndex": 4,
       "hasUserUploadedImage": true
     },
     {
@@ -11695,8 +12845,18 @@
       "description": "{X:red,C:white}X2{} Mult[s]{C:green}1 in 4{} chance to destroy card",
       "imagePreview": "data:image/png;base64,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",
       "enhancementKey": "glasscard",
+      "pos": {
+        "x": 0,
+        "y": 0
+      },
+      "any_suit": false,
+      "replace_base_card": false,
+      "no_rank": false,
+      "no_suit": false,
+      "always_scores": false,
       "unlocked": true,
       "discovered": true,
+      "no_collection": false,
       "rules": [
         {
           "id": "13a2d889-d0ea-40b2-8c20-822becab56b1",
@@ -11734,13 +12894,8 @@
           }
         }
       ],
+      "userVariables": [],
       "placeholderCreditIndex": 3,
-      "no_collection": false,
-      "any_suit": false,
-      "replace_base_card": false,
-      "no_rank": false,
-      "no_suit": false,
-      "always_scores": false,
       "hasUserUploadedImage": true
     },
     {
@@ -11749,8 +12904,18 @@
       "description": "{X:red,C:white}X1.5{} Mult while this card stays in hand",
       "imagePreview": "data:image/png;base64,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",
       "enhancementKey": "steelcard",
+      "pos": {
+        "x": 0,
+        "y": 0
+      },
+      "any_suit": false,
+      "replace_base_card": false,
+      "no_rank": false,
+      "no_suit": false,
+      "always_scores": false,
       "unlocked": true,
       "discovered": true,
+      "no_collection": false,
       "rules": [
         {
           "id": "0f158992-238e-4b57-9cec-f822a9b5c30a",
@@ -11773,13 +12938,8 @@
           }
         }
       ],
+      "userVariables": [],
       "placeholderCreditIndex": 2,
-      "no_collection": false,
-      "any_suit": false,
-      "replace_base_card": false,
-      "no_rank": false,
-      "no_suit": false,
-      "always_scores": false,
       "hasUserUploadedImage": true
     },
     {
@@ -11788,8 +12948,18 @@
       "description": "{C:blue}+50{} Chips[s]No rank or suit[s]Card always scores",
       "imagePreview": "data:image/png;base64,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",
       "enhancementKey": "stonecard",
+      "pos": {
+        "x": 0,
+        "y": 0
+      },
+      "any_suit": false,
+      "replace_base_card": true,
+      "no_rank": true,
+      "no_suit": true,
+      "always_scores": true,
       "unlocked": true,
       "discovered": true,
+      "no_collection": false,
       "rules": [
         {
           "id": "136c609b-db1d-4c14-ad8f-8b90eb17062b",
@@ -11812,13 +12982,8 @@
           }
         }
       ],
+      "userVariables": [],
       "placeholderCreditIndex": 4,
-      "no_collection": false,
-      "any_suit": false,
-      "replace_base_card": true,
-      "no_rank": true,
-      "no_suit": true,
-      "always_scores": true,
       "hasUserUploadedImage": true
     },
     {
@@ -11827,8 +12992,18 @@
       "description": "{C:green}1 in 5{} chance for {C:red}+20{} Mult[s]{C:green}1 in 15{} chance to win $20",
       "imagePreview": "data:image/png;base64,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",
       "enhancementKey": "luckycard",
+      "pos": {
+        "x": 0,
+        "y": 0
+      },
+      "any_suit": false,
+      "replace_base_card": false,
+      "no_rank": false,
+      "no_suit": false,
+      "always_scores": false,
       "unlocked": true,
       "discovered": true,
+      "no_collection": false,
       "rules": [
         {
           "id": "4795bc07-7951-4820-9931-b4d4083d8c69",
@@ -11873,13 +13048,8 @@
           }
         }
       ],
+      "userVariables": [],
       "placeholderCreditIndex": 6,
-      "no_collection": false,
-      "any_suit": false,
-      "replace_base_card": false,
-      "no_rank": false,
-      "no_suit": false,
-      "always_scores": false,
       "hasUserUploadedImage": true
     },
     {
@@ -11888,8 +13058,18 @@
       "description": "{C:money}$3{} if this card is held in hand[s] at end of round",
       "imagePreview": "data:image/png;base64,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",
       "enhancementKey": "goldcard",
+      "pos": {
+        "x": 0,
+        "y": 0
+      },
+      "any_suit": false,
+      "replace_base_card": false,
+      "no_rank": false,
+      "no_suit": false,
+      "always_scores": false,
       "unlocked": true,
       "discovered": true,
+      "no_collection": false,
       "rules": [
         {
           "id": "d2716536-714f-4ed1-830a-23763a8a4ad2",
@@ -11913,16 +13093,141 @@
           }
         }
       ],
+      "userVariables": [],
+      "placeholderCreditIndex": 2,
+      "hasUserUploadedImage": true
+    }
+  ],
+  "seals": [
+    {
+      "id": "2ed869f7-a536-4d99-a860-d8d6866e822f",
+      "name": "Purple Seal",
+      "description": "Create a {C:tarot}Tarot{} card when discarded[s]{C:inactive}(Must have room){}",
+      "imagePreview": "data:image/png;base64,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",
+      "sealKey": "purple_seal",
+      "badge_colour": "#7b559c",
+      "unlocked": true,
+      "discovered": true,
+      "rules": [
+        {
+          "id": "93258606-d641-43a5-928b-7b4a27975bbf",
+          "trigger": "card_discarded",
+          "blueprintCompatible": true,
+          "conditionGroups": [],
+          "effects": [
+            {
+              "id": "b9f361e6-0804-495e-8ba2-7a0cdf0f37c5",
+              "type": "create_consumable",
+              "params": {
+                "set": "Tarot",
+                "specific_card": "random",
+                "is_negative": "none"
+              }
+            }
+          ],
+          "randomGroups": [],
+          "position": {
+            "x": 1760,
+            "y": 745
+          }
+        }
+      ],
       "placeholderCreditIndex": 2,
       "no_collection": false,
-      "any_suit": false,
-      "replace_base_card": false,
-      "no_rank": false,
-      "no_suit": false,
-      "always_scores": false,
+      "hasUserUploadedImage": true
+    },
+    {
+      "id": "e283b317-af8b-42c7-990f-b18e3fc318bb",
+      "name": "Red Seal",
+      "description": "Retrigger this card {C:attention}1{} time",
+      "imagePreview": "data:image/png;base64,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",
+      "sealKey": "red_seal",
+      "badge_colour": "#ff4c40",
+      "unlocked": true,
+      "discovered": true,
+      "rules": [
+        {
+          "id": "444a81f9-3c3f-4eb8-94b0-096692b9a8b0",
+          "trigger": "card_scored",
+          "blueprintCompatible": true,
+          "conditionGroups": [],
+          "effects": [
+            {
+              "id": "28812a02-7732-44c0-a4d8-74b9fbc042f3",
+              "type": "retrigger_card",
+              "params": {
+                "value": 1
+              }
+            }
+          ],
+          "randomGroups": [],
+          "position": {
+            "x": 2210,
+            "y": 1009
+          }
+        },
+        {
+          "id": "943bbc56-7df6-4bfa-9c0c-733b3d2f757e",
+          "trigger": "card_held",
+          "blueprintCompatible": true,
+          "conditionGroups": [],
+          "effects": [
+            {
+              "id": "cb332deb-1021-4d1b-91b9-08cbb1d1fd56",
+              "type": "retrigger_card",
+              "params": {
+                "value": 1
+              }
+            }
+          ],
+          "randomGroups": [],
+          "position": {
+            "x": 1376,
+            "y": 587
+          }
+        }
+      ],
+      "placeholderCreditIndex": 2,
+      "no_collection": false,
+      "hasUserUploadedImage": true
+    },
+    {
+      "id": "46715dae-611b-4386-9929-da224f286179",
+      "name": "Gold Seal",
+      "description": "Earn {C:money}$3{} when this card is played and scores",
+      "imagePreview": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAI4AAAC+CAYAAADjhzelAAAJIElEQVR4AexcTasdRRDtGB+IuMpGXbjRRdAgCAp+oAT8K26yFn+GuBbEPyH4A4LBDzAgiIiCceFC3QQEEeEZn57Eg/2KuXfm3Zk7VTV1hGPd7unprj515tBzb5KHmv4TAwcwIOEcQJpuaU3CkQoOYkDCOYg23SThSAMHMSDhHESbbpJwpIGDGFhdOAdlqZvCMSDhhCtJjoQknBx1CpelhBOuJDkSknBy1ClclhJOuJLkSEjCyVGncFluXzjhKN9GQhLONuq4+i4knNUp38aCEs426rj6LiSc1SnfxoISzjbquPouJJzVKd/GghLO4nWsMaGEU6POi+9Swlmc0hoTSjg16rz4LiWcxSmtMaGEU6POi+9Swlmc0hoTSjj56+yyAwnHhfb8i6YXzl+fv33W4+z7D84A9uHzEPKXzncH6YXjS1/d1dMIhw7CSBc5/fnT1uPPbz5sAPvweQi8n5Hz1pXCxXaeRjgX25ZGH5uB8MKhE1y+8mwDrJN8+cNpOwTWhTA3wPWOTXz2+cMLJzvBW8wfewonHD7xPHuMOQw20ePKY61NgXUpOhDXYx6M/Rr6rH/KTRo4kIEwjsMnG+cMgA5gnYH73OUqTz9+0oDn3rzRelx94XoDcA2w99t16Dxcj/mxXT2GEU71QmTbfxjhwGUA6zQk1DoE++EePR659lYDTn/8uPX47NbNBtBZ+nvw2c7PcdZ5uG71GEY41QuRbf/uwuHZYcxpSCzcoQf7d8Uvvv6pAbxOZ7nz62kD2N/Pic8cd/Lkaw2g83zy7otnAO+rGlcVTlWSt7hvN+HQaXCuASy5fOLZDxcA2MY5Zgg813DcS8+cNIDtu7+3BvCNi/2Mlx99ogFYC2C/jXAdwPZXabsJpwrBW92nu3B2nW1IOJ56gG26zL273zaADsPIcYxwD+Dl559qANwHuPXR+w3g2xPHM+IegGcbnHMA3AtwXNXoLpyqxGfft5twcK4BLIH2bGOvs/3dVzcbcO+PXxrA/l0RY4BdDoM3LABjgF3zqP8BA27CebC8/p+VgdWFw1+9L3q2sQTj3APAJQC4BHBu3J7GVGfDOQfYddbBmxWwZ6lNXlpdOJtkseCmwgsHTzvA2uBNCmCb38dgDMD+i0a4F3DR+6qODy+cqoWJvu8wwpl65uBZYyli8Z0MwPngWgDbNuJNELD91dphhFON+Oz7DSccnDMAPPUACcZngG1GnHfuY8f3OXjTAvDmBfA+rAFgzh68rrifgXDC2Z9u9Kt18ksnHLoDS8QzD9wEYL+N+EUcsGcpuBFgx6u9n4F0wtm/HV1di4HVhXP/PPLvL9uHbhDuANj7r/73txhsv23jXAPY/l1trAXgl3GA4/ibl3UwXt96XF04Wye0yv7CCgdPOcBC4DPANv9cDuPfv91pAK8z8kyE72oAuEYPjsPcANuK+xkIK5z9aeuqNwOrC+fhV967BPCphwsAeOMB8GYEkBi4AEBnYeSf+GPk+F2RzgNX6sE8OC/W6sH58G0xwF/12X/txu1LANsrR7flVheO20618KIMhBHOq69fb8DY7qzD0B14H9uM7LeR1/k9EP78MWDH0ZHYX/1tijyEEQ4TUszBgJtw8Pe4AT7BfPLt9zF84nm2wN/K7EGa6SA4HwGcl/12HK8z4pwFsM3xjFyf7erRTTjVic++fzfhvPHO7UvAGIF0IjoBv6llpCPBZQC8mQG8zvvoPGzzOiP74ToA58WbFMDrHI83KWAs/61edxPOVgnd+r64P3fhwHUAPtF0GD7xTBQuAOB3ph5wAwAuA9AROAb3AJyf8zHacVwXcwJ40wI4L1wG4P1Vo7twqhKffd/hhENnsM7Db3Yt4XADgI5AB7Hj4DoA+zmODsMIlwEwJ8DxiucZCCec8+mpFZWBMMLBOQcgUdZ5+D0KnYcRLgLQQXi/jXQUfDsN8H64C0CHg8sAdDBGnGsAO2/VdhjhVC1A1n2HEw5cpwedh5HOw0jnGItwlR68H+4CcH7rMHAZIGuBj5X3asI51gY0rw8D4YVD9yE9dAZGOsdYhKv04P10GEa4C8D1FIcZCC+c4bTV681AGuHQeWykc4xFOgoj54G79PAuSJb10wgnC6FV8kwvHDrHWOxdBZ+rFPhY+0wvnGMRo3n3M7Bd4ezft67OZEDCmUlg1dslnKqVn7lvCWcmgVVvl3CqVn7mviWcmQRWvV3CqVr5mfuWcGYS+P/ttT5JOLXqvdhuJZzFqKw1kYRTq96L7VbCWYzKWhNJOLXqvdhuJZzFqKw1kYSTt96umUs4rvTnXVzCyVs718wlHFf68y4u4eStnWvmEo4r/XkXl3Dy1s41cwnHlf5ci/fZSjg9G/o8mQEJZzJVGtgzIOH0bOjzZAYknMlUaWDPgITTs6HPkxmQcCZTpYE9AxJOz4Y+T2ZgFeFMzkYD0zAg4aQpVaxEJZxY9UiTjYSTplSxEpVwYtUjTTYSTppSxUpUwolVjzTZbFM4aejPm6iEk7d2rplLOK70511cwslbO9fMJRxX+vMuLuHkrZ1r5hKOK/15F5dwFqldvUkknHo1X2THEs4iNNabRMKpV/NFdizhLEJjvUkknHo1X2THEs4iNNabRMLJWXP3rCUc9xLkTEDCyVk396wlHPcS5ExAwslZN/esJRz3EuRMQMLJWTf3rCUc9xLkSMBmKeFYRtSexICEM4kmDbIMSDiWEbUnMSDhTKJJgywDEo5lRO1JDEg4k2jSIMuAhGMZUXsSA0cXzqQsNCgdAxJOupLFSFjCiVGHdFlIOOlKFiNhCSdGHdJlIeGkK1mMhCWcGHVIl8X2hJOuBDkTlnBy1s09awnHvQQ5E5BwctbNPWsJx70EOROQcHLWzT1rCce9BDkTkHBm163mBBJOzbrP3rWEM5vCmhNIODXrPnvXEs5sCmtOIOHUrPvsXUs4symsOYGEk6/uITKWcEKUIV8SEk6+moXIWMIJUYZ8SUg4+WoWImMJJ0QZ8iUh4eSrWYiMJZwQZYidxFB2Es4QK+obZUDCGaVIA4YYkHCGWFHfKAMSzihFGjDEgIQzxIr6RhmQcEYp0oAhBiScIVbUN8rAUYUzuroGpGVAwklbOt/EJRxf/tOu/g8AAAD//8XFmCsAAAAGSURBVAMASUSbuQflATwAAAAASUVORK5CYII=",
+      "sealKey": "gold_seal",
+      "badge_colour": "#eac058",
+      "unlocked": true,
+      "discovered": true,
+      "rules": [
+        {
+          "id": "29e6d0ea-6d9e-4f2e-a32d-16911a99cfdc",
+          "trigger": "card_scored",
+          "blueprintCompatible": true,
+          "conditionGroups": [],
+          "effects": [
+            {
+              "id": "94e8bbae-ba64-4671-bef5-3468bc8c79d9",
+              "type": "edit_dollars",
+              "params": {
+                "operation": "add",
+                "value": 3
+              }
+            }
+          ],
+          "randomGroups": [],
+          "position": {
+            "x": 1760,
+            "y": 745
+          }
+        }
+      ],
+      "placeholderCreditIndex": 4,
+      "no_collection": false,
       "hasUserUploadedImage": true
     }
   ],
   "version": "1.0.0",
-  "exportedAt": "2025-07-21T10:45:20.248Z"
+  "exportedAt": "2025-08-15T06:03:29.451Z"
 }
