@@ -728,6 +728,26 @@ export const CARD_EFFECT_TYPES: EffectTypeDefinition[] = [
     category: "Consumables",
   },
   {
+    id: "create_last_played_planet",
+    label: "Create Last Played Planet",
+    description:
+      "Create a Planet card corresponding to the last hand played (Blue Seal effect)",
+    applicableTriggers: GENERIC_TRIGGERS,
+    params: [
+      {
+        id: "is_negative",
+        type: "select",
+        label: "Edition",
+        options: [
+          { value: "none", label: "No Edition" },
+          { value: "negative", label: "Negative Edition" },
+        ],
+        default: "none",
+      },
+    ],
+    category: "Consumables",
+  },
+  {
     id: "show_message",
     label: "Show Message",
     description: "Display a custom message with specified color",

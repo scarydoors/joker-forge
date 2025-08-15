@@ -16,6 +16,7 @@ import { generateDestroyConsumableReturn } from "./effects/DestroyConsumableEffe
 import { generateShowMessageReturn } from "./effects/ShowMessageEffect";
 import { generateBalanceReturn } from "./effects/BalanceEffect";
 import { generateDrawCardsReturn } from "./effects/DrawCardsEffect";
+import { generateCreateLastPlayedPlanetReturn } from "./effects/CreateLastPlayedPlanetEffect";
 
 export interface ConfigExtraVariable {
   name: string;
@@ -102,6 +103,9 @@ const generateSingleEffect = (
 
     case "draw_cards":
       return generateDrawCardsReturn(effect);
+
+    case "create_last_played_planet":
+      return generateCreateLastPlayedPlanetReturn(effect);
 
     default:
       return {

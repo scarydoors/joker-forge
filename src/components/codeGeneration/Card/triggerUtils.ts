@@ -19,13 +19,12 @@ const TRIGGER_DEFINITIONS: Record<string, TriggerDefinition> = {
   },
   card_held_in_hand_end_of_round: {
     condition:
-      "context.cardarea == G.hand and context.main_scoring and context.end_of_round",
+      "context.end_of_round and context.cardarea == G.hand and context.other_card == card and context.individual",
     context: "end of round context",
-    description:
-      "When this card is held in hand at the end of the round (main evaluation only)",
+    description: "When this card is held in hand at the end of the round",
   },
   card_discarded: {
-    condition: "context.discard and context.other_card == card ",
+    condition: "context.discard and context.other_card == card",
     context: "discard context",
     description:
       "Triggers whenever a card is discarded. Use conditions to check properties of the discarded card.",
