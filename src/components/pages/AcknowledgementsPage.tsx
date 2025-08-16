@@ -120,6 +120,9 @@ const AcknowledgementsPage: React.FC = () => {
           .
         </p>
         <p className="text-white-dark text-center text-sm mt-8">
+          Icon from FlatIcon
+        </p>
+        <p className="text-white-dark text-center text-sm">
           This project is licensed under the{" "}
           <a
             href="https://opensource.org/license/mit/"
