@@ -87,6 +87,7 @@ import {
   generateEditDiscardSizeReturn,
   generatePassiveDiscardSize,
 } from "./effects/EditDiscardSizeEffect";
+import { generateEmitFlagReturn } from "./effects/EmitFlagEffect";
 
 interface ExtendedEffect extends Effect {
   _isInRandomGroup?: boolean;
@@ -561,6 +562,8 @@ const generateSingleEffect = (
       return generateForceGameOverReturn(effect);
     case "juice_up_joker":
       return generateJuiceUpReturn(effect, sameTypeCount, "joker");
+    case "emit_flag":
+      return generateEmitFlagReturn(effect, modprefix);
     case "juice_up_card":
       return generateJuiceUpReturn(effect, sameTypeCount, "card");
     case "edit_play_size":
