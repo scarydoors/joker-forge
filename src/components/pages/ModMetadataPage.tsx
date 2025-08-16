@@ -12,26 +12,7 @@ import {
 } from "@heroicons/react/24/outline";
 import InputField from "../generic/InputField";
 import Button from "../generic/Button";
-
-export interface ModMetadata {
-  id: string;
-  name: string;
-  author: string[];
-  description: string;
-  prefix: string;
-  main_file: string;
-  version: string;
-  priority: number;
-  badge_colour: string;
-  badge_text_colour: string;
-  display_name: string;
-  dependencies: string[];
-  conflicts: string[];
-  provides: string[];
-  dump_loc?: boolean;
-  iconImage?: string;
-  hasUserUploadedIcon?: boolean;
-}
+import { ModMetadata } from "../data/BalatroUtils";
 
 interface ModMetadataValidation {
   isValid: boolean;
