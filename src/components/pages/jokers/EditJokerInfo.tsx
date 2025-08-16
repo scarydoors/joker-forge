@@ -386,6 +386,23 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
     }
   };
 
+  const handleCardAppearanceCheckboxChange = (field: string, checked: boolean) => {
+    if (field === "shop") {
+      setFormData({
+        ...formData,
+        appears_in_shop: checked
+      });
+    } else {
+      setFormData({
+        ...formData,
+        cardAppearance: {
+          ...formData.cardAppearance,
+          [field]: checked
+        }
+      });
+    }
+  };
+
   const handleRarityChange = (value: string) => {
     const parsedValue = parseInt(value, 10);
     let newRarity: number | string;
@@ -1104,42 +1121,6 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
                                   />
                                 </div>
                               </div>
-                              <div>
-                                <p className="text-xs font-medium tracking-widest text-white-darker mb-2">
-                                  Shop Availability
-                                </p>
-                                <div className="grid grid-cols-1 gap-y-2">
-                                  <Checkbox
-                                    id="appears_in_shop_edit"
-                                    label={
-                                      formData.rarity === 4
-                                        ? "Force Appear in Shop (Legendary)"
-                                        : "Appears in Shop"
-                                    }
-                                    checked={formData.appears_in_shop !== false}
-                                    onChange={(checked) =>
-                                      handleCheckboxChange(
-                                        "appears_in_shop",
-                                        checked
-                                      )
-                                    }
-                                    disabled={false}
-                                  />
-                                  {formData.rarity === 4 && (
-                                    <p className="text-xs text-white-darker mt-1">
-                                      Legendary jokers don't normally appear in
-                                      shops. Enable this to force shop
-                                      appearance.
-                                    </p>
-                                  )}
-                                  {formData.rarity !== 4 &&
-                                    formData.appears_in_shop === false && (
-                                      <p className="text-xs text-white-darker mt-1">
-                                        This joker will not appear in shops.
-                                      </p>
-                                    )}
-                                </div>
-                              </div>
                             </div>
                           </div>
                         </div>
@@ -1256,11 +1237,98 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
                     )}
                     <h4 className="text-white-light font-medium text-base mb-4 flex items-center gap-2">
                       <BuildingStorefrontIcon className="h-5 w-5 text-mint" />
-                      Shop Appearance
+                      Card Appearance
                     </h4>
-                    <p className="text-xs text-white-darker -mt-2">
-                      Coming Soon?
-                    </p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2">
+                      <Checkbox
+                        id="shop"
+                        label="Can appear in Shop"
+                        checked={formData.appears_in_shop !== false}
+                        onChange={(checked) =>
+                          handleCardAppearanceCheckboxChange(
+                            "shop",
+                            checked
+                          )
+                        }
+                      />
+                      <Checkbox
+                        id="judgement"
+                        label="Can appear from Judgement"
+                        checked={formData.cardAppearance.jud === true}
+                        onChange={(checked) =>
+                          handleCardAppearanceCheckboxChange(
+                            "jud",
+                            checked
+                          )
+                        }
+                      />
+                      <Checkbox
+                        id="soul"
+                        label="Can appear from The Soul"
+                        checked={formData.cardAppearance.sou === true}
+                        onChange={(checked) =>
+                          handleCardAppearanceCheckboxChange(
+                            "sou",
+                            checked
+                          )
+                        }
+                      />
+                      <Checkbox
+                        id="wraith"
+                        label="Can appear from The Wraith"
+                        checked={formData.cardAppearance.wra === true}
+                        onChange={(checked) =>
+                          handleCardAppearanceCheckboxChange(
+                            "wra",
+                            checked
+                          )
+                        }
+                      />
+                      <Checkbox
+                        id="buffoon_pack"
+                        label="Can appear in a Buffoon Pack"
+                        checked={formData.cardAppearance.buf === true}
+                        onChange={(checked) =>
+                          handleCardAppearanceCheckboxChange(
+                            "buf",
+                            checked
+                          )
+                        }
+                      />
+                      <Checkbox
+                        id="riff_raff"
+                        label="Can appear from Riff Raff"
+                        checked={formData.cardAppearance.rif === true}
+                        onChange={(checked) =>
+                          handleCardAppearanceCheckboxChange(
+                            "rif",
+                            checked
+                          )
+                        }
+                      />
+                      <Checkbox
+                        id="rare_tag"
+                        label="Can appear from a Rare Tag"
+                        checked={formData.cardAppearance.rta === true}
+                        onChange={(checked) =>
+                          handleCardAppearanceCheckboxChange(
+                            "rta",
+                            checked
+                          )
+                        }
+                      />
+                      <Checkbox
+                        id="uncommon_tag"
+                        label="Can appear from an Uncommon Tag"
+                        checked={formData.cardAppearance.uta === true}
+                        onChange={(checked) =>
+                          handleCardAppearanceCheckboxChange(
+                            "uta",
+                            checked
+                          )
+                        }
+                      />
+                    </div>
                   </div>
                 </div>
               )}

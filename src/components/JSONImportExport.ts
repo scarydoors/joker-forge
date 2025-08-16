@@ -106,6 +106,7 @@ const normalizeJokerData = (joker: Partial<JokerData>): JokerData => {
     placeholderCreditIndex: joker.placeholderCreditIndex,
     jokerKey: joker.jokerKey || "",
     hasUserUploadedImage: joker.hasUserUploadedImage || false,
+    cardAppearance: joker.cardAppearance || {}
   };
 };
 

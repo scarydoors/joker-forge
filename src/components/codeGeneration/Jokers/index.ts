@@ -122,6 +122,36 @@ export const generateCustomRaritiesCode = (
   return output.trim();
 };
 
+const generateInPoolFunction = (
+  joker: JokerData
+): string => {
+  const notAppearsIn: string[] = []
+  const appearsIn: string[] =[]
+  
+  joker.appears_in_shop ? appearsIn.push("args.source == 'sho'") : notAppearsIn.push("args.source ~= 'sho'")
+
+  Object.entries(joker.cardAppearance).forEach(([key, value]) => {
+    value ? appearsIn.push(`args.source == '${key}'`) : notAppearsIn.push(`args.source ~= '${key}'`)
+  });
+
+  if (notAppearsIn.length > 0 || appearsIn.length > 0) {
+    return `in_pool = function(self, args)
+          return not args ${
+          notAppearsIn.length > 0 ? "or" : ""} ${notAppearsIn.join(" and ")} ${
+          appearsIn.length > 0 ? "or" : ""} ${appearsIn.join(" or ")}
+      end
+    `
+  }
+  return `
+    in_pool = function(self, args)
+        return ${
+          joker.rarity === 4 && joker.appears_in_shop === true
+            ? "true"
+            : "args.source ~= 'sho'"
+        }
+    end`
+}
+
 const generateSingleJokerCode = (
   joker: JokerData,
   atlasKey: string,
@@ -273,20 +303,10 @@ const generateSingleJokerCode = (
     nextPosition++;
   }
 
-  if (
-    (joker.rarity !== 4 && joker.appears_in_shop === false) ||
-    (joker.rarity === 4 && joker.appears_in_shop === true)
-  ) {
+  
     jokerCode += `,
-
-    in_pool = function(self, args)
-        return ${
-          joker.rarity === 4 && joker.appears_in_shop === true
-            ? "true"
-            : "args.source ~= 'sho'"
-        }
-    end`;
-  }
+    ` + generateInPoolFunction(joker);
+  
 
   const locVarsCode = generateLocVarsFunction(joker, passiveEffects, modPrefix);
   if (locVarsCode) {

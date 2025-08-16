@@ -84,6 +84,15 @@ export interface JokerData {
   placeholderCreditIndex?: number;
   jokerKey?: string;
   hasUserUploadedImage?: boolean;
+  cardAppearance: { // this uses the "source keys" as keys
+    jud?: boolean // judgement
+    sou?: boolean // soul
+    wra?: boolean // wraith
+    buf?: boolean // buffoon_pack
+    rif?: boolean // riff raff
+    rta?: boolean // rare tag
+    uta?: boolean // uncommon tag
+  }
 }
 
 export interface RarityData {
