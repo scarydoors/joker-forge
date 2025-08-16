@@ -1,4 +1,11 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import {
+  useState,
+  useEffect,
+  useCallback,
+  useRef,
+  Suspense,
+  lazy,
+} from "react";
 import {
   BrowserRouter as Router,
   Routes,
@@ -18,29 +25,48 @@ import {
 } from "@heroicons/react/24/outline";
 
 // Pages
+const OverviewPage = lazy(() => import("./components/pages/OverviewPage"));
+const JokersPage = lazy(() => import("./components/pages/JokersPage"));
+const ModMetadataPage = lazy(
+  () => import("./components/pages/ModMetadataPage")
+);
+const RaritiesPage = lazy(() => import("./components/pages/RaritiesPage"));
+const ConsumablesPage = lazy(
+  () => import("./components/pages/ConsumablesPage")
+);
+const DecksPage = lazy(() => import("./components/pages/DecksPage"));
+const EditionsPage = lazy(() => import("./components/pages/EditionsPage"));
+const BoostersPage = lazy(() => import("./components/pages/BoostersPage"));
+const EnhancementsPage = lazy(
+  () => import("./components/pages/EnhancementsPage")
+);
+const SealsPage = lazy(() => import("./components/pages/SealsPage"));
+
+const JokersVanillaReforgedPage = lazy(
+  () => import("./components/pages/vanillareforged/JokersVanillaReforgedPage")
+);
+const ConsumablesVanillaReforgedPage = lazy(
+  () =>
+    import("./components/pages/vanillareforged/ConsumablesVanillaReforgedPage")
+);
+const BoostersVanillaReforgedPage = lazy(
+  () => import("./components/pages/vanillareforged/BoostersVanillaReforgedPage")
+);
+const EnhancementsVanillaReforgedPage = lazy(
+  () =>
+    import("./components/pages/vanillareforged/EnhancementsVanillaReforgedPage")
+);
+const SealsVanillaReforgedPage = lazy(
+  () => import("./components/pages/vanillareforged/SealsVanillaReforgedPage")
+);
+
+const AcknowledgementsPage = lazy(
+  () => import("./components/pages/AcknowledgementsPage")
+);
+const NotFoundPage = lazy(() => import("./components/pages/NotFoundPage"));
+
+// Core components
 import Sidebar from "./components/Sidebar";
-import OverviewPage from "./components/pages/OverviewPage";
-import JokersPage from "./components/pages/JokersPage";
-import ModMetadataPage, {
-  ModMetadata,
-  DEFAULT_MOD_METADATA,
-} from "./components/pages/ModMetadataPage";
-import RaritiesPage from "./components/pages/RaritiesPage";
-import ConsumablesPage from "./components/pages/ConsumablesPage";
-import DecksPage from "./components/pages/DecksPage";
-import EditionsPage from "./components/pages/EditionsPage";
-
-import JokersVanillaReforgedPage from "./components/pages/vanillareforged/JokersVanillaReforgedPage";
-import ConsumablesVanillaReforgedPage from "./components/pages/vanillareforged/ConsumablesVanillaReforgedPage";
-import BoostersVanillaReforgedPage from "./components/pages/vanillareforged/BoostersVanillaReforgedPage";
-import EnhancementsVanillaReforgedPage from "./components/pages/vanillareforged/EnhancementsVanillaReforgedPage";
-import SealsVanillaReforgedPage from "./components/pages/vanillareforged/SealsVanillaReforgedPage";
-
-import AcknowledgementsPage from "./components/pages/AcknowledgementsPage";
-import NotFoundPage from "./components/pages/NotFoundPage";
-import BoostersPage from "./components/pages/BoostersPage";
-import EnhancementsPage from "./components/pages/EnhancementsPage";
-import SealsPage from "./components/pages/SealsPage";
 
 // Data and Utils
 import {
@@ -52,19 +78,15 @@ import {
   updateDataRegistry,
   EnhancementData,
   SealData,
+  ModMetadata,
 } from "./components/data/BalatroUtils";
-import { exportModCode } from "./components/codeGeneration/entry";
-import {
-  exportModAsJSON,
-  importModFromJSON,
-  normalizeImportedModData,
-} from "./components/JSONImportExport";
 import Alert from "./components/generic/Alert";
 import ConfirmationPopup from "./components/generic/ConfirmationPopup";
 import ExportModal from "./components/generic/ExportModal";
 import DonationNotification from "./components/generic/DonationNotification";
 import RestoreProgressModal from "./components/generic/RestoreProgressModal";
-
+import { DEFAULT_MOD_METADATA } from "./components/pages/ModMetadataPage";
+import SkeletonPage from "./components/pages/SkeletonPage";
 interface AlertState {
   isVisible: boolean;
   type: "success" | "warning" | "error";
@@ -763,10 +785,15 @@ function AppContent() {
   }, []);
 
   // this is bad but i am tired
-  const handleRestoreAutoSave = () => {
+  const handleRestoreAutoSave = async () => {
     const savedData = loadFromLocalStorage();
     if (savedData) {
       try {
+        // Dynamically import normalization function
+        const { normalizeImportedModData } = await import(
+          "./components/JSONImportExport"
+        );
+
         const normalizedData = normalizeImportedModData({
           metadata: savedData.modMetadata,
           jokers: savedData.jokers,
@@ -894,6 +921,11 @@ function AppContent() {
 
     setExportLoading(true);
     try {
+      // Dynamically import the export function
+      const { exportModCode } = await import(
+        "./components/codeGeneration/entry"
+      );
+
       await exportModCode(
         jokers,
         consumables,
@@ -925,8 +957,10 @@ function AppContent() {
     }
   };
 
-  const handleExportJSON = () => {
+  const handleExportJSON = async () => {
     try {
+      const { exportModAsJSON } = await import("./components/JSONImportExport");
+
       exportModAsJSON(
         modMetadata,
         jokers,
@@ -954,30 +988,37 @@ function AppContent() {
 
   const handleImportJSON = async () => {
     try {
+      // Dynamically import the import functions
+      const { importModFromJSON, normalizeImportedModData } = await import(
+        "./components/JSONImportExport"
+      );
+
       const importedData = await importModFromJSON();
       if (importedData) {
-        setModMetadata(importedData.metadata);
-        setJokers(importedData.jokers);
-        setConsumables(importedData.consumables);
-        setCustomRarities(importedData.customRarities);
-        setConsumableSets(importedData.consumableSets);
-        setBoosters(importedData.boosters);
-        setEnhancements(importedData.enhancements || []);
-        setSeals(importedData.seals || []);
+        const normalizedData = normalizeImportedModData(importedData);
+
+        setModMetadata(normalizedData.metadata);
+        setJokers(normalizedData.jokers);
+        setConsumables(normalizedData.consumables);
+        setCustomRarities(normalizedData.customRarities);
+        setConsumableSets(normalizedData.consumableSets);
+        setBoosters(normalizedData.boosters);
+        setEnhancements(normalizedData.enhancements || []);
+        setSeals(normalizedData.seals || []);
         setSelectedJokerId(null);
         setSelectedConsumableId(null);
         setSelectedBoosterId(null);
         setSelectedEnhancementId(null);
         setSelectedSealId(null);
         prevDataRef.current = {
-          modMetadata: importedData.metadata,
-          jokers: importedData.jokers,
-          consumables: importedData.consumables,
-          customRarities: importedData.customRarities,
-          consumableSets: importedData.consumableSets,
-          boosters: importedData.boosters,
-          enhancements: importedData.enhancements || [],
-          seals: importedData.seals || [],
+          modMetadata: normalizedData.metadata,
+          jokers: normalizedData.jokers,
+          consumables: normalizedData.consumables,
+          customRarities: normalizedData.customRarities,
+          consumableSets: normalizedData.consumableSets,
+          boosters: normalizedData.boosters,
+          enhancements: normalizedData.enhancements || [],
+          seals: normalizedData.seals || [],
         };
         showAlert(
           "success",
@@ -1054,16 +1095,26 @@ function AppContent() {
           <Route
             path="/metadata"
             element={
-              <ModMetadataPage
-                metadata={modMetadata}
-                setMetadata={setModMetadata}
-              />
+              <Suspense fallback={<SkeletonPage variant="metadata" />}>
+                <ModMetadataPage
+                  metadata={modMetadata}
+                  setMetadata={setModMetadata}
+                />
+              </Suspense>
             }
           />
           <Route
             path="/jokers"
             element={
-              <>
+              <Suspense
+                fallback={
+                  <SkeletonPage
+                    variant="grid"
+                    showFloatingDock={true}
+                    showFilters={true}
+                  />
+                }
+              >
                 {jokersRaritiesTab === "jokers" ? (
                   <JokersPage
                     modName={modMetadata.name}
@@ -1083,66 +1134,106 @@ function AppContent() {
                     showConfirmation={showConfirmation}
                   />
                 )}
-              </>
+              </Suspense>
             }
           />
           <Route
             path="/consumables"
             element={
-              <ConsumablesPage
-                modName={modMetadata.name}
-                consumables={consumables}
-                setConsumables={setConsumables}
-                selectedConsumableId={selectedConsumableId}
-                setSelectedConsumableId={setSelectedConsumableId}
-                modPrefix={modMetadata.prefix || ""}
-                consumableSets={consumableSets}
-                setConsumableSets={setConsumableSets}
-                showConfirmation={showConfirmation}
-              />
+              <Suspense
+                fallback={
+                  <SkeletonPage
+                    variant="grid"
+                    showFloatingDock={true}
+                    showFilters={true}
+                  />
+                }
+              >
+                <ConsumablesPage
+                  modName={modMetadata.name}
+                  consumables={consumables}
+                  setConsumables={setConsumables}
+                  selectedConsumableId={selectedConsumableId}
+                  setSelectedConsumableId={setSelectedConsumableId}
+                  modPrefix={modMetadata.prefix || ""}
+                  consumableSets={consumableSets}
+                  setConsumableSets={setConsumableSets}
+                  showConfirmation={showConfirmation}
+                />
+              </Suspense>
             }
           />
           <Route
             path="/boosters"
             element={
-              <BoostersPage
-                modName={modMetadata.name}
-                boosters={boosters}
-                setBoosters={setBoosters}
-                selectedBoosterId={selectedBoosterId}
-                setSelectedBoosterId={setSelectedBoosterId}
-                modPrefix={modMetadata.prefix || ""}
-                showConfirmation={showConfirmation}
-                consumableSets={consumableSets}
-              />
+              <Suspense
+                fallback={
+                  <SkeletonPage
+                    variant="grid"
+                    showFloatingDock={true}
+                    showFilters={true}
+                  />
+                }
+              >
+                <BoostersPage
+                  modName={modMetadata.name}
+                  boosters={boosters}
+                  setBoosters={setBoosters}
+                  selectedBoosterId={selectedBoosterId}
+                  setSelectedBoosterId={setSelectedBoosterId}
+                  modPrefix={modMetadata.prefix || ""}
+                  showConfirmation={showConfirmation}
+                  consumableSets={consumableSets}
+                />
+              </Suspense>
             }
           />
           <Route
             path="/enhancements"
             element={
-              <EnhancementsPage
-                modName={modMetadata.name}
-                enhancements={enhancements}
-                setEnhancements={setEnhancements}
-                selectedEnhancementId={selectedEnhancementId}
-                setSelectedEnhancementId={setSelectedEnhancementId}
-                modPrefix={modMetadata.prefix || ""}
-                showConfirmation={showConfirmation}
-              />
+              <Suspense
+                fallback={
+                  <SkeletonPage
+                    variant="grid"
+                    showFloatingDock={true}
+                    showFilters={true}
+                  />
+                }
+              >
+                <EnhancementsPage
+                  modName={modMetadata.name}
+                  enhancements={enhancements}
+                  setEnhancements={setEnhancements}
+                  selectedEnhancementId={selectedEnhancementId}
+                  setSelectedEnhancementId={setSelectedEnhancementId}
+                  modPrefix={modMetadata.prefix || ""}
+                  showConfirmation={showConfirmation}
+                />
+              </Suspense>
             }
           />
           <Route
             path="/seals"
             element={
-              <SealsPage
-                modName={modMetadata.name}
-                seals={seals}
-                setSeals={setSeals}
-                selectedSealId={selectedSealId}
-                setSelectedSealId={setSelectedSealId}
-                modPrefix={modMetadata.prefix || ""}
-                showConfirmation={showConfirmation}
-              />
+              <Suspense
+                fallback={
+                  <SkeletonPage
+                    variant="grid"
+                    showFloatingDock={true}
+                    showFilters={true}
+                  />
+                }
+              >
+                <SealsPage
+                  modName={modMetadata.name}
+                  seals={seals}
+                  setSeals={setSeals}
+                  selectedSealId={selectedSealId}
+                  setSelectedSealId={setSelectedSealId}
+                  modPrefix={modMetadata.prefix || ""}
+                  showConfirmation={showConfirmation}
+                />
+              </Suspense>
             }
           />
           <Route path="/decks" element={<DecksPage />} />
@@ -1150,79 +1241,139 @@ function AppContent() {
           <Route
             path="/vanilla/jokers"
             element={
-              <JokersVanillaReforgedPage
-                onDuplicateToProject={(item) => {
-                  setJokers([...jokers, item as JokerData]);
-                }}
-                onNavigateToJokers={() => {
-                  navigate("/jokers");
-                }}
-              />
+              <Suspense
+                fallback={
+                  <SkeletonPage
+                    variant="grid"
+                    showFloatingDock={true}
+                    showFilters={true}
+                  />
+                }
+              >
+                <JokersVanillaReforgedPage
+                  onDuplicateToProject={(item) => {
+                    setJokers([...jokers, item as JokerData]);
+                  }}
+                  onNavigateToJokers={() => {
+                    navigate("/jokers");
+                  }}
+                />
+              </Suspense>
             }
           />
           <Route
             path="/vanilla/consumables"
             element={
-              <ConsumablesVanillaReforgedPage
-                onDuplicateToProject={(item) => {
-                  setConsumables([...consumables, item as ConsumableData]);
-                }}
-                onNavigateToConsumables={() => {
-                  navigate("/consumables");
-                }}
-              />
+              <Suspense
+                fallback={
+                  <SkeletonPage
+                    variant="grid"
+                    showFloatingDock={true}
+                    showFilters={true}
+                  />
+                }
+              >
+                <ConsumablesVanillaReforgedPage
+                  onDuplicateToProject={(item) => {
+                    setConsumables([...consumables, item as ConsumableData]);
+                  }}
+                  onNavigateToConsumables={() => {
+                    navigate("/consumables");
+                  }}
+                />
+              </Suspense>
             }
           />
           <Route
             path="/vanilla/boosters"
             element={
-              <BoostersVanillaReforgedPage
-                onDuplicateToProject={(item) => {
-                  setBoosters([...boosters, item as BoosterData]);
-                }}
-                onNavigateToBoosters={() => {
-                  navigate("/boosters");
-                }}
-              />
+              <Suspense
+                fallback={
+                  <SkeletonPage
+                    variant="grid"
+                    showFloatingDock={true}
+                    showFilters={true}
+                  />
+                }
+              >
+                <BoostersVanillaReforgedPage
+                  onDuplicateToProject={(item) => {
+                    setBoosters([...boosters, item as BoosterData]);
+                  }}
+                  onNavigateToBoosters={() => {
+                    navigate("/boosters");
+                  }}
+                />
+              </Suspense>
             }
           />
           <Route
             path="/vanilla/enhancements"
             element={
-              <EnhancementsVanillaReforgedPage
-                onDuplicateToProject={(item) => {
-                  setEnhancements([...enhancements, item as EnhancementData]);
-                }}
-                onNavigateToEnhancements={() => {
-                  navigate("/enhancements");
-                }}
-              />
+              <Suspense
+                fallback={
+                  <SkeletonPage
+                    variant="grid"
+                    showFloatingDock={true}
+                    showFilters={true}
+                  />
+                }
+              >
+                <EnhancementsVanillaReforgedPage
+                  onDuplicateToProject={(item) => {
+                    setEnhancements([...enhancements, item as EnhancementData]);
+                  }}
+                  onNavigateToEnhancements={() => {
+                    navigate("/enhancements");
+                  }}
+                />
+              </Suspense>
             }
           />
           <Route
             path="/vanilla/seals"
             element={
-              <SealsVanillaReforgedPage
-                onDuplicateToProject={(item) => {
-                  setSeals([...seals, item as SealData]);
-                }}
-                onNavigateToSeals={() => {
-                  navigate("/seals");
-                }}
-              />
+              <Suspense
+                fallback={
+                  <SkeletonPage
+                    variant="grid"
+                    showFloatingDock={true}
+                    showFilters={true}
+                  />
+                }
+              >
+                <SealsVanillaReforgedPage
+                  onDuplicateToProject={(item) => {
+                    setSeals([...seals, item as SealData]);
+                  }}
+                  onNavigateToSeals={() => {
+                    navigate("/seals");
+                  }}
+                />
+              </Suspense>
             }
           />
           <Route
             path="/vanilla"
             element={
-              <JokersVanillaReforgedPage
-                onDuplicateToProject={(item) => {
-                  setJokers([...jokers, item as JokerData]);
-                }}
-                onNavigateToJokers={() => {
-                  navigate("/jokers");
-                }}
-              />
+              <Suspense
+                fallback={
+                  <SkeletonPage
+                    variant="grid"
+                    showFloatingDock={true}
+                    showFilters={true}
+                  />
+                }
+              >
+                <JokersVanillaReforgedPage
+                  onDuplicateToProject={(item) => {
+                    setJokers([...jokers, item as JokerData]);
+                  }}
+                  onNavigateToJokers={() => {
+                    navigate("/jokers");
+                  }}
+                />
+              </Suspense>
             }
           />
 
