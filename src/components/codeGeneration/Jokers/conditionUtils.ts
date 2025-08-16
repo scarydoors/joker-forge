@@ -53,6 +53,7 @@ import { generateJokerRarityConditionCode } from "./conditions/JokerRarityCondit
 import { generateJokerStickerConditionCode, generateThisJokerStickerConditionCode } from "./conditions/JokerStickerCondition";
 import { generateJokerPositionConditionCode, generateThisJokerPositionConditionCode } from "./conditions/JokerPositionCondition";
 import { generateJokerKeyConditionCode } from "./conditions/JokerKeyCondition";
+import { generateCheckFlagConditionCode } from "./conditions/CheckFlagCondition";
 
 export const generateConditionChain = (
   rule: Rule,
@@ -202,6 +203,9 @@ const generateSingleConditionCode = (
 
     case "internal_variable":
       return generateInternalVariableConditionCode([singleConditionRule]);
+
+    case "check_flag":
+      return generateCheckFlagConditionCode([singleConditionRule]);
 
     case "first_played_hand":
       return generateFirstPlayedHandConditionCode();
