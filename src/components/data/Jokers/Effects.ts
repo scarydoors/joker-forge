@@ -70,7 +70,12 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
     id: "add_chips",
     label: "Add Chips",
     description: "Add a flat amount of chips to the hand score",
-    applicableTriggers: ["hand_played", "card_scored", "card_held_in_hand", "joker_evaluated"],
+    applicableTriggers: [
+      "hand_played",
+      "card_scored",
+      "card_held_in_hand",
+      "joker_evaluated",
+    ],
     params: [
       {
         id: "value",
@@ -86,7 +91,12 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
     id: "apply_x_chips",
     label: "Apply xChips",
     description: "Multiply the chips by this value",
-    applicableTriggers: ["hand_played", "card_scored", "card_held_in_hand", "joker_evaluated"],
+    applicableTriggers: [
+      "hand_played",
+      "card_scored",
+      "card_held_in_hand",
+      "joker_evaluated",
+    ],
     params: [
       {
         id: "value",
@@ -101,7 +111,12 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
     id: "apply_exp_chips",
     label: "Apply ^Chips (Exponential)",
     description: "Apply exponential chips (echips) - REQUIRES TALISMAN MOD",
-    applicableTriggers: ["hand_played", "card_scored", "card_held_in_hand", "joker_evaluated"],
+    applicableTriggers: [
+      "hand_played",
+      "card_scored",
+      "card_held_in_hand",
+      "joker_evaluated",
+    ],
     params: [
       {
         id: "value",
@@ -116,7 +131,12 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
     id: "add_mult",
     label: "Add Mult",
     description: "Add a flat amount of mult to the hand score",
-    applicableTriggers: ["hand_played", "card_scored", "card_held_in_hand", "joker_evaluated"],
+    applicableTriggers: [
+      "hand_played",
+      "card_scored",
+      "card_held_in_hand",
+      "joker_evaluated",
+    ],
     params: [
       {
         id: "value",
@@ -132,7 +152,12 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
     id: "apply_x_mult",
     label: "Apply xMult",
     description: "Multiply the score by this value",
-    applicableTriggers: ["hand_played", "card_scored", "card_held_in_hand", "joker_evaluated"],
+    applicableTriggers: [
+      "hand_played",
+      "card_scored",
+      "card_held_in_hand",
+      "joker_evaluated",
+    ],
     params: [
       {
         id: "value",
@@ -147,7 +172,12 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
     id: "apply_exp_mult",
     label: "Apply ^Mult (Exponential)",
     description: "Apply exponential mult (emult) - REQUIRES TALISMAN MOD",
-    applicableTriggers: ["hand_played", "card_scored", "card_held_in_hand", "joker_evaluated"],
+    applicableTriggers: [
+      "hand_played",
+      "card_scored",
+      "card_held_in_hand",
+      "joker_evaluated",
+    ],
     params: [
       {
         id: "value",
@@ -955,6 +985,7 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
     ],
     category: "Jokers",
   },
+
   {
     id: "destroy_joker",
     label: "Destroy Joker",
@@ -1009,6 +1040,16 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
           parameter: "position",
           values: ["specific"],
         },
+      },
+      {
+        id: "bypass_eternal",
+        type: "select",
+        label: "Bypass Eternal",
+        options: [
+          { value: "no", label: "No" },
+          { value: "yes", label: "Yes" },
+        ],
+        default: "no",
       },
       {
         id: "sell_value_multiplier",
@@ -1841,6 +1882,32 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
         label: "Rotation",
         min: 0,
         default: 1,
+      },
+    ],
+    category: "Special",
+  },
+  {
+    id: "emit_flag",
+    label: "Emit Flag",
+    description: "Emit a custom flag. Flags are global variables that can be set to true or false and checked by any other jokers",
+    applicableTriggers: [...GENERIC_TRIGGERS],
+    params: [
+      {
+        id: "flag_name",
+        type: "text",
+        label: "Unique Flag Name",
+        default: "custom_flag",
+      },
+      {
+        id: "change",
+        type: "select",
+        label: "Set Flag to",
+        options: [
+          {value: "true", label: "True"},
+          {value: "false", label: "False"},
+          {value: "invert", label: "Invert Current"},
+        ],
+        default: "true"
       },
     ],
     category: "Special",

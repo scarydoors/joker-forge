@@ -11,6 +11,26 @@ export const slugify = (text: string): string => {
   );
 };
 
+export interface ModMetadata {
+  id: string;
+  name: string;
+  author: string[];
+  description: string;
+  prefix: string;
+  main_file: string;
+  version: string;
+  priority: number;
+  badge_colour: string;
+  badge_text_colour: string;
+  display_name: string;
+  dependencies: string[];
+  conflicts: string[];
+  provides: string[];
+  dump_loc?: boolean;
+  iconImage?: string;
+  hasUserUploadedIcon?: boolean;
+}
+
 // =============================================================================
 // DATA REGISTRY INTERFACES
 // =============================================================================

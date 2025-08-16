@@ -14,13 +14,16 @@ export const generateDestroyJokerReturn = (
   const sellValueMultiplier =
     (effect.params?.sell_value_multiplier as number) || 0;
   const variableName = (effect.params?.variable_name as string) || "";
+  const bypassEternal = (effect.params?.bypass_eternal as string) === "yes";
 
   const scoringTriggers = ["hand_played", "card_scored"];
   const isScoring = scoringTriggers.includes(triggerType);
 
-  const normalizedJokerKey = jokerKey.startsWith("j_") 
-  ? jokerKey 
-  : `j_${jokerKey}`
+  const normalizedJokerKey = jokerKey.startsWith("j_")
+    ? jokerKey
+    : `j_${jokerKey}`;
+
+  const eternalCheck = bypassEternal ? "" : " and not joker.ability.eternal";
 
   let jokerSelectionCode = "";
   let destroyCode = "";
@@ -29,7 +32,7 @@ export const generateDestroyJokerReturn = (
     jokerSelectionCode = `
                 local target_joker = nil
                 for i, joker in ipairs(G.jokers.cards) do
-                    if joker.config.center.key == "${normalizedJokerKey}" and not joker.ability.eternal and not joker.getting_sliced then
+                    if joker.config.center.key == "${normalizedJokerKey}"${eternalCheck} and not joker.getting_sliced then
                         target_joker = joker
                         break
                     end
@@ -39,7 +42,7 @@ export const generateDestroyJokerReturn = (
       jokerSelectionCode = `
                 local target_joker = nil
                 for i, joker in ipairs(G.jokers.cards) do
-                    if joker ~= card and not joker.ability.eternal and not joker.getting_sliced then
+                    if joker ~= card${eternalCheck} and not joker.getting_sliced then
                         target_joker = joker
                         break
                     end
@@ -49,7 +52,7 @@ export const generateDestroyJokerReturn = (
                 local target_joker = nil
                 for i = #G.jokers.cards, 1, -1 do
                     local joker = G.jokers.cards[i]
-                    if joker ~= card and not joker.ability.eternal and not joker.getting_sliced then
+                    if joker ~= card${eternalCheck} and not joker.getting_sliced then
                         target_joker = joker
                         break
                     end
@@ -66,7 +69,9 @@ export const generateDestroyJokerReturn = (
                 local target_joker = nil
                 if my_pos and my_pos > 1 then
                     local joker = G.jokers.cards[my_pos - 1]
-                    if not joker.ability.eternal and not joker.getting_sliced then
+                    if ${
+                      bypassEternal ? "true" : "not joker.ability.eternal"
+                    } and not joker.getting_sliced then
                         target_joker = joker
                     end
                 end`;
@@ -82,7 +87,9 @@ export const generateDestroyJokerReturn = (
                 local target_joker = nil
                 if my_pos and my_pos < #G.jokers.cards then
                     local joker = G.jokers.cards[my_pos + 1]
-                    if not joker.ability.eternal and not joker.getting_sliced then
+                    if ${
+                      bypassEternal ? "true" : "not joker.ability.eternal"
+                    } and not joker.getting_sliced then
                         target_joker = joker
                     end
                 end`;
@@ -91,7 +98,7 @@ export const generateDestroyJokerReturn = (
                 local target_joker = nil
                 if G.jokers.cards[${specificIndex}] then
                     local joker = G.jokers.cards[${specificIndex}]
-                    if joker ~= card and not joker.ability.eternal and not joker.getting_sliced then
+                    if joker ~= card${eternalCheck} and not joker.getting_sliced then
                         target_joker = joker
                     end
                 end`;
@@ -100,7 +107,7 @@ export const generateDestroyJokerReturn = (
     jokerSelectionCode = `
                 local destructable_jokers = {}
                 for i, joker in ipairs(G.jokers.cards) do
-                    if joker ~= card and not joker.ability.eternal and not joker.getting_sliced then
+                    if joker ~= card${eternalCheck} and not joker.getting_sliced then
                         table.insert(destructable_jokers, joker)
                     end
                 end
@@ -115,9 +122,17 @@ export const generateDestroyJokerReturn = (
                     card.ability.extra.${variableName} = card.ability.extra.${variableName} + sell_value_gain`;
   }
 
+  let bypassEternalCode = "";
+  if (bypassEternal) {
+    bypassEternalCode = `
+                    if target_joker.ability.eternal then
+                        target_joker.ability.eternal = nil
+                    end`;
+  }
+
   destroyCode = `${jokerSelectionCode}
                 
-                if target_joker then${sellValueCode}
+                if target_joker then${bypassEternalCode}${sellValueCode}
                     target_joker.getting_sliced = true
                     G.E_MANAGER:add_event(Event({
                         func = function()

@@ -1095,6 +1095,21 @@ export const CONDITION_TYPES: ConditionTypeDefinition[] = [
     category: "Special",
   },
   {
+    id: "check_flag",
+    label: "Check Flag",
+    description: "Check if a specific flag from your mod is true",
+    applicableTriggers: [...GENERIC_TRIGGERS],
+    params: [
+      {
+        id: "flag_name",
+        type: "text",
+        label: "Flag Name",
+        default: "custom_flag",
+      },
+    ],
+    category: "Special",
+  },
+  {
     id: "consumable_count",
     label: "Consumable Count",
     description: "Check how many of a consumable a player has",
