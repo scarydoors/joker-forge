@@ -9,7 +9,7 @@ export const generateAnteLevelConditionCode = (rules: Rule[]): string => {
   if (!condition || condition.type !== "ante_level") return "";
 
   const operator = condition.params?.operator || "greater_than";
-  const value = condition.params?.value || 1;
+  const value = condition.params?.value ?? 1;
 
   const valueCode = generateGameVariableCode(value);
 

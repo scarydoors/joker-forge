@@ -178,7 +178,7 @@ const ConsumableSetCard: React.FC<ConsumableSetCardProps> = ({
                 min="0"
                 value={tempShopRate}
                 onChange={(e) =>
-                  setTempShopRate(parseFloat(e.target.value) || 1)
+                  setTempShopRate(parseFloat(e.target.value) ?? 1)
                 }
                 onBlur={handleShopRateSave}
                 onKeyDown={(e) => {

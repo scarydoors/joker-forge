@@ -99,7 +99,7 @@ const normalizeJokerData = (joker: Partial<JokerData>): JokerData => {
     unlockTrigger: joker.unlockTrigger || undefined,
     unlockProperties: joker.unlockProperties || [],
     unlockOperator: joker.unlockOperator || "",
-    unlockCount: joker.unlockCount || 1,
+    unlockCount: joker.unlockCount ?? 1,
     unlockDescription: joker.unlockDescription || "",
     rules: joker.rules || [],
     userVariables: joker.userVariables || [],
@@ -146,8 +146,8 @@ const normalizeBoosterData = (booster: BoosterData): BoosterData => {
     name: booster.name || "",
     description: booster.description || "",
     imagePreview: booster.imagePreview || "",
-    cost: booster.cost || 4,
-    weight: booster.weight || 1,
+    cost: booster.cost ?? 4,
+    weight: booster.weight ?? 1,
     draw_hand: booster.draw_hand || false,
     booster_type: booster.booster_type || "joker",
     kind: booster.kind,
@@ -218,7 +218,7 @@ const normalizeRarityData = (rarity: RarityData): RarityData => {
     key: rarity.key || "",
     name: rarity.name || "",
     badge_colour: rarity.badge_colour || "#666665",
-    default_weight: rarity.default_weight || 1,
+    default_weight: rarity.default_weight ?? 1,
   };
 };
 
@@ -234,7 +234,7 @@ const normalizeConsumableSetData = (
     shader: set.shader,
     collection_rows: set.collection_rows || [5, 5],
     default_card: set.default_card,
-    shop_rate: set.shop_rate || 1,
+    shop_rate: set.shop_rate ?? 1,
     collection_name: set.collection_name,
   };
 };
