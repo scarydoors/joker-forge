@@ -1381,7 +1381,15 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
     id: "modify_blind_requirement",
     label: "Modify Blind Requirement",
     description: "Changes the score requirement of a blind",
-    applicableTriggers: ["blind_selected"],
+    applicableTriggers: [
+      "blind_selected",
+      "card_scored",
+      "hand_played",
+      "card_discarded",
+      "hand_discarded",
+      "card_held_in_hand",
+      "joker_evaluated",
+    ],
     params: [
       {
         id: "operation",
