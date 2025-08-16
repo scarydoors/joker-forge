@@ -313,7 +313,15 @@ const JokersPage: React.FC<JokersPageProps> = ({
       discovered: true,
       rules: [],
       placeholderCreditIndex: placeholderResult.creditIndex,
-      cardAppearance: {}
+      cardAppearance: {
+        buf: true,
+        jud: true,
+        rif: true,
+        rta: true,
+        sou: true,
+        uta: true,
+        wra: true
+      }
     };
     setJokers([...jokers, newJoker]);
     setEditingJoker(newJoker);
