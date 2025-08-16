@@ -274,7 +274,7 @@ const ChanceInput: React.FC<ChanceInputProps> = React.memo(
               type="number"
               value={rangeValues.min.toString()}
               onChange={(e) => {
-                const newMin = parseFloat(e.target.value) || 1;
+                const newMin = parseFloat(e.target.value) ?? 1;
                 onChange(`RANGE:${newMin}|${rangeValues.max}`);
               }}
               size="sm"
@@ -286,7 +286,7 @@ const ChanceInput: React.FC<ChanceInputProps> = React.memo(
               type="number"
               value={rangeValues.max.toString()}
               onChange={(e) => {
-                const newMax = parseFloat(e.target.value) || 1;
+                const newMax = parseFloat(e.target.value) ?? 1;
                 onChange(`RANGE:${rangeValues.min}|${newMax}`);
               }}
               size="sm"
@@ -616,7 +616,7 @@ const ParameterField: React.FC<ParameterFieldProps> = ({
       };
 
       const handleRangeChange = (field: "min" | "max", newValue: string) => {
-        const parsed = parseFloat(newValue) || 1;
+        const parsed = parseFloat(newValue) ?? 1;
         if (field === "min") {
           onChange(`RANGE:${parsed}|${rangeValues.max}`);
         } else {

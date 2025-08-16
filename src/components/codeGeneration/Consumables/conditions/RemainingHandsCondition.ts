@@ -9,7 +9,7 @@ export const generateRemainingHandsConditionCode = (rules: Rule[]): string => {
   if (!condition || condition.type !== "remaining_hands") return "";
 
   const operator = condition.params?.operator || "greater_than";
-  const value = condition.params?.value || 1;
+  const value = condition.params?.value ?? 1;
 
   const valueCode = generateGameVariableCode(value);
 
