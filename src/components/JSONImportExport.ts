@@ -1,4 +1,3 @@
-import { ModMetadata } from "./pages/ModMetadataPage";
 import {
   JokerData,
   ConsumableData,
@@ -6,6 +5,7 @@ import {
   BoosterData,
   EnhancementData,
   SealData,
+  ModMetadata,
 } from "./data/BalatroUtils";
 import { RarityData } from "./data/BalatroUtils";
 

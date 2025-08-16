@@ -6,6 +6,7 @@ import {
   ConsumableData,
   EnhancementData,
   SealData,
+  ModMetadata,
 } from "../data/BalatroUtils";
 import { addAtlasToZip } from "./ImageProcessor";
 import { generateJokersCode, generateCustomRaritiesCode } from "./Jokers/index";
@@ -14,7 +15,6 @@ import { generateBoostersCode } from "./boosters";
 import { ConsumableSetData } from "../data/BalatroUtils";
 import { modToJson } from "../JSONImportExport";
 import { generateEnhancementsCode, generateSealsCode } from "./Card/index";
-import { ModMetadata } from "../pages/ModMetadataPage";
 
 const sortForExport = <T extends { id: string; name: string }>(
   items: T[]
