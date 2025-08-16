@@ -1887,6 +1887,32 @@ export const EFFECT_TYPES: EffectTypeDefinition[] = [
     category: "Special",
   },
   {
+    id: "emit_flag",
+    label: "Emit Flag",
+    description: "Emit a custom flag. Flags are global variables that can be set to true or false and checked by any other jokers",
+    applicableTriggers: [...GENERIC_TRIGGERS],
+    params: [
+      {
+        id: "flag_name",
+        type: "text",
+        label: "Unique Flag Name",
+        default: "custom_flag",
+      },
+      {
+        id: "change",
+        type: "select",
+        label: "Set Flag to",
+        options: [
+          {value: "true", label: "True"},
+          {value: "false", label: "False"},
+          {value: "invert", label: "Invert Current"},
+        ],
+        default: "true"
+      },
+    ],
+    category: "Special",
+  },
+  {
     id: "juice_up_card",
     label: "Juice Up The Card",
     description: "Make the Card play a animation",
