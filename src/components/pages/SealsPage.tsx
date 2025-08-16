@@ -8,7 +8,9 @@ import {
 } from "@heroicons/react/24/outline";
 import SealCard from "./seals/SealCard";
 import EditSealInfo from "./seals/EditSealInfo";
-import RuleBuilder from "../ruleBuilder/RuleBuilder";
+import { Suspense, lazy } from "react";
+const RuleBuilder = lazy(() => import("../ruleBuilder/RuleBuilder"));
+import RuleBuilderLoading from "../generic/RuleBuilderLoading";
 import Button from "../generic/Button";
 import { exportSingleSeal } from "../codeGeneration/Card/index";
 import type { Rule } from "../ruleBuilder/types";
@@ -492,18 +494,20 @@ const SealsPage: React.FC<SealsPageProps> = ({
         )}
 
         {showRuleBuilder && currentSealForRules && (
-          <RuleBuilder
-            isOpen={showRuleBuilder}
-            onClose={() => {
-              setShowRuleBuilder(false);
-              setCurrentSealForRules(null);
-            }}
-            onSave={handleSaveRules}
-            existingRules={currentSealForRules.rules || []}
-            item={currentSealForRules}
-            onUpdateItem={handleUpdateSealFromRuleBuilder}
-            itemType="card"
-          />
+          <Suspense fallback={<RuleBuilderLoading />}>
+            <RuleBuilder
+              isOpen={showRuleBuilder}
+              onClose={() => {
+                setShowRuleBuilder(false);
+                setCurrentSealForRules(null);
+              }}
+              onSave={handleSaveRules}
+              existingRules={currentSealForRules.rules || []}
+              item={currentSealForRules}
+              onUpdateItem={handleUpdateSealFromRuleBuilder}
+              itemType="card"
+            />
+          </Suspense>
         )}
       </div>
 

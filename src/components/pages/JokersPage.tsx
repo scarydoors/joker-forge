@@ -8,7 +8,9 @@ import {
 } from "@heroicons/react/24/outline";
 import JokerCard from "./jokers/JokerCard";
 import EditJokerInfo from "./jokers/EditJokerInfo";
-import RuleBuilder from "../ruleBuilder/RuleBuilder";
+import { Suspense, lazy } from "react";
+const RuleBuilder = lazy(() => import("../ruleBuilder/RuleBuilder"));
+import RuleBuilderLoading from "../generic/RuleBuilderLoading";
 import Button from "../generic/Button";
 import { exportSingleJoker } from "../codeGeneration/Jokers/index";
 import type { Rule } from "../ruleBuilder/types";
@@ -606,18 +608,20 @@ const JokersPage: React.FC<JokersPageProps> = ({
         )}
 
         {showRuleBuilder && currentJokerForRules && (
-          <RuleBuilder
-            isOpen={showRuleBuilder}
-            onClose={() => {
-              setShowRuleBuilder(false);
-              setCurrentJokerForRules(null);
-            }}
-            onSave={handleSaveRules}
-            existingRules={currentJokerForRules.rules || []}
-            item={currentJokerForRules}
-            onUpdateItem={handleUpdateJokerFromRuleBuilder}
-            itemType="joker"
-          />
+          <Suspense fallback={<RuleBuilderLoading />}>
+            <RuleBuilder
+              isOpen={showRuleBuilder}
+              onClose={() => {
+                setShowRuleBuilder(false);
+                setCurrentJokerForRules(null);
+              }}
+              onSave={handleSaveRules}
+              existingRules={currentJokerForRules.rules || []}
+              item={currentJokerForRules}
+              onUpdateItem={handleUpdateJokerFromRuleBuilder}
+              itemType="joker"
+            />
+          </Suspense>
         )}
       </div>
 

@@ -8,7 +8,9 @@ import {
 } from "@heroicons/react/24/outline";
 import EnhancementCard from "./enhancements/EnhancementCard";
 import EditEnhancementInfo from "./enhancements/EditEnhancementInfo";
-import RuleBuilder from "../ruleBuilder/RuleBuilder";
+import { Suspense, lazy } from "react";
+const RuleBuilder = lazy(() => import("../ruleBuilder/RuleBuilder"));
+import RuleBuilderLoading from "../generic/RuleBuilderLoading";
 import Button from "../generic/Button";
 import { exportSingleEnhancement } from "../codeGeneration/Card/index";
 import type { Rule } from "../ruleBuilder/types";
@@ -514,18 +516,20 @@ const EnhancementsPage: React.FC<EnhancementsPageProps> = ({
         )}
 
         {showRuleBuilder && currentEnhancementForRules && (
-          <RuleBuilder
-            isOpen={showRuleBuilder}
-            onClose={() => {
-              setShowRuleBuilder(false);
-              setCurrentEnhancementForRules(null);
-            }}
-            onSave={handleSaveRules}
-            existingRules={currentEnhancementForRules.rules || []}
-            item={currentEnhancementForRules}
-            onUpdateItem={handleUpdateEnhancementFromRuleBuilder}
-            itemType="card"
-          />
+          <Suspense fallback={<RuleBuilderLoading />}>
+            <RuleBuilder
+              isOpen={showRuleBuilder}
+              onClose={() => {
+                setShowRuleBuilder(false);
+                setCurrentEnhancementForRules(null);
+              }}
+              onSave={handleSaveRules}
+              existingRules={currentEnhancementForRules.rules || []}
+              item={currentEnhancementForRules}
+              onUpdateItem={handleUpdateEnhancementFromRuleBuilder}
+              itemType="card"
+            />
+          </Suspense>
         )}
       </div>
 

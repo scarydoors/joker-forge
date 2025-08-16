@@ -19,7 +19,9 @@ import Button from "../generic/Button";
 import InputField from "../generic/InputField";
 import InputDropdown from "../generic/InputDropdown";
 import Modal from "../generic/Modal";
-import RuleBuilder from "../ruleBuilder/RuleBuilder";
+import { Suspense, lazy } from "react";
+const RuleBuilder = lazy(() => import("../ruleBuilder/RuleBuilder"));
+import RuleBuilderLoading from "../generic/RuleBuilderLoading";
 import type { Rule } from "../ruleBuilder/types";
 import { validateJokerName } from "../generic/validationUtils";
 import {
@@ -1064,12 +1066,12 @@ const ConsumablesPage: React.FC<ConsumablesPageProps> = ({
   };
 
   const handleExportConsumable = (consumable: ConsumableData) => {
-      try {
-        exportSingleConsumable(consumable);
-      } catch (error) {
-        console.error("Failed to export consumable:", error);
-      }
-    };
+    try {
+      exportSingleConsumable(consumable);
+    } catch (error) {
+      console.error("Failed to export consumable:", error);
+    }
+  };
 
   const handleQuickUpdate = (
     consumable: ConsumableData,
@@ -1576,18 +1578,20 @@ const ConsumablesPage: React.FC<ConsumablesPageProps> = ({
         )}
 
       {showRuleBuilder && currentConsumableForRules && (
-        <RuleBuilder
-          isOpen={showRuleBuilder}
-          onClose={() => {
-            setShowRuleBuilder(false);
-            setCurrentConsumableForRules(null);
-          }}
-          onSave={handleSaveRules}
-          existingRules={currentConsumableForRules.rules || []}
-          item={currentConsumableForRules}
-          onUpdateItem={handleUpdateConsumableFromRuleBuilder}
-          itemType="consumable"
-        />
+        <Suspense fallback={<RuleBuilderLoading />}>
+          <RuleBuilder
+            isOpen={showRuleBuilder}
+            onClose={() => {
+              setShowRuleBuilder(false);
+              setCurrentConsumableForRules(null);
+            }}
+            onSave={handleSaveRules}
+            existingRules={currentConsumableForRules.rules || []}
+            item={currentConsumableForRules}
+            onUpdateItem={handleUpdateConsumableFromRuleBuilder}
+            itemType="consumable"
+          />
+        </Suspense>
       )}
     </div>
   );

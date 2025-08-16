@@ -19,8 +19,7 @@ import {
   CheckIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
-import { JokerData } from "../data/BalatroUtils";
-import { ModMetadata } from "./ModMetadataPage";
+import { JokerData, ModMetadata } from "../data/BalatroUtils";
 
 interface OverviewPageProps {
   jokerCount: number;
