@@ -1459,7 +1459,18 @@ function AppContent() {
   );
 }
 
+
+import { init } from 'tracker'
+
 function App() {
+    let trackerInit = useRef(false);
+    useEffect(() => {
+        if (trackerInit.current) return;
+        init({
+            domain: "jokerforge.com"
+        })
+        trackerInit.current = true;
+    }, [])
   return (
     <Router>
       <AppContent />
