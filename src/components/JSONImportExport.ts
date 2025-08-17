@@ -114,7 +114,8 @@ const normalizeJokerData = (joker: Partial<JokerData>): JokerData => {
       sou: true,
       uta: true,
       wra: true
-    }
+    },
+    appearFlags: joker.appearFlags || "",
   };
 };
 
