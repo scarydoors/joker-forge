@@ -128,6 +128,8 @@ const generateInPoolFunction = (
   const notAppearsIn: string[] = []
   const appearsIn: string[] =[]
   
+  joker.appears_in_shop = joker.appears_in_shop ?? true;
+  
   joker.appears_in_shop ? appearsIn.push("args.source == 'sho'") : notAppearsIn.push("args.source ~= 'sho'")
 
   Object.entries(joker.cardAppearance).forEach(([key, value]) => {
