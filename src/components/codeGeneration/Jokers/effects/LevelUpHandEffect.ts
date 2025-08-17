@@ -17,7 +17,7 @@ export const generateLevelUpHandReturn = (
     const variableName =
       sameTypeCount === 0 ? "levels" : `levels${sameTypeCount + 1}`;
 
-    let ret = generateConfigVariables(
+    const ret = generateConfigVariables(
       effect.params?.value,
       effect.id,
       variableName
@@ -94,7 +94,7 @@ export const generateLevelUpHandReturn = (
           text, poker_hands, text_disp, loc_disp_text = G.FUNCS.get_poker_hand_info(G.hand.highlighted)
           ${targetHandVar} = text
         `;
-      } else if (triggerType === "hand_played") {
+      } else if (triggerType === "hand_played" || triggerType === "before_hand_played" || triggerType === "after_hand_played") {
         handDeterminationCode = `${targetHandVar} = context.scoring_name`;
       } else {
         handDeterminationCode = `${targetHandVar} = "High Card"`

@@ -322,7 +322,8 @@ const JokersPage: React.FC<JokersPageProps> = ({
         sou: true,
         uta: true,
         wra: true
-      }
+      },
+      appearFlags: "",
     };
     setJokers([...jokers, newJoker]);
     setEditingJoker(newJoker);

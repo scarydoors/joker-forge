@@ -123,13 +123,27 @@ export const generateCustomRaritiesCode = (
 };
 
 const generateInPoolFunction = (
-  joker: JokerData
+  joker: JokerData,
+  modprefix: string,
 ): string => {
   const notAppearsIn: string[] = []
-  const appearsIn: string[] =[]
-  
+  const appearsIn: string[] = []
+
+  const appearFlags: string[] = joker.appearFlags 
+  ? joker.appearFlags
+    .split(",")
+    .map(flag => flag.trim())
+    .filter(Boolean)
+    .map(flag => {
+      const isNegated = flag.startsWith("not ");
+      const rawFlag = isNegated ? flag.slice(4).trim() : flag
+      const safeFlagName = rawFlag.replace(/[^a-zA-Z0-9_]/g, '_') // replace non-alphanumeric charactes with underscore
+      const luaFlag = `G.GAME.pool_flags.${modprefix}_${safeFlagName}`;
+      return isNegated ? `not ${luaFlag}` : luaFlag;
+    }) 
+  : [];
+
   joker.appears_in_shop = joker.appears_in_shop ?? true;
-  
   joker.appears_in_shop ? appearsIn.push("args.source == 'sho'") : notAppearsIn.push("args.source ~= 'sho'")
 
   Object.entries(joker.cardAppearance).forEach(([key, value]) => {
@@ -138,9 +152,12 @@ const generateInPoolFunction = (
 
   if (notAppearsIn.length > 0 || appearsIn.length > 0) {
     return `in_pool = function(self, args)
-          return not args ${
-          notAppearsIn.length > 0 ? "or" : ""} ${notAppearsIn.join(" and ")} ${
-          appearsIn.length > 0 ? "or" : ""} ${appearsIn.join(" or ")}
+          return (
+          not args 
+          ${notAppearsIn.length > 0 ? "or" : ""} ${notAppearsIn.join(" and ")} 
+          ${appearsIn.length > 0 ? "or" : ""} ${appearsIn.join(" or ")}
+          )
+          and ${appearFlags.length > 0 ? appearFlags.join(" and ") : "true"}
       end
     `
   }
@@ -307,7 +324,7 @@ const generateSingleJokerCode = (
 
   
     jokerCode += `,
-    ` + generateInPoolFunction(joker);
+    ` + generateInPoolFunction(joker, modPrefix);
   
 
   const locVarsCode = generateLocVarsFunction(joker, passiveEffects, modPrefix);

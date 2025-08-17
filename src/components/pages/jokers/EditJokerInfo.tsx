@@ -1263,28 +1263,6 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
                         }
                       />
                       <Checkbox
-                        id="soul"
-                        label="Can appear from The Soul"
-                        checked={formData.cardAppearance.sou === true}
-                        onChange={(checked) =>
-                          handleCardAppearanceCheckboxChange(
-                            "sou",
-                            checked
-                          )
-                        }
-                      />
-                      <Checkbox
-                        id="wraith"
-                        label="Can appear from The Wraith"
-                        checked={formData.cardAppearance.wra === true}
-                        onChange={(checked) =>
-                          handleCardAppearanceCheckboxChange(
-                            "wra",
-                            checked
-                          )
-                        }
-                      />
-                      <Checkbox
                         id="buffoon_pack"
                         label="Can appear in a Buffoon Pack"
                         checked={formData.cardAppearance.buf === true}
@@ -1296,9 +1274,34 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
                         }
                       />
                       <Checkbox
+                        id="soul"
+                        label="Can appear from The Soul"
+                        checked={formData.cardAppearance.sou === true}
+                        className={formData.rarity !== 4 ? "hidden" : ""}
+                        onChange={(checked) =>
+                          handleCardAppearanceCheckboxChange(
+                            "sou",
+                            checked
+                          )
+                        }
+                      />
+                      <Checkbox
+                        id="wraith"
+                        label="Can appear from The Wraith"
+                        checked={formData.cardAppearance.wra === true}
+                        className={formData.rarity !== 3 ? "hidden" : ""}
+                        onChange={(checked) =>
+                          handleCardAppearanceCheckboxChange(
+                            "wra",
+                            checked
+                          )
+                        }
+                      />
+                      <Checkbox
                         id="riff_raff"
                         label="Can appear from Riff Raff"
                         checked={formData.cardAppearance.rif === true}
+                        className={formData.rarity !== 1 ? "hidden" : ""}
                         onChange={(checked) =>
                           handleCardAppearanceCheckboxChange(
                             "rif",
@@ -1310,6 +1313,7 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
                         id="rare_tag"
                         label="Can appear from a Rare Tag"
                         checked={formData.cardAppearance.rta === true}
+                        className={formData.rarity !== 3 ? "hidden" : ""}
                         onChange={(checked) =>
                           handleCardAppearanceCheckboxChange(
                             "rta",
@@ -1321,6 +1325,7 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
                         id="uncommon_tag"
                         label="Can appear from an Uncommon Tag"
                         checked={formData.cardAppearance.uta === true}
+                        className={formData.rarity !== 2 ? "hidden" : ""}
                         onChange={(checked) =>
                           handleCardAppearanceCheckboxChange(
                             "uta",
@@ -1329,6 +1334,16 @@ const EditJokerInfo: React.FC<EditJokerInfoProps> = ({
                         }
                       />
                     </div>
+                      <InputField
+                        id={"joker-pool-flags"}
+                        value={formData.appearFlags || ""}
+                        onChange={(e) => handleInputChange("appearFlags", e.target.value)}
+                        className="col-span-full"
+                        height="44px"
+                        separator={true}
+                        label="Flags Required"
+                        placeholder={"custom_flag1, not custom_flag2, ..."}
+                      />
                   </div>
                 </div>
               )}

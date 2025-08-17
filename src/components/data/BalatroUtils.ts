@@ -112,7 +112,8 @@ export interface JokerData {
     rif?: boolean // riff raff
     rta?: boolean // rare tag
     uta?: boolean // uncommon tag
-  }
+  };
+  appearFlags?: string;
 }
 
 export interface RarityData {
