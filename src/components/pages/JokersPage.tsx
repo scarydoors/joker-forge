@@ -313,6 +313,7 @@ const JokersPage: React.FC<JokersPageProps> = ({
       discovered: true,
       rules: [],
       placeholderCreditIndex: placeholderResult.creditIndex,
+      appears_in_shop: true,
       cardAppearance: {
         buf: true,
         jud: true,
